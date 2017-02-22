@@ -1,0 +1,132 @@
+bibliometrix v1.4 (Release date: 2017-01-24)
+==============
+
+New functionality:
+
+* concepualStructure() creates and plots conceptual structure map of a scientific field
+* histPlot() plots historical co-citation network
+* networkPlot() plots Bibliographic networks
+* readFiles() loads a sequence of ISI or SCOPUS Export files into a large character object
+ 
+Changes:
+* Minor fixes in metaTagExtraction() function
+* Minor fixes in convert2df() function
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v1.3 (Release date: 2016-11-17)
+==============
+
+New functionality:
+
+* termExtraction() extracts terms from a textual field (abstract, title, author's keywords, etc.) of a bibliographic data frame. 
+Now it integrates Porter's stemming algorithm and term extraction procedure for English, French, German, Italian and Spanish textual contents.
+
+
+bibliometrix v1.2 (Release date: 2016-10-18)
+==============
+
+New functionality:
+* keywordAssoc() associates authors' keywords to keywords plus
+* keywordGrowth() calculates yearly cumulative occurrences of top keywords.
+* termExtraction() extracts terms from a textual field (abstract, title, author's keywords, etc.) of a bibliographic data frame.
+
+Changes:
+* New statistics in summary() function
+* Minor fixes in convert2df() function
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v1.1 (Release date: 2016-09-07)
+==============
+
+Changes:
+* Minor fixes in convert2df() function
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v1.0 (Release date: 2016-06-28)
+==============
+
+New functionality:
+* histNetwork() creates a historical co-citation network from a bibliographic data frame.
+
+Changes:
+* Minor fixes in cocMatrix() function
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v0.8 (Release date: 2016-06-10)
+==============
+
+New functionality:
+* Hindex() calculates the authors' h-index and its variants (g-index, m-index) in a a bibliographic collection.
+
+New data:
+* garfield dataset
+
+Changes:
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v0.7 (Release date: 2016-06-04)
+==============
+
+New functionality:
+* timeslice() calculates Jaccard and Salton similarity indices among manuscripts of a coupling network
+* dfMerge() merges two bibliographic data frames deleting duplicate manuscripts.
+* metaTagExtraction() now extracts also university of affiliation for each co-author
+
+Changes:
+* Minor fixes in metaTagExtraction() function 
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v0.6 (Release date: 2016-05-30)
+==============
+
+New functionality:
+* couplingSimilarity() calculates Jaccard and Salton similarity indices among manuscripts of a coupling network
+
+Changes:
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v0.5 (Release date: 2016-05-25)
+==============
+
+New functionality:
+* localCitations() generates the frequency table of the most cited local authors.
+
+Changes:
+* Minor fixes in citations() function
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v0.4 (Release date: 2016-05-23)
+==============
+
+Changes:
+* Minor fixes in citations() function
+
+
+bibliometrix v0.3 (Release date: 2016-05-21)
+==============
+
+Changes:
+* Minor corrections in vignettes and documentation
+
+
+bibliometrix v0.2 (Release date: 2016-05-19)
+==============
+
+Changes:
+* Additional vignettes and documentation
+
+New functionality:
+* citations() generates the frequency table of the most cited references or the most cited first authors (of references).
+* lotka() now performs Kolmogorov-Smirnoff two sample test among observed and theoretical Lotka's distributions.
+
+Bug Fixes:
+* Minor fixes in importing routines and summary function.
+      

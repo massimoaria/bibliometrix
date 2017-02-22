@@ -1,0 +1,34 @@
+Package: bibliometrix
+Type: Package
+Title: Bibliometric and Co-Citation Analysis Tool
+Version: 1.4
+Date: 2017-01-24
+Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
+             person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
+Description: Tool for quantitative research in scientometrics and bibliometrics.
+    It provides various routines for importing bibliographic data from SCOPUS (<http://scopus.com>) and 
+    Thomson Reuters' ISI Web of Knowledge (<http://www.webofknowledge.com/>) databases, performing bibliometric analysis 
+    and building data matrices for co-citation, coupling, scientific collaboration and co-word analysis.
+License: GPL-3
+URL: http://www.bibliometrix.org
+LazyData: FALSE
+Encoding: latin1
+Depends: R (>= 3.3.0)
+Imports: stats, 
+		 dplyr, 
+		 igraph,
+		 Matrix, 
+		 stringr,
+		 SnowballC,
+		 FactoMineR,
+		 factoextra,
+	     ggplot2		 
+Suggests: knitr, 
+		  rmarkdown
+RoxygenNote: 5.0.1
+NeedsCompilation: no
+Packaged: 2016-11-17 14:40:50 UTC; aria
+Author: Massimo Aria [cre, aut],
+  Corrado Cuccurullo [aut]
+Maintainer: Massimo Aria <aria@unina.it>
+VignetteBuilder: knitr

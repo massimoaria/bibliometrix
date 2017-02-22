@@ -1,0 +1,19 @@
+
+
+Main Information about data
+
+ Articles                              147 
+ Period                                1995 - 2014 
+ Average citations per article         18.36 
+
+ Authors                               295 
+ Author Appearances                    311 
+ Authors of single authored articles   31 
+ Authors of multi authored articles    264 
+
+ Articles per Author                   0.498 
+ Authors per Article                   2.01 
+ Co-Authors per Articles               2.12 
+ Collaboration Index                   2.47 
+ 
+

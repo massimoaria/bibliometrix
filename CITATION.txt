@@ -1,0 +1,17 @@
+
+citHeader("To cite bibliometrix in publications, please use:")
+
+
+citEntry(entry = "article",
+    title = "bibliometrix: A R tool for comprehensive bibliometric analysis of scientific literature",
+    author = "Aria, Massimo and Cuccurullo, Corrado",
+    journal = "Scientometrics",
+    volume = "1",
+	pages="1--20",
+	publisher="Springer",
+	year = "2016",
+    textVersion  = paste("Aria, M. and Cuccurullo C. (2016).",
+        "bibliometrix: A R tool for comprehensive bibliometric analysis of scientific literature.",
+        "Scientometrics, 1, pages 1-17.")
+)
+

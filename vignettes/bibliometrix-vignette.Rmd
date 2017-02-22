@@ -1,0 +1,638 @@
+---
+title: "A brief introduction to bibliometrix"
+author: "Massimo Aria and Corrado Cuccurullo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A brief introduction to bibliometrix}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+#### Latest version 1.4 
+#### http://www.bibliometrix.org
+
+#### Citation for package 'bibliometrix': 
+
+```{r Package citation}
+citation("bibliometrix")
+```
+
+
+## Introduction
+
+**bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
+
+Bibliometrics turns the main tool of science, quantitative analysis, on itself. Essentially, bibliometrics is the application of quantitative analysis and statistics to publications such as journal articles and their accompanying citation counts. Quantitative evaluation of publication and citation data is now used in almost all science fields to evaluate growth, maturity, leading authors, conceptual and intellectual maps, trends of a scientific community.
+
+Bibliometrics is also used in research performance evaluation, especially in university and government labs, and also by policymakers, research directors and administrators, information specialists and librarians, and scholars themselves.
+
+**bibliometrix** supports scholars in three key phases of analysis:
+
+* Data importing and conversion to R format; 
+
+* Bibliometric analysis of a publication dataset;
+
+* Building matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction technique.
+
+## Bibliographic databases
+**bibliometrix** works with data extracted from the two main bibliographic databases: SCOPUS and Thomson Reuter ISI Web of Knowledge.
+
+*SCOPUS* (http://www.scopus.com), founded in 2004, offers a great deal of flexibility for the bibliometric user.  It permits to query for different fields, such as titles, abstracts, keywords, references and so on. SCOPUS allows for relatively easy downloading data-queries, although there are some limits on very large results sets with over 2,000 items.
+
+*ISI Web of Knowledge (WoK)* (http://www.webofknowledge.com), owned by Thomson Reuter, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
+This platform includes many different collections.
+
+## Data acquisition
+Bibliographic data may be obtained by querying the SCOPUS or ISI WoK database by diverse fields, such as topic, author, journal, timespan, and so on.
+
+In this example, we show how to download data, querying a term in the manuscript title field.
+
+We choose the generic term "bibliometrics".
+
+### Querying from ISI WoK
+At the link http://www.webofknowledge.com , select Web of Science Core Collection database. 
+
+Write the keyword "bibliometrics" in the search field and select title from the dropdown menu (see figure 1).  
+
+<div style="width:300px; height=200px">
+![Figure 1](figures/isi1.png)
+</div>
+
+
+Choose SCI-EXPANDED and SSCI citation indexes.
+
+The search yielded 300 results on May 09, 2016.
+
+Results can be refined using options on the left side of the page (type of manuscript, source, subject category, etc.).
+
+After refining the query, you can add records to your Marked List by clicking the button "add to marked list" at the end of the page and selecting the records to save (see figure 2).
+
+<div style="width:300px; height=200px">
+![Figure 2](figures/isi2.png)
+</div>
+
+
+The Marked List page provides you with a list of publications selected and various means of exporting data. 
+
+To export the data you desire, choose the export tool and follow the three intuitive steps (see figure 3).
+
+<div style="width:300px; height=200px">
+![Figure 3](figures/isi3.png)
+</div>
+
+
+The export tool allows you to select the diverse fields to save. So, select the fields your are interested in (for example all the available data about marked records).
+
+
+To download an export file, in an appropriate format for *bibliometrix* package, make sure to select the option "**Save to Other File Formats**" and choose Bibtex or Plain Text.
+
+Please pay attention that bibtex import function is faster than plain text.
+
+The ISI platform permits to export only 500 records at a time. 
+
+The ISI Web of Science export tool creates an export file with a default name "savedrecs" with extention ".txt" or ".bib" for plain text or bibtex format respectively. Export files can be separately stored.
+
+### Querying from SCOPUS
+The access to SCOPUS is via http://www.scopus.com.
+
+To find all articles whose title includes the term "bibliometrics", simply write this keyword in the field and select "Article Title" (see figure 4)
+
+<div style="width:300px; height=200px">
+![Figure 4](figures/scopus1.png)
+</div>
+
+The search yielded 414 results on May 09, 2016.
+
+You can download the references (up to 2,000 full records) by checking the 'Select All' box and clicking on the link 'Export'. 
+Choose the file type "bibtex export" and "all available information" (see figure 5).
+
+
+<div style="width:300px; height=200px">
+![Figure 5](figures/scopus2.png)
+</div>
+
+
+The SCOPUS export tool creates an export file with the default name "scopus.bib".
+
+## bibliometrix installation
+
+Download and install the most recent version of R (https://cran.r-project.org/)
+
+Download and install the most recent version of Rstudio (http://www.rstudio.com)
+
+Open Rstudio, in the console window, digit:
+
+install.packages("bibliometrix", dependencies=TRUE)      ### installs bibliometrix package and dependencies
+
+
+```{r bibliometrix loading}
+library(bibliometrix)   ### load bibliometrix package
+```
+
+## Data loading and converting
+
+The export file can be read by R using the function *readFiles*:
+
+```{r Data loading}
+
+D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
+```
+
+D is a large character vector. 
+*readFiles* argument contains the name of files downloaded from SCOPUS or ISI WOS website.
+
+The function *readFiles* combines all the text files onto a single large character vector. Furthermore, the format is converted into UTF-8.
+
+es. D <- readFiles("file1.txt","file2.txt", ...)
+
+
+
+The object D can be converted in a  data frame using the function *convert2df*:
+```{r Data converting}
+M <- convert2df(D, dbsource = "isi", format = "bibtex")
+```
+
+*convert2df* creates a bibliographic data frame with cases corresponding to manuscripts and variables to Field Tag in the original export file.
+
+Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
+
+Data frame columns are named using the standard ISI WoS Field Tag codify. 
+
+The main field tags are:
+
+Field Tag  | Description
+---------- | -----------
+AU		     | Authors
+TI		     | Document Title
+SO		     | Publication Name (or Source)
+JI		     | ISO Source Abbreviation
+DT		     | Document Type
+DE		     | Authors' Keywords
+ID		     | Keywords associated by SCOPUS or ISI database
+AB		     | Abstract
+C1		     | Author Address
+RP		     | Reprint Address
+CR		     | Cited References
+TC		     | Times Cited
+PY		     | Year
+SC		     | Subject Category
+UT		     | Unique Article Identifier
+DB		     | Bibliographic Database
+
+
+For a complete list of field tags see https://images.webofknowledge.com/WOK50B6/help/WOS/h_fieldtags.html
+
+## Bibliometric Analysis
+
+The first step is to perform a descriptive analysis of the bibliographic data frame.
+
+The function *biblioAnalysis* calculates main bibliometric measures using this syntax:
+ 
+```{r biblioAnalysis}
+results <- biblioAnalysis(M, sep = ";")
+```
+
+The function *biblioAnalysis* returns an object of class "bibliometrix".
+
+An object of class "bibliometrix" is a list containing the following components:
+
+List element       | Description
+------------------ | --------------------------------------------
+Articles		 | the total number of manuscripts
+Authors		   | the authors' frequency distribution
+AuthorsFrac	 | the authors' frequency distribution (fractionalized)
+FirstAuthors | first author of each manuscript
+nAUperPaper	 | the number of authors per manuscript
+Apparences	 |  the number of author apparences
+nAuthors		 | the number of authors
+AuMultiAuthoredArt | the number of authors of multi authored articles
+MostCitedPapers | the list of manuscripts sorted by citations
+Years		     | pubblication year of each manuscript
+FirstAffiliation | the affiliation of the first author
+Affiliations | the frequency distribution of affiliations (of all co-authors for each paper)
+Aff_frac		 | the fractionalized frequency distribution of affiliations (of all co-authors for each paper)
+CO		       | the affiliation country of first author
+Countries		 | the affiliation countries' frequency distribution
+TotalCitation | 		 the number of times each manuscript has been cited
+TCperYear		 | the yearly average number of times each manuscript has been cited
+Sources		   | the frequency distribution of sources (journals, books, etc.)
+DE		       | the frequency distribution of authors' keywords
+ID		       | the frequency distribution of keywords associated to the manuscript by SCOPUS and Thomson Reuters' ISI Web of Knowledge databases
+
+### Functions *summary* and *plot*
+
+To summarize main results of the bibliometric analysis, use the generic function *summary*.
+It displays main information about the bibliographic data frame and several tables, such as annual scientific production, top manuscripts per number of citations, most productive authors, most productive countries, total citation per country, most relevant sources (journals) and most relevant keywords.
+
+*summary* accepts two additional arguments. *k* is a formatting value that indicates the number of rows of each table. *pause* is a logical value (TRUE or FALSE) used to allow (or not) pause in screen scrolling.
+Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
+
+```{r summary generic function}
+S=summary(object = results, k = 10, pause = FALSE)
+```
+
+Some basic plots can be drawn using the generic function \code{plot}:
+
+```{r plot generic function}
+plot(x = results, k = 10, pause = FALSE)
+```
+
+## Analysis of Cited References 
+The function *citations* generates the frequency table of the most cited references or the most cited first authors (of references).
+
+For each manuscript, cited references are in a single string stored in the column "CR" of the data frame. 
+
+For a correct extraction, you need to identify the separator field among different references, used by ISI or SCOPUS database. Usually, the default separator is ";" or `".  "` (a dot with double space).
+
+```{r}
+# M$CR[1]
+```
+The figure shows the reference string of the first manuscript. In this case, the separator field is `sep = ".  "`.
+
+<div style="width:300px; height=200px">
+![Figure 6](figures/cr1.png)
+</div>
+
+
+To obtain the most frequent cited manuscripts:
+```{r Article citation}
+CR <- citations(M, field = "article", sep = ".  ")
+CR$Cited[1:10]
+```
+
+To obtain the most frequent cited first authors:
+```{r Author citation}
+CR <- citations(M, field = "author", sep = ".  ")
+CR$Cited[1:10]
+```
+
+The function *localCitations* generates the frequency table of the most local cited authors.
+Local citations measures how many times an author included in this collection have been cited by other authors also in the collection.
+
+To obtain the most frequent local cited authors:
+```{r Local Author citation}
+CR <- localCitations(M, results, sep = ".  ")
+CR[1:10]
+```
+
+
+## Authors' Dominance ranking
+
+The function *dominance* calculates the authors' dominance ranking as proposed by Kumar & Kumar, 2008.
+
+Function arguments are: *results* (object of class *bibliometrix*) obtained by *biblioAnalysis*; and *k* (the number of authors to consider in the analysis).
+
+```{r Dominance Ranking}
+DF <- dominance(results, k = 10)
+DF
+```
+
+The Dominance Factor is a ratio indicating the fraction of multi authored articles in which a scholar appears as first author.
+
+In this example, Kostoff and Holden dominate their research team because they appear as first authors in all their papers (8 for Kostoff and 3 for Holden). 
+
+## Authors' h-index
+The h-index is an author-level metric that attempts to measure both the productivity and citation impact of the publications of a scientist or scholar. 
+
+The index is based on the set of the scientist's most cited papers and the number of citations that they have received in other publications.
+
+The function *Hindex* calculates the authors' H-index and its variants (g-index and m-index) in a bibliographic collection.
+
+Function arguments are: *M* a bibliographic data frame; *auhtors* a character vector containing the the authors' names for which you want to calculate the H-index. The aurgument has the form c("SURNAME1 N","SURNAME2 N",...). 
+
+In other words, for each author: surname and initials are separated by one blank space. 
+i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *authors* argument is *authors = c("ARIA M", "CUCCURULLO C")*.
+
+To calculate the h-index of Lutz Bornmann in this collection:
+
+```{r h-index}
+indices <- Hindex(M, authors="BORNMANN L", sep = ";")
+
+# Bornmann's impact indices:
+indices$H
+
+# Bornmann's citations
+indices$CitationList
+
+```
+
+To calculate the h-index of the first 10 most productive authors (in this collection):
+
+```{r h-index 10 authors}
+
+authors=gsub(","," ",names(results$Authors)[1:10])
+
+indices <- Hindex(M, authors, sep = ";")
+
+indices$H
+```
+
+
+## Lotka's Law coefficient estimation
+The function *lotka* estimates Lotka's law coefficients for scientific productivity (Lotka A.J., 1926).
+
+Lotka's law describes the frequency of publication by authors in any given field as an inverse square law, where the number of authors publishing a certain number of articles is a fixed ratio to the number of authors publishing a single article.
+This assumption implies that the theoretical beta coefficient of Lotka's law is equal to 2.
+
+Using *lotka* function is possible to estimate the Beta coefficient of our bibliographic collection and assess, through a statistical test, the similarity of this empirical distribution with the theoretical one.
+
+```{r Lotka law}
+L <- lotka(results)
+
+# Author Productivity. Empirical Distribution
+L$AuthorProd
+
+# Beta coefficient estimate
+L$Beta
+
+# Constant
+L$C
+
+# Goodness of fit
+L$R2
+
+# P-value of K-S two sample test
+L$p.value
+
+```
+
+The table L$AuthorProd shows the observed distribution of scientific productivity in our example.
+
+The estimated Beta coefficient is 3.05 with a goodness of fit equal to 0.94. Kolmogorov-Smirnoff two sample test provides a p-value 0.09 that means there is not a significant difference between the observed and the theoretical Lotka distributions.
+
+You can compare the two distributions using *plot* function:
+
+```{r Lotka law comparison, out.width='300px', dpi=200}
+# Observed distribution
+Observed=L$AuthorProd[,3]
+
+# Theoretical distribution with Beta = 2
+Theoretical=10^(log10(L$C)-2*log10(L$AuthorProd[,1]))
+
+plot(L$AuthorProd[,1],Theoretical,type="l",col="red",ylim=c(0, 1), xlab="Articles",ylab="Freq. of Authors",main="Scientific Productivity")
+lines(L$AuthorProd[,1],Observed,col="blue")
+legend(x="topright",c("Theoretical (B=2)","Observed"),col=c("red","blue"),lty = c(1,1,1),cex=0.6,bty="n")
+```
+
+
+## Bibliometric network matrices
+Manuscript's attributes are connected to each other through the manuscript itself: author(s) to journal, keywords to publication date, etc.
+
+These connections of different attributes generate bipartite networks that can be represented as rectangular matrices (Manuscripts x Attributes).
+
+Furthermore, scientific publications regularly contain references to
+other scientific works. This generates a further network, namely, co-citation or coupling network.
+
+These networks are analysed in order to capture meaningful properties of the underlying research system, and in particular to determine the influence of bibliometric units such as scholars and journals.
+
+### Bipartite networks
+*cocMatrix* is a general function to compute a bipartite network selecting one of the metadata attributes.
+
+For example, to create a network *Manuscript x Publication Source* you have to use the field tag "SO":
+
+```{r Bipartite network}
+A <- cocMatrix(M, Field = "SO", sep = ";")
+```
+
+A is a rectangular binary matrix, representing a bipartite network where rows and columns are manuscripts and sources respectively. 
+
+The generic element $a_{ij}$ is 1 if the manuscript $i$ has been published in source $j$, 0 otherwise. 
+
+The $j-th$ column sum $a_j$ is the number of manuscripts published in source $j$. 
+
+Sorting, in decreasing order, the column sums of A, you can see the most relevant publication sources:
+
+```{r Most relevant sources}
+sort(Matrix::colSums(A), decreasing = TRUE)[1:5]
+```
+
+
+
+Following this approach, you can compute several bipartite networks:
+
+* Citation network
+```{r}
+# A <- cocMatrix(M, Field = "CR", sep = ".  ")
+```
+
+* Author network
+```{r}
+# A <- cocMatrix(M, Field = "AU", sep = ";")
+```
+
+* Country network
+
+Authors' Countries is not a standard attribute of the bibliographic data frame. You need to extract this information from affiliation attribute using the function *metaTagExtraction*.
+
+```{r}
+M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
+# A <- cocMatrix(M, Field = "AU_CO", sep = ";")
+```
+
+*metaTagExtraction* allows to extract the following additional field tags: *Authors' countries* (`Field = "AU_CO"`); *First author of each cited reference* (`Field = "CR_AU"`); *Publication source of each cited reference* (`Field = "CR_SO"`); and *Authors' affiliations* (`Field = "AU_UN"`).
+
+* Author keyword network
+```{r}
+# A <- cocMatrix(M, Field = "DE", sep = ";")
+```
+
+* Keyword Plus network
+```{r}
+# A <- cocMatrix(M, Field = "ID", sep = ";")
+```
+
+* Etc.
+
+### Bibliographic coupling 
+
+Two articles are said to be bibliographically coupled if at least one cited source appears in the bibliographies or reference lists of both articles (Kessler, 1963).
+
+A coupling network can be obtained using the general formulation:
+
+$$
+B = A \times A^T
+$$
+where A is a bipartite network.
+
+Element $b_{ij}$ indicates how many bibliographic coupling exist between manuscripts $i$ and $j$. In other words, $b_{ij}$ gives the number of paths of length 2, via which one moves from $i$ along the arrow and then to $j$ in the opposite direction.
+
+$B$ is a simmetrical matrix $B = B^T$.
+
+The strength of the coupling of two articles, $i$ and $j$ is defined
+simply by the number of references that the articles have in common, as given by the element $b_{ij}$ of matrix $B$.
+
+The function *biblioNetwork* calculates, starting from a bibliographic  data frame, the most frequently used coupling networks: Authors, Sources, and Countries.
+
+*biblioNetwork* uses two arguments to define the network to compute:
+
+* *analysis* argument can be "co-citation", "coupling", "collaboration",  or "co-occurrences".
+
+* *network* argument can be "authors", "references", "sources", "countries", "universities", "keywords", "author_keywords", "titles" and "abstracts".
+
+The following code calculates a classical article coupling network:
+```{r}
+# NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", sep = ".  ")
+```
+
+Articles with only a few references, therefore, would tend to be more weakly bibliographically coupled, if coupling strength is measured simply according to the number of references that articles contain in common. 
+
+This suggests that it might be more practicable to switch to a relative measure of bibliographic coupling.
+
+*couplingSimilarity* function calculates Jaccard or Salton similarity coefficient among vertices of a coupling network.
+
+```{r similarity, fig.height=7, fig.width=7, warning=FALSE}
+NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
+
+# calculate jaccard similarity coefficient
+S <- couplingSimilarity(NetMatrix, type="jaccard")
+
+# plot authors' similarity (first 20 authors)
+net=networkPlot(S, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
+
+```
+
+
+### Bibliographic co-citation
+
+We talk about co-citation of two articles when
+both are cited in a third article. Thus, co-citation can be seen as the counterpart of bibliographic coupling.
+
+A co-citation network can be obtained using the general formulation:
+
+$$
+C = A^T \times A
+$$
+where A is a bipartite network.
+
+Like matrix $B$, matrix $C$ is also symmetric. The main diagonal
+of $C$ contains the number of cases in which a reference is cited in our data frame. 
+
+In other words, the diagonal element $c_{i}$ is the number of local citations of the reference $i$.
+
+Using the function *biblioNetwork*, you can calculate a classical reference co-citation network:
+```{r}
+# NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+```
+
+### Bibliographic collaboration
+
+Scientific collaboration network is a network where nodes are authors and links are co-authorships as the latter is one of the most well documented forms of scientific collaboration (Glanzel, 2004).
+
+An author collaboration network can be obtained using the general formulation:
+
+$$
+AC = A^T \times A
+$$
+where A is a bipartite network *Manuscripts x Authors*.
+
+The diagonal element $ac_{i}$ is the number of manuscripts authored or co-authored by researcher $i$.
+
+Using the function *biblioNetwork*, you can calculate an authors' collaboration network:
+```{r}
+# NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "authors", sep = ";")
+```
+
+or a country collaboration network:
+```{r}
+# NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
+```
+
+## Visualizing bibliographic networks
+
+All bibliographic networks can be graphically visualized or
+modeled.
+
+Here, we show how to visualize networks using function *networkPlot* and *VOSviewer software* by Nees Jan van Eck and Ludo Waltman (http://www.vosviewer.com).
+
+Using the function *networkPlot*, you can plot a network created by *biblioNetwork* using R routines or using *VOSviewer*.
+
+The main argument of *networkPlot* is type. It indicates the network map layout: circle, kamada-kawai, mds, etc.
+Choosing type="vosviewer", the function automatically: (i) saves the network into a pajek network file, named "vosnetwork.net"; (ii) starts an instance of VOSviewer which will map the file "vosnetwork.net".
+You need to declare, using argument *vos.path*, the full path of folder where VOSviewer software is located (es. vos.path='c:/software/VOSviewer').
+
+
+### Country Scientific Collaboration
+
+```{r Country collaboration, fig.height=7, fig.width=7, warning=FALSE}
+# Create a country collaboration network
+
+M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
+NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
+
+# Plot the network
+net=networkPlot(NetMatrix, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE)
+
+```
+
+
+### Co-Citation Network
+
+```{r Co-citation network, fig.height=7, fig.width=7, warning=FALSE}
+# Create a co-citation network
+
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+
+# Plot the network
+net=networkPlot(NetMatrix, n = 15, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE)
+
+```
+
+### Keyword co-occurrences
+
+```{r Keyword c-occurrences, fig.height=7, fig.width=7, warning=FALSE}
+# Create keyword co-occurrencies network
+
+NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
+
+# Plot the network
+net=networkPlot(NetMatrix, n = 20, Title = "Keyword Co-occurrences", type = "kamada", size=T)
+
+```
+
+## Co-Word Analysis: Conceptual structure of a field 
+The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
+
+The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS) or Multiple Correspondence Analysis (MCA). 
+
+Here, we show an example using the function *conceptualStructure* that performs a MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
+
+*conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts.  In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
+
+
+```{r Co-Word Analysis, fig.height=7, fig.width=7, warning=FALSE}
+
+# Conceptual Structure using keywords
+
+CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE)
+
+```
+
+## Historical Co-Citation Network
+Historiographic map is a graph proposed by E. Garfield to represent a chronological network map of most relevant co-citations resulting from a bibliographic collection.
+
+The function \code{histNetwork} generates a chronological co-citation network matrix which can be plotted using *histPlot*:
+
+```{r Historical Co-citation network, fig.height=8, fig.width=7, warning=FALSE}
+# Create a historical co-citation network
+
+histResults <- histNetwork(M, n = 15, sep = ".  ")
+
+# Plot a historical co-citation network
+net <- histPlot(histResults, size = FALSE)
+
+```
+
+## Main Authors' references (about bibliometrics)
+
+Cuccurullo, C., Aria, M., & Sarto, F. (2016). *Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains*, **Scientometrics**, DOI: 10.1007/s11192-016-1948-8 (https://doi.org/10.1007/s11192-016-1948-8).
+
+
+Cuccurullo, C., Aria, M., & Sarto, F.  (2015). *Twenty years of research on performance management in business and public administration domains.* Presentation at the **Correspondence Analysis and Related Methods conference (CARME 2015)** in September 2015 (http://www.bibliometrix.org/documentation/2015Carme_cuccurulloetal.pdf).
+
+
+Sarto, F., Cuccurullo, C., & Aria, M. (2014). *Exploring healthcare governance literature: systematic review and paths for future research.* **Mecosan** (http://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en).
+
+
+Cuccurullo, C., Aria, M., & Sarto, F. (2013). *Twenty years of research on performance management in business and public administration domains.* In **Academy of Management Proceedings** (Vol. 2013, No. 1, p. 14270). Academy of Management (https://doi.org/10.5465/AMBPP.2013.14270abstract).
+

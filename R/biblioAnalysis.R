@@ -68,7 +68,7 @@ biblioAnalysis<-function(M,sep=";"){
 
 
 
-# M is the dataframe
+# M is the bibliographic dataframe
 Tags<-names(M)
 
 # temporal analyis

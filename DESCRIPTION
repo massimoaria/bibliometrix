@@ -1,8 +1,8 @@
 Package: bibliometrix
 Type: Package
 Title: Bibliometric and Co-Citation Analysis Tool
-Version: 1.4
-Date: 2017-01-24
+Version: 1.5
+Date: 2017-03-02
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
 Description: Tool for quantitative research in scientometrics and bibliometrics.

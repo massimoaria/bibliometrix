@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-*.txt
-*.bib
+.txt
+.bib

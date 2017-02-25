@@ -55,6 +55,7 @@
 #' @export
 #' @import stats
 #' @import ggplot2
+#' @importFrom RColorBrewer brewer.pal
 #' @importFrom FactoMineR MCA
 #' @importFrom factoextra get_mca_var
 #' @importFrom factoextra fviz_nbclust

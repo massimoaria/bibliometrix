@@ -57,12 +57,11 @@ if (n>dim(NET)[1]) {n <- dim(NET)[1]}
 NetDegree <- unname(sort(deg,decreasing=TRUE)[n])
 bsk.network <- delete.vertices(bsk.network,which(degree(bsk.network)<NetDegree))
 
-
 # Remove loops and multiple edges
 bsk.network <- simplify(bsk.network, remove.multiple = remove.multiple, remove.loops = noloops) 
 
 # delete not linked vertices
-bsk.network <- delete.isolates(bsk.network, mode = 'in')
+#bsk.network <- delete.isolates(bsk.network, mode = 'in')
 
 # Choose Network layout
 l <- layout.kamada.kawai(bsk.network) #default
@@ -85,6 +84,9 @@ switch(type,
 
 
 if (type!="vosviewer"){
+  
+  net_groups <- cluster_walktrap(bsk.network)
+  V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]
 ## Plot the network
 plot(bsk.network,layout = l, vertex.label.dist = 0.5, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)}
 

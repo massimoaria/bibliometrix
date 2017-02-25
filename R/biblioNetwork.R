@@ -39,38 +39,22 @@
 #' @examples
 #' # EXAMPLE 1: Authors collaboration network
 #'
-#' library(igraph)
 #' data(scientometrics)
 #'
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 #' network = "authors", sep = ";")
-#' netDegree <- 2
-#' diag <- Matrix::diag 
-#' NetMatrix <- NetMatrix[diag(NetMatrix) >= netDegree,diag(NetMatrix) >= netDegree]
-#' diag(NetMatrix) <- 0
-#'
-#' bsk.network <- graph.adjacency(NetMatrix,mode = "undirected")
-#' plot(bsk.network,layout = layout.fruchterman.reingold, vertex.label.dist = 0.5,
-#' vertex.frame.color = 'blue', vertex.label.color = 'black',
-#' vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = 0.7)
+#' 
+#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) #igraph object
 #'
 #'
 #' # EXAMPLE 2: Co-citation network
 #'
-#' library(igraph)
 #' data(scientometrics)
 #'
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #' network = "references", sep = ";")
-#' netDegree=10
-#' diag <- Matrix::diag
-#' NetMatrix <- NetMatrix[diag(NetMatrix) >= netDegree,diag(NetMatrix) >= netDegree]
-#' diag(NetMatrix) <- 0
-#'
-#' bsk.network <- graph.adjacency(NetMatrix,mode = "undirected")
-#' plot(bsk.network,layout = layout.fruchterman.reingold, vertex.label.dist = 0.5,
-#' vertex.frame.color = 'blue', vertex.label.color = 'black',
-#' vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = 0.7)
+#' 
+#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) #igraph object
 #'
 #' @seealso \code{\link{convert2df}} to import and convert a SCOPUS and Thomson 
 #'   Reuters' ISI Web of Knowledge export file in a data frame.

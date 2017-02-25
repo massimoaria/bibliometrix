@@ -46,6 +46,9 @@ histPlot<-function(histResults, size = F, labelsize = 1){
   # Remove loops
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
   
+  
+  V(bsk.network)$color <- 'red'
+  
   # delete not linked vertices
   #bsk.network <- delete.isolates(bsk.network, mode = 'in')
   
@@ -53,7 +56,7 @@ histPlot<-function(histResults, size = F, labelsize = 1){
   l <- layout.fruchterman.reingold(bsk.network) #default
   l[,2]=histResults[[3]]$Year
   # Plot the chronological co-citation network
-  plot(bsk.network,layout = l, vertex.label.dist = 0.5, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = row.names(histResults[[3]]), vertex.label.cex = labelsize, edge.arrow.size=0.1, main="Historical co-citation network")
+  plot(bsk.network,layout = l, vertex.label.dist = 0.5, vertex.frame.color = 'black', vertex.label.color = 'darkblue', vertex.label.font = 1, vertex.label = row.names(histResults[[3]]), vertex.label.cex = labelsize, edge.arrow.size=0.1, main="Historical co-citation network")
   cat("\n Legend\n\n")
   print(histResults[[3]])
   

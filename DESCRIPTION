@@ -22,6 +22,7 @@ Imports: stats,
 		 SnowballC,
 		 FactoMineR,
 		 factoextra,
+		 RColorBrewer,
 	     ggplot2		 
 Suggests: knitr, 
 		  rmarkdown

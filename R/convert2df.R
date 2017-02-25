@@ -55,6 +55,7 @@
 #' @export
 #' @import stats
 #' @import ggplot2
+#' @importFrom RColorBrewer brewer.pal
 #' @importFrom FactoMineR MCA
 #' @importFrom factoextra get_mca_var
 #' @importFrom factoextra fviz_nbclust
@@ -73,6 +74,8 @@
 #' @importFrom igraph layout.kamada.kawai
 #' @importFrom igraph layout.fruchterman.reingold
 #' @importFrom igraph write.graph
+#' @importFrom igraph cluster_walktrap
+#' @importFrom igraph membership
 #' @importFrom Matrix %&%
 #' @importFrom Matrix abIseq
 #' @importFrom Matrix abIseq1

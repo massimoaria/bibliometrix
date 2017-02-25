@@ -44,7 +44,7 @@
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 #' network = "authors", sep = ";")
 #' 
-#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) #igraph object
+#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) 
 #'
 #'
 #' # EXAMPLE 2: Co-citation network
@@ -54,7 +54,7 @@
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #' network = "references", sep = ";")
 #' 
-#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) #igraph object
+#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
 #'
 #' @seealso \code{\link{convert2df}} to import and convert a SCOPUS and Thomson 
 #'   Reuters' ISI Web of Knowledge export file in a data frame.

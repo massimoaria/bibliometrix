@@ -21,6 +21,8 @@
 #' @param size is logical. If TRUE the point size of each vertex is proportional to its degree. 
 #' @param noloops is logical. If TRUE loops in the network are deleted.
 #' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
+#' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
+#' @param remove.isoates is logical. If TRUE isolates vertices are not plotted.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @return It is a network object of the class \code{igraph}.
 #' 
@@ -39,7 +41,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, vos.path=NULL, size=FALSE, noloops=TRUE, remove.multiple=TRUE){
+networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, vos.path=NULL, size=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE){
 
 NET=NetMatrix
 
@@ -61,7 +63,9 @@ bsk.network <- delete.vertices(bsk.network,which(degree(bsk.network)<NetDegree))
 bsk.network <- simplify(bsk.network, remove.multiple = remove.multiple, remove.loops = noloops) 
 
 # delete not linked vertices
-#bsk.network <- delete.isolates(bsk.network, mode = 'in')
+if (isTRUE(remove.isolates)){
+
+bsk.network <- delete.isolates(bsk.network, mode = 'in')}
 
 # Choose Network layout
 l <- layout.kamada.kawai(bsk.network) #default
@@ -88,7 +92,8 @@ if (type!="vosviewer"){
   net_groups <- cluster_walktrap(bsk.network)
   V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]
 ## Plot the network
-plot(bsk.network,layout = l, vertex.label.dist = 0.5, vertex.frame.color = 'black', vertex.label.color = 'darkblue', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)}
+  
+plot(bsk.network,layout = l, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)}
 
 return(bsk.network)}
 

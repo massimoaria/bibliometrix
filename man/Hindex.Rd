@@ -4,7 +4,7 @@
 \alias{Hindex}
 \title{h-index calculation}
 \usage{
-Hindex(M, authors, sep = ";")
+Hindex(M, authors, sep = ";", years = 10)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
@@ -14,6 +14,8 @@ It is a data matrix with cases corresponding to manuscripts and variables to Fie
 i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{authors} argument is \code{authors = c("SEMPRONIO TC", "ARIA M")}.}
 
 \item{sep}{is the field separator character. This character separates auhtors in each string of AU column of the bibiographic data frame. The default is \code{sep = ";"}.}
+
+\item{years}{is a integer. It indicates the number of years to consider for Hindex calculation. Default is 10.}
 }
 \value{
 an object of \code{class} "list". It contains two elements: H is a data frame with h-index, g-index and m-index for each author; CitationList is a list with the bibliographic collection for each author.

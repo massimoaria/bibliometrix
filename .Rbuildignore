@@ -2,5 +2,6 @@
 ^\.Rproj\.user$
 ^.*\.txt$
 ^.*\.bib$
+^.*\.ini$
 ^.*\.md$
 LICENCE.*$

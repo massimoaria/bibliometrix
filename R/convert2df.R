@@ -216,7 +216,8 @@ convert2df<-function(file,dbsource="isi",format="bibtex"){
     scopus={M=scopus2df(file)
     }
 )
-
+  M$PY=as.numeric(M$PY)
+  M$TC=as.numeric(M$TC)
   return(M)
 
 }

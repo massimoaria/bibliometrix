@@ -307,7 +307,7 @@ i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *authors* argument is *
 To calculate the h-index of Lutz Bornmann in this collection:
 
 ```{r h-index}
-indices <- Hindex(M, authors="BORNMANN L", sep = ";")
+indices <- Hindex(M, authors="BORNMANN L", sep = ";",years=10)
 
 # Bornmann's impact indices:
 indices$H
@@ -323,7 +323,7 @@ To calculate the h-index of the first 10 most productive authors (in this collec
 
 authors=gsub(","," ",names(results$Authors)[1:10])
 
-indices <- Hindex(M, authors, sep = ";")
+indices <- Hindex(M, authors, sep = ";",years=50)
 
 indices$H
 ```

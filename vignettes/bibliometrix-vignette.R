@@ -40,7 +40,7 @@ DF <- dominance(results, k = 10)
 DF
 
 ## ----h-index-------------------------------------------------------------
-indices <- Hindex(M, authors="BORNMANN L", sep = ";")
+indices <- Hindex(M, authors="BORNMANN L", sep = ";",years=100)
 
 # Bornmann's impact indices:
 indices$H
@@ -53,7 +53,7 @@ indices$CitationList
 
 authors=gsub(","," ",names(results$Authors)[1:10])
 
-indices <- Hindex(M, authors, sep = ";")
+indices <- Hindex(M, authors, sep = ";", years=100)
 
 indices$H
 

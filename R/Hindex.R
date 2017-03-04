@@ -42,7 +42,6 @@
 
 Hindex <- function(M, authors, sep = ";",years=10){
   
-
   M$TC=as.numeric(M$TC)
   M$PY=as.numeric(M$PY)
   Today=as.numeric(substr(Sys.time(),1,4))

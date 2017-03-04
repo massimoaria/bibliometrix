@@ -35,7 +35,13 @@ networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
 
 \item{remove.multiple}{is logical. If TRUE multiple links are plotted using just one edge.}
 
+<<<<<<< HEAD
 \item{remove.isolates}{is logical. If TRUE isolates vertices are not plotted.}
+=======
+\item{remove.multiple}{is logical. If TRUE multiple links are plotted using just one edge.}
+
+\item{remove.isoates}{is logical. If TRUE isolates vertices are not plotted.}
+>>>>>>> 5a2330588172defbeb942ce574eca0bfb9ef5edc
 }
 \value{
 It is a network object of the class \code{igraph}.

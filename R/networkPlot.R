@@ -20,8 +20,8 @@
 #' @param vos.path is a character indicating the full path whre VOSviewer.jar is located.
 #' @param size is logical. If TRUE the point size of each vertex is proportional to its degree. 
 #' @param noloops is logical. If TRUE loops in the network are deleted.
-#' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
 #' @param remove.isolates is logical. If TRUE isolates vertices are not plotted.
+#' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @return It is a network object of the class \code{igraph}.
 #' 

@@ -88,6 +88,9 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
     for (i in 1:AU_count){
       D=AU_S[[1]][[i]]
       AU[i]=paste(unlist(lapply(D$author,function(l){a=l$authname})),collapse=";")
+      
+      AU[i]=paste(unique(trim(unlist(strsplit(AU[i],";")))),collapse =";")
+      
       if (!is.null(D$`dc:title`)){TI[i]=D$`dc:title`}else{TI[i]=NA}
       if (!is.null(D$`dc:description`)){AB[i]=D$`dc:description`}else{AB[i]=NA}
       if (!is.null(D$subtypeDescription)){DT[i]=D$subtypeDescription}else{DT[i]=NA}
@@ -125,4 +128,8 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   M$ID=M$DE
   M <- mutate_each(M, funs(toupper))
   return(M)
+}
+
+trim <- function( x ) {
+  gsub("(^[[:space:]]+|[[:space:]]+$)", "", x)
 }

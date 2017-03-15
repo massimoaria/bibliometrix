@@ -55,6 +55,8 @@
 #' @export
 #' @import stats
 #' @import ggplot2
+#' @importFrom rscopus author_search
+#' @importFrom rscopus get_complete_author_info
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom FactoMineR MCA
 #' @importFrom factoextra get_mca_var

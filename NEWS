@@ -1,3 +1,16 @@
+bibliometrix v1.5 (Release date: 2017-03-15)
+==============
+
+New functionality:
+
+* retrievalByAuthorID() Get Author Content on SCOPUS by ID
+* idByAuthor() Get Complete Author Information and ID from Scopus
+* Hindex() introduced the argument years
+ 
+Changes:
+* Minor fixes in several functions
+* Minor corrections in vignettes and documentation
+
 bibliometrix v1.4 (Release date: 2017-01-24)
 ==============
 

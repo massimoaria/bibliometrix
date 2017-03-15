@@ -98,7 +98,7 @@ scopus2df<-function(D){
   # Year
   DATA$PY=as.numeric(sub("\\D*(\\d+).*", "\\1", DATA$PY))
 
-  DATA$UT=gsub(":","",DATA$UT,fixed=TRUE)
+  #DATA$UT=gsub(":","",DATA$UT,fixed=TRUE)
   DATA <- mutate_each(DATA, funs(toupper))
 
   DATA$DB="SCOPUS"

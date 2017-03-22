@@ -15,7 +15,8 @@ SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.}
 \item{remove.duplicated}{is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.}
 }
 \value{
-a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
+a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
+M includes the entire bibliographic collection downloaded from SCOPUS.
 The main field tags are:
 
 \tabular{lll}{
@@ -32,6 +33,7 @@ The main field tags are:
 \code{PY}\tab   \tab Year\cr
 \code{UT}\tab   \tab Unique Article Identifier\cr
 \code{DB}\tab   \tab Database\cr}
+(ii) authorDocuments which is a list containing a bibliographic data frame for each author.
 
 LIMITATIONS: 
 Currently, SCOPUS API does not allow to download document references. 
@@ -61,8 +63,9 @@ Uses SCOPUS API search to get information about documents on a set of authors us
 
 ## create the bibliographic collection
 # 
-# M <- retrievalByAuthor(id, api_key)
-#
+# res <- retrievalByAuthor(id, api_key)
+# M <- res$M  # the entire bibliographic data frame
+# M <- res$authorDocuments # the list containing a bibliographic data frame for each author
 
 }
 \seealso{

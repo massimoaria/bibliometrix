@@ -6,7 +6,8 @@
 #' SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.
 #' @param api_key is a character. It contains the Elsvier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}
 #' @param remove.duplicated is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.
-#' @return a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
+#' @return a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
+#' M includes the entire bibliographic collection downloaded from SCOPUS.
 #' The main field tags are:
 #'
 #' \tabular{lll}{
@@ -23,7 +24,8 @@
 #' \code{PY}\tab   \tab Year\cr
 #' \code{UT}\tab   \tab Unique Article Identifier\cr
 #' \code{DB}\tab   \tab Database\cr}
-#'
+#' (ii) authorDocuments which is a list containing a bibliographic data frame for each author.
+#' 
 #' LIMITATIONS: 
 #' Currently, SCOPUS API does not allow to download document references. 
 #' As consequence, it is not possible to perform co-citation analysis (the field CR is empty).
@@ -49,8 +51,10 @@
 #' 
 #' ## create the bibliographic collection
 #' # 
-#' # M <- retrievalByAuthor(id, api_key)
+#' # res <- retrievalByAuthor(id, api_key)
 #' #
+#' # M <- res$M  # the entire bibliographic data frame
+#' # M <- res$authorDocuments # the list containing a bibliographic data frame for each author
 #' 
 #' @seealso \code{\link{idByAuthor}} for downloading auhtor information and SCOPUS ID.
 #' 

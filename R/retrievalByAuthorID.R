@@ -122,7 +122,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   M=M[-1,]  ### remove first empty row
   
   if (isTRUE(remove.duplicated)){
-    d=duplicated(M$UT)
+    d=duplicated(gsub("[^[:alnum:] ]","",M$UT))
     cat("\n",sum(d),"duplicated documents have been removed\n")
     M=M[!d,]
   }
@@ -130,10 +130,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   M$DB="SCOPUS"
   M$ID=M$DE
   M <- mutate_each(M, funs(toupper))
-  results=list(M=M,author_documents=M_list)
+  results=list(M=M,authorDocuments=M_list)
   return(results)
 }
 
-trim <- function( x ) {
-  gsub("(^[[:space:]]+|[[:space:]]+$)", "", x)
-}

@@ -59,6 +59,7 @@
 retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   
   id=id[!is.na(id)]
+  M_list=list()
   n=length(id)
   M=data.frame(AU=NA,TI=NA,AB=NA,SO=NA,JI=NA,DOI=NA,DT=NA,DE=NA,PY=NA,TC=NA,C1=NA,RP=NA,UT=NA,AU_CO=NA)
   for (j in 1:n){
@@ -115,6 +116,8 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
     }
     M_AU=data.frame(AU,TI,AB,SO,JI,DOI,DT,DE,PY,TC,C1,RP,UT,AU_CO,stringsAsFactors = FALSE)
     M=rbind(M,M_AU)
+    M_list[[j]]=M_AU
+    names(M_list)[j]=id[j]
   }
   M=M[-1,]  ### remove first empty row
   
@@ -127,7 +130,8 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   M$DB="SCOPUS"
   M$ID=M$DE
   M <- mutate_each(M, funs(toupper))
-  return(M)
+  results=list(M=M,author_documents=M_list)
+  return(results)
 }
 
 trim <- function( x ) {

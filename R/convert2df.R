@@ -220,6 +220,24 @@ convert2df<-function(file,dbsource="isi",format="bibtex"){
 )
   M$PY=as.numeric(M$PY)
   M$TC=as.numeric(M$TC)
+  
+  ## Author data cleaning
+  if ("AU" %in% names(M)){
+    M$AU=gsub(","," ",M$AU)
+    AUlist=strsplit(M$AU,";")
+    AU=lapply(AUlist,function(l){
+      l=trim(l)
+      name=strsplit(l," ")
+      lastname=unlist(lapply(name,function(ln){ln[1]}))
+      firstname=lapply(name,function(ln){
+        f=paste(substr(ln[-1],1,1),collapse=" ")
+      })
+      AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
+      return(AU)
+    })
+    M$AU=unlist(AU)
+    
+  }
   return(M)
 
 }

@@ -1,10 +1,25 @@
+bibliometrix v1.6 (Release date: )
+==============
+
+New functionality:
+
+* added two datasets isiCollection and scopusCollection
+* mergeDbSources() merges bibliographic data frames from SCOPUS and ISI WOS
+* duplicatedMatching() searches duplicated records in a bibliographic database using the generalized Levenshtein (edit) distance
+* dfMerge() removed from package
+ 
+Changes:
+* Minor fixes in several functions
+* Minor corrections in vignettes and documentation
+
+
 bibliometrix v1.5 (Release date: 2017-03-15)
 ==============
 
 New functionality:
 
-* retrievalByAuthorID() Get Author Content on SCOPUS by ID
-* idByAuthor() Get Complete Author Information and ID from Scopus
+* retrievalByAuthorID() gets Author Content on SCOPUS by ID
+* idByAuthor() gets Complete Author Information and ID from Scopus
 * Hindex() introduced the argument years
  
 Changes:

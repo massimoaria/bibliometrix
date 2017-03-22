@@ -35,18 +35,17 @@ duplicatedMatching <- function(M, Field="TI", tol=0.95){
   
   a=b=M[[Field]]
   an=nchar(a)
-  bn=nchar(b)
-  A=matrix(an,length(an),length(bn))
-  B=matrix(bn,length(an),length(bn),byrow=TRUE)
+  #bn=nchar(b)
+  A=matrix(an,length(an),length(an))
+  B=t(A)
   C=A
   C[B>A]=B[B>A]
   D=adist(a)
   Dn=1-(D/C)
-  ind=which(Dn>=tol,arr.ind = TRUE)
-  ind=ind[(ind[,1]-ind[,2])!=0,]
-  ind=ind[(seq(1,dim(ind)[1],2)-1),]
-  ind=ind[order(ind[,1]),]
-  M=M[-ind[,2]]
+  Dn2=Dn
+  Dn2[Dn>tol]=2
+  ind=!duplicated(Dn2)
+  M=M[ind,]
   return(M)
   
 }

@@ -23,7 +23,7 @@ Search duplicated records in a dataframe.
 A bibliographic data frame is obtained by the converting function \code{\link{convert2df}}. 
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
 The function identifies duplicated records in a bibliographic data frame and deletes them. 
-Duplicate entries are identified through the generalized Levenshtein (edit) distance. 
+Duplicate entries are identified through the restricted Damerau-Levenshtein distance. 
 Two manuscripts that have a relative similarity measure greater than \code{tol} argument are stored in the output data frame only once.
 }
 \examples{

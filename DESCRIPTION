@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Bibliometric and Co-Citation Analysis Tool
-Version: 1.5
+Version: 1.6
 Date: 2017-03-15
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
@@ -16,15 +16,16 @@ Encoding: latin1
 Depends: R (>= 3.3.0)
 Imports: stats, 
 		 dplyr, 
+		 factoextra,
+		 FactoMineR,
+		 ggplot2,
 		 igraph,
 		 Matrix, 
-		 stringr,
-		 SnowballC,
-		 FactoMineR,
-		 factoextra,
 		 RColorBrewer,
-	     ggplot2,
-         rscopus		 
+	     rscopus,
+		 SnowballC,
+		 stringdist,
+		 stringr		 
 Suggests: knitr, 
 		  rmarkdown
 RoxygenNote: 5.0.1

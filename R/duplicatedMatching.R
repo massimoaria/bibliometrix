@@ -5,7 +5,7 @@
 #' A bibliographic data frame is obtained by the converting function \code{\link{convert2df}}. 
 #' It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
 #' The function identifies duplicated records in a bibliographic data frame and deletes them. 
-#' Duplicate entries are identified through the generalized Levenshtein (edit) distance. 
+#' Duplicate entries are identified through the restricted Damerau-Levenshtein distance. 
 #' Two manuscripts that have a relative similarity measure greater than \code{tol} argument are stored in the output data frame only once. 
 #'
 #' @param M is the bibliographic data frame.
@@ -35,17 +35,14 @@ duplicatedMatching <- function(M, Field="TI", tol=0.95){
   
   a=b=M[[Field]]
   an=nchar(a)
-  #bn=nchar(b)
   A=matrix(an,length(an),length(an))
   B=t(A)
   C=A
   C[B>A]=B[B>A]
-  D=adist(a)
+  D=as.matrix(stringdistmatrix(a))
   Dn=1-(D/C)
-  Dn2=Dn
-  Dn2[Dn>tol]=2
-  ind=!duplicated(Dn2)
-  M=M[ind,]
+  Dn[Dn>tol]=2
+  M=M[!duplicated(Dn),]
   return(M)
   
 }

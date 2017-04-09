@@ -51,10 +51,11 @@ Year=sapply(Papers, function(P){
   })
 Year=as.numeric(Year)
 Year[Year<=1100]=NA
+Year[Year>max(M$PY)]=NA
 
 Papers=Papers[!is.na(Year)]
-Year=Year[!is.na(Year)]
 TC=TC[!is.na(Year)]
+Year=Year[!is.na(Year)]
 
 Degree <- sort(TC,decreasing=TRUE)[n]
 

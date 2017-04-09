@@ -33,14 +33,15 @@ histNetwork<-function(M, n=10, sep = ";"){
 ### Calculate Co-citation matrix
 NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = sep)
 NetMatrix=NetMatrix[(!is.na(colnames(NetMatrix))),(!is.na(colnames(NetMatrix)))]
+
 TC=Matrix::diag(NetMatrix)
 
-Degree <- sort(TC,decreasing=TRUE)[n]
+
 
 ### Cited papers list
 Papers=colnames(NetMatrix)
 
-Papers=Papers[TC>=Degree]
+#Papers=Papers[TC>=Degree]
 
 
 ### Extract year from cited papers
@@ -51,7 +52,17 @@ Year=sapply(Papers, function(P){
 Year=as.numeric(Year)
 Year[Year<=1100]=NA
 
-X=as.matrix(NetMatrix[TC>=Degree,TC>=Degree])
+Papers=Papers[!is.na(Year)]
+Year=Year[!is.na(Year)]
+TC=TC[!is.na(Year)]
+
+Degree <- sort(TC,decreasing=TRUE)[n]
+
+Papers=Papers[TC>=Degree]
+Year=Year[TC>=Degree]
+
+
+X=as.matrix(NetMatrix[Papers,Papers])
 rownames(X)=colnames(X)=Year
 
 X=X[sort(rownames(X)),sort(rownames(X))]
@@ -72,3 +83,4 @@ row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
 results=list(NetMatrix=X,Degree=Degree,histData=df[,-4])
 return(results)
 }
+

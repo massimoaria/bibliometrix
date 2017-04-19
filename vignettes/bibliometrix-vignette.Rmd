@@ -62,7 +62,7 @@ Write the keyword "bibliometrics" in the search field and select title from the 
 
 Choose SCI-EXPANDED and SSCI citation indexes.
 
-The search yielded 300 results on May 09, 2016.
+The search yielded 291 results on May 09, 2016.
 
 Results can be refined using options on the left side of the page (type of manuscript, source, subject category, etc.).
 

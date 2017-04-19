@@ -91,8 +91,9 @@ for (i in 1:length(Tag)){
   DATA$UT=gsub(":","",DATA$UT,fixed=TRUE)
 
   DATA$RP=unlist(lapply(strsplit(DATA$C1,"\\."),function (l) l[1]))
-
-  DATA <- mutate_each(DATA, funs(toupper))
+  
+  #DATA <- mutate_each(DATA, funs(toupper))
+  DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
   
   # keywords post-processing (missing ";" in some rows)
   DATA$ID=gsub("   ",";",DATA$ID)

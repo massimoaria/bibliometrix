@@ -15,7 +15,6 @@ LazyData: FALSE
 Encoding: latin1
 Depends: R (>= 3.3.0)
 Imports: stats, 
-		 dplyr, 
 		 factoextra,
 		 FactoMineR,
 		 ggplot2,

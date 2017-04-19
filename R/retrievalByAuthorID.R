@@ -133,7 +133,8 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   M$CR=NA
   M$DB="SCOPUS"
   M$ID=M$DE
-  M <- mutate_each(M, funs(toupper))
+  M <- data.frame(lapply(M,toupper),stringsAsFactors = FALSE)
+  #M <- mutate_each(M, funs(toupper))
   results=list(M=M,authorDocuments=M_list)
   return(results)
 }

@@ -6,7 +6,7 @@
 \usage{
 termExtraction(M, Field = "TI", stemming = FALSE, language = "english",
   remove.numbers = TRUE, remove.terms = NULL, keep.terms = NULL,
-  verbose = TRUE)
+  synonyms = NULL, verbose = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
@@ -29,6 +29,8 @@ The default is \code{Field = "TI"}.}
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
 
 \item{keep.terms}{is a character vector. It contains a list of compound words "formed by two or more terms" to keep in their original form in the term extraction process. The default is \code{keep.terms = NULL}.}
+
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separeted by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 
 \item{verbose}{is logical. If TRUE the function prints the most frequent terms extracted from documents. The default is \code{verbose=TRUE}.}
 }

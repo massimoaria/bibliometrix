@@ -16,6 +16,7 @@
 #' @param remove.numbers is logical. If TRUE all numbers are deleted from the documents before term extraction. The default is \code{remove.numbers = TRUE}.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param keep.terms is a character vector. It contains a list of compound words "formed by two or more terms" to keep in their original form in the term extraction process. The default is \code{keep.terms = NULL}.
+#' @param synonyms is a character vector. Each element contains a list of synonyms, separeted by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param verbose is logical. If TRUE the function prints the most frequent terms extracted from documents. The default is \code{verbose=TRUE}.
 #' @return the bibliometric data frame with a new column containing terms about the field tag indicated in the argument \code{Field}.
 #'
@@ -26,7 +27,10 @@
 #' data(scientometrics)
 #' 
 #' # vector of compound words
-#' keep.terms=c("co-citation analysis","bibliographic coupling")
+#' keep.terms <- c("co-citation analysis","bibliographic coupling")
+#' 
+#' # vector of synonyms (two groups of terms)
+#' synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
 #' 
 #' # term extraction
 #' scientometrics <- termExtraction(scientometrics, Field = "TI",
@@ -49,6 +53,17 @@
 #' 
 #' # terms extracted from the first abstract
 #' scientometrics$AB_TM[1]
+#' 
+#' # Example 3: Term extraction from keywords with synonyms
+#'
+#' data(scientometrics)
+#' 
+#' # vector of synonyms 
+#' synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
+#' 
+#' # term extraction
+#' scientometrics <- termExtraction(scientometrics, Field = "ID",
+#' synonyms=synonyms, verbose=TRUE)
 #'
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
@@ -56,7 +71,7 @@
 #' 
 #' @export
 
-termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, verbose=TRUE){
+termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, synonyms=NULL, verbose=TRUE){
   
   # load stopwords
   data("stopwords",envir=environment())
@@ -77,7 +92,7 @@ termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remo
   
   TERMS=gsub("\\."," ",TERMS)
   TERMS=gsub(" - "," ",TERMS)
-    
+  
   # keep terms in the vector keep.terms
   if (length(keep.terms)>0 & class(keep.terms)=="character"){
     keep.terms=toupper(keep.terms)
@@ -90,6 +105,21 @@ termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remo
   # create a list of terms for each document
   listTERMS=strsplit(TERMS,split=" ")
 
+  # merge synonyms 
+  if (length(synonyms)>0 & class(synonyms)=="character"){
+    synonyms=toupper(synonyms)
+    listTERMS=lapply(listTERMS,function(l){
+      s=(strsplit(synonyms,split=";"))
+      
+      for (i in length(synonyms)){
+        
+        ind=which(l %in% trim(s[[i]]))
+        if (length(ind)>0){l[ind]=trim(s[[i]][1])}
+      }
+      return(l)
+    })
+  }
+  
   # remove stopwords from each list of terms
   listTERMS=lapply(listTERMS,function(l){
     l=l[!(l %in% stopwords)]

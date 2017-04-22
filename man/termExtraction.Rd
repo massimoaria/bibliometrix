@@ -46,7 +46,10 @@ It extracts terms from a textual field (abstract, title, author's keywords, etc.
 data(scientometrics)
 
 # vector of compound words
-keep.terms=c("co-citation analysis","bibliographic coupling")
+keep.terms <- c("co-citation analysis","bibliographic coupling")
+
+# vector of synonyms (two groups of terms)
+synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
 
 # term extraction
 scientometrics <- termExtraction(scientometrics, Field = "TI",
@@ -69,6 +72,17 @@ scientometrics <- termExtraction(scientometrics, Field = "AB", stemming=TRUE,lan
 
 # terms extracted from the first abstract
 scientometrics$AB_TM[1]
+
+# Example 3: Term extraction from keywords with synonyms
+
+data(scientometrics)
+
+# vector of synonyms 
+synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
+
+# term extraction
+scientometrics <- termExtraction(scientometrics, Field = "ID",
+synonyms=synonyms, verbose=TRUE)
 
 
 }

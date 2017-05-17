@@ -5,8 +5,9 @@
 \title{Plotting Bibliographic networks}
 \usage{
 networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
-  labelsize = 1, vos.path = NULL, size = FALSE, noloops = TRUE,
-  remove.multiple = TRUE, remove.isolates = FALSE)
+  labelsize = 1, halo = FALSE, cluster = "optimal", vos.path = NULL,
+  size = FALSE, noloops = TRUE, remove.multiple = TRUE,
+  remove.isolates = FALSE)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -26,6 +27,10 @@ networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
 \code{type="vosviewer"}\tab   \tab Network is plotted using VOSviewer software\cr}}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
+
+\item{halo}{is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}}
+
+\item{cluster}{is a character. It indicates the type of cluster to perform among ("null", optimal", "lovain","infomap","edge_betweenness","walktrap").}
 
 \item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
 

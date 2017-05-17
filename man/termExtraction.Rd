@@ -48,9 +48,6 @@ data(scientometrics)
 # vector of compound words
 keep.terms <- c("co-citation analysis","bibliographic coupling")
 
-# vector of synonyms (two groups of terms)
-synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
-
 # term extraction
 scientometrics <- termExtraction(scientometrics, Field = "TI",
 remove.numbers=TRUE, remove.terms=NULL, keep.terms=keep.terms, verbose=TRUE)

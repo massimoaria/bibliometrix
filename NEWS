@@ -1,4 +1,12 @@
-bibliometrix v1.6 (Release date: )
+bibliometrix v1.7 (Release date: ???)
+==============
+
+New functionality:
+* added new clusterng algorithms into networkPlot()
+* added argument 'halo' in networkPlot() to color cluster groups
+
+
+bibliometrix v1.6 (Release date: 2017-05-09)
 ==============
 
 New functionality:
@@ -7,6 +15,8 @@ New functionality:
 * mergeDbSources() merges bibliographic data frames from SCOPUS and ISI WOS
 * duplicatedMatching() searches duplicated records in a bibliographic database using the generalized Levenshtein (edit) distance
 * dfMerge() removed from package
+* removed dipendence from dplyr package
+* added possibility to merge synonyms using termExtraction()
  
 Changes:
 * Minor fixes in several functions

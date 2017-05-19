@@ -42,7 +42,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="optimal", vos.path=NULL, size=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE){
+networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE){
 
 NET=NetMatrix
 

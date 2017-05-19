@@ -36,7 +36,8 @@ localCitations <- function(M, results, sep = ";"){
     if (M$DB[1]=="ISI"){ 
       listCR=lapply(listCR, function(l){
         ListL=lapply(strsplit(unlist(l),","),function(x) x[1])
-        l=unlist(ListL)
+        l=trim(unlist(ListL))
+        
       })}
     if (M$DB[1]=="SCOPUS"){ 
       listCR=lapply(listCR, function(l){
@@ -49,7 +50,13 @@ localCitations <- function(M, results, sep = ";"){
         l=unlist(ListL)
       })}
   
+    listCR=lapply(listCR,function(l){
+      L=lapply(strsplit(l," "),function(x){
+        x=paste(x[1],substr(x[2],1,1))
+      })
+    })
   CR=unlist(listCR)
+  CR=gsub("\\.","",CR)
   CR=CR[nchar(CR)>=3]
   if (M$DB[1]=="ISI"){
     CR=trim.leading(CR)

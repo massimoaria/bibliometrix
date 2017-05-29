@@ -25,6 +25,7 @@
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("null", optimal", "lovain","infomap","edge_betweenness","walktrap").
+#' @param curved is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -42,7 +43,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE){
+networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE){
 
 NET=NetMatrix
 
@@ -112,9 +113,9 @@ if (type!="vosviewer"){
 ## Plot the network
 
   if (isTRUE(halo) & cluster!="null"){
-    plot(net_groups,bsk.network,layout = l, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
+    plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
   } else{
-    plot(bsk.network,layout = l, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
+    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
   }
 
 }  

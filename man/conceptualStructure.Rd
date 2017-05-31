@@ -4,8 +4,9 @@
 \alias{conceptualStructure}
 \title{Creating and plotting conceptual structure map of a scientific field}
 \usage{
-conceptualStructure(M, field = "ID", minDegree = 2, k.max = 5,
-  stemming = FALSE, labelsize = 3)
+conceptualStructure(M, field = "ID", quali.supp = NULL,
+  quanti.supp = NULL, minDegree = 2, k.max = 5, stemming = FALSE,
+  labelsize = 3)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -22,6 +23,10 @@ field can be equal to one of this tags:
 \code{DE_TM}\tab   \tab Author's Keywords stemmed through the Porter's stemming algorithm\cr
 \code{TI}\tab   \tab Terms extracted from titles\cr
 \code{AB}\tab   \tab Terms extracted from abstracts}}
+
+\item{quali.supp}{is a vector indicating the indexes of the categorical supplementary variables.}
+
+\item{quanti.supp}{is a vector indicating the indexes of the quantitative supplementary variables.}
 
 \item{minDegree}{is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.}
 

@@ -21,6 +21,8 @@
 #' @param k.max is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 8.
 #' @param stemming is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=2}
+#' @param quali.supp is a vector indicating the indexes of the categorical supplementary variables.
+#' @param quanti.supp is a vector indicating the indexes of the quantitative supplementary variables.
 #' @return It is an object of the class \code{list} containing the following components:
 #'
 #' \tabular{lll}{
@@ -42,8 +44,21 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-conceptualStructure <- function(M,field="ID", minDegree=2, k.max=5, stemming=FALSE, labelsize=3){
+conceptualStructure <- function(M,field="ID", quali.supp=NULL, quanti.supp=NULL, minDegree=2, k.max=5, stemming=FALSE, labelsize=3){
 
+  
+  if (!is.null(quali.supp)){
+    QSUPP=data.frame(M[,quali.supp])
+    names(QSUPP)=names(M)[quali.supp]
+    row.names(QSUPP)=row.names(M)
+  }
+  
+  if (!is.null(quanti.supp)){
+    SUPP=data.frame(M[,quanti.supp])
+    names(SUPP)=names(M)[quanti.supp]
+    row.names(SUPP)=row.names(M)
+  }
+  
 switch(field,
        ID={
          # Create a bipartite network of Keyword plus
@@ -56,8 +71,10 @@ switch(field,
          # Delete empty rows
          CW=CW[,!(colnames(CW) %in% "NA")]
          CW=CW[rowSums(CW)>0,]
+         
          # Recode as dataframe
          CW=data.frame(apply(CW,2,factor))
+         
          },
        DE={
          CW <- cocMatrix(M, Field = "DE", type="matrix", sep=";")
@@ -120,14 +137,40 @@ switch(field,
        }
        )
 
-  
+p=dim(CW)[2] 
+quali=NULL
+quanti=NULL
 # Perform Multiple Correspondence Analysis (MCA)
-res.mca <- MCA(CW, ncp=2, graph=FALSE)
+  if (!is.null(quali.supp)){
+    ind=which(row.names(QSUPP) %in% row.names(CW))
+    QSUPP=as.data.frame(QSUPP[ind,])
+    CW=cbind(CW,QSUPP)
+    quali=(p+1):dim(CW)[2]
+    names(CW)[quali]=names(M)[quali.supp]
+    }
+  if (!is.null(quanti.supp)){
+    ind=which(row.names(SUPP) %in% row.names(CW))
+    SUPP=as.data.frame(SUPP[ind,])
+    CW=cbind(CW,SUPP)
+    quanti=(p+1+length(quali)):dim(CW)[2]
+    names(CW)[quanti]=names(M)[quanti.supp]
+    }
+  
+  
+res.mca <- MCA(CW, quanti.sup=quanti, quali.sup=quali, ncp=2, graph=FALSE)
 
 # Get coordinates of keywords (we take only categories "1"")
 coord=get_mca_var(res.mca)
 df=data.frame(coord$coord)[seq(2,dim(coord$coord)[1],by=2),]
 row.names(df)=gsub("_1","",row.names(df))
+if (!is.null(quali.supp)){
+  df_quali=data.frame(res.mca$quali.sup$coord)[seq(1,dim(res.mca$quali.sup$coord)[1],by=2),]
+  row.names(df_quali)=gsub("_1","",row.names(df_quali))
+}
+if (!is.null(quanti.supp)){
+  df_quanti=data.frame(res.mca$quanti.sup$coord)[seq(1,dim(res.mca$quanti.sup$coord)[1],by=2),]
+  row.names(df_quanti)=gsub("_1","",row.names(df_quanti))
+} 
 
 # K-means clustering
 
@@ -147,10 +190,30 @@ b=fviz_cluster(km.res, data = df,labelsize=labelsize)+
   scale_fill_manual(values = cbPalette[1:clust]) +
   labs(title= "     ") +
   geom_point()
+if (!is.null(quali.supp)){
+  s_df_quali=df_quali[(abs(df_quali[,1]) >= quantile(abs(df_quali[,1]),0.75) | abs(df_quali[,2]) >= quantile(abs(df_quali[,2]),0.75)),]
+  #s_df_quali=subset(df_quali,subset(abs(df_quali[,1]) >= quantile(abs(df_quali[,1]),0.80) | abs(df_quali[,2]) >= quantile(abs(df_quali[,2]),0.80)))
+  names(s_df_quali)=c("x","y")
+  s_df_quali$label=row.names(s_df_quali)
+  x=s_df_quali$x
+  y=s_df_quali$y
+  label=s_df_quali$label
+  b=b+geom_point(aes(x=x,y=y),data=s_df_quali,colour="red",size=1) +
+  geom_text(aes(x=x,y=y,label=label,size=labelsize/3),data=s_df_quali)
+}
+
+if (!is.null(quanti.supp)){
+  names(df_quanti)=c("x","y")
+  df_quanti$label=row.names(df_quanti)
+  x=df_quanti$x
+  y=df_quanti$y
+  label=df_quanti$label
+  b=b+geom_point(aes(x=x,y=y),data=df_quanti,colour="blue",size=1) +
+    geom_text(aes(x=x,y=y,label=label,size=labelsize/3),data=df_quanti)
+}
+
 plot(b)
+
 semanticResults=list(net=CW,res.mca=res.mca,km.res=km.res)
 return(semanticResults)
 }
-
-
-

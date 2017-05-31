@@ -5,8 +5,8 @@
 \title{Plotting Bibliographic networks}
 \usage{
 networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
-  labelsize = 1, halo = FALSE, cluster = "optimal", vos.path = NULL,
-  size = FALSE, noloops = TRUE, remove.multiple = TRUE,
+  labelsize = 1, halo = FALSE, cluster = "walktrap", vos.path = NULL,
+  size = FALSE, curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
   remove.isolates = FALSE)
 }
 \arguments{
@@ -35,6 +35,8 @@ networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
 \item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
 
 \item{size}{is logical. If TRUE the point size of each vertex is proportional to its degree.}
+
+\item{curved}{is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}}
 
 \item{noloops}{is logical. If TRUE loops in the network are deleted.}
 

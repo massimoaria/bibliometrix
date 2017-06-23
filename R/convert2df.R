@@ -68,6 +68,7 @@
 #' @importFrom igraph plot.igraph
 #' @importFrom igraph delete.vertices
 #' @importFrom igraph E
+#' @importFrom igraph E<-
 #' @importFrom igraph V
 #' @importFrom igraph V<-
 #' @importFrom igraph simplify

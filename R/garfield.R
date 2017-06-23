@@ -23,4 +23,5 @@
 #' \item{DB}{Database}
 #' }
 #' @source \url{http://www.scopus.com}
-"garfield"
+#' @name garfield
+NULL

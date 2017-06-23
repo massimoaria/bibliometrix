@@ -38,4 +38,3 @@ names(list_df)
 
 \code{\link{plot}} to draw some useful plots of the results.
 }
-

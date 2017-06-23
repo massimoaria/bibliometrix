@@ -6,4 +6,5 @@
 #'
 #' @format A character vector with 665 rows.\cr 
 #' 
-"stopwords"
+#' @name stopwords
+NULL

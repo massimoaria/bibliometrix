@@ -7,7 +7,7 @@
 networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
   labelsize = 1, halo = FALSE, cluster = "walktrap", vos.path = NULL,
   size = FALSE, curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
-  remove.isolates = FALSE)
+  remove.isolates = FALSE, weighted = NULL, edgesize = 1)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -43,6 +43,13 @@ networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
 \item{remove.multiple}{is logical. If TRUE multiple links are plotted using just one edge.}
 
 \item{remove.isolates}{is logical. If TRUE isolates vertices are not plotted.}
+
+\item{weighted}{This argument specifies whether to create a weighted graph from an adjacency matrix. 
+If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
+If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute 
+named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.}
+
+\item{edgesize}{is an integer. It indicates the network edge size.}
 }
 \value{
 It is a network object of the class \code{igraph}.
@@ -72,4 +79,3 @@ net <- networkPlot(NetMatrix, n = 20, type = "kamada", Title = "Co-Citation")
 
 \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 }
-

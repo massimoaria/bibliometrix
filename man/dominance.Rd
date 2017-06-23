@@ -37,4 +37,3 @@ DF
 
 \code{\link{summary}} method for class '\code{bibliometrix}'
 }
-

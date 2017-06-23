@@ -34,7 +34,6 @@ It converts an ISI Wok Export file and create a data frame from it, with cases c
 \seealso{
 \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
 
-Other converting.functions: \code{\link{convert2df}},
+Other converting functions: \code{\link{convert2df}},
   \code{\link{isibib2df}}, \code{\link{scopus2df}}
 }
-

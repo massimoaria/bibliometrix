@@ -59,4 +59,3 @@ summary(results, k = 10, pause = FALSE)
 
 \code{\link{plot}} to draw some useful plots of the results.
 }
-

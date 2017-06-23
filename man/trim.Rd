@@ -25,4 +25,3 @@ char
 trim(char)
 
 }
-

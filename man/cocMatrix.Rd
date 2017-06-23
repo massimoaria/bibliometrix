@@ -71,4 +71,3 @@ WA <- cocMatrix(scientometrics, Field = "AU", type = "sparse", sep = ";")
 
 \code{\link{biblioNetwork}} to compute a bibliographic network.
 }
-

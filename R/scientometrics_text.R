@@ -9,4 +9,5 @@
 #' Data has been imported by an ISI Export file in plain text format using the function \code{\link{readLines}}.
 #' 
 #' @source \url{http://www.webofknowledge.com}
-"scientometrics_text"
+#' @name scientometrics_text
+NULL

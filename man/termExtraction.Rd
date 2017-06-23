@@ -88,4 +88,3 @@ synonyms=synonyms, verbose=TRUE)
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis
 }
-

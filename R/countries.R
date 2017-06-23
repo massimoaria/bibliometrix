@@ -9,4 +9,5 @@
 #'     \item{countries}{country names}
 #'     }
 #' 
-"countries"
+#' @name countries
+NULL

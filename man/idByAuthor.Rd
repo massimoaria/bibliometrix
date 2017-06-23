@@ -41,4 +41,3 @@ Uses SCOPUS API author search to identify author identification information.
 \seealso{
 \code{\link{retrievalByAuthorID}} for downloading the complete author bibliographic collection from SCOPUS
 }
-

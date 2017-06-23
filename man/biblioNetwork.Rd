@@ -80,4 +80,3 @@ net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",lab
 
 \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 }
-

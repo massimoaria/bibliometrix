@@ -41,4 +41,3 @@ histResults <- histNetwork(scientometrics, n = 10, sep = ";")
 
 \code{\link{biblioNetwork}} to compute a bibliographic network.
 }
-

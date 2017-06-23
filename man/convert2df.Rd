@@ -69,7 +69,6 @@ biblio_df_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 
-Other converting.functions: \code{\link{isi2df}},
+Other converting functions: \code{\link{isi2df}},
   \code{\link{isibib2df}}, \code{\link{scopus2df}}
 }
-

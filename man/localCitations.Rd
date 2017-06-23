@@ -43,4 +43,3 @@ CR[1:10]
 
 \code{\link{plot}} to draw some useful plots of the results.
 }
-

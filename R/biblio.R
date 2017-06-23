@@ -8,4 +8,5 @@
 #' Data has been imported by an ISI Export file in bibtex format using the function \code{\link{readLines}}.
 #' 
 #' @source \url{http://www.webofknowledge.com}
-"biblio"
+#' @name biblio
+NULL

@@ -72,4 +72,3 @@ Uses SCOPUS API search to get information about documents on a set of authors us
 \seealso{
 \code{\link{idByAuthor}} for downloading auhtor information and SCOPUS ID.
 }
-

@@ -31,4 +31,3 @@ Tab <- tableTag(scientometrics, Tag = "CR", sep = ";")
 Tab[1:10]
 
 }
-

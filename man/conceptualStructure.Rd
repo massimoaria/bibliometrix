@@ -67,4 +67,3 @@ author's keywords, etc.) of a bibliographic data frame.
 
 \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 }
-

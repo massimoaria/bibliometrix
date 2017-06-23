@@ -25,4 +25,5 @@
 #' \item{DB}{Database}
 #' }
 #' @source \url{http://www.webofknowledge.com}
-"isiCollection"
+#' @name isiCollection
+NULL

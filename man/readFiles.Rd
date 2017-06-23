@@ -29,4 +29,3 @@ D <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt'
 \seealso{
 \code{\link{convert2df}} for converting SCOPUS of ISI Export file into a dataframe
 }
-

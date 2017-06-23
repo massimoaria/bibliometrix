@@ -39,4 +39,3 @@ S=couplingSimilarity(NetMatrix, type = "jaccard")
 
 \code{\link{cocMatrix}} to compute a bibliographic bipartite network.
 }
-

@@ -32,4 +32,3 @@ The bibliometric analysis function \code{\link{biblioAnalysis}}.
 
 \code{\link{summary}} to compute a list of summary statistics of the object of class \code{bibliometrix}.
 }
-

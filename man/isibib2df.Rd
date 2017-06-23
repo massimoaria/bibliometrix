@@ -34,7 +34,6 @@ It converts an ISI WoK Export file and create a data frame from it, with cases c
 \seealso{
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 
-Other converting.functions: \code{\link{convert2df}},
+Other converting functions: \code{\link{convert2df}},
   \code{\link{isi2df}}, \code{\link{scopus2df}}
 }
-

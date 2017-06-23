@@ -55,4 +55,3 @@ indices$CitationList[[1]]
 
 \code{\link{plot}} to draw some useful plots of the results.
 }
-

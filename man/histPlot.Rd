@@ -47,4 +47,3 @@ net <- histPlot(histResults, size = TRUE)
 
 \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 }
-

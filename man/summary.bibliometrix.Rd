@@ -44,4 +44,3 @@ summary(results)
 
 \code{\link{plot}} to draw some useful plots of the results.
 }
-

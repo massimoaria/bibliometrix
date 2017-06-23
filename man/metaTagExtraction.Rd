@@ -52,4 +52,3 @@ scientometrics$AU_CO[1:10]
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis
 }
-

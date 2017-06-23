@@ -25,4 +25,5 @@
 #' }
 #'  
 #' @source \url{http://www.webofknowledge.com}
-"biblio_df"
+#' @name biblio_df
+NULL

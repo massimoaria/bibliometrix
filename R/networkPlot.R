@@ -26,6 +26,10 @@
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("null", optimal", "lovain","infomap","edge_betweenness","walktrap").
 #' @param curved is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}
+#' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix. 
+#' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
+#' If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute 
+#' named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -43,12 +47,12 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE){
+networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL){
 
 NET=NetMatrix
 
 # Create igraph object
-bsk.network <- graph.adjacency(NET,mode="undirected")
+bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
 V(bsk.network)$id <- colnames(NET)
 
 # Compute node degrees (#links) and use that to set node size:
@@ -92,7 +96,7 @@ switch(type,
 if (type!="vosviewer"){
   
   switch(cluster,
-         null={V(net)$color="#8DD3C7"},
+         null={V(bsk.network)$color="#8DD3C7"},
          optimal={
            net_groups <- cluster_optimal(bsk.network)
            V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},

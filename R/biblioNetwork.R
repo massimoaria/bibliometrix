@@ -130,6 +130,15 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
            references={
              WCR=cocMatrix(M, Field="CR", type = "sparse", sep)
              NetMatrix = crossprod(WCR, WCR)
+             ### reduce name length
+             A=row.names(NetMatrix)
+             ind=unlist(regexec("*V[0-9]", A))
+             A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+             ind=unlist(regexec("*DOI ", A))
+             A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+             row.names(NetMatrix)=A
+             colnames(NetMatrix)=A
+             ###
            },
            sources={
              WSO=cocMatrix(M, Field="CR_SO", type = "sparse", sep)

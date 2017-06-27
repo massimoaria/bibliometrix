@@ -164,7 +164,7 @@ net=networkPlot(NetMatrix, n = 20, Title = "Keyword Co-occurrences", type = "kam
 
 # Conceptual Structure using keywords
 
-CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE)
+CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE, labelsize=10)
 
 
 ## ----Historical Co-citation network, fig.height=8, fig.width=7, warning=FALSE----

@@ -605,7 +605,7 @@ Here, we show an example using the function *conceptualStructure* that performs 
 
 # Conceptual Structure using keywords
 
-CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE)
+CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE, labelsize=10)
 
 ```
 

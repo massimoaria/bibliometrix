@@ -3,7 +3,7 @@ citHeader("To cite bibliometrix in publications, please use:")
 
 
 citEntry(entry = "manual",
-    title = "bibliometrix: a R tool for comprehensive bibliometric analysis of scientific literature",
+    title = "bibliometrix: an R tool for comprehensive bibliometric analysis of scientific literature",
     author = "Aria, Massimo and Cuccurullo, Corrado",
     organization = "University of Naples Federico II",
     address = "Naples, Italy",

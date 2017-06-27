@@ -117,7 +117,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # calculate jaccard similarity coefficient
-S <- couplingSimilarity(NetMatrix, type="jaccard")
+S <- normalizeSimilarity(NetMatrix, type="jaccard")
 
 # plot authors' similarity (first 20 authors)
 net=networkPlot(S, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)

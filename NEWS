@@ -4,7 +4,10 @@ bibliometrix v1.7 (Release date: ???)
 New functionality:
 * added new clusterng algorithms into networkPlot()
 * added argument 'halo' in networkPlot() to color cluster groups
+* added function normalizeSimilarity() to calculate some probabilistic and set-theoretic similarity measures
 
+Changes:
+* removed function couplingSimilarity()
 
 bibliometrix v1.6 (Release date: 2017-05-09)
 ==============

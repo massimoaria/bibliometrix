@@ -480,13 +480,13 @@ Articles with only a few references, therefore, would tend to be more weakly bib
 
 This suggests that it might be more practicable to switch to a relative measure of bibliographic coupling.
 
-*couplingSimilarity* function calculates Jaccard or Salton similarity coefficient among vertices of a coupling network.
+*normalizeSimilarity* function calculates Association strength, Inclusion, Jaccard or Salton similarity among vertices of a network.
 
 ```{r similarity, fig.height=7, fig.width=7, warning=FALSE}
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # calculate jaccard similarity coefficient
-S <- couplingSimilarity(NetMatrix, type="jaccard")
+S <- normalizeSimilarity(NetMatrix, type="jaccard")
 
 # plot authors' similarity (first 20 authors)
 net=networkPlot(S, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)

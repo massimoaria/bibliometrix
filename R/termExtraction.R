@@ -7,8 +7,8 @@
 #' \tabular{lll}{
 #' \code{"TI"}\tab   \tab Manuscript title\cr
 #' \code{"AB"}\tab   \tab Manuscript abstract\cr
-#' \code{"DE"}\tab   \tab Manuscript keywords plus\cr
-#' \code{"ID"}\tab   \tab Manuscript author's keywords}
+#' \code{"ID"}\tab   \tab Manuscript keywords plus\cr
+#' \code{"DE"}\tab   \tab Manuscript author's keywords}
 #' The default is \code{Field = "TI"}.
 #'
 #' @param stemming is logical. If TRUE the Porter Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.

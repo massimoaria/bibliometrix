@@ -54,7 +54,7 @@ summary.bibliometrix<-function(object, ...){
   TCm=format(mean(as.numeric(object$TotalCitation), na.rm=TRUE),digits=4)
   MainInfo[7]=paste("Average citations per article        ",TCm,"\n\n")
   MainInfo[8]=paste("Authors                              ",object$nAuthors,"\n")
-  MainInfo[9]=paste("Author Appearances                   ",object$Apparences,"\n")
+  MainInfo[9]=paste("Author Appearances                   ",object$Appearances,"\n")
   MainInfo[10]=paste("Authors of single authored articles  ",object$nAuthors-object$AuMultiAuthoredArt,"\n")
   MainInfo[11]=paste("Authors of multi authored articles   ",object$AuMultiAuthoredArt,"\n\n")
   MainInfo[12]=paste("Articles per Author                  ",format(object$Articles/object$nAuthors,digits=3),"\n")

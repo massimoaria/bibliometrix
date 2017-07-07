@@ -35,7 +35,7 @@ histPlot<-function(histResults, size = F, labelsize = 1){
   NET=histResults$NetMatrix
   
   # Create igraph object
-  bsk.network <- graph.adjacency(NET,mode="undirected")
+  bsk.network <- graph.adjacency(NET,mode="undirected",weighted=TRUE)
   V(bsk.network)$id <- colnames(NET)
   
   # Compute node degrees (#links) and use that to set node size:

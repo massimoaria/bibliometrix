@@ -6,6 +6,7 @@
 #' The network map can be plotted using internal R routines or using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 #' @param NetMatrix is a network matrix obtained by the function \code{\link{biblioNetwork}}. 
 #' @param n is an integer. It indicates the number of vertices to plot.
+#' @param Degree is an integer. It idicates the min frequency of a vertex. If Degree is not NULL, n is ignored.
 #' @param type is a character object. It indicates the network map layout:
 #' 
 #' \tabular{lll}{
@@ -48,7 +49,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=20,Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
+networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
 
 NET=NetMatrix
 
@@ -62,6 +63,10 @@ if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
 else{V(bsk.network)$size=rep(5,length(V(bsk.network)))}
 
 # Select number of vertices to plot
+if (!is.null(Degree)){
+  n=length(which(diag(NET)>=Degree))
+}
+
 if (n>dim(NET)[1]) {n <- dim(NET)[1]}
 NetDegree <- unname(sort(deg,decreasing=TRUE)[n])
 bsk.network <- delete.vertices(bsk.network,which(degree(bsk.network)<NetDegree))

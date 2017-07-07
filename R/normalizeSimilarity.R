@@ -40,17 +40,18 @@ normalizeSimilarity <- function(NetMatrix, type = "association"){
   
   diag <- Matrix::diag
   D=diag(NetMatrix)
-  
+  #S=NetMatrix
   switch(type,
-         association={S=NetMatrix/(outer(D,D,"*"))},
+         association={S=NetMatrix/((outer(D,D,"*")))},
          inclusion={S=NetMatrix/outer(D,D, function(a,b){mapply(min,a,b)})},
          jaccard={S=NetMatrix/(outer(D,D,"+")-NetMatrix)},
-         salton={S=NetMatrix/sqrt(outer(D,D,"*"))},
+         salton={S=NetMatrix/(sqrt(outer(D,D,"*")))},
          equivalence={S=(NetMatrix/sqrt(outer(D,D,"*")))^2})
   
   S=as.matrix(S)
   S[is.nan(S)]=0
-  S=Matrix(S)
+  S=Matrix(S, sparse=TRUE)
+  #if (class(S)!="dgCMatrix"){S=as.matrix(S)}
     
   return(S)
   

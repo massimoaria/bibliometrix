@@ -4,15 +4,18 @@
 \alias{networkPlot}
 \title{Plotting Bibliographic networks}
 \usage{
-networkPlot(NetMatrix, n = 20, Title = "Plot", type = "kamada",
-  labelsize = 1, halo = FALSE, cluster = "walktrap", vos.path = NULL,
-  size = FALSE, curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
-  remove.isolates = FALSE, weighted = NULL, edgesize = 1)
+networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
+  type = "kamada", labelsize = 1, halo = FALSE, cluster = "walktrap",
+  vos.path = NULL, size = FALSE, curved = FALSE, noloops = TRUE,
+  remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
+  edgesize = 1)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
+
+\item{Degree}{is an integer. It idicates the min frequency of a vertex. If Degree is not NULL, n is ignored.}
 
 \item{Title}{is a character indicating the plot title.}
 

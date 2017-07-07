@@ -1,10 +1,12 @@
-bibliometrix v1.7 (Release date: ???)
+bibliometrix v1.7 (Release date: 2017-07-07)
 ==============
 
 New functionality:
 * added new clusterng algorithms into networkPlot()
 * added argument 'halo' in networkPlot() to color cluster groups
 * added function normalizeSimilarity() to calculate some probabilistic and set-theoretic similarity measures
+* added function thematicMap() to create a thematic map based on co-word network analysis and clustering
+* added function thematicEvolution() to create an Evolution thematic map based on co-word network analysis and clustering. 
 
 Changes:
 * removed function couplingSimilarity()

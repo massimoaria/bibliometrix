@@ -25,7 +25,7 @@ Authors \tab       \tab the authors' frequency distribution\cr
 AuthorsFrac \tab      \tab the authors' frequency distribution (fractionalized)\cr
 FirstAuthors \tab      \tab first author of each manuscript\cr
 nAUperPaper \tab      \tab the number of authors per manuscript\cr
-Apparences \tab      \tab the number of author apparences\cr
+Appearances \tab      \tab the number of author appearances\cr
 nAuthors \tab       \tab the number of authors\cr
 AuMultiAuthoredArt \tab      \tab the number of authors of multi authored articles\cr
 MostCitedPapers \tab      \tab The list of manuscripts sorted by citations\cr

@@ -23,6 +23,7 @@
 #' @param noloops is logical. If TRUE loops in the network are deleted.
 #' @param remove.isolates is logical. If TRUE isolates vertices are not plotted.
 #' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
+#' @param label is logical. If TRUE vertex labels are plotted.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("null", optimal", "lovain","infomap","edge_betweenness","walktrap").
@@ -49,7 +50,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
+networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
 
 NET=NetMatrix
 
@@ -121,6 +122,11 @@ if (type!="vosviewer"){
          )
   
 ## Plot the network
+  LABEL=""
+  if (isTRUE(label)){
+    LABEL=V(bsk.network)$name
+  }
+  
   
   if (!is.null(weighted)){
     E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
@@ -130,7 +136,7 @@ if (type!="vosviewer"){
   if (isTRUE(halo) & cluster!="null"){
     plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
   } else{
-    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
+    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, vertex.label.cex = labelsize, main=Title)
   }
 
 }  

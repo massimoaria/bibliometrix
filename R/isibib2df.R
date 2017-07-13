@@ -27,7 +27,7 @@
 isibib2df<-function(D){
 
   #D=iconv(D, "latin1", "ASCII", sub="")
-  AT=which(regexpr("\\@",D)==1)
+  #AT=which(regexpr("\\@",D)==1)
   D=gsub("\\@","Manuscript =",D)
 
   #individua la prima riga di ogni paper
@@ -37,11 +37,11 @@ isibib2df<-function(D){
   #individua il numero totale di paper
   nP=length(Papers)-1
 
-  uniqueTag=c("AU","TI","SO","JI","DT","DE","ID","AB","C1","CR","TC","PY","SC","UT","RP")
+  uniqueTag=c("AU","TI","SO","JI","VO","NU","PP","BO","DT","DE","ID","AB","C1","CR","TC","PY","SC","UT","RP")
 
   DATA=data.frame(matrix(NA,nP,length(uniqueTag)))
   names(DATA)=uniqueTag
-  Tag=c("Author =","Title =","Journal =","Journal-ISO =","Manuscript =","Keywords =","Keywords-Plus =","Abstract =","Affiliation =","Cited-References =","Times-Cited =","Year =","Web-of-Science-Categories  =","Unique-ID =")
+  Tag=c("Author =","Title =","Journal =","Journal-ISO =","Volume =","Number =","Pages =","Booktitle =","Manuscript =","Keywords =","Keywords-Plus =","Abstract =","Affiliation =","Cited-References =","Times-Cited =","Year =","Web-of-Science-Categories  =","Unique-ID =")
 
   for (i in 1:nP){
 
@@ -101,6 +101,13 @@ for (i in 1:length(Tag)){
   #row.names(DATA)=DATA$UT
   
   DATA$DB="ISI"
+  
+  ### merge Sources and Proceedings
+  ind=which(is.na(DATA$SO))
+  DATA$SO[ind]=DATA$BO[ind]
+  DATA=DATA[,-(which(names(DATA)=="BO"))]
+  
+  DATA$NU=as.numeric(gsub("[^0-9]", "", DATA$NU))
   
   return(DATA)
 }

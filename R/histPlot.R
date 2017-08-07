@@ -46,7 +46,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
     RR=lapply(R,function(l){
       l=l[1:2]
       l=paste(l[1],l[2],sep=",")})
-    V(bsk.network)$id <- unlist(RR)}else{V(bsk.network)$id=substring(row.names(histResults[[3]]),8)}
+    V(bsk.network)$id <- unlist(RR)}else{V(bsk.network)$id=row.names(histResults[[3]])}
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- histResults$LCS

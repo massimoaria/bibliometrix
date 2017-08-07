@@ -1,6 +1,6 @@
 #' Historical co-citation network
 #'
-#' \code{histNetwork} creates a historical co-citation network from a bibliographic data frame.
+#' \code{histNetwork} creates a historical citation network from a bibliographic data frame.
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 #'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
@@ -11,7 +11,8 @@
 #' \tabular{lll}{
 #' NetMatrix \tab  \tab the historical co-citation network matrix\cr
 #' Degree \tab       \tab the min degree of the network\cr
-#' histData \tab      \tab the set of n most cited references}
+#' histData \tab      \tab the set of n most cited references
+#' M \tab      \tab the bibliographic data frame}
 #'
 #'
 #' @examples
@@ -29,59 +30,56 @@
 
 histNetwork<-function(M, n=10, sep = ";"){
 
+  N=dim(M)[1]
+  
+  listAU=strsplit(as.character(M$AU),sep)
+  listAU=lapply(listAU, function(l) trim.leading(l))
+    listAU=lapply(listAU,function(l){
+    l=trim(l)
+    l=sub(" ",",",l, fixed = TRUE)
+    l=sub(",,",",",l, fixed = TRUE)
+    l=gsub(" ","",l, fixed = TRUE)})
+  FirstAuthors=gsub(","," ",unlist(lapply(listAU,function(l) l[[1]])))
+  
+  if (!is.null(M$J9)){
+    SR=paste(FirstAuthors,M$PY,M$J9,sep=", ")}else{J9=trim(gsub("\\."," ",M$JI))
+    SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
+    M$SR=SR
 
-### Calculate Co-citation matrix
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = sep)
-NetMatrix=NetMatrix[(!is.na(colnames(NetMatrix))),(!is.na(colnames(NetMatrix)))]
-
-TC=Matrix::diag(NetMatrix)
-
-
+  lCit=Matrix(0, N,N)
+  for (i in 1:N){
+    
+    x=M$SR[i]
+    pos = grep(x, M$CR)
+    
+    if ("DI" %in% names(M)){
+      if (!is.na(M$DI[i])){
+      pos2 = grep(M$DI[i],M$CR)
+      if (length(pos2)>0){pos=pos2}}
+      }
+    
+      if (length(pos)>0){
+      lCit[i,pos]=1
+    }
+  }
+  
+  LCS=rowSums(lCit)
+  M$LCS=LCS
+  row.names(lCit)=colnames(lCit)=SR
+  
+  s=sort(LCS,decreasing = TRUE)[n]
+  ind=which(LCS>=s)
+  lCit=lCit[ind,ind]
+  Y=M$PY[ind]
 
 ### Cited papers list
-Papers=colnames(NetMatrix)
-
-#Papers=Papers[TC>=Degree]
-
-
-### Extract year from cited papers
-Year=sapply(Papers, function(P){
-  Y=gsub("[^0-9]", "", unlist(strsplit(P,",")))
-  Y=as.numeric(Y[nchar(Y)==4])[1]
-  })
-Year=as.numeric(Year)
-Year[Year<=1100]=NA
-Year[Year>max(M$PY)]=NA
-
-Papers=Papers[!is.na(Year)]
-TC=TC[!is.na(Year)]
-Year=Year[!is.na(Year)]
-
-Degree <- sort(TC,decreasing=TRUE)[n]
-
-Papers=Papers[TC>=Degree]
-Year=Year[TC>=Degree]
-
-
-X=as.matrix(NetMatrix[Papers,Papers])
-rownames(X)=colnames(X)=Year
-
-X=X[sort(rownames(X)),sort(rownames(X))]
-
-df=data.frame(Paper=Papers,Year=Year)
+df=data.frame(Paper=SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind])
 df=df[order(df$Year),]  
-TC=diag(X)
-df$LCS=TC
 
-for (i in 1:length(df$Paper)){
-  a=regexpr(df$Year[i],df$Paper[i])[1]
-  df$PaperShort[i]=substr(df$Paper[i], 1, a+3)
-}
-X[upper.tri(X)]=0
-row.names(X)=colnames(X)=df$PaperShort
+
 row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
 
-results=list(NetMatrix=X,Degree=Degree,histData=df[,-4])
+results=list(NetMatrix=t(lCit),Degree=s,histData=df,M=M,LCS=LCS[ind])
 return(results)
 }
 

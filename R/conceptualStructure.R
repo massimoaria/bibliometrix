@@ -189,7 +189,9 @@ b=fviz_cluster(km.res, data = df,labelsize=labelsize)+
   scale_color_manual(values = cbPalette[1:clust])+
   scale_fill_manual(values = cbPalette[1:clust]) +
   labs(title= "     ") +
-  geom_point()
+  geom_point() +
+  theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"))
+
 if (!is.null(quali.supp)){
   s_df_quali=df_quali[(abs(df_quali[,1]) >= quantile(abs(df_quali[,1]),0.75) | abs(df_quali[,2]) >= quantile(abs(df_quali[,2]),0.75)),]
   #s_df_quali=subset(df_quali,subset(abs(df_quali[,1]) >= quantile(abs(df_quali[,1]),0.80) | abs(df_quali[,2]) >= quantile(abs(df_quali[,2]),0.80)))

@@ -168,11 +168,11 @@ CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE, la
 
 
 ## ----Historical Co-citation network, fig.height=8, fig.width=7, warning=FALSE----
-# Create a historical co-citation network
+# Create a historical citation network
 
-histResults <- histNetwork(M, n = 15, sep = ".  ")
+histResults <- histNetwork(M, n = 10, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE)
+net <- histPlot(histResults, size = FALSE,arrowsize = 0.5)
 
 

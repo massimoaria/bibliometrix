@@ -72,6 +72,7 @@
 #' @importFrom igraph V
 #' @importFrom igraph V<-
 #' @importFrom igraph graph_from_incidence_matrix
+#' @importFrom igraph graph_from_adjacency_matrix
 #' @importFrom igraph simplify
 #' @importFrom igraph layout.circle
 #' @importFrom igraph layout.sphere

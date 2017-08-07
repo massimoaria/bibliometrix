@@ -4,21 +4,29 @@
 \alias{histPlot}
 \title{Plotting historical co-citation network}
 \usage{
-histPlot(histResults, size = F, labelsize = 1)
+histPlot(histResults, remove.isolates = FALSE, size = F, labelsize = 0.8,
+  label = TRUE, arrowsize = 0.1)
 }
 \arguments{
 \item{histResults}{is an object of \code{class} "list" containing the following components:
 
 \tabular{lll}{
-NetMatrix \tab  \tab the historical co-citation network matrix\cr
+NetMatrix \tab  \tab the historical citation network matrix\cr
 Degree \tab       \tab the min degree of the network\cr
-histData \tab      \tab the set of n most cited references}
+histData \tab      \tab the set of n most cited references\cr
+M \tab      \tab the bibliographic data frame}
 
-is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
+is a network matrix obtained by the function \code{\link{histNetwork}}.}
+
+\item{remove.isolates}{is logical. If TRUE isolates vertices are not plotted.}
 
 \item{size}{is logical. If TRUE the point size of each vertex is proportional to its degree.}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
+
+\item{label}{is logical. If TRUE vertex labels are plotted.}
+
+\item{arrowsize}{is numerical. It indicates the edge arrow size.}
 }
 \value{
 It is a network object of the class \code{igraph}.
@@ -30,7 +38,7 @@ It is a network object of the class \code{igraph}.
 The function \code{\link{histPlot}} can plot a historical co-citation network previously created by \code{\link{histNetwork}}.
 }
 \examples{
-# EXAMPLE Co-citation network
+# EXAMPLE Citation network
 
 library(igraph)
 data(scientometrics)

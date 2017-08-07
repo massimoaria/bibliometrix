@@ -11,7 +11,7 @@
 #' \tabular{lll}{
 #' NetMatrix \tab  \tab the historical co-citation network matrix\cr
 #' Degree \tab       \tab the min degree of the network\cr
-#' histData \tab      \tab the set of n most cited references
+#' histData \tab      \tab the set of n most cited references\cr
 #' M \tab      \tab the bibliographic data frame}
 #'
 #'
@@ -73,6 +73,7 @@ histNetwork<-function(M, n=10, sep = ";"){
   Y=M$PY[ind]
 
 ### Cited papers list
+if (!("DI" %in% names(M))){M$DI=NA}
 df=data.frame(Paper=SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind])
 df=df[order(df$Year),]  
 

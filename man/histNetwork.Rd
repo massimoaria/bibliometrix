@@ -20,10 +20,11 @@ It is a data matrix with cases corresponding to manuscripts and variables to Fie
 \tabular{lll}{
 NetMatrix \tab  \tab the historical co-citation network matrix\cr
 Degree \tab       \tab the min degree of the network\cr
-histData \tab      \tab the set of n most cited references}
+histData \tab      \tab the set of n most cited references\cr
+M \tab      \tab the bibliographic data frame}
 }
 \description{
-\code{histNetwork} creates a historical co-citation network from a bibliographic data frame.
+\code{histNetwork} creates a historical citation network from a bibliographic data frame.
 }
 \examples{
 data(scientometrics)

@@ -8,7 +8,7 @@
 #' \tabular{lll}{
 #' NetMatrix \tab  \tab the historical citation network matrix\cr
 #' Degree \tab       \tab the min degree of the network\cr
-#' histData \tab      \tab the set of n most cited references
+#' histData \tab      \tab the set of n most cited references\cr
 #' M \tab      \tab the bibliographic data frame}
 #' 
 #' is a network matrix obtained by the function \code{\link{histNetwork}}. 

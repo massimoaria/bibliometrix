@@ -5,10 +5,10 @@
 \title{Plotting Bibliographic networks}
 \usage{
 networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
-  type = "kamada", labelsize = 1, halo = FALSE, cluster = "walktrap",
-  vos.path = NULL, size = FALSE, curved = FALSE, noloops = TRUE,
-  remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
-  edgesize = 1)
+  type = "kamada", label = TRUE, labelsize = 1, halo = FALSE,
+  cluster = "walktrap", vos.path = NULL, size = FALSE, curved = FALSE,
+  noloops = TRUE, remove.multiple = TRUE, remove.isolates = FALSE,
+  weighted = NULL, edgesize = 1)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -28,6 +28,8 @@ networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
 \code{type="fruchterman"}\tab   \tab Fruchterman-Reingold layout\cr
 \code{type="kamada"}\tab   \tab  Kamada-Kawai layout\cr
 \code{type="vosviewer"}\tab   \tab Network is plotted using VOSviewer software\cr}}
+
+\item{label}{is logical. If TRUE vertex labels are plotted.}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
 

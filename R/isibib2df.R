@@ -37,11 +37,11 @@ isibib2df<-function(D){
   #individua il numero totale di paper
   nP=length(Papers)-1
 
-  uniqueTag=c("AU","TI","SO","JI","VO","NU","PP","BO","DT","DE","ID","AB","C1","CR","TC","PY","SC","UT","RP")
+  uniqueTag=c("AU","TI","SO","JI","VO","NU","PP","BO","DT","DE","ID","AB","C1","CR","TC","PY","SC","UT","DI","RP")
 
   DATA=data.frame(matrix(NA,nP,length(uniqueTag)))
   names(DATA)=uniqueTag
-  Tag=c("Author =","Title =","Journal =","Journal-ISO =","Volume =","Number =","Pages =","Booktitle =","Manuscript =","Keywords =","Keywords-Plus =","Abstract =","Affiliation =","Cited-References =","Times-Cited =","Year =","Web-of-Science-Categories  =","Unique-ID =")
+  Tag=c("Author =","Title =","Journal =","Journal-ISO =","Volume =","Number =","Pages =","Booktitle =","Manuscript =","Keywords =","Keywords-Plus =","Abstract =","Affiliation =","Cited-References =","Times-Cited =","Year =","Web-of-Science-Categories  =","Unique-ID =","DOI =")
 
   for (i in 1:nP){
 
@@ -57,6 +57,12 @@ isibib2df<-function(D){
       if (uniqueTag[j]!="C1"){
         DATA[[uniqueTag[j]]][i]=paste0(D[(POS):(POS+END-1)],collapse="")}
       else {DATA[[uniqueTag[j]]][i]=paste0(gsub(";",",",D[(POS):(POS+END-1)]),collapse=";")}
+      if (uniqueTag[j]=="DI"){
+        #DOI=gsub("\\{","",D[POS])
+        #DOI=gsub("\\}","",DOI)
+        DOI=gsub("DOI = ","",D[POS])
+        DATA[[uniqueTag[j]]][i]=gsub(",","",DOI)
+      }
       }
     }
 

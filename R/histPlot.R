@@ -42,7 +42,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   bsk.network=graph_from_adjacency_matrix(NET, mode = c("directed"),weighted = NULL)
   
   if (isTRUE(label)){
-    R=strsplit(row.names(NET),",")
+    R=strsplit(names(V(bsk.network)),",")
     RR=lapply(R,function(l){
       l=l[1:2]
       l=paste(l[1],l[2],sep=",")})
@@ -62,7 +62,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
     # Choose Network layout
   if (!isTRUE(remove.isolates)){
   l <- layout.fruchterman.reingold(bsk.network) #default
-  l[,2]=(histResults[[3]]$Year)*-1
+  l[,2]=(histResults[[3]]$Year)
   
   edges1=colSums(NET)
   edges2=rowSums(NET)
@@ -72,6 +72,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   l[ind,1]=sample(seq(ma,ma+((ma-mi)/3),length.out = length(ind)),size=length(ind))}
   else{
     l <- layout.fruchterman.reingold(bsk.network) #default
+    l <- layout_on_grid(bsk.network)
     l[,2]=(histResults[[3]]$Year)*-1
     edges1=colSums(NET)
     edges2=rowSums(NET)
@@ -80,8 +81,9 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
     l=l[-ind,]
     
   }
-  l[,1]=l[,1]*2
+  #l[,1]=l[,1]*2
   # Plot the chronological co-citation network
+  l=layout.norm(l)
   plot(bsk.network,layout = l, vertex.color="lightblue", vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'darkblue', vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, edge.arrow.size=arrowsize, main="Historical citation network")
   cat("\n Legend\n\n")
   print(histResults[[3]])

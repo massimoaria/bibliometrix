@@ -98,6 +98,7 @@ switch(type,
          system(VOScommand)}
          })
 
+l=layout.norm(l)
 
 
 if (type!="vosviewer"){

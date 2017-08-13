@@ -86,6 +86,7 @@
 #' @importFrom igraph cluster_edge_betweenness
 #' @importFrom igraph cluster_louvain
 #' @importFrom igraph membership
+#' @importFrom igraph layout.norm
 #' @importFrom Matrix %&%
 #' @importFrom Matrix abIseq
 #' @importFrom Matrix abIseq1

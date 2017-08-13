@@ -29,7 +29,8 @@
 #' @export
 
 histNetwork<-function(M, n=10, sep = ";"){
-
+  
+  M=M[order(M$PY),]
   N=dim(M)[1]
   
   listAU=strsplit(as.character(M$AU),sep)
@@ -45,7 +46,7 @@ histNetwork<-function(M, n=10, sep = ";"){
     SR=paste(FirstAuthors,M$PY,M$J9,sep=", ")}else{J9=trim(gsub("\\."," ",M$JI))
     SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
     M$SR=SR
-
+    
   lCit=Matrix(0, N,N)
   for (i in 1:N){
     

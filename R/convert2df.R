@@ -230,25 +230,43 @@ convert2df<-function(file,dbsource="isi",format="bibtex"){
   M$TC=as.numeric(M$TC)
   
   ## Author data cleaning
-  if ("AU" %in% names(M)){
-    M$AU=gsub(","," ",M$AU)
-    M$AU=gsub("  "," ",M$AU)
-    AUlist=strsplit(M$AU,";")
-    AU=lapply(AUlist,function(l){
-      l=trim(l)
-      name=strsplit(l," ")
-      lastname=unlist(lapply(name,function(ln){ln[1]}))
-      firstname=lapply(name,function(ln){
-        ln=ln[-1]
-        ln=gsub(" ","",ln)
-        #f=paste(ln,collapse="")
-      })
-      AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
-      return(AU)
-    })
-    M$AU=unlist(AU)
+  # if ("AU" %in% names(M)){
+  #   M$AU=gsub(","," ",M$AU)
+  #   M$AU=gsub("  "," ",M$AU)
+  #   AUlist=strsplit(M$AU,";")
+  #   AU=lapply(AUlist,function(l){
+  #     l=trim(l)
+  #     name=strsplit(l," ")
+  #     lastname=unlist(lapply(name,function(ln){ln[1]}))
+  #     firstname=lapply(name,function(ln){
+  #       ln=ln[-1]
+  #       ln=gsub(" ","",ln)
+  #       #f=paste(ln,collapse="")
+  #     })
+  #     AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
+  #     return(AU)
+  #   })
+  #   M$AU=unlist(AU)
     
-  }
+  #}
+  
+  #M=M[order(M$PY),]
+  #N=dim(M)[1]
+  
+  listAU=strsplit(as.character(M$AU),";")
+  listAU=lapply(listAU, function(l) trim.leading(l))
+  listAU=lapply(listAU,function(l){
+    l=trim(l)
+    l=sub(" ",",",l, fixed = TRUE)
+    l=sub(",,",",",l, fixed = TRUE)
+    l=gsub(" ","",l, fixed = TRUE)})
+  FirstAuthors=gsub(","," ",unlist(lapply(listAU,function(l) l[[1]])))
+  
+  if (!is.null(M$J9)){
+    SR=paste(FirstAuthors,M$PY,M$J9,sep=", ")}else{J9=trim(gsub("\\."," ",M$JI))
+    SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
+  M$SR=SR
+  
   return(M)
 
 }

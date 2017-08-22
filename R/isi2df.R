@@ -73,6 +73,30 @@ isi2df<-function(D){
   if ("PY" %in% names(DATA)){
     DATA$PY=as.numeric(DATA$PY)}
   DATA$DB="ISI"
+  listAU=strsplit(DATA$AU, ";")
+  listAU=lapply(listAU,function(l){
+    l=gsub(",", ' ', l,fixed=TRUE)
+    l=gsub(".", '', l,fixed=TRUE)
+    l=gsub("\\s+", " ",l)
+    l=trim(l)
+    l=paste(l,collapse=";")
+  })
+  
+  # AU=lapply(listAU,function(l){
+  #   l=trim(l)
+  #   name=strsplit(l," ")
+  #   lastname=unlist(lapply(name,function(ln){ln[1]}))
+  #   firstname=lapply(name,function(ln){
+  #     ln=ln[-1]
+  #     ln=substr(ln,1,1)
+  #     ln=gsub(" ","",ln)
+  #     ln=paste(ln,collapse="")
+  #     
+  #   })
+  #   AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
+  #   return(AU)
+  # })
+  DATA$AU=unlist(listAU)
   return(DATA)
 }
 

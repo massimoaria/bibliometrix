@@ -84,12 +84,14 @@ scopus2df<-function(D){
   for (i in 1:length(letters)){
     listAU=lapply(listAU,function(l) gsub(paste(" ",letters[i]," ",sep=""), '', l,fixed=TRUE) )}
 
-  listAU=lapply(listAU,function(l) gsub(" ", '', l,fixed=TRUE) )
-  listAU=lapply(listAU,function(l) gsub(",", ' ', l,fixed=TRUE) )
-  listAU=lapply(listAU,function(l) gsub(".", '', l,fixed=TRUE) )
-  #listAU=lapply(listAU,function(l) toupper(l) )
+  listAU=lapply(listAU,function(l){
+    l=gsub(" ", '', l,fixed=TRUE)
+    l=gsub(",", ' ', l,fixed=TRUE)
+    l=gsub(".", '', l,fixed=TRUE)
+    l=trim(l)})
 
-  DATA$AU=unlist(lapply(listAU, function(l) paste0(l,collapse=" ;")))
+
+  DATA$AU=unlist(lapply(listAU, function(l) paste0(l,collapse=";")))
 
 
   # TC post-processing

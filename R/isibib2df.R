@@ -82,11 +82,34 @@ for (i in 1:length(Tag)){
 
   listAU=strsplit(DATA$AU, " and ")
 
-  listAU=lapply(listAU,function(l) gsub(" ", '', l,fixed=TRUE) )
-  listAU=lapply(listAU,function(l) gsub(",", ' ', l,fixed=TRUE) )
-  listAU=lapply(listAU,function(l) gsub(".", '', l,fixed=TRUE) )
-
-  DATA$AU=unlist(lapply(listAU, function(l) paste0(l,collapse=" ;")))
+  #listAU=lapply(listAU,function(l) gsub(" ", '', l,fixed=TRUE) )
+  listAU=lapply(listAU,function(l){
+    l=gsub(",", ' ', l,fixed=TRUE)
+    l=gsub(".", '', l,fixed=TRUE)
+    l=gsub("\\s+", " ",l)
+    l=trim(l)
+  })
+  
+  AU=lapply(listAU,function(l){
+    l=trim(l)
+    name=strsplit(l," ")
+    lastname=unlist(lapply(name,function(ln){ln[1]}))
+    firstname=lapply(name,function(ln){
+      ln=ln[-1]
+      ln=substr(ln,1,1)
+      ln=gsub(" ","",ln)
+      ln=paste(ln,collapse="")
+      
+    })
+    AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
+    return(AU)
+  })
+  
+  #listAU=lapply(listAU,function(l) gsub(",", ' ', l,fixed=TRUE) )
+  #listAU=lapply(listAU,function(l) gsub(".", '', l,fixed=TRUE) )
+  #listAU=lapply(listAU,function(l) gsub("\\s+", " ",l))
+  DATA$AU=unlist(AU)
+  #DATA$AU=unlist(lapply(listAU, function(l) paste0(l,collapse=" ;")))
 
   # TC post-processing
   DATA$TC=as.numeric(sub("\\D*(\\d+).*", "\\1", DATA$TC))

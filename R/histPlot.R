@@ -22,7 +22,6 @@
 #' @examples
 #' # EXAMPLE Citation network
 #'
-#' library(igraph)
 #' data(scientometrics)
 #'
 #' histResults <- histNetwork(scientometrics, n = 20, sep = ";")

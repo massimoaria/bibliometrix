@@ -33,6 +33,7 @@ histNetwork<-function(M, n=10, sep = ";"){
   M=M[order(M$PY),]
   N=dim(M)[1]
   
+  if (!("SR" %in% names(M))){
   listAU=strsplit(as.character(M$AU),sep)
   listAU=lapply(listAU, function(l) trim.leading(l))
     listAU=lapply(listAU,function(l){
@@ -46,7 +47,7 @@ histNetwork<-function(M, n=10, sep = ";"){
     SR=paste(FirstAuthors,M$PY,M$J9,sep=", ")}else{J9=trim(gsub("\\."," ",M$JI))
     SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
     M$SR=SR
-    
+  } 
   lCit=Matrix(0, N,N)
   for (i in 1:N){
     
@@ -66,7 +67,7 @@ histNetwork<-function(M, n=10, sep = ";"){
   
   LCS=rowSums(lCit)
   M$LCS=LCS
-  row.names(lCit)=colnames(lCit)=SR
+  row.names(lCit)=colnames(lCit)=M$SR
   
   s=sort(LCS,decreasing = TRUE)[n]
   ind=which(LCS>=s)
@@ -75,7 +76,7 @@ histNetwork<-function(M, n=10, sep = ";"){
 
 ### Cited papers list
 if (!("DI" %in% names(M))){M$DI=NA}
-df=data.frame(Paper=SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind])
+df=data.frame(Paper=M$SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind])
 df=df[order(df$Year),]  
 
 

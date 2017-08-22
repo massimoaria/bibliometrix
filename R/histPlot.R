@@ -72,7 +72,6 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   l[ind,1]=sample(seq(ma,ma+((ma-mi)/3),length.out = length(ind)),size=length(ind))}
   else{
     l <- layout.fruchterman.reingold(bsk.network) #default
-    l <- layout_on_grid(bsk.network)
     l[,2]=(histResults[[3]]$Year)*-1
     edges1=colSums(NET)
     edges2=rowSums(NET)

@@ -173,6 +173,6 @@ CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE, la
 histResults <- histNetwork(M, n = 10, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE,arrowsize = 0.5)
+net <- histPlot(histResults, size = FALSE,label=FALSE, arrowsize = 0.5)
 
 

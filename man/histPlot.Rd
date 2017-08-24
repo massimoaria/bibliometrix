@@ -40,7 +40,6 @@ The function \code{\link{histPlot}} can plot a historical co-citation network pr
 \examples{
 # EXAMPLE Citation network
 
-library(igraph)
 data(scientometrics)
 
 histResults <- histNetwork(scientometrics, n = 20, sep = ";")

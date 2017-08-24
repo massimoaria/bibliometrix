@@ -2,31 +2,27 @@
 % Please edit documentation in R/isibib2df.R
 \name{isibib2df}
 \alias{isibib2df}
-\title{Convert an ISI WoK Export file into a data frame}
+\title{Convert an Clarivate Analitycs WoS Export file into a data frame}
 \usage{
 isibib2df(D)
 }
 \arguments{
-\item{D}{is a character array containing data read from an ISI Export file (in bibtex format).}
+\item{D}{is a character array containing data read from an WoS Export file (in bibtex format).}
 }
 \value{
 a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.
 }
 \description{
-It converts an ISI WoK Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+It converts an Clarivate Analitycs WoS Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
 # A ISI Export file can be read using \\code{\\link{readLines}} function:
 
-# largechar <- readLines('filename.bib')
+# largechar <- readFiles('filename1.bib','filename2.bib2,...)
 
-# filename.bib is an ISI Export file in plain text format.
-# The file have to be saved without Byte order mark (U+FEFF) at the
-# beginning and EoF code at the end of file.
-# The original file (exported by ISI search web site) can be modified
-# using an advanced text editor like Notepad++ or Emacs.
+# filename.bib is a Clarivate Analytics WoS Export file in plain text format.
 
-# largechar <- readLines('http://www.bibliometrix.org/datasets/ranking.bib')
+# largechar <- readFiles('http://www.bibliometrix.org/datasets/ranking.bib')
 
 # ranking <- isibib2df(largechar)
 

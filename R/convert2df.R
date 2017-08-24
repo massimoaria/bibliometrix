@@ -265,7 +265,18 @@ convert2df<-function(file,dbsource="isi",format="bibtex"){
   if (!is.null(M$J9)){
     SR=paste(FirstAuthors,M$PY,M$J9,sep=", ")}else{J9=trim(gsub("\\."," ",M$JI))
     SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
-  M$SR=SR
+    
+  ## assign an unique name to each document
+  st<-i<-0
+  while(st==0){
+  ind <- which(duplicated(SR))
+  if (length(ind)>0){
+    i <- i+1
+    SR[ind]=paste0(SR[ind],"-",letters[i],sep="")}else{st <- 1}}
+  M$SR<- SR
+  row.names(M) <- SR
+    
+  
   
   return(M)
 

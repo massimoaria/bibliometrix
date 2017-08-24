@@ -77,7 +77,7 @@ if (Field %in% names(M)){
   Fi<-lapply(Fi,trim.leading)
 if (Field=="CR"){Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])}  ## delete not congruent references
 
-  ## Scelta dell'informazione contenuta in CR da utilizzare (Reference, Autore, Affiliazion, ecc.)
+  ## Scelta dell'informazione contenuta in CR da utilizzare (Reference, Autore, Affiliation, ecc.)
 
 
 

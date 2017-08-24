@@ -16,17 +16,13 @@ a data frame with cases corresponding to articles and variables to Field Tag in 
 It converts a SCOPUS Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
-# A SCOPUS Export file can be read using \\code{\\link{readLines}} function:
+# A SCOPUS Export file can be read using \\code{\\link{readFiles}} function:
 
-# largechar <- readLines('filename.bib')
+# largechar <- readFiles('filename1.bib','filename2.bib2,...)
 
 # filename.bib is a SCOPUS Export file in plain text format.
-# The file have to be saved without Byte order mark (U+FEFF) at the
-# beginning and EoF code at the end of file.
-# The original file (exported by SCOPUS search web site) can be modified
-# using an advanced text editor like Notepad++ or Emacs.
 
-#largechar <- readLines('http://www.bibliometrix.org/datasets/scopus.bib')
+#largechar <- readFiles('http://www.bibliometrix.org/datasets/scopus.bib')
 
 
 #scopus_df <- scopus2df(largechar)

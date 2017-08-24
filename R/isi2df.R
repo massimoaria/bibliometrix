@@ -25,22 +25,19 @@
 
 isi2df<-function(D){
 
-  #D=iconv(D, "latin1", "ASCII", sub="")
+  Papers=which(regexpr("PT ",D)==1)  # first row of each document
+
+  nP=length(Papers)  # number of docuemnts
+
+  Tag=which(regexpr("  ",D)==-1)   # first row of each field tags 
+  lt=length(Tag)   # number of field tags
+  st1=seq(1,(lt-1))
   
-  Papers=which(regexpr("PT ",D)==1)
-
-  nP=length(Papers)
-
-  Tag=which(regexpr("  ",D)==-1)
-
-  nTag=(Tag[1:length(Tag)-1]-Tag[2:length(Tag)])*-1
-
-  df=data.frame(Tag=substr(D[Tag[1:length(Tag)-1]],1,2),Frow=Tag[1:length(Tag)-1],Rows=nTag)
-
-  uniqueTag=unique(substr(D[Tag[1:length(Tag)-1]],1,2))
+  uniqueTag=unique(substr(D[Tag[st1]],1,2))  # list of field tags
   uniqueTag=uniqueTag[nchar(uniqueTag)==2]
   uniqueTag=uniqueTag[uniqueTag!="FN" & uniqueTag!="VR"]
 
+  ## Bibliographic data frame initialization
   DATA=data.frame(matrix(NA,nP,length(uniqueTag)))
   names(DATA)=uniqueTag
 
@@ -48,11 +45,12 @@ isi2df<-function(D){
     if (i%%100==0 | i==nP) cat("Articles extracted  ",i,"\n")
     iStart=Papers[i]
     if (i==nP){iStop=length(D)} else {iStop=Papers[i+1]-1}
-    pTag=iStart+which(regexpr("  ",D[iStart:iStop])==1)-1
+    Seq=seq(iStart,iStop)
+    pTag=iStart+which(regexpr("  ",D[Seq])==1)-1
 
     for (j in uniqueTag){
 
-      indTag=iStart+which(regexpr(j,D[iStart:iStop])==1)-1
+      indTag=iStart+which(regexpr(j,D[Seq])==1)-1
       if (length(indTag)>0){
         it=0
         repeat {
@@ -64,15 +62,19 @@ isi2df<-function(D){
     }
   }
 
-  if ("AB" %in% uniqueTag){DATA$AB=str_replace_all(DATA$AB,";  ","")}
-  if ("TI" %in% uniqueTag){DATA$TI=str_replace_all(DATA$TI,";  ","")}
-  #DATA <- mutate_each(DATA, funs(toupper))
+  
+  
+  if ("AB" %in% uniqueTag){DATA$AB=gsub(";\\s+"," ",DATA$AB)}
+  if ("TI" %in% uniqueTag){DATA$TI=gsub(";\\s+"," ",DATA$TI)}
+  
   DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
   DATA$UT=gsub("WOS:","ISI",DATA$UT)
-  #row.names(DATA)=DATA$UT
-  if ("PY" %in% names(DATA)){
-    DATA$PY=as.numeric(DATA$PY)}
+  
+  if ("PY" %in% names(DATA)){DATA$PY=as.numeric(DATA$PY)}
+  
   DATA$DB="ISI"
+  
+  # Authors' names cleaning (surname and initials)
   listAU=strsplit(DATA$AU, ";")
   listAU=lapply(listAU,function(l){
     l=gsub(",", ' ', l,fixed=TRUE)
@@ -82,20 +84,7 @@ isi2df<-function(D){
     l=paste(l,collapse=";")
   })
   
-  # AU=lapply(listAU,function(l){
-  #   l=trim(l)
-  #   name=strsplit(l," ")
-  #   lastname=unlist(lapply(name,function(ln){ln[1]}))
-  #   firstname=lapply(name,function(ln){
-  #     ln=ln[-1]
-  #     ln=substr(ln,1,1)
-  #     ln=gsub(" ","",ln)
-  #     ln=paste(ln,collapse="")
-  #     
-  #   })
-  #   AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
-  #   return(AU)
-  # })
+  
   DATA$AU=unlist(listAU)
   return(DATA)
 }

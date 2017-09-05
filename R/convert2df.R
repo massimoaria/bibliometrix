@@ -229,37 +229,16 @@ convert2df<-function(file,dbsource="isi",format="bibtex"){
   M$PY=as.numeric(M$PY)
   M$TC=as.numeric(M$TC)
   
-  ## Author data cleaning
-  # if ("AU" %in% names(M)){
-  #   M$AU=gsub(","," ",M$AU)
-  #   M$AU=gsub("  "," ",M$AU)
-  #   AUlist=strsplit(M$AU,";")
-  #   AU=lapply(AUlist,function(l){
-  #     l=trim(l)
-  #     name=strsplit(l," ")
-  #     lastname=unlist(lapply(name,function(ln){ln[1]}))
-  #     firstname=lapply(name,function(ln){
-  #       ln=ln[-1]
-  #       ln=gsub(" ","",ln)
-  #       #f=paste(ln,collapse="")
-  #     })
-  #     AU=paste(lastname,unlist(firstname),sep=" ",collapse=";")
-  #     return(AU)
-  #   })
-  #   M$AU=unlist(AU)
-    
-  #}
-  
-  #M=M[order(M$PY),]
-  #N=dim(M)[1]
+  ### SR field creation
   
   listAU=strsplit(as.character(M$AU),";")
   listAU=lapply(listAU, function(l) trim.leading(l))
+  if (dbsource=="scopus"){
   listAU=lapply(listAU,function(l){
     l=trim(l)
     l=sub(" ",",",l, fixed = TRUE)
     l=sub(",,",",",l, fixed = TRUE)
-    l=gsub(" ","",l, fixed = TRUE)})
+    l=gsub(" ","",l, fixed = TRUE)})}
   FirstAuthors=gsub(","," ",unlist(lapply(listAU,function(l) l[[1]])))
   
   if (!is.null(M$J9)){

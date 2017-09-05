@@ -81,20 +81,13 @@ for (i in 1:length(Tag)){
   # Authors' names cleaning (surname and initials)
   
   listAU <- strsplit(DATA$AU, " and ")
-
-  listAU <- lapply(listAU,function(l){
-    l <- gsub(",", ' ', l,fixed=TRUE)
-    l <- gsub(".", '', l,fixed=TRUE)
-    l <- gsub("\\s+", " ",l)
-    l <- trim(l)
-  })
   
   AU <- lapply(listAU,function(l){
-    l <- trim(l)
-    name <- strsplit(l," ")
-    lastname <- unlist(lapply(name,function(ln){ln[1]}))
-    firstname <- lapply(name,function(ln){
-      ln <- ln[-1]
+    
+    lastname <- trim(gsub(",.*","",l))
+    firstname <- strsplit(trim(gsub(".*,","",l))," ")
+    firstname <- lapply(firstname,function(ln){
+      ln <- trim(gsub("-"," ",ln))
       ln <- substr(ln,1,1)
       ln <- gsub(" ","",ln)
       ln <- paste(ln,collapse="")

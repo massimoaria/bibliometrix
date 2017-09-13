@@ -1,8 +1,8 @@
 Package: bibliometrix
 Type: Package
-Title: Bibliometric and Co-Citation Analysis Tool
+Title: An R-tool for comprehensive science mapping analysis
 Version: 1.8
-Date: 2017-08-23
+Date: 2017-09-13
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
 Description: Tool for quantitative research in scientometrics and bibliometrics.

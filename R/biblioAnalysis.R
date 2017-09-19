@@ -73,19 +73,19 @@ Tags<-names(M)
 
 # temporal analyis
 
-if ("PY" %in% Tags){Years=table(PY)}
+#if ("PY" %in% Tags){Years=table(M$PY)}
 
 # Author's distribution
 
 if ("AU" %in% Tags){
   listAU=strsplit(as.character(M$AU),sep)
-  listAU=lapply(listAU, function(l) trim.leading(l))
+  listAU=lapply(listAU, function(l) trim(l))
   #if (M$DB[1]=="ISI"){
-     listAU=lapply(listAU,function(l){
-      l=trim.leading(l)
-      l=sub(" ",",",l, fixed = TRUE)
-      l=sub(",,",",",l, fixed = TRUE)
-      l=gsub(" ","",l, fixed = TRUE)})
+     #listAU=lapply(listAU,function(l){
+      #l=trim.leading(l)
+      #l=sub(" ",",",l, fixed = TRUE)
+      #l=sub(",,",",",l, fixed = TRUE)
+      #l=gsub(" ","",l, fixed = TRUE)})
      #}
     
   #if (M$DB[1]=="SCOPUS"){
@@ -97,7 +97,8 @@ if ("AU" %in% Tags){
     
   nAU=unlist(lapply(listAU,length))  # num. of authors per paper
   fracAU=unlist(sapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
-  AU=gsub(" ", "", unlist(listAU), fixed = TRUE)
+  AU=unlist(listAU)
+  #AU=gsub(" ", "", unlist(listAU), fixed = TRUE)
   #if (M$DB[1]=="ISI"){AU=gsub(" ", "", unlist(listAU), fixed = TRUE)} # delete spaces
   #if (M$DB[1]=="SCOPUS"){AU=sub(" ",",",unlist(listAU),fixed=TRUE);AU=gsub(" ","",AU,fixed=TRUE)}
   Authors=sort(table(AU),decreasing=TRUE)
@@ -123,7 +124,7 @@ if ("TC" %in% Tags){
 }
 
 # References
-if ("CR" %in% Tags){CR=tableTag(M,"CR",sep)}
+#if ("CR" %in% Tags){CR=tableTag(M,"CR",sep)}
 
 # ID Keywords
 if ("ID" %in% Tags){ID=tableTag(M,"ID",sep)}

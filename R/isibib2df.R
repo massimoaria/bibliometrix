@@ -86,13 +86,15 @@ for (i in 1:length(Tag)){
     
     lastname <- trim(gsub(",.*","",l))
     firstname <- strsplit(trim(gsub(".*,","",l))," ")
-    firstname <- lapply(firstname,function(ln){
-      ln <- trim(gsub("-"," ",ln))
-      ln <- substr(ln,1,1)
-      ln <- gsub(" ","",ln)
-      ln <- paste(ln,collapse="")
+    firstname <- gsub("[^:A-Z:]","",firstname)
+    #firstname <- lapply(firstname,function(ln){
+     # ln <- gsub("[^:A-Z:]","",ln)
+      #ln <- trim(gsub("-"," ",ln))
+      #ln <- substr(ln,1,1)
+      #ln <- gsub(" ","",ln)
+      #ln <- paste(ln,collapse="")
       
-    })
+    #})
     AU <- paste(lastname,unlist(firstname),sep=" ",collapse=";")
     return(AU)
   })

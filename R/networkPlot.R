@@ -135,9 +135,9 @@ if (type!="vosviewer"){
   
 
   if (isTRUE(halo) & cluster!="null"){
-    plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
+    plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
   } else{
-    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, vertex.label.cex = labelsize, main=Title)
+    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, vertex.label.cex = labelsize, main=Title)
   }
 
 }  

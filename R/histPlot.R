@@ -66,10 +66,15 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   edges1=colSums(NET)
   edges2=rowSums(NET)
   ind=which((edges1==0) & (edges2==0))
-  ma=max(l[-ind,1])
-  mi=min(l[-ind,1])
-  l[ind,1]=sample(seq(ma,ma+((ma-mi)/3),length.out = length(ind)),size=length(ind))}
-  else{
+    if (length(ind)>0){
+      ma=max(l[-ind,1])
+      mi=min(l[-ind,1])
+      l[ind,1]=sample(seq(ma,ma+((ma-mi)/3),length.out = length(ind)),size=length(ind))}
+    else{
+        ma=max(l[,1])
+        mi=min(l[,1])}
+  
+  }else{
     l <- layout.fruchterman.reingold(bsk.network) #default
     l[,2]=(histResults[[3]]$Year)*-1
     edges1=colSums(NET)

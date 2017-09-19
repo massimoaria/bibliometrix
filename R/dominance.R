@@ -36,7 +36,7 @@ dominance<-function(results, k = 10){
   
   Nmf=table(results$FirstAuthors[results$nAUperPaper>1])
   FA=names(Nmf)
-  FA=gsub(" ", "", FA, fixed = TRUE)  # delete spaces
+  #FA=gsub(" ", "", FA, fixed = TRUE)  # delete spaces
   
   AU=names(results$Authors)
   

@@ -50,7 +50,7 @@ histNetwork<-function(M, n=10, sep = ";"){
   } 
   lCit=Matrix(0, N,N)
   for (i in 1:N){
-    
+    if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
     x=M$SR[i]
     pos = grep(x, M$CR)
     

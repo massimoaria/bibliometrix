@@ -1,3 +1,3 @@
 .onAttach<-function(...){
-  packageStartupMessage("\nbibliometrix\nA R tool for comprehensive bibliometric analysis of scientific literature\n\nby Massimo Aria & Corrado Cuccurullo\n\nhttp:\\\\www.bibliometrix.org\n")
+  packageStartupMessage("To cite bibliometrix in publications, please use:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, \nJournal of Informetrics, 11(4), pp 959-975, Elsevier.\n\nhttp:\\\\www.bibliometrix.org\n")
 }

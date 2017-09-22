@@ -85,6 +85,7 @@
 #' @importFrom igraph cluster_infomap
 #' @importFrom igraph cluster_edge_betweenness
 #' @importFrom igraph cluster_louvain
+#' @importFrom igraph count_multiple
 #' @importFrom igraph membership
 #' @importFrom igraph layout.norm
 #' @importFrom Matrix %&%

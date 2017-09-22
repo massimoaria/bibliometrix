@@ -6,7 +6,7 @@
 \usage{
 networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
   type = "kamada", label = TRUE, labelsize = 1, halo = FALSE,
-  cluster = "walktrap", vos.path = NULL, size = FALSE, curved = FALSE,
+  cluster = "walktrap", vos.path = NULL, size = 3, curved = FALSE,
   noloops = TRUE, remove.multiple = TRUE, remove.isolates = FALSE,
   weighted = NULL, edgesize = 1)
 }
@@ -39,7 +39,8 @@ networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
 
 \item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
 
-\item{size}{is logical. If TRUE the point size of each vertex is proportional to its degree.}
+\item{size}{is integer or logical. If TRUE the point size of each vertex is proportional to its degree. 
+If it is a integer, the point size of each vertex is constant equal to size. Default is \code{size=3}.}
 
 \item{curved}{is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}}
 

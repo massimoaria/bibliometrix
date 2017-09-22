@@ -19,14 +19,15 @@
 #' 
 #' @param Title is a character indicating the plot title. 
 #' @param vos.path is a character indicating the full path whre VOSviewer.jar is located.
-#' @param size is logical. If TRUE the point size of each vertex is proportional to its degree. 
+#' @param size is integer or logical. If TRUE the point size of each vertex is proportional to its degree. 
+#' If it is a integer, the point size of each vertex is constant equal to size. Default is \code{size=3}. 
 #' @param noloops is logical. If TRUE loops in the network are deleted.
 #' @param remove.isolates is logical. If TRUE isolates vertices are not plotted.
 #' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
 #' @param label is logical. If TRUE vertex labels are plotted.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
-#' @param cluster is a character. It indicates the type of cluster to perform among ("null", optimal", "lovain","infomap","edge_betweenness","walktrap").
+#' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").
 #' @param curved is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}
 #' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix. 
 #' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
@@ -50,9 +51,13 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
+networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
 
 NET=NetMatrix
+
+## legacy
+if (size==FALSE){size=3}
+
 
 # Create igraph object
 bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
@@ -61,7 +66,7 @@ V(bsk.network)$id <- colnames(NET)
 # Compute node degrees (#links) and use that to set node size:
 deg <- degree(bsk.network, mode="all")
 if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
-else{V(bsk.network)$size=rep(5,length(V(bsk.network)))}
+else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
 
 # Select number of vertices to plot
 if (!is.null(Degree)){
@@ -104,7 +109,7 @@ l=layout.norm(l)
 if (type!="vosviewer"){
   
   switch(cluster,
-         null={V(bsk.network)$color="#8DD3C7"},
+         none={V(bsk.network)$color="#8DD3C7"},
          optimal={
            net_groups <- cluster_optimal(bsk.network)
            V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
@@ -131,7 +136,12 @@ if (type!="vosviewer"){
   
   if (!is.null(weighted)){
     E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
-  } else {E(bsk.network)$width=edgesize}
+  } else{
+    if(isTRUE(remove.multiple)){E(bsk.network)$width=edgesize} 
+      else{
+        edges=count_multiple(bsk.network, eids = E(bsk.network))
+        E(bsk.network)$width=edges/max(edges)*edgesize}
+  }
   
 
   if (isTRUE(halo) & cluster!="null"){

@@ -56,6 +56,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
   
   
+  
   #V(bsk.network)$color <- 'red'
   
     # Choose Network layout

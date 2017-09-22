@@ -50,7 +50,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   # Compute node degrees (#links) and use that to set node size:
   deg <- histResults$LCS
   if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
-  else{V(bsk.network)$size=rep(3,length(V(bsk.network)))}
+  else{V(bsk.network)$size=rep(1,length(V(bsk.network)))}
   
   # Remove loops
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
@@ -88,7 +88,7 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   #l[,1]=l[,1]*2
   # Plot the chronological co-citation network
   l=layout.norm(l)
-  plot(bsk.network,layout = l, vertex.color="lightblue", vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'darkblue', vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, edge.arrow.size=arrowsize, main="Historical citation network")
+  plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'darkblue', vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, edge.arrow.size=arrowsize, main="Historical citation network")
   cat("\n Legend\n\n")
   print(histResults[[3]])
   

@@ -35,7 +35,7 @@
 #' If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute 
 #' named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.
 #' @param edgesize is an integer. It indicates the network edge size.
-#' @param edgesize is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
+#' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -53,7 +53,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edge.min=0){
+networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
 
 NET=NetMatrix
 
@@ -151,7 +151,7 @@ if (type!="vosviewer"){
         E(bsk.network)$width=edges/max(edges)*edgesize}
   }
   
-  bsk.network=delete.edges(bsk.network, which(E(bsk.network)$num<edge.min))
+  bsk.network=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
   
   if (isTRUE(halo) & cluster!="null"){
     plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)

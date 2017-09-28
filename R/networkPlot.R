@@ -26,6 +26,7 @@
 #' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
 #' @param label is logical. If TRUE vertex labels are plotted.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
+#' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.  
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").
 #' @param curved is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}
@@ -34,6 +35,7 @@
 #' If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute 
 #' named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.
 #' @param edgesize is an integer. It indicates the network edge size.
+#' @param edgesize is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -51,7 +53,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1){
+networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edge.min=0){
 
 NET=NetMatrix
 
@@ -67,6 +69,12 @@ V(bsk.network)$id <- colnames(NET)
 deg <- degree(bsk.network, mode="all")
 if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
 else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
+
+# label size
+if (isTRUE(label.cex)){
+  V(bsk.network)$label.cex <- log(1+(deg/max(deg)[1])*labelsize)}else{
+    V(bsk.network)$label.cex <- labelsize}
+
 
 # Select number of vertices to plot
 if (!is.null(Degree)){
@@ -133,21 +141,24 @@ if (type!="vosviewer"){
     LABEL=V(bsk.network)$name
   }
   
-  
+  E(bsk.network)$num=count_multiple(bsk.network, eids = E(bsk.network))
   if (!is.null(weighted)){
     E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
   } else{
     if(isTRUE(remove.multiple)){E(bsk.network)$width=edgesize} 
       else{
-        edges=count_multiple(bsk.network, eids = E(bsk.network))
+        edges=E(bsk.network)$num
         E(bsk.network)$width=edges/max(edges)*edgesize}
   }
   
-
+  bsk.network=delete.edges(bsk.network, which(E(bsk.network)$num<edge.min))
+  
   if (isTRUE(halo) & cluster!="null"){
-    plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
+    plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+    #plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
   } else{
-    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, vertex.label.cex = labelsize, main=Title)
+    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+    #plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, vertex.label.cex = labelsize, main=Title)
   }
 
 }  

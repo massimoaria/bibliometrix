@@ -5,10 +5,10 @@
 \title{Plotting Bibliographic networks}
 \usage{
 networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
-  type = "kamada", label = TRUE, labelsize = 1, halo = FALSE,
-  cluster = "walktrap", vos.path = NULL, size = 3, curved = FALSE,
-  noloops = TRUE, remove.multiple = TRUE, remove.isolates = FALSE,
-  weighted = NULL, edgesize = 1)
+  type = "kamada", label = TRUE, labelsize = 1, label.cex = FALSE,
+  halo = FALSE, cluster = "walktrap", vos.path = NULL, size = 3,
+  curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
+  remove.isolates = FALSE, weighted = NULL, edgesize = 1, edge.min = 0)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -33,9 +33,11 @@ networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
 
+\item{label.cex}{is logical. If TRUE the label size of each vertex is proportional to its degree.}
+
 \item{halo}{is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}}
 
-\item{cluster}{is a character. It indicates the type of cluster to perform among ("null", optimal", "lovain","infomap","edge_betweenness","walktrap").}
+\item{cluster}{is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").}
 
 \item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
 
@@ -56,6 +58,8 @@ If it is a character constant then for every non-zero matrix entry an edge is cr
 named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.}
 
 \item{edgesize}{is an integer. It indicates the network edge size.}
+
+\item{edgesize}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
 }
 \value{
 It is a network object of the class \code{igraph}.

@@ -88,6 +88,7 @@
 #' @importFrom igraph count_multiple
 #' @importFrom igraph membership
 #' @importFrom igraph layout.norm
+#' @importFrom igraph delete.edges
 #' @importFrom Matrix %&%
 #' @importFrom Matrix abIseq
 #' @importFrom Matrix abIseq1

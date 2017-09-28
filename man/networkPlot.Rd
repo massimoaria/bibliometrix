@@ -8,7 +8,7 @@ networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
   type = "kamada", label = TRUE, labelsize = 1, label.cex = FALSE,
   halo = FALSE, cluster = "walktrap", vos.path = NULL, size = 3,
   curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
-  remove.isolates = FALSE, weighted = NULL, edgesize = 1, edge.min = 0)
+  remove.isolates = FALSE, weighted = NULL, edgesize = 1, edges.min = 0)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -59,7 +59,7 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 
 \item{edgesize}{is an integer. It indicates the network edge size.}
 
-\item{edgesize}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
+\item{edges.min}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
 }
 \value{
 It is a network object of the class \code{igraph}.

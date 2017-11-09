@@ -33,11 +33,11 @@ isibib2df<-function(D){
   # number of documents
   nP <- length(Papers)-1
 
-  uniqueTag <- c("AU","TI","SO","JI","VO","NU","PP","BO","DT","DE","ID","AB","C1","CR","TC","PY","SC","UT","DI","RP")
+  uniqueTag <- c("AU","TI","SO","JI","VO","NU","PP","BO","DT","DT2","DE","ID","AB","C1","CR","TC","PY","SC","UT","DI","RP")
 
   DATA <- data.frame(matrix(NA,nP,length(uniqueTag)))
   names(DATA) <- uniqueTag
-  Tag <- c("Author =","Title =","Journal =","Journal-ISO =","Volume =","Number =","Pages =","Booktitle =","Manuscript =","Keywords =","Keywords-Plus =","Abstract =","Affiliation =","Cited-References =","Times-Cited =","Year =","Web-of-Science-Categories  =","Unique-ID =","DOI =")
+  Tag <- c("Author =","Title =","Journal =","Journal-ISO =","Volume =","Number =","Pages =","Booktitle =","Manuscript =","Type =","Keywords =","Keywords-Plus =","Abstract =","Affiliation =","Cited-References =","Times-Cited =","Year =","Web-of-Science-Categories  =","Unique-ID =","DOI =")
 
   for (i in 1:nP){
 

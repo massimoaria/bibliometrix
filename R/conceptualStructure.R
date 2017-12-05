@@ -184,7 +184,7 @@ km.res <- kmeans(scale(df), clust, nstart = 25)
 # Plot of the conceptual map
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-b=fviz_cluster(km.res, data = df,labelsize=labelsize)+
+b=fviz_cluster(km.res, data = df,labelsize=labelsize, repel = TRUE)+
   theme_minimal()+
   scale_color_manual(values = cbPalette[1:clust])+
   scale_fill_manual(values = cbPalette[1:clust]) +

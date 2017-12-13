@@ -56,7 +56,7 @@ histNetwork<-function(M, n=10, sep = ";"){
     
     if ("DI" %in% names(M)){
       if (!is.na(M$DI[i])){
-      pos2 = grep(M$DI[i],M$CR)
+      pos2 = grep(M$DI[i],M$CR,fixed=TRUE)
       if (length(pos2)>0){pos=pos2}}
       }
     

@@ -11,17 +11,15 @@ localCitations(M, sep = ";")
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
 
 \item{sep}{is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.}
-
-\item{results}{is an object of \code{class} "bibliometrix". The default is \code{field = "article"}.}
 }
 \value{
-an object of \code{class} "table".
+an object of \code{class} "list" containing author local citations and docuemnt local citations.
 }
 \description{
-It calculates frequency distribution of cited local authors and references.
+It calculates local citations (LCS) of authors and documents of a bibliographic collection.
 }
 \details{
-Local citations measure how many times an author included in this collection have been cited by other authors also in the collection.
+Local citations measure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection.
 }
 \examples{
  

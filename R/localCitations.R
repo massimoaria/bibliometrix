@@ -1,14 +1,13 @@
 #' Author local citations 
 #'
-#' It calculates frequency distribution of cited local authors.
+#' It calculates local citations (LCS) of authors and documents of a bibliographic collection.
 #' 
-#' Local citations measure how many times an author included in this collection have been cited by other authors also in the collection.
+#' Local citations measure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection.
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 #'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param results is an object of \code{class} "bibliometrix". The default is \code{field = "article"}.
 #' @param sep is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.
-#' @return an object of \code{class} "table".
+#' @return an object of \code{class} "list" containing author local citations and docuemnt local citations.
 #'
 #' 
 #'
@@ -16,11 +15,10 @@
 #'  
 #' data(scientometrics)
 #' 
-#' results <- biblioAnalysis(scientometrics)
+#' CR <- localCitations(scientometrics, sep = ";")
 #'
-#' CR <- localCitations(scientometrics, results, sep = ";")
-#'
-#' CR[1:10]
+#' CR$Authors[1:10,]
+#' CR$Papers[1:10,]
 #'
 #' @seealso \code{\link{citations}} function for citation frequency distribution.
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis.
@@ -29,45 +27,21 @@
 #' 
 #' @export
 
-localCitations <- function(M, results, sep = ";"){
-  CR=NULL
+localCitations <- function(M, sep = ";"){
   
-    listCR=strsplit(M$CR,sep)
-    if (M$DB[1]=="ISI"){ 
-      listCR=lapply(listCR, function(l){
-        ListL=lapply(strsplit(unlist(l),","),function(x) x[1])
-        l=trim(unlist(ListL))
-        
-      })}
-    if (M$DB[1]=="SCOPUS"){ 
-      listCR=lapply(listCR, function(l){
-        ListL=lapply(l,function(x) {
-          a=strsplit(x,"\\., ")
-          ind=which(grepl("[[:digit:]]", a[[1]]))
-          if (length(ind)==0) ind=1
-          x=unlist(a[[1]][1:(ind[1]-1)])
-          })
-        l=unlist(ListL)
-      })}
+  H=histNetwork(M,n=dim(M)[1],sep=sep)
+  LCS=H$histData
+  M=H$M
+  rm(H)
+  AU=strsplit(M$AU,split=";")
+  n=lengths(AU)
   
-    listCR=lapply(listCR,function(l){
-      L=lapply(strsplit(l," "),function(x){
-        x=paste(x[1],substr(x[2],1,1))
-      })
-    })
-  CR=unlist(listCR)
-  CR=gsub("\\.","",CR)
-  CR=CR[nchar(CR)>=3]
-  if (M$DB[1]=="ISI"){
-    CR=trim.leading(CR)
-    CR=gsub(" ","-",CR)
-    #AU=trim.leading(results$Authors)
-    AU=gsub(",","-",names(results$Authors))}
-  if (M$DB[1]=="SCOPUS"){
-    CR=gsub(" ","",CR)
-    AU=gsub(" ","",names(results$Authors))}
-  CR=CR[CR %in% AU]
-  CR=gsub("-"," ",CR)
-  CR=sort(table(CR),decreasing=TRUE)
+  df=data.frame(AU=unlist(AU),LCS=rep(LCS$LCS,n))
+  AU=aggregate(df$LCS,by=list(df$AU),FUN="sum")
+  names(AU)=c("Author", "LocalCitations" )
+  AU=AU[order(-AU$LocalCitations),]
+  
+  CR=list(Authors=AU,Papers=LCS)
   return(CR)
+  
 }

@@ -268,12 +268,13 @@ CR$Cited[1:10]
 ```
 
 The function *localCitations* generates the frequency table of the most local cited authors.
-Local citations measures how many times an author included in this collection have been cited by other authors also in the collection.
+Local citations measures how many times an author (or a document) included in this collection have been cited by other authors also in the collection.
 
 To obtain the most frequent local cited authors:
 ```{r Local Author citation}
-CR <- localCitations(M, results, sep = ".  ")
-CR[1:10]
+CR <- localCitations(M, sep = ".  ")
+CR$Authors[1:10,]
+CR$Papers[1:10,]
 ```
 
 
@@ -614,10 +615,10 @@ Historiographic map is a graph proposed by E. Garfield to represent a chronologi
 
 The function \code{histNetwork} generates a chronological co-citation network matrix which can be plotted using *histPlot*:
 
-```{r Historical Co-citation network, fig.height=8, fig.width=7, warning=FALSE}
+```{r Historical Co-citation network, fig.height=9, fig.width=7, warning=FALSE}
 # Create a historical citation network
 
-histResults <- histNetwork(M, n = 10, sep = ".  ")
+histResults <- histNetwork(M, n = 20, sep = ".  ")
 
 # Plot a historical co-citation network
 net <- histPlot(histResults, size = FALSE,label=FALSE, arrowsize = 0.5)

@@ -4,21 +4,21 @@
 \alias{localCitations}
 \title{Author local citations}
 \usage{
-localCitations(M, results, sep = ";")
+localCitations(M, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
 
-\item{results}{is an object of \code{class} "bibliometrix". The default is \code{field = "article"}.}
-
 \item{sep}{is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.}
+
+\item{results}{is an object of \code{class} "bibliometrix". The default is \code{field = "article"}.}
 }
 \value{
 an object of \code{class} "table".
 }
 \description{
-It calculates frequency distribution of cited local authors.
+It calculates frequency distribution of cited local authors and references.
 }
 \details{
 Local citations measure how many times an author included in this collection have been cited by other authors also in the collection.
@@ -27,11 +27,10 @@ Local citations measure how many times an author included in this collection hav
  
 data(scientometrics)
 
-results <- biblioAnalysis(scientometrics)
+CR <- localCitations(scientometrics, sep = ";")
 
-CR <- localCitations(scientometrics, results, sep = ";")
-
-CR[1:10]
+CR$Authors[1:10,]
+CR$Papers[1:10,]
 
 }
 \seealso{

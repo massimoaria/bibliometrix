@@ -32,32 +32,22 @@ histNetwork<-function(M, n=10, sep = ";"){
   
   M=M[order(M$PY),]
   N=dim(M)[1]
+  rows=c(1:N)
   
-  if (!("SR" %in% names(M))){
-  listAU=strsplit(as.character(M$AU),sep)
-  listAU=lapply(listAU, function(l) trim.leading(l))
-    listAU=lapply(listAU,function(l){
-    l=trim(l)
-    l=sub(" ",",",l, fixed = TRUE)
-    l=sub(",,",",",l, fixed = TRUE)
-    l=gsub(" ","",l, fixed = TRUE)})
-  FirstAuthors=gsub(","," ",unlist(lapply(listAU,function(l) l[[1]])))
+  if (!("SR" %in% names(M))){M=metaTagExtraction(M,Field="SR")} 
   
-  if (!is.null(M$J9)){
-    SR=paste(FirstAuthors,M$PY,M$J9,sep=", ")}else{J9=trim(gsub("\\."," ",M$JI))
-    SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
-    M$SR=SR
-  } 
   lCit=Matrix(0, N,N)
   for (i in 1:N){
     if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
     x=M$SR[i]
-    pos = grep(x, M$CR)
-    
+    Year=M$PY[i]
+    pos = grep(x, M$CR[M$PY>=Year])
+    pos = rows[M$PY>=Year][pos]
     if ("DI" %in% names(M)){
       if (!is.na(M$DI[i])){
-      pos2 = grep(M$DI[i],M$CR,fixed=TRUE)
-      if (length(pos2)>0){pos=pos2}}
+      pos2 = grep(M$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
+      pos2 = rows[M$PY>=Year][pos2]
+      pos=unique(pos,pos2)}
       }
     
       if (length(pos)>0){
@@ -76,7 +66,7 @@ histNetwork<-function(M, n=10, sep = ";"){
 
 ### Cited papers list
 if (!("DI" %in% names(M))){M$DI=NA}
-df=data.frame(Paper=M$SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind])
+df=data.frame(Paper=M$SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind],stringsAsFactors = F)
 df=df[order(df$Year),]  
 
 

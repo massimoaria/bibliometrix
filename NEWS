@@ -1,3 +1,11 @@
+bibliometrix v1.9 (Release date: 2017-12-20)
+==============
+
+Changes:
+* improved speed and efficiency in citation analysis (histNetwork(), localCitations(), metaTagExtraction())
+* improved function histNetwork()
+
+
 bibliometrix v1.8 (Release date: 2017-08-30)
 ==============
 

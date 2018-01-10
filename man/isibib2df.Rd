@@ -31,5 +31,6 @@ It converts an Clarivate Analitycs WoS Export file and create a data frame from 
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 
 Other converting functions: \code{\link{convert2df}},
-  \code{\link{isi2df}}, \code{\link{scopus2df}}
+  \code{\link{isi2df}}, \code{\link{pubmed2df}},
+  \code{\link{scopus2df}}
 }

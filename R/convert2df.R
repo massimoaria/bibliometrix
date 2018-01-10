@@ -1,15 +1,16 @@
-#' Convert an ISI or SCOPUS Export file into a data frame
+#' Convert a Clarivate Analytics WoS and SCOPUS Export files or RISmed PubMed/MedLine object into a data frame
 #'
-#' It converts a SCOPUS and Thomson Reuters' ISI Web of Knowledge export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+#' It converts a SCOPUS and Clarivate Analytics WoS export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
-#' Actually the function allows to convert both SCOPUS/ISI files in bibtext format and just ISI files in plain text format.
+#' Actually the function allows to convert both SCOPUS/WoS files in bibtext format and just WoS files in plain text format.
 #'
-#' @param file is a character array containing data read from an ISI WoK Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format).
-#' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"} or \code{"scopus"}. Default is \code{dbsource = "isi"}.
-#' @param format is a character indicating the format of the SCOPUS and Thomson Reuters' ISI Web of Knowledge export file. \code{format} can be \code{"bibtex"} or \code{"plaintext"}. Default is \code{format = "bibtex"}.
-#' @return a data frame with cases corresponding to articles and variables to Field Tag in the original export file.
+#' @param file can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
+#' b) an object of the class \code{pubmed (package RISmed)} containing a collection obtained from a query performed with RISmed package.
+#' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"scopus"} or \code{pubmed}. Default is \code{dbsource = "isi"}.
+#' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"bibtex"} or \code{"plaintext"}. Default is \code{format = "plaintext"}.
+#' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
 #'
-#' data frame columns are named using the standard ISI WoS Field Tag codify. The main field tags are:
+#' data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify. The main field tags are:
 #'
 #' \tabular{lll}{
 #' \code{AU}\tab   \tab Authors\cr
@@ -18,7 +19,7 @@
 #' \code{JI}\tab   \tab ISO Source Abbreviation\cr
 #' \code{DT}\tab   \tab Document Type\cr
 #' \code{DE}\tab   \tab Authors' Keywords\cr
-#' \code{ID}\tab   \tab Keywords associated by SCOPUS or ISI database \cr
+#' \code{ID}\tab   \tab Keywords associated by SCOPUS or WoS database \cr
 #' \code{AB}\tab   \tab Abstract\cr
 #' \code{C1}\tab   \tab Author Address\cr
 #' \code{RP}\tab   \tab Reprint Address\cr
@@ -29,19 +30,17 @@
 #' \code{UT}\tab   \tab Unique Article Identifier\cr
 #' \code{DB}\tab   \tab Database\cr}
 #'
-#' for a complete list of field tags see: \href{https://images.webofknowledge.com/WOK50B6/help/WOS/h_fieldtags.html}{ISI WoS Field Tags}
+#' for a complete list of field tags see: \href{https://images.webofknowledge.com/WOK50B6/help/WOS/h_fieldtags.html}{Clarivate Analytics WoS Field Tags}
+#' 
 #' @examples
 #' # An ISI or SCOPUS Export file can be read using \code{\link{readLines}} function:
 #'
-#' # largechar <- readLines('filename.txt')
+#' # D <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 #'
-#' # filename.txt is an ISI or SCOPUS Export file in plain text or bibtex format.
-#' # The file have to be saved without Byte order mark (U+FEFF) at the beginning
-#' # and EoF code at the end of file.
-#' # The original file (exported by ISI or SCOPUS search web site) can be modified
-#' # using an advanced text editor like Notepad++ or Emacs.
+#' # filename1.txt, filename2.txt and filename3.txt are WoS or SCOPUS Export file 
+#' # in plain text or bibtex format.
 #'
-#' #  biblio <- readLines('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
+#' #  biblio <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
 #'
 #' data(biblio)
 #'
@@ -50,11 +49,13 @@
 #' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
 #' @seealso \code{\link{isibib2df}} for converting ISI Export file (in bibtex format)
 #' @seealso \code{\link{isi2df}} for converting ISI Export file (in plain text format)
+#' @seealso \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 #' @family converting functions
 #' 
 #' @export
 #' @import stats
 #' @import ggplot2
+#' @import RISmed
 #' @importFrom stringdist stringdistmatrix
 #' @importFrom rscopus author_search
 #' @importFrom rscopus get_complete_author_info
@@ -209,16 +210,17 @@
 #' @importFrom SnowballC wordStem
 #' @importFrom SnowballC getStemLanguages
 
-convert2df<-function(file,dbsource="isi",format="bibtex"){
+convert2df<-function(file,dbsource="isi",format="plaintext"){
 
-  if (length(setdiff(dbsource,c("isi","scopus")))>0){
+  if (length(setdiff(dbsource,c("isi","scopus","pubmed")))>0){
     cat("\n 'dbsource' argument is not properly specified")
-    cat("\n 'dbsource' argument has to be a character string matching 'isi or 'scopus'.\n")}
-  if (length(setdiff(format,c("plaintext","bibtex")))>0){
+    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'scopus' or 'pubmed'.\n")}
+  if (length(setdiff(format,c("plaintext","bibtex","pubmed")))>0){
     cat("\n 'format' argument is not properly specified")
     cat("\n 'format' argument has to be a character string matching 'plaintext or 'bibtex'.\n")}
-
-  file=iconv(file, "latin1", "ASCII", sub="")
+  if (length(setdiff(format,c("plaintext","bibtex")))>0){
+    file=iconv(file, "latin1", "ASCII", sub="")}
+  
   switch(dbsource,
     isi={
       switch(format,
@@ -226,11 +228,16 @@ convert2df<-function(file,dbsource="isi",format="bibtex"){
              plaintext={M=isi2df(file)}
       )},
     scopus={M=scopus2df(file)
+    },
+    pubmed={M=pubmed2df(file)
+    M$CR="none"
     }
 )
   M$PY=as.numeric(M$PY)
   M$TC=as.numeric(M$TC)
   
+  ## AU_UN field creation
+  M <- metaTagExtraction(M, Field="AU_UN")
 
   ### SR field creation
   M <- metaTagExtraction(M, Field="SR")

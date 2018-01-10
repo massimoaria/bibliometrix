@@ -140,9 +140,10 @@ if ("SO" %in% Tags){
 
 # All Affiliations, First Affiliation and Countries
 if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
-  AFF=gsub("\\[.*?\\] ", "", M$C1)
+  if(!("AU_UN" %in% Tags)){M=metaTagExtraction(M,Field="AU_UN")}
+  AFF=M$AU_UN
   listAFF=strsplit(AFF,sep,fixed=TRUE)
-  nAFF=unlist(lapply(listAFF,length))  # num. of references per paper
+  nAFF=unlist(lapply(listAFF,length))
   listAFF[nAFF==0]="NA"
   fracAFF=unlist(sapply(nAFF,function(x){rep(1/x,x)}))  # fractional frequencies
   AFF=trim.leading(unlist(listAFF))  # delete spaces
@@ -150,6 +151,17 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
   Affiliation_frac=aggregate(fracAFF,by=list(AFF),'sum')
   names(Affiliation_frac)=c("Affiliation","Frequency")
   Affiliation_frac=Affiliation_frac[order(-Affiliation_frac$Frequency),]
+  
+  # AFF=gsub("\\[.*?\\] ", "", M$C1)
+  # listAFF=strsplit(AFF,sep,fixed=TRUE)
+  # nAFF=unlist(lapply(listAFF,length))  
+  # listAFF[nAFF==0]="NA"
+  # fracAFF=unlist(sapply(nAFF,function(x){rep(1/x,x)}))  # fractional frequencies
+  # AFF=trim.leading(unlist(listAFF))  # delete spaces
+  # Affiliation=sort(table(AFF),decreasing=TRUE)
+  # Affiliation_frac=aggregate(fracAFF,by=list(AFF),'sum')
+  # names(Affiliation_frac)=c("Affiliation","Frequency")
+  # Affiliation_frac=Affiliation_frac[order(-Affiliation_frac$Frequency),]
 
   # First Affiliation
   FAffiliation=lapply(listAFF,function(l) l[1])
@@ -164,11 +176,16 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
     RP=paste(M$RP,";",sep="")
     countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
   else if (M$DB[1]=="ISI"){
-    #FA=paste(FAffiliation,".",sep="")
     FA=FAffiliation
     RP=paste(M$RP,".",sep="")
     countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))}
+  if (M$DB[1]=="PUBMED"){
+    countries=M$AU_CO
+    FA=FAffiliation
+    RP=FAffiliation
+  }
 
+  if (M$DB[1]!="PUBMED"){
   for (i in 1:length(countries)){
 
     ind=which(regexpr(countries[i],FA,fixed=TRUE)!=-1)
@@ -179,7 +196,7 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
   }
   CO=gsub(";","",CO)
   CO=gsub("\\.","",CO)
-  CO=gsub("UNITED STATES","USA",CO)
+  CO=gsub("UNITED STATES","USA",CO)}else{CO=countries}
 
   Country=sort(table(CO),decreasing = TRUE)
 

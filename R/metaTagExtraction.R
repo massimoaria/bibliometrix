@@ -179,6 +179,8 @@ if (Field=="AU_UN"){
   AFF=gsub("\\[.*?\\] ", "", M$C1)
   indna=which(is.na(AFF))
   if (length(indna)>0){AFF[indna]=M$RP[indna]}
+  nc=nchar(AFF)
+  AFF[nc==0]=NA
   
   listAFF=strsplit(AFF,sep,fixed=TRUE)
   
@@ -199,12 +201,21 @@ if (Field=="AU_UN"){
       ind[[6]]=which(regexpr("ECOLE",affL,fixed=TRUE)!=-1)
       ind[[7]]=which(regexpr("CTR",affL,fixed=TRUE)!=-1)
       ind[[8]]=which(regexpr("SCI",affL,fixed=TRUE)!=-1)
-      for (a in 1:8){
+      ind[[9]]=which(regexpr("HOSP",affL,fixed=TRUE)!=-1)
+      ind[[10]]=which(regexpr("CENTRE",affL,fixed=TRUE)!=-1)
+      ind[[11]]=which(regexpr("CENTER",affL,fixed=TRUE)!=-1)
+      ind[[12]]=which(regexpr("CENTRO",affL,fixed=TRUE)!=-1)
+      ind[[13]]=which(regexpr("ASSOC",affL,fixed=TRUE)!=-1)
+      ind[[14]]=which(regexpr("FONDAZ",affL,fixed=TRUE)!=-1)
+      ind[[15]]=which(regexpr("FOUNDAT",affL,fixed=TRUE)!=-1)
+      ind[[16]]=which(regexpr("ISTIT",affL,fixed=TRUE)!=-1)
+      
+      for (a in 1:length(ind)){
         indd=ind[[a]]
         if (length(indd)>0){break()}
       }
       
-      if (length(indd)==0){index=append(index,"OTHER CENTER")
+      if (length(indd)==0){index=append(index,"NR")
       } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
       } else {index=append(index,affL[indd[1]])}
       

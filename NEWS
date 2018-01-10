@@ -1,9 +1,12 @@
 bibliometrix v1.9 (Release date: 2017-12-20)
 ==============
 
+New functionality:
+* added the possibility to import collections from MedLine/PubMed in convert2df()
 Changes:
 * improved speed and efficiency in citation analysis (histNetwork(), localCitations(), metaTagExtraction())
 * improved function histNetwork()
+* improved function metaTagExtraction()
 
 
 bibliometrix v1.8 (Release date: 2017-08-30)

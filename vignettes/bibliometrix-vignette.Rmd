@@ -181,7 +181,7 @@ UT		     | Unique Article Identifier
 DB		     | Bibliographic Database
 
 
-For a complete list of field tags see http://images.webofknowledge.com/WOKRS527R13/help/WOK/hs_alldb_fieldtags.html
+For a complete list of field tags see http://www.bibliometrix.org/documentation/Field_Tags_bibliometrix.pdf
 
 ## Bibliometric Analysis
 

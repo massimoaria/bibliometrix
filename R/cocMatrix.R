@@ -17,8 +17,7 @@
 #'   Cited References}
 #'
 #'   for a complete list of filed tags see:
-#'   \href{https://images.webofknowledge.com/WOK50B6/help/WOS/h_fieldtags.html}{ISI
-#'   WoS Field Tags}
+#'   \href{http://www.bibliometrix.org/documentation/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 #'
 #' @param type indicates the output format of co-occurrences: \tabular{lll}{
 #'   \code{type = "matrix"} \tab   \tab produces an object of class

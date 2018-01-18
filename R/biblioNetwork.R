@@ -39,12 +39,12 @@
 #' @examples
 #' # EXAMPLE 1: Authors collaboration network
 #'
-#' data(scientometrics)
+#' # data(scientometrics)
 #'
-#' NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
-#' network = "authors", sep = ";")
+#' # NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
+#' # network = "authors", sep = ";")
 #' 
-#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) 
+#' # net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) 
 #'
 #'
 #' # EXAMPLE 2: Co-citation network

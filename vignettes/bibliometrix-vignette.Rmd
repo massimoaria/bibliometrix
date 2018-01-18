@@ -10,7 +10,7 @@ vignette: >
 ---
 
 #### Latest version
-```{r}
+```{r echo=FALSE}
 cat(paste("bibliometrix ",packageVersion("bibliometrix")))
 ```
 
@@ -18,7 +18,7 @@ cat(paste("bibliometrix ",packageVersion("bibliometrix")))
 
 #### Citation for package 'bibliometrix': 
 
-```{r Package citation}
+```{r Package citation, echo=FALSE}
 citation("bibliometrix")
 ```
 

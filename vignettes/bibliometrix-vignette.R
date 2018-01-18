@@ -1,4 +1,7 @@
-## ----Package citation----------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+cat(paste("bibliometrix ",packageVersion("bibliometrix")))
+
+## ----Package citation, echo=FALSE----------------------------------------
 citation("bibliometrix")
 
 ## ----bibliometrix loading------------------------------------------------

@@ -4,14 +4,18 @@
 \alias{networkPlot}
 \title{Plotting Bibliographic networks}
 \usage{
-networkPlot(NetMatrix, n = NULL, Degree = NULL, Title = "Plot",
-  type = "kamada", label = TRUE, labelsize = 1, label.cex = FALSE,
-  halo = FALSE, cluster = "walktrap", vos.path = NULL, size = 3,
-  curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
-  remove.isolates = FALSE, weighted = NULL, edgesize = 1, edges.min = 0)
+networkPlot(NetMatrix, normalize = NULL, n = NULL, Degree = NULL,
+  Title = "Plot", type = "kamada", label = TRUE, labelsize = 1,
+  label.cex = FALSE, halo = FALSE, cluster = "walktrap",
+  vos.path = NULL, size = 3, curved = FALSE, noloops = TRUE,
+  remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
+  edgesize = 1, edges.min = 0)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
+
+\item{normalize}{is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
+Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.}
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
 

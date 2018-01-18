@@ -5,6 +5,8 @@
 #' The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
 #' The network map can be plotted using internal R routines or using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 #' @param NetMatrix is a network matrix obtained by the function \code{\link{biblioNetwork}}. 
+#' @param normalize is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
+#' Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.
 #' @param n is an integer. It indicates the number of vertices to plot.
 #' @param Degree is an integer. It idicates the min frequency of a vertex. If Degree is not NULL, n is ignored.
 #' @param type is a character object. It indicates the network map layout:
@@ -53,118 +55,133 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
-
-NET=NetMatrix
-#diag(NetMatrix)=0
-#num=apply(NetMatrix, 2, max)
-
-## legacy
-if (size==FALSE){size=3}
-
-
-# Create igraph object
-bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
-V(bsk.network)$id <- colnames(NET)
-
-
-# Compute node degrees (#links) and use that to set node size:
-deg <- degree(bsk.network, mode="all")
-if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
-else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
-
-# label size
-if (isTRUE(label.cex)){
-  V(bsk.network)$label.cex <- log(1+(deg/max(deg)[1])*labelsize)}else{
-    V(bsk.network)$label.cex <- labelsize}
-
-
-# Select number of vertices to plot
-
-if (!is.null(Degree)){
-  Deg=deg-diag(NET)
-  Vind=Deg<Degree
-  if (sum(!Vind)==0){cat("\nDegree argument is to high!\n\n")
-    return()}
-  bsk.network <- delete.vertices(bsk.network,which(Vind))
-} else { 
-  if (n>dim(NET)[1]) {n <- dim(NET)[1]}
-NetDegree <- unname(sort(deg,decreasing=TRUE)[n])
-bsk.network <- delete.vertices(bsk.network,which(deg<NetDegree))}
-
-# Remove loops and multiple edges
-bsk.network <- simplify(bsk.network, remove.multiple = remove.multiple, remove.loops = noloops) 
-
-# delete not linked vertices
-if (isTRUE(remove.isolates)){
-
-bsk.network <- delete.isolates(bsk.network, mode = 'in')}
-
-# Choose Network layout
-l <- switchLayout(bsk.network,type)
-
-# Clustering
-if (type!="vosviewer"){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
-  cl <- clusteringNetwork(bsk.network,cluster)
+  NET=NetMatrix
+  bsk.S=TRUE
   
-  bsk.network <- cl$bsk.network
-  net_groups <- cl$net_groups
+  if (!is.null(normalize)){
+    S=normalizeSimilarity(NetMatrix, type = "association")
+    bsk.S <- graph.adjacency(S,mode="undirected",weighted=T)
+  }
+  #diag(NetMatrix)=0
+  #num=apply(NetMatrix, 2, max)
   
-## Plot the network
-  LABEL=""
-  if (isTRUE(label)){
-    LABEL=V(bsk.network)$name
+  ## legacy
+  if (size==FALSE){size=3}
+  
+  
+  # Create igraph object
+  bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
+  V(bsk.network)$id <- colnames(NET)
+  
+  
+  # Compute node degrees (#links) and use that to set node size:
+  deg <- degree(bsk.network, mode="all")
+  if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
+  else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
+  
+  # label size
+  if (isTRUE(label.cex)){
+    V(bsk.network)$label.cex <- log(1+(deg/max(deg)[1])*labelsize)}else{
+      V(bsk.network)$label.cex <- labelsize}
+  
+  
+  # Select number of vertices to plot
+  
+  if (!is.null(Degree)){
+    Deg=deg-diag(NET)
+    Vind=Deg<Degree
+    if (sum(!Vind)==0){cat("\nDegree argument is to high!\n\n")
+      return()}
+    bsk.network <- delete.vertices(bsk.network,which(Vind))
+    if (!isTRUE(bsk.S)){bsk.S <- delete.vertices(bsk.S,which(Vind))}
+  } else { 
+    if (n>dim(NET)[1]) {n <- dim(NET)[1]}
+    NetDegree <- unname(sort(deg,decreasing=TRUE)[n])
+    bsk.network <- delete.vertices(bsk.network,which(deg<NetDegree))
+    if (!isTRUE(bsk.S)){bsk.S <- delete.vertices(bsk.S,which(deg<NetDegree))}
   }
   
-  E(bsk.network)$num=count_multiple(bsk.network, eids = E(bsk.network))
-  if (!is.null(weighted)){
-    E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
-  } else{
-    if(isTRUE(remove.multiple)){E(bsk.network)$width=edgesize} 
+  # Remove loops and multiple edges
+  if (edges.min>1){remove.multiple=FALSE}
+  bsk.network <- simplify(bsk.network, remove.multiple = remove.multiple, remove.loops = noloops) 
+  if (!isTRUE(bsk.S)){bsk.S <- simplify(bsk.S, remove.multiple = remove.multiple, remove.loops = noloops)}
+  
+  # delete not linked vertices
+  if (isTRUE(remove.isolates)){
+    bsk.network <- delete.isolates(bsk.network, mode = 'in')
+    if (!isTRUE(bsk.S)){bsk.S <- delete.isolates(bsk.S, mode = 'in')}
+  }
+  
+  # Choose Network layout
+  if (!isTRUE(bsk.S)){l <- switchLayout(bsk.S,type)
+  } else{l <- switchLayout(bsk.network,type)}
+  
+  
+  # Clustering
+  if (type!="vosviewer"){
+    
+    cl <- clusteringNetwork(bsk.network,cluster)
+    
+    bsk.network <- cl$bsk.network
+    if (!isTRUE(bsk.S)){V(bsk.S)$color=V(bsk.network)$color}
+    net_groups <- cl$net_groups
+    
+    ## Plot the network
+    LABEL=""
+    if (isTRUE(label)){
+      LABEL=V(bsk.network)$name
+    }
+    
+    E(bsk.network)$num=count_multiple(bsk.network, eids = E(bsk.network))
+    if (!is.null(weighted)){
+      E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
+    } else{
+      if(isTRUE(remove.multiple)){E(bsk.network)$width=edgesize} 
       else{
         edges=E(bsk.network)$num
         E(bsk.network)$width=edges/max(edges)*edgesize}
-  }
-  
-  bsk.network=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
-  
-  if (isTRUE(halo) & cluster!="null"){
-    plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
-    
-  } else{
-    plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
     }
-
-}  
-
-
-return(bsk.network)}
+    
+    bsk.network=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
+    
+    if (isTRUE(halo) & cluster!="null"){
+      plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+      
+    } else{
+      plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+    }
+    
+  }  
+  
+  
+  return(bsk.network)}
 
 delete.isolates <- function(graph, mode = 'all') {
   isolates <- which(degree(graph, mode = mode) == 0) - 1
   delete.vertices(graph, names(isolates))
-  }
+}
 
 clusteringNetwork <- function(bsk.network,cluster){
-
+  
   switch(cluster,
-       none={V(bsk.network)$color="#8DD3C7"},
-       optimal={
-         net_groups <- cluster_optimal(bsk.network)
-         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-       louvain={
-         net_groups <- cluster_louvain(bsk.network)
-         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-       infomap={
-         net_groups <- cluster_infomap(bsk.network)
-         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-       edge_betweenness={
-         net_groups <- cluster_edge_betweenness(bsk.network)
-         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-       walktrap={
-         net_groups <- cluster_walktrap(bsk.network)
-         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]}
+         none={V(bsk.network)$color="#8DD3C7"},
+         optimal={
+           net_groups <- cluster_optimal(bsk.network)
+           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+         louvain={
+           net_groups <- cluster_louvain(bsk.network)
+           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+         infomap={
+           net_groups <- cluster_infomap(bsk.network)
+           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+         edge_betweenness={
+           net_groups <- cluster_edge_betweenness(bsk.network)
+           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+         walktrap={
+           net_groups <- cluster_walktrap(bsk.network)
+           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]}
   )
   cl=list()
   cl$bsk.network=bsk.network

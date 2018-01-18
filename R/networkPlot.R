@@ -56,6 +56,8 @@
 networkPlot<-function(NetMatrix, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
 
 NET=NetMatrix
+#diag(NetMatrix)=0
+#num=apply(NetMatrix, 2, max)
 
 ## legacy
 if (size==FALSE){size=3}
@@ -64,6 +66,7 @@ if (size==FALSE){size=3}
 # Create igraph object
 bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
 V(bsk.network)$id <- colnames(NET)
+
 
 # Compute node degrees (#links) and use that to set node size:
 deg <- degree(bsk.network, mode="all")
@@ -77,13 +80,17 @@ if (isTRUE(label.cex)){
 
 
 # Select number of vertices to plot
-if (!is.null(Degree)){
-  n=length(which(diag(NET)>=Degree))
-}
 
-if (n>dim(NET)[1]) {n <- dim(NET)[1]}
+if (!is.null(Degree)){
+  Deg=deg-diag(NET)
+  Vind=Deg<Degree
+  if (sum(!Vind)==0){cat("\nDegree argument is to high!\n\n")
+    return()}
+  bsk.network <- delete.vertices(bsk.network,which(Vind))
+} else { 
+  if (n>dim(NET)[1]) {n <- dim(NET)[1]}
 NetDegree <- unname(sort(deg,decreasing=TRUE)[n])
-bsk.network <- delete.vertices(bsk.network,which(degree(bsk.network)<NetDegree))
+bsk.network <- delete.vertices(bsk.network,which(deg<NetDegree))}
 
 # Remove loops and multiple edges
 bsk.network <- simplify(bsk.network, remove.multiple = remove.multiple, remove.loops = noloops) 
@@ -94,46 +101,15 @@ if (isTRUE(remove.isolates)){
 bsk.network <- delete.isolates(bsk.network, mode = 'in')}
 
 # Choose Network layout
-l <- layout.kamada.kawai(bsk.network) #default
-switch(type,
-       circle={l <- layout.circle(bsk.network)},
-       sphere={l <- layout.sphere(bsk.network)},
-       mds={l <- layout.mds(bsk.network)},
-       fruchterman={l <- layout.fruchterman.reingold(bsk.network)},
-       kamada={l <- layout.kamada.kawai(bsk.network)},
-       vosviewer={
-         if (is.null(vos.path)){vos.path=getwd()}
-         if (sum(dir(vos.path) %in% "VOSviewer.jar")==0){cat(paste("VOSviewer.jar does not exist in the path",vos.path,"\n\nPlese download it from http://www.vosviewer.com/download","\n(Java version for other systems)\n"))}
-         else{
-         netfile=paste(vos.path,"/","vosnetwork.net",sep="")
-         VOScommand=paste("java -jar ",vos.path,"/","VOSviewer.jar -pajek_network ",netfile,sep="")
-         write.graph(graph = bsk.network, file = netfile, format = "pajek")
-         system(VOScommand)}
-         })
+l <- switchLayout(bsk.network,type)
 
-l=layout.norm(l)
-
-
+# Clustering
 if (type!="vosviewer"){
   
-  switch(cluster,
-         none={V(bsk.network)$color="#8DD3C7"},
-         optimal={
-           net_groups <- cluster_optimal(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-         louvain={
-           net_groups <- cluster_louvain(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-         infomap={
-           net_groups <- cluster_infomap(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-         edge_betweenness={
-           net_groups <- cluster_edge_betweenness(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
-         walktrap={
-           net_groups <- cluster_walktrap(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]}
-         )
+  cl <- clusteringNetwork(bsk.network,cluster)
+  
+  bsk.network <- cl$bsk.network
+  net_groups <- cl$net_groups
   
 ## Plot the network
   LABEL=""
@@ -155,11 +131,10 @@ if (type!="vosviewer"){
   
   if (isTRUE(halo) & cluster!="null"){
     plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
-    #plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$name, vertex.label.cex = labelsize, main=Title)
+    
   } else{
     plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
-    #plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, vertex.label.cex = labelsize, main=Title)
-  }
+    }
 
 }  
 
@@ -171,3 +146,49 @@ delete.isolates <- function(graph, mode = 'all') {
   delete.vertices(graph, names(isolates))
   }
 
+clusteringNetwork <- function(bsk.network,cluster){
+
+  switch(cluster,
+       none={V(bsk.network)$color="#8DD3C7"},
+       optimal={
+         net_groups <- cluster_optimal(bsk.network)
+         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+       louvain={
+         net_groups <- cluster_louvain(bsk.network)
+         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+       infomap={
+         net_groups <- cluster_infomap(bsk.network)
+         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+       edge_betweenness={
+         net_groups <- cluster_edge_betweenness(bsk.network)
+         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+       walktrap={
+         net_groups <- cluster_walktrap(bsk.network)
+         V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]}
+  )
+  cl=list()
+  cl$bsk.network=bsk.network
+  cl$net_groups=net_groups
+  return(cl)
+}
+
+switchLayout <- function(bsk.network,type){
+  switch(type,
+         circle={l <- layout.circle(bsk.network)},
+         sphere={l <- layout.sphere(bsk.network)},
+         mds={l <- layout.mds(bsk.network)},
+         fruchterman={l <- layout.fruchterman.reingold(bsk.network)},
+         kamada={l <- layout.kamada.kawai(bsk.network)},
+         vosviewer={
+           if (is.null(vos.path)){vos.path=getwd()}
+           if (sum(dir(vos.path) %in% "VOSviewer.jar")==0){cat(paste("VOSviewer.jar does not exist in the path",vos.path,"\n\nPlese download it from http://www.vosviewer.com/download","\n(Java version for other systems)\n"))}
+           else{
+             netfile=paste(vos.path,"/","vosnetwork.net",sep="")
+             VOScommand=paste("java -jar ",vos.path,"/","VOSviewer.jar -pajek_network ",netfile,sep="")
+             write.graph(graph = bsk.network, file = netfile, format = "pajek")
+             system(VOScommand)}
+         })
+  
+  l=layout.norm(l)
+  return(l)
+}

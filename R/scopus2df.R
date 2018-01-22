@@ -34,11 +34,11 @@ scopus2df<-function(D){
   #individua il numero totale di paper
   nP  <-  length(Papers)-1
 
-  uniqueTag  <-  c("AU","TI","SO","JI","DT","DE","ID","AB","C1","RP","CR","TC","PY","UT")
+  uniqueTag  <-  c("AU","TI","SO","JI","DT","DE","ID","AB","C1","RP","CR","TC","PY","DI","UT")
 
   DATA  <-  data.frame(matrix(NA,nP,length(uniqueTag)))
   names(DATA)  <-  uniqueTag
-  Tag  <-  c("author=","title=","journal=","abbrev_source_title=","Manuscript=","author_keywords=","keywords=","abstract=","affiliation=","correspondence_address1=","references=","note=","year=")
+  Tag  <-  c("author=","title=","journal=","abbrev_source_title=","Manuscript=","author_keywords=","keywords=","abstract=","affiliation=","correspondence_address1=","references=","note=","year=","doi=")
 
   for (i in 1:nP){
 

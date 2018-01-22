@@ -166,7 +166,9 @@ delete.isolates <- function(graph, mode = 'all') {
 clusteringNetwork <- function(bsk.network,cluster){
   
   switch(cluster,
-         none={V(bsk.network)$color="#8DD3C7"},
+         none={
+           net_groups=NA
+           V(bsk.network)$color="#8DD3C7"},
          optimal={
            net_groups <- cluster_optimal(bsk.network)
            V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},

@@ -6,7 +6,7 @@
 \usage{
 networkPlot(NetMatrix, normalize = NULL, n = NULL, Degree = NULL,
   Title = "Plot", type = "kamada", label = TRUE, labelsize = 1,
-  label.cex = FALSE, halo = FALSE, cluster = "walktrap",
+  label.cex = FALSE, label.n = NULL, halo = FALSE, cluster = "walktrap",
   vos.path = NULL, size = 3, curved = FALSE, noloops = TRUE,
   remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
   edgesize = 1, edges.min = 0)

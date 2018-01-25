@@ -38,6 +38,7 @@
 #' named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.
 #' @param edgesize is an integer. It indicates the network edge size.
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
+#' @label.n is an integer. It indicates the number of vertex labels to draw.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -55,7 +56,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
   NET=NetMatrix
   bsk.S=TRUE
@@ -115,8 +116,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plo
   }
   
   # Choose Network layout
-  if (!isTRUE(bsk.S)){l <- switchLayout(bsk.S,type)
-  } else{l <- switchLayout(bsk.network,type)}
+  if (!isTRUE(bsk.S)){l <- switchLayout(bsk.S,type,vos.path)
+  } else{l <- switchLayout(bsk.network,type,vos.path)}
   
   
   # Clustering
@@ -132,6 +133,11 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plo
     LABEL=""
     if (isTRUE(label)){
       LABEL=V(bsk.network)$name
+      if (label.n>0){
+        q=1-(label.n/length(V(bsk.network)$label.cex))
+        q=quantile(V(bsk.network)$label.cex,q)
+        LABEL[V(bsk.network)$label.cex<q]=""
+      }
     }
     
     E(bsk.network)$num=count_multiple(bsk.network, eids = E(bsk.network))
@@ -191,7 +197,7 @@ clusteringNetwork <- function(bsk.network,cluster){
   return(cl)
 }
 
-switchLayout <- function(bsk.network,type){
+switchLayout <- function(bsk.network,type,vos.path){
   switch(type,
          circle={l <- layout.circle(bsk.network)},
          sphere={l <- layout.sphere(bsk.network)},
@@ -208,6 +214,6 @@ switchLayout <- function(bsk.network,type){
              system(VOScommand)}
          })
   
-  l=layout.norm(l)
+  if (type!="vosviewer"){l=layout.norm(l)}
   return(l)
 }

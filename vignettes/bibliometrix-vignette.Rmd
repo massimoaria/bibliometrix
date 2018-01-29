@@ -233,7 +233,7 @@ It displays main information about the bibliographic data frame and several tabl
 Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
 
 ```{r summary generic function}
-S=summary(object = results, k = 10, pause = FALSE)
+S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
 Some basic plots can be drawn using the generic function \code{plot}:
@@ -436,7 +436,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 # A <- cocMatrix(M, Field = "AU_CO", sep = ";")
 ```
 
-*metaTagExtraction* allows to extract the following additional field tags: *Authors' countries* (`Field = "AU_CO"`); *First author of each cited reference* (`Field = "CR_AU"`); *Publication source of each cited reference* (`Field = "CR_SO"`); and *Authors' affiliations* (`Field = "AU_UN"`).
+*metaTagExtraction* allows to extract the following additional field tags: *Authors' countries* (`Field = "AU_CO"`); *First Author's countries* (`Field = "AU_CO"`); *First author of each cited reference* (`Field = "CR_AU"`); *Publication source of each cited reference* (`Field = "CR_SO"`); and *Authors' affiliations* (`Field = "AU_UN"`).
 
 * Author keyword network
 ```{r}
@@ -485,16 +485,13 @@ Articles with only a few references, therefore, would tend to be more weakly bib
 
 This suggests that it might be more practicable to switch to a relative measure of bibliographic coupling.
 
-*normalizeSimilarity* function calculates Association strength, Inclusion, Jaccard or Salton similarity among vertices of a network.
+*normalizeSimilarity* function calculates Association strength, Inclusion, Jaccard or Salton similarity among vertices of a network. *normalizeSimilarity* can be recalled directly from *networkPlot()* function using the argument *normalize*. 
 
 ```{r similarity, fig.height=7, fig.width=7, warning=FALSE}
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
-# calculate jaccard similarity coefficient
-S <- normalizeSimilarity(NetMatrix, type="jaccard")
-
-# plot authors' similarity (first 20 authors)
-net=networkPlot(S, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
+# plot authors' similarity (first 20 authors), using salton similarity index
+net=networkPlot(NetMatrix, normalize = "salton", weighted=T, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
 
 ```
 
@@ -567,7 +564,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE)
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8)
 
 ```
 
@@ -592,7 +589,7 @@ net=networkPlot(NetMatrix, n = 15, Title = "Co-Citation Network", type = "frucht
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = 20, Title = "Keyword Co-occurrences", type = "kamada", size=T)
+net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 20, Title = "Keyword Co-occurrences", type = "fruchterman", size=T)
 
 ```
 
@@ -625,7 +622,7 @@ The function \code{histNetwork} generates a chronological co-citation network ma
 histResults <- histNetwork(M, n = 20, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE,label=FALSE, arrowsize = 0.5)
+net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
 
 ```
 

@@ -50,7 +50,7 @@ summary.bibliometrix<-function(object, ...){
   MainInfo[3]=paste("Sources (Journals, Books, etc.)      ",length(object$Sources),"\n")
   MainInfo[4]=paste("Keywords Plus (ID)                   ",length(object$ID),"\n")
   MainInfo[5]=paste("Author's Keywords (DE)               ",length(object$DE),"\n")
-  MainInfo[6]=paste("Period                               ",min(object$Years),"-",max(object$Years),"\n")
+  MainInfo[6]=paste("Period                               ",min(object$Years,na.rm=T),"-",max(object$Years,na.rm=T),"\n")
   TCm=format(mean(as.numeric(object$TotalCitation), na.rm=TRUE),digits=4)
   MainInfo[7]=paste("Average citations per article        ",TCm,"\n\n")
   MainInfo[8]=paste("Authors                              ",object$nAuthors,"\n")
@@ -110,7 +110,7 @@ summary.bibliometrix<-function(object, ...){
   kk=k
   if (!is.null(object$Countries)){
   # Most Productive Countries
-  cat("\nMost Productive Countries\n\n")
+  cat("\nMost Productive Countries (of corresponding authors)\n\n")
 
   if (length(object$Countries)<k) {kk=length(object$Countries)}
 

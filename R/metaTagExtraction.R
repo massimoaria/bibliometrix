@@ -9,6 +9,7 @@
 #' \code{"CR_AU"}\tab   \tab First Author of each cited reference\cr
 #' \code{"CR_SO"}\tab   \tab Source of each cited reference\cr
 #' \code{"AU_CO"}\tab   \tab Country of affiliation for each co-author\cr
+#' \code{"AU1_CO"}\tab   \tab Country of affiliation for the first author\cr
 #' \code{"AU_UN"}\tab   \tab University of affiliation for each co-author\cr
 #' \code{"SR"}\tab     \tab Short tag of the document (as used in reference lists)}
 #'
@@ -87,8 +88,9 @@ if (Field=="SR"){
 size=dim(M)
 FCAU=list(NULL)
 CCR=NULL
-M$CR=str_replace_all(as.character(M$CR),"DOI;","DOI ")
-CR=M$CR
+if ("CR" %in% names(M)){
+  M$CR=str_replace_all(as.character(M$CR),"DOI;","DOI ")
+  CR=M$CR}
   
 if (Field=="CR_AU"){
 
@@ -152,9 +154,11 @@ if (Field=="AU_CO"){
   C1=M$C1
   C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
   C1=gsub("\\[.*?\\] ", "", C1)
+  #C1=gsub("[[:punct:][:blank:]]+", " ", C1)
   RP=M$RP
   #RP[which(is.na(RP))]=M$RRP)
   RP=paste(RP,";",sep="")
+  RP=gsub("[[:punct:][:blank:]]+", " ", RP)
   
   for (i in 1:size[1]){
     if (!is.na(C1[i])){
@@ -169,8 +173,49 @@ if (Field=="AU_CO"){
   M$AU_CO=gsub("[[:digit:]]","",M$AU_CO)
   M$AU_CO=gsub(".", "", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
+  
+}
 
-
+if (Field=="AU1_CO"){
+  # Countries
+  data("countries",envir=environment())
+  countries=as.character(countries[[1]])
+  #if (M$DB[1]=="ISI"){
+  #countries=as.character(sapply(countries,function(s) paste0(" ",s," ",collapse="")))
+  #} else if (M$DB[1]=="SCOPUS"){
+  #  countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
+  countries=paste(" ",countries," ",sep="")
+  M$AU1_CO=NA
+  C1=M$C1
+  C1[which(!is.na(M$RP))]=M$RP[which(!is.na(M$RP))]
+  C1=unlist(lapply(strsplit(C1,sep),function(l) l[1]))
+  C1=gsub("\\[.*?\\] ", "", C1)
+  C1=gsub("[[:punct:][:blank:]]+", " ", C1)
+  C1=paste(trim(C1)," ",sep="")
+  if (M$DB[1]!="PUBMED"){
+  RP=M$RP
+  #RP[which(is.na(RP))]=M$RRP)
+  RP=paste(RP,";",sep="")
+  RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {RP=C1}
+  
+  
+  for (i in 1:size[1]){
+    if (!is.na(C1[i])){
+      ind=unlist(sapply(countries, function (l) (gregexpr ( l , C1[i],fixed=TRUE))))
+      if (sum(ind>-1)>0) {M$AU1_CO[i]=paste(unique(names(ind[ind>-1][1])),collapse=";")
+      #print(i)
+      #print(M$AU1_CO[i])
+      }
+    }
+    if (is.na(M$AU1_CO[i])){
+      ind=unlist(sapply(countries, function (l) (gregexpr ( l , RP[i],fixed=TRUE))))
+      if (sum(ind>-1)>0) {M$AU1_CO[i]=paste(unique(names(ind[ind>-1][1])),collapse=";")}  
+    }
+  }
+  M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
+  #M$AU1_CO=gsub(".", "", M$AU1_CO, fixed = TRUE)
+  #M$AU1_CO=gsub(";;", ";", M$AU1_CO, fixed = TRUE)
+  
 }
 
 # UNIVERSITY AFFILIATION

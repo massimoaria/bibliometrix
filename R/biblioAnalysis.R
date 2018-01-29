@@ -80,21 +80,6 @@ Tags<-names(M)
 if ("AU" %in% Tags){
   listAU=strsplit(as.character(M$AU),sep)
   listAU=lapply(listAU, function(l) trim(l))
-  #if (M$DB[1]=="ISI"){
-     #listAU=lapply(listAU,function(l){
-      #l=trim.leading(l)
-      #l=sub(" ",",",l, fixed = TRUE)
-      #l=sub(",,",",",l, fixed = TRUE)
-      #l=gsub(" ","",l, fixed = TRUE)})
-     #}
-    
-  #if (M$DB[1]=="SCOPUS"){
-      #listAU=lapply(listAU,function(l){
-      #l=trim.leading(l)
-      #l=sub(" ",",",l, fixed = TRUE)
-      #l=gsub(" ","",l, fixed = TRUE)})
-      #}
-    
   nAU=unlist(lapply(listAU,length))  # num. of authors per paper
   fracAU=unlist(sapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
   AU=unlist(listAU)
@@ -169,37 +154,40 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
   # Countries
   data("countries",envir=environment())
   countries=as.character(countries[[1]])
+  
+  ### new code
+  M=metaTagExtraction(M,Field="AU1_CO",sep)
+  CO=M$AU1_CO
 
 
-  if (M$DB[1]=="SCOPUS"){
-    FA=paste(FAffiliation,";",sep="")
-    RP=paste(M$RP,";",sep="")
-    countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
-  else if (M$DB[1]=="ISI"){
-    FA=FAffiliation
-    RP=paste(M$RP,".",sep="")
-    countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))}
-  if (M$DB[1]=="PUBMED"){
-    countries=M$AU_CO
-    FA=FAffiliation
-    RP=FAffiliation
-  }
+  # if (M$DB[1]=="SCOPUS"){
+  #   FA=paste(FAffiliation,";",sep="")
+  #   RP=paste(M$RP,";",sep="")
+  #   countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
+  # else if (M$DB[1]=="ISI"){
+  #   FA=FAffiliation
+  #   RP=paste(M$RP,".",sep="")
+  #   countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))}
+  # if (M$DB[1]=="PUBMED"){
+  #   countries=M$AU_CO
+  #   FA=FAffiliation
+  #   RP=FAffiliation
+  # }
+  # 
+  # if (M$DB[1]!="PUBMED"){
+  # for (i in 1:length(countries)){
+  # 
+  #   ind=which(regexpr(countries[i],FA,fixed=TRUE)!=-1)
+  #   if (length(ind)>0){CO[ind]=countries[i]}
+  # 
+  #   indd=which(regexpr(countries[i],RP,fixed=TRUE)!=-1)
+  #   if (length(indd)>0){CO[indd]=countries[i]}
+  # }
+  #CO=gsub(";","",CO)
+  #CO=gsub("\\.","",CO)
+  #CO=gsub("UNITED STATES","USA",CO)}else{CO=countries}
 
-  if (M$DB[1]!="PUBMED"){
-  for (i in 1:length(countries)){
-
-    ind=which(regexpr(countries[i],FA,fixed=TRUE)!=-1)
-    if (length(ind)>0){CO[ind]=countries[i]}
-
-    indd=which(regexpr(countries[i],RP,fixed=TRUE)!=-1)
-    if (length(indd)>0){CO[indd]=countries[i]}
-  }
-  CO=gsub(";","",CO)
-  CO=gsub("\\.","",CO)
-  CO=gsub("UNITED STATES","USA",CO)}else{CO=countries}
-
-  Country=sort(table(CO),decreasing = TRUE)
-
+  Country=tableTag(M,"AU1_CO")
 
 }
 

@@ -39,6 +39,7 @@
 #' @param edgesize is an integer. It indicates the network edge size.
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @label.n is an integer. It indicates the number of vertex labels to draw.
+#' @label.short is a logical. If TRUE label are plotted in short format.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -56,13 +57,13 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.short=TRUE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
   NET=NetMatrix
   bsk.S=TRUE
   
   if (!is.null(normalize)){
-    S=normalizeSimilarity(NetMatrix, type = "association")
+    S=normalizeSimilarity(NetMatrix, type = normalize)
     bsk.S <- graph.adjacency(S,mode="undirected",weighted=T)
   }
   #diag(NetMatrix)=0
@@ -74,7 +75,25 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plo
   
   # Create igraph object
   bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
-  V(bsk.network)$id <- colnames(NET)
+  
+  if (isTRUE(label.short)){
+    LABEL=colnames(NET)
+    LABEL2=regexpr(".([0-9]?[0-9]?[0-9]?[0-9]).*",LABEL)
+    LABEL2[LABEL2==-1 | LABEL2==1]=nchar(LABEL[LABEL2==-1 | LABEL2==1])-4
+    LABEL2=substr(LABEL,1,LABEL2+4)
+    
+    ## assign an unique name to each label
+    tab=sort(table(LABEL2),decreasing=T)
+    dup=names(tab[tab>1])
+    for (i in 1:length(dup)){
+      ind=which(LABEL2 %in% dup[i])
+      if (length(ind)>0){
+        LABEL2[ind]=paste0(LABEL2[ind],"-",as.character(1:length(ind)),sep="")
+      }
+    }
+    
+   V(bsk.network)$name=LABEL2
+  } else {V(bsk.network)$name <- colnames(NET)}
   
   
   # Compute node degrees (#links) and use that to set node size:
@@ -133,7 +152,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plo
     LABEL=""
     if (isTRUE(label)){
       LABEL=V(bsk.network)$name
-      if (label.n>0){
+      if (!is.null(label.n)){
         q=1-(label.n/length(V(bsk.network)$label.cex))
         q=quantile(V(bsk.network)$label.cex,q)
         LABEL[V(bsk.network)$label.cex<q]=""
@@ -200,6 +219,7 @@ clusteringNetwork <- function(bsk.network,cluster){
 switchLayout <- function(bsk.network,type,vos.path){
   switch(type,
          circle={l <- layout.circle(bsk.network)},
+         star={l <- layout.star(bsk.network)},
          sphere={l <- layout.sphere(bsk.network)},
          mds={l <- layout.mds(bsk.network)},
          fruchterman={l <- layout.fruchterman.reingold(bsk.network)},

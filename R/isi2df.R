@@ -86,6 +86,7 @@ isi2df<-function(D){
   
   
   DATA$AU=unlist(listAU)
+  if (names(DATA)[1]!="PT"){DATA=DATA[,-(which(names(DATA)=="X.U.FEFF.F"))]}
   return(DATA)
 }
 

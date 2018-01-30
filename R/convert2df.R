@@ -80,6 +80,7 @@
 #' @importFrom igraph layout.mds
 #' @importFrom igraph layout.kamada.kawai
 #' @importFrom igraph layout.fruchterman.reingold
+#' @importFrom igraph layout.star
 #' @importFrom igraph write.graph
 #' @importFrom igraph cluster_walktrap
 #' @importFrom igraph cluster_optimal

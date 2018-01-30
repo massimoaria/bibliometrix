@@ -18,7 +18,7 @@ M <- convert2df(D, dbsource = "isi", format = "bibtex")
 results <- biblioAnalysis(M, sep = ";")
 
 ## ----summary generic function--------------------------------------------
-S=summary(object = results, k = 10, pause = FALSE)
+S <- summary(object = results, k = 10, pause = FALSE)
 
 ## ----plot generic function-----------------------------------------------
 plot(x = results, k = 10, pause = FALSE)
@@ -120,11 +120,8 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 ## ----similarity, fig.height=7, fig.width=7, warning=FALSE----------------
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
-# calculate jaccard similarity coefficient
-S <- normalizeSimilarity(NetMatrix, type="jaccard")
-
-# plot authors' similarity (first 20 authors)
-net=networkPlot(S, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
+# plot authors' similarity (first 20 authors), using salton similarity index
+net=networkPlot(NetMatrix, normalize = "salton", weighted=T, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
 
 
 ## ------------------------------------------------------------------------
@@ -143,7 +140,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE)
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8)
 
 
 ## ----Co-citation network, fig.height=7, fig.width=7, warning=FALSE-------
@@ -161,7 +158,7 @@ net=networkPlot(NetMatrix, n = 15, Title = "Co-Citation Network", type = "frucht
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = 20, Title = "Keyword Co-occurrences", type = "kamada", size=T)
+net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 20, Title = "Keyword Co-occurrences", type = "fruchterman", size=T)
 
 
 ## ----Co-Word Analysis, fig.height=7, fig.width=7, warning=FALSE----------
@@ -177,6 +174,6 @@ CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE, la
 histResults <- histNetwork(M, n = 20, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE,label=FALSE, arrowsize = 0.5)
+net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
 
 

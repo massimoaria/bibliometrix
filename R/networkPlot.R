@@ -38,8 +38,8 @@
 #' named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.
 #' @param edgesize is an integer. It indicates the network edge size.
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
-#' @label.n is an integer. It indicates the number of vertex labels to draw.
-#' @label.short is a logical. If TRUE label are plotted in short format.
+#' @param label.n is an integer. It indicates the number of vertex labels to draw.
+#' @param label.short is a logical. If TRUE label are plotted in short format.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples

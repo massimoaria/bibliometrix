@@ -34,11 +34,11 @@ scopus2df<-function(D){
   #individua il numero totale di paper
   nP  <-  length(Papers)-1
 
-  uniqueTag  <-  c("AU","TI","SO","JI","DT","DE","ID","AB","C1","RP","CR","TC","PY","DI","UT")
+  uniqueTag  <-  c("AU","TI","SO","JI","DT","DT1","DE","ID","AB","C1","RP","CR","TC","PY","DI","UT")
 
   DATA  <-  data.frame(matrix(NA,nP,length(uniqueTag)))
   names(DATA)  <-  uniqueTag
-  Tag  <-  c("author=","title=","journal=","abbrev_source_title=","Manuscript=","author_keywords=","keywords=","abstract=","affiliation=","correspondence_address1=","references=","note=","year=","doi=")
+  Tag  <-  c("author=","title=","journal=","abbrev_source_title=","document_type=","Manuscript=","author_keywords=","keywords=","abstract=","affiliation=","correspondence_address1=","references=","note=","year=","doi=")
 
   for (i in 1:nP){
 
@@ -60,8 +60,8 @@ scopus2df<-function(D){
 
   }
 
-  DT <- which(uniqueTag=="DT")
-  DATA[,-DT] <- as.data.frame(apply(DATA[,-DT],2,function(d) gsub("\\{","",d)),stringsAsFactors = FALSE)
+  DT1 <- which(uniqueTag=="DT1")
+  DATA[,-DT1] <- as.data.frame(apply(DATA[,-DT1],2,function(d) gsub("\\{","",d)),stringsAsFactors = FALSE)
   DATA <- as.data.frame(apply(DATA,2,function(d) gsub("\\},","",d)),stringsAsFactors = FALSE)
   DATA <- as.data.frame(apply(DATA,2,function(d) gsub("\\}","",d)),stringsAsFactors = FALSE)
 
@@ -70,9 +70,9 @@ scopus2df<-function(D){
     DATA[[uniqueTag[i]]] <- gsub(Tag[i],"",DATA[[uniqueTag[i]]],fixed=TRUE)
   }
 
-  DATA$DT <- gsub("Manuscript=","",unlist(lapply(strsplit(DATA$DT,","),function(l) l[1])))
-  DATA$UT <- gsub(".*\\{","",DATA$DT)
-  DATA$DT <- gsub("\\{.*","",DATA$DT)
+  DATA$DT1 <- gsub("Manuscript=","",unlist(lapply(strsplit(DATA$DT1,","),function(l) l[1])))
+  DATA$UT <- gsub(".*\\{","",DATA$DT1)
+  DATA$DT1 <- gsub("\\{.*","",DATA$DT1)
 
 
   # Author post-processing

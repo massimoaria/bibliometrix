@@ -27,6 +27,7 @@
 #' Aff_frac \tab      \tab the fractionalized frequency distribution of affiliations (of all co-authors for each paper)\cr
 #' CO \tab      \tab the affiliation country of first author\cr
 #' Countries \tab      \tab the affiliation countries' frequency distribution\cr
+#' CountryCollaboration \tab      \tab Intracountry (SCP) and intercountry (MCP) collaboration indices\cr
 #' TotalCitation \tab      \tab the number of times each manuscript has been cited\cr
 #' TCperYear \tab      \tab the yearly average number of times each manuscript has been cited\cr
 #' Sources \tab      \tab the frequency distribution of sources (journals, books, etc.)\cr
@@ -160,34 +161,8 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
   CO=M$AU1_CO
 
 
-  # if (M$DB[1]=="SCOPUS"){
-  #   FA=paste(FAffiliation,";",sep="")
-  #   RP=paste(M$RP,";",sep="")
-  #   countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
-  # else if (M$DB[1]=="ISI"){
-  #   FA=FAffiliation
-  #   RP=paste(M$RP,".",sep="")
-  #   countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))}
-  # if (M$DB[1]=="PUBMED"){
-  #   countries=M$AU_CO
-  #   FA=FAffiliation
-  #   RP=FAffiliation
-  # }
-  # 
-  # if (M$DB[1]!="PUBMED"){
-  # for (i in 1:length(countries)){
-  # 
-  #   ind=which(regexpr(countries[i],FA,fixed=TRUE)!=-1)
-  #   if (length(ind)>0){CO[ind]=countries[i]}
-  # 
-  #   indd=which(regexpr(countries[i],RP,fixed=TRUE)!=-1)
-  #   if (length(indd)>0){CO[indd]=countries[i]}
-  # }
-  #CO=gsub(";","",CO)
-  #CO=gsub("\\.","",CO)
-  #CO=gsub("UNITED STATES","USA",CO)}else{CO=countries}
-
   Country=tableTag(M,"AU1_CO")
+  SCP_MCP=countryCollaboration(M,Country,k=dim(Country),sep)
 
 }
 
@@ -206,6 +181,7 @@ results=list(Articles=dim(M)[1],             # Articles
              Aff_frac=Affiliation_frac,      # Affiliations of all authors (fractionalized)
              CO=CO,                          # Country of each paper
              Countries=Country,              # Countries' frequency distribution
+             CountryCollaboration=SCP_MCP,   # Intracountry (SCP) and intercountry (MCP) collaboration
              TotalCitation=TC,               # Total Citations
              TCperYear=TCperYear,            # Total Citations per year
              Sources=SO,                     # Sources
@@ -214,4 +190,28 @@ results=list(Articles=dim(M)[1],             # Articles
   class(results)<-"bibliometrix"
 
   return(results)
+}
+countryCollaboration<-function(M,Country,k,sep){
+  M=metaTagExtraction(M,Field="AU_CO",sep)
+  M$SCP=0
+  M$SCP_CO=NA
+  for (i in 1:dim(M)[1]){
+    if (!is.na(M$AU_CO[i])){
+      co=M$AU_CO[i]
+      co=table(unlist(strsplit(co,";")))
+      if (length(co)==1){M$SCP[i]=1}
+      M$SCP_CO[i]=M$AU1_CO[i]
+      } else {M$SCP[i]=NA}
+  }
+  
+  CO=names(Country)[1:k]
+  
+  df=data.frame(Country=rep(NA,k),SCP=rep(0,k))
+  for (i in 1:length(CO)){
+    co=CO[i]
+    df$Country[i]=co
+    df$SCP[i]=sum(M$SCP[M$SCP_CO==co],na.rm = T)
+  }
+  df$MCP=as.numeric(tableTag(M,"AU1_CO")[1:k])-df$SCP
+  return(df)
 }

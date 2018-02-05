@@ -35,6 +35,7 @@ Affiliations \tab      \tab the frequency distribution of affiliations (of all c
 Aff_frac \tab      \tab the fractionalized frequency distribution of affiliations (of all co-authors for each paper)\cr
 CO \tab      \tab the affiliation country of first author\cr
 Countries \tab      \tab the affiliation countries' frequency distribution\cr
+CountryCollaboration \tab      \tab Intracountry (SCP) and intercountry (MCP) collaboration indices\cr
 TotalCitation \tab      \tab the number of times each manuscript has been cited\cr
 TCperYear \tab      \tab the yearly average number of times each manuscript has been cited\cr
 Sources \tab      \tab the frequency distribution of sources (journals, books, etc.)\cr

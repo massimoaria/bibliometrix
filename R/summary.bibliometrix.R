@@ -119,10 +119,12 @@ summary.bibliometrix<-function(object, ...){
   Co$Country=row.names(Co)
   names(Co)=c("Country  ","Articles","Freq")
   Co$Freq=as.numeric(Co[,2])/sum(object$Countries)
+  Co=cbind(Co,object$CountryCollaboration[1:kk,2:3])
   #names(Co)=c("Country  ","Articles","Frequency")
   Co=format(Co,justify="left",digits=3)
   row.names(Co)=1:kk
   print(Co,row.names=TRUE);cat("\n")
+  cat("\nSCP: Single Country Publications\n\nMCP: Multiple Country Publications\n\n")
 
 
   if (pause==TRUE){

@@ -30,7 +30,7 @@
 #' \code{UT}\tab   \tab Unique Article Identifier\cr
 #' \code{DB}\tab   \tab Database\cr}
 #'
-#' for a complete list of field tags see: \href{http://www.bibliometrix.org/documentation/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
+#' for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 #' 
 #' @examples
 #' # An ISI or SCOPUS Export file can be read using \code{\link{readLines}} function:

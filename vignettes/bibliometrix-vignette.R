@@ -149,7 +149,7 @@ net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration
 NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = 15, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE)
+net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
 
 
 ## ----Keyword c-occurrences, fig.height=7, fig.width=7, warning=FALSE-----
@@ -158,7 +158,7 @@ net=networkPlot(NetMatrix, n = 15, Title = "Co-Citation Network", type = "frucht
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 20, Title = "Keyword Co-occurrences", type = "fruchterman", size=T)
+net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = "Keyword Co-occurrences", type = "fruchterman", size=T,edgesize = 5,labelsize=0.7)
 
 
 ## ----Co-Word Analysis, fig.height=7, fig.width=7, warning=FALSE----------

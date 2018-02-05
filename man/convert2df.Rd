@@ -37,7 +37,7 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 \code{UT}\tab   \tab Unique Article Identifier\cr
 \code{DB}\tab   \tab Database\cr}
 
-for a complete list of field tags see: \href{http://www.bibliometrix.org/documentation/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
+for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
 It converts a SCOPUS and Clarivate Analytics WoS export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.

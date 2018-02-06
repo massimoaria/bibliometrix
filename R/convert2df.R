@@ -243,7 +243,7 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
   ### SR field creation
   M <- metaTagExtraction(M, Field="SR")
   
-  #if (length(ind)>0){ 
+  
   ### identify duplicated SRs 
     SR=M$SR
     tab=table(SR)
@@ -253,11 +253,13 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
     if (length(ind)>0){
       for (i in ind){
         indice=names(which(tab==i))
-        indice=which(SR==indice)
-        SR[indice]=paste(SR[indice],as.character(1:length(indice)),sep=" ")
+        for (j in indice){
+          indice2=which(SR==j)
+          SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
+        }
       }
     }
-  #}
+ 
   row.names(M) <- SR
     
   

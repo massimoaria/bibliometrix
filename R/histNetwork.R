@@ -30,6 +30,9 @@
 
 histNetwork<-function(M, n=10, sep = ";"){
   
+  if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
+    return()}
+  
   M=M[order(M$PY),]
   N=dim(M)[1]
   rows=c(1:N)

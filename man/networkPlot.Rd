@@ -70,7 +70,11 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 \item{edges.min}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
 }
 \value{
-It is a network object of the class \code{igraph}.
+It is a list containing the following elements:
+\tabular{lll}{
+\code{graph} \tab  \tab a network object of the class \code{igraph}\cr
+\code{cluster_obj} \tab  \tab a \code{\link{communities}} object of the package \code{igraph}\cr
+\code{cluster_res} \tab  \tab a data frame with main results of clustering procedure.\cr}
 }
 \description{
 \code{networkPlot} plots a bibliographic network.
@@ -87,7 +91,6 @@ data(scientometrics)
 NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 network = "references", sep = ";")
 
-net <- networkPlot(NetMatrix, n = 20, type = "kamada", Title = "Co-Citation")
 
 }
 \seealso{

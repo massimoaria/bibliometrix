@@ -37,10 +37,11 @@
 #'
 #' @export
 
-thematicMap <- function(net, NetMatrix, S=NULL){
+thematicMap <- function(Net, NetMatrix, S=NULL){
   
+  net=Net$graph
   if (is.null(S)){S=NetMatrix}
-  net_groups <- cluster_walktrap(net)
+  net_groups <- Net$cluster_obj
   groups=net_groups$membership
   words=net_groups$name
 

@@ -91,6 +91,7 @@
 #' @importFrom igraph membership
 #' @importFrom igraph layout.norm
 #' @importFrom igraph delete.edges
+#' @importFrom igraph betweenness
 #' @importFrom Matrix %&%
 #' @importFrom Matrix abIseq
 #' @importFrom Matrix abIseq1

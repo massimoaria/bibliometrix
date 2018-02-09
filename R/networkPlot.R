@@ -8,7 +8,7 @@
 #' @param normalize is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
 #' Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.
 #' @param n is an integer. It indicates the number of vertices to plot.
-#' @param Degree is an integer. It idicates the min frequency of a vertex. If Degree is not NULL, n is ignored.
+#' @param degree is an integer. It idicates the min frequency of a vertex. If degree is not NULL, n is ignored.
 #' @param type is a character object. It indicates the network map layout:
 #' 
 #' \tabular{lll}{
@@ -40,7 +40,12 @@
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @param label.n is an integer. It indicates the number of vertex labels to draw.
 #' @param label.short is a logical. If TRUE label are plotted in short format.
-#' @return It is a network object of the class \code{igraph}.
+#' @return It is a list containing the following elements:
+#' \tabular{lll}{
+#' \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
+#' \code{cluster_obj} \tab  \tab a \code{\link{communities}} object of the package \code{igraph}\cr
+#' \code{cluster_res} \tab  \tab a data frame with main results of clustering procedure.\cr}
+#' 
 #' 
 #' @examples
 #' # EXAMPLE Co-citation network
@@ -50,14 +55,14 @@
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #' network = "references", sep = ";")
 #' 
-#' net <- networkPlot(NetMatrix, n = 20, type = "kamada", Title = "Co-Citation")
+#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
 #' 
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @seealso \code{\link{cocMatrix}} to compute a co-occurrence matrix.
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.short=TRUE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.short=TRUE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
   NET=NetMatrix
   bsk.S=TRUE
@@ -109,10 +114,10 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plo
   
   # Select number of vertices to plot
   
-  if (!is.null(Degree)){
+  if (!is.null(degree)){
     Deg=deg-diag(NET)
-    Vind=Deg<Degree
-    if (sum(!Vind)==0){cat("\nDegree argument is to high!\n\n")
+    Vind=Deg<degree
+    if (sum(!Vind)==0){cat("\ndegree argument is to high!\n\n")
       return()}
     bsk.network <- delete.vertices(bsk.network,which(Vind))
     if (!isTRUE(bsk.S)){bsk.S <- delete.vertices(bsk.S,which(Vind))}
@@ -169,24 +174,35 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, Degree=NULL, Title="Plo
         E(bsk.network)$width=edges/max(edges)*edgesize}
     }
     
-    bsk.network=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
+    bsk.network1=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
     
     if (isTRUE(halo) & cluster!="null"){
-      plot(net_groups,bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+      plot(net_groups,bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
       
     } else{
-      plot(bsk.network,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+      plot(bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
     }
     
   }  
   
+  cluster_res=data.frame(net_groups$names,net_groups$membership,as.numeric(betweenness(bsk.network,directed = F,normalized = F)))
+  names(cluster_res)=c("vertex","cluster","btw_centrality")
+  cluster_res=cluster_res[order(cluster_res$cluster),]
+  net=list(graph=bsk.network, cluster_obj=net_groups, cluster_res=cluster_res)
   
-  return(bsk.network)}
+  return(net)}
+
+
+### internal functions:
+
+### deleteIsolates
 
 delete.isolates <- function(graph, mode = 'all') {
   isolates <- which(degree(graph, mode = mode) == 0) - 1
   delete.vertices(graph, names(isolates))
 }
+
+### clusteringNetwork
 
 clusteringNetwork <- function(bsk.network,cluster){
   
@@ -215,6 +231,8 @@ clusteringNetwork <- function(bsk.network,cluster){
   cl$net_groups=net_groups
   return(cl)
 }
+
+### switchLayout
 
 switchLayout <- function(bsk.network,type,vos.path){
   switch(type,

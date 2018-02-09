@@ -4,16 +4,16 @@
 \alias{thematicMap}
 \title{Create a thematic map}
 \usage{
-thematicMap(net, NetMatrix, S = NULL)
+thematicMap(Net, NetMatrix, S = NULL)
 }
 \arguments{
-\item{net}{is a igraph object created by \code{\link{networkPlot}} function.}
-
 \item{NetMatrix}{is a co-occurence matrix obtained by the network functions 
 \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.}
 
 \item{S}{is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 
 If S is NULL, map is created using co-occurrence counts.}
+
+\item{net}{is a igraph object created by \code{\link{networkPlot}} function.}
 }
 \value{
 a list containing:

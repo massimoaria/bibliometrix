@@ -232,6 +232,7 @@ if (Field=="AU_UN"){
   
   AFFL=lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
+    l<-gsub("\\(REPRINT AUTHOR\\)","",l)
     index=NULL
     
     for (i in 1:length(l)){
@@ -254,6 +255,9 @@ if (Field=="AU_UN"){
       ind[[14]]=which(regexpr("FONDAZ",affL,fixed=TRUE)!=-1)
       ind[[15]]=which(regexpr("FOUNDAT",affL,fixed=TRUE)!=-1)
       ind[[16]]=which(regexpr("ISTIT",affL,fixed=TRUE)!=-1)
+      ind[[17]]=which(regexpr("LAB",affL,fixed=TRUE)!=-1)
+      ind[[18]]=which(regexpr("TECH",affL,fixed=TRUE)!=-1)
+      ind[[19]]=which(regexpr("RES",affL,fixed=TRUE)!=-1)
       
       for (a in 1:length(ind)){
         indd=ind[[a]]
@@ -278,6 +282,7 @@ if (Field=="AU_UN"){
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)
   }
+
 
 return(M)
 }

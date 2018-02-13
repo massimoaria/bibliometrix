@@ -25,7 +25,8 @@
 #' NetMatrix1 <- biblioNetwork(M1, analysis = "co-occurrences", 
 #'               network = "keywords", sep = ";")
 #' S1 <- normalizeSimilarity(NetMatrix1, type = "association")
-#' net1 <- networkPlot(NetMatrix1, normalize = "association",n = 50, Title = "co-occurrence network",type="fruchterman",
+#' net1 <- networkPlot(NetMatrix1, normalize = "association",n = 50, 
+#'      Title = "co-occurrence network",type="fruchterman",
 #'      labelsize = 0.7, halo = FALSE, cluster = "walktrap",remove.isolates=FALSE,
 #'      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE)
 #' res1 <- thematicMap(net1, NetMatrix1, S1)
@@ -34,7 +35,8 @@
 #' NetMatrix2 <- biblioNetwork(M2, analysis = "co-occurrences", 
 #'               network = "keywords", sep = ";")
 #' S2 <- normalizeSimilarity(NetMatrix2, type = "association")
-#' net2 <- networkPlot(NetMatrix2, normalize = "association",n = 50, Title = "co-occurrence network",type="fruchterman",
+#' net2 <- networkPlot(NetMatrix2, normalize = "association",n = 50, 
+#'      Title = "co-occurrence network",type="fruchterman",
 #'      labelsize = 0.7, halo = FALSE, cluster = "walktrap",remove.isolates=FALSE,
 #'      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE)
 #' res2 <- thematicMap(net2, NetMatrix2, S2)

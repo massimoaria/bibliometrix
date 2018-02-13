@@ -4,7 +4,7 @@
 \alias{networkPlot}
 \title{Plotting Bibliographic networks}
 \usage{
-networkPlot(NetMatrix, normalize = NULL, n = NULL, Degree = NULL,
+networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
   Title = "Plot", type = "kamada", label = TRUE, labelsize = 1,
   label.cex = FALSE, label.short = TRUE, label.n = NULL, halo = FALSE,
   cluster = "walktrap", vos.path = NULL, size = 3, curved = FALSE,
@@ -19,7 +19,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
 
-\item{Degree}{is an integer. It idicates the min frequency of a vertex. If Degree is not NULL, n is ignored.}
+\item{degree}{is an integer. It idicates the min frequency of a vertex. If degree is not NULL, n is ignored.}
 
 \item{Title}{is a character indicating the plot title.}
 
@@ -91,6 +91,7 @@ data(scientometrics)
 NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 network = "references", sep = ";")
 
+net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
 
 }
 \seealso{

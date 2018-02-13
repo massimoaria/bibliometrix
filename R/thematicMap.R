@@ -7,7 +7,7 @@
 #' two-dimesional map the typological themes of a domain.
 #' 
 #' 
-#' @param net is a igraph object created by \code{\link{networkPlot}} function.
+#' @param Net is a igraph object created by \code{\link{networkPlot}} function.
 #' @param NetMatrix is a co-occurence matrix obtained by the network functions 
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param S is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 

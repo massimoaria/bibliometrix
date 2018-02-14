@@ -235,14 +235,16 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
     M$CR="none"
     }
 )
-  M$PY=as.numeric(M$PY)
-  M$TC=as.numeric(M$TC)
+  if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
+  if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC=NA}
   
   ## AU_UN field creation
-  M <- metaTagExtraction(M, Field="AU_UN")
+  if ("C1" %in% names(M)){M <- metaTagExtraction(M, Field="AU_UN")} else{
+    M$C1=NA
+    M$AU_UN=NA}
 
   ### SR field creation
-  M <- metaTagExtraction(M, Field="SR")
+  suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
   
   
   ### identify duplicated SRs 

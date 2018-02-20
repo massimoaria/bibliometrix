@@ -4,7 +4,7 @@
 \alias{thematicMap}
 \title{Create a thematic map}
 \usage{
-thematicMap(Net, NetMatrix, S = NULL)
+thematicMap(Net, NetMatrix, S = NULL, minfreq = 5)
 }
 \arguments{
 \item{Net}{is a igraph object created by \code{\link{networkPlot}} function.}
@@ -14,6 +14,8 @@ thematicMap(Net, NetMatrix, S = NULL)
 
 \item{S}{is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 
 If S is NULL, map is created using co-occurrence counts.}
+
+\item{minfreq}{is a integer. It indicates the minimun frequency of a cluster.}
 }
 \value{
 a list containing:

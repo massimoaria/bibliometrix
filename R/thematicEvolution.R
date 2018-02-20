@@ -65,8 +65,8 @@ thematicEvolution <- function(...,weighted=FALSE){
   for (k in 2:K){
     res1=arguments[[(k-1)]]
     res2=arguments[[(k)]]
-    CL1=unique(res1$words$Cluster)
-    CL2=unique(res2$words$Cluster)
+    CL1=unique(res1$clusters$label)
+    CL2=unique(res2$clusters$label)
     
     Inc=data.frame(CL1=NA,CL2=NA,Inc_index=NA,Words="NA",Occ=NA,Tot=NA,Inc_Weighted=NA, stringsAsFactors = FALSE)
     cont=0
@@ -82,7 +82,7 @@ thematicEvolution <- function(...,weighted=FALSE){
         Inc[cont,4]=paste(intersect(w1,w2),collapse=";")
         wi=intersect(w1,w2)
         si=sum(res1$words$Occurrences[res1$words$Words %in% wi])
-        s1=min(c(res1$clusters$sum[res1$clusters$label==i],res2$clusters$sum[res2$clusters$label==j]))
+        s1=min(c(res1$clusters$sum[res1$clusters$label==i],res2$clusters$sum[res2$clusters$label==j]),na.rm=T)
         Inc[cont,5]=si
         Inc[cont,6]=s1
         Inc[cont,7]=si/s1

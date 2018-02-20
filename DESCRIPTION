@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: An R-Tool for Comprehensive Science Mapping Analysis
-Version: 1.9
+Version: 2.0
 Date: 2018-01-18
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
@@ -18,6 +18,7 @@ Imports: stats,
 		 factoextra,
 		 FactoMineR,
 		 ggplot2,
+		 ggrepel,
 		 igraph,
 		 Matrix, 
 		 RColorBrewer,

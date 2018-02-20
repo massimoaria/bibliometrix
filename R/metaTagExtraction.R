@@ -258,6 +258,13 @@ if (Field=="AU_UN"){
       ind[[17]]=which(regexpr("LAB",affL,fixed=TRUE)!=-1)
       ind[[18]]=which(regexpr("TECH",affL,fixed=TRUE)!=-1)
       ind[[19]]=which(regexpr("RES",affL,fixed=TRUE)!=-1)
+      ind[[20]]=which(regexpr("CNR",affL,fixed=TRUE)!=-1)
+      ind[[21]]=which(regexpr("ARCH",affL,fixed=TRUE)!=-1)
+      ind[[22]]=which(regexpr("SCUOLA",affL,fixed=TRUE)!=-1)
+      ind[[23]]=which(regexpr("PATENT OFF",affL,fixed=TRUE)!=-1)
+      ind[[24]]=which(regexpr("CENT LIB",affL,fixed=TRUE)!=-1)
+      ind[[25]]=which(regexpr("LIBRAR",affL,fixed=TRUE)!=-1)
+      
       
       for (a in 1:length(ind)){
         indd=ind[[a]]
@@ -281,8 +288,21 @@ if (Field=="AU_UN"){
   M$AU_UN=AFFL
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)
-  }
 
+  ## identification of NR affiliations
+  M$AU_UN_NR=NA
+  listAFF2=strsplit(M$AU_UN,sep)
+  cont=lapply(listAFF2, function(l){
+    l=unlist(l)
+    ind=which(l %in% "NR")
+  })
+  
+  for (i in 1:length(cont)){
+    if (length(cont[[i]])>0){
+      M$AU_UN_NR[i]=paste(trim(listAFF[[i]][cont[[i]]]),collapse=";")
+    }
+  }
+}
 
 return(M)
 }

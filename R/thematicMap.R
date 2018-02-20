@@ -12,6 +12,7 @@
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param S is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 
 #' If S is NULL, map is created using co-occurrence counts.
+#' @param minfreq is a integer. It indicates the minimun frequency of a cluster.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
@@ -37,7 +38,7 @@
 #'
 #' @export
 
-thematicMap <- function(Net, NetMatrix, S=NULL){
+thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   
   net=Net$graph
   if (is.null(S)){S=NetMatrix}
@@ -81,20 +82,28 @@ thematicMap <- function(Net, NetMatrix, S=NULL){
   row.names(df)=df$label
   A=aggregate(df_lab$sC,by=list(groups),'sum')
   df$sum=A[,2]
+  
+  meandens=mean(df$rdensity)
+  meancentr=mean(df$rcentrality)
+  df=df[df$sum>=minfreq,]
+  df=df[!is.na(df$color),]
+  
 
-  min_sum=1
 
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity)) +
-    geom_point(aes(size=as.numeric(df$sum)),shape=20,col=df$color)      # Use hollow circles
-  g=g+geom_text(aes(label=ifelse(df$sum>min_sum,unlist(df$name),'')),size=3,angle=0,hjust=0.5,vjust=1)+ geom_hline(yintercept = mean(df$rdensity),linetype=2) +
-    geom_vline(xintercept = mean(df$rcentrality),linetype=2) + theme(legend.position="none") +
-    scale_size_continuous(range = c(10, 25)) + labs(x = "Centrality", y = "Density")+
+    geom_point(aes(size=log(as.numeric(df$sum))),shape=20,col=df$color)     # Use hollow circles
+  g=g+geom_label_repel(aes(label=ifelse(df$sum>1,unlist(df$name),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
+    geom_vline(xintercept = meancentr,linetype=2) + theme(legend.position="none") +
+    scale_radius(range=c(1, 50))+labs(x = "Centrality", y = "Density")+
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 #plot(g)
   names(df_lab)=c("Occurrences", "Words", "Cluster", "Color")
-  results=list(map=g, clusters=df, words=df_lab[order(df_lab$Cluster),])
+  words=df_lab[order(df_lab$Cluster),]
+  words=words[!is.na(words$Color),]
+  row.names(df)=NULL
+  results=list(map=g, clusters=df, words=words)
 return(results)
 }

@@ -45,8 +45,17 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   net_groups <- Net$cluster_obj
   groups=net_groups$membership
   words=net_groups$name
+  index=which(row.names(NetMatrix) %in% words)
+  color=V(net)$color
+  color[is.na(color)]="#D3D3D3"
+  
+  if (length(words)>length(index)){
+    ii=which(words==setdiff(words,row.names(S)))
+    words=words[-ii]
+    groups=groups[-ii]
+    color=color[-ii]
+  }
 
-  index=which(row.names(S) %in% words)
   C=diag(NetMatrix)
 
   sEij=S[index,index]
@@ -59,7 +68,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   centrality=c()
   density=c()
   labels=list()
-  color=V(net)$color
+  
   df_lab=data.frame(sC=sC,words=words,groups=groups)
   df_lab$color=color
   color=c()
@@ -86,10 +95,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   meandens=mean(df$rdensity)
   meancentr=mean(df$rcentrality)
   df=df[df$sum>=minfreq,]
-  df=df[!is.na(df$color),]
   
-
-
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity)) +
     geom_point(aes(size=log(as.numeric(df$sum))),shape=20,col=df$color)     # Use hollow circles
   g=g+geom_label_repel(aes(label=ifelse(df$sum>1,unlist(df$name),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +

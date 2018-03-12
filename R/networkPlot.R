@@ -184,10 +184,13 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     }
     
   }  
+  if (cluster!="none"){
+    cluster_res=data.frame(net_groups$names,net_groups$membership,as.numeric(betweenness(bsk.network,directed = F,normalized = F)))
+    names(cluster_res)=c("vertex","cluster","btw_centrality")
+    cluster_res=cluster_res[order(cluster_res$cluster),]
+  } else {cluster_res=NA}
   
-  cluster_res=data.frame(net_groups$names,net_groups$membership,as.numeric(betweenness(bsk.network,directed = F,normalized = F)))
-  names(cluster_res)=c("vertex","cluster","btw_centrality")
-  cluster_res=cluster_res[order(cluster_res$cluster),]
+  
   net=list(graph=bsk.network, cluster_obj=net_groups, cluster_res=cluster_res)
   
   return(net)}

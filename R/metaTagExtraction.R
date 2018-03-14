@@ -105,6 +105,8 @@ listCAU=lapply(listCAU,function(l) l=l[nchar(l)>10])  ## delete not congruent re
   M$CR_AU=CCR
   }
 
+### CR_SO field creation
+
 if (Field=="CR_SO"){
   listCAU=strsplit(as.character(CR),sep)
   FCAU=list(NULL)
@@ -141,8 +143,11 @@ if (Field=="CR_SO"){
   M$CR_SO=CCR
 }
 
+### AU_CO field creation
+
 if (Field=="AU_CO"){
   # Countries
+  
   data("countries",envir=environment())
   countries=as.character(countries[[1]])
   if (M$DB[1]=="ISI"){
@@ -154,6 +159,9 @@ if (Field=="AU_CO"){
   C1=M$C1
   C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
   C1=gsub("\\[.*?\\] ", "", C1)
+  if (M$DB[1]=="ISI"){ C1=lastChar(C1,last=".")}
+  if (M$DB[1]=="SCOPUS"){ C1=lastChar(C1,last=";")}
+  
   #C1=gsub("[[:punct:][:blank:]]+", " ", C1)
   RP=M$RP
   #RP[which(is.na(RP))]=M$RRP)
@@ -173,6 +181,10 @@ if (Field=="AU_CO"){
   M$AU_CO=gsub("[[:digit:]]","",M$AU_CO)
   M$AU_CO=gsub(".", "", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
+  
+  if (M$DB[1]=="ISI"){M$AU_CO=removeLastChar(M$AU_CO,last=".")}
+  if (M$DB[1]=="SCOPUS"){M$AU_CO=removeLastChar(M$AU_CO,last=";")}
+  
   
 }
 
@@ -197,7 +209,6 @@ if (Field=="AU1_CO"){
   #RP[which(is.na(RP))]=M$RRP)
   RP=paste(RP,";",sep="")
   RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {RP=C1}
-  
   
   for (i in 1:size[1]){
     if (!is.na(C1[i])){
@@ -264,6 +275,8 @@ if (Field=="AU_UN"){
       ind[[23]]=which(regexpr("PATENT OFF",affL,fixed=TRUE)!=-1)
       ind[[24]]=which(regexpr("CENT LIB",affL,fixed=TRUE)!=-1)
       ind[[25]]=which(regexpr("LIBRAR",affL,fixed=TRUE)!=-1)
+      ind[[26]]=which(regexpr("CLIN",affL,fixed=TRUE)!=-1)
+      ind[[27]]=which(regexpr("FDN",affL,fixed=TRUE)!=-1)
       
       
       for (a in 1:length(ind)){
@@ -305,4 +318,18 @@ if (Field=="AU_UN"){
 }
 
 return(M)
+}
+
+lastChar<-function(C,last="."){
+  A=substr(C,nchar(C),nchar(C))
+  ind=which((A!=last) & (!is.na(A)))
+  C[ind]=paste0(C[ind],last)
+  return(C)
+}
+
+removeLastChar<-function(C,last="."){
+  A=substr(C,nchar(C),nchar(C))
+  ind=which((A==last) & (!is.na(A)))
+  C[ind]=substr(C[ind],1,(nchar(C[ind])-1))
+  return(C)
 }

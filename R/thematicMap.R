@@ -45,16 +45,26 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   net_groups <- Net$cluster_obj
   groups=net_groups$membership
   words=net_groups$name
-  index=which(row.names(NetMatrix) %in% words)
   color=V(net)$color
   color[is.na(color)]="#D3D3D3"
   
-  if (length(words)>length(index)){
-    ii=which(words==setdiff(words,row.names(S)))
-    words=words[-ii]
-    groups=groups[-ii]
-    color=color[-ii]
-  }
+  ###
+  W=intersect(row.names(NetMatrix),words)
+  index=which(row.names(NetMatrix) %in% W)
+  ii=which(words %in% W)
+  words=words[ii]
+  groups=groups[ii]
+  color=color[ii]
+  ###
+  
+  
+  # 
+  # if (length(words)>length(index)){
+  #   ii=which(words==setdiff(words,row.names(S)))
+  #   words=words[-ii]
+  #   groups=groups[-ii]
+  #   color=color[-ii]
+  # }
 
   C=diag(NetMatrix)
 

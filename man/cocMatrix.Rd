@@ -20,7 +20,7 @@ articles and variables to Field Tag in the original ISI or SCOPUS file.}
   Cited References}
 
   for a complete list of filed tags see:
-  \href{http://www.bibliometrix.org/documentation/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}}
+  \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}}
 
 \item{type}{indicates the output format of co-occurrences: \tabular{lll}{
 \code{type = "matrix"} \tab   \tab produces an object of class

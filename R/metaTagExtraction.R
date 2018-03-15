@@ -277,6 +277,11 @@ if (Field=="AU_UN"){
       ind[[25]]=which(regexpr("LIBRAR",affL,fixed=TRUE)!=-1)
       ind[[26]]=which(regexpr("CLIN",affL,fixed=TRUE)!=-1)
       ind[[27]]=which(regexpr("FDN",affL,fixed=TRUE)!=-1)
+      ind[[28]]=which(regexpr("OECD",affL,fixed=TRUE)!=-1)
+      ind[[29]]=which(regexpr("FAC",affL,fixed=TRUE)!=-1)
+      ind[[30]]=which(regexpr("WORLD BANK",affL,fixed=TRUE)!=-1)
+      ind[[31]]=which(regexpr("POLITECN",affL,fixed=TRUE)!=-1)
+      ind[[32]]=which(regexpr("INT MONETARY FUND",affL,fixed=TRUE)!=-1)
       
       
       for (a in 1:length(ind)){

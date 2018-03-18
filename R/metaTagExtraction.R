@@ -10,7 +10,7 @@
 #' \code{"CR_SO"}\tab   \tab Source of each cited reference\cr
 #' \code{"AU_CO"}\tab   \tab Country of affiliation for each co-author\cr
 #' \code{"AU1_CO"}\tab   \tab Country of affiliation for the first author\cr
-#' \code{"AU_UN"}\tab   \tab University of affiliation for each co-author\cr
+#' \code{"AU_UN"}\tab   \tab University of affiliation for each co-author and the corresponding author (AU1_UN)\cr
 #' \code{"SR"}\tab     \tab Short tag of the document (as used in reference lists)}
 #'
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
@@ -229,7 +229,7 @@ if (Field=="AU1_CO"){
   
 }
 
-# UNIVERSITY AFFILIATION
+# UNIVERSITY AFFILIATION OF ALL AUTHORS AND CORRESPONDING AUTHOR
 if (Field=="AU_UN"){
   
   AFF=gsub("\\[.*?\\] ", "", M$C1)
@@ -240,6 +240,9 @@ if (Field=="AU_UN"){
   
   listAFF=strsplit(AFF,sep,fixed=TRUE)
   
+  uTags=c("UNIV","COLL","SCH","INST","ACAD","ECOLE","CTR","SCI","CENTRE","CENTER","CENTRO","HOSP","ASSOC",
+          "FONDAZ","FOUNDAT","ISTIT","LAB","TECH","RES","CNR","ARCH","SCUOLA","PATENT OFF","CENT LIB",
+          "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND")
   
   AFFL=lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
@@ -247,47 +250,10 @@ if (Field=="AU_UN"){
     index=NULL
     
     for (i in 1:length(l)){
-      ind=list()
+      #ind=list()
       affL=unlist(strsplit(l[i],",",fixed=TRUE))
-    #affL=l[i]
-      ind[[1]]=which(regexpr("UNIV",affL,fixed=TRUE)!=-1)
-      ind[[2]]=which(regexpr("COLL",affL,fixed=TRUE)!=-1)
-      ind[[3]]=which(regexpr("SCH",affL,fixed=TRUE)!=-1)
-      ind[[4]]=which(regexpr("INST",affL,fixed=TRUE)!=-1)
-      ind[[5]]=which(regexpr("ACAD",affL,fixed=TRUE)!=-1)
-      ind[[6]]=which(regexpr("ECOLE",affL,fixed=TRUE)!=-1)
-      ind[[7]]=which(regexpr("CTR",affL,fixed=TRUE)!=-1)
-      ind[[8]]=which(regexpr("SCI",affL,fixed=TRUE)!=-1)
-      ind[[9]]=which(regexpr("HOSP",affL,fixed=TRUE)!=-1)
-      ind[[10]]=which(regexpr("CENTRE",affL,fixed=TRUE)!=-1)
-      ind[[11]]=which(regexpr("CENTER",affL,fixed=TRUE)!=-1)
-      ind[[12]]=which(regexpr("CENTRO",affL,fixed=TRUE)!=-1)
-      ind[[13]]=which(regexpr("ASSOC",affL,fixed=TRUE)!=-1)
-      ind[[14]]=which(regexpr("FONDAZ",affL,fixed=TRUE)!=-1)
-      ind[[15]]=which(regexpr("FOUNDAT",affL,fixed=TRUE)!=-1)
-      ind[[16]]=which(regexpr("ISTIT",affL,fixed=TRUE)!=-1)
-      ind[[17]]=which(regexpr("LAB",affL,fixed=TRUE)!=-1)
-      ind[[18]]=which(regexpr("TECH",affL,fixed=TRUE)!=-1)
-      ind[[19]]=which(regexpr("RES",affL,fixed=TRUE)!=-1)
-      ind[[20]]=which(regexpr("CNR",affL,fixed=TRUE)!=-1)
-      ind[[21]]=which(regexpr("ARCH",affL,fixed=TRUE)!=-1)
-      ind[[22]]=which(regexpr("SCUOLA",affL,fixed=TRUE)!=-1)
-      ind[[23]]=which(regexpr("PATENT OFF",affL,fixed=TRUE)!=-1)
-      ind[[24]]=which(regexpr("CENT LIB",affL,fixed=TRUE)!=-1)
-      ind[[25]]=which(regexpr("LIBRAR",affL,fixed=TRUE)!=-1)
-      ind[[26]]=which(regexpr("CLIN",affL,fixed=TRUE)!=-1)
-      ind[[27]]=which(regexpr("FDN",affL,fixed=TRUE)!=-1)
-      ind[[28]]=which(regexpr("OECD",affL,fixed=TRUE)!=-1)
-      ind[[29]]=which(regexpr("FAC",affL,fixed=TRUE)!=-1)
-      ind[[30]]=which(regexpr("WORLD BANK",affL,fixed=TRUE)!=-1)
-      ind[[31]]=which(regexpr("POLITECN",affL,fixed=TRUE)!=-1)
-      ind[[32]]=which(regexpr("INT MONETARY FUND",affL,fixed=TRUE)!=-1)
-      
-      
-      for (a in 1:length(ind)){
-        indd=ind[[a]]
-        if (length(indd)>0){break()}
-      }
+
+      indd=unlist(lapply(uTags,function(x) which(regexpr(x,affL,fixed=TRUE)!=-1)))
       
       if (length(indd)==0){index=append(index,"NR")
       } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
@@ -307,6 +273,51 @@ if (Field=="AU_UN"){
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)
 
+  
+  ## identification of Corresponding author affiliation
+  RP=M$RP
+  RP[is.na(RP)]=M$C1[is.na(RP)]
+  AFF=gsub("\\[.*?\\] ", "", RP)
+  indna=which(is.na(AFF))
+  if (length(indna)>0){AFF[indna]=M$RP[indna]}
+  nc=nchar(AFF)
+  AFF[nc==0]=NA
+  
+  listAFF=strsplit(AFF,sep,fixed=TRUE)
+  
+  uTags=c("UNIV","COLL","SCH","INST","ACAD","ECOLE","CTR","SCI","CENTRE","CENTER","CENTRO","HOSP","ASSOC",
+          "FONDAZ","FOUNDAT","ISTIT","LAB","TECH","RES","CNR","ARCH","SCUOLA","PATENT OFF","CENT LIB",
+          "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND")
+  
+  AFFL=lapply(listAFF, function(l){
+    #l=gsub(","," ,",l)
+    l<-gsub("\\(REPRINT AUTHOR\\)","",l)
+    index=NULL
+    
+    for (i in 1:length(l)){
+      #ind=list()
+      affL=unlist(strsplit(l[i],",",fixed=TRUE))
+      
+      indd=unlist(lapply(uTags,function(x) which(regexpr(x,affL,fixed=TRUE)!=-1)))
+      
+      if (length(indd)==0){index=append(index,"NR")
+      } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
+      } else {index=append(index,affL[indd[1]])}
+      
+    }
+    #index=unique(c(ind1,ind2,ind3,ind4,ind5,ind6,ind7,ind8))
+    x=""
+    if (length(index)>0){
+      #x=paste0(trim.leading((affL[index])),collapse=",")
+      x=paste0(trim.leading(index),collapse=";")
+      x=gsub(" ,",";",x)}
+    return(x)
+  })
+  AFFL=unlist(AFFL)
+  M$AU1_UN=AFFL
+  M$AU1_UN=gsub("\\\\&","AND",M$AU1_UN)
+  M$AU1_UN=gsub("\\&","AND",M$AU1_UN)
+  
   ## identification of NR affiliations
   M$AU_UN_NR=NA
   listAFF2=strsplit(M$AU_UN,sep)

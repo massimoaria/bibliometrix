@@ -17,7 +17,7 @@ Field can be equal to one of this tags:
 \code{"CR_SO"}\tab   \tab Source of each cited reference\cr
 \code{"AU_CO"}\tab   \tab Country of affiliation for each co-author\cr
 \code{"AU1_CO"}\tab   \tab Country of affiliation for the first author\cr
-\code{"AU_UN"}\tab   \tab University of affiliation for each co-author\cr
+\code{"AU_UN"}\tab   \tab University of affiliation for each co-author and the corresponding author (AU1_UN)\cr
 \code{"SR"}\tab     \tab Short tag of the document (as used in reference lists)}}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}

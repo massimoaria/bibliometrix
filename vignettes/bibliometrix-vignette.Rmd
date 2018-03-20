@@ -239,7 +239,7 @@ S <- summary(object = results, k = 10, pause = FALSE)
 
 Some basic plots can be drawn using the generic function \code{plot}:
 
-```{r plot generic function}
+```{r plot generic function, fig.height=8, fig.width=8}
 plot(x = results, k = 10, pause = FALSE)
 ```
 

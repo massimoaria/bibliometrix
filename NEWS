@@ -1,3 +1,10 @@
+bibliometrix v1.9.2 (Release date: 2018-03-28)
+==============
+
+Changes:
+* Solved the issue https://stat.ethz.ch/pipermail/r-devel/2018-March/075737.html regarding the package Matrix
+
+
 bibliometrix v1.9.1 (Release date: 2018-03-14)
 ==============
 

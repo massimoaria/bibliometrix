@@ -66,6 +66,7 @@ biblioAnalysis<-function(M,sep=";"){
   DE=NULL
   ID=NULL
   MostCitedPapers=NULL
+  
 
 
 
@@ -166,6 +167,8 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
 
 }
 
+if ("PT" %in% names(M)){Documents=table(M$PT)}else{Documents=NA}
+
 results=list(Articles=dim(M)[1],             # Articles
              Authors=Authors,                # Authors' frequency distribution
              AuthorsFrac=Authors_frac,       # Authors' frequency distribution (fractionalized)
@@ -186,7 +189,8 @@ results=list(Articles=dim(M)[1],             # Articles
              TCperYear=TCperYear,            # Total Citations per year
              Sources=SO,                     # Sources
              DE=DE,
-             ID=ID)
+             ID=ID,
+             Documents=Documents)
   class(results)<-"bibliometrix"
 
   return(results)

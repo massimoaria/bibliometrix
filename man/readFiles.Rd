@@ -23,7 +23,7 @@ It loads a sequence of SCOPUS and Thomson Reuters' ISI Web of Knowledge export f
 # filename1.txt, filename2.txt and filename3.txt are ISI or SCOPUS Export file 
 # in plain text or bibtex format.
 
-D <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
+# D <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
 
 }
 \seealso{

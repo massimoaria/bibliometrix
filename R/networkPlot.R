@@ -81,7 +81,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   # Create igraph object
   bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
   
-  if (isTRUE(label.short)){
+  if (isTRUE(label.short) | type=="vosviewer"){
     LABEL=colnames(NET)
     LABEL2=regexpr(".([0-9]?[0-9]?[0-9]?[0-9]).*",LABEL)
     LABEL2[LABEL2==-1 | LABEL2==1]=nchar(LABEL[LABEL2==-1 | LABEL2==1])-4
@@ -139,7 +139,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     if (!isTRUE(bsk.S)){bsk.S <- delete.isolates(bsk.S, mode = 'in')}
   }
   
-  # Choose Network layout
+    # Choose Network layout
   if (!isTRUE(bsk.S)){l <- switchLayout(bsk.S,type,vos.path)
   } else{l <- switchLayout(bsk.network,type,vos.path)}
   
@@ -183,8 +183,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
       plot(bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
     }
     
-  }  
-  if (cluster!="none"){
+  }else{net_groups=NA}  
+  if (cluster!="none" & type!="vosviewer"){
     cluster_res=data.frame(net_groups$names,net_groups$membership,as.numeric(betweenness(bsk.network,directed = F,normalized = F)))
     names(cluster_res)=c("vertex","cluster","btw_centrality")
     cluster_res=cluster_res[order(cluster_res$cluster),]
@@ -252,9 +252,9 @@ switchLayout <- function(bsk.network,type,vos.path){
              netfile=paste(vos.path,"/","vosnetwork.net",sep="")
              VOScommand=paste("java -jar ",vos.path,"/","VOSviewer.jar -pajek_network ",netfile,sep="")
              write.graph(graph = bsk.network, file = netfile, format = "pajek")
-             system(VOScommand)}
+             system(VOScommand,wait=FALSE)}
          })
   
-  if (type!="vosviewer"){l=layout.norm(l)}
+  if (type!="vosviewer"){l=layout.norm(l)}else{l=NA}
   return(l)
 }

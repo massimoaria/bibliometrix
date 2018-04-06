@@ -237,6 +237,8 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
   if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC=NA}
   
+  M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)
+  
   ## AU_UN field creation
   if ("C1" %in% names(M)){M <- metaTagExtraction(M, Field="AU_UN")} else{
     M$C1=NA

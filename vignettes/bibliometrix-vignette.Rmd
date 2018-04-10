@@ -604,7 +604,7 @@ Here, we show an example using the function *conceptualStructure* that performs 
 *conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts.  In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
 
 
-```{r Co-Word Analysis, fig.height=7, fig.width=7, warning=FALSE}
+```{r Co-Word Analysis, fig.height=9, fig.width=9, warning=FALSE}
 
 # Conceptual Structure using keywords (method="CA")
 

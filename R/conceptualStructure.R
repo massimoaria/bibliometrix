@@ -226,15 +226,21 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     rangey=c(min(df_all[,2]),max(df_all[,2]))
 
     b_doc=ggplot(aes(x=A$dim1,y=A$dim2,label=A$nomi),data=A)+
-      geom_point()+
+      geom_point(size = 2, color = 'grey')+
       labs(title= "Factorial map of the documents with the highest contributes") +
-      geom_label_repel(box.padding = unit(0.5, "lines"))+
-      scale_x_continuous(limits = rangex)+
-      scale_y_continuous(limits = rangey)+
+      geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize)), fontface = "bold", 
+                       fill="steelblue", color = "white", segment.alpha=0.5, segment.color="gray")+
+      scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
+      scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
       xlab("dim1")+ ylab("dim2")+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
-            axis.title=element_text(size=labelsize,face="bold"))
-    
+            axis.title=element_text(size=labelsize,face="bold") ,
+            panel.background = element_rect(fill = "lavender",
+                                            colour = "lavender"),
+            #size = 1, linetype = "solid"),
+            panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
+            panel.grid.minor = element_blank())
+      
     plot(b_doc)
     
     ## Factorial map of the most cited documents
@@ -249,18 +255,24 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     rangey=c(min(df_all_TC[,2]),max(df_all_TC[,2]))
     
     b_doc_TC=ggplot(aes(x=B$dim1,y=B$dim2,label=B$nomi),data=B)+
-      geom_point()+
+      geom_point(size = 2, color = 'grey')+
       labs(title= "Factorial map of the most cited documents") +
-      geom_label_repel(box.padding = unit(0.5, "lines"),size=1)+
-      scale_x_continuous(limits = rangex)+
-      scale_y_continuous(limits = rangey)+
+      geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize)), fontface = "bold", 
+                       fill="indianred", color = "white", segment.alpha=0.5, segment.color="gray")+
+      scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
+      scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
       xlab("dim1")+ ylab("dim2")+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
-            axis.title=element_text(size=labelsize,face="bold"))
-    
+            axis.title=element_text(size=labelsize,face="bold") ,
+            panel.background = element_rect(fill = "lavender",
+                                          colour = "lavender"),
+                                            #size = 1, linetype = "solid"),
+           panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
+           panel.grid.minor = element_blank())
+      
     
     plot(b_doc_TC)
- # }
+
   
   
   
@@ -290,16 +302,7 @@ factorial<-function(X,method,quanti,quali,labelsize){
            coord_doc=get_ca_row(res.mca)
            df_doc=data.frame(coord_doc$coord)
            
-           ### building the plot
-           # b_doc=fviz_ca_row(res.mca, repel = TRUE,geom="point",invisible="row")+
-           #   theme_minimal()+
-           #   scale_color_manual(values = cbPalette[1:clust])+
-           #   scale_fill_manual(values = cbPalette[1:clust]) +
-           #   labs(title= "     ") +
-           #   geom_point() +
-           #   theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"))
-           
-         },
+           },
          ### MULTIPLE CORRESPONDENCE ANALYSIS ###
          MCA={
            X=data.frame(apply(X,2,factor))
@@ -319,15 +322,7 @@ factorial<-function(X,method,quanti,quali,labelsize){
            coord_doc=get_mca_ind(res.mca)
            df_doc=data.frame(coord_doc$coord)
            
-           ### building the plot
-           # b_doc=fviz_mca_ind(res.mca, repel = TRUE,geom="point",invisible="ind")+
-           #   theme_minimal()+
-           #   scale_color_manual(values = cbPalette[1:clust])+
-           #   scale_fill_manual(values = cbPalette[1:clust]) +
-           #   labs(title= "     ") +
-           #   geom_point() +
-           #   theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"))
-         }
+           }
   )
   
   #

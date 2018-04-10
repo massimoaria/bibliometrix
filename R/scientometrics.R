@@ -5,7 +5,7 @@
 #' Period: 1985 - 2015\cr
 #' Database: \href{http://www.webofknowledge.com}{ISI Web of Knowledge}\cr
 #'
-#' @format A data frame with 147 rows and 16 variables:
+#' @format A data frame with 147 rows and 17 variables:
 #' \describe{
 #' \item{AU}{Authors}
 #' \item{TI}{Document Title}
@@ -23,6 +23,7 @@
 #' \item{SC}{Subject Category}
 #' \item{UT}{Unique Article Identifier}
 #' \item{DB}{Database}
+#' \item{SR}{Short Reference}
 #' }
 #' @source \url{http://www.webofknowledge.com}
 #' @name scientometrics

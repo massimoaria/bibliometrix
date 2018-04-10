@@ -4,9 +4,9 @@
 \alias{conceptualStructure}
 \title{Creating and plotting conceptual structure map of a scientific field}
 \usage{
-conceptualStructure(M, field = "ID", quali.supp = NULL,
+conceptualStructure(M, field = "ID", method = "MCA", quali.supp = NULL,
   quanti.supp = NULL, minDegree = 2, k.max = 5, stemming = FALSE,
-  labelsize = 3)
+  labelsize = 10, documents = 10)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -24,6 +24,9 @@ field can be equal to one of this tags:
 \code{TI}\tab   \tab Terms extracted from titles\cr
 \code{AB}\tab   \tab Terms extracted from abstracts}}
 
+\item{method}{is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis
+or \code{method="MCA"} for Multiple Correspondence Analysis. The default is \code{method="MCA"}}
+
 \item{quali.supp}{is a vector indicating the indexes of the categorical supplementary variables.}
 
 \item{quanti.supp}{is a vector indicating the indexes of the quantitative supplementary variables.}
@@ -34,19 +37,24 @@ field can be equal to one of this tags:
 
 \item{stemming}{is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.}
 
-\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=2}}
+\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}}
+
+\item{documents}{is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10.}
 }
 \value{
 It is an object of the class \code{list} containing the following components:
 
 \tabular{lll}{
 net \tab  \tab bipartite network\cr
-res.mca \tab       \tab Results of Multiple Correspondence Analysis\cr
-km.res \tab      \tab Results of cluster analysis}
+res \tab       \tab Results of CA or MCA method\cr
+km.res \tab      \tab Results of cluster analysis\cr
+graph_terms \tab      \tab Conceptual structure map (class "ggplot2")\cr
+graph_documents_Contrib \tab      \tab Factorial map of the documents with the highest contributes (class "ggplot2")\cr
+graph_docuemnts_TC \tab      \tab Factorial map of the most cited documents (class "ggplot2")}
 }
 \description{
 The function \code{conceptualStructure} creates a conceptual structure map of 
-a scientific field performing Multiple Correspondence Analysis (MCA) and Clustering 
+a scientific field performing Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA) and Clustering 
 of a bipartite network of terms extracted from keyword, title or abstract fields.
 }
 \examples{
@@ -54,7 +62,8 @@ of a bipartite network of terms extracted from keyword, title or abstract fields
 
 data(scientometrics)
 
-S <- conceptualStructure(scientometrics, field="ID_TM", stemming=TRUE, minDegree=5, k.max = 5)
+CS <- conceptualStructure(scientometrics, field="ID", method="CA", 
+             stemming=FALSE, minDegree=3, k.max = 5)
 
 }
 \seealso{

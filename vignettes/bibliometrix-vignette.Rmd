@@ -597,18 +597,18 @@ net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = 
 ## Co-Word Analysis: Conceptual structure of a field 
 The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
 
-The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS) or Multiple Correspondence Analysis (MCA). 
+The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS), Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA). 
 
-Here, we show an example using the function *conceptualStructure* that performs a MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
+Here, we show an example using the function *conceptualStructure* that performs a CA or MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
 
 *conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts.  In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
 
 
 ```{r Co-Word Analysis, fig.height=7, fig.width=7, warning=FALSE}
 
-# Conceptual Structure using keywords
+# Conceptual Structure using keywords (method="CA")
 
-CS <- conceptualStructure(M,field="ID", minDegree=4, k.max=5, stemming=FALSE, labelsize=10)
+CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
 
 ```
 

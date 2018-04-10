@@ -4,5 +4,6 @@
 ^.*\.bib$
 ^.*\.ini$
 ^.*\.md$
+^.*\.RData$
 LICENCE.*$
 Rubbish

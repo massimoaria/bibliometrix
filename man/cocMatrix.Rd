@@ -4,7 +4,7 @@
 \alias{cocMatrix}
 \title{Co-occurrence matrix}
 \usage{
-cocMatrix(M, Field = "AU", type = "sparse", sep = ";")
+cocMatrix(M, Field = "AU", type = "sparse", sep = ";", binary = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -30,6 +30,8 @@ argument generates a compact representation of the matrix.}}
 
 \item{sep}{is the field separator character. This character separates strings in each 
 column of the data frame. The default is \code{sep = ";"}.}
+
+\item{binary}{is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency.}
 }
 \value{
 a co-occurrence matrix with cases corresponding to manuscripts and variables to the

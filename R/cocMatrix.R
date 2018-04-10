@@ -26,6 +26,7 @@
 #'   argument generates a compact representation of the matrix.}
 #' @param sep is the field separator character. This character separates strings in each 
 #' column of the data frame. The default is \code{sep = ";"}.
+#' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency. 
 #' @return a co-occurrence matrix with cases corresponding to manuscripts and variables to the
 #'   objects extracted from the Tag \code{Field}.
 #'
@@ -53,7 +54,7 @@
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @export
 
-cocMatrix<-function(M, Field = "AU", type = "sparse", sep = ";"){
+cocMatrix<-function(M, Field = "AU", type = "sparse", sep = ";",binary=TRUE){
 #
 # The function creates co-occurences data between Works and Field
 #
@@ -66,7 +67,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", sep = ";"){
 # if Field is CR -> WR (Works x References)
 # if Field is DE -> WK (Works x Keywords)
 # etc.
-crossprod <- Matrix::crossprod
+#crossprod <- Matrix::crossprod
 size<-dim(M)
 
 if (Field=="CR"){M$CR<-str_replace_all(as.character(M$CR),"DOI;","DOI ")}
@@ -93,6 +94,7 @@ if (Field=="CR"){
     l<-gsub(","," ",l)
     l<-gsub(";"," ",l)
     l<-gsub("\\s+", " ", l)
+    l<-l[nchar(l)>0]
     return(l)
   })
 } else {
@@ -107,26 +109,36 @@ if (Field=="CR"){
     l<-sub("\\;",",",l)
     l<-sub("\\;",",",l)
     l<-gsub("\\;.*","",l)
+    l<-l[nchar(l)>0]
     return(l)
   })
   }
 
-if (type=="matrix"){
+if (type=="matrix" | !isTRUE(binary)){
   # Initialization of WA matrix
   WF<-matrix(0,size[1],length(uniqueField))}
 else if (type=="sparse"){WF<-Matrix(0,size[1],length(uniqueField))}
 else {print("error in type argument");return()}
+colnames(WF)<-uniqueField
+rownames(WF)<-rownames(M)
   # Population of WA matrix
   for (i in 1:size[1]){
     if (length(Fi[[i]])>0) {
-      
-      
-      WF[i,uniqueField %in% Fi[[i]]]<-1}
+      #print(i)
+      if (isTRUE(binary)){
+        ## binary counting
+      WF[i,uniqueField %in% Fi[[i]]]<-1}else{
+        ## full counting
+        tab=table(Fi[[i]])
+        WF[i,names(tab)]=tab
+        }
+      }
 	}
 
+if (type=="sparse" & !isTRUE(binary)){
+  WF=Matrix(WF)
+}
 
-  colnames(WF)<-uniqueField
-  rownames(WF)<-rownames(M)
   WF=WF[,!is.na(uniqueField)]
   
 return(WF)

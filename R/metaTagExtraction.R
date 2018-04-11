@@ -240,9 +240,10 @@ if (Field=="AU_UN"){
   
   listAFF=strsplit(AFF,sep,fixed=TRUE)
   
-  uTags=c("UNIV","COLL","SCH","INST","ACAD","ECOLE","CTR","SCI","CENTRE","CENTER","CENTRO","HOSP","ASSOC",
-          "FONDAZ","FOUNDAT","ISTIT","LAB","TECH","RES","CNR","ARCH","SCUOLA","PATENT OFF","CENT LIB",
-          "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND")
+  uTags=c("UNIV","COLL","SCH","INST","ACAD","ECOLE","CTR","SCI","CENTRE","CENTER","CENTRO","HOSP","ASSOC","COUNCIL",
+          "FONDAZ","FOUNDAT","ISTIT","LAB","TECH","RES","CNR","ARCH","SCUOLA","PATENT OFF","CENT LIB","HEALTH","NATL",
+          "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND","CLIMA","METEOR","OFFICE","ENVIR",
+          "CONSORTIUM","OBSERVAT","AGRI")
   
   AFFL=lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
@@ -255,9 +256,15 @@ if (Field=="AU_UN"){
 
       indd=unlist(lapply(uTags,function(x) which(regexpr(x,affL,fixed=TRUE)!=-1)))
       
+     
+      # if (length(indd)==0){index=append(index,"NR")
+      #   } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
+      #   } else {index=append(index,affL[indd[1]])}
+      
       if (length(indd)==0){index=append(index,"NR")
-      } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
-      } else {index=append(index,affL[indd[1]])}
+      } else if (isTRUE(ND(affL,indd)$cond)){index=append(index,"ND")
+      } else {index=append(index,ND(affL,indd)$affL)}
+      
       
     }
       #index=unique(c(ind1,ind2,ind3,ind4,ind5,ind6,ind7,ind8))
@@ -285,11 +292,7 @@ if (Field=="AU_UN"){
   
   listAFF=strsplit(AFF,sep,fixed=TRUE)
   
-  uTags=c("UNIV","COLL","SCH","INST","ACAD","ECOLE","CTR","SCI","CENTRE","CENTER","CENTRO","HOSP","ASSOC",
-          "FONDAZ","FOUNDAT","ISTIT","LAB","TECH","RES","CNR","ARCH","SCUOLA","PATENT OFF","CENT LIB",
-          "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND")
-  
-  AFFL=lapply(listAFF, function(l){
+   AFFL=lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
     l<-gsub("\\(REPRINT AUTHOR\\)","",l)
     index=NULL
@@ -331,6 +334,13 @@ if (Field=="AU_UN"){
       M$AU_UN_NR[i]=paste(trim(listAFF[[i]][cont[[i]]]),collapse=";")
     }
   }
+  M$AU_UN[is.na(AFF)]=NA
+  M$AU_UN[M$AU_UN=="ND"]=NA
+  M$AU_UN[M$AU_UN=="NR"]=NA
+  M$AU_UN=gsub("NR;","",M$AU_UN)
+  M$AU_UN=gsub(";NR","",M$AU_UN)
+  M$AU_UN=gsub("ND;","",M$AU_UN)
+  M$AU_UN=gsub(";ND","",M$AU_UN)
 }
 
 return(M)
@@ -348,4 +358,13 @@ removeLastChar<-function(C,last="."){
   ind=which((A==last) & (!is.na(A)))
   C[ind]=substr(C[ind],1,(nchar(C[ind])-1))
   return(C)
+}
+
+### remove non interesting field
+ND<-function(affL,indd){
+  aff=affL[!grepl("[[:digit:]]", affL)]
+  ind=indd[!grepl("[[:digit:]]", affL[indd])]
+  cond=length(ind)<1
+  r=list(affL=aff[ind],cond=cond)
+  return(r)
 }

@@ -67,7 +67,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     row.names(SUPP)=row.names(M)
   }
   binary=FALSE
-  if (method=="MBA"){binary=TRUE}
+  if (method=="MCA"){binary=TRUE}
   
   switch(field,
          ID={
@@ -160,7 +160,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     names(CW)[quanti]=names(M)[quanti.supp]
   }
   
-  results <- factorial(CW,method=method,quanti=quanti,quali=quali,labelsize=labelsize)
+  results <- factorial(CW,method=method,quanti=quanti,quali=quali)
   res.mca <- results$res.mca
   df <- results$df
   docCoord <- results$docCoord
@@ -172,13 +172,13 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   
   
   # Selection of optimal number of clusters (silhouette method)
-  a=fviz_nbclust(scale(df), kmeans, method = "silhouette",k.max=k.max)['data']
+  a=fviz_nbclust((df), kmeans, method = "silhouette",k.max=k.max)['data']
   clust=as.numeric(a$data[order(-a$data$y),][1,1])
   
   # Perform the K-means clustering
-  km.res <- kmeans(scale(df), clust, nstart = 25)
+  km.res <- kmeans((df), clust, nstart = 25)
   
-  b=fviz_cluster(km.res, data = df,labelsize=labelsize, repel = TRUE)+
+  b=fviz_cluster(km.res, stand=FALSE, data = df,labelsize=labelsize, repel = TRUE)+
     theme_minimal()+
     scale_color_manual(values = cbPalette[1:clust])+
     scale_fill_manual(values = cbPalette[1:clust]) +
@@ -281,7 +281,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
 }
 
 
-factorial<-function(X,method,quanti,quali,labelsize){
+factorial<-function(X,method,quanti,quali){
   df_quali=data.frame()
   df_quanti=data.frame()
   

@@ -217,6 +217,7 @@
 
 convert2df<-function(file,dbsource="isi",format="plaintext"){
 
+  cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
   if (length(setdiff(dbsource,c("isi","scopus","pubmed")))>0){
     cat("\n 'dbsource' argument is not properly specified")
     cat("\n 'dbsource' argument has to be a character string matching 'isi, 'scopus' or 'pubmed'.\n")}
@@ -243,8 +244,15 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
   
   M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)
   
+  cat("Done!\n\n")
+  
   ## AU_UN field creation
-  if ("C1" %in% names(M)){M <- metaTagExtraction(M, Field="AU_UN")} else{
+  if ("C1" %in% names(M)){
+    cat("\nGenereting affiliation field tag AU_UN from C1:  ")
+    
+    M <- metaTagExtraction(M, Field="AU_UN")
+    cat("Done!\n\n")
+    } else{
     M$C1=NA
     M$AU_UN=NA}
 

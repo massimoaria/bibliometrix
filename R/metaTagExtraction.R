@@ -46,10 +46,50 @@
 metaTagExtraction<-function(M, Field = "CR_AU", sep = ";"){
 
 
+### data cleaning
+  if ("CR" %in% names(M)){
+    M$CR=str_replace_all(as.character(M$CR),"DOI;","DOI ")
+  }
+  
+  
 ### SR field creation
 
-if (Field=="SR"){
+  if (Field=="SR"){
+    M<-SR(M)
+  }
+
+
+  if (Field=="CR_AU"){
+    M<-CR_AU(M,sep)
+  }
+
+### CR_SO field creation
+
+  if (Field=="CR_SO"){
+    M<-CR_SO(M,sep)
+  }
+### AU_CO field creation
+
+  if (Field=="AU_CO"){
+    M<-AU_CO(M)  
+  }
   
+  if (Field=="AU1_CO"){
+    M<-AU1_CO(M)
+  }
+  
+  
+# UNIVERSITY AFFILIATION OF ALL AUTHORS AND CORRESPONDING AUTHOR
+  if (Field=="AU_UN"){
+    M<-AU_UN(M,sep)
+  }
+  
+  return(M)
+}
+
+
+### SR field
+SR <- function(M){
   listAU=strsplit(as.character(M$AU),";")
   listAU=lapply(listAU, function(l) trim.leading(l))
   if (M$DB[1]=="scopus"){
@@ -82,79 +122,80 @@ if (Field=="SR"){
       SR[ind]=paste0(SR[ind],"-",letters[i],sep="")}else{st <- 1}}
   
   M$SR<- gsub("\\s+", " ", SR)
+  return(M)
 }
 
-
-size=dim(M)
-FCAU=list(NULL)
-CCR=NULL
-if ("CR" %in% names(M)){
-  M$CR=str_replace_all(as.character(M$CR),"DOI;","DOI ")
-  CR=M$CR}
+### CR_AU field
+CR_AU<-function(M,sep){
+  FCAU=list(NULL)
+  CCR=NULL
+  size=dim(M)
+  CR=M$CR
+  listCAU=strsplit(as.character(CR),sep)
+  listCAU=lapply(listCAU,function(l) l=l[nchar(l)>10])  ## delete not congruent references
   
-if (Field=="CR_AU"){
-
-listCAU=strsplit(as.character(CR),sep)
-listCAU=lapply(listCAU,function(l) l=l[nchar(l)>10])  ## delete not congruent references
-
   # vector of cited authors
   for (i in 1:size[1]){
     FCAU[[i]]=str_replace_all(trim.leading(sub(",.*", "", listCAU[[i]])), "[[:punct:]]", "")
     CCR[i]=paste(FCAU[[i]],collapse=";")}
-
+  
   M$CR_AU=CCR
-  }
+  return(M)
+}
 
-### CR_SO field creation
-
-if (Field=="CR_SO"){
-  listCAU=strsplit(as.character(CR),sep)
+### CR_SO field
+CR_SO<-function(M,sep){
   FCAU=list(NULL)
-
+  CCR=NULL
+  size=dim(M)
+  CR<-M$CR
+  listCAU=strsplit(as.character(CR),sep)
+  
+  
   # vector of cited Journals
   if (M$DB[1]=="ISI"){
-  for (i in 1:size[1]){
-
-    elem=strsplit(as.character(listCAU[[i]]),",")
-    ind=lengths(elem)
-    if (max(ind)>2) {
-    elem=elem[ind>2]
-    FCAU[[i]]=trim.leading(unlist(lapply(elem,function(l) l[[3]])))
-    CCR[i]=paste(FCAU[[i]],collapse=";")}
-    else {CCR[[i]]=NA}}
-
-    } else if (M$DB[1]=="SCOPUS") {
-
-
     for (i in 1:size[1]){
-
+      
+      elem=strsplit(as.character(listCAU[[i]]),",")
+      ind=lengths(elem)
+      if (max(ind)>2) {
+        elem=elem[ind>2]
+        FCAU[[i]]=trim.leading(unlist(lapply(elem,function(l) l[[3]])))
+        CCR[i]=paste(FCAU[[i]],collapse=";")}
+      else {CCR[[i]]=NA}}
+    
+  } else if (M$DB[1]=="SCOPUS") {
+    
+    
+    for (i in 1:size[1]){
+      
       listCAU[[i]]=gsub(".*?\\) ", "", listCAU[[i]])
       elem=strsplit(as.character(listCAU[[i]]),",")
       ind=lengths(elem)
       CCR[[i]]=NA
       if (length(ind)>0){
-      if (max(ind)>2) {
-        elem=elem[ind>2]
-        FCAU[[i]]=trim.leading(unlist(lapply(elem,function(l) l[[1]])))
-        CCR[i]=paste(FCAU[[i]],collapse=";")}}
-      } 
+        if (max(ind)>2) {
+          elem=elem[ind>2]
+          FCAU[[i]]=trim.leading(unlist(lapply(elem,function(l) l[[1]])))
+          CCR[i]=paste(FCAU[[i]],collapse=";")}}
+    } 
   }
-
+  
   M$CR_SO=CCR
+  return(M)
 }
 
-### AU_CO field creation
-
-if (Field=="AU_CO"){
+### AU_CO field
+AU_CO<-function(M){
   # Countries
-  
+  size=dim(M)[1]
   data("countries",envir=environment())
   countries=as.character(countries[[1]])
   if (M$DB[1]=="ISI"){
-  countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))
+    countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))
   } else if (M$DB[1]=="SCOPUS"){
     countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
-
+  
   M$AU_CO=NA
   C1=M$C1
   C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
@@ -170,8 +211,8 @@ if (Field=="AU_CO"){
   
   for (i in 1:size[1]){
     if (!is.na(C1[i])){
-    ind=unlist(sapply(countries, function (l) (gregexpr ( l , C1[i],fixed=TRUE))))
-    if (sum(ind>-1)>0) {M$AU_CO[i]=paste(unique(names(ind[ind>-1])),collapse=";")}
+      ind=unlist(sapply(countries, function (l) (gregexpr ( l , C1[i],fixed=TRUE))))
+      if (sum(ind>-1)>0) {M$AU_CO[i]=paste(unique(names(ind[ind>-1])),collapse=";")}
     }
     if (is.na(M$AU_CO[i])){
       ind=unlist(sapply(countries, function (l) (gregexpr ( l , RP[i],fixed=TRUE))))
@@ -185,10 +226,12 @@ if (Field=="AU_CO"){
   if (M$DB[1]=="ISI"){M$AU_CO=removeLastChar(M$AU_CO,last=".")}
   if (M$DB[1]=="SCOPUS"){M$AU_CO=removeLastChar(M$AU_CO,last=";")}
   
-  
+  return(M) 
 }
 
-if (Field=="AU1_CO"){
+### AU1_CO field
+AU1_CO<-function(M){
+  size=dim(M)[1]
   # Countries
   data("countries",envir=environment())
   countries=as.character(countries[[1]])
@@ -205,10 +248,10 @@ if (Field=="AU1_CO"){
   C1=gsub("[[:punct:][:blank:]]+", " ", C1)
   C1=paste(trim(C1)," ",sep="")
   if (M$DB[1]!="PUBMED"){
-  RP=M$RP
-  #RP[which(is.na(RP))]=M$RRP)
-  RP=paste(RP,";",sep="")
-  RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {RP=C1}
+    RP=M$RP
+    #RP[which(is.na(RP))]=M$RRP)
+    RP=paste(RP,";",sep="")
+    RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {RP=C1}
   
   for (i in 1:size[1]){
     if (!is.na(C1[i])){
@@ -226,12 +269,11 @@ if (Field=="AU1_CO"){
   M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
   #M$AU1_CO=gsub(".", "", M$AU1_CO, fixed = TRUE)
   #M$AU1_CO=gsub(";;", ";", M$AU1_CO, fixed = TRUE)
-  
+  return(M)
 }
 
-# UNIVERSITY AFFILIATION OF ALL AUTHORS AND CORRESPONDING AUTHOR
-if (Field=="AU_UN"){
-  
+### AU_UN field
+AU_UN<-function(M,sep){
   AFF=gsub("\\[.*?\\] ", "", M$C1)
   indna=which(is.na(AFF))
   if (length(indna)>0){AFF[indna]=M$RP[indna]}
@@ -253,10 +295,10 @@ if (Field=="AU_UN"){
     for (i in 1:length(l)){
       #ind=list()
       affL=unlist(strsplit(l[i],",",fixed=TRUE))
-
+      
       indd=unlist(lapply(uTags,function(x) which(regexpr(x,affL,fixed=TRUE)!=-1)))
       
-     
+      
       # if (length(indd)==0){index=append(index,"NR")
       #   } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
       #   } else {index=append(index,affL[indd[1]])}
@@ -267,7 +309,7 @@ if (Field=="AU_UN"){
       
       
     }
-      #index=unique(c(ind1,ind2,ind3,ind4,ind5,ind6,ind7,ind8))
+    #index=unique(c(ind1,ind2,ind3,ind4,ind5,ind6,ind7,ind8))
     x=""
     if (length(index)>0){
       #x=paste0(trim.leading((affL[index])),collapse=",")
@@ -279,7 +321,7 @@ if (Field=="AU_UN"){
   M$AU_UN=AFFL
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)
-
+  
   
   ## identification of Corresponding author affiliation
   RP=M$RP
@@ -292,7 +334,7 @@ if (Field=="AU_UN"){
   
   listAFF=strsplit(AFF,sep,fixed=TRUE)
   
-   AFFL=lapply(listAFF, function(l){
+  AFFL=lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
     l<-gsub("\\(REPRINT AUTHOR\\)","",l)
     index=NULL
@@ -341,11 +383,12 @@ if (Field=="AU_UN"){
   M$AU_UN=gsub(";NR","",M$AU_UN)
   M$AU_UN=gsub("ND;","",M$AU_UN)
   M$AU_UN=gsub(";ND","",M$AU_UN)
+  
+  return(M)
 }
 
-return(M)
-}
 
+### tools
 lastChar<-function(C,last="."){
   A=substr(C,nchar(C),nchar(C))
   ind=which((A!=last) & (!is.na(A)))
@@ -359,7 +402,6 @@ removeLastChar<-function(C,last="."){
   C[ind]=substr(C[ind],1,(nchar(C[ind])-1))
   return(C)
 }
-
 ### remove non interesting field
 ND<-function(affL,indd){
   aff=affL[!grepl("[[:digit:]]", affL)]

@@ -75,7 +75,7 @@ metaTagExtraction<-function(M, Field = "CR_AU", sep = ";"){
   }
   
   if (Field=="AU1_CO"){
-    M<-AU1_CO(M)
+    M<-AU1_CO(M,sep)
   }
   
   
@@ -230,7 +230,7 @@ AU_CO<-function(M){
 }
 
 ### AU1_CO field
-AU1_CO<-function(M){
+AU1_CO<-function(M,sep){
   size=dim(M)[1]
   # Countries
   data("countries",envir=environment())

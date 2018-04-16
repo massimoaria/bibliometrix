@@ -407,6 +407,6 @@ ND<-function(affL,indd){
   aff=affL[!grepl("[[:digit:]]", affL)]
   ind=indd[!grepl("[[:digit:]]", affL[indd])]
   cond=length(ind)<1
-  r=list(affL=aff[ind],cond=cond)
+  r=list(affL=aff[ind[1]],cond=cond)
   return(r)
 }

@@ -1,4 +1,4 @@
-#' Dataset of "Bibliometrics" manuscripts.
+#' Dataset of "Bibliometrics" scientific documents.
 #'
 #' The set of manuscripts which the title containing the word "bibliometrics" and published in a journal indexed by ISI WoK database.\cr
 #' Period: 2006 - 2015\cr

@@ -32,7 +32,7 @@ It converts a PubMed/MedLine collection (obtained through a query performed with
 
 \code{\link{isibib2df}} for converting Clarivate Analitics WoS Export file (in bibtex format)
 
-Other converting functions: \code{\link{convert2df}},
-  \code{\link{isi2df}}, \code{\link{isibib2df}},
-  \code{\link{scopus2df}}
+Other converting functions: \code{\link{cochrane2df}},
+  \code{\link{convert2df}}, \code{\link{isi2df}},
+  \code{\link{isibib2df}}, \code{\link{scopus2df}}
 }

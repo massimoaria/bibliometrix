@@ -19,13 +19,13 @@
 #' nAUperPaper \tab      \tab the number of authors per manuscript\cr
 #' Appearances \tab      \tab the number of author appearances\cr
 #' nAuthors \tab       \tab the number of authors\cr
-#' AuMultiAuthoredArt \tab      \tab the number of authors of multi authored articles\cr
+#' AuMultiAuthoredArt \tab      \tab the number of authors of multi-authored articles\cr
 #' MostCitedPapers \tab      \tab The list of manuscripts sorted by citations\cr
 #' Years \tab      \tab pubblication year of each manuscript\cr
 #' FirstAffiliation \tab      \tab the affiliation of the first author\cr
 #' Affiliations \tab      \tab the frequency distribution of affiliations (of all co-authors for each paper)\cr
 #' Aff_frac \tab      \tab the fractionalized frequency distribution of affiliations (of all co-authors for each paper)\cr
-#' CO \tab      \tab the affiliation country of first author\cr
+#' CO \tab      \tab the affiliation country of the first author\cr
 #' Countries \tab      \tab the affiliation countries' frequency distribution\cr
 #' CountryCollaboration \tab      \tab Intracountry (SCP) and intercountry (MCP) collaboration indices\cr
 #' TotalCitation \tab      \tab the number of times each manuscript has been cited\cr
@@ -157,16 +157,18 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
   data("countries",envir=environment())
   countries=as.character(countries[[1]])
   
-  ### new code
-  M=metaTagExtraction(M,Field="AU1_CO",sep)
-  CO=M$AU1_CO
+  ### new code{
 
+    M=metaTagExtraction(M,Field="AU1_CO",sep)
+    CO=M$AU1_CO
 
-  Country=tableTag(M,"AU1_CO")
-  SCP_MCP=countryCollaboration(M,Country,k=dim(Country),sep)
-
+    Country=tableTag(M,"AU1_CO")
+    SCP_MCP=countryCollaboration(M,Country,k=dim(Country),sep)
+  
+}else{
+    M$AU_CO1=NA
+    SCP_MCP=data.frame(Country=rep(NA,1),SCP=rep(NA,1))
 }
-
 if ("PT" %in% names(M)){Documents=table(M$PT)}else{Documents=NA}
 
 results=list(Articles=dim(M)[1],             # Articles
@@ -176,7 +178,7 @@ results=list(Articles=dim(M)[1],             # Articles
              nAUperPaper=nAU,                # N. Authors per Paper
              Appearances=sum(nAU),            # Author appearances
              nAuthors=dim(Authors),          # N. of Authors
-             AuMultiAuthoredArt=AuMultiAuthoredArt, # N. of Authors of multi authored articles
+             AuMultiAuthoredArt=AuMultiAuthoredArt, # N. of Authors of multi-authored articles
              MostCitedPapers=MostCitedPapers,# Papers sorted by citations
              Years=PY,                       # Years
              FirstAffiliation=unlist(FAffiliation),  # Affiliation of First Author
@@ -188,9 +190,10 @@ results=list(Articles=dim(M)[1],             # Articles
              TotalCitation=TC,               # Total Citations
              TCperYear=TCperYear,            # Total Citations per year
              Sources=SO,                     # Sources
-             DE=DE,
-             ID=ID,
-             Documents=Documents)
+             DE=DE,                          # Keywords
+             ID=ID,                          # Authors' keywords
+             Documents=Documents,
+             DB=M$DB[1])
   class(results)<-"bibliometrix"
 
   return(results)

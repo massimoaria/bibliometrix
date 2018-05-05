@@ -5,17 +5,11 @@
 #' @param D is a character array containing data read from a ISI Export file (in plain text format).
 #' @return a data frame with cases corresponding to articles and variables to Field Tag in the original ISI file.
 #' @examples
-#' # An ISI Export file can be read using \code{\link{readLines}} function:
+#' # A group of ISI Export files can be read using \code{\link{readFiles}} function:
 #'
-#' # largechar <- readLines('filename.txt')
+#' # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 #'
-#' # filename.txt is an ISI Export file in plain text format.
-#' # The file have to be saved without Byte order mark (U+FEFF) at the beginning
-#' # and EoF code at the end of file.
-#' # The original file (exported by ISI search web site) can be modified
-#' # using an advanced text editor like Notepad++ or Emacs.
-#'
-#' # scientometrics_text <- readLines('http://www.bibliometrix.org/datasets/scientometrics.txt')
+#' # scientometrics_text <- readFiles('http://www.bibliometrix.org/datasets/scientometrics.txt')
 #' # data(scientometrics_text)
 #' # scient_df <- isi2df(scientometrics_text)
 #'

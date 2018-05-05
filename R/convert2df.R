@@ -1,6 +1,6 @@
-#' Convert a Clarivate Analytics WoS and SCOPUS Export files or RISmed PubMed/MedLine object into a data frame
+#' Convert a Clarivate Analytics WoS, SCOPUS and COCHRANE Database Export files or RISmed PubMed/MedLine object into a data frame
 #'
-#' It converts a SCOPUS and Clarivate Analytics WoS export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
+#' It converts a SCOPUS, Clarivate Analytics WoS and COCHRANE Database export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
 #' Actually the function allows to convert both SCOPUS/WoS files in bibtext format and just WoS files in plain text format.
 #'
@@ -218,10 +218,10 @@
 convert2df<-function(file,dbsource="isi",format="plaintext"){
 
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
-  if (length(setdiff(dbsource,c("isi","scopus","pubmed")))>0){
+  if (length(setdiff(dbsource,c("isi","scopus","pubmed","cochrane")))>0){
     cat("\n 'dbsource' argument is not properly specified")
     cat("\n 'dbsource' argument has to be a character string matching 'isi, 'scopus' or 'pubmed'.\n")}
-  if (length(setdiff(format,c("plaintext","bibtex","pubmed")))>0){
+  if (length(setdiff(format,c("plaintext","bibtex","pubmed","cochrane")))>0){
     cat("\n 'format' argument is not properly specified")
     cat("\n 'format' argument has to be a character string matching 'plaintext or 'bibtex'.\n")}
   if (length(setdiff(format,c("plaintext","bibtex")))>0){
@@ -237,12 +237,15 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
     },
     pubmed={M=pubmed2df(file)
     M$CR="none"
+    },
+    cochrane={M=cochrane2df(file)
+    M$CR="none"
     }
 )
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
   if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC=NA}
   
-  M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)
+  if (dbsource!="cochrane"){M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
   
   cat("Done!\n\n")
   

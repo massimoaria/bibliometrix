@@ -48,7 +48,7 @@ plot.bibliometrix<-function(x, ...){
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
     line <- readline()}
-
+  if (!is.na(x$CountryCollaboration[1,1])){
   # Countries
   #barplot(sort(x$Countries,decreasing=TRUE)[1:k],horiz=TRUE,las=2,cex.names=0.6,main="Most Productive Countries",xlab="Articles")
   xx=x$CountryCollaboration[1:k,]
@@ -68,7 +68,7 @@ plot.bibliometrix<-function(x, ...){
           color = "blue", face = "italic"))+
     coord_flip())
   plot(g)
-  
+  }
   
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
@@ -100,6 +100,9 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.x = element_text(hjust = 0)
     )   
   plot(g)
+  
+  
+  if(!(x$DB %in% c("COCHRANE","PUBMED"))){
   
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
@@ -157,5 +160,5 @@ plot.bibliometrix<-function(x, ...){
   #plot(as.numeric(row.names(Y)),TCY[,2]/Y,type="l",main="Average Citations per Article",xlab="Year",ylab="Average Citations",col="blue")
   #lines(as.numeric(row.names(Y)),Y,col="red")
   #legend(x="topright",c("Average Citations","N. of Articles"),col=c("blue","red"),lty = c(1, 1),cex=0.6,bty="n")
-
+}
 }

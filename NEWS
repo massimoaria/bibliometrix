@@ -1,7 +1,8 @@
-bibliometrix v1.9.3 (Release date: 2018-04-10)
+bibliometrix v1.9.3 (Release date: 2018-05-05)
 ==============
 
 New functionality:
+* Added the possibility to import collections from COCHRANE Database in convert2df()
 * Completely rewritten concepualStructure() function. 
   Now it performs CA and MCA method and plots factorial maps of documents.
 * Added binary argument in cocMatrix(). It allows to build up a document x attribute matrix using both binary and full counting

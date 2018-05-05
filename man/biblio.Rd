@@ -2,7 +2,7 @@
 % Please edit documentation in R/biblio.R
 \name{biblio}
 \alias{biblio}
-\title{Dataset of "Bibliometrics" manuscripts.}
+\title{Dataset of "Bibliometrics" scientific documents.}
 \format{A large character with 9014 rows.\cr 
 Data has been imported by an ISI Export file in bibtex format using the function \code{\link{readLines}}.}
 \source{

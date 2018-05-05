@@ -2,7 +2,7 @@
 % Please edit documentation in R/convert2df.R
 \name{convert2df}
 \alias{convert2df}
-\title{Convert a Clarivate Analytics WoS and SCOPUS Export files or RISmed PubMed/MedLine object into a data frame}
+\title{Convert a Clarivate Analytics WoS, SCOPUS and COCHRANE Database Export files or RISmed PubMed/MedLine object into a data frame}
 \usage{
 convert2df(file, dbsource = "isi", format = "plaintext")
 }
@@ -40,7 +40,7 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
-It converts a SCOPUS and Clarivate Analytics WoS export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
+It converts a SCOPUS, Clarivate Analytics WoS and COCHRANE Database export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 }
 \details{
 Actually the function allows to convert both SCOPUS/WoS files in bibtext format and just WoS files in plain text format.
@@ -69,7 +69,7 @@ biblio_df_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 
 \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 
-Other converting functions: \code{\link{isi2df}},
-  \code{\link{isibib2df}}, \code{\link{pubmed2df}},
-  \code{\link{scopus2df}}
+Other converting functions: \code{\link{cochrane2df}},
+  \code{\link{isi2df}}, \code{\link{isibib2df}},
+  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
 }

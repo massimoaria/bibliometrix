@@ -27,7 +27,7 @@ citation("bibliometrix")
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
 
-Bibliometrics turns the main tool of science, quantitative analysis, on itself. Essentially, bibliometrics is the application of quantitative analysis and statistics to publications such as journal articles and their accompanying citation counts. Quantitative evaluation of publication and citation data is now used in almost all science fields to evaluate growth, maturity, leading authors, conceptual and intellectual maps, trends of a scientific community.
+Bibliometrics turns the main tool of science, quantitative analysis, on itself. Essentially, bibliometrics is the application of quantitative analysis and statistics to publications such as journal articles and their accompanying citation counts. Quantitative evaluation of publication and citation data is now used in almost all scientific fields to evaluate growth, maturity, leading authors, conceptual and intellectual maps, trends of a scientific community.
 
 Bibliometrics is also used in research performance evaluation, especially in university and government labs, and also by policymakers, research directors and administrators, information specialists and librarians, and scholars themselves.
 
@@ -37,15 +37,19 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 
 * Bibliometric analysis of a publication dataset;
 
-* Building matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction technique.
+* Building matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
 ## Bibliographic databases
-**bibliometrix** works with data extracted from the two main bibliographic databases: SCOPUS and Thomson Reuter ISI Web of Knowledge.
+**bibliometrix** works with data extracted from the four main bibliographic databases: SCOPUS, Clarivate Analytics Web of Science, COCHRANE database of Systematic Reviews (CDSR) and RISmed PubMed/MedLine.
 
 *SCOPUS* (http://www.scopus.com), founded in 2004, offers a great deal of flexibility for the bibliometric user.  It permits to query for different fields, such as titles, abstracts, keywords, references and so on. SCOPUS allows for relatively easy downloading data-queries, although there are some limits on very large results sets with over 2,000 items.
 
-*ISI Web of Knowledge (WoK)* (http://www.webofknowledge.com), owned by Thomson Reuter, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
+*Clarivate Analytics Web of Science (WoS)* (http://www.webofknowledge.com), owned by Clarivate Analytics, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
 This platform includes many different collections.
+
+*COCHRANE Database of Systematic Reviews* (http://www.cochranelibrary.com/cochrane-database-of-systematic-reviews/index.html) is the leading resource for systematic reviews in health care. The CDSR includes Cochrane Reviews (the systematic reviews) and protocols for Cochrane Reviews as well as editorials. The CDSR also has occasional supplements. The CDSR is updated regularly as Cochrane Reviews are published "when ready" and form monthly issues; see publication schedule.
+
+*PubMed* comprises more than 28 million citations for biomedical literature from MEDLINE, life science journals, and online books. Citations may include links to full-text content from PubMed Central and publisher websites.
 
 ## Data acquisition
 Bibliographic data may be obtained by querying the SCOPUS or ISI WoK database by diverse fields, such as topic, author, journal, timespan, and so on.
@@ -54,10 +58,10 @@ In this example, we show how to download data, querying a term in the manuscript
 
 We choose the generic term "bibliometrics".
 
-### Querying from ISI WoK
+### Querying from Clarivate Analytics WoS
 At the link http://www.webofknowledge.com , select Web of Science Core Collection database. 
 
-Write the keyword "bibliometrics" in the search field and select title from the dropdown menu (see figure 1).  
+Write the keyword "bibliometrics" in the search field and select title from the drop-down menu (see figure 1).  
 
 <div style="width:300px; height=200px">
 ![Figure 1](figures/isi1.png)
@@ -68,7 +72,7 @@ Choose SCI-EXPANDED and SSCI citation indexes.
 
 The search yielded 291 results on May 09, 2016.
 
-Results can be refined using options on the left side of the page (type of manuscript, source, subject category, etc.).
+Results can be refined using options on the left side of the page (the type of manuscript, source, subject category, etc.).
 
 After refining the query, you can add records to your Marked List by clicking the button "add to marked list" at the end of the page and selecting the records to save (see figure 2).
 
@@ -86,16 +90,16 @@ To export the data you desire, choose the export tool and follow the three intui
 </div>
 
 
-The export tool allows you to select the diverse fields to save. So, select the fields your are interested in (for example all the available data about marked records).
+The export tool allows you to select the diverse fields to save. So, select the fields you are interested in (for example all the available data about marked records).
 
 
-To download an export file, in an appropriate format for *bibliometrix* package, make sure to select the option "**Save to Other File Formats**" and choose Bibtex or Plain Text.
+To download an export file, in an appropriate format for the *bibliometrix* package, make sure to select the option "**Save to Other File Formats**" and choose Bibtex or Plain Text.
 
-Please pay attention that bibtex import function is faster than plain text.
+Please pay attention that BibTeX  import function is faster than plain text.
 
-The ISI platform permits to export only 500 records at a time. 
+The WOS platform permits to export only 500 records at a time. 
 
-The ISI Web of Science export tool creates an export file with a default name "savedrecs" with extention ".txt" or ".bib" for plain text or bibtex format respectively. Export files can be separately stored.
+The Clarivate Analytics Web of Science export tool creates an export file with a default name "savedrecs" with an extension ".txt" or ".bib" for plain text or BibTeX  format respectively. Export files can be separately stored.
 
 ### Querying from SCOPUS
 The access to SCOPUS is via http://www.scopus.com.
@@ -109,7 +113,7 @@ To find all articles whose title includes the term "bibliometrics", simply write
 The search yielded 414 results on May 09, 2016.
 
 You can download the references (up to 2,000 full records) by checking the 'Select All' box and clicking on the link 'Export'. 
-Choose the file type "bibtex export" and "all available information" (see figure 5).
+Choose the file type "BibTeX  export" and "all available information" (see figure 5).
 
 
 <div style="width:300px; height=200px">
@@ -208,15 +212,15 @@ Authors		   | the authors' frequency distribution
 AuthorsFrac	 | the authors' frequency distribution (fractionalized)
 FirstAuthors | first author of each manuscript
 nAUperPaper	 | the number of authors per manuscript
-Apparences	 |  the number of author apparences
+Appearances |  the number of author appearances
 nAuthors		 | the number of authors
-AuMultiAuthoredArt | the number of authors of multi authored articles
+AuMultiAuthoredArt | the number of authors of multi-authored articles
 MostCitedPapers | the list of manuscripts sorted by citations
-Years		     | pubblication year of each manuscript
+Years		     | publication year of each manuscript
 FirstAffiliation | the affiliation of the first author
 Affiliations | the frequency distribution of affiliations (of all co-authors for each paper)
 Aff_frac		 | the fractionalized frequency distribution of affiliations (of all co-authors for each paper)
-CO		       | the affiliation country of first author
+CO		       | the affiliation country of the first author
 Countries		 | the affiliation countries' frequency distribution
 CountryCollaboration | the intra-country (SCP) and inter-country (MCP) collaboration indices
 TotalCitation | 		 the number of times each manuscript has been cited
@@ -294,9 +298,9 @@ DF <- dominance(results, k = 10)
 DF
 ```
 
-The Dominance Factor is a ratio indicating the fraction of multi authored articles in which a scholar appears as first author.
+The Dominance Factor is a ratio indicating the fraction of multi-authored articles in which a scholar appears as the first author.
 
-In this example, Kostoff and Holden dominate their research team because they appear as first authors in all their papers (8 for Kostoff and 3 for Holden). 
+In this example, Kostoff and Holden dominate their research team because they appear as the first authors in all their papers (8 for Kostoff and 3 for Holden). 
 
 ## Authors' h-index
 The h-index is an author-level metric that attempts to measure both the productivity and citation impact of the publications of a scientist or scholar. 
@@ -305,7 +309,7 @@ The index is based on the set of the scientist's most cited papers and the numbe
 
 The function *Hindex* calculates the authors' H-index and its variants (g-index and m-index) in a bibliographic collection.
 
-Function arguments are: *M* a bibliographic data frame; *auhtors* a character vector containing the the authors' names for which you want to calculate the H-index. The aurgument has the form c("SURNAME1 N","SURNAME2 N",...). 
+Function arguments are: *M* a bibliographic data frame; *authors* a character vector containing the authors' names for which you want to calculate the H-index. The argument has the form c("SURNAME1 N","SURNAME2 N",...). 
 
 In other words, for each author: surname and initials are separated by one blank space. 
 i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *authors* argument is *authors = c("ARIA M", "CUCCURULLO C")*.
@@ -391,7 +395,7 @@ These connections of different attributes generate bipartite networks that can b
 Furthermore, scientific publications regularly contain references to
 other scientific works. This generates a further network, namely, co-citation or coupling network.
 
-These networks are analysed in order to capture meaningful properties of the underlying research system, and in particular to determine the influence of bibliometric units such as scholars and journals.
+These networks are analyzed in order to capture meaningful properties of the underlying research system, and in particular to determine the influence of bibliometric units such as scholars and journals.
 
 ### Bipartite networks
 *cocMatrix* is a general function to compute a bipartite network selecting one of the metadata attributes.
@@ -462,9 +466,9 @@ B = A \times A^T
 $$
 where A is a bipartite network.
 
-Element $b_{ij}$ indicates how many bibliographic coupling exist between manuscripts $i$ and $j$. In other words, $b_{ij}$ gives the number of paths of length 2, via which one moves from $i$ along the arrow and then to $j$ in the opposite direction.
+Element $b_{ij}$ indicates how many bibliographic couplings exist between manuscripts $i$ and $j$. In other words, $b_{ij}$ gives the number of paths of length 2, via which one moves from $i$ along the arrow and then to $j$ in the opposite direction.
 
-$B$ is a simmetrical matrix $B = B^T$.
+$B$ is a symmetrical matrix $B = B^T$.
 
 The strength of the coupling of two articles, $i$ and $j$ is defined
 simply by the number of references that the articles have in common, as given by the element $b_{ij}$ of matrix $B$.
@@ -484,7 +488,7 @@ The following code calculates a classical article coupling network:
 
 Articles with only a few references, therefore, would tend to be more weakly bibliographically coupled, if coupling strength is measured simply according to the number of references that articles contain in common. 
 
-This suggests that it might be more practicable to switch to a relative measure of bibliographic coupling.
+This suggests that it might be more practical to switch to a relative measure of bibliographic coupling.
 
 *normalizeSimilarity* function calculates Association strength, Inclusion, Jaccard or Salton similarity among vertices of a network. *normalizeSimilarity* can be recalled directly from *networkPlot()* function using the argument *normalize*. 
 
@@ -521,7 +525,7 @@ Using the function *biblioNetwork*, you can calculate a classical reference co-c
 
 ### Bibliographic collaboration
 
-Scientific collaboration network is a network where nodes are authors and links are co-authorships as the latter is one of the most well documented forms of scientific collaboration (Glanzel, 2004).
+Scientific collaboration network is a network where nodes are authors and links are co-authorships as the latter is one of the most well-documented forms of scientific collaboration (Glanzel, 2004).
 
 An author collaboration network can be obtained using the general formulation:
 
@@ -553,7 +557,7 @@ Using the function *networkPlot*, you can plot a network created by *biblioNetwo
 
 The main argument of *networkPlot* is type. It indicates the network map layout: circle, kamada-kawai, mds, etc.
 Choosing type="vosviewer", the function automatically: (i) saves the network into a pajek network file, named "vosnetwork.net"; (ii) starts an instance of VOSviewer which will map the file "vosnetwork.net".
-You need to declare, using argument *vos.path*, the full path of folder where VOSviewer software is located (es. vos.path='c:/software/VOSviewer').
+You need to declare, using argument *vos.path*, the full path of the folder where VOSviewer software is located (es. vos.path='c:/software/VOSviewer').
 
 
 ### Country Scientific Collaboration
@@ -585,7 +589,7 @@ net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "frucht
 ### Keyword co-occurrences
 
 ```{r Keyword c-occurrences, fig.height=7, fig.width=7, warning=FALSE}
-# Create keyword co-occurrencies network
+# Create keyword co-occurrences network
 
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 
@@ -612,10 +616,10 @@ CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemm
 
 ```
 
-## Historical Co-Citation Network
-Historiographic map is a graph proposed by E. Garfield to represent a chronological network map of most relevant co-citations resulting from a bibliographic collection.
+## Historical Direct Citation Network
+The historiographic map is a graph proposed by E. Garfield to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
 
-The function \code{histNetwork} generates a chronological co-citation network matrix which can be plotted using *histPlot*:
+The function \code{histNetwork} generates a chronological direct citation network matrix which can be plotted using *histPlot*:
 
 ```{r Historical Co-citation network, fig.height=9, fig.width=7, warning=FALSE}
 # Create a historical citation network

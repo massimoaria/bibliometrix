@@ -27,13 +27,13 @@ FirstAuthors \tab      \tab first author of each manuscript\cr
 nAUperPaper \tab      \tab the number of authors per manuscript\cr
 Appearances \tab      \tab the number of author appearances\cr
 nAuthors \tab       \tab the number of authors\cr
-AuMultiAuthoredArt \tab      \tab the number of authors of multi authored articles\cr
+AuMultiAuthoredArt \tab      \tab the number of authors of multi-authored articles\cr
 MostCitedPapers \tab      \tab The list of manuscripts sorted by citations\cr
 Years \tab      \tab pubblication year of each manuscript\cr
 FirstAffiliation \tab      \tab the affiliation of the first author\cr
 Affiliations \tab      \tab the frequency distribution of affiliations (of all co-authors for each paper)\cr
 Aff_frac \tab      \tab the fractionalized frequency distribution of affiliations (of all co-authors for each paper)\cr
-CO \tab      \tab the affiliation country of first author\cr
+CO \tab      \tab the affiliation country of the first author\cr
 Countries \tab      \tab the affiliation countries' frequency distribution\cr
 CountryCollaboration \tab      \tab Intracountry (SCP) and intercountry (MCP) collaboration indices\cr
 TotalCitation \tab      \tab the number of times each manuscript has been cited\cr

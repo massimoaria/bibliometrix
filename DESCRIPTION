@@ -28,11 +28,13 @@ Imports: stats,
 		 stringdist,
 		 stringr		 
 Suggests: knitr, 
-		  rmarkdown
+		  rmarkdown,
+    
 RoxygenNote: 6.0.1
 NeedsCompilation: no
 Packaged: 2018-01-18 14:40:50 UTC; aria
 Author: Massimo Aria [cre, aut],
   Corrado Cuccurullo [aut]
 Maintainer: Massimo Aria <aria@unina.it>
-VignetteBuilder: knitr
+VignetteBuilder: knitr,
+    

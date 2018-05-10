@@ -1,8 +1,17 @@
 ---
 title: "A brief introduction to bibliometrix"
-author: "Massimo Aria and Corrado Cuccurullo"
+author:
+- name: Massimo Aria
+  affiliation: 
+  - Department of Economics and Statistics, University of Naples Federico II
+  email: aria@unina.it
+- name: Corrado Cuccurullo
+  affiliation: 
+  - Department of Economics, University of Campania Luigi Vanvitelli
+  
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_document
+toc: true
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
   %\VignetteEngine{knitr::rmarkdown}
@@ -11,6 +20,17 @@ vignette: >
 
 #### Latest version
 ```{r echo=FALSE}
+#output: rmarkdown::html_vignette
+library(knitr)
+
+## Import the style from CSS file 'css_path' 
+style = paste(readLines("bioc.css"), collapse = "\n")
+
+opts_knit$set(self.contained = TRUE,
+              upload.fun = image_uri, ## optional
+              header = c(highlight = style))
+
+
 cat(paste("bibliometrix ",packageVersion("bibliometrix")))
 ```
 
@@ -63,7 +83,7 @@ At the link http://www.webofknowledge.com , select Web of Science Core Collectio
 
 Write the keyword "bibliometrics" in the search field and select title from the drop-down menu (see figure 1).  
 
-<div style="width:300px; height=200px">
+<div style="width:900px; height=600px">
 ![Figure 1](figures/isi1.png)
 </div>
 
@@ -76,7 +96,7 @@ Results can be refined using options on the left side of the page (the type of m
 
 After refining the query, you can add records to your Marked List by clicking the button "add to marked list" at the end of the page and selecting the records to save (see figure 2).
 
-<div style="width:300px; height=200px">
+<div style="width:900px; height=600px">
 ![Figure 2](figures/isi2.png)
 </div>
 
@@ -85,7 +105,7 @@ The Marked List page provides you with a list of publications selected and vario
 
 To export the data you desire, choose the export tool and follow the three intuitive steps (see figure 3).
 
-<div style="width:300px; height=200px">
+<div style="width:900px; height=600px">
 ![Figure 3](figures/isi3.png)
 </div>
 
@@ -106,7 +126,7 @@ The access to SCOPUS is via http://www.scopus.com.
 
 To find all articles whose title includes the term "bibliometrics", simply write this keyword in the field and select "Article Title" (see figure 4)
 
-<div style="width:300px; height=200px">
+<div style="width:900px; height=600px">
 ![Figure 4](figures/scopus1.png)
 </div>
 
@@ -116,7 +136,7 @@ You can download the references (up to 2,000 full records) by checking the 'Sele
 Choose the file type "BibTeX  export" and "all available information" (see figure 5).
 
 
-<div style="width:300px; height=200px">
+<div style="width:900px; height=600px">
 ![Figure 5](figures/scopus2.png)
 </div>
 
@@ -243,7 +263,7 @@ S <- summary(object = results, k = 10, pause = FALSE)
 
 Some basic plots can be drawn using the generic function \code{plot}:
 
-```{r plot generic function, fig.height=9, fig.width=9}
+```{r plot generic function, fig.width=7}
 plot(x = results, k = 10, pause = FALSE)
 ```
 
@@ -259,7 +279,7 @@ For a correct extraction, you need to identify the separator field among differe
 ```
 The figure shows the reference string of the first manuscript. In this case, the separator field is `sep = ".  "`.
 
-<div style="width:300px; height=200px">
+<div style="width:900px; height=600px">
 ![Figure 6](figures/cr1.png)
 </div>
 

@@ -7,3 +7,4 @@
 ^.*\.RData$
 LICENCE.*$
 Rubbish
+^_gh-pages$

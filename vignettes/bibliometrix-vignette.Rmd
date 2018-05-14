@@ -618,7 +618,7 @@ net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = 
 
 ```
 
-## Co-Word Analysis: Conceptual structure of a field 
+## Co-Word Analysis: The conceptual structure of a field 
 The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
 
 The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS), Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA). 

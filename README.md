@@ -1,5 +1,6 @@
 [![Logo](http://www.bibliometrix.org/logo_small.png)](http://www.bibliometrix.org)
 
+
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Build Status](http://www.bibliometrix.org/passing.png)](http://www.bibliometrix.org)
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)

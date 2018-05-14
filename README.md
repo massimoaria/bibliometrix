@@ -1,3 +1,10 @@
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Build Status](http://www.bibliometrix.org/passing.png)](http://www.bibliometrix.org)
+[![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix](https://github.com/metacran/cranlogs.app)
+[![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
+
+
+
 # bibliometrix 
 ## An R Tool for quantitative research in scientometrics and bibliometrics.
 

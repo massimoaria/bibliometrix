@@ -1,3 +1,4 @@
+[![Logo](http://www.bibliometrix.org/logo_small.png)](http://www.bibliometrix.org)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Build Status](http://www.bibliometrix.org/passing.png)](http://www.bibliometrix.org)
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
@@ -160,8 +161,9 @@ The function *biblioNetwork* calculates, starting from a bibliographic data fram
 * *network* argument can be "authors", "references", "sources", "countries", "universities", "keywords", "author_keywords", "titles" and "abstracts".
 
 i.e. the following code calculates a classical co-citation network:
+
 ```{r}
-# NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
 ```
 
 

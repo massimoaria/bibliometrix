@@ -1,4 +1,4 @@
-[![Logo](http://www.bibliometrix.org/logo_small.png)](http://www.bibliometrix.org)
+[![Logo](http://www.bibliometrix.org/logo_small.jpg)](http://www.bibliometrix.org)
 
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)

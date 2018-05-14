@@ -10,7 +10,7 @@
 bibliometrix
 ====================================
 
-## An R Tool for quantitative research in scientometrics and bibliometrics.
+## An R-tool for comprehensive science mapping analysis.
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
 

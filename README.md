@@ -84,7 +84,7 @@ D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
 ```
 
 D is a large character vector. 
-*readFiles* argument contains the name of files downloaded from SCOPUS or ISI WOS website.
+*readFiles* argument contains the name of files downloaded from SCOPUS, Clarivate Analytics WOS, or Cochrane CDSR website.
 
 The function *readFiles* combines all the text files onto a single large character vector. Furthermore, the format is converted into UTF-8.
 

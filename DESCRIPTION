@@ -2,13 +2,14 @@ Package: bibliometrix
 Type: Package
 Title: An R-Tool for Comprehensive Science Mapping Analysis
 Version: 1.9.3
-Date: 2018-04-10
+Date: 2018-05-15
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
 Description: Tool for quantitative research in scientometrics and bibliometrics.
-    It provides various routines for importing bibliographic data from SCOPUS (<http://scopus.com>) and 
-    Clarivate Analytics Web of Science (<http://www.webofknowledge.com/>) databases, performing bibliometric analysis 
-    and building data matrices for co-citation, coupling, scientific collaboration and co-word analysis.
+    It provides various routines for importing bibliographic data from SCOPUS (<http://scopus.com>),
+    Clarivate Analytics Web of Science (<http://www.webofknowledge.com/>), Cochrane Library (<http://www.cochranelibrary.com/>) 
+	and PubMed (<https://www.ncbi.nlm.nih.gov/pubmed/>) databases, performing bibliometric analysis 
+    and building networks for co-citation, coupling, scientific collaboration and co-word analysis.
 License: GPL-3
 URL: http://www.bibliometrix.org
 LazyData: FALSE
@@ -31,7 +32,7 @@ Suggests: knitr,
 		  rmarkdown,
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2018-01-18 14:40:50 UTC; aria
+Packaged: 2018-05-15 09:40:50 UTC; aria
 Author: Massimo Aria [cre, aut],
   Corrado Cuccurullo [aut]
 Maintainer: Massimo Aria <aria@unina.it>

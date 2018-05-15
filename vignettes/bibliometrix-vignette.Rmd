@@ -60,14 +60,14 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 * Building matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
 ## Bibliographic databases
-**bibliometrix** works with data extracted from the four main bibliographic databases: SCOPUS, Clarivate Analytics Web of Science, COCHRANE database of Systematic Reviews (CDSR) and RISmed PubMed/MedLine.
+**bibliometrix** works with data extracted from the four main bibliographic databases: SCOPUS, Clarivate Analytics Web of Science, Cochrane Database of Systematic Reviews (CDSR) and RISmed PubMed/MedLine.
 
 *SCOPUS* (http://www.scopus.com), founded in 2004, offers a great deal of flexibility for the bibliometric user.  It permits to query for different fields, such as titles, abstracts, keywords, references and so on. SCOPUS allows for relatively easy downloading data-queries, although there are some limits on very large results sets with over 2,000 items.
 
 *Clarivate Analytics Web of Science (WoS)* (http://www.webofknowledge.com), owned by Clarivate Analytics, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
 This platform includes many different collections.
 
-*COCHRANE Database of Systematic Reviews* (http://www.cochranelibrary.com/cochrane-database-of-systematic-reviews/index.html) is the leading resource for systematic reviews in health care. The CDSR includes Cochrane Reviews (the systematic reviews) and protocols for Cochrane Reviews as well as editorials. The CDSR also has occasional supplements. The CDSR is updated regularly as Cochrane Reviews are published "when ready" and form monthly issues; see publication schedule.
+*Cochrane Database of Systematic Reviews* (http://www.cochranelibrary.com/cochrane-database-of-systematic-reviews/index.html) is the leading resource for systematic reviews in health care. The CDSR includes Cochrane Reviews (the systematic reviews) and protocols for Cochrane Reviews as well as editorials. The CDSR also has occasional supplements. The CDSR is updated regularly as Cochrane Reviews are published "when ready" and form monthly issues; see publication schedule.
 
 *PubMed* comprises more than 28 million citations for biomedical literature from MEDLINE, life science journals, and online books. Citations may include links to full-text content from PubMed Central and publisher websites.
 
@@ -168,7 +168,7 @@ D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
 ```
 
 D is a large character vector. 
-*readFiles* argument contains the name of files downloaded from SCOPUS or ISI WOS website.
+*readFiles* argument contains the name of files downloaded from SCOPUS, Clarivate Analytics WOS, or Cochrane CDSR website.
 
 The function *readFiles* combines all the text files onto a single large character vector. Furthermore, the format is converted into UTF-8.
 
@@ -185,7 +185,7 @@ M <- convert2df(D, dbsource = "isi", format = "bibtex")
 
 Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
 
-Data frame columns are named using the standard ISI WoS Field Tag codify. 
+Data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify. 
 
 The main field tags are:
 

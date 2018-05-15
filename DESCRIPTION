@@ -29,7 +29,6 @@ Imports: stats,
 		 stringr		 
 Suggests: knitr, 
 		  rmarkdown,
-    
 RoxygenNote: 6.0.1
 NeedsCompilation: no
 Packaged: 2018-01-18 14:40:50 UTC; aria

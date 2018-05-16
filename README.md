@@ -130,7 +130,7 @@ Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
 S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
-Some basic plots can be drawn using the generic function \code{plot}:
+Some basic plots can be drawn using the generic function plot:
 
 ```{r plot generic function, fig.width=7}
 plot(x = results, k = 10, pause = FALSE)
@@ -139,7 +139,7 @@ plot(x = results, k = 10, pause = FALSE)
 
 
 
-## Bibliometric network matrices
+## Bibliographic network matrices
 
 Manuscript's attributes are connected to each other through the manuscript itself: author(s) to journal, keywords to publication date, etc.
 
@@ -254,7 +254,7 @@ CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemm
 
 The historiographic map is a graph proposed by E. Garfield to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
 
-The function \code{histNetwork} generates a chronological direct citation network matrix which can be plotted using *histPlot*:
+The function histNetwork generates a chronological direct citation network matrix which can be plotted using *histPlot*:
 
 ```{r Historical Co-citation network, fig.height=9, fig.width=7, warning=FALSE}
 # Create a historical citation network

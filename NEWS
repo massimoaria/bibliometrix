@@ -1,3 +1,13 @@
+bibliometrix v1.9.4 (Release date: 2018-05-15)
+==============
+
+New functionality:
+* 
+
+Changes:
+* Solved the issue regarding the older versions of utils::promptPackage()
+
+
 bibliometrix v1.9.3 (Release date: 2018-05-15)
 ==============
 

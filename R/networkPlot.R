@@ -21,8 +21,8 @@
 #' 
 #' @param Title is a character indicating the plot title. 
 #' @param vos.path is a character indicating the full path whre VOSviewer.jar is located.
-#' @param size is integer or logical. If TRUE the point size of each vertex is proportional to its degree. 
-#' If it is a integer, the point size of each vertex is constant equal to size. Default is \code{size=3}. 
+#' @param size is integer. It defines the size of each vertex. Default is \code{size=3}. 
+#' @param size.cex is logical. If TRUE the size of each vertex is proportional to its degree.  
 #' @param noloops is logical. If TRUE loops in the network are deleted.
 #' @param remove.isolates is logical. If TRUE isolates vertices are not plotted.
 #' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
@@ -62,7 +62,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.short=TRUE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.short=TRUE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
   NET=NetMatrix
   bsk.S=TRUE
@@ -70,12 +70,16 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   if (!is.null(normalize)){
     S=normalizeSimilarity(NetMatrix, type = normalize)
     bsk.S <- graph.adjacency(S,mode="undirected",weighted=T)
+    weighted=NULL
   }
   #diag(NetMatrix)=0
   #num=apply(NetMatrix, 2, max)
   
-  ## legacy
-  if (size==FALSE){size=3}
+  ## legacy with version <1.9.4
+  if (size==TRUE){
+    size=20
+    size.cex=T
+  }
   
   
   # Create igraph object
@@ -103,7 +107,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- degree(bsk.network, mode="all")
-  if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
+  if (isTRUE(size.cex)){V(bsk.network)$size <- (deg/max(deg)[1])*size}
   else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
   
   # label size
@@ -140,8 +144,11 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   }
   
     # Choose Network layout
-  if (!isTRUE(bsk.S)){l <- switchLayout(bsk.S,type,vos.path)
-  } else{l <- switchLayout(bsk.network,type,vos.path)}
+  if (!isTRUE(bsk.S)){
+    l <- switchLayout(bsk.S,type,vos.path)
+  } else{
+    l <- switchLayout(bsk.network,type,vos.path)
+    }
   
   
   # Clustering

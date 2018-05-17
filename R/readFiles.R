@@ -25,7 +25,8 @@ readFiles <- function(...){
   arguments <- list(...)
   k=length(arguments)
   D=list()
-  for (i in 1:k){D[[i]]=suppressWarnings(readLines(arguments[[i]],encoding = "UTF-8"))}
+  enc="UTF-8"
+  for (i in 1:k){D[[i]]=suppressWarnings(readLines(arguments[[i]],encoding = enc))}
   D=unlist(D)
   return(D)
   # warning off

@@ -34,12 +34,10 @@ networkStat<-function(object){
   V(net)$id <- colnames(object)}else{net <- object}
   
   net <- simplify(net, remove.loops = T) 
+  
   ### network statistics
   networkSize <- vcount(net)
-  #networkEdges=ecount(net)
-  #edges=count_multiple(net, eids = E(net))
-  #networkFrequency=sum(edges[edges>1])
-  
+ 
   # The proportion of present edges from all possible edges in the network.
   networkDensity=edge_density(net, loops = FALSE)
   
@@ -83,7 +81,7 @@ networkStat<-function(object){
                networkCentrDegree=NCD,
                networkCentrCloseness=NCC,
                networkCentrEigen=NCE,
-               networkCentrbetweeness=NCB,
+               networkCentrbetweenness=NCB,
                NetworkAverPathLeng=meanDistance)
   
   ### Centrality and Prestige of vertices
@@ -129,7 +127,7 @@ networkStat<-function(object){
                      vertexCentrDegree=DC,
                      vertexCentrCloseness=CC,
                      vertexCentrEigen=EC,
-                     vertexCentrBetweeness=BC,
+                     vertexCentrBetweenness=BC,
                      vertexPageRank=PR,
                      vertexHub=HS,
                      vertexAuthority=AS)

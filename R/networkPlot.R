@@ -71,10 +71,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   if (!is.null(normalize)){
     S=normalizeSimilarity(NetMatrix, type = normalize)
     bsk.S <- graph.adjacency(S,mode="undirected",weighted=T)
-    #weighted=NULL
   }
-  #diag(NetMatrix)=0
-  #num=apply(NetMatrix, 2, max)
   
   ## legacy with version <1.9.4
   if (isTRUE(size)){
@@ -102,10 +99,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     V(bsk.network)$label.cex <- log(1+(deg/max(deg)[1])*labelsize)}else{
       V(bsk.network)$label.cex <- labelsize}
   
-  
-  # Select number of vertices to plot
-  
-  if (!is.null(degree)){
+ # Select number of vertices to plot
+ if (!is.null(degree)){
     Deg=deg-diag(NET)
     Vind=Deg<degree
     if (sum(!Vind)==0){cat("\ndegree argument is to high!\n\n")
@@ -126,8 +121,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   
   # delete not linked vertices
   if (isTRUE(remove.isolates)){
-    bsk.network <- delete.isolates(bsk.network, mode = 'in')
-    if (!isTRUE(bsk.S)){bsk.S <- delete.isolates(bsk.S, mode = 'in')}
+    bsk.network <- delete.isolates(bsk.network, mode = 'all')
+    if (!isTRUE(bsk.S)){bsk.S <- delete.isolates(bsk.S, mode = 'all')}
   }
   
     # Choose Network layout

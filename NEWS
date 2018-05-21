@@ -1,8 +1,10 @@
-bibliometrix v1.9.4 (Release date: 2018-05-15)
+bibliometrix v1.9.4 (Release date: 2018-05-21)
 ==============
 
 New functionality:
-* 
+* Added function networkStat() to perform the descriptive analysis of network graph characteristics
+* Added the generic function summary() to summarize the results of the networkStat() function 
+* Added a new section "the descriptive analysis of network graph characteristics" in the vignettes
 
 Changes:
 * Solved the issue regarding the older versions of utils::promptPackage()

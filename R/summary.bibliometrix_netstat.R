@@ -32,10 +32,10 @@ summary.bibliometrix_netstat<-function(object, ...){
   MainStatNet[3]=paste("Density                              ",round(object$network$networkDensity,3),"\n")
   MainStatNet[4]=paste("Transitivity                         ",round(object$network$networkTransitivity,3),"\n")
   MainStatNet[5]=paste("Diameter                             ",round(object$network$networkDiameter,3),"\n")
-  MainStatNet[6]=paste("Centrality degree                    ",round(object$network$networkCentrDegree,3),"\n")
-  MainStatNet[7]=paste("Centrality closeness                 ",round(object$network$networkCentrCloseness,3),"\n")
-  MainStatNet[8]=paste("Centrality betweeness                ",round(object$network$networkCentrbetweeness,3),"\n")
-  MainStatNet[9]=paste("Centrality eigenvector               ",round(object$network$networkCentrEigen,3),"\n")
+  MainStatNet[6]=paste("Degree Centralization                ",round(object$network$networkCentrDegree,3),"\n")
+  MainStatNet[7]=paste("Closeness Centralization             ",round(object$network$networkCentrCloseness,3),"\n")
+  MainStatNet[8]=paste("Betweenness Centralization           ",round(object$network$networkCentrbetweenness,3),"\n")
+  MainStatNet[9]=paste("Eigenvector Centralization           ",round(object$network$networkCentrEigen,3),"\n")
   MainStatNet[10]=paste("Average path length                  ",round(object$network$NetworkAverPathLeng,3),"\n")
   MainStatNet[11]=paste("\n")
   cat(MainStatNet)
@@ -43,7 +43,7 @@ summary.bibliometrix_netstat<-function(object, ...){
   
   
   #main measures of centrality and prestige of vertices
-  cat("\n\nMain statistics about the network\n\n")
+  cat("\n\nMain measures of centrality and prestige of vertices\n\n")
   # Centrality Degree
   cat("\nDegree Centrality: Top vertices\n\n")
   CD=object$vertex[,1:2]
@@ -76,11 +76,11 @@ summary.bibliometrix_netstat<-function(object, ...){
   print(A,row.names=TRUE);cat("\n")
   
   # Centrality betweeness
-  cat("\nBetweeness Centrality: Top vertices\n\n")
+  cat("\nBetweenness Centrality: Top vertices\n\n")
   CD=object$vertex[,c(1,5)]
   
-  A=CD[order(-CD$vertexCentrBetweeness),]
-  names(A)=c("Vertex ID             ", "Betweeness Centrality")
+  A=CD[order(-CD$vertexCentrBetweenness),]
+  names(A)=c("Vertex ID             ", "Betweenness Centrality")
   A=format(A[1:k,],justify="left",digits=3)
   row.names(A)=1:k
   print(A,row.names=TRUE);cat("\n")

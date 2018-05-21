@@ -888,7 +888,7 @@ This suggests that it might be more practical to switch to a relative measure of
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # plot authors' similarity (first 20 authors), using salton similarity index
-net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 50, Title = "Authors' Coupling", type = "fruchterman", size=10,size.cex=T,remove.multiple=TRUE,labelsize=0.6,label.n=15,label.cex=F)
+net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
 ```
 
 ![](bibliometrix-vignette_files/figure-html/similarity-1.png)<!-- -->
@@ -942,6 +942,250 @@ or a country collaboration network:
 # NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 ```
 
+## Descriptive analysis of network graph characteristics
+
+The function *networkStat* calculates several summary statistics.
+
+In particular, starting from a bibliographic matrix (or an *igraph* object), two groups of descriptive measures are computed:
+
+* The summary statistics of the network; 
+
+* The main indices of centrality and prestige of vertices.
+
+
+```r
+# An example of a classical co-citation network
+
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+netstat <- networkStat(NetMatrix)
+```
+
+
+### The summary statistics of the network
+
+This group of statistics allows to describe the structural properties of a network:
+
+* **Size** is the number of verticex composing the network;
+
+* **Density** is the proportion of present edges from all possible edges in the network;
+
+* **Transitivity** is the ratio of triangles to connected triples;
+
+* **Diameter** is the longest geodesic distance (length of the shortest path between two nodes) in the network;
+
+* **Degree distribution** is the cumulative distribution of vertex degrees;
+
+* **Degree centralization** is the normalized degree of the overall network;
+
+* **Closeness centralization** is the normalized inverse of the vertexâ€™s average geodesic distance to others in the network;
+
+* **Eigenvector centralization** is the first eigenvector of the graph matrix;
+
+* **Betweenness centralization** is the normalized number of geodesics that pass through the vertex;
+
+* **Average path length** is the mean of the shortest distance between each pair of vertices in the network.
+
+
+```r
+names(netstat$network)
+```
+
+```
+##  [1] "networkSize"             "networkDensity"          "networkTransitivity"    
+##  [4] "networkDiameter"         "networkDegreeDist"       "networkCentrDegree"     
+##  [7] "networkCentrCloseness"   "networkCentrEigen"       "networkCentrbetweenness"
+## [10] "NetworkAverPathLeng"
+```
+
+### The main indices of centrality and prestige of vertices
+
+These measures help to identify the most important vertices in a network and the propensity of two vertices that are connected to be both connected to a third vertex.
+
+The statistics, at vertex level, returned by *networkStat* are:
+
+* **Degree centrality**
+
+* **Closeness centrality** measures how many steps are required to access every other vertex from a given vertex;
+
+* **Eigenveector centrality** is a measure of being well-connected connected to the well-connected;
+
+* **Betweenness centrality** measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between vertices that pass through a particular vertex;
+
+* **PageRank score** approximates probability that any message will arrive to a particular vertex. This algorithm was developed by Google founders, and originally applied to website links;
+
+* **Hub Score** estimates the value of the links outgoing from the vertex. It was initially applied to the web pages;
+
+* **Authority Score** is another measure of centrality initially applied to the Web. A vertex has high authority when it is linked by many other vertices that are linking many other vertices;
+
+* **Vertex Ranking** is an overall vertex ranking obtained as a linear weighted combination of the centrality and prestige vertex measures. The weights are proportional to the loadings of the first component of the Principal Component Analysis.
+
+
+```r
+names(netstat$vertex)
+```
+
+```
+## [1] "vertexID"               "vertexCentrDegree"      "vertexCentrCloseness"  
+## [4] "vertexCentrEigen"       "vertexCentrBetweenness" "vertexPageRank"        
+## [7] "vertexHub"              "vertexAuthority"        "Ranking"
+```
+
+To summarize the main results of the *networkStat* function, use the generic function *summary*.
+It displays the main information about the network and vertex description through several tables.
+
+*summary* accepts one additional argument. *k* is a formatting value that indicates the number of rows of each table. 
+Choosing k=10, you decide to see the first 10 vertices.
+
+
+```r
+summary(netstat, k=10)
+```
+
+```
+## 
+## 
+## Main statistics about the network
+## 
+##  Size                                  4834 
+##  Density                               0.015 
+##  Transitivity                          0.727 
+##  Diameter                              6 
+##  Degree Centralization                 0.183 
+##  Closeness Centralization              0 
+##  Betweenness Centralization            0.083 
+##  Eigenvector Centralization            0.94 
+##  Average path length                   2.888 
+##  
+## 
+## 
+## 
+## 
+## 
+## Main measures of centrality and prestige of vertices
+## 
+## 
+## Degree Centrality: Top vertices
+## 
+##                       Vertex ID              Degree Centrality
+## 1  SMALL H 1973 J AM SOC INFORM SCI                      0.198
+## 2  BRADFORD S. C 1934 ENGINEERING-LONDON                 0.142
+## 3  PRICE DJD 1976 J AM SOC INFORM SCI                    0.138
+## 4  SMITH LC 1981 LIBR TRENDS                             0.132
+## 5  BURTON RE 1960 AM DOC                                 0.131
+## 6  GARFIELD E. 1979 CITATION INDEXING                    0.128
+## 7  PRITCHAR.A 1969 J DOC                                 0.121
+## 8  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI             0.115
+## 9  SMALL HG 1978 SOC STUD SCI                            0.114
+## 10 HIRSCH JE 2005 P NATL ACAD SCI USA                    0.108
+## 
+## 
+## Closeness Centrality: Top vertices
+## 
+##                       Vertex ID              Closeness Centrality
+## 1  SMALL H 1973 J AM SOC INFORM SCI                       0.00203
+## 2  HIRSCH JE 2005 P NATL ACAD SCI USA                     0.00203
+## 3  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI              0.00203
+## 4  BRADFORD S. C 1934 ENGINEERING-LONDON                  0.00203
+## 5  PRICE DJD 1976 J AM SOC INFORM SCI                     0.00203
+## 6  PRITCHAR.A 1969 J DOC                                  0.00203
+## 7  GARFIELD E 1972 SCIENCE                                0.00203
+## 8  MACROBERTS MH 1989 J AM SOC INFORM SCI                 0.00203
+## 9  BURTON RE 1960 AM DOC                                  0.00203
+## 10 ALMIND TC 1997 J DOC                                   0.00203
+## 
+## 
+## Eigenvector Centrality: Top vertices
+## 
+##                        Vertex ID              Eigenvector Centrality
+## 1  SMALL H 1973 J AM SOC INFORM SCI                            1.000
+## 2  BURTON RE 1960 AM DOC                                       0.950
+## 3  PRICE DJD 1976 J AM SOC INFORM SCI                          0.948
+## 4  HAWKINS DT 1977 J AM SOC INFORM SCI                         0.926
+## 5  BROADUS RN 1987 J AM SOC INFORM SCI                         0.924
+## 6  HERTZEL DOROTHY 1987 ENCY LIBRARY INFO S7                   0.924
+## 7  SMALL H 1985 SCIENTOMETRICS                                 0.923
+## 8  BOOKSTEIN A 1976 LIBR QUART                                 0.919
+## 9  OCONNOR DO 1981 LIBR TRENDS                                 0.919
+## 10 BROOKES BC 1968 J DOC                                       0.918
+## 
+## 
+## Betweenness Centrality: Top vertices
+## 
+##                       Vertex ID              Betweenness Centrality
+## 1  HIRSCH JE 2005 P NATL ACAD SCI USA                        0.0830
+## 2  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI                 0.0634
+## 3  SMALL H 1973 J AM SOC INFORM SCI                          0.0562
+## 4  BRADFORD S. C 1934 ENGINEERING-LONDON                     0.0413
+## 5  GARFIELD E 2006 JAMA-J AM MED ASSOC                       0.0334
+## 6  GARFIELD E 1955 SCIENCE                                   0.0286
+## 7  PRITCHAR.A 1969 J DOC                                     0.0286
+## 8  KESSLER MM 1963 AM DOC                                    0.0215
+## 9  PRICE DJD 1976 J AM SOC INFORM SCI                        0.0200
+## 10 GARFIELD E 1972 SCIENCE                                   0.0189
+## 
+## 
+## PageRank Score: Top vertices
+## 
+##                       Vertex ID              Pagerank Score
+## 1  HIRSCH JE 2005 P NATL ACAD SCI USA               0.00227
+## 2  SMALL H 1973 J AM SOC INFORM SCI                 0.00204
+## 3  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI        0.00168
+## 4  BRADFORD S. C 1934 ENGINEERING-LONDON            0.00156
+## 5  PRITCHAR.A 1969 J DOC                            0.00139
+## 6  GARFIELD E 2006 JAMA-J AM MED ASSOC              0.00128
+## 7  SMITH LC 1981 LIBR TRENDS                        0.00119
+## 8  SMALL HG 1978 SOC STUD SCI                       0.00117
+## 9  PRICE DJD 1976 J AM SOC INFORM SCI               0.00116
+## 10 KESSLER MM 1963 AM DOC                           0.00115
+## 
+## 
+## Hub Score: Top vertices
+## 
+##                        Vertex ID              Hub Score
+## 1  SMALL H 1973 J AM SOC INFORM SCI               1.000
+## 2  BURTON RE 1960 AM DOC                          0.950
+## 3  PRICE DJD 1976 J AM SOC INFORM SCI             0.948
+## 4  HAWKINS DT 1977 J AM SOC INFORM SCI            0.926
+## 5  BROADUS RN 1987 J AM SOC INFORM SCI            0.924
+## 6  HERTZEL DOROTHY 1987 ENCY LIBRARY INFO S7      0.924
+## 7  SMALL H 1985 SCIENTOMETRICS                    0.923
+## 8  BOOKSTEIN A 1976 LIBR QUART                    0.919
+## 9  OCONNOR DO 1981 LIBR TRENDS                    0.919
+## 10 BROOKES BC 1968 J DOC                          0.918
+## 
+## 
+## Authority Score: Top vertices
+## 
+##                        Vertex ID              Authority Score
+## 1  SMALL H 1973 J AM SOC INFORM SCI                     1.000
+## 2  BURTON RE 1960 AM DOC                                0.950
+## 3  PRICE DJD 1976 J AM SOC INFORM SCI                   0.948
+## 4  HAWKINS DT 1977 J AM SOC INFORM SCI                  0.926
+## 5  BROADUS RN 1987 J AM SOC INFORM SCI                  0.924
+## 6  HERTZEL DOROTHY 1987 ENCY LIBRARY INFO S7            0.924
+## 7  SMALL H 1985 SCIENTOMETRICS                          0.923
+## 8  BOOKSTEIN A 1976 LIBR QUART                          0.919
+## 9  OCONNOR DO 1981 LIBR TRENDS                          0.919
+## 10 BROOKES BC 1968 J DOC                                0.918
+## 
+## 
+## Overall Ranking: Top vertices
+## 
+##                       Vertex ID              Overall Ranking
+## 1  SMALL H 1973 J AM SOC INFORM SCI                        1
+## 2  HIRSCH JE 2005 P NATL ACAD SCI USA                      2
+## 3  PRICE DJD 1976 J AM SOC INFORM SCI                      3
+## 4  SMITH LC 1981 LIBR TRENDS                               4
+## 5  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI               5
+## 6  BURTON RE 1960 AM DOC                                   6
+## 7  SMALL HG 1978 SOC STUD SCI                              7
+## 8  GARFIELD E. 1979 CITATION INDEXING                      8
+## 9  BRADFORD S. C 1934 ENGINEERING-LONDON                   9
+## 10 SMALL H 1985 SCIENTOMETRICS                            10
+```
+
+
+
 ## Visualizing bibliographic networks
 
 All bibliographic networks can be graphically visualized or
@@ -966,7 +1210,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8)
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8,cluster="none")
 ```
 
 ![](bibliometrix-vignette_files/figure-html/Country collaboration-1.png)<!-- -->

@@ -522,7 +522,7 @@ This suggests that it might be more practical to switch to a relative measure of
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # plot authors' similarity (first 20 authors), using salton similarity index
-net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 50, Title = "Authors' Coupling", type = "fruchterman", size=10,size.cex=T,remove.multiple=TRUE,labelsize=0.6,label.n=15,label.cex=F)
+net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
 
 ```
 
@@ -572,6 +572,90 @@ or a country collaboration network:
 # NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 ```
 
+## Descriptive analysis of network graph characteristics
+
+The function *networkStat* calculates several summary statistics.
+
+In particular, starting from a bibliographic matrix (or an *igraph* object), two groups of descriptive measures are computed:
+
+* The summary statistics of the network; 
+
+* The main indices of centrality and prestige of vertices.
+
+```{r}
+# An example of a classical co-citation network
+
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+netstat <- networkStat(NetMatrix)
+```
+
+
+### The summary statistics of the network
+
+This group of statistics allows to describe the structural properties of a network:
+
+* **Size** is the number of verticex composing the network;
+
+* **Density** is the proportion of present edges from all possible edges in the network;
+
+* **Transitivity** is the ratio of triangles to connected triples;
+
+* **Diameter** is the longest geodesic distance (length of the shortest path between two nodes) in the network;
+
+* **Degree distribution** is the cumulative distribution of vertex degrees;
+
+* **Degree centralization** is the normalized degree of the overall network;
+
+* **Closeness centralization** is the normalized inverse of the vertex’s average geodesic distance to others in the network;
+
+* **Eigenvector centralization** is the first eigenvector of the graph matrix;
+
+* **Betweenness centralization** is the normalized number of geodesics that pass through the vertex;
+
+* **Average path length** is the mean of the shortest distance between each pair of vertices in the network.
+
+```{r}
+names(netstat$network)
+```
+
+### The main indices of centrality and prestige of vertices
+
+These measures help to identify the most important vertices in a network and the propensity of two vertices that are connected to be both connected to a third vertex.
+
+The statistics, at vertex level, returned by *networkStat* are:
+
+* **Degree centrality**
+
+* **Closeness centrality** measures how many steps are required to access every other vertex from a given vertex;
+
+* **Eigenveector centrality** is a measure of being well-connected connected to the well-connected;
+
+* **Betweenness centrality** measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between vertices that pass through a particular vertex;
+
+* **PageRank score** approximates probability that any message will arrive to a particular vertex. This algorithm was developed by Google founders, and originally applied to website links;
+
+* **Hub Score** estimates the value of the links outgoing from the vertex. It was initially applied to the web pages;
+
+* **Authority Score** is another measure of centrality initially applied to the Web. A vertex has high authority when it is linked by many other vertices that are linking many other vertices;
+
+* **Vertex Ranking** is an overall vertex ranking obtained as a linear weighted combination of the centrality and prestige vertex measures. The weights are proportional to the loadings of the first component of the Principal Component Analysis.
+
+```{r}
+names(netstat$vertex)
+```
+
+To summarize the main results of the *networkStat* function, use the generic function *summary*.
+It displays the main information about the network and vertex description through several tables.
+
+*summary* accepts one additional argument. *k* is a formatting value that indicates the number of rows of each table. 
+Choosing k=10, you decide to see the first 10 vertices.
+
+```{r}
+summary(netstat, k=10)
+```
+
+
+
 ## Visualizing bibliographic networks
 
 All bibliographic networks can be graphically visualized or
@@ -595,7 +679,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8)
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8,cluster="none")
 
 ```
 

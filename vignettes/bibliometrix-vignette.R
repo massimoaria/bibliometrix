@@ -1,15 +1,4 @@
 ## ----echo=FALSE----------------------------------------------------------
-#output: rmarkdown::html_vignette
-#library(knitr)
-
-## Import the style from CSS file 'css_path' 
-#style = paste(readLines("bioc.css"), collapse = "\n")
-
-#opts_knit$set(self.contained = TRUE,
-#              upload.fun = image_uri, ## optional
-#              header = c(highlight = style))
-
-
 cat(paste("bibliometrix ",packageVersion("bibliometrix")))
 
 ## ----Package citation, echo=FALSE----------------------------------------
@@ -146,9 +135,9 @@ net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title 
 # NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 ## -------------------------------------------------------------------------------------------------
-# An example of a classical co-citation network
+# An example of a classical keyword co-occurrences network
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ".  ")
 netstat <- networkStat(NetMatrix)
 
 ## -------------------------------------------------------------------------------------------------

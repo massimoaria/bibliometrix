@@ -1,17 +1,8 @@
 ---
 title: "A brief introduction to bibliometrix"
-author:
-- name: Massimo Aria
-  affiliation: 
-  - Department of Economics and Statistics, University of Naples Federico II
-  email: aria@unina.it
-- name: Corrado Cuccurullo
-  affiliation: 
-  - Department of Economics, University of Campania Luigi Vanvitelli
-  
+author: "Massimo Aria and Corrado Cuccurullo"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
   %\VignetteEngine{knitr::rmarkdown}
@@ -22,33 +13,126 @@ vignette: >
 ![ ](figures/logo_small.png)
 </div>
 
+#### http://www.bibliometrix.org
 
 #### Latest version
 ```{r echo=FALSE}
-#output: rmarkdown::html_vignette
-#library(knitr)
-
-## Import the style from CSS file 'css_path' 
-#style = paste(readLines("bioc.css"), collapse = "\n")
-
-#opts_knit$set(self.contained = TRUE,
-#              upload.fun = image_uri, ## optional
-#              header = c(highlight = style))
-
-
 cat(paste("bibliometrix ",packageVersion("bibliometrix")))
 ```
 
-#### http://www.bibliometrix.org
+&nbsp; 
 
-#### Citation for package 'bibliometrix': 
+&nbsp; 
 
-```{r Package citation, echo=FALSE}
+&nbsp; 
+
+### Citation for package 'bibliometrix'
+
+
+To cite bibliometrix in publications, please use:
+
+**Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.**
+ 
+&nbsp; 
+
+&nbsp; 
+
+A BibTeX entry for LaTeX users is
+ 
+@Article{,
+
+   author = {Massimo Aria and Corrado Cuccurullo},
+
+   title = {bibliometrix: An R-tool for comprehensive science mapping analysis},
+
+   journal = {Journal of Informetrics},
+
+   volume = {11},
+
+   number = {4},
+
+   pages = {959-975},
+
+   publisher = {Elsevier},
+
+   year = {2017},
+
+   url = {https://doi.org/10.1016/j.joi.2017.08.007},
+
+   }
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+```{r Package citation, eval=FALSE, include=FALSE}
 citation("bibliometrix")
 ```
 
 
-## Introduction
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+### Authors' affiliations
+
+#### Dr. Massimo Aria
+
+Associate Professor in Social Statistics 
+
+PhD in Computational Statistics
+
+Laboratory and Research Group STAD Statistics, Technology, Data Analysis
+
+Department of Economics and Statistics 
+
+University of Naples Federico II
+
+email aria@unina.it
+
+http://www.massimoaria.com
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+#### Dr. Corrado Cuccurullo
+
+Full Professor in Accounting 
+
+PhD in Management
+
+Dep.t of Management and Economics
+
+University of Campania Luigi Vanvitelli
+
+email corrado.cuccurullo@unicampania.it
+
+https://sites.google.com/site/cocuccurunina2/
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp;
+
+&nbsp; 
+
+
+
+# Introduction
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
 
@@ -583,9 +667,9 @@ In particular, starting from a bibliographic matrix (or an *igraph* object), two
 * The main indices of centrality and prestige of vertices.
 
 ```{r}
-# An example of a classical co-citation network
+# An example of a classical keyword co-occurrences network
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 netstat <- networkStat(NetMatrix)
 ```
 
@@ -628,7 +712,7 @@ The statistics, at vertex level, returned by *networkStat* are:
 
 * **Closeness centrality** measures how many steps are required to access every other vertex from a given vertex;
 
-* **Eigenveector centrality** is a measure of being well-connected connected to the well-connected;
+* **Eigenvector centrality** is a measure of being well-connected connected to the well-connected;
 
 * **Betweenness centrality** measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between vertices that pass through a particular vertex;
 

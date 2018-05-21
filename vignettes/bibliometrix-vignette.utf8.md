@@ -1,17 +1,8 @@
 ---
 title: "A brief introduction to bibliometrix"
-author:
-- name: Massimo Aria
-  affiliation: 
-  - Department of Economics and Statistics, University of Naples Federico II
-  email: aria@unina.it
-- name: Corrado Cuccurullo
-  affiliation: 
-  - Department of Economics, University of Campania Luigi Vanvitelli
-  
+author: "Massimo Aria and Corrado Cuccurullo"
 date: "2018-05-21"
 output: rmarkdown::html_vignette
-
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
   %\VignetteEngine{knitr::rmarkdown}
@@ -22,6 +13,7 @@ vignette: >
 ![ ](figures/logo_small.png)
 </div>
 
+#### http://www.bibliometrix.org
 
 #### Latest version
 
@@ -29,36 +21,117 @@ vignette: >
 ## bibliometrix  1.9.4
 ```
 
-#### http://www.bibliometrix.org
+&nbsp; 
 
-#### Citation for package 'bibliometrix': 
+&nbsp; 
 
+&nbsp; 
 
-```
-## 
-## To cite bibliometrix in publications, please use:
-## 
-##   Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for
-##   comprehensive science mapping analysis, Journal of Informetrics,
-##   11(4), pp 959-975, Elsevier.
-## 
-## A BibTeX entry for LaTeX users is
-## 
-##   @Article{,
-##     author = {Massimo Aria and Corrado Cuccurullo},
-##     title = {bibliometrix: An R-tool for comprehensive science mapping analysis},
-##     journal = {Journal of Informetrics},
-##     volume = {11},
-##     number = {4},
-##     pages = {959-975},
-##     publisher = {Elsevier},
-##     year = {2017},
-##     url = {https://doi.org/10.1016/j.joi.2017.08.007},
-##   }
-```
+### Citation for package 'bibliometrix'
 
 
-## Introduction
+To cite bibliometrix in publications, please use:
+
+**Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.**
+ 
+&nbsp; 
+
+&nbsp; 
+
+A BibTeX entry for LaTeX users is
+ 
+@Article{,
+
+   author = {Massimo Aria and Corrado Cuccurullo},
+
+   title = {bibliometrix: An R-tool for comprehensive science mapping analysis},
+
+   journal = {Journal of Informetrics},
+
+   volume = {11},
+
+   number = {4},
+
+   pages = {959-975},
+
+   publisher = {Elsevier},
+
+   year = {2017},
+
+   url = {https://doi.org/10.1016/j.joi.2017.08.007},
+
+   }
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+### Authors' affiliations
+
+#### Dr. Massimo Aria
+
+Associate Professor in Social Statistics 
+
+PhD in Computational Statistics
+
+Laboratory and Research Group STAD Statistics, Technology, Data Analysis
+
+Department of Economics and Statistics 
+
+University of Naples Federico II
+
+email aria@unina.it
+
+http://www.massimoaria.com
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+#### Dr. Corrado Cuccurullo
+
+Full Professor in Accounting 
+
+PhD in Management
+
+Dep.t of Management and Economics
+
+University of Campania Luigi Vanvitelli
+
+email corrado.cuccurullo@unicampania.it
+
+https://sites.google.com/site/cocuccurunina2/
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp;
+
+&nbsp; 
+
+
+
+# Introduction
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
 
@@ -172,6 +245,14 @@ install.packages("bibliometrix", dependencies=TRUE)      ### installs bibliometr
 
 ```r
 library(bibliometrix)   ### load bibliometrix package
+```
+
+```
+## To cite bibliometrix in publications, please use:
+## 
+## Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.
+## 
+## http:\\www.bibliometrix.org
 ```
 
 ## Data loading and converting
@@ -954,9 +1035,9 @@ In particular, starting from a bibliographic matrix (or an *igraph* object), two
 
 
 ```r
-# An example of a classical co-citation network
+# An example of a classical keyword co-occurrences network
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 netstat <- networkStat(NetMatrix)
 ```
 
@@ -1007,7 +1088,7 @@ The statistics, at vertex level, returned by *networkStat* are:
 
 * **Closeness centrality** measures how many steps are required to access every other vertex from a given vertex;
 
-* **Eigenveector centrality** is a measure of being well-connected connected to the well-connected;
+* **Eigenvector centrality** is a measure of being well-connected connected to the well-connected;
 
 * **Betweenness centrality** measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between vertices that pass through a particular vertex;
 
@@ -1046,15 +1127,15 @@ summary(netstat, k=10)
 ## 
 ## Main statistics about the network
 ## 
-##  Size                                  4834 
-##  Density                               0.015 
-##  Transitivity                          0.727 
-##  Diameter                              6 
-##  Degree Centralization                 0.183 
-##  Closeness Centralization              0 
-##  Betweenness Centralization            0.083 
-##  Eigenvector Centralization            0.94 
-##  Average path length                   2.888 
+##  Size                                  474 
+##  Density                               0.024 
+##  Transitivity                          0.335 
+##  Diameter                              5 
+##  Degree Centralization                 0.302 
+##  Closeness Centralization              0.005 
+##  Betweenness Centralization            0.286 
+##  Eigenvector Centralization            0.907 
+##  Average path length                   2.742 
 ##  
 ## 
 ## 
@@ -1066,122 +1147,122 @@ summary(netstat, k=10)
 ## 
 ## Degree Centrality: Top vertices
 ## 
-##                       Vertex ID              Degree Centrality
-## 1  SMALL H 1973 J AM SOC INFORM SCI                      0.198
-## 2  BRADFORD S. C 1934 ENGINEERING-LONDON                 0.142
-## 3  PRICE DJD 1976 J AM SOC INFORM SCI                    0.138
-## 4  SMITH LC 1981 LIBR TRENDS                             0.132
-## 5  BURTON RE 1960 AM DOC                                 0.131
-## 6  GARFIELD E. 1979 CITATION INDEXING                    0.128
-## 7  PRITCHAR.A 1969 J DOC                                 0.121
-## 8  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI             0.115
-## 9  SMALL HG 1978 SOC STUD SCI                            0.114
-## 10 HIRSCH JE 2005 P NATL ACAD SCI USA                    0.108
+##    Vertex ID              Degree Centrality
+## 1     SCIENCE                         0.326
+## 2     CITATION ANALYSIS               0.186
+## 3     INDICATORS                      0.184
+## 4     IMPACT                          0.178
+## 5     CITATION                        0.175
+## 6     JOURNALS                        0.150
+## 7     PUBLICATION                     0.129
+## 8     INFORMATION-SCIENCE             0.125
+## 9     H-INDEX                         0.114
+## 10    PERFORMANCE                     0.106
 ## 
 ## 
 ## Closeness Centrality: Top vertices
 ## 
-##                       Vertex ID              Closeness Centrality
-## 1  SMALL H 1973 J AM SOC INFORM SCI                       0.00203
-## 2  HIRSCH JE 2005 P NATL ACAD SCI USA                     0.00203
-## 3  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI              0.00203
-## 4  BRADFORD S. C 1934 ENGINEERING-LONDON                  0.00203
-## 5  PRICE DJD 1976 J AM SOC INFORM SCI                     0.00203
-## 6  PRITCHAR.A 1969 J DOC                                  0.00203
-## 7  GARFIELD E 1972 SCIENCE                                0.00203
-## 8  MACROBERTS MH 1989 J AM SOC INFORM SCI                 0.00203
-## 9  BURTON RE 1960 AM DOC                                  0.00203
-## 10 ALMIND TC 1997 J DOC                                   0.00203
+##    Vertex ID              Closeness Centrality
+## 1       SCIENCE                         0.0240
+## 2       INDICATORS                      0.0239
+## 3       CITATION                        0.0239
+## 4       JOURNALS                        0.0239
+## 5       IMPACT                          0.0239
+## 6       CITATION ANALYSIS               0.0239
+## 7       GOOGLE SCHOLAR                  0.0239
+## 8       PUBLICATION                     0.0239
+## 9       H-INDEX                         0.0238
+## 10      SELF-CITATION                   0.0238
 ## 
 ## 
 ## Eigenvector Centrality: Top vertices
 ## 
-##                        Vertex ID              Eigenvector Centrality
-## 1  SMALL H 1973 J AM SOC INFORM SCI                            1.000
-## 2  BURTON RE 1960 AM DOC                                       0.950
-## 3  PRICE DJD 1976 J AM SOC INFORM SCI                          0.948
-## 4  HAWKINS DT 1977 J AM SOC INFORM SCI                         0.926
-## 5  BROADUS RN 1987 J AM SOC INFORM SCI                         0.924
-## 6  HERTZEL DOROTHY 1987 ENCY LIBRARY INFO S7                   0.924
-## 7  SMALL H 1985 SCIENTOMETRICS                                 0.923
-## 8  BOOKSTEIN A 1976 LIBR QUART                                 0.919
-## 9  OCONNOR DO 1981 LIBR TRENDS                                 0.919
-## 10 BROOKES BC 1968 J DOC                                       0.918
+##    Vertex ID              Eigenvector Centrality
+## 1     SCIENCE                              1.000
+## 2     CITATION ANALYSIS                    0.677
+## 3     CITATION                             0.677
+## 4     JOURNALS                             0.673
+## 5     INDICATORS                           0.670
+## 6     IMPACT                               0.615
+## 7     PUBLICATION                          0.607
+## 8     H-INDEX                              0.507
+## 9     INFORMATION-SCIENCE                  0.472
+## 10    GOOGLE SCHOLAR                       0.462
 ## 
 ## 
 ## Betweenness Centrality: Top vertices
 ## 
-##                       Vertex ID              Betweenness Centrality
-## 1  HIRSCH JE 2005 P NATL ACAD SCI USA                        0.0830
-## 2  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI                 0.0634
-## 3  SMALL H 1973 J AM SOC INFORM SCI                          0.0562
-## 4  BRADFORD S. C 1934 ENGINEERING-LONDON                     0.0413
-## 5  GARFIELD E 2006 JAMA-J AM MED ASSOC                       0.0334
-## 6  GARFIELD E 1955 SCIENCE                                   0.0286
-## 7  PRITCHAR.A 1969 J DOC                                     0.0286
-## 8  KESSLER MM 1963 AM DOC                                    0.0215
-## 9  PRICE DJD 1976 J AM SOC INFORM SCI                        0.0200
-## 10 GARFIELD E 1972 SCIENCE                                   0.0189
+##    Vertex ID              Betweenness Centrality
+## 1       SCIENCE                           0.2883
+## 2       INDICATORS                        0.1142
+## 3       IMPACT                            0.1026
+## 4       CITATION                          0.0796
+## 5       CITATION ANALYSIS                 0.0707
+## 6       JOURNALS                          0.0538
+## 7       PUBLICATION                       0.0445
+## 8       GOOGLE SCHOLAR                    0.0380
+## 9       SURFACE                           0.0379
+## 10      POLICY                            0.0379
 ## 
 ## 
 ## PageRank Score: Top vertices
 ## 
-##                       Vertex ID              Pagerank Score
-## 1  HIRSCH JE 2005 P NATL ACAD SCI USA               0.00227
-## 2  SMALL H 1973 J AM SOC INFORM SCI                 0.00204
-## 3  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI        0.00168
-## 4  BRADFORD S. C 1934 ENGINEERING-LONDON            0.00156
-## 5  PRITCHAR.A 1969 J DOC                            0.00139
-## 6  GARFIELD E 2006 JAMA-J AM MED ASSOC              0.00128
-## 7  SMITH LC 1981 LIBR TRENDS                        0.00119
-## 8  SMALL HG 1978 SOC STUD SCI                       0.00117
-## 9  PRICE DJD 1976 J AM SOC INFORM SCI               0.00116
-## 10 KESSLER MM 1963 AM DOC                           0.00115
+##    Vertex ID              Pagerank Score
+## 1     SCIENCE                    0.02476
+## 2     INDICATORS                 0.01442
+## 3     IMPACT                     0.01412
+## 4     CITATION ANALYSIS          0.01361
+## 5     CITATION                   0.01266
+## 6     JOURNALS                   0.01068
+## 7     PUBLICATION                0.00953
+## 8     INFORMATION-SCIENCE        0.00910
+## 9     H-INDEX                    0.00841
+## 10    PERFORMANCE                0.00836
 ## 
 ## 
 ## Hub Score: Top vertices
 ## 
-##                        Vertex ID              Hub Score
-## 1  SMALL H 1973 J AM SOC INFORM SCI               1.000
-## 2  BURTON RE 1960 AM DOC                          0.950
-## 3  PRICE DJD 1976 J AM SOC INFORM SCI             0.948
-## 4  HAWKINS DT 1977 J AM SOC INFORM SCI            0.926
-## 5  BROADUS RN 1987 J AM SOC INFORM SCI            0.924
-## 6  HERTZEL DOROTHY 1987 ENCY LIBRARY INFO S7      0.924
-## 7  SMALL H 1985 SCIENTOMETRICS                    0.923
-## 8  BOOKSTEIN A 1976 LIBR QUART                    0.919
-## 9  OCONNOR DO 1981 LIBR TRENDS                    0.919
-## 10 BROOKES BC 1968 J DOC                          0.918
+##    Vertex ID              Hub Score
+## 1     SCIENCE                 1.000
+## 2     CITATION ANALYSIS       0.677
+## 3     CITATION                0.677
+## 4     JOURNALS                0.673
+## 5     INDICATORS              0.670
+## 6     IMPACT                  0.615
+## 7     PUBLICATION             0.607
+## 8     H-INDEX                 0.507
+## 9     INFORMATION-SCIENCE     0.472
+## 10    GOOGLE SCHOLAR          0.462
 ## 
 ## 
 ## Authority Score: Top vertices
 ## 
-##                        Vertex ID              Authority Score
-## 1  SMALL H 1973 J AM SOC INFORM SCI                     1.000
-## 2  BURTON RE 1960 AM DOC                                0.950
-## 3  PRICE DJD 1976 J AM SOC INFORM SCI                   0.948
-## 4  HAWKINS DT 1977 J AM SOC INFORM SCI                  0.926
-## 5  BROADUS RN 1987 J AM SOC INFORM SCI                  0.924
-## 6  HERTZEL DOROTHY 1987 ENCY LIBRARY INFO S7            0.924
-## 7  SMALL H 1985 SCIENTOMETRICS                          0.923
-## 8  BOOKSTEIN A 1976 LIBR QUART                          0.919
-## 9  OCONNOR DO 1981 LIBR TRENDS                          0.919
-## 10 BROOKES BC 1968 J DOC                                0.918
+##    Vertex ID              Authority Score
+## 1     SCIENCE                       1.000
+## 2     CITATION ANALYSIS             0.677
+## 3     CITATION                      0.677
+## 4     JOURNALS                      0.673
+## 5     INDICATORS                    0.670
+## 6     IMPACT                        0.615
+## 7     PUBLICATION                   0.607
+## 8     H-INDEX                       0.507
+## 9     INFORMATION-SCIENCE           0.472
+## 10    GOOGLE SCHOLAR                0.462
 ## 
 ## 
 ## Overall Ranking: Top vertices
 ## 
-##                       Vertex ID              Overall Ranking
-## 1  SMALL H 1973 J AM SOC INFORM SCI                        1
-## 2  HIRSCH JE 2005 P NATL ACAD SCI USA                      2
-## 3  PRICE DJD 1976 J AM SOC INFORM SCI                      3
-## 4  SMITH LC 1981 LIBR TRENDS                               4
-## 5  DE SOLLA PRICE DJ 1963 LITTLE SCI BIG SCI               5
-## 6  BURTON RE 1960 AM DOC                                   6
-## 7  SMALL HG 1978 SOC STUD SCI                              7
-## 8  GARFIELD E. 1979 CITATION INDEXING                      8
-## 9  BRADFORD S. C 1934 ENGINEERING-LONDON                   9
-## 10 SMALL H 1985 SCIENTOMETRICS                            10
+##    Vertex ID              Overall Ranking
+## 1     SCIENCE                           1
+## 2     INDICATORS                        2
+## 3     CITATION ANALYSIS                 3
+## 4     IMPACT                            4
+## 5     CITATION                          5
+## 6     JOURNALS                          6
+## 7     PUBLICATION                       7
+## 8     INFORMATION-SCIENCE               8
+## 9     H-INDEX                           9
+## 10    GOOGLE SCHOLAR                   10
 ```
 
 

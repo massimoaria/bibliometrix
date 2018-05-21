@@ -9,7 +9,7 @@ author:
   affiliation: 
   - Department of Economics, University of Campania Luigi Vanvitelli
   
-date: "2018-05-16"
+date: "2018-05-21"
 output: rmarkdown::html_vignette
 
 vignette: >
@@ -18,10 +18,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<div style="width:450px; height=300px">
+![ ](figures/logo_small.png)
+</div>
+
+
 #### Latest version
 
 ```
-## bibliometrix  1.9.3
+## bibliometrix  1.9.4
 ```
 
 #### http://www.bibliometrix.org
@@ -285,6 +290,7 @@ Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
 
 
 ```r
+options(width=100)
 S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
@@ -366,28 +372,17 @@ S <- summary(object = results, k = 10, pause = FALSE)
 ## 
 ## Top manuscripts per citations
 ## 
-##                                                              Paper         
-## 1  DAIM TU;RUEDA G;MARTIN H;GERDSRI P,(2006),TECHNOL. FORECAST. SOC. CHANG.
-## 2  WHITE HD;MCCAIN KW,(1989),ANNU. REV. INFORM. SCI. TECHNOL.              
-## 3  BORGMAN CL;FURNER J,(2002),ANNU. REV. INFORM. SCI. TECHNOL.             
-## 4  WEINGART P,(2005),SCIENTOMETRICS                                        
-## 5  NARIN F,(1994),SCIENTOMETRICS                                           
-## 6  CRONIN B,(2001),J. INF. SCI.                                            
-## 7  CHEN YC;YEH HY;WU JC;HASCHLER I;CHEN TJ;WETTER T,(2011),SCIENTOMETRICS  
-## 8  HOOD WW;WILSON CS,(2001),SCIENTOMETRICS                                 
-## 9  D'ANGELO CA;GIUFFRIDA C;ABRAMO G,(2011),J. AM. SOC. INF. SCI. TECHNOL.  
-## 10 NARIN F;OLIVASTRO D;STEVENS KA,(1994),EVAL. REV.                        
-##     TC TCperYear
-## 1  211     17.58
-## 2  196      6.76
-## 3  192     12.00
-## 4  151     11.62
-## 5  141      5.88
-## 6  129      7.59
-## 7  101     14.43
-## 8   71      4.18
-## 9   64      9.14
-## 10  62      2.58
+##                                                              Paper           TC TCperYear
+## 1  DAIM TU;RUEDA G;MARTIN H;GERDSRI P,(2006),TECHNOL. FORECAST. SOC. CHANG. 211     17.58
+## 2  WHITE HD;MCCAIN KW,(1989),ANNU. REV. INFORM. SCI. TECHNOL.               196      6.76
+## 3  BORGMAN CL;FURNER J,(2002),ANNU. REV. INFORM. SCI. TECHNOL.              192     12.00
+## 4  WEINGART P,(2005),SCIENTOMETRICS                                         151     11.62
+## 5  NARIN F,(1994),SCIENTOMETRICS                                            141      5.88
+## 6  CRONIN B,(2001),J. INF. SCI.                                             129      7.59
+## 7  CHEN YC;YEH HY;WU JC;HASCHLER I;CHEN TJ;WETTER T,(2011),SCIENTOMETRICS   101     14.43
+## 8  HOOD WW;WILSON CS,(2001),SCIENTOMETRICS                                   71      4.18
+## 9  D'ANGELO CA;GIUFFRIDA C;ABRAMO G,(2011),J. AM. SOC. INF. SCI. TECHNOL.    64      9.14
+## 10 NARIN F;OLIVASTRO D;STEVENS KA,(1994),EVAL. REV.                          62      2.58
 ## 
 ## 
 ## Most Productive Countries (of corresponding authors)
@@ -427,28 +422,17 @@ S <- summary(object = results, k = 10, pause = FALSE)
 ## 
 ## Most Relevant Sources
 ## 
-##                                                            Sources       
-## 1  SCIENTOMETRICS                                                        
-## 2  JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE AND TECHNOLOGY
-## 3  JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE               
-## 4  JOURNAL OF DOCUMENTATION                                              
-## 5  JOURNAL OF INFORMATION SCIENCE                                        
-## 6  JOURNAL OF INFORMETRICS                                               
-## 7  BRITISH JOURNAL OF ANAESTHESIA                                        
-## 8  LIBRI                                                                 
-## 9  SOCIAL WORK IN HEALTH CARE                                            
-## 10 TECHNOLOGICAL FORECASTING AND SOCIAL CHANGE                           
-##    Articles
-## 1        49
-## 2        14
-## 3         8
-## 4         6
-## 5         6
-## 6         6
-## 7         5
-## 8         5
-## 9         5
-## 10        5
+##                                                            Sources        Articles
+## 1  SCIENTOMETRICS                                                               49
+## 2  JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE AND TECHNOLOGY       14
+## 3  JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE                       8
+## 4  JOURNAL OF DOCUMENTATION                                                      6
+## 5  JOURNAL OF INFORMATION SCIENCE                                                6
+## 6  JOURNAL OF INFORMETRICS                                                       6
+## 7  BRITISH JOURNAL OF ANAESTHESIA                                                5
+## 8  LIBRI                                                                         5
+## 9  SOCIAL WORK IN HEALTH CARE                                                    5
+## 10 TECHNOLOGICAL FORECASTING AND SOCIAL CHANGE                                   5
 ## 
 ## 
 ## Most Relevant Keywords
@@ -497,46 +481,42 @@ To obtain the most frequent cited manuscripts:
 
 ```r
 CR <- citations(M, field = "article", sep = ".  ")
-CR$Cited[1:10]
+cbind(CR$Cited[1:10])
 ```
 
 ```
-## CR
-## HIRSCH JE, 2005, P NATL ACAD SCI USA, V102, P16569, DOI 101073/PNAS0507655102 
-##                                                                            26 
-##       SMALL H, 1973, J AM SOC INFORM SCI, V24, P265, DOI 101002/ASI4630240406 
-##                                                                            19 
-##                                   DE SOLLA PRICE DJ, 1963, LITTLE SCI BIG SCI 
-##                                                                            15 
-##                                             PRITCHARA, 1969, J DOC, V25, P348 
-##                                                                            14 
-##                             BRADFORD S C, 1934, ENGINEERING-LONDON, V137, P85 
-##                                                                            13 
-##       GARFIELD E, 2006, JAMA-J AM MED ASSOC, V295, P90, DOI 101001/JAMA295190 
-##                                                                            11 
-##                                    COLE FRANCIS J, 1917, SCI PROGR, V11, P578 
-##                                                                            10 
-##                  KESSLER MM, 1963, AM DOC, V14, P10, DOI 101002/ASI5090140103 
-##                                                                            10 
-##         SMALL HG, 1978, SOC STUD SCI, V8, P327, DOI 101177/030631277800800305 
-##                                                                            10 
-##                                         SMITH LC, 1981, LIBR TRENDS, V30, P83 
-##                                                                            10
+##                                                                               [,1]
+## HIRSCH JE, 2005, P NATL ACAD SCI USA, V102, P16569, DOI 101073/PNAS0507655102   26
+## SMALL H, 1973, J AM SOC INFORM SCI, V24, P265, DOI 101002/ASI4630240406         19
+## DE SOLLA PRICE DJ, 1963, LITTLE SCI BIG SCI                                     15
+## PRITCHARA, 1969, J DOC, V25, P348                                               14
+## BRADFORD S C, 1934, ENGINEERING-LONDON, V137, P85                               13
+## GARFIELD E, 2006, JAMA-J AM MED ASSOC, V295, P90, DOI 101001/JAMA295190         11
+## COLE FRANCIS J, 1917, SCI PROGR, V11, P578                                      10
+## KESSLER MM, 1963, AM DOC, V14, P10, DOI 101002/ASI5090140103                    10
+## SMALL HG, 1978, SOC STUD SCI, V8, P327, DOI 101177/030631277800800305           10
+## SMITH LC, 1981, LIBR TRENDS, V30, P83                                           10
 ```
 
 To obtain the most frequent cited first authors:
 
 ```r
 CR <- citations(M, field = "author", sep = ".  ")
-CR$Cited[1:10]
+cbind(CR$Cited[1:10])
 ```
 
 ```
-## CR
-##    GARFIELD E    BORNMANN L       SMALL H      CRONIN B     GLANZEL W 
-##           129            81            62            53            48 
-##      WHITE HD    KOSTOFF RN       NARIN F LEYDESDORFF L    BROOKES BC 
-##            48            45            41            40            38
+##               [,1]
+## GARFIELD E     129
+## BORNMANN L      81
+## SMALL H         62
+## CRONIN B        53
+## GLANZEL W       48
+## WHITE HD        48
+## KOSTOFF RN      45
+## NARIN F         41
+## LEYDESDORFF L   40
+## BROOKES BC      38
 ```
 
 The function *localCitations* generates the frequency table of the most local cited authors.
@@ -577,28 +557,17 @@ CR$Papers[1:10,]
 ```
 
 ```
-##                                                                                                                    Paper
-## 1985 - 1                                                                                     BROOKES BC, 1985, J INF SCI
-## 1985 - 2                                                                                       IKPAAHINDI L, 1985, LIBRI
-## 1985 - 3  VOVERENE O, 1985, NAUCHNO-TEKHNICHESKAYA INFORMATSIYA SERIYA 1-ORGANIZATSIYA I METODIKA INFORMATSIONNOI RABOTY
-## 1985 - 4                                                                                       WHITE EC, 1985, SPEC LIBR
-## 1986 - 5                                                                                    SEN SK, 1986, SCIENTOMETRICS
-## 1986 - 6                                                                                 PERSSON O, 1986, SCIENTOMETRICS
-## 1986 - 7                                                                                           DEGLAS F, 1986, LIBRI
-## 1987 - 8                                                                                           LINE MB, 1987, LIBR J
-## 1987 - 9                                                                                BROADUS RN, 1987, SCIENTOMETRICS
-## 1987 - 10                                                                          BROADUS RN, 1987, J EDUC LIBR INF SCI
-##                                  DOI Year LCS GCS
-## 1985 - 1  10.1177/016555158501000206 1985   0   2
-## 1985 - 2                        <NA> 1985   1  19
-## 1985 - 3                        <NA> 1985   0   1
-## 1985 - 4                        <NA> 1985   0   9
-## 1986 - 5          10.1007/BF02016859 1986   0   6
-## 1986 - 6          10.1007/BF02016861 1986   3  15
-## 1986 - 7   10.1515/LIBR.1986.36.1.40 1986   2   8
-## 1987 - 8                        <NA> 1987   0   1
-## 1987 - 9          10.1007/BF02016680 1987   5  38
-## 1987 - 10           10.2307/40323625 1987   2   2
+##                                    Paper                              DOI Year LCS GCS
+## 111 HOLDEN G, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_01 2005   6  22
+## 9       BROADUS RN, 1987, SCIENTOMETRICS               10.1007/BF02016680 1987   5  38
+## 229        BORNMANN L, 2013, J INFORMETR        10.1016/J.JOI.2013.02.005 2013   5  10
+## 46              SENGUPTA IN, 1992, LIBRI        10.1515/LIBR.1992.42.2.75 1992   4  20
+## 133   SMITH DR, 2008, CONTACT DERMATITIS 10.1111/J.1600-0536.2008.01405.X 2008   4  11
+## 6        PERSSON O, 1986, SCIENTOMETRICS               10.1007/BF02016861 1986   3  15
+## 83                 CRONIN B, 2000, J DOC         10.1108/EUM0000000007123 2000   3  20
+## 89           TRAYNOR M, 2001, J ADV NURS 10.1046/J.1365-2648.2001.02017.X 2001   3   8
+## 119      GLANZEL W, 2006, SCIENTOMETRICS       10.1556/SCIENT.67.2006.2.8 2006   3  41
+## 146           ABRAMO G, 2009, RES POLICY     10.1016/J.RESPOL.2008.11.001 2009   3  43
 ```
 
 
@@ -615,28 +584,17 @@ DF
 ```
 
 ```
-##             Dominance Factor Multi Authored First Authored
-## KOSTOFF RN         1.0000000              8              8
-## HOLDEN G           1.0000000              3              3
-## ABRAMO G           0.7500000              4              3
-## GARG KC            0.7500000              4              3
-## BORNMANN L         0.6250000              8              5
-## GLANZEL W          0.6000000              5              3
-## BORGMAN CL         0.3333333              3              1
-## D'ANGELO CA        0.2500000              4              1
-## WHITE HD           0.2500000              4              1
-## MARX W             0.1666667              6              1
-##             Rank by Articles Rank by DF
-## KOSTOFF RN                 2          1
-## HOLDEN G                  10          2
-## ABRAMO G                   5          3
-## GARG KC                    7          4
-## BORNMANN L                 1          5
-## GLANZEL W                  4          6
-## BORGMAN CL                 9          7
-## D'ANGELO CA                6          8
-## WHITE HD                   8          9
-## MARX W                     3         10
+##             Dominance Factor Multi Authored First Authored Rank by Articles Rank by DF
+## KOSTOFF RN         1.0000000              8              8                2          1
+## HOLDEN G           1.0000000              3              3               10          2
+## ABRAMO G           0.7500000              4              3                5          3
+## GARG KC            0.7500000              4              3                7          4
+## BORNMANN L         0.6250000              8              5                1          5
+## GLANZEL W          0.6000000              5              3                4          6
+## BORGMAN CL         0.3333333              3              1                9          7
+## D'ANGELO CA        0.2500000              4              1                6          8
+## WHITE HD           0.2500000              4              1                8          9
+## MARX W             0.1666667              6              1                3         10
 ```
 
 The Dominance Factor is a ratio indicating the fraction of multi-authored articles in which a scholar appears as the first author.
@@ -677,24 +635,15 @@ indices$CitationList
 
 ```
 ## [[1]]
-##                          Authors                        Journal Year
-## 2              MARX W;BORNMANN L SOZIALE WELT-ZEITSCHRIFT FUR S 2015
-## 4       BORNMANN L;LEYDESDORFF L        JOURNAL OF INFORMETRICS 2014
-## 8 BORNMANN L;BOWMAN BF;BAUER J;M     ZEITSCHRIFT FUR EVALUATION 2012
-## 3                     BORNMANN L            RESEARCH EVALUATION 2014
-## 1              BORNMANN L;MARX W        JOURNAL OF INFORMETRICS 2015
-## 6          BORNMANN L;WILLIAMS R        JOURNAL OF INFORMETRICS 2013
-## 7              BORNMANN L;MARX W        JOURNAL OF INFORMETRICS 2013
-## 5                     BORNMANN L JOURNAL OF THE AMERICAN SOCIET 2013
-##   TotalCitation
-## 2             0
-## 4             1
-## 8             2
-## 3             3
-## 1             5
-## 6            10
-## 7            11
-## 5            18
+##                          Authors                        Journal Year TotalCitation
+## 2              MARX W;BORNMANN L SOZIALE WELT-ZEITSCHRIFT FUR S 2015             0
+## 4       BORNMANN L;LEYDESDORFF L        JOURNAL OF INFORMETRICS 2014             1
+## 8 BORNMANN L;BOWMAN BF;BAUER J;M     ZEITSCHRIFT FUR EVALUATION 2012             2
+## 3                     BORNMANN L            RESEARCH EVALUATION 2014             3
+## 1              BORNMANN L;MARX W        JOURNAL OF INFORMETRICS 2015             5
+## 6          BORNMANN L;WILLIAMS R        JOURNAL OF INFORMETRICS 2013            10
+## 7              BORNMANN L;MARX W        JOURNAL OF INFORMETRICS 2013            11
+## 5                     BORNMANN L JOURNAL OF THE AMERICAN SOCIET 2013            18
 ```
 
 To calculate the h-index of the first 10 most productive authors (in this collection):
@@ -939,7 +888,7 @@ This suggests that it might be more practical to switch to a relative measure of
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # plot authors' similarity (first 20 authors), using salton similarity index
-net=networkPlot(NetMatrix, normalize = "salton", weighted=T, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
+net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 50, Title = "Authors' Coupling", type = "fruchterman", size=10,size.cex=T,remove.multiple=TRUE,labelsize=0.6,label.n=15,label.cex=F)
 ```
 
 ![](bibliometrix-vignette_files/figure-html/similarity-1.png)<!-- -->
@@ -1099,50 +1048,28 @@ net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
 ## 
 ##  Legend
 ## 
-##                                           Paper
-## 1986 - 1        PERSSON O, 1986, SCIENTOMETRICS
-## 1986 - 2                  DEGLAS F, 1986, LIBRI
-## 1987 - 3       BROADUS RN, 1987, SCIENTOMETRICS
-## 1987 - 4  BROADUS RN, 1987, J EDUC LIBR INF SCI
-## 1989 - 5           BORGMAN CL, 1989, COMMUN RES
-## 1990 - 6        PERITZ BC, 1990, SCIENTOMETRICS
-## 1992 - 7           GARG KC, 1992, J SCI IND RES
-## 1992 - 8               SENGUPTA IN, 1992, LIBRI
-## 1994 - 9        GLANZEL W, 1994, SCIENTOMETRICS
-## 2000 - 10                 CRONIN B, 2000, J DOC
-## 2000 - 11       WORMELL I, 2000, SCIENTOMETRICS
-## 2001 - 12           TRAYNOR M, 2001, J ADV NURS
-## 2001 - 13         HOOD WW, 2001, SCIENTOMETRICS
-## 2005 - 14  HOLDEN G, 2005, SOC WORK HEALTH CARE
-## 2006 - 15       GLANZEL W, 2006, SCIENTOMETRICS
-## 2008 - 16           THELWALL M, 2008, J INF SCI
-## 2008 - 17    SMITH DR, 2008, CONTACT DERMATITIS
-## 2009 - 18            ABRAMO G, 2009, RES POLICY
-## 2011 - 19        ABRAMO G, 2011, SCIENTOMETRICS
-## 2013 - 20         BORNMANN L, 2013, J INFORMETR
-## 2014 - 21        SCHREIBER M, 2014, J INFORMETR
-##                                        DOI Year LCS GCS
-## 1986 - 1                10.1007/BF02016861 1986   3  15
-## 1986 - 2         10.1515/LIBR.1986.36.1.40 1986   2   8
-## 1987 - 3                10.1007/BF02016680 1987   5  38
-## 1987 - 4                  10.2307/40323625 1987   2   2
-## 1989 - 5        10.1177/009365089016005002 1989   2  28
-## 1990 - 6                10.1007/BF02020148 1990   2   5
-## 1992 - 7                              <NA> 1992   2   4
-## 1992 - 8         10.1515/LIBR.1992.42.2.75 1992   4  20
-## 1994 - 9                              <NA> 1994   2   0
-## 2000 - 10         10.1108/EUM0000000007123 2000   3  20
-## 2000 - 11          10.1023/A:1005688520197 2000   2   1
-## 2001 - 12 10.1046/J.1365-2648.2001.02017.X 2001   3   8
-## 2001 - 13          10.1023/A:1017919924342 2001   2  71
-## 2005 - 14          10.1300/J010V41N03\\_01 2005   6  22
-## 2006 - 15       10.1556/SCIENT.67.2006.2.8 2006   3  41
-## 2008 - 16         10.1177/0165551507087238 2008   2  32
-## 2008 - 17 10.1111/J.1600-0536.2008.01405.X 2008   4  11
-## 2009 - 18     10.1016/J.RESPOL.2008.11.001 2009   3  43
-## 2011 - 19        10.1007/S11192-011-0459-X 2011   3  16
-## 2013 - 20        10.1016/J.JOI.2013.02.005 2013   5  10
-## 2014 - 21        10.1016/J.JOI.2014.10.001 2014   2   1
+##                                           Paper                              DOI Year LCS GCS
+## 1986 - 1        PERSSON O, 1986, SCIENTOMETRICS               10.1007/BF02016861 1986   3  15
+## 1986 - 2                  DEGLAS F, 1986, LIBRI        10.1515/LIBR.1986.36.1.40 1986   2   8
+## 1987 - 3       BROADUS RN, 1987, SCIENTOMETRICS               10.1007/BF02016680 1987   5  38
+## 1987 - 4  BROADUS RN, 1987, J EDUC LIBR INF SCI                 10.2307/40323625 1987   2   2
+## 1989 - 5           BORGMAN CL, 1989, COMMUN RES       10.1177/009365089016005002 1989   2  28
+## 1990 - 6        PERITZ BC, 1990, SCIENTOMETRICS               10.1007/BF02020148 1990   2   5
+## 1992 - 7           GARG KC, 1992, J SCI IND RES                             <NA> 1992   2   4
+## 1992 - 8               SENGUPTA IN, 1992, LIBRI        10.1515/LIBR.1992.42.2.75 1992   4  20
+## 1994 - 9        GLANZEL W, 1994, SCIENTOMETRICS                             <NA> 1994   2   0
+## 2000 - 10                 CRONIN B, 2000, J DOC         10.1108/EUM0000000007123 2000   3  20
+## 2000 - 11       WORMELL I, 2000, SCIENTOMETRICS          10.1023/A:1005688520197 2000   2   1
+## 2001 - 12           TRAYNOR M, 2001, J ADV NURS 10.1046/J.1365-2648.2001.02017.X 2001   3   8
+## 2001 - 13         HOOD WW, 2001, SCIENTOMETRICS          10.1023/A:1017919924342 2001   2  71
+## 2005 - 14  HOLDEN G, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_01 2005   6  22
+## 2006 - 15       GLANZEL W, 2006, SCIENTOMETRICS       10.1556/SCIENT.67.2006.2.8 2006   3  41
+## 2008 - 16           THELWALL M, 2008, J INF SCI         10.1177/0165551507087238 2008   2  32
+## 2008 - 17    SMITH DR, 2008, CONTACT DERMATITIS 10.1111/J.1600-0536.2008.01405.X 2008   4  11
+## 2009 - 18            ABRAMO G, 2009, RES POLICY     10.1016/J.RESPOL.2008.11.001 2009   3  43
+## 2011 - 19        ABRAMO G, 2011, SCIENTOMETRICS        10.1007/S11192-011-0459-X 2011   3  16
+## 2013 - 20         BORNMANN L, 2013, J INFORMETR        10.1016/J.JOI.2013.02.005 2013   5  10
+## 2014 - 21        SCHREIBER M, 2014, J INFORMETR        10.1016/J.JOI.2014.10.001 2014   2   1
 ```
 
 ## Main Authors' references (about bibliometrics)

@@ -41,6 +41,10 @@ localCitations <- function(M, sep = ";"){
   names(AU)=c("Author", "LocalCitations" )
   AU=AU[order(-AU$LocalCitations),]
   
+  if ("SR" %in% names(M)){
+    LCS=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=M$LCS,GCS=M$TC)
+    LCS=LCS[order(-LCS$LCS),]
+  }
   CR=list(Authors=AU,Papers=LCS)
   return(CR)
   

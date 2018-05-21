@@ -7,9 +7,9 @@
 networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
   Title = "Plot", type = "kamada", label = TRUE, labelsize = 1,
   label.cex = FALSE, label.short = TRUE, label.n = NULL, halo = FALSE,
-  cluster = "walktrap", vos.path = NULL, size = 3, curved = FALSE,
-  noloops = TRUE, remove.multiple = TRUE, remove.isolates = FALSE,
-  weighted = NULL, edgesize = 1, edges.min = 0)
+  cluster = "walktrap", vos.path = NULL, size = 3, size.cex = FALSE,
+  curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
+  remove.isolates = FALSE, weighted = NULL, edgesize = 1, edges.min = 0)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -26,6 +26,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 \item{type}{is a character object. It indicates the network map layout:
 
 \tabular{lll}{
+\code{type="auto"}\tab   \tab Automatic layout selection\cr
 \code{type="circle"}\tab   \tab Circle layout\cr
 \code{type="sphere"}\tab   \tab Sphere layout\cr
 \code{type="mds"}\tab   \tab Multidimensional Scaling layout\cr
@@ -49,8 +50,9 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
 
-\item{size}{is integer or logical. If TRUE the point size of each vertex is proportional to its degree. 
-If it is a integer, the point size of each vertex is constant equal to size. Default is \code{size=3}.}
+\item{size}{is integer. It defines the size of each vertex. Default is \code{size=3}.}
+
+\item{size.cex}{is logical. If TRUE the size of each vertex is proportional to its degree.}
 
 \item{curved}{is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}}
 

@@ -12,6 +12,7 @@
 #' @param type is a character object. It indicates the network map layout:
 #' 
 #' \tabular{lll}{
+#' \code{type="auto"}\tab   \tab Automatic layout selection\cr
 #' \code{type="circle"}\tab   \tab Circle layout\cr
 #' \code{type="sphere"}\tab   \tab Sphere layout\cr
 #' \code{type="mds"}\tab   \tab Multidimensional Scaling layout\cr
@@ -70,13 +71,13 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   if (!is.null(normalize)){
     S=normalizeSimilarity(NetMatrix, type = normalize)
     bsk.S <- graph.adjacency(S,mode="undirected",weighted=T)
-    weighted=NULL
+    #weighted=NULL
   }
   #diag(NetMatrix)=0
   #num=apply(NetMatrix, 2, max)
   
   ## legacy with version <1.9.4
-  if (size==TRUE){
+  if (isTRUE(size)){
     size=20
     size.cex=T
   }
@@ -86,27 +87,13 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
   
   if (isTRUE(label.short) | type=="vosviewer"){
-    LABEL=colnames(NET)
-    LABEL2=regexpr(".([0-9]?[0-9]?[0-9]?[0-9]).*",LABEL)
-    LABEL2[LABEL2==-1 | LABEL2==1]=nchar(LABEL[LABEL2==-1 | LABEL2==1])-4
-    LABEL2=substr(LABEL,1,LABEL2+4)
-    
-    ## assign an unique name to each label
-    tab=sort(table(LABEL2),decreasing=T)
-    dup=names(tab[tab>1])
-    for (i in 1:length(dup)){
-      ind=which(LABEL2 %in% dup[i])
-      if (length(ind)>0){
-        LABEL2[ind]=paste0(LABEL2[ind],"-",as.character(1:length(ind)),sep="")
-      }
-    }
-    
-   V(bsk.network)$name=LABEL2
+    V(bsk.network)$name=shortLabel(NET)
   } else {V(bsk.network)$name <- colnames(NET)}
   
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- degree(bsk.network, mode="all")
+  V(bsk.network)$deg<-deg
   if (isTRUE(size.cex)){V(bsk.network)$size <- (deg/max(deg)[1])*size}
   else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
   
@@ -160,17 +147,19 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     if (!isTRUE(bsk.S)){V(bsk.S)$color=V(bsk.network)$color}
     net_groups <- cl$net_groups
     
-    ## Plot the network
+    ## Labelling the network
     LABEL=""
     if (isTRUE(label)){
       LABEL=V(bsk.network)$name
       if (!is.null(label.n)){
-        q=1-(label.n/length(V(bsk.network)$label.cex))
-        q=quantile(V(bsk.network)$label.cex,q)
-        LABEL[V(bsk.network)$label.cex<q]=""
+        q=1-(label.n/length(V(bsk.network)$deg))
+        q=quantile(V(bsk.network)$deg,q)
+        LABEL[V(bsk.network)$deg<q]=""
       }
     }
     
+    
+    ## Edge size
     E(bsk.network)$num=count_multiple(bsk.network, eids = E(bsk.network))
     if (!is.null(weighted)){
       E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
@@ -183,6 +172,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     
     bsk.network1=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
     
+    ## Plot the network
+    
     if (isTRUE(halo) & cluster!="null"){
       plot(net_groups,bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
       
@@ -190,7 +181,9 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
       plot(bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
     }
     
-  }else{net_groups=NA}  
+  }else{net_groups=NA} 
+  
+  ## Output
   if (cluster!="none" & type!="vosviewer"){
     cluster_res=data.frame(net_groups$names,net_groups$membership,as.numeric(betweenness(bsk.network,directed = F,normalized = F)))
     names(cluster_res)=c("vertex","cluster","btw_centrality")
@@ -201,6 +194,10 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   net=list(graph=bsk.network, cluster_obj=net_groups, cluster_res=cluster_res)
   
   return(net)}
+
+
+
+
 
 
 ### internal functions:
@@ -246,6 +243,7 @@ clusteringNetwork <- function(bsk.network,cluster){
 
 switchLayout <- function(bsk.network,type,vos.path){
   switch(type,
+         auto={l <- layout.auto(bsk.network)},
          circle={l <- layout.circle(bsk.network)},
          star={l <- layout.star(bsk.network)},
          sphere={l <- layout.sphere(bsk.network)},
@@ -264,4 +262,23 @@ switchLayout <- function(bsk.network,type,vos.path){
   
   if (type!="vosviewer"){l=layout.norm(l)}else{l=NA}
   return(l)
+}
+
+### shortlabel
+shortLabel <- function(NET){
+  LABEL=colnames(NET)
+  LABEL2=regexpr(".([0-9]?[0-9]?[0-9]?[0-9]).*",LABEL)
+  LABEL2[LABEL2==-1 | LABEL2==1]=nchar(LABEL[LABEL2==-1 | LABEL2==1])-4
+  LABEL2=substr(LABEL,1,LABEL2+4)
+  
+  ## assign an unique name to each label
+  tab=sort(table(LABEL2),decreasing=T)
+  dup=names(tab[tab>1])
+  for (i in 1:length(dup)){
+    ind=which(LABEL2 %in% dup[i])
+    if (length(ind)>0){
+      LABEL2[ind]=paste0(LABEL2[ind],"-",as.character(1:length(ind)),sep="")
+    }
+  }
+  return(LABEL2)
 }

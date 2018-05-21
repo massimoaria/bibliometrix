@@ -37,6 +37,8 @@ summary.bibliometrix<-function(object, ...){
 
   if (class(object)!="bibliometrix"){cat('\n argument "object" have to be an object of class "bibliometrix"\n');return(NA)}
   
+  options(width=100)
+  
   arguments <- list(...)
   if (sum(names(arguments)=="k")==0){k=10} else {k=arguments$k}
   if (sum(names(arguments)=="pause")==0){pause=FALSE} else {pause=arguments$pause}

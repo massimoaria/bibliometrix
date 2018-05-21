@@ -18,6 +18,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<div style="width:450px; height=300px">
+![ ](figures/logo_small.png)
+</div>
+
+
 #### Latest version
 ```{r echo=FALSE}
 #output: rmarkdown::html_vignette
@@ -258,6 +263,7 @@ It displays main information about the bibliographic data frame and several tabl
 Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
 
 ```{r summary generic function}
+options(width=100)
 S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
@@ -287,13 +293,13 @@ The figure shows the reference string of the first manuscript. In this case, the
 To obtain the most frequent cited manuscripts:
 ```{r Article citation}
 CR <- citations(M, field = "article", sep = ".  ")
-CR$Cited[1:10]
+cbind(CR$Cited[1:10])
 ```
 
 To obtain the most frequent cited first authors:
 ```{r Author citation}
 CR <- citations(M, field = "author", sep = ".  ")
-CR$Cited[1:10]
+cbind(CR$Cited[1:10])
 ```
 
 The function *localCitations* generates the frequency table of the most local cited authors.
@@ -512,11 +518,11 @@ This suggests that it might be more practical to switch to a relative measure of
 
 *normalizeSimilarity* function calculates Association strength, Inclusion, Jaccard or Salton similarity among vertices of a network. *normalizeSimilarity* can be recalled directly from *networkPlot()* function using the argument *normalize*. 
 
-```{r similarity, fig.height=7, fig.width=7, warning=FALSE}
+```{r similarity, fig.height=9, fig.width=9, warning=FALSE}
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # plot authors' similarity (first 20 authors), using salton similarity index
-net=networkPlot(NetMatrix, normalize = "salton", weighted=T, n = 20, Title = "Authors' Coupling", type = "fruchterman", size=FALSE,remove.multiple=TRUE)
+net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 50, Title = "Authors' Coupling", type = "fruchterman", size=10,size.cex=T,remove.multiple=TRUE,labelsize=0.6,label.n=15,label.cex=F)
 
 ```
 

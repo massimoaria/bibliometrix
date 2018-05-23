@@ -99,16 +99,16 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   df$name=unlist(labels)
   df=df[order(df$label),]
   row.names(df)=df$label
-  A=aggregate(df_lab$sC,by=list(groups),'sum')
-  df$sum=A[,2]
+  A=aggregate(df_lab$sC,by=list(groups),'max')
+  df$freq=A[,2]
   
   meandens=mean(df$rdensity)
   meancentr=mean(df$rcentrality)
-  df=df[df$sum>=minfreq,]
+  df=df[df$freq>=minfreq,]
   
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity)) +
-    geom_point(aes(size=log(as.numeric(df$sum))),shape=20,col=df$color)     # Use hollow circles
-  g=g+geom_label_repel(aes(label=ifelse(df$sum>1,unlist(df$name),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
+    geom_point(aes(size=log(as.numeric(df$freq))),shape=20,col=df$color)     # Use hollow circles
+  g=g+geom_label_repel(aes(label=ifelse(df$freq>1,unlist(df$name),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
     geom_vline(xintercept = meancentr,linetype=2) + theme(legend.position="none") +
     scale_radius(range=c(1, 50))+labs(x = "Centrality", y = "Density")+
     theme(axis.text.x=element_blank(),

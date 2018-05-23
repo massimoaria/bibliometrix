@@ -82,7 +82,7 @@ thematicEvolution <- function(...,weighted=FALSE){
         Inc[cont,4]=paste(intersect(w1,w2),collapse=";")
         wi=intersect(w1,w2)
         si=sum(res1$words$Occurrences[res1$words$Words %in% wi])
-        s1=min(c(res1$clusters$sum[res1$clusters$label==i],res2$clusters$sum[res2$clusters$label==j]),na.rm=T)
+        s1=min(c(res1$clusters$freq[res1$clusters$label==i],res2$clusters$freq[res2$clusters$label==j]),na.rm=T)
         Inc[cont,5]=si
         Inc[cont,6]=s1
         Inc[cont,7]=si/s1

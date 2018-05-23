@@ -219,9 +219,11 @@ AU_CO<-function(M){
       if (sum(ind>-1)>0) {M$AU_CO[i]=paste(unique(names(ind[ind>-1])),collapse=";")}  
     }
   }
+  
   M$AU_CO=gsub("[[:digit:]]","",M$AU_CO)
   M$AU_CO=gsub(".", "", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
+  M$AU_CO=gsub("UNITED STATES","USA",M$AU_CO)
   
   if (M$DB[1]=="ISI"){M$AU_CO=removeLastChar(M$AU_CO,last=".")}
   if (M$DB[1]=="SCOPUS"){M$AU_CO=removeLastChar(M$AU_CO,last=";")}
@@ -267,6 +269,7 @@ AU1_CO<-function(M,sep){
     }
   }
   M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
+  M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
   #M$AU1_CO=gsub(".", "", M$AU1_CO, fixed = TRUE)
   #M$AU1_CO=gsub(";;", ";", M$AU1_CO, fixed = TRUE)
   return(M)

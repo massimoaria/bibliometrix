@@ -40,7 +40,6 @@
 #' @param edgesize is an integer. It indicates the network edge size.
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @param label.n is an integer. It indicates the number of vertex labels to draw.
-#' @param label.short is a logical. If TRUE label are plotted in short format.
 #' @return It is a list containing the following elements:
 #' \tabular{lll}{
 #' \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
@@ -63,7 +62,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE,label.short=TRUE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
   NET=NetMatrix
   bsk.S=TRUE
@@ -83,9 +82,9 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   # Create igraph object
   bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
   
-  if (isTRUE(label.short) | type=="vosviewer"){
-    V(bsk.network)$name=shortLabel(NET)
-  } else {V(bsk.network)$name <- colnames(NET)}
+  
+  # vertex labels 
+  V(bsk.network)$name <- colnames(NET)
   
   
   # Compute node degrees (#links) and use that to set node size:
@@ -260,20 +259,34 @@ switchLayout <- function(bsk.network,type,vos.path){
 }
 
 ### shortlabel
-shortLabel <- function(NET){
-  LABEL=colnames(NET)
-  LABEL2=regexpr(".([0-9]?[0-9]?[0-9]?[0-9]).*",LABEL)
-  LABEL2[LABEL2==-1 | LABEL2==1]=nchar(LABEL[LABEL2==-1 | LABEL2==1])-4
-  LABEL2=substr(LABEL,1,LABEL2+4)
+labelShort <- function(NET,db="isi"){
+  LABEL<-colnames(NET)
+  YEAR=suppressWarnings(as.numeric(sub('.*(\\d{4}).*', '\\1', LABEL)))
+  YEAR[is.na(YEAR)]=""
+  switch(db,
+         isi={
+           AU=strsplit(LABEL," ")
+           AU=unlist(lapply(AU, function(l){paste(l[1]," ",l[2],sep="")}))
+           LABEL=paste0(AU, " ", YEAR, sep="")
+         },
+         scopus={
+           AU=strsplit(LABEL,"\\. ")
+           AU=unlist(lapply(AU, function(l){l[1]}))
+           LABEL=paste0(AU, ". ", YEAR, sep="")
+         })
   
   ## assign an unique name to each label
-  tab=sort(table(LABEL2),decreasing=T)
+  tab=sort(table(LABEL),decreasing=T)
   dup=names(tab[tab>1])
   for (i in 1:length(dup)){
-    ind=which(LABEL2 %in% dup[i])
+    ind=which(LABEL %in% dup[i])
     if (length(ind)>0){
-      LABEL2[ind]=paste0(LABEL2[ind],"-",as.character(1:length(ind)),sep="")
+      LABEL[ind]=paste0(LABEL[ind],"-",as.character(1:length(ind)),sep="")
     }
   }
-  return(LABEL2)
+  
+  
+  return(LABEL)
 }
+  
+  

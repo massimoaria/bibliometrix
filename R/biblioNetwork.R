@@ -163,5 +163,41 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
   # delete empty vertices
   NetMatrix=NetMatrix[nchar(colnames(NetMatrix))!=0,nchar(colnames(NetMatrix))!=0]
   
+  # short label for scopus references
+  if (network=="references"){
+    LABEL<-labelShort(NetMatrix,db=tolower(M$DB[1]))
+  }
+  colnames(NetMatrix)=rownames(NetMatrix)=LABEL
   return(NetMatrix)
+}
+
+### shortlabel
+labelShort <- function(NET,db="isi"){
+  LABEL<-colnames(NET)
+  YEAR=suppressWarnings(as.numeric(sub('.*(\\d{4}).*', '\\1', LABEL)))
+  YEAR[is.na(YEAR)]=""
+  switch(db,
+         isi={
+           AU=strsplit(LABEL," ")
+           AU=unlist(lapply(AU, function(l){paste(l[1]," ",l[2],sep="")}))
+           LABEL=paste0(AU, " ", YEAR, sep="")
+         },
+         scopus={
+           AU=strsplit(LABEL,"\\. ")
+           AU=unlist(lapply(AU, function(l){l[1]}))
+           LABEL=paste0(AU, ". ", YEAR, sep="")
+         })
+  
+  ## assign an unique name to each label
+  tab=sort(table(LABEL),decreasing=T)
+  dup=names(tab[tab>1])
+  for (i in 1:length(dup)){
+    ind=which(LABEL %in% dup[i])
+    if (length(ind)>0){
+      LABEL[ind]=paste0(LABEL[ind],"-",as.character(1:length(ind)),sep="")
+    }
+  }
+  
+  
+  return(LABEL)
 }

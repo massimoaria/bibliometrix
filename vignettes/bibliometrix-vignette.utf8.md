@@ -1,7 +1,7 @@
 ---
 title: "A brief introduction to bibliometrix"
 author: "Massimo Aria and Corrado Cuccurullo"
-date: "2018-05-21"
+date: "2018-05-23"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
@@ -105,7 +105,7 @@ http://www.massimoaria.com
 
 #### Dr. Corrado Cuccurullo
 
-Full Professor in Accounting 
+Full Professor in Strategy and Corporate Governance 
 
 PhD in Management
 

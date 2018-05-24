@@ -306,8 +306,8 @@ AU_UN<-function(M,sep){
       #   } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
       #   } else {index=append(index,affL[indd[1]])}
       
-      if (length(indd)==0){index=append(index,"NR")
-      } else if (isTRUE(ND(affL,indd)$cond)){index=append(index,"ND")
+      if (length(indd)==0){index=append(index,"NOTREPORTED")
+      } else if (isTRUE(ND(affL,indd)$cond)){index=append(index,"NOTDECLARED")
       } else {index=append(index,ND(affL,indd)$affL)}
       
       
@@ -348,8 +348,8 @@ AU_UN<-function(M,sep){
       
       indd=unlist(lapply(uTags,function(x) which(regexpr(x,affL,fixed=TRUE)!=-1)))
       
-      if (length(indd)==0){index=append(index,"NR")
-      } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"ND")
+      if (length(indd)==0){index=append(index,"NOTREPORTED")
+      } else if (grepl("[[:digit:]]", affL[indd[1]])){index=append(index,"NOTDECLARED")
       } else {index=append(index,affL[indd[1]])}
       
     }
@@ -380,12 +380,12 @@ AU_UN<-function(M,sep){
     }
   }
   M$AU_UN[is.na(AFF)]=NA
-  M$AU_UN[M$AU_UN=="ND"]=NA
-  M$AU_UN[M$AU_UN=="NR"]=NA
-  M$AU_UN=gsub("NR;","",M$AU_UN)
-  M$AU_UN=gsub(";NR","",M$AU_UN)
-  M$AU_UN=gsub("ND;","",M$AU_UN)
-  M$AU_UN=gsub(";ND","",M$AU_UN)
+  M$AU_UN[M$AU_UN=="NOTDECLARED"]=NA
+  M$AU_UN[M$AU_UN=="NOTREPORTED"]=NA
+  M$AU_UN=gsub("NOTREPORTED;","",M$AU_UN)
+  M$AU_UN=gsub(";NOTREPORTED","",M$AU_UN)
+  M$AU_UN=gsub("NOTDECLARED;","",M$AU_UN)
+  M$AU_UN=gsub("NOTDECLARED","",M$AU_UN)
   
   return(M)
 }

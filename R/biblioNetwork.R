@@ -166,8 +166,9 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
   # short label for scopus references
   if (network=="references"){
     LABEL<-labelShort(NetMatrix,db=tolower(M$DB[1]))
+    colnames(NetMatrix)=rownames(NetMatrix)=LABEL
   }
-  colnames(NetMatrix)=rownames(NetMatrix)=LABEL
+  
   return(NetMatrix)
 }
 

@@ -4,7 +4,8 @@
 #' @param object is the object for which a summary is desired.
 #' @param ... can accept two arguments:\cr
 #' \code{k} integer, used for table formatting (number of rows). Default value is 10.\cr
-#' \code{pause} locical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.
+#' \code{pause} locical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.\cr
+#' \code{width} integer, used to define screen output width. Default value is \code{width = 120}.
 #' @return The function \code{summary} computes and returns a list of summary statistics of the object of class \code{bibliometrics}.
 #'
 #' the list contains the following objects:
@@ -37,11 +38,12 @@ summary.bibliometrix<-function(object, ...){
 
   if (class(object)!="bibliometrix"){cat('\n argument "object" have to be an object of class "bibliometrix"\n');return(NA)}
   
-  options(width=100)
+  options(width=130)
   
   arguments <- list(...)
   if (sum(names(arguments)=="k")==0){k=10} else {k=arguments$k}
   if (sum(names(arguments)=="pause")==0){pause=FALSE} else {pause=arguments$pause}
+  if (sum(names(arguments)=="width")==0){options(width=120)} else {options(width=arguments$width)}
   
   Co=NULL
   AC=NULL

@@ -269,7 +269,7 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
   
   ## AU_UN field creation
   if ("C1" %in% names(M)){
-    cat("\nGenereting affiliation field tag AU_UN from C1:  ")
+    cat("\nGenerating affiliation field tag AU_UN from C1:  ")
     
     M <- metaTagExtraction(M, Field="AU_UN")
     cat("Done!\n\n")

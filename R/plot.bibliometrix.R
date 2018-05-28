@@ -86,15 +86,15 @@ plot.bibliometrix<-function(x, ...){
   
   g=ggplot(Y, aes(x = Y$Year, y = Y$Freq)) +
     geom_line() +
-    geom_area(fill = 'cyan', alpha = .1) +
+    geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'
          , y = 'Articles'
          , title = "Annual Scientific Production") +
     theme(text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = '#444B5A')
+          ,panel.background = element_rect(fill = '#EFEFEF')
           ,panel.grid.minor = element_line(color = '#4d5566')
           ,panel.grid.major = element_line(color = '#586174')
-          ,plot.title = element_text(size = 28)
+          ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0)
           ,axis.title.x = element_text(hjust = 0)
@@ -121,15 +121,15 @@ plot.bibliometrix<-function(x, ...){
   
   g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +
     geom_line() +
-    geom_area(fill = 'cyan', alpha = .1) +
+    geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'
          , y = 'Citations'
          , title = "Average Article Citations per Year")+
     theme(text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = '#444B5A')
+          ,panel.background = element_rect(fill = '#EFEFEF')
           ,panel.grid.minor = element_line(color = '#4d5566')
           ,panel.grid.major = element_line(color = '#586174')
-          ,plot.title = element_text(size = 28)
+          ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0)
           ,axis.title.x = element_text(hjust = 0)
@@ -142,18 +142,18 @@ plot.bibliometrix<-function(x, ...){
   
   g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperArt)) +
     geom_line() +
-    geom_area(fill = 'cyan', alpha = .1) +
+    geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'
          , y = 'Citations'
          , title = "Average Total Citations per Year")+
     theme(text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = '#444B5A')
+          ,panel.background = element_rect(fill = '#EFEFEF')
           ,panel.grid.minor = element_line(color = '#4d5566')
           ,panel.grid.major = element_line(color = '#586174')
-          ,plot.title = element_text(size = 28)
+          ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0)
-          ,axis.title.x = element_text(hjust = 0)
+          ,axis.title.x = element_text(hjust = 0, angle = 0)
     )   
   plot(g)
   #TCY=aggregate(x$TotalCitation,list(x$Years),"sum")

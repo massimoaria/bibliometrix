@@ -129,11 +129,12 @@ plot.bibliometrix<-function(x, ...){
   
   ## inserting missing years
   YY=setdiff(seq(min(x$Years),max(x$Years)),Table2$Year)
+  if (length(YY>0)){
   YY=data.frame(YY,0,0,0,0)
   names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
   Table2=rbind(Table2,YY)
   Table2=Table2[order(Table2$Year),]
-  row.names(Table2)=Table2$Year
+  row.names(Table2)=Table2$Year}
   
   
   g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +

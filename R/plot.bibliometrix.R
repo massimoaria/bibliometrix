@@ -5,7 +5,8 @@
 #' @param ... can accept two arguments:\cr 
 #' \code{k} is an integer, used for plot formatting (number of objects). Default value is 10.\cr
 #' \code{pause} is a logical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.
-#' @return none. The function \code{plot} returns a set of plots of the object of class \code{bibliometrix}.
+#' @return The function \code{plot} returns a set of plots of the object of class \code{bibliometrix} 
+#' and a dataframe of citation analysis.
 #'
 #' @examples
 #' data(scientometrics)
@@ -80,8 +81,14 @@ plot.bibliometrix<-function(x, ...){
 #  plot(as.numeric(row.names(Y)),Y,type="l",main="Articles per Year",xlab="Year",ylab="N.Articles",col="blue")
 #  lines(as.numeric(row.names(Ym)),Ym,col="red")
 #  legend(x="topleft",c("Total Articles","Multi Auth. Articles"),col=c("blue","red"),lty = c(1, 1),cex=0.6,bty="n")
+  
   Tab=table(x$Years)
-  Y=data.frame(Year=as.numeric(names(Tab)),Freq=as.numeric(Tab))
+  
+  ## inserting missing years
+  YY=setdiff(seq(min(x$Years),max(x$Years)),names(Tab))
+  Y=data.frame(Year=as.numeric(c(names(Tab),YY)),Freq=c(as.numeric(Tab),rep(0,length(YY))))
+  Y=Y[order(Y$Year),]
+  
   names(Y)=c("Year","Freq")
   
   g=ggplot(Y, aes(x = Y$Year, y = Y$Freq)) +
@@ -90,10 +97,11 @@ plot.bibliometrix<-function(x, ...){
     labs(x = 'Year'
          , y = 'Articles'
          , title = "Annual Scientific Production") +
+    scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
     theme(text = element_text(color = "#444444")
           ,panel.background = element_rect(fill = '#EFEFEF')
-          ,panel.grid.minor = element_line(color = '#4d5566')
-          ,panel.grid.major = element_line(color = '#586174')
+          ,panel.grid.minor = element_line(color = '#FFFFFF')
+          ,panel.grid.major = element_line(color = '#FFFFFF')
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0)
@@ -101,7 +109,7 @@ plot.bibliometrix<-function(x, ...){
     )   
   plot(g)
   
-  
+  Table2=NA
   if(!(x$DB %in% c("COCHRANE","PUBMED"))){
   
   if (pause == TRUE){
@@ -119,16 +127,26 @@ plot.bibliometrix<-function(x, ...){
   Table2$Annual=Table2$xx/Table2$Years
   names(Table2)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
   
+  ## inserting missing years
+  YY=setdiff(seq(min(x$Years),max(x$Years)),Table2$Year)
+  YY=data.frame(YY,0,0,0,0)
+  names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
+  Table2=rbind(Table2,YY)
+  Table2=Table2[order(Table2$Year),]
+  row.names(Table2)=Table2$Year
+  
+  
   g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +
     geom_line() +
     geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'
          , y = 'Citations'
          , title = "Average Article Citations per Year")+
+    scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
     theme(text = element_text(color = "#444444")
           ,panel.background = element_rect(fill = '#EFEFEF')
-          ,panel.grid.minor = element_line(color = '#4d5566')
-          ,panel.grid.major = element_line(color = '#586174')
+          ,panel.grid.minor = element_line(color = '#FFFFFF')
+          ,panel.grid.major = element_line(color = '#FFFFFF')
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0)
@@ -146,19 +164,19 @@ plot.bibliometrix<-function(x, ...){
     labs(x = 'Year'
          , y = 'Citations'
          , title = "Average Total Citations per Year")+
+    scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
     theme(text = element_text(color = "#444444")
           ,panel.background = element_rect(fill = '#EFEFEF')
-          ,panel.grid.minor = element_line(color = '#4d5566')
-          ,panel.grid.major = element_line(color = '#586174')
+          ,panel.grid.minor = element_line(color = '#FFFFFF')
+          ,panel.grid.major = element_line(color = '#FFFFFF')
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0)
           ,axis.title.x = element_text(hjust = 0, angle = 0)
     )   
   plot(g)
-  #TCY=aggregate(x$TotalCitation,list(x$Years),"sum")
-  #plot(as.numeric(row.names(Y)),TCY[,2]/Y,type="l",main="Average Citations per Article",xlab="Year",ylab="Average Citations",col="blue")
-  #lines(as.numeric(row.names(Y)),Y,col="red")
-  #legend(x="topright",c("Average Citations","N. of Articles"),col=c("blue","red"),lty = c(1, 1),cex=0.6,bty="n")
-}
+  
+  }
+  invisible(Table2)
+  
 }

@@ -29,7 +29,7 @@
 
 localCitations <- function(M, sep = ";"){
   
-  H=histNetwork(M,n=dim(M)[1],sep=sep)
+  H=histNetwork(M,sep=sep)
   LCS=H$histData
   M=H$M
   rm(H)

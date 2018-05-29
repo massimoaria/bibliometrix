@@ -70,6 +70,7 @@
 #' @importFrom factoextra get_ca_col
 #' @importFrom factoextra fviz_nbclust
 #' @importFrom factoextra fviz_cluster
+#' @importFrom igraph get.edgelist
 #' @importFrom igraph graph.adjacency
 #' @importFrom igraph degree
 #' @importFrom igraph plot.igraph

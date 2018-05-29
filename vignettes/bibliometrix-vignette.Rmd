@@ -815,13 +815,13 @@ The historiographic map is a graph proposed by E. Garfield to represent a chrono
 
 The function \code{histNetwork} generates a chronological direct citation network matrix which can be plotted using *histPlot*:
 
-```{r Historical Co-citation network, fig.height=9, fig.width=7, warning=FALSE}
+```{r Historical Co-citation network, fig.height=9, fig.width=9, warning=FALSE}
 # Create a historical citation network
-
-histResults <- histNetwork(M, n = 20, sep = ".  ")
+options(width=130)
+histResults <- histNetwork(M, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
+net <- histPlot(histResults, n=30, size = 10, size.cex=TRUE, arrowsize = 0.5)
 
 ```
 

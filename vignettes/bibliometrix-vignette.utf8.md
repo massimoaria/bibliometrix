@@ -1,7 +1,7 @@
 ---
 title: "A brief introduction to bibliometrix"
 author: "Massimo Aria and Corrado Cuccurullo"
-date: "2018-05-23"
+date: "2018-05-29"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
@@ -247,14 +247,6 @@ install.packages("bibliometrix", dependencies=TRUE)      ### installs bibliometr
 library(bibliometrix)   ### load bibliometrix package
 ```
 
-```
-## To cite bibliometrix in publications, please use:
-## 
-## Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.
-## 
-## http:\\www.bibliometrix.org
-```
-
 ## Data loading and converting
 
 The export file can be read by R using the function *readFiles*:
@@ -289,7 +281,7 @@ M <- convert2df(D, dbsource = "isi", format = "bibtex")
 ## Done!
 ## 
 ## 
-## Genereting affiliation field tag AU_UN from C1:  Done!
+## Generating affiliation field tag AU_UN from C1:  Done!
 ```
 
 *convert2df* creates a bibliographic data frame with cases corresponding to manuscripts and variables to Field Tag in the original export file.
@@ -1072,10 +1064,9 @@ names(netstat$network)
 ```
 
 ```
-##  [1] "networkSize"             "networkDensity"          "networkTransitivity"    
-##  [4] "networkDiameter"         "networkDegreeDist"       "networkCentrDegree"     
-##  [7] "networkCentrCloseness"   "networkCentrEigen"       "networkCentrbetweenness"
-## [10] "NetworkAverPathLeng"
+##  [1] "networkSize"             "networkDensity"          "networkTransitivity"     "networkDiameter"        
+##  [5] "networkDegreeDist"       "networkCentrDegree"      "networkCentrCloseness"   "networkCentrEigen"      
+##  [9] "networkCentrbetweenness" "NetworkAverPathLeng"
 ```
 
 ### The main indices of centrality and prestige of vertices
@@ -1106,9 +1097,9 @@ names(netstat$vertex)
 ```
 
 ```
-## [1] "vertexID"               "vertexCentrDegree"      "vertexCentrCloseness"  
-## [4] "vertexCentrEigen"       "vertexCentrBetweenness" "vertexPageRank"        
-## [7] "vertexHub"              "vertexAuthority"        "Ranking"
+## [1] "vertexID"               "vertexCentrDegree"      "vertexCentrCloseness"   "vertexCentrEigen"      
+## [5] "vertexCentrBetweenness" "vertexPageRank"         "vertexHub"              "vertexAuthority"       
+## [9] "Ranking"
 ```
 
 To summarize the main results of the *networkStat* function, use the generic function *summary*.
@@ -1352,8 +1343,8 @@ The function \code{histNetwork} generates a chronological direct citation networ
 
 ```r
 # Create a historical citation network
-
-histResults <- histNetwork(M, n = 20, sep = ".  ")
+options(width=130)
+histResults <- histNetwork(M, sep = ".  ")
 ```
 
 ```
@@ -1364,7 +1355,7 @@ histResults <- histNetwork(M, n = 20, sep = ".  ")
 
 ```r
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
+net <- histPlot(histResults, n=30, size = 10, size.cex=TRUE, arrowsize = 0.5)
 ```
 
 ![](bibliometrix-vignette_files/figure-html/Historical Co-citation network-1.png)<!-- -->
@@ -1373,28 +1364,53 @@ net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
 ## 
 ##  Legend
 ## 
-##                                           Paper                              DOI Year LCS GCS
-## 1986 - 1        PERSSON O, 1986, SCIENTOMETRICS               10.1007/BF02016861 1986   3  15
-## 1986 - 2                  DEGLAS F, 1986, LIBRI        10.1515/LIBR.1986.36.1.40 1986   2   8
-## 1987 - 3       BROADUS RN, 1987, SCIENTOMETRICS               10.1007/BF02016680 1987   5  38
-## 1987 - 4  BROADUS RN, 1987, J EDUC LIBR INF SCI                 10.2307/40323625 1987   2   2
-## 1989 - 5           BORGMAN CL, 1989, COMMUN RES       10.1177/009365089016005002 1989   2  28
-## 1990 - 6        PERITZ BC, 1990, SCIENTOMETRICS               10.1007/BF02020148 1990   2   5
-## 1992 - 7           GARG KC, 1992, J SCI IND RES                             <NA> 1992   2   4
-## 1992 - 8               SENGUPTA IN, 1992, LIBRI        10.1515/LIBR.1992.42.2.75 1992   4  20
-## 1994 - 9        GLANZEL W, 1994, SCIENTOMETRICS                             <NA> 1994   2   0
-## 2000 - 10                 CRONIN B, 2000, J DOC         10.1108/EUM0000000007123 2000   3  20
-## 2000 - 11       WORMELL I, 2000, SCIENTOMETRICS          10.1023/A:1005688520197 2000   2   1
-## 2001 - 12           TRAYNOR M, 2001, J ADV NURS 10.1046/J.1365-2648.2001.02017.X 2001   3   8
-## 2001 - 13         HOOD WW, 2001, SCIENTOMETRICS          10.1023/A:1017919924342 2001   2  71
-## 2005 - 14  HOLDEN G, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_01 2005   6  22
-## 2006 - 15       GLANZEL W, 2006, SCIENTOMETRICS       10.1556/SCIENT.67.2006.2.8 2006   3  41
-## 2008 - 16           THELWALL M, 2008, J INF SCI         10.1177/0165551507087238 2008   2  32
-## 2008 - 17    SMITH DR, 2008, CONTACT DERMATITIS 10.1111/J.1600-0536.2008.01405.X 2008   4  11
-## 2009 - 18            ABRAMO G, 2009, RES POLICY     10.1016/J.RESPOL.2008.11.001 2009   3  43
-## 2011 - 19        ABRAMO G, 2011, SCIENTOMETRICS        10.1007/S11192-011-0459-X 2011   3  16
-## 2013 - 20         BORNMANN L, 2013, J INFORMETR        10.1016/J.JOI.2013.02.005 2013   5  10
-## 2014 - 21        SCHREIBER M, 2014, J INFORMETR        10.1016/J.JOI.2014.10.001 2014   2   1
+##                                             Paper                              DOI Year LCS GCS
+## 1985 - 2                IKPAAHINDI L, 1985, LIBRI                             <NA> 1985   1  19
+## 1986 - 6          PERSSON O, 1986, SCIENTOMETRICS               10.1007/BF02016861 1986   3  15
+## 1986 - 7                    DEGLAS F, 1986, LIBRI        10.1515/LIBR.1986.36.1.40 1986   2   8
+## 1987 - 9         BROADUS RN, 1987, SCIENTOMETRICS               10.1007/BF02016680 1987   5  38
+## 1987 - 10   BROADUS RN, 1987, J EDUC LIBR INF SCI                 10.2307/40323625 1987   2   2
+## 1987 - 12                WALLACE DP, 1987, LIBR J                             <NA> 1987   1  15
+## 1988 - 16       PHILLIPS DC, 1988, SCIENTOMETRICS               10.1007/BF02020074 1988   1   5
+## 1988 - 19                BRAUN T, 1988, J INF SCI                             <NA> 1988   1   1
+## 1989 - 22            BORGMAN CL, 1989, COMMUN RES       10.1177/009365089016005002 1989   2  28
+## 1990 - 31         PERITZ BC, 1990, SCIENTOMETRICS               10.1007/BF02020148 1990   2   5
+## 1992 - 42            GARG KC, 1992, J SCI IND RES                             <NA> 1992   2   4
+## 1992 - 46                SENGUPTA IN, 1992, LIBRI        10.1515/LIBR.1992.42.2.75 1992   4  20
+## 1994 - 53                 PERITZ BC, 1994, LIBR Q                             <NA> 1994   1   1
+## 1994 - 55         GLANZEL W, 1994, SCIENTOMETRICS                             <NA> 1994   2   0
+## 1994 - 56           NARIN F, 1994, SCIENTOMETRICS               10.1007/BF02017219 1994   1 141
+## 1996 - 62                   OSAREH F, 1996, LIBRI       10.1515/LIBR.1996.46.4.217 1996   1  23
+## 2000 - 83                   CRONIN B, 2000, J DOC         10.1108/EUM0000000007123 2000   3  20
+## 2000 - 84         WORMELL I, 2000, SCIENTOMETRICS          10.1023/A:1005688520197 2000   2   1
+## 2001 - 89             TRAYNOR M, 2001, J ADV NURS 10.1046/J.1365-2648.2001.02017.X 2001   3   8
+## 2001 - 90           HOOD WW, 2001, SCIENTOMETRICS          10.1023/A:1017919924342 2001   2  71
+## 2001 - 91               PARDO C, 2001, J ADV NURS 10.1046/J.1365-2648.2001.01931.X 2001   1  15
+## 2002 - 95       KOSTOFF RN, 2002, J POWER SOURCES    10.1016/S0378-7753(02)00233-1 2002   1  34
+## 2002 - 96           ARUNACHALAM S, 2002, CURR SCI                             <NA> 2002   1  14
+## 2005 - 105               KOSTOFF RN, 2005, ENERGY     10.1016/J.ENERGY.2004.04.058 2005   1  39
+## 2005 - 108  MEADOWS J, 2005, INTERLEND DOC SUPPLY           10.1108/02641050602628 2005   1   7
+## 2005 - 111   HOLDEN G, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_01 2005   6  22
+## 2005 - 114    LIGON J, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_08 2005   1   7
+## 2006 - 117          GODIN B, 2006, SCIENTOMETRICS        10.1007/S11192-006-0086-0 2006   1  31
+## 2006 - 119        GLANZEL W, 2006, SCIENTOMETRICS       10.1556/SCIENT.67.2006.2.8 2006   3  41
+## 2008 - 127        SMITH DR, 2008, NURS HEALTH SCI 10.1111/J.1442-2018.2008.00414.X 2008   1  23
+## 2008 - 131            THELWALL M, 2008, J INF SCI         10.1177/0165551507087238 2008   2  32
+## 2008 - 133     SMITH DR, 2008, CONTACT DERMATITIS 10.1111/J.1600-0536.2008.01405.X 2008   4  11
+## 2009 - 146             ABRAMO G, 2009, RES POLICY     10.1016/J.RESPOL.2008.11.001 2009   3  43
+## 2010 - 150         FRIEDBERG EC, 2010, DNA REPAIR     10.1016/J.DNAREP.2010.07.010 2010   1   1
+## 2010 - 152          MULLINS ME, 2010, ACAD RADIOL       10.1016/J.ACRA.2010.05.005 2010   1   7
+## 2010 - 157      LINMANS AJM, 2010, SCIENTOMETRICS        10.1007/S11192-009-0088-9 2010   1  20
+## 2011 - 165         ABRAMO G, 2011, SCIENTOMETRICS        10.1007/S11192-011-0459-X 2011   3  16
+## 2011 - 168            PAGEL PS, 2011, ANAESTHESIA 10.1111/J.1365-2044.2011.06860.X 2011   1  50
+## 2012 - 185               KAMALSKI J, 2012, CITIES     10.1016/J.CITIES.2012.06.012 2012   1   8
+## 2012 - 190 JOHNSON MH, 2012, REPROD BIOMED ONLINE       10.1016/J.RBMO.2012.07.012 2012   1   1
+## 2013 - 210           CORRALL S, 2013, LIBR TRENDS                             <NA> 2013   1  14
+## 2013 - 225                SHARMA B, 2013, SURGERY       10.1016/J.SURG.2012.09.006 2013   1  23
+## 2013 - 229          BORNMANN L, 2013, J INFORMETR        10.1016/J.JOI.2013.02.005 2013   5  10
+## 2014 - 232      SOLE CV, 2014, STRAHLENTHER ONKOL        10.1007/S00066-014-0695-0 2014   1   2
+## 2014 - 235         SCHREIBER M, 2014, J INFORMETR        10.1016/J.JOI.2014.10.001 2014   2   1
+## 2014 - 257          BORNMANN L, 2014, J INFORMETR        10.1016/J.JOI.2013.12.006 2014   1   1
 ```
 
 ## Main Authors' references (about bibliometrics)

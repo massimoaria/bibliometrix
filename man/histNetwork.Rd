@@ -4,13 +4,11 @@
 \alias{histNetwork}
 \title{Historical co-citation network}
 \usage{
-histNetwork(M, n = 10, sep = ";")
+histNetwork(M, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
-
-\item{n}{is an integer, indicating the number of most cited references to select. Default value is 10.\cr}
 
 \item{sep}{is the field separator character. This character separates strings in CR column of the data frame. The default is \code{sep = ";"}.}
 }

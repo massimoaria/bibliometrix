@@ -4,7 +4,6 @@
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 #'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param n is an integer, indicating the number of most cited references to select. Default value is 10.\cr
 #' @param sep is the field separator character. This character separates strings in CR column of the data frame. The default is \code{sep = ";"}.
 #' @return \code{histNetwork} returns an object of \code{class} "list" containing the following components:
 #'
@@ -28,7 +27,7 @@
 #' 
 #' @export
 
-histNetwork<-function(M, n=10, sep = ";"){
+histNetwork<-function(M, sep = ";"){
   
   if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
     return()}
@@ -62,20 +61,27 @@ histNetwork<-function(M, n=10, sep = ";"){
   M$LCS=LCS
   row.names(lCit)=colnames(lCit)=M$SR
   
-  s=sort(LCS,decreasing = TRUE)[n]
-  ind=which(LCS>=s)
-  lCit=lCit[ind,ind]
-  Y=M$PY[ind]
+  ####### old to remove
+  #s=sort(LCS,decreasing = TRUE)[n]
+  #ind=which(LCS>=s)
+  #lCit=lCit[ind,ind]
+  #Y=M$PY[ind]
 
 ### Cited papers list
-if (!("DI" %in% names(M))){M$DI=NA}
-df=data.frame(Paper=M$SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind],stringsAsFactors = F)
-df=df[order(df$Year),]  
+#if (!("DI" %in% names(M))){M$DI=NA}
+#df=data.frame(Paper=M$SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind],stringsAsFactors = F)
+#df=df[order(df$Year),]  
 
+  if (!("DI" %in% names(M))){M$DI=NA}
+  df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=M$TC,stringsAsFactors = F)
+  df=df[order(df$Year),]  
+  
 
 row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
 
-results=list(NetMatrix=t(lCit),Degree=s,histData=df,M=M,LCS=LCS[ind])
+#results=list(NetMatrix=t(lCit),Degree=s,histData=df,M=M,LCS=LCS[ind])
+
+results=list(NetMatrix=t(lCit),histData=df,M=M,LCS=LCS)
+
 return(results)
 }
-

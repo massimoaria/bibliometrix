@@ -12,10 +12,10 @@
 #' M \tab      \tab the bibliographic data frame}
 #' 
 #' is a network matrix obtained by the function \code{\link{histNetwork}}. 
-#' @param remove.isolates is logical. If TRUE isolates vertices are not plotted.
-#' @param size is logical. If TRUE the point size of each vertex is proportional to its degree.
+#' @param n is integer. It defines the numebr of vertices to plot.
+#' @param size.cex is logical. If TRUE the point size of each vertex is proportional to its degree. Default value is TRUE.
+#' @param size is integer. It define the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
-#' @param label is logical. If TRUE vertex labels are plotted. 
 #' @param arrowsize is numerical. It indicates the edge arrow size.
 #' @return It is a network object of the class \code{igraph}.
 #' 
@@ -33,24 +33,36 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8,label=TRUE,arrowsize=0.1){
+histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,arrowsize=0.1){
   
+  ## legacy with old argument size
+  if (isTRUE(size)){
+    size.cex=TRUE
+    size=5
+  }
+  
+  LCS=histResults$LCS
   NET=histResults$NetMatrix
+  
+  ## selecting the first n vertices
+  s=sort(LCS,decreasing = TRUE)[n]
+  ind=which(LCS>=s)
+  NET=NET[ind,ind]
+  LCS=LCS[ind]
   
   # Create igraph object
   bsk.network=graph_from_adjacency_matrix(NET, mode = c("directed"),weighted = NULL)
   
-  if (isTRUE(label)){
-    R=strsplit(names(V(bsk.network)),",")
-    RR=lapply(R,function(l){
+  R=strsplit(names(V(bsk.network)),",")
+  RR=lapply(R,function(l){
       l=l[1:2]
       l=paste(l[1],l[2],sep=",")})
-    V(bsk.network)$id <- unlist(RR)}else{V(bsk.network)$id=row.names(histResults[[3]])}
+  V(bsk.network)$id <- unlist(RR)
   
   # Compute node degrees (#links) and use that to set node size:
-  deg <- histResults$LCS
-  if (isTRUE(size)){V(bsk.network)$size <- (deg/max(deg)[1])*20}
-  else{V(bsk.network)$size=rep(1,length(V(bsk.network)))}
+  deg <- LCS
+  if (isTRUE(size.cex)){V(bsk.network)$size <- (deg/max(deg)[1])*size}else{
+    V(bsk.network)$size=rep(size,length(V(bsk.network)))}
   
   # Remove loops
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
@@ -59,39 +71,49 @@ histPlot<-function(histResults, remove.isolates=FALSE, size = F, labelsize = 0.8
   
   #V(bsk.network)$color <- 'red'
   
-    # Choose Network layout
-  if (!isTRUE(remove.isolates)){
-  l <- layout.fruchterman.reingold(bsk.network) #default
-  l[,2]=(histResults[[3]]$Year)
+  # define network layout
+  Years=histResults$histData$Year[ind]
+  L <- histLayout(NET,bsk.network,Years)
+  l <- L$l
+  bsk.network<- L$bsk.network
   
-  edges1=colSums(NET)
-  edges2=rowSums(NET)
-  ind=which((edges1==0) & (edges2==0))
-    if (length(ind)>0){
-      ma=max(l[-ind,1])
-      mi=min(l[-ind,1])
-      l[ind,1]=sample(seq(ma,ma+((ma-mi)/3),length.out = length(ind)),size=length(ind))}
-    else{
-        ma=max(l[,1])
-        mi=min(l[,1])}
-  
-  }else{
-    l <- layout.fruchterman.reingold(bsk.network) #default
-    l[,2]=(histResults[[3]]$Year)*-1
-    edges1=colSums(NET)
-    edges2=rowSums(NET)
-    ind=which((edges1==0) & (edges2==0))
-    bsk.network=delete.vertices(bsk.network, ind)
-    l=l[-ind,]
-    
-  }
-  #l[,1]=l[,1]*2
   # Plot the chronological co-citation network
   l=layout.norm(l)
   plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, edge.arrow.size=arrowsize, main="Historical citation network")
   cat("\n Legend\n\n")
-  print(histResults[[3]])
+  
+  Data=histResults$histData
+  Data=Data[ind,]
+  print(Data)
   
   return(bsk.network)
-  }
+}
+
+
+### layout function
+histLayout <- function(NET,bsk.network,Years){
   
+  diag(NET)=0
+  
+  up=triu(NET)
+  
+  V(bsk.network)$cited=colSums(NET)-(rowSums(up)/max(NET))
+  V(bsk.network)$citing=rowSums(NET)
+  V(bsk.network)$year=Years
+  V(bsk.network)$rank=rank(-V(bsk.network)$cited,ties="random")
+  l=matrix(0,dim(NET)[1],2)
+  l[,1]=V(bsk.network)$year
+  l[,2]=V(bsk.network)$rank
+  
+  edges=get.edgelist(bsk.network)
+  
+  A=apply(NET,2,function(x){
+    x[x>0]=sum(x)
+    return(x)
+  })
+  edgesize=2
+  E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
+  
+  L=list(l=l,bsk.network=bsk.network)
+  return(L)
+}

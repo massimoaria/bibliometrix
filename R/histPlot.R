@@ -121,7 +121,7 @@ histLayout <- function(NET,bsk.network,Years,color=color){
   
   ### color
   if (isTRUE(color)){
-  B=NET
+  B=as.matrix(NET)
   for (i in 1:dim(NET)[2]){
     ind=which(B[,i]>0)
     if (length(ind)>0){B[ind,i]=i}

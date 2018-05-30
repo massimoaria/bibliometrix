@@ -35,11 +35,11 @@ If you use this package for your research, we would appreciate a citation.
 
 To cite bibliometrix in publications, please use:
 
-Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.
+Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for comprehensive science mapping analysis**, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier.
 
 
 
-## bibliometrix community
+## Community
 
 Official website:   http://www.bibliometrix.org
 

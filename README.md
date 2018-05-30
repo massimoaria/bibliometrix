@@ -1,5 +1,10 @@
 [![Logo](http://www.bibliometrix.org/logo_small.jpg)](http://www.bibliometrix.org)
 
+bibliometrix
+====================================
+
+## An R-tool for comprehensive science mapping analysis.
+
 [![bibliometrix: An R-tool for comprehensive science mapping analysis.](http://www.bibliometrix.org/altro/joi-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Build Status](http://www.bibliometrix.org/passing.png)](http://www.bibliometrix.org)
@@ -7,10 +12,7 @@
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 
-bibliometrix
-====================================
-
-## An R-tool for comprehensive science mapping analysis.
+## Overview
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
 
@@ -26,6 +28,14 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 
 * Building and plotting matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
+
+## Suggested citation
+
+If you use this package for your research, we would appreciate a citation.
+
+To cite bibliometrix in publications, please use:
+
+Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.
 
 
 

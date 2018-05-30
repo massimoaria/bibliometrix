@@ -7,32 +7,36 @@
 histNetwork(M, sep = ";")
 }
 \arguments{
-\item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+\item{M}{is a bibliographic data frame obtained by the converting function
+\code{\link{convert2df}}. It is a data matrix with cases corresponding to
+manuscripts and variables to Field Tag in the original SCOPUS and Thomson
+Reuters' ISI Web of Knowledge file.}
 
-\item{sep}{is the field separator character. This character separates strings in CR column of the data frame. The default is \code{sep = ";"}.}
+\item{sep}{is the field separator character. This character separates strings
+in CR column of the data frame. The default is \code{sep = ";"}.}
 }
 \value{
-\code{histNetwork} returns an object of \code{class} "list" containing the following components:
+\code{histNetwork} returns an object of \code{class} "list"
+  containing the following components:
 
-\tabular{lll}{
-NetMatrix \tab  \tab the historical co-citation network matrix\cr
-Degree \tab       \tab the min degree of the network\cr
-histData \tab      \tab the set of n most cited references\cr
-M \tab      \tab the bibliographic data frame}
+  \tabular{lll}{ NetMatrix \tab  \tab the historical co-citation network
+  matrix\cr histData \tab      \tab the set of n most cited references\cr M
+  \tab      \tab the bibliographic data frame}
 }
 \description{
-\code{histNetwork} creates a historical citation network from a bibliographic data frame.
+\code{histNetwork} creates a historical citation network from a bibliographic
+data frame.
 }
 \examples{
 data(scientometrics)
 
-histResults <- histNetwork(scientometrics, n = 10, sep = ";")
+histResults <- histNetwork(scientometrics, sep = ";")
 
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert an ISI or SCOPUS
+  Export file in a bibliographic data frame.
 
 \code{\link{summary}} to obtain a summary of the results.
 

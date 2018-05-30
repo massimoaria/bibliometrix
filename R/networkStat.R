@@ -13,13 +13,14 @@
 #' 
 #' @examples
 #' # EXAMPLE Co-citation network
-#'
-#' data(scientometrics)
-#'
-#' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
-#' network = "references", sep = ";")
 #' 
-#' netstat <- networkStat(NetMatrix) 
+#' # to run the example, please remove # from the beginning of the following lines
+#' # data(scientometrics)
+#'
+#' # NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
+#' #      network = "references", sep = ";")
+#' 
+#' # netstat <- networkStat(NetMatrix) 
 #' 
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @seealso \code{\link{cocMatrix}} to compute a co-occurrence matrix.

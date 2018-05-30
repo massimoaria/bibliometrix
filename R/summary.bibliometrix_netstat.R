@@ -9,11 +9,14 @@
 #' 
 #'
 #' @examples
-#' data(scientometrics)
 #' 
-#' NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", network = "authors", sep = ";")
-#' netstat <- networkStat(NetMatrix)
-#' summary(netstat)
+#' # to run the example, please remove # from the beginning of the following lines
+#' #data(scientometrics)
+#' 
+#' #NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
+#' #                   network = "authors", sep = ";")
+#' #netstat <- networkStat(NetMatrix)
+#' #summary(netstat)
 #'
 #' @method summary bibliometrix_netstat
 #' @export

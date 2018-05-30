@@ -1,30 +1,34 @@
 #' Historical co-citation network
 #'
-#' \code{histNetwork} creates a historical citation network from a bibliographic data frame.
+#' \code{histNetwork} creates a historical citation network from a bibliographic
+#' data frame.
 #'
-#' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param sep is the field separator character. This character separates strings in CR column of the data frame. The default is \code{sep = ";"}.
-#' @return \code{histNetwork} returns an object of \code{class} "list" containing the following components:
+#' @param M is a bibliographic data frame obtained by the converting function
+#'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
+#'   manuscripts and variables to Field Tag in the original SCOPUS and Thomson
+#'   Reuters' ISI Web of Knowledge file.
+#' @param sep is the field separator character. This character separates strings
+#'   in CR column of the data frame. The default is \code{sep = ";"}.
+#' @return \code{histNetwork} returns an object of \code{class} "list"
+#'   containing the following components:
 #'
-#' \tabular{lll}{
-#' NetMatrix \tab  \tab the historical co-citation network matrix\cr
-#' Degree \tab       \tab the min degree of the network\cr
-#' histData \tab      \tab the set of n most cited references\cr
-#' M \tab      \tab the bibliographic data frame}
+#'   \tabular{lll}{ NetMatrix \tab  \tab the historical co-citation network
+#'   matrix\cr histData \tab      \tab the set of n most cited references\cr M
+#'   \tab      \tab the bibliographic data frame}
 #'
 #'
 #' @examples
 #' data(scientometrics)
 #'
-#' histResults <- histNetwork(scientometrics, n = 10, sep = ";")
+#' histResults <- histNetwork(scientometrics, sep = ";")
 #'
 #'
-#' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+#' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS
+#'   Export file in a bibliographic data frame.
 #' @seealso \code{\link{summary}} to obtain a summary of the results.
 #' @seealso \code{\link{plot}} to draw some useful plots of the results.
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
-#' 
+#'
 #' @export
 
 histNetwork<-function(M, sep = ";"){

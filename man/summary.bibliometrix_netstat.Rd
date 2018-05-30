@@ -19,10 +19,13 @@ The function \code{summary} computes and returns on display severa statistics bo
 \code{summary} method for class '\code{bibliometrix_netstat}'
 }
 \examples{
-data(scientometrics)
 
-NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", network = "authors", sep = ";")
-netstat <- networkStat(NetMatrix)
-summary(netstat)
+# to run the example, please remove # from the beginning of the following lines
+#data(scientometrics)
+
+#NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
+#                   network = "authors", sep = ";")
+#netstat <- networkStat(NetMatrix)
+#summary(netstat)
 
 }

@@ -14,9 +14,10 @@
 #' is a network matrix obtained by the function \code{\link{histNetwork}}. 
 #' @param n is integer. It defines the numebr of vertices to plot.
 #' @param size.cex is logical. If TRUE the point size of each vertex is proportional to its degree. Default value is TRUE.
-#' @param size is integer. It define the point size of the vertices. Default value is 5.
+#' @param size is an integer. It define the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @param arrowsize is numerical. It indicates the edge arrow size.
+#' @param color is logical. If TRUE, egdes are colored according to citing references.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -24,16 +25,16 @@
 #'
 #' data(scientometrics)
 #'
-#' histResults <- histNetwork(scientometrics, n = 20, sep = ";")
+#' histResults <- histNetwork(scientometrics, sep = ";")
 #' 
-#' net <- histPlot(histResults, size = TRUE)
+#' net <- histPlot(histResults, n=20, size.cex=TRUE, size = 5, arrowsize=0.3)
 #' 
 #' @seealso \code{\link{histNetwork}} to compute a historical co-citation network.
 #' @seealso \code{\link{cocMatrix}} to compute a co-occurrence matrix.
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,arrowsize=0.1){
+histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,arrowsize=0.1, color=TRUE){
   
   ## legacy with old argument size
   if (isTRUE(size)){
@@ -73,13 +74,17 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
   
   # define network layout
   Years=histResults$histData$Year[ind]
-  L <- histLayout(NET,bsk.network,Years)
+  L <- histLayout(NET,bsk.network,Years,color=color)
   l <- L$l
   bsk.network<- L$bsk.network
   
   # Plot the chronological co-citation network
   l=layout.norm(l)
-  plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, edge.arrow.size=arrowsize, main="Historical citation network")
+  plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", 
+       vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'black', 
+       vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, 
+       edge.arrow.size=arrowsize, main="Historical Direct Citation Network",edge.curved=T)
+  
   cat("\n Legend\n\n")
   
   Data=histResults$histData
@@ -91,7 +96,7 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
 
 
 ### layout function
-histLayout <- function(NET,bsk.network,Years){
+histLayout <- function(NET,bsk.network,Years,color=color){
   
   diag(NET)=0
   
@@ -100,7 +105,7 @@ histLayout <- function(NET,bsk.network,Years){
   V(bsk.network)$cited=colSums(NET)-(rowSums(up)/max(NET))
   V(bsk.network)$citing=rowSums(NET)
   V(bsk.network)$year=Years
-  V(bsk.network)$rank=rank(-V(bsk.network)$cited,ties="random")
+  V(bsk.network)$rank=rank(-V(bsk.network)$cited, ties.method="random")
   l=matrix(0,dim(NET)[1],2)
   l[,1]=V(bsk.network)$year
   l[,2]=V(bsk.network)$rank
@@ -113,6 +118,18 @@ histLayout <- function(NET,bsk.network,Years){
   })
   edgesize=2
   E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
+  
+  ### color
+  if (isTRUE(color)){
+  B=NET
+  for (i in 1:dim(NET)[2]){
+    ind=which(B[,i]>0)
+    if (length(ind)>0){B[ind,i]=i}
+  }
+  
+  E(bsk.network)$color=suppressWarnings(t(B)[t(B)>0])
+  }
+    
   
   L=list(l=l,bsk.network=bsk.network)
   return(L)

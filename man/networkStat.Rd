@@ -25,12 +25,13 @@ The function \code{\link{networkStat}} can calculate the main network statistics
 \examples{
 # EXAMPLE Co-citation network
 
-data(scientometrics)
+# to run the example, please remove # from the beginning of the following lines
+# data(scientometrics)
 
-NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
-network = "references", sep = ";")
+# NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
+#      network = "references", sep = ";")
 
-netstat <- networkStat(NetMatrix) 
+# netstat <- networkStat(NetMatrix) 
 
 }
 \seealso{

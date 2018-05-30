@@ -270,10 +270,10 @@ The function histNetwork generates a chronological direct citation network matri
 ```{r Historical Co-citation network, fig.height=9, fig.width=7, warning=FALSE}
 # Create a historical citation network
 
-histResults <- histNetwork(M, n = 20, sep = ".  ")
+histResults <- histNetwork(M, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
+net <- histPlot(histResults, n=20, size = FALSE,label=TRUE, arrowsize = 0.5)
 
 ```
 

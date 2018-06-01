@@ -2,12 +2,15 @@ bibliometrix v1.9.4 (Release date: 2018-05-21)
 ==============
 
 New functionality:
+* New, and more readable, historiograph plot in histPlot()
 * Added function networkStat() to perform the descriptive analysis of network graph characteristics
 * Added the generic function summary() to summarize the results of the networkStat() function 
 * Added a new section "the descriptive analysis of network graph characteristics" in the vignettes
 
 Changes:
+* Minor changes in argument list of histNetwork() and histPlot()
 * Solved the issue regarding the older versions of utils::promptPackage()
+* Solved the issue regarding missing vertex labels in VOSviewer visualization 
 
 
 bibliometrix v1.9.3 (Release date: 2018-05-15)
@@ -60,7 +63,7 @@ bibliometrix v1.7 (Release date: 2017-07-07)
 ==============
 
 New functionality:
-* added new clusterng algorithms into networkPlot()
+* added new clustering algorithms into networkPlot()
 * added argument 'halo' in networkPlot() to color cluster groups
 * added function normalizeSimilarity() to calculate some probabilistic and set-theoretic similarity measures
 * added function thematicMap() to create a thematic map based on co-word network analysis and clustering

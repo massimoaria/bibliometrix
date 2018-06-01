@@ -90,8 +90,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   # Compute node degrees (#links) and use that to set node size:
   deg <- degree(bsk.network, mode="all")
   V(bsk.network)$deg<-deg
-  if (isTRUE(size.cex)){V(bsk.network)$size <- (deg/max(deg)[1])*size}
-  else{V(bsk.network)$size=rep(size,length(V(bsk.network)))}
+  if (isTRUE(size.cex)){V(bsk.network)$size <- (deg/max(deg)[1])*size}else{
+    V(bsk.network)$size=rep(size,length(V(bsk.network)))}
   
   # label size
   if (isTRUE(label.cex)){
@@ -245,6 +245,7 @@ switchLayout <- function(bsk.network,type,vos.path){
          fruchterman={l <- layout.fruchterman.reingold(bsk.network)},
          kamada={l <- layout.kamada.kawai(bsk.network)},
          vosviewer={
+           V(bsk.network)$id=V(bsk.network)$name
            if (is.null(vos.path)){vos.path=getwd()}
            if (sum(dir(vos.path) %in% "VOSviewer.jar")==0){cat(paste("VOSviewer.jar does not exist in the path",vos.path,"\n\nPlese download it from http://www.vosviewer.com/download","\n(Java version for other systems)\n"))}
            else{

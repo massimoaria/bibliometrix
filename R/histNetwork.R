@@ -62,6 +62,12 @@ histNetwork<-function(M, sep = ";"){
   }
   
   LCS=rowSums(lCit)
+
+  ### to assure that LCS cannot be greater than TC
+  ind=which(LCS>M$TC)
+  LCS[ind]=M$TC[ind]
+  ####
+  
   M$LCS=LCS
   row.names(lCit)=colnames(lCit)=M$SR
   

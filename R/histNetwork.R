@@ -44,7 +44,7 @@ histNetwork<-function(M, sep = ";"){
   
   lCit=Matrix(0, N,N)
   
-  switch(M$DB[i],
+  switch(M$DB[1],
      ISI={
        ## matching by SR
             for (i in 1:N){

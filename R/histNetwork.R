@@ -5,8 +5,8 @@
 #'
 #' @param M is a bibliographic data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-#'   manuscripts and variables to Field Tag in the original SCOPUS and Thomson
-#'   Reuters' ISI Web of Knowledge file.
+#'   manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
+#'   Analitics' Web of Knowledge file.
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
 #' @return \code{histNetwork} returns an object of \code{class} "list"
@@ -33,8 +33,8 @@
 
 histNetwork<-function(M, sep = ";"){
   
-  if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
-    return()}
+  #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
+  #  return()}
   
   M=M[order(M$PY),]
   N=dim(M)[1]
@@ -43,23 +43,48 @@ histNetwork<-function(M, sep = ";"){
   if (!("SR" %in% names(M))){M=metaTagExtraction(M,Field="SR")} 
   
   lCit=Matrix(0, N,N)
-  for (i in 1:N){
-    if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
-    x=M$SR[i]
-    Year=M$PY[i]
-    pos = grep(x, M$CR[M$PY>=Year])
-    pos = rows[M$PY>=Year][pos]
-    if ("DI" %in% names(M)){
-      if (!is.na(M$DI[i])){
-      pos2 = grep(M$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
-      pos2 = rows[M$PY>=Year][pos2]
-      pos=unique(pos,pos2)}
-      }
+  
+  switch(M$DB[i],
+     ISI={
+       ## matching by SR
+            for (i in 1:N){
+                if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
+                x=M$SR[i]
+                Year=M$PY[i]
+                pos = grep(x, M$CR[M$PY>=Year])
+                pos = rows[M$PY>=Year][pos]
+                if ("DI" %in% names(M)){
+                  if (!is.na(M$DI[i])){
+                    pos2 = grep(M$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
+                    pos2 = rows[M$PY>=Year][pos2]
+                    pos=unique(pos,pos2)}
+                }
     
-      if (length(pos)>0){
-      lCit[i,pos]=1
-    }
-  }
+                if (length(pos)>0){
+                  lCit[i,pos]=1
+                }
+            }
+         },
+    SCOPUS={
+      ## matching by title and year
+      TI=paste(M$TI," ","\\(",M$PY,"\\)",sep = "")
+      TIb=paste("\\(",M$PY,"\\)"," ",M$TI,sep = "")
+      for (i in 1:N){
+        if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
+      
+        x=TI[i]
+        y=TIb[i]
+        Year=M$PY[i]
+        pos = grep(x, M$CR[M$PY>=Year])
+        pos = rows[M$PY>=Year][pos]
+        pos2 = grep(y, M$CR[M$PY>=Year])
+        pos2 = rows[M$PY>=Year][pos2]
+        pos=unique(pos,pos2)
+        if (length(pos)>0){
+          lCit[i,pos]=1
+        }
+      }
+  })
   
   LCS=rowSums(lCit)
 

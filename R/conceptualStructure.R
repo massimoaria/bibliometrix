@@ -216,17 +216,25 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   ## Factorial map of most contributing documents
   
   if (documents>dim(docCoord)[1]){documents=dim(docCoord)[1]}
+    centers=as.data.frame(km.res$centers[,1:2])
+    centers$color="red"
+    row.names(centers)=paste("cluster",as.character(1:dim(centers)[1]),sep="")
     A=docCoord[1:documents,1:2]
+    A$color="grey"
+    names(centers)=names(A)
+    A=rbind(A,centers)
     x=A$dim1
     y=A$dim2
-    A[,3]=row.names(A)
-    names(A)[3]="nomi"
+    A[,4]=row.names(A)
+    
+    names(A)[4]="nomi"
+    
     df_all=rbind(as.matrix(df),as.matrix(A[,1:2]))
     rangex=c(min(df_all[,1]),max(df_all[,1]))
     rangey=c(min(df_all[,2]),max(df_all[,2]))
 
     b_doc=ggplot(aes(x=A$dim1,y=A$dim2,label=A$nomi),data=A)+
-      geom_point(size = 2, color = 'grey')+
+      geom_point(size = 2, color = A$color)+
       labs(title= "Factorial map of the documents with the highest contributes") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize)), fontface = "bold", 
                        fill="steelblue", color = "white", segment.alpha=0.5, segment.color="gray")+
@@ -246,16 +254,18 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     ## Factorial map of the most cited documents
     docCoord=docCoord[order(-docCoord$TC),]
     B=docCoord[1:documents,1:2]
+    B$color="grey"
+    B=rbind(B,centers)
     x=B$dim1
     y=B$dim2
-    B[,3]=row.names(B)
-    names(B)[3]="nomi"
+    B[,4]=row.names(B)
+    names(B)[4]="nomi"
     df_all_TC=rbind(as.matrix(df),as.matrix(B[,1:2]))
     rangex=c(min(df_all_TC[,1]),max(df_all_TC[,1]))
     rangey=c(min(df_all_TC[,2]),max(df_all_TC[,2]))
     
     b_doc_TC=ggplot(aes(x=B$dim1,y=B$dim2,label=B$nomi),data=B)+
-      geom_point(size = 2, color = 'grey')+
+      geom_point(size = 2, color = B$color)+
       labs(title= "Factorial map of the most cited documents") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize)), fontface = "bold", 
                        fill="indianred", color = "white", segment.alpha=0.5, segment.color="gray")+

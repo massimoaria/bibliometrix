@@ -17,6 +17,7 @@
 #' @param size is an integer. It define the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
 #' @param arrowsize is numerical. It indicates the edge arrow size.
+#' @param edgesize is numerical. It indicates the edge size.
 #' @param color is logical. If TRUE, egdes are colored according to citing references.
 #' @return It is a network object of the class \code{igraph}.
 #' 
@@ -34,7 +35,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,arrowsize=0.1, color=TRUE){
+histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,arrowsize=0.1, edgesize=2, color=TRUE){
   
   ## legacy with old argument size
   if (isTRUE(size)){
@@ -74,7 +75,7 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
   
   # define network layout
   Years=histResults$histData$Year[ind]
-  L <- histLayout(NET,bsk.network,Years,color=color)
+  L <- histLayout(NET,bsk.network,Years,color=color,edgesize=edgesize)
   l <- L$l
   bsk.network<- L$bsk.network
   
@@ -96,7 +97,7 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
 
 
 ### layout function
-histLayout <- function(NET,bsk.network,Years,color=color){
+histLayout <- function(NET,bsk.network,Years,color=color,edgesize=edgesize){
   
   diag(NET)=0
   
@@ -105,7 +106,22 @@ histLayout <- function(NET,bsk.network,Years,color=color){
   V(bsk.network)$cited=colSums(NET)-(rowSums(up)/max(NET))
   V(bsk.network)$citing=rowSums(NET)
   V(bsk.network)$year=Years
-  V(bsk.network)$rank=rank(-V(bsk.network)$cited, ties.method="random")
+  
+  ### ranking of vertex (y axis)
+  NET2=NET
+  rank=rep(0,dim(NET2)[2])
+  diag(NET2)=1
+  cited=-V(bsk.network)$cited
+  for (i in 1:dim(NET2)[2]){
+    if (rank[i]==0){
+      ind=which(NET2[,i]!=0 & rank==0)
+      rank[ind]=max(rank)+rank(cited[ind], ties.method="random")
+    }
+    
+  }
+  V(bsk.network)$rank=rank
+  ##############################
+  
   l=matrix(0,dim(NET)[1],2)
   l[,1]=V(bsk.network)$year
   l[,2]=V(bsk.network)$rank
@@ -116,7 +132,7 @@ histLayout <- function(NET,bsk.network,Years,color=color){
     x[x>0]=sum(x)
     return(x)
   })
-  edgesize=2
+  #edgesize=2
   E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
   
   ### color

@@ -101,25 +101,13 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
   M$LCS=LCS
   row.names(lCit)=colnames(lCit)=M$SR
   
-  ####### old to remove
-  #s=sort(LCS,decreasing = TRUE)[n]
-  #ind=which(LCS>=s)
-  #lCit=lCit[ind,ind]
-  #Y=M$PY[ind]
-
-### Cited papers list
-#if (!("DI" %in% names(M))){M$DI=NA}
-#df=data.frame(Paper=M$SR[ind],DOI=M$DI[ind],Year=Y,LCS=LCS[ind],GCS=M$TC[ind],stringsAsFactors = F)
-#df=df[order(df$Year),]  
-
+ 
   if (!("DI" %in% names(M))){M$DI=NA}
   df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=as.numeric(M$TC),stringsAsFactors = F)
   df=df[order(df$Year),]  
   
 
 row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
-
-#results=list(NetMatrix=t(lCit),Degree=s,histData=df,M=M,LCS=LCS[ind])
 
 results=list(NetMatrix=t(lCit),histData=df,M=M,LCS=LCS)
 

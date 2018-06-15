@@ -4,13 +4,16 @@
 \alias{histNetwork}
 \title{Historical co-citation network}
 \usage{
-histNetwork(M, sep = ";")
+histNetwork(M, min.citations = 0, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
 \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-manuscripts and variables to Field Tag in the original SCOPUS and Thomson
-Reuters' ISI Web of Knowledge file.}
+manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
+Analitics' Web of Knowledge file.}
+
+\item{min.citations}{is an integer. It sets the minimum number of citations 
+for the documents included in the analysis. The default is \code{min.citations = 0}.}
 
 \item{sep}{is the field separator character. This character separates strings
 in CR column of the data frame. The default is \code{sep = ";"}.}
@@ -30,7 +33,7 @@ data frame.
 \examples{
 data(scientometrics)
 
-histResults <- histNetwork(scientometrics, sep = ";")
+histResults <- histNetwork(scientometrics, min.citations = 10, sep = ";")
 
 
 }

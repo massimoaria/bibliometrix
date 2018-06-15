@@ -36,6 +36,7 @@ duplicatedMatching <- function(M, Field="TI", tol=0.95){
   a=b=M[[Field]]
   an=nchar(a)
   A=matrix(an,length(an),length(an))
+  A[is.na(A)]=0
   B=t(A)
   C=A
   C[B>A]=B[B>A]

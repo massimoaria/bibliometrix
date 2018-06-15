@@ -7,6 +7,8 @@
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 #'   manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
 #'   Analitics' Web of Knowledge file.
+#' @param min.citations is an integer. It sets the minimum number of citations 
+#'   for the documents included in the analysis. The default is \code{min.citations = 0}.
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
 #' @return \code{histNetwork} returns an object of \code{class} "list"
@@ -20,7 +22,7 @@
 #' @examples
 #' data(scientometrics)
 #'
-#' histResults <- histNetwork(scientometrics, sep = ";")
+#' histResults <- histNetwork(scientometrics, min.citations = 10, sep = ";")
 #'
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS
@@ -31,10 +33,13 @@
 #'
 #' @export
 
-histNetwork<-function(M, sep = ";"){
+histNetwork<-function(M, min.citations = 0, sep = ";"){
   
   #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
   #  return()}
+  
+  M=M[as.numeric(M$TC)>min.citations,]
+  if (dim(M)[1]==0){cat("\nNo document has a number of citations above the fixed threshold\n");return(NULL)}
   
   M=M[order(M$PY),]
   N=dim(M)[1]
@@ -108,7 +113,7 @@ histNetwork<-function(M, sep = ";"){
 #df=df[order(df$Year),]  
 
   if (!("DI" %in% names(M))){M$DI=NA}
-  df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=M$TC,stringsAsFactors = F)
+  df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=as.numeric(M$TC),stringsAsFactors = F)
   df=df[order(df$Year),]  
   
 

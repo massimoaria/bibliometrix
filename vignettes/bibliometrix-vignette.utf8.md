@@ -1,7 +1,7 @@
 ---
 title: "A brief introduction to bibliometrix"
 author: "Massimo Aria and Corrado Cuccurullo"
-date: "`r Sys.Date()`"
+date: "2018-06-15"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
@@ -16,8 +16,9 @@ vignette: >
 #### http://www.bibliometrix.org
 
 #### Latest version
-```{r echo=FALSE}
-cat(paste("bibliometrix ",packageVersion("bibliometrix")))
+
+```
+## bibliometrix  1.9.4
 ```
 
 &nbsp; 
@@ -67,9 +68,7 @@ A BibTeX entry for LaTeX users is
 
 &nbsp; 
 
-```{r Package citation, eval=FALSE, include=FALSE}
-citation("bibliometrix")
-```
+
 
 
 &nbsp; 
@@ -243,7 +242,8 @@ Open Rstudio, in the console window, digit:
 install.packages("bibliometrix", dependencies=TRUE)      ### installs bibliometrix package and dependencies
 
 
-```{r bibliometrix loading}
+
+```r
 library(bibliometrix)   ### load bibliometrix package
 ```
 
@@ -251,8 +251,8 @@ library(bibliometrix)   ### load bibliometrix package
 
 The export file can be read by R using the function *readFiles*:
 
-```{r Data loading}
 
+```r
 D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
 ```
 
@@ -266,8 +266,22 @@ es. D <- readFiles("file1.txt","file2.txt", ...)
 
 
 The object D can be converted in a  data frame using the function *convert2df*:
-```{r Data converting}
+
+```r
 M <- convert2df(D, dbsource = "isi", format = "bibtex")
+```
+
+```
+## 
+## Converting your isi collection into a bibliographic dataframe
+## 
+## Articles extracted   100 
+## Articles extracted   200 
+## Articles extracted   291 
+## Done!
+## 
+## 
+## Generating affiliation field tag AU_UN from C1:  Done!
 ```
 
 *convert2df* creates a bibliographic data frame with cases corresponding to manuscripts and variables to Field Tag in the original export file.
@@ -306,7 +320,8 @@ The first step is to perform a descriptive analysis of the bibliographic data fr
 
 The function *biblioAnalysis* calculates main bibliometric measures using this syntax:
  
-```{r biblioAnalysis}
+
+```r
 results <- biblioAnalysis(M, sep = ";")
 ```
 
@@ -346,16 +361,176 @@ It displays main information about the bibliographic data frame and several tabl
 *summary* accepts two additional arguments. *k* is a formatting value that indicates the number of rows of each table. *pause* is a logical value (TRUE or FALSE) used to allow (or not) pause in screen scrolling.
 Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
 
-```{r summary generic function}
+
+```r
 options(width=100)
 S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
+```
+## 
+## 
+## Main Information about data
+## 
+##  Documents                             291 
+##  Sources (Journals, Books, etc.)       141 
+##  Keywords Plus (ID)                    474 
+##  Author's Keywords (DE)                365 
+##  Period                                1985 - 2015 
+##  Average citations per documents       11.73 
+## 
+##  Authors                               535 
+##  Author Appearances                    647 
+##  Authors of single authored documents  104 
+##  Authors of multi authored documents   431 
+## 
+##  Documents per Author                  0.544 
+##  Authors per Document                  1.84 
+##  Co-Authors per Documents              2.22 
+##  Collaboration Index                   2.93 
+##  
+## 
+## Annual Scientific Production
+## 
+##  Year    Articles
+##     1985        4
+##     1986        3
+##     1987        6
+##     1988        7
+##     1989        8
+##     1990        6
+##     1991        7
+##     1992        6
+##     1993        5
+##     1994        7
+##     1995        1
+##     1996        8
+##     1997        4
+##     1998        5
+##     1999        2
+##     2000        7
+##     2001        8
+##     2002        5
+##     2003        1
+##     2004        3
+##     2005       12
+##     2006        5
+##     2007        5
+##     2008        8
+##     2009       14
+##     2010       17
+##     2011       20
+##     2012       25
+##     2013       21
+##     2014       29
+##     2015       32
+## 
+## Annual Percentage Growth Rate 7.177346 
+## 
+## 
+## Most Productive Authors
+## 
+##    Authors        Articles Authors        Articles Fractionalized
+## 1     BORNMANN L         8     BORNMANN L                    4.67
+## 2     KOSTOFF RN         8     WHITE HD                      3.50
+## 3     MARX W             6     MARX W                        3.17
+## 4     GLANZEL W          5     ATKINSON R                    3.00
+## 5     HUMENIK JA         5     BROADUS RN                    3.00
+## 6     ABRAMO G           4     CRONIN B                      3.00
+## 7     D'ANGELO CA        4     BORGMAN CL                    2.50
+## 8     GARG KC            4     MCCAIN KW                     2.50
+## 9     WHITE HD           4     PERITZ BC                     2.50
+## 10    ATKINSON R         3     KOSTOFF RN                    2.10
+## 
+## 
+## Top manuscripts per citations
+## 
+##                                                              Paper           TC TCperYear
+## 1  DAIM TU;RUEDA G;MARTIN H;GERDSRI P,(2006),TECHNOL. FORECAST. SOC. CHANG. 211     17.58
+## 2  WHITE HD;MCCAIN KW,(1989),ANNU. REV. INFORM. SCI. TECHNOL.               196      6.76
+## 3  BORGMAN CL;FURNER J,(2002),ANNU. REV. INFORM. SCI. TECHNOL.              192     12.00
+## 4  WEINGART P,(2005),SCIENTOMETRICS                                         151     11.62
+## 5  NARIN F,(1994),SCIENTOMETRICS                                            141      5.88
+## 6  CRONIN B,(2001),J. INF. SCI.                                             129      7.59
+## 7  CHEN YC;YEH HY;WU JC;HASCHLER I;CHEN TJ;WETTER T,(2011),SCIENTOMETRICS   101     14.43
+## 8  HOOD WW;WILSON CS,(2001),SCIENTOMETRICS                                   71      4.18
+## 9  D'ANGELO CA;GIUFFRIDA C;ABRAMO G,(2011),J. AM. SOC. INF. SCI. TECHNOL.    64      9.14
+## 10 NARIN F;OLIVASTRO D;STEVENS KA,(1994),EVAL. REV.                          62      2.58
+## 
+## 
+## Most Productive Countries (of corresponding authors)
+## 
+##    Country   Articles   Freq SCP MCP
+## 1  USA             80 0.3019  75   5
+## 2  ENGLAND         25 0.0943  25   0
+## 3  GERMANY         17 0.0642  12   5
+## 4  FRANCE          13 0.0491  11   2
+## 5  BRAZIL          12 0.0453  10   2
+## 6  CHINA           10 0.0377   8   2
+## 7  INDIA           10 0.0377  10   0
+## 8  AUSTRALIA        8 0.0302   6   2
+## 9  CANADA           8 0.0302   7   1
+## 10 SPAIN            8 0.0302   8   0
+## 
+## 
+## SCP: Single Country Publications
+## 
+## MCP: Multiple Country Publications
+## 
+## 
+## Total Citations per Country
+## 
+##    Country      Total Citations Average Article Citations
+## 1  USA                     1824                     22.80
+## 2  GERMANY                  330                     19.41
+## 3  ITALY                    163                     32.60
+## 4  AUSTRALIA                134                     16.75
+## 5  ENGLAND                  121                      4.84
+## 6  CANADA                   111                     13.88
+## 7  INDIA                     85                      8.50
+## 8  IRAN                      74                     37.00
+## 9  SPAIN                     73                      9.12
+## 10 BELGIUM                   70                     10.00
+## 
+## 
+## Most Relevant Sources
+## 
+##                                                            Sources        Articles
+## 1  SCIENTOMETRICS                                                               49
+## 2  JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE AND TECHNOLOGY       14
+## 3  JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE                       8
+## 4  JOURNAL OF DOCUMENTATION                                                      6
+## 5  JOURNAL OF INFORMATION SCIENCE                                                6
+## 6  JOURNAL OF INFORMETRICS                                                       6
+## 7  BRITISH JOURNAL OF ANAESTHESIA                                                5
+## 8  LIBRI                                                                         5
+## 9  SOCIAL WORK IN HEALTH CARE                                                    5
+## 10 TECHNOLOGICAL FORECASTING AND SOCIAL CHANGE                                   5
+## 
+## 
+## Most Relevant Keywords
+## 
+##    Author Keywords (DE)      Articles Keywords-Plus (ID)     Articles
+## 1      BIBLIOMETRICS               63    SCIENCE                   38
+## 2      CITATION ANALYSIS           11    INDICATORS                24
+## 3      SCIENTOMETRICS               7    IMPACT                    23
+## 4      IMPACT FACTOR                5    CITATION                  20
+## 5      INFORMATION RETRIEVAL        5    CITATION ANALYSIS         15
+## 6      PEER REVIEW                  5    JOURNALS                  14
+## 7      CITATION                     4    H-INDEX                   13
+## 8      CITATIONS                    4    PUBLICATION               12
+## 9      H-INDEX                      4    INFORMATION-SCIENCE       10
+## 10     IMPACT FACTORS               4    IMPACT FACTORS             8
+```
+
 Some basic plots can be drawn using the generic function \code{plot}:
 
-```{r plot generic function, fig.width=7}
+
+```r
 plot(x = results, k = 10, pause = FALSE)
 ```
+
+![](bibliometrix-vignette_files/figure-html/plot generic function-1.png)<!-- -->![](bibliometrix-vignette_files/figure-html/plot generic function-2.png)<!-- -->![](bibliometrix-vignette_files/figure-html/plot generic function-3.png)<!-- -->![](bibliometrix-vignette_files/figure-html/plot generic function-4.png)<!-- -->![](bibliometrix-vignette_files/figure-html/plot generic function-5.png)<!-- -->
 
 ## Analysis of Cited References 
 The function *citations* generates the frequency table of the most cited references or the most cited first authors (of references).
@@ -364,7 +539,8 @@ For each manuscript, cited references are in a single string stored in the colum
 
 For a correct extraction, you need to identify the separator field among different references, used by ISI or SCOPUS database. Usually, the default separator is ";" or `".  "` (a dot with double space).
 
-```{r}
+
+```r
 # M$CR[1]
 ```
 The figure shows the reference string of the first manuscript. In this case, the separator field is `sep = ".  "`.
@@ -375,25 +551,96 @@ The figure shows the reference string of the first manuscript. In this case, the
 
 
 To obtain the most frequent cited manuscripts:
-```{r Article citation}
+
+```r
 CR <- citations(M, field = "article", sep = ".  ")
 cbind(CR$Cited[1:10])
 ```
 
+```
+##                                                                               [,1]
+## HIRSCH JE, 2005, P NATL ACAD SCI USA, V102, P16569, DOI 101073/PNAS0507655102   26
+## SMALL H, 1973, J AM SOC INFORM SCI, V24, P265, DOI 101002/ASI4630240406         19
+## DE SOLLA PRICE DJ, 1963, LITTLE SCI BIG SCI                                     15
+## PRITCHARA, 1969, J DOC, V25, P348                                               14
+## BRADFORD S C, 1934, ENGINEERING-LONDON, V137, P85                               13
+## GARFIELD E, 2006, JAMA-J AM MED ASSOC, V295, P90, DOI 101001/JAMA295190         11
+## COLE FRANCIS J, 1917, SCI PROGR, V11, P578                                      10
+## KESSLER MM, 1963, AM DOC, V14, P10, DOI 101002/ASI5090140103                    10
+## SMALL HG, 1978, SOC STUD SCI, V8, P327, DOI 101177/030631277800800305           10
+## SMITH LC, 1981, LIBR TRENDS, V30, P83                                           10
+```
+
 To obtain the most frequent cited first authors:
-```{r Author citation}
+
+```r
 CR <- citations(M, field = "author", sep = ".  ")
 cbind(CR$Cited[1:10])
+```
+
+```
+##               [,1]
+## GARFIELD E     129
+## BORNMANN L      81
+## SMALL H         62
+## CRONIN B        53
+## GLANZEL W       48
+## WHITE HD        48
+## KOSTOFF RN      45
+## NARIN F         41
+## LEYDESDORFF L   40
+## BROOKES BC      38
 ```
 
 The function *localCitations* generates the frequency table of the most local cited authors.
 Local citations measures how many times an author (or a document) included in this collection have been cited by other authors also in the collection.
 
 To obtain the most frequent local cited authors:
-```{r Local Author citation}
+
+```r
 CR <- localCitations(M, sep = ".  ")
+```
+
+```
+## Articles analysed   100 
+## Articles analysed   200 
+## Articles analysed   202
+```
+
+```r
 CR$Authors[1:10,]
+```
+
+```
+##          Author LocalCitations
+## 38   BROADUS RN              7
+## 1      ABRAMO G              6
+## 15     BARKER K              6
+## 61  D'ANGELO CA              6
+## 139    HOLDEN G              6
+## 276 ROSENBERG G              6
+## 31   BORNMANN L              5
+## 350  WILLIAMS R              5
+## 290 SENGUPTA IN              4
+## 300    SMITH DR              4
+```
+
+```r
 CR$Papers[1:10,]
+```
+
+```
+##                                    Paper                              DOI Year LCS GCS
+## 83  HOLDEN G, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_01 2005   6  22
+## 9       BROADUS RN, 1987, SCIENTOMETRICS               10.1007/BF02016680 1987   5  38
+## 177        BORNMANN L, 2013, J INFORMETR        10.1016/J.JOI.2013.02.005 2013   5  10
+## 34              SENGUPTA IN, 1992, LIBRI        10.1515/LIBR.1992.42.2.75 1992   4  20
+## 6        PERSSON O, 1986, SCIENTOMETRICS               10.1007/BF02016861 1986   3  15
+## 59                 CRONIN B, 2000, J DOC         10.1108/EUM0000000007123 2000   3  20
+## 65           TRAYNOR M, 2001, J ADV NURS 10.1046/J.1365-2648.2001.02017.X 2001   3   8
+## 91       GLANZEL W, 2006, SCIENTOMETRICS       10.1556/SCIENT.67.2006.2.8 2006   3  41
+## 103   SMITH DR, 2008, CONTACT DERMATITIS 10.1111/J.1600-0536.2008.01405.X 2008   3  11
+## 114           ABRAMO G, 2009, RES POLICY     10.1016/J.RESPOL.2008.11.001 2009   3  43
 ```
 
 
@@ -403,9 +650,24 @@ The function *dominance* calculates the authors' dominance ranking as proposed b
 
 Function arguments are: *results* (object of class *bibliometrix*) obtained by *biblioAnalysis*; and *k* (the number of authors to consider in the analysis).
 
-```{r Dominance Ranking}
+
+```r
 DF <- dominance(results, k = 10)
 DF
+```
+
+```
+##             Dominance Factor Multi Authored First Authored Rank by Articles Rank by DF
+## KOSTOFF RN         1.0000000              8              8                2          1
+## HOLDEN G           1.0000000              3              3               10          2
+## ABRAMO G           0.7500000              4              3                5          3
+## GARG KC            0.7500000              4              3                7          4
+## BORNMANN L         0.6250000              8              5                1          5
+## GLANZEL W          0.6000000              5              3                4          6
+## BORGMAN CL         0.3333333              3              1                9          7
+## D'ANGELO CA        0.2500000              4              1                6          8
+## WHITE HD           0.2500000              4              1                8          9
+## MARX W             0.1666667              6              1                3         10
 ```
 
 The Dominance Factor is a ratio indicating the fraction of multi-authored articles in which a scholar appears as the first author.
@@ -426,27 +688,60 @@ i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *authors* argument is *
 
 To calculate the h-index of Lutz Bornmann in this collection:
 
-```{r h-index}
 
+```r
 indices <- Hindex(M, authors="BORNMANN L", sep = ";",years=10)
 
 # Bornmann's impact indices:
 indices$H
+```
 
+```
+##       Author h_index g_index   m_index TC NP
+## 1 BORNMANN L       4       7 0.5714286 50  8
+```
+
+```r
 # Bornmann's citations
 indices$CitationList
+```
 
+```
+## [[1]]
+##                          Authors                        Journal Year TotalCitation
+## 2              MARX W;BORNMANN L SOZIALE WELT-ZEITSCHRIFT FUR S 2015             0
+## 4       BORNMANN L;LEYDESDORFF L        JOURNAL OF INFORMETRICS 2014             1
+## 8 BORNMANN L;BOWMAN BF;BAUER J;M     ZEITSCHRIFT FUR EVALUATION 2012             2
+## 3                     BORNMANN L            RESEARCH EVALUATION 2014             3
+## 1              BORNMANN L;MARX W        JOURNAL OF INFORMETRICS 2015             5
+## 6          BORNMANN L;WILLIAMS R        JOURNAL OF INFORMETRICS 2013            10
+## 7              BORNMANN L;MARX W        JOURNAL OF INFORMETRICS 2013            11
+## 5                     BORNMANN L JOURNAL OF THE AMERICAN SOCIET 2013            18
 ```
 
 To calculate the h-index of the first 10 most productive authors (in this collection):
 
-```{r h-index 10 authors}
 
+```r
 authors=gsub(","," ",names(results$Authors)[1:10])
 
 indices <- Hindex(M, authors, sep = ";",years=50)
 
 indices$H
+```
+
+```
+##         Author h_index g_index   m_index  TC NP
+## 1   BORNMANN L       4       7 0.5714286  50  8
+## 2   KOSTOFF RN       8       8 0.4000000 276  8
+## 3       MARX W       3       6 0.3750000  36  6
+## 4    GLANZEL W       2       5 0.0800000  64  5
+## 5   HUMENIK JA       5       5 0.2631579 213  5
+## 6     ABRAMO G       4       4 0.4000000 158  4
+## 7  D'ANGELO CA       4       4 0.4000000 158  4
+## 8      GARG KC       4       4 0.1481481  41  4
+## 9     WHITE HD       4       4 0.1333333 248  4
+## 10  ATKINSON R       0       0 0.0000000   0  3
 ```
 
 
@@ -458,24 +753,59 @@ This assumption implies that the theoretical beta coefficient of Lotka's law is 
 
 Using *lotka* function is possible to estimate the Beta coefficient of our bibliographic collection and assess, through a statistical test, the similarity of this empirical distribution with the theoretical one.
 
-```{r Lotka law}
+
+```r
 L <- lotka(results)
 
 # Author Productivity. Empirical Distribution
 L$AuthorProd
+```
 
+```
+##   N.Articles N.Authors        Freq
+## 1          1       466 0.871028037
+## 2          2        47 0.087850467
+## 3          3        13 0.024299065
+## 4          4         4 0.007476636
+## 5          5         2 0.003738318
+## 6          6         1 0.001869159
+## 7          8         2 0.003738318
+```
+
+```r
 # Beta coefficient estimate
 L$Beta
+```
 
+```
+## [1] 2.976457
+```
+
+```r
 # Constant
 L$C
+```
 
+```
+## [1] 0.6634829
+```
+
+```r
 # Goodness of fit
 L$R2
+```
 
+```
+## [1] 0.9413535
+```
+
+```r
 # P-value of K-S two sample test
 L$p.value
+```
 
+```
+## [1] 0.2031888
 ```
 
 The table L$AuthorProd shows the observed distribution of scientific productivity in our example.
@@ -484,7 +814,8 @@ The estimated Beta coefficient is 3.05 with a goodness of fit equal to 0.94. Kol
 
 You can compare the two distributions using *plot* function:
 
-```{r Lotka law comparison, out.width='300px', dpi=200}
+
+```r
 # Observed distribution
 Observed=L$AuthorProd[,3]
 
@@ -495,6 +826,8 @@ plot(L$AuthorProd[,1],Theoretical,type="l",col="red",ylim=c(0, 1), xlab="Article
 lines(L$AuthorProd[,1],Observed,col="blue")
 legend(x="topright",c("Theoretical (B=2)","Observed"),col=c("red","blue"),lty = c(1,1,1),cex=0.6,bty="n")
 ```
+
+<img src="bibliometrix-vignette_files/figure-html/Lotka law comparison-1.png" width="300px" />
 
 
 ## Bibliographic network matrices
@@ -512,7 +845,8 @@ These networks are analyzed in order to capture meaningful properties of the und
 
 For example, to create a network *Manuscript x Publication Source* you have to use the field tag "SO":
 
-```{r Bipartite network}
+
+```r
 A <- cocMatrix(M, Field = "SO", sep = ";")
 ```
 
@@ -524,8 +858,22 @@ The $j-th$ column sum $a_j$ is the number of manuscripts published in source $j$
 
 Sorting, in decreasing order, the column sums of A, you can see the most relevant publication sources:
 
-```{r Most relevant sources}
+
+```r
 sort(Matrix::colSums(A), decreasing = TRUE)[1:5]
+```
+
+```
+##                                                         SCIENTOMETRICS 
+##                                                                     49 
+## JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE AND TECHNOLOGY 
+##                                                                     14 
+##                JOURNAL OF THE AMERICAN SOCIETY FOR INFORMATION SCIENCE 
+##                                                                      8 
+##                                                JOURNAL OF INFORMETRICS 
+##                                                                      6 
+##                                               JOURNAL OF DOCUMENTATION 
+##                                                                      6
 ```
 
 
@@ -533,12 +881,14 @@ sort(Matrix::colSums(A), decreasing = TRUE)[1:5]
 Following this approach, you can compute several bipartite networks:
 
 * Citation network
-```{r}
+
+```r
 # A <- cocMatrix(M, Field = "CR", sep = ".  ")
 ```
 
 * Author network
-```{r}
+
+```r
 # A <- cocMatrix(M, Field = "AU", sep = ";")
 ```
 
@@ -546,7 +896,8 @@ Following this approach, you can compute several bipartite networks:
 
 Authors' Countries is not a standard attribute of the bibliographic data frame. You need to extract this information from affiliation attribute using the function *metaTagExtraction*.
 
-```{r}
+
+```r
 M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 # A <- cocMatrix(M, Field = "AU_CO", sep = ";")
 ```
@@ -554,12 +905,14 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 *metaTagExtraction* allows to extract the following additional field tags: *Authors' countries* (`Field = "AU_CO"`); *First Author's countries* (`Field = "AU_CO"`); *First author of each cited reference* (`Field = "CR_AU"`); *Publication source of each cited reference* (`Field = "CR_SO"`); and *Authors' affiliations* (`Field = "AU_UN"`).
 
 * Author keyword network
-```{r}
+
+```r
 # A <- cocMatrix(M, Field = "DE", sep = ";")
 ```
 
 * Keyword Plus network
-```{r}
+
+```r
 # A <- cocMatrix(M, Field = "ID", sep = ";")
 ```
 
@@ -592,7 +945,8 @@ The function *biblioNetwork* calculates, starting from a bibliographic  data fra
 * *network* argument can be "authors", "references", "sources", "countries", "universities", "keywords", "author_keywords", "titles" and "abstracts".
 
 The following code calculates a classical article coupling network:
-```{r}
+
+```r
 # NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", sep = ".  ")
 ```
 
@@ -602,13 +956,15 @@ This suggests that it might be more practical to switch to a relative measure of
 
 *normalizeSimilarity* function calculates Association strength, Inclusion, Jaccard or Salton similarity among vertices of a network. *normalizeSimilarity* can be recalled directly from *networkPlot()* function using the argument *normalize*. 
 
-```{r similarity, fig.height=9, fig.width=9, warning=FALSE}
+
+```r
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
 # plot authors' similarity (first 20 authors), using salton similarity index
 net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
-
 ```
+
+![](bibliometrix-vignette_files/figure-html/similarity-1.png)<!-- -->
 
 
 ### Bibliographic co-citation
@@ -629,7 +985,8 @@ of $C$ contains the number of cases in which a reference is cited in our data fr
 In other words, the diagonal element $c_{i}$ is the number of local citations of the reference $i$.
 
 Using the function *biblioNetwork*, you can calculate a classical reference co-citation network:
-```{r}
+
+```r
 # NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
 ```
 
@@ -647,12 +1004,14 @@ where A is a bipartite network *Manuscripts x Authors*.
 The diagonal element $ac_{i}$ is the number of manuscripts authored or co-authored by researcher $i$.
 
 Using the function *biblioNetwork*, you can calculate an authors' collaboration network:
-```{r}
+
+```r
 # NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "authors", sep = ";")
 ```
 
 or a country collaboration network:
-```{r}
+
+```r
 # NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 ```
 
@@ -666,7 +1025,8 @@ In particular, starting from a bibliographic matrix (or an *igraph* object), two
 
 * The main indices of centrality and prestige of vertices.
 
-```{r}
+
+```r
 # An example of a classical keyword co-occurrences network
 
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
@@ -690,7 +1050,7 @@ This group of statistics allows to describe the structural properties of a netwo
 
 * **Degree centralization** is the normalized degree of the overall network;
 
-* **Closeness centralization** is the normalized inverse of the vertex’s average geodesic distance to others in the network;
+* **Closeness centralization** is the normalized inverse of the vertexâ€™s average geodesic distance to others in the network;
 
 * **Eigenvector centralization** is the first eigenvector of the graph matrix;
 
@@ -698,8 +1058,15 @@ This group of statistics allows to describe the structural properties of a netwo
 
 * **Average path length** is the mean of the shortest distance between each pair of vertices in the network.
 
-```{r}
+
+```r
 names(netstat$network)
+```
+
+```
+##  [1] "networkSize"             "networkDensity"          "networkTransitivity"     "networkDiameter"        
+##  [5] "networkDegreeDist"       "networkCentrDegree"      "networkCentrCloseness"   "networkCentrEigen"      
+##  [9] "networkCentrbetweenness" "NetworkAverPathLeng"
 ```
 
 ### The main indices of centrality and prestige of vertices
@@ -724,8 +1091,15 @@ The statistics, at vertex level, returned by *networkStat* are:
 
 * **Vertex Ranking** is an overall vertex ranking obtained as a linear weighted combination of the centrality and prestige vertex measures. The weights are proportional to the loadings of the first component of the Principal Component Analysis.
 
-```{r}
+
+```r
 names(netstat$vertex)
+```
+
+```
+## [1] "vertexID"               "vertexCentrDegree"      "vertexCentrCloseness"   "vertexCentrEigen"      
+## [5] "vertexCentrBetweenness" "vertexPageRank"         "vertexHub"              "vertexAuthority"       
+## [9] "Ranking"
 ```
 
 To summarize the main results of the *networkStat* function, use the generic function *summary*.
@@ -734,8 +1108,152 @@ It displays the main information about the network and vertex description throug
 *summary* accepts one additional argument. *k* is a formatting value that indicates the number of rows of each table. 
 Choosing k=10, you decide to see the first 10 vertices.
 
-```{r}
+
+```r
 summary(netstat, k=10)
+```
+
+```
+## 
+## 
+## Main statistics about the network
+## 
+##  Size                                  474 
+##  Density                               0.024 
+##  Transitivity                          0.335 
+##  Diameter                              5 
+##  Degree Centralization                 0.302 
+##  Closeness Centralization              0.005 
+##  Betweenness Centralization            0.286 
+##  Eigenvector Centralization            0.907 
+##  Average path length                   2.742 
+##  
+## 
+## 
+## 
+## 
+## 
+## Main measures of centrality and prestige of vertices
+## 
+## 
+## Degree Centrality: Top vertices
+## 
+##    Vertex ID              Degree Centrality
+## 1     SCIENCE                         0.326
+## 2     CITATION ANALYSIS               0.186
+## 3     INDICATORS                      0.184
+## 4     IMPACT                          0.178
+## 5     CITATION                        0.175
+## 6     JOURNALS                        0.150
+## 7     PUBLICATION                     0.129
+## 8     INFORMATION-SCIENCE             0.125
+## 9     H-INDEX                         0.114
+## 10    PERFORMANCE                     0.106
+## 
+## 
+## Closeness Centrality: Top vertices
+## 
+##    Vertex ID              Closeness Centrality
+## 1       SCIENCE                         0.0240
+## 2       INDICATORS                      0.0239
+## 3       CITATION                        0.0239
+## 4       JOURNALS                        0.0239
+## 5       IMPACT                          0.0239
+## 6       CITATION ANALYSIS               0.0239
+## 7       GOOGLE SCHOLAR                  0.0239
+## 8       PUBLICATION                     0.0239
+## 9       H-INDEX                         0.0238
+## 10      SELF-CITATION                   0.0238
+## 
+## 
+## Eigenvector Centrality: Top vertices
+## 
+##    Vertex ID              Eigenvector Centrality
+## 1     SCIENCE                              1.000
+## 2     CITATION ANALYSIS                    0.677
+## 3     CITATION                             0.677
+## 4     JOURNALS                             0.673
+## 5     INDICATORS                           0.670
+## 6     IMPACT                               0.615
+## 7     PUBLICATION                          0.607
+## 8     H-INDEX                              0.507
+## 9     INFORMATION-SCIENCE                  0.472
+## 10    GOOGLE SCHOLAR                       0.462
+## 
+## 
+## Betweenness Centrality: Top vertices
+## 
+##    Vertex ID              Betweenness Centrality
+## 1       SCIENCE                           0.2883
+## 2       INDICATORS                        0.1142
+## 3       IMPACT                            0.1026
+## 4       CITATION                          0.0796
+## 5       CITATION ANALYSIS                 0.0707
+## 6       JOURNALS                          0.0538
+## 7       PUBLICATION                       0.0445
+## 8       GOOGLE SCHOLAR                    0.0380
+## 9       SURFACE                           0.0379
+## 10      POLICY                            0.0379
+## 
+## 
+## PageRank Score: Top vertices
+## 
+##    Vertex ID              Pagerank Score
+## 1     SCIENCE                    0.02476
+## 2     INDICATORS                 0.01442
+## 3     IMPACT                     0.01412
+## 4     CITATION ANALYSIS          0.01361
+## 5     CITATION                   0.01266
+## 6     JOURNALS                   0.01068
+## 7     PUBLICATION                0.00953
+## 8     INFORMATION-SCIENCE        0.00910
+## 9     H-INDEX                    0.00841
+## 10    PERFORMANCE                0.00836
+## 
+## 
+## Hub Score: Top vertices
+## 
+##    Vertex ID              Hub Score
+## 1     SCIENCE                 1.000
+## 2     CITATION ANALYSIS       0.677
+## 3     CITATION                0.677
+## 4     JOURNALS                0.673
+## 5     INDICATORS              0.670
+## 6     IMPACT                  0.615
+## 7     PUBLICATION             0.607
+## 8     H-INDEX                 0.507
+## 9     INFORMATION-SCIENCE     0.472
+## 10    GOOGLE SCHOLAR          0.462
+## 
+## 
+## Authority Score: Top vertices
+## 
+##    Vertex ID              Authority Score
+## 1     SCIENCE                       1.000
+## 2     CITATION ANALYSIS             0.677
+## 3     CITATION                      0.677
+## 4     JOURNALS                      0.673
+## 5     INDICATORS                    0.670
+## 6     IMPACT                        0.615
+## 7     PUBLICATION                   0.607
+## 8     H-INDEX                       0.507
+## 9     INFORMATION-SCIENCE           0.472
+## 10    GOOGLE SCHOLAR                0.462
+## 
+## 
+## Overall Ranking: Top vertices
+## 
+##    Vertex ID              Overall Ranking
+## 1     SCIENCE                           1
+## 2     INDICATORS                        2
+## 3     CITATION ANALYSIS                 3
+## 4     IMPACT                            4
+## 5     CITATION                          5
+## 6     JOURNALS                          6
+## 7     PUBLICATION                       7
+## 8     INFORMATION-SCIENCE               8
+## 9     H-INDEX                           9
+## 10    GOOGLE SCHOLAR                   10
 ```
 
 
@@ -756,7 +1274,8 @@ You need to declare, using argument *vos.path*, the full path of the folder wher
 
 ### Country Scientific Collaboration
 
-```{r Country collaboration, fig.height=7, fig.width=7, warning=FALSE}
+
+```r
 # Create a country collaboration network
 
 M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
@@ -764,33 +1283,38 @@ NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries",
 
 # Plot the network
 net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8,cluster="none")
-
 ```
+
+![](bibliometrix-vignette_files/figure-html/Country collaboration-1.png)<!-- -->
 
 
 ### Co-Citation Network
 
-```{r Co-citation network, fig.height=7, fig.width=7, warning=FALSE}
+
+```r
 # Create a co-citation network
 
 NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
 
 # Plot the network
 net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
-
 ```
+
+![](bibliometrix-vignette_files/figure-html/Co-citation network-1.png)<!-- -->
 
 ### Keyword co-occurrences
 
-```{r Keyword c-occurrences, fig.height=7, fig.width=7, warning=FALSE}
+
+```r
 # Create keyword co-occurrences network
 
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
 
 # Plot the network
 net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = "Keyword Co-occurrences", type = "fruchterman", size=T,edgesize = 5,labelsize=0.7)
-
 ```
+
+![](bibliometrix-vignette_files/figure-html/Keyword c-occurrences-1.png)<!-- -->
 
 ## Co-Word Analysis: The conceptual structure of a field 
 The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
@@ -802,27 +1326,60 @@ Here, we show an example using the function *conceptualStructure* that performs 
 *conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts.  In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
 
 
-```{r Co-Word Analysis, fig.height=9, fig.width=9, warning=FALSE}
 
+```r
 # Conceptual Structure using keywords (method="CA")
 
 CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
-
 ```
+
+![](bibliometrix-vignette_files/figure-html/Co-Word Analysis-1.png)<!-- -->![](bibliometrix-vignette_files/figure-html/Co-Word Analysis-2.png)<!-- -->![](bibliometrix-vignette_files/figure-html/Co-Word Analysis-3.png)<!-- -->
 
 ## Historical Direct Citation Network
 The historiographic map is a graph proposed by E. Garfield to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
 
 The function \code{histNetwork} generates a chronological direct citation network matrix which can be plotted using *histPlot*:
 
-```{r Historical Co-citation network, fig.height=9, fig.width=9, warning=FALSE}
+
+```r
 # Create a historical citation network
 options(width=130)
 histResults <- histNetwork(M, min.citations = 10, sep = ".  ")
+```
 
+```
+## Articles analysed   81
+```
+
+```r
 # Plot a historical co-citation network
 net <- histPlot(histResults, n=10, size = 10, size.cex=TRUE, arrowsize = 0.5, color = FALSE)
+```
 
+![](bibliometrix-vignette_files/figure-html/Historical Co-citation network-1.png)<!-- -->
+
+```
+## 
+##  Legend
+## 
+##                                          Paper                              DOI Year LCS GCS
+## 1985 - 1             IKPAAHINDI L, 1985, LIBRI                             <NA> 1985   1  19
+## 1986 - 2       PERSSON O, 1986, SCIENTOMETRICS               10.1007/BF02016861 1986   2  15
+## 1987 - 3      BROADUS RN, 1987, SCIENTOMETRICS               10.1007/BF02016680 1987   4  38
+## 1989 - 6          BORGMAN CL, 1989, COMMUN RES       10.1177/009365089016005002 1989   1  28
+## 1992 - 14             SENGUPTA IN, 1992, LIBRI        10.1515/LIBR.1992.42.2.75 1992   3  20
+## 1996 - 18                OSAREH F, 1996, LIBRI       10.1515/LIBR.1996.46.4.217 1996   1  23
+## 2000 - 25                CRONIN B, 2000, J DOC         10.1108/EUM0000000007123 2000   3  20
+## 2001 - 29        HOOD WW, 2001, SCIENTOMETRICS          10.1023/A:1017919924342 2001   1  71
+## 2001 - 30            PARDO C, 2001, J ADV NURS 10.1046/J.1365-2648.2001.01931.X 2001   1  15
+## 2005 - 43 HOLDEN G, 2005, SOC WORK HEALTH CARE          10.1300/J010V41N03\\_01 2005   3  22
+## 2006 - 46        GODIN B, 2006, SCIENTOMETRICS        10.1007/S11192-006-0086-0 2006   1  31
+## 2008 - 51      SMITH DR, 2008, NURS HEALTH SCI 10.1111/J.1442-2018.2008.00414.X 2008   1  23
+## 2008 - 52          THELWALL M, 2008, J INF SCI         10.1177/0165551507087238 2008   1  32
+## 2008 - 53   SMITH DR, 2008, CONTACT DERMATITIS 10.1111/J.1600-0536.2008.01405.X 2008   3  11
+## 2009 - 60           ABRAMO G, 2009, RES POLICY     10.1016/J.RESPOL.2008.11.001 2009   2  43
+## 2010 - 62    LINMANS AJM, 2010, SCIENTOMETRICS        10.1007/S11192-009-0088-9 2010   1  20
+## 2011 - 67       ABRAMO G, 2011, SCIENTOMETRICS        10.1007/S11192-011-0459-X 2011   2  16
 ```
 
 ## Main Authors' references (about bibliometrics)

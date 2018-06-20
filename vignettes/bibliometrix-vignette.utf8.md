@@ -1,7 +1,7 @@
 ---
 title: "A brief introduction to bibliometrix"
 author: "Massimo Aria and Corrado Cuccurullo"
-date: "2018-06-15"
+date: "2018-06-20"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A brief introduction to bibliometrix}
@@ -265,7 +265,7 @@ es. D <- readFiles("file1.txt","file2.txt", ...)
 
 
 
-The object D can be converted in a  data frame using the function *convert2df*:
+The object D can be converted in a data frame using the function *convert2df*:
 
 ```r
 M <- convert2df(D, dbsource = "isi", format = "bibtex")
@@ -285,6 +285,22 @@ M <- convert2df(D, dbsource = "isi", format = "bibtex")
 ```
 
 *convert2df* creates a bibliographic data frame with cases corresponding to manuscripts and variables to Field Tag in the original export file.
+
+*convert2df* accepts two additional arguments: *dbsource* and *format*.
+
+The argument *dbsource* indicates from which database the collection has been downloaded. 
+
+It can be: 
+
+- "isi" (for Clarivate Analytics Web of Science database), 
+
+- "scopus" (for SCOPUS database), 
+
+- "pubmed" (for PubMed/Medline database),  
+
+- "cochrane" (for Cochrane database of systematic reviews).
+
+The argument *format* indicates the file format of the imported collection. It can be "plaintext" or "bibtex" for WOS collection and mandatorily "bibtext" for SCOPUS collection. The argument is ignored if the collection comes from Pubmed or Cochrane.
 
 Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
 
@@ -357,6 +373,14 @@ ID		       | the frequency distribution of keywords associated to the manuscript
 
 To summarize main results of the bibliometric analysis, use the generic function *summary*.
 It displays main information about the bibliographic data frame and several tables, such as annual scientific production, top manuscripts per number of citations, most productive authors, most productive countries, total citation per country, most relevant sources (journals) and most relevant keywords.
+
+Main information table describes the collection size in terms of number of documents, number of authors, number of sources, number of keywords, timespan, and average number of citations. 
+
+Furthermore, many different co-authorship indices are shown. In particular, the **Authors per Article index** is calculated as the ratio between the total number of articles and the total number of authors. The **Co-Authors per Articles index** is calculated as the average number of co-authors per article. In this case, the index takes into account the author appearances while for the "authors per article" an author, even if he has published more than one article, is counted only once.
+For that reasons,  *Authors per Article index $\ge$ Co-authors per Article index*.
+
+The **Collaboration Index** (CI) is calculated as Total Authors of Multi-Authored Articles/Total Multi-Authored Articles (Elango and Rajendran, 2012; Koseoglu, 2016). In other word, the Collaboration Index is a Co-authors per Article index calculated only using the multi-authored article set.
+
 
 *summary* accepts two additional arguments. *k* is a formatting value that indicates the number of rows of each table. *pause* is a logical value (TRUE or FALSE) used to allow (or not) pause in screen scrolling.
 Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
@@ -960,7 +984,6 @@ This suggests that it might be more practical to switch to a relative measure of
 ```r
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
-# plot authors' similarity (first 20 authors), using salton similarity index
 net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
 ```
 
@@ -1282,7 +1305,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8,cluster="none")
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.7,cluster="none")
 ```
 
 ![](bibliometrix-vignette_files/figure-html/Country collaboration-1.png)<!-- -->
@@ -1353,7 +1376,7 @@ histResults <- histNetwork(M, min.citations = 10, sep = ".  ")
 
 ```r
 # Plot a historical co-citation network
-net <- histPlot(histResults, n=10, size = 10, size.cex=TRUE, arrowsize = 0.5, color = FALSE)
+net <- histPlot(histResults, n=10, size = 10, labelsize=5, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
 ```
 
 ![](bibliometrix-vignette_files/figure-html/Historical Co-citation network-1.png)<!-- -->

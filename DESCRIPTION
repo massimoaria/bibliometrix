@@ -18,6 +18,7 @@ Depends: R (>= 3.3.0)
 Imports: stats, 
 		 factoextra,
 		 FactoMineR,
+		 ggraph,
 		 ggplot2,
 		 ggrepel,
 		 igraph,

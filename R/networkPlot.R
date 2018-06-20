@@ -29,6 +29,7 @@
 #' @param remove.multiple is logical. If TRUE multiple links are plotted using just one edge.
 #' @param label is logical. If TRUE vertex labels are plotted.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
+#' @param label.color is logical. If TRUE, for each vertex, the label color is the same as its cluster. 
 #' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.  
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").
@@ -62,7 +63,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, label.color=FALSE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
   
   NET=NetMatrix
   bsk.S=TRUE
@@ -166,16 +167,22 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     
     bsk.network1=delete.edges(bsk.network, which(E(bsk.network)$num<edges.min))
     
+    if (isTRUE(label.color)){
+      lab.color=V(bsk.network)$color
+    }else{lab.color="black"}
+    
+    
     ## Plot the network
+    l=layout.norm(l)
     
     if (isTRUE(halo) & cluster!="null"){
-      plot(net_groups,bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+      plot(net_groups,bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 2, vertex.label = LABEL, main=Title)
       
     } else{
-      plot(bsk.network1,layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = LABEL, main=Title)
+      plot(bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = lab.color, vertex.label.font = 2, vertex.label = LABEL, main=Title, edge.color=E(bsk.network1)$color)
     }
     
-  }else{net_groups=NA} 
+  }else{net_groups$modularity=rep(1,vcount(bsk.network))} 
   
   ## Output
   if (cluster!="none" & type!="vosviewer"){
@@ -206,27 +213,42 @@ delete.isolates <- function(graph, mode = 'all') {
 ### clusteringNetwork
 
 clusteringNetwork <- function(bsk.network,cluster){
+  colorlist= c(brewer.pal(12, 'Paired'),brewer.pal(12, 'Set3'), brewer.pal(8, 'Set2'),brewer.pal(8, 'Set1'))
   
   switch(cluster,
          none={
-           net_groups=NA
-           V(bsk.network)$color="#8DD3C7"},
+           net_groups$modularity=rep(1,vcount(bsk.network))},
          optimal={
-           net_groups <- cluster_optimal(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+           net_groups <- cluster_optimal(bsk.network)},
          louvain={
-           net_groups <- cluster_louvain(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+           net_groups <- cluster_louvain(bsk.network)},
          infomap={
-           net_groups <- cluster_infomap(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+           net_groups <- cluster_infomap(bsk.network)},
          edge_betweenness={
-           net_groups <- cluster_edge_betweenness(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]},
+           net_groups <- cluster_edge_betweenness(bsk.network)},
          walktrap={
-           net_groups <- cluster_walktrap(bsk.network)
-           V(bsk.network)$color <- brewer.pal(12, 'Set3')[membership(net_groups)]}
+           net_groups <- cluster_walktrap(bsk.network)},
+         
+         ## default statement
+         {cat("\nUnknown cluster argument. Using default algorithm\n")
+         net_groups <- cluster_walktrap(bsk.network)}
   )
+  
+  V(bsk.network)$color <- colorlist[net_groups$membership]
+  ### set egde intra-class colors
+  V(bsk.network)$community <- net_groups$membership
+  El=as.data.frame(get.edgelist(bsk.network,names=F))
+  
+  
+  E(bsk.network)$color <- apply(El, 1, function(x){
+                        #print(x)
+                        if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]){
+                          C=brewer.pal(12, 'Paired')[V(bsk.network)$community[x[1]]]
+                        }else{C='#E8E8E8'}
+                        return(C)
+                        })
+  ### end
+  
   cl=list()
   cl$bsk.network=bsk.network
   cl$net_groups=net_groups

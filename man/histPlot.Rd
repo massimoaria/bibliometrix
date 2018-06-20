@@ -5,7 +5,7 @@
 \title{Plotting historical co-citation network}
 \usage{
 histPlot(histResults, n = 20, size.cex = TRUE, size = 5,
-  labelsize = 0.8, arrowsize = 0.1, color = TRUE)
+  labelsize = 0.8, arrowsize = 0.1, edgesize = 2, color = TRUE)
 }
 \arguments{
 \item{histResults}{is an object of \code{class} "list" containing the following components:
@@ -27,6 +27,8 @@ is a network matrix obtained by the function \code{\link{histNetwork}}.}
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
 
 \item{arrowsize}{is numerical. It indicates the edge arrow size.}
+
+\item{edgesize}{is numerical. It indicates the edge size.}
 
 \item{color}{is logical. If TRUE, egdes are colored according to citing references.}
 }

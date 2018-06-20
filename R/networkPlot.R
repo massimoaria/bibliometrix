@@ -217,7 +217,8 @@ clusteringNetwork <- function(bsk.network,cluster){
   
   switch(cluster,
          none={
-           net_groups$modularity=rep(1,vcount(bsk.network))},
+           
+           net_groups=list(membership=rep(1,vcount(bsk.network)))},
          optimal={
            net_groups <- cluster_optimal(bsk.network)},
          louvain={

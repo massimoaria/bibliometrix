@@ -6,10 +6,10 @@
 \usage{
 networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
   Title = "Plot", type = "kamada", label = TRUE, labelsize = 1,
-  label.cex = FALSE, label.n = NULL, halo = FALSE, cluster = "walktrap",
-  vos.path = NULL, size = 3, size.cex = FALSE, curved = FALSE,
-  noloops = TRUE, remove.multiple = TRUE, remove.isolates = FALSE,
-  weighted = NULL, edgesize = 1, edges.min = 0)
+  label.cex = FALSE, label.color = FALSE, label.n = NULL, halo = FALSE,
+  cluster = "walktrap", vos.path = NULL, size = 3, size.cex = FALSE,
+  curved = FALSE, noloops = TRUE, remove.multiple = TRUE,
+  remove.isolates = FALSE, weighted = NULL, edgesize = 1, edges.min = 0)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -39,6 +39,8 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
 
 \item{label.cex}{is logical. If TRUE the label size of each vertex is proportional to its degree.}
+
+\item{label.color}{is logical. If TRUE, for each vertex, the label color is the same as its cluster.}
 
 \item{label.n}{is an integer. It indicates the number of vertex labels to draw.}
 

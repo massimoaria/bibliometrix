@@ -75,16 +75,35 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
   
   # define network layout
   Years=histResults$histData$Year[ind]
-  L <- histLayout(NET,bsk.network,Years,color=color,edgesize=edgesize)
-  l <- L$l
-  bsk.network<- L$bsk.network
+  bsk.network <- histLayout(NET,bsk.network,Years,color=color,edgesize=edgesize)
   
-  # Plot the chronological co-citation network
-  l=layout.norm(l)
-  plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", 
-       vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'black', 
-       vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, 
-       edge.arrow.size=arrowsize, main="Historical Direct Citation Network",edge.curved=T)
+  layout_m <- create_layout(bsk.network, layout = 'nicely')#, algorithm = 'kk')
+  layout_m$x=Years
+  
+  g=ggraph(layout_m) +
+    geom_edge_arc(aes(width = 0.2, color=as.factor(E(bsk.network)$color)), curvature = 0.1, 
+          check_overlap = T, edge_alpha = 0.2, 
+          arrow = grid::arrow(angle = 10, unit(0.3, "inches")))+
+    scale_edge_colour_discrete(as.factor(E(bsk.network)$color))+
+    geom_node_text(aes(label=V(bsk.network)$id, size=labelsize),repel = TRUE)+
+    geom_node_point(aes(size = V(bsk.network)$size,color = "grey", alpha=0.1))+
+    scale_color_viridis(discrete = TRUE) +
+    theme_minimal()+
+    theme(legend.position='none', panel.background = element_rect(fill='gray97', color='grey97'),
+          axis.line.y = element_blank(), axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+          axis.title.y=element_blank(), axis.title.x=element_blank(),
+          panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank())+
+    labs(title = "Historical Direct Citation Network")
+  
+  plot(g)
+  
+  
+    # Plot the chronological co-citation network
+ # l=layout.norm(l)
+ # plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", 
+ #      vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'black', 
+ #      vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, 
+ #      edge.arrow.size=arrowsize, main="Historical Direct Citation Network",edge.curved=T)
   
   cat("\n Legend\n\n")
   
@@ -107,33 +126,13 @@ histLayout <- function(NET,bsk.network,Years,color=color,edgesize=edgesize){
   V(bsk.network)$citing=rowSums(NET)
   V(bsk.network)$year=Years
   
-  ### ranking of vertex (y axis)
-  NET2=NET
-  rank=rep(0,dim(NET2)[2])
-  diag(NET2)=1
-  cited=-V(bsk.network)$cited
-  for (i in 1:dim(NET2)[2]){
-    if (rank[i]==0){
-      ind=which(NET2[,i]!=0 & rank==0)
-      rank[ind]=max(rank)+rank(cited[ind], ties.method="random")
-    }
-    
-  }
-  V(bsk.network)$rank=rank
-  ##############################
-  
-  l=matrix(0,dim(NET)[1],2)
-  l[,1]=V(bsk.network)$year
-  l[,2]=V(bsk.network)$rank
-  
   edges=get.edgelist(bsk.network)
   
   A=apply(NET,2,function(x){
     x[x>0]=sum(x)
     return(x)
   })
-  #edgesize=2
-  E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
+   E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
   
   ### color
   if (isTRUE(color)){
@@ -144,9 +143,8 @@ histLayout <- function(NET,bsk.network,Years,color=color,edgesize=edgesize){
   }
   
   E(bsk.network)$color=suppressWarnings(t(B)[t(B)>0])
-  }
-    
+  }else{E(bsk.network)$color="#E8E8E8"}
   
-  L=list(l=l,bsk.network=bsk.network)
-  return(L)
+ 
+  return(bsk.network)
 }

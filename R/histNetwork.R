@@ -37,8 +37,8 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
   
   #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
   #  return()}
-  
-  M=M[as.numeric(M$TC)>min.citations,]
+  M$TC=as.numeric(M$TC)
+  M=M[M$TC>min.citations,]
   if (dim(M)[1]==0){cat("\nNo document has a number of citations above the fixed threshold\n");return(NULL)}
   
   M=M[order(M$PY),]
@@ -103,7 +103,7 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
   
  
   if (!("DI" %in% names(M))){M$DI=NA}
-  df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=as.numeric(M$TC),stringsAsFactors = F)
+  df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=M$TC,stringsAsFactors = F)
   df=df[order(df$Year),]  
   
 

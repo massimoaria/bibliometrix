@@ -57,6 +57,7 @@
 #' @import ggplot2
 #' @import RISmed
 #' @import ggrepel
+#' @import ggraph
 #' @importFrom stringdist stringdistmatrix
 #' @importFrom rscopus author_search
 #' @importFrom rscopus get_complete_author_info

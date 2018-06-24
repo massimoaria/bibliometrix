@@ -83,10 +83,19 @@ metaTagExtraction<-function(M, Field = "CR_AU", sep = ";", aff.disamb=TRUE){
   
 # UNIVERSITY AFFILIATION OF ALL AUTHORS AND CORRESPONDING AUTHOR
   if (Field=="AU_UN"){
+      ### with disambiguation
     if(isTRUE(aff.disamb)){M<-AU_UN(M,sep)
     }else{
+      ### without disambiguation
       M$AU_UN=gsub("\\[.*?\\] ", "", M$C1)
-      M$AU1_UN=gsub("\\[.*?\\] ", "", M$RP)}
+      M$AU1_UN=unlist(lapply(strsplit(M$RP, sep), function(l){
+        l=l[1]
+        return(l)
+      }))
+      ind=regexpr("\\),", M$AU1_UN)
+      a=which(ind>-1)
+      M$AU1_UN[a]=trim(substr(M$AU1_UN[a],ind[a]+2,nchar(M$AU1_UN[a])))
+      }
   }
   
   return(M)

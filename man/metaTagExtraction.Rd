@@ -4,7 +4,7 @@
 \alias{metaTagExtraction}
 \title{Meta-Field Tag Extraction}
 \usage{
-metaTagExtraction(M, Field = "CR_AU", sep = ";")
+metaTagExtraction(M, Field = "CR_AU", sep = ";", aff.disamb = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
@@ -21,6 +21,9 @@ Field can be equal to one of this tags:
 \code{"SR"}\tab     \tab Short tag of the document (as used in reference lists)}}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
+
+\item{aff.disamb}{is a logical. If TRUE and Field="AU_UN", then a disambiguation algorithm is used to identify and match scientific affiliations 
+(univ, research centers, etc.). The default is \code{aff.disamb=TRUE}.}
 }
 \value{
 the bibliometric data frame with a new column containing data about new field tag indicated in the argument \code{Field}.

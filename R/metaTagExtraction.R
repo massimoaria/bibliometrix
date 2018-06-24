@@ -14,6 +14,8 @@
 #' \code{"SR"}\tab     \tab Short tag of the document (as used in reference lists)}
 #'
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
+#' @param aff.disamb is a logical. If TRUE and Field="AU_UN", then a disambiguation algorithm is used to identify and match scientific affiliations 
+#' (univ, research centers, etc.). The default is \code{aff.disamb=TRUE}.
 #' @return the bibliometric data frame with a new column containing data about new field tag indicated in the argument \code{Field}.
 #'
 #'
@@ -43,7 +45,7 @@
 #' 
 #' @export
 
-metaTagExtraction<-function(M, Field = "CR_AU", sep = ";"){
+metaTagExtraction<-function(M, Field = "CR_AU", sep = ";", aff.disamb=TRUE){
 
 
 ### data cleaning
@@ -81,7 +83,10 @@ metaTagExtraction<-function(M, Field = "CR_AU", sep = ";"){
   
 # UNIVERSITY AFFILIATION OF ALL AUTHORS AND CORRESPONDING AUTHOR
   if (Field=="AU_UN"){
-    M<-AU_UN(M,sep)
+    if(isTRUE(aff.disamb)){M<-AU_UN(M,sep)
+    }else{
+      M$AU_UN=gsub("\\[.*?\\] ", "", M$C1)
+      M$AU1_UN=gsub("\\[.*?\\] ", "", M$RP)}
   }
   
   return(M)

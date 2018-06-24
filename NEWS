@@ -1,4 +1,4 @@
-bibliometrix v1.9.4 (Release date: 2018-05-21)
+bibliometrix v1.9.4 (Release date: 2018-06-24)
 ==============
 
 New functionality:
@@ -8,6 +8,7 @@ New functionality:
 * Added a new section "the descriptive analysis of network graph characteristics" in the vignettes
 * Added the possibility to use scopus collections in histNetwork() function
 * Added the possibility, in histNetwork() function, to set the minimum number of citations for the documents included in the analysis
+* Added the argument aff.disamb in metaTagExtraction()
 
 Changes:
 * Minor changes in argument list of histNetwork() and histPlot()

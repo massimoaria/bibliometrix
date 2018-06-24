@@ -302,7 +302,7 @@ AU_UN<-function(M,sep){
   uTags=c("UNIV","COLL","SCH","INST","ACAD","ECOLE","CTR","SCI","CENTRE","CENTER","CENTRO","HOSP","ASSOC","COUNCIL",
           "FONDAZ","FOUNDAT","ISTIT","LAB","TECH","RES","CNR","ARCH","SCUOLA","PATENT OFF","CENT LIB","HEALTH","NATL",
           "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND","CLIMA","METEOR","OFFICE","ENVIR",
-          "CONSORTIUM","OBSERVAT","AGRI")
+          "CONSORTIUM","OBSERVAT","AGRI", "MIT ", "INFN", "SUNY ")
   
   AFFL=lapply(listAFF, function(l){
     #l=gsub(","," ,",l)

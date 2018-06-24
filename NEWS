@@ -12,6 +12,7 @@ New functionality:
 
 Changes:
 * Minor changes in argument list of histNetwork() and histPlot()
+* Improved plot layout and colors in networkPlot()
 * Solved the issue regarding the older versions of utils::promptPackage()
 * Solved the issue regarding missing vertex labels in VOSviewer visualization 
 

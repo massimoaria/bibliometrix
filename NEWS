@@ -11,6 +11,7 @@ New functionality:
 * Added the argument aff.disamb in metaTagExtraction()
 
 Changes:
+* Solved the compatibility issue with the new version of rscopus package
 * Minor changes in argument list of histNetwork() and histPlot()
 * Improved plot layout and colors in networkPlot()
 * Solved the issue regarding the older versions of utils::promptPackage()

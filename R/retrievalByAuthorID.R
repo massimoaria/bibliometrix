@@ -51,7 +51,7 @@
 #' 
 #' ## create the bibliographic collection
 #' # 
-#' # res <- retrievalByAuthor(id, api_key)
+#' # res <- retrievalByAuthorID(id, api_key)
 #' #
 #' # M <- res$M  # the entire bibliographic data frame
 #' # M <- res$authorDocuments # the list containing a bibliographic data frame for each author
@@ -65,60 +65,23 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   id=id[!is.na(id)]
   M_list=list()
   n=length(id)
-  M=data.frame(AU=NA,TI=NA,AB=NA,SO=NA,JI=NA,DOI=NA,DT=NA,DE=NA,PY=NA,TC=NA,C1=NA,RP=NA,UT=NA,AU_CO=NA)
+  M=data.frame(AU_ID=NA,AU=NA,C1_ID=NA,C1=NA,nAU=NA,nC1=NA,TC=NA,SO=NA,DT=NA,TI=NA,PII=NA,DI=NA,EID=NA,PY=NA,CDD=NA, URL=NA,UT=NA,AU1=NA,ISSN=NA,EISSN=NA,PAG=NA,AB=NA,PT=NA,SUBTYPE=NA,DE=NA,SO_ID=NA)
   for (j in 1:n){
     AU_ID=id[j]
     cat("\n Query n. ",j,"   Author ID: ",AU_ID)
     ### documents of an author
-    AU_S=author_search(au_id = AU_ID, api_key=api_key)
-    AU_count=length(AU_S[[1]])
+    AU_S=author_df_orig(au_id = AU_ID, api_key=api_key, all_author_info=TRUE,verbose=FALSE)
+    AU_S$cover_date=substr(as.character(AU_S$cover_date),1,4)
     
-    ### first document information
-    AU=NA
-    TI=NA
-    AB=NA
-    SO=NA
-    JI=NA
-    DOI=NA
-    PY=NA
-    TC=NA
-    C1=NA
-    RP=NA
-    UT=NA
-    DT=NA
-    DE=NA
-    AU_CO=NA
-  
-    ### documents retrieval
-    for (i in 1:AU_count){
-      D=AU_S[[1]][[i]]
-      AU[i]=paste(unlist(lapply(D$author,function(l){a=l$authname})),collapse=";")
-      
-      AU[i]=paste(unique(trim(unlist(strsplit(AU[i],";")))),collapse =";")
-      
-      if (!is.null(D$`dc:title`)){TI[i]=D$`dc:title`}else{TI[i]=NA}
-      if (!is.null(D$`dc:description`)){AB[i]=D$`dc:description`}else{AB[i]=NA}
-      if (!is.null(D$subtypeDescription)){DT[i]=D$subtypeDescription}else{DT[i]=NA}
-      if (!is.null(D$`dc:identifier`)){UT[i]=D$`dc:identifier`}else{UT[i]=NA}
-      if (!is.null(D$`prism:publicationName`)){SO[i]=D$`prism:publicationName`}else{SO[i]=NA}
-      JI[i]=SO[i]
-      if (!is.null(D$`prism:doi`)){DOI[i]=D$`prism:doi`}else{DOI[i]=NA}
-      if (!is.null(D$authkeywords)){DE[i]=gsub("\\|",";",D$authkeywords)}else{DE[i]=NA}
-      if (!is.null(D$`prism:coverDate`)){PY[i]=as.numeric(substring(D$`prism:coverDate`,1,4))}else{PY[i]=NA}
-      if (!is.null(D$`citedby-count`)){TC[i]=as.numeric(D$`citedby-count`)}else{TC[i]=NA}
-      if (!is.null(D$affiliation)){
-        aff=D$affiliation
-        C1[i]=paste(unlist(lapply(aff,function(l){
-          a=paste(l$affilname, ", ",l$`affiliation-city`,", ", l$`affiliation-country`,sep="")})),collapse=";")
-        l=aff[[1]]
-        RP[i]=paste(l$affilname, ", ",l$`affiliation-city`,", ", l$`affiliation-country`,sep="")
-        AU_CO[i]=paste(unlist(lapply(aff,function(l){a=l$`affiliation-country`})),collapse=";")
-      }else{
-        C1[i]=NA 
-        RP[i]=NA 
-        AU_CO[i]=NA}
+    for (i in 1:dim(AU_S)[2]){
+      if (is.factor(AU_S[[i]])){
+        AU_S[[i]]=as.character(AU_S[[i]])
+      }
     }
-    M_AU=data.frame(AU,TI,AB,SO,JI,DOI,DT,DE,PY,TC,C1,RP,UT,AU_CO,stringsAsFactors = FALSE)
+    
+    M_AU=data.frame(AU_S,stringsAsFactors = FALSE)
+    names(M_AU)=c("AU_ID","AU","C1_ID","C1","nAU","nC1","TC","SO","DT","TI","PII","DI","EID","PY","CDD", "URL","UT","AU1","ISSN","EISSN","PAG","AB","PT","SUBTYPE","DE","SO_ID")
+    
     M=rbind(M,M_AU)
     M_list[[j]]=M_AU
     names(M_list)[j]=id[j]
@@ -132,9 +95,52 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   }
   M$CR=NA
   M$DB="SCOPUS"
+  M$DE=gsub("\\| ",";",M$DE)
   M$ID=M$DE
+  
+  M$AU_CO=paste(M$C1_ID,";",sep="")
+  
+  ### country retrieval
+  cat("\nAuthors' country retrieval\n\n")
+  aff_id=sort(unique(unlist(strsplit(M$C1_ID,";"))))
+  aff_id=aff_id[nchar(aff_id)>1]
+  
+  AFF=data.frame(ID=NA,NAME=NA,CO=NA)
+  for (i in 1:length(aff_id)){
+    a=affiliation_retrieval(aff_id[i],api_key=api_key,verbose=FALSE)
+    AFF[i,1]=aff_id[i]
+    AFF[i,2]=a$content$`affiliation-retrieval-response`$`affiliation-name`
+    AFF[i,3]=a$content$`affiliation-retrieval-response`$country
+    cat("\nAffiliation ID: ", AFF[i,1],"   Name: ",AFF[i,2], " ,", AFF[i,3])
+    M$AU_CO=gsub(paste(aff_id[i],";",sep = ""),paste(AFF[i,3],";",sep=""),M$AU_CO)
+  }
+  M$AU_CO=gsub(";;",";",M$AU_CO)
+  M$AU_CO[nchar(M$AU_CO)<3]=NA
+  M$AU1_CO=unlist(lapply(strsplit(M$AU_CO,";"), function(l){
+    l=l[1]
+  }))
+  UN=strsplit(M$C1,";")
+  CO=strsplit(M$AU_CO,";")
+  
+  for (i in 1:length(UN)){
+    M$C1[i]=paste(paste(UN[[i]],", ",CO[[i]],sep=""),collapse=";")
+  }
+  #########
+  
   M <- data.frame(lapply(M,toupper),stringsAsFactors = FALSE)
-  #M <- mutate_each(M, funs(toupper))
+  M$TC=as.numeric(M$TC)
+  M$PY=as.numeric(M$PY)
+  M$DB="SCOPUS"
+  M$RP=unlist(lapply(strsplit(M$C1,";"), function(l){
+    l=l[1]
+  }))
+  M$CR=NA
+  
+  
+  
+  
+  
+  
   results=list(M=M,authorDocuments=M_list)
   return(results)
 }

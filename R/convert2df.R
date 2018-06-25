@@ -59,6 +59,7 @@
 #' @import ggrepel
 #' @import ggraph
 #' @importFrom stringdist stringdistmatrix
+#' @importFrom rscopus affiliation_retrieval
 #' @importFrom rscopus author_df_orig
 #' @importFrom rscopus author_search
 #' @importFrom rscopus get_complete_author_info

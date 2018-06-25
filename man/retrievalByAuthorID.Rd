@@ -63,7 +63,7 @@ Uses SCOPUS API search to get information about documents on a set of authors us
 
 ## create the bibliographic collection
 # 
-# res <- retrievalByAuthor(id, api_key)
+# res <- retrievalByAuthorID(id, api_key)
 #
 # M <- res$M  # the entire bibliographic data frame
 # M <- res$authorDocuments # the list containing a bibliographic data frame for each author

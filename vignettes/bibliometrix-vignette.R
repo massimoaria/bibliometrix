@@ -121,7 +121,6 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 ## ----similarity, fig.height=9, fig.width=9, warning=FALSE-------------------------------------------------------------
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
-# plot authors' similarity (first 20 authors), using salton similarity index
 net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
 
 
@@ -156,7 +155,7 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.8,cluster="none")
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.7,cluster="none")
 
 
 ## ----Co-citation network, fig.height=7, fig.width=7, warning=FALSE----------------------------------------------------
@@ -184,12 +183,12 @@ net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = 
 CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
 
 
-## ----Historical Co-citation network, fig.height=9, fig.width=9, warning=FALSE---------------------------------------------------
+## ----Historical Co-citation network, fig.height=7, fig.width=10, warning=FALSE--------------------------------------------------
 # Create a historical citation network
 options(width=130)
-histResults <- histNetwork(M, sep = ".  ")
+histResults <- histNetwork(M, min.citations = 10, sep = ".  ")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, n=20, size = 10, size.cex=TRUE, arrowsize = 0.5)
+net <- histPlot(histResults, n=10, size = 10, labelsize=5, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
 
 

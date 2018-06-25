@@ -10,7 +10,7 @@ vignette: >
 ---
 
 <div style="width:450px; height=300px">
-![ ](figures/logo_small.png)
+![bibliometrix](figures/logo.jpg)
 </div>
 
 #### http://www.bibliometrix.org

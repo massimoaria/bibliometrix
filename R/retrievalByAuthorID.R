@@ -86,7 +86,8 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
     }
     
     M_AU=data.frame(AU_S,stringsAsFactors = FALSE)
-    if (dim(M_AU)[2]<=dim(M)){
+    
+    if (dim(M_AU)[2]<=dim(M)[2]){
       M_AU[setdiff(names(M),names(M_AU))]=NA
     }
     M=rbind(M,M_AU[names(M)])
@@ -94,7 +95,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
     names(M_list)[j]=id[j]
   }
   M=M[-1,]  ### remove first empty row
-  names(M_AU)=c("AU_ID","AU","C1_ID","C1","nAU","nC1","TC","SO","DT","TI","PII","DI","EID","PY","CDD", "URL","UT","AU1","ISSN","EISSN","PAG","AB","PT","SUBTYPE","DE","SO_ID")
+  names(M)=c("AU_ID","AU","C1_ID","C1","nAU","nC1","TC","SO","DT","TI","PII","DI","EID","PY","CDD", "URL","UT","AU1","ISSN","EISSN","PAG","AB","PT","SUBTYPE","DE","SO_ID")
   if (isTRUE(remove.duplicated)){
     d=duplicated(gsub("[^[:alnum:] ]","",M$UT))
     cat("\n",sum(d),"duplicated documents have been removed\n")

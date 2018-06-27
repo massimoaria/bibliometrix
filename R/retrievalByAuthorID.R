@@ -6,6 +6,7 @@
 #' SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.
 #' @param api_key is a character. It contains the Elsvier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}
 #' @param remove.duplicated is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.
+#' @param country is logical. If TRUE authors' country information will be dowloaded from SCOPUS.
 #' @return a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
 #' M includes the entire bibliographic collection downloaded from SCOPUS.
 #' The main field tags are:
@@ -60,7 +61,7 @@
 #' 
 #' @export
 #' 
-retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
+retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE){
   
   id=id[!is.na(id)]
   M_list=list()
@@ -106,6 +107,9 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   M$DE=gsub("\\| ",";",M$DE)
   M$ID=M$DE
   
+  
+  ### da rivedere ###
+  if (isTRUE(affiliation)){
   M$AU_CO=paste(M$C1_ID,";",sep="")
   
   ### country retrieval
@@ -134,7 +138,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
     M$C1[i]=paste(paste(UN[[i]],", ",CO[[i]],sep=""),collapse=";")
   }
   #########
-  
+  }
   M <- data.frame(lapply(M,toupper),stringsAsFactors = FALSE)
   M$TC=as.numeric(M$TC)
   M$PY=as.numeric(M$PY)

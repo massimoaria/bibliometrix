@@ -109,7 +109,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE)
   
   
   ### da rivedere ###
-  if (isTRUE(affiliation)){
+  if (isTRUE(country)){
   M$AU_CO=paste(M$C1_ID,";",sep="")
   
   ### country retrieval

@@ -65,7 +65,13 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
   id=id[!is.na(id)]
   M_list=list()
   n=length(id)
-  M=data.frame(AU_ID=NA,AU=NA,C1_ID=NA,C1=NA,nAU=NA,nC1=NA,TC=NA,SO=NA,DT=NA,TI=NA,PII=NA,DI=NA,EID=NA,PY=NA,CDD=NA, URL=NA,UT=NA,AU1=NA,ISSN=NA,EISSN=NA,PAG=NA,AB=NA,PT=NA,SUBTYPE=NA,DE=NA,SO_ID=NA)
+  nomi=c("au_id","name","affil_id","affilname","n_auth","n_affils","citations","journal","description",
+         "title","pii","doi","eid","cover_date","cover_display_date","prism_url","dc_identifier",
+         "dc_creator","prism_issn","prism_eIssn","prism_pageRange","dc_description","prism_aggregationType",
+         "subtype","authkeywords","source_id" )
+  M=data.frame(matrix(NA,1,length(nomi)))
+  names(M)=nomi
+  
   for (j in 1:n){
     AU_ID=id[j]
     cat("\n Query n. ",j,"   Author ID: ",AU_ID)
@@ -80,14 +86,15 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE){
     }
     
     M_AU=data.frame(AU_S,stringsAsFactors = FALSE)
-    names(M_AU)=c("AU_ID","AU","C1_ID","C1","nAU","nC1","TC","SO","DT","TI","PII","DI","EID","PY","CDD", "URL","UT","AU1","ISSN","EISSN","PAG","AB","PT","SUBTYPE","DE","SO_ID")
-    
-    M=rbind(M,M_AU)
+    if (dim(M_AU)[2]<=dim(M)){
+      M_AU[setdiff(names(M),names(M_AU))]=NA
+    }
+    M=rbind(M,M_AU[names(M)])
     M_list[[j]]=M_AU
     names(M_list)[j]=id[j]
   }
   M=M[-1,]  ### remove first empty row
-  
+  names(M_AU)=c("AU_ID","AU","C1_ID","C1","nAU","nC1","TC","SO","DT","TI","PII","DI","EID","PY","CDD", "URL","UT","AU1","ISSN","EISSN","PAG","AB","PT","SUBTYPE","DE","SO_ID")
   if (isTRUE(remove.duplicated)){
     d=duplicated(gsub("[^[:alnum:] ]","",M$UT))
     cat("\n",sum(d),"duplicated documents have been removed\n")

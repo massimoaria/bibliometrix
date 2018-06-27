@@ -121,9 +121,9 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE)
   for (i in 1:length(aff_id)){
     a=affiliation_retrieval(aff_id[i],api_key=api_key,verbose=FALSE)
     AFF[i,1]=aff_id[i]
-    AFF[i,2]=a$content$`affiliation-retrieval-response`$`affiliation-name`
-    AFF[i,3]=a$content$`affiliation-retrieval-response`$country
-    cat("\nAffiliation ID: ", AFF[i,1],"   Name: ",AFF[i,2], " ,", AFF[i,3])
+    if(length(a$content$`affiliation-retrieval-response`$`affiliation-name`)>0){AFF[i,2]=a$content$`affiliation-retrieval-response`$`affiliation-name`}
+    if(length(a$content$`affiliation-retrieval-response`$country)>0){AFF[i,3]=a$content$`affiliation-retrieval-response`$country}
+    cat("\nAffiliation ID: ", AFF[i,1],"   Name: ",AFF[i,2], ",", AFF[i,3])
     M$AU_CO=gsub(paste(aff_id[i],";",sep = ""),paste(AFF[i,3],";",sep=""),M$AU_CO)
   }
   M$AU_CO=gsub(";;",";",M$AU_CO)

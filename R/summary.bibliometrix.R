@@ -130,6 +130,7 @@ summary.bibliometrix<-function(object, ...){
   names(Co)=c("Country  ","Articles","Freq")
   Co$Freq=as.numeric(Co[,2])/sum(object$Countries)
   Co=cbind(Co,object$CountryCollaboration[1:kk,2:3])
+  Co$MCP_Ratio=Co$MCP/Co$Articles
   #names(Co)=c("Country  ","Articles","Frequency")
   Co=format(Co,justify="left",digits=3)
   row.names(Co)=1:kk

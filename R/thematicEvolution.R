@@ -9,6 +9,8 @@
 #' @param ... is a sequence of names of thematic maps created by \code{\link{thematicMap}} function.
 #' @param weighted is a logical. If FALSE, a thematic nexus is measures by the classical inclusion index (calculated using the 
 #' number of keywords). If TRUE, the inclusion index is calculated considering the occurrences of keywords.
+#' @param labelsize
+#' @param size
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
@@ -50,7 +52,7 @@
 #'
 #' @export
 
-thematicEvolution <- function(...,weighted=FALSE){
+thematicEvolution <- function(...,weighted=FALSE,labelsize=0.5,size=1){
   
   arguments <- list(...)
   K=length(arguments)
@@ -74,6 +76,7 @@ thematicEvolution <- function(...,weighted=FALSE){
     for (i in CL1){
       w1=as.character(res1$words$Words[res1$words$Cluster==i])
       for (j in CL2){
+        
         cont=cont+1
         w2=as.character(res2$words$Words[res2$words$Cluster==j])  
         Inc[cont,1]=i
@@ -106,8 +109,9 @@ thematicEvolution <- function(...,weighted=FALSE){
     l[,1]=c(rep(1,n1),rep(2,n2))
     l[(1:n1),2]=seq(1,10,length.out = n1)
     l[((n1+1):(n1+n2)),2]=seq(1,10,length.out = n2)
-    labelsize=0.75
+    #labelsize=0.75
     Title=paste("From sub-period",(k-1),"to sub-period",k)
+    V(net2way)$size=size
     plot(net2way,layout=l,vertex.label.dist = 0.4, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 1, vertex.label = V(net2way)$name, vertex.label.cex = labelsize, main=Title)
     net[[k-1]]=net2way
     incMatrix[[k-1]]=Inc

@@ -26,6 +26,7 @@
 #' @param quali.supp is a vector indicating the indexes of the categorical supplementary variables.
 #' @param quanti.supp is a vector indicating the indexes of the quantitative supplementary variables.
 #' @param documents is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10.
+#' @param graph is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE
 #' @return It is an object of the class \code{list} containing the following components:
 #'
 #' \tabular{lll}{
@@ -51,7 +52,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, k.max=5, stemming=FALSE, labelsize=10,documents=10){
+conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, k.max=5, stemming=FALSE, labelsize=10,documents=10, graph=TRUE){
   
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   
@@ -209,7 +210,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
       geom_segment(data=df_quanti,aes(x=0,y=0,xend = x, yend = y), size=1.5,arrow = arrow(length = unit(0.3,"cm")))
   }
   b=b + theme(legend.position="none")
-  plot(b)
+  
+  if (isTRUE(graph)){plot(b)}
   
   
   
@@ -249,7 +251,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
             panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
             panel.grid.minor = element_blank())
       
-    plot(b_doc)
+    if (isTRUE(graph)){plot(b_doc)}
     
     ## Factorial map of the most cited documents
     docCoord=docCoord[order(-docCoord$TC),]
@@ -281,7 +283,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
            panel.grid.minor = element_blank())
       
     
-    plot(b_doc_TC)
+    if (isTRUE(graph)){plot(b_doc_TC)}
 
   
   

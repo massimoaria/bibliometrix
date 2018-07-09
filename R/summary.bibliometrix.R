@@ -6,6 +6,7 @@
 #' \code{k} integer, used for table formatting (number of rows). Default value is 10.\cr
 #' \code{pause} locical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.\cr
 #' \code{width} integer, used to define screen output width. Default value is \code{width = 120}.
+#' \code{verbose} logical, used to allow screen output. Default is TRUE.
 #' @return The function \code{summary} computes and returns a list of summary statistics of the object of class \code{bibliometrics}.
 #'
 #' the list contains the following objects:
@@ -44,6 +45,7 @@ summary.bibliometrix<-function(object, ...){
   if (sum(names(arguments)=="k")==0){k=10} else {k=arguments$k}
   if (sum(names(arguments)=="pause")==0){pause=FALSE} else {pause=arguments$pause}
   if (sum(names(arguments)=="width")==0){options(width=120)} else {options(width=arguments$width)}
+  if (sum(names(arguments)=="verbose")==0){verbose=TRUE} else {verbose=FALSE}
   
   Co=NULL
   AC=NULL
@@ -73,54 +75,54 @@ summary.bibliometrix<-function(object, ...){
   MainInfo[length(MainInfo)+1]=paste(names(object$Documents)[i], "                                   ",as.numeric(object$Documents)[i],"\n")  
   }
   MainInfo[length(MainInfo)+1]=paste("\n")}
-  cat(MainInfo)
+  if (isTRUE(verbose)){cat(MainInfo)}
 
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
   cat("Hit <Return> to see next table: ")
   line <- readline()}
 
-  cat("\nAnnual Scientific Production\n\n")
+  if (isTRUE(verbose)) cat("\nAnnual Scientific Production\n\n")
   Y=data.frame(table(object$Years))
   names(Y)=c("Year   ", "Articles")
-  print(Y,row.names=FALSE);cat("\n")
+  if (isTRUE(verbose)) {print(Y,row.names=FALSE);cat("\n")}
   ny=dim(Y)[1]
   GR=((Y[ny,2]/Y[1,2])^(1/(ny-1))-1)*100
-  cat("Annual Percentage Growth Rate",GR,"\n\n")
+  if (isTRUE(verbose)){cat("Annual Percentage Growth Rate",GR,"\n\n")}
 
 
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
 
   # Most Productive Authors
-  cat("\nMost Productive Authors\n\n")
+  if (isTRUE(verbose)){cat("\nMost Productive Authors\n\n")}
   A=data.frame(cbind(object$Authors[1:k]))
   A$MPA=row.names(A);A=A[,c(2,1)]
   A[,3:4]=object$AuthorsFrac[1:k,]
   names(A)=c("Authors       ", "Articles", "Authors       ","Articles Fractionalized")
   A=format(A,justify="left",digits=3)
   row.names(A)=1:k
-  print(A,row.names=TRUE);cat("\n")
+  if (isTRUE(verbose)) {print(A,row.names=TRUE);cat("\n")}
   
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
 
   # Most Cited Manuscipts
-  cat("\nTop manuscripts per citations\n\n")
+  if (isTRUE(verbose)){cat("\nTop manuscripts per citations\n\n")}
   MostCitedPapers=object$MostCitedPapers[1:k,]
   MostCitedPapers=format(MostCitedPapers,justify="left",digits=3)
   row.names(MostCitedPapers)=1:k
-  print(MostCitedPapers,row.names=TRUE);cat("\n")
+  if (isTRUE(verbose)){print(MostCitedPapers,row.names=TRUE);cat("\n")}
 
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
 
   kk=k
   if (!is.null(object$Countries)){
   # Most Productive Countries
-  cat("\nMost Productive Countries (of corresponding authors)\n\n")
+    if (isTRUE(verbose)){cat("\nMost Productive Countries (of corresponding authors)\n\n")}
 
   if (length(object$Countries)<k) {kk=length(object$Countries)}
 
@@ -134,16 +136,16 @@ summary.bibliometrix<-function(object, ...){
   #names(Co)=c("Country  ","Articles","Frequency")
   Co=format(Co,justify="left",digits=3)
   row.names(Co)=1:kk
-  print(Co,row.names=TRUE);cat("\n")
-  cat("\nSCP: Single Country Publications\n\nMCP: Multiple Country Publications\n\n")
+  if (isTRUE(verbose)){print(Co,row.names=TRUE);cat("\n")}
+  if (isTRUE(verbose)){cat("\nSCP: Single Country Publications\n\nMCP: Multiple Country Publications\n\n")}
 
 
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
 
   # Total Citation per Country
-  cat("\nTotal Citations per Country\n\n")
+  if (isTRUE(verbose)){cat("\nTotal Citations per Country\n\n")}
   ind=which(!is.na(object$TotalCitation))
   AC=aggregate(object$TotalCitation[ind],list(object$CO[ind]),"sum")
   CC=object$Countries[sort(row.names(object$Countries))]
@@ -155,17 +157,17 @@ summary.bibliometrix<-function(object, ...){
   names(AC)=c("Country     ", "Total Citations", "Average Article Citations")
   AC=format(AC,justify="left",digits=3)[1:kk,]
   row.names(AC)=1:kk
-  print(AC,row.names=TRUE);cat("\n")
+  if (isTRUE(verbose)){print(AC,row.names=TRUE);cat("\n")}
 
 
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
   }
 
   if (!is.null(object$Sources)){
   # Most relevant Sources
-  cat("\nMost Relevant Sources\n\n")
+    if (isTRUE(verbose)){cat("\nMost Relevant Sources\n\n")}
   kk=k
   if (length(object$Sources)<k){kk=length(object$Sources)}
   AA=data.frame(cbind(object$Sources[1:kk]))
@@ -173,17 +175,17 @@ summary.bibliometrix<-function(object, ...){
   names(AA)=c("Sources       ", "Articles")
   AA=format(AA,justify="left",digits=3)
   row.names(AA)=1:kk
-  print(AA,row.names=TRUE);cat("\n")
+  if (isTRUE(verbose)){print(AA,row.names=TRUE);cat("\n")}
 
 
-  if (pause==TRUE){
+  if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
   }
 
   if (!is.null(object$ID) & !is.null(object$DE)){
   # Most relevant Keywords
-  cat("\nMost Relevant Keywords\n\n")
+    if (isTRUE(verbose)){cat("\nMost Relevant Keywords\n\n")}
   AAA=data.frame(cbind(object$DE[1:k]))
   AAA$MPA=row.names(AAA);AAA=AAA[,c(2,1)]
   names(AAA)=c("DE Keywords     ", "Articles")
@@ -193,7 +195,8 @@ summary.bibliometrix<-function(object, ...){
   names(AAA)=c("Author Keywords (DE)     ", "Articles","Keywords-Plus (ID)    ", "Articles" )
   AAA=format(AAA,justify="left",digits=3)
   row.names(AAA)=1:k
-  print(AAA,row.names=TRUE);cat("\n")}
+  if (isTRUE(verbose)){print(AAA,row.names=TRUE);cat("\n")}
+  }
 
   summaryresults=list(MainInformation=MainInfo,AnnualProduction=Y,AnnualGrowthRate=GR,MostProdAuthors=A,MostCitedPapers=MostCitedPapers,MostProdCountries=Co,TCperCountries=AC,MostRelSources=AA,MostRelKeywords=AAA)
 

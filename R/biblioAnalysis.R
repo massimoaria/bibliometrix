@@ -67,11 +67,14 @@ biblioAnalysis<-function(M,sep=";"){
   ID=NULL
   MostCitedPapers=NULL
   
+ 
 
 
 
 # M is the bibliographic dataframe
 Tags<-names(M)
+
+if (!("SR" %in% Tags)){M=metaTagExtraction(M,"SR")}
 
 # temporal analyis
 
@@ -103,9 +106,7 @@ if ("TC" %in% Tags){
   PY=as.numeric(M$PY)
   CurrentYear=as.numeric(format(Sys.Date(),"%Y"))
   TCperYear=TC/(CurrentYear-PY)
-  if (sum(names(M) %in% "JI")==1){
-    MostCitedPapers=data.frame(paste(M$AU,paste("(",M$PY,")",sep=""),M$JI,sep=","),TC,TCperYear)
-  }else{MostCitedPapers=data.frame(paste(M$AU,paste("(",M$PY,")",sep=""),M$SO,sep=","),TC,TCperYear)}
+  MostCitedPapers=data.frame(M$SR,TC,TCperYear)
   MostCitedPapers=MostCitedPapers[order(TC,decreasing=TRUE),]
   names(MostCitedPapers)=c("Paper         ","TC","TCperYear")
 }

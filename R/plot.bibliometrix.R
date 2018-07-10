@@ -59,7 +59,7 @@ plot.bibliometrix<-function(x, ...){
   xx2=cbind(xx[,c(1,3)],rep("MCP",k))
   names(xx2)=c("Country","Freq","Collaboration")
   xx=rbind(xx2,xx1)
-  xx$Country=factor(xx$Country,levels=a[1:dim(xx2)[1]])
+  xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
   g=suppressWarnings(ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
     geom_bar(stat="identity")+
     scale_x_discrete(limits = rev(levels(xx$Country)))+

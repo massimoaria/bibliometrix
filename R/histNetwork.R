@@ -38,7 +38,7 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
   #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
   #  return()}
   M$TC=as.numeric(M$TC)
-  M=M[M$TC>min.citations,]
+  M=M[M$TC>=min.citations,]
   if (dim(M)[1]==0){cat("\nNo document has a number of citations above the fixed threshold\n");return(NULL)}
   
   M=M[order(M$PY),]

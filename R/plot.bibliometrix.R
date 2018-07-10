@@ -53,13 +53,16 @@ plot.bibliometrix<-function(x, ...){
   # Countries
   #barplot(sort(x$Countries,decreasing=TRUE)[1:k],horiz=TRUE,las=2,cex.names=0.6,main="Most Productive Countries",xlab="Articles")
   xx=x$CountryCollaboration[1:k,]
+  xx=xx[order(-(xx$SCP+xx$MCP)),]
   xx1=cbind(xx[,1:2],rep("SCP",k))
   names(xx1)=c("Country","Freq","Collaboration")
   xx2=cbind(xx[,c(1,3)],rep("MCP",k))
   names(xx2)=c("Country","Freq","Collaboration")
   xx=rbind(xx2,xx1)
+  xx$Country=factor(xx$Country,levels=a[1:dim(xx2)[1]])
   g=suppressWarnings(ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
     geom_bar(stat="identity")+
+    scale_x_discrete(limits = rev(levels(xx$Country)))+
     scale_fill_discrete(name="Collaboration",
                         breaks=c("SCP","MCP"))+
     labs(title = "Most Productive Countries", x = "Countries", y = "N. of Documents", 

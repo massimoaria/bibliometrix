@@ -317,7 +317,7 @@ factorial<-function(X,method,quanti,quali){
            },
          ### MULTIPLE CORRESPONDENCE ANALYSIS ###
          MCA={
-           X=data.frame(apply(X,2,factor))
+           X[,-quanti]=data.frame(apply(X[,-quanti],2,factor))
            res.mca <- MCA(X, quanti.sup=quanti, quali.sup=quali, ncp=2, graph=FALSE)
            # Get coordinates of keywords (we take only categories "1"")
            coord=get_mca_var(res.mca)

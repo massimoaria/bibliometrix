@@ -6,7 +6,7 @@
 \usage{
 conceptualStructure(M, field = "ID", method = "MCA", quali.supp = NULL,
   quanti.supp = NULL, minDegree = 2, k.max = 5, stemming = FALSE,
-  labelsize = 10, documents = 10)
+  labelsize = 10, documents = 10, graph = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -40,6 +40,8 @@ or \code{method="MCA"} for Multiple Correspondence Analysis. The default is \cod
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}}
 
 \item{documents}{is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10.}
+
+\item{graph}{is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE}
 }
 \value{
 It is an object of the class \code{list} containing the following components:

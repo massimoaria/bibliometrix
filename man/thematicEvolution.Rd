@@ -4,13 +4,17 @@
 \alias{thematicEvolution}
 \title{Create an Evolution Thematic Map}
 \usage{
-thematicEvolution(..., weighted = FALSE)
+thematicEvolution(..., weighted = FALSE, labelsize = 0.5, size = 1)
 }
 \arguments{
 \item{...}{is a sequence of names of thematic maps created by \code{\link{thematicMap}} function.}
 
 \item{weighted}{is a logical. If FALSE, a thematic nexus is measures by the classical inclusion index (calculated using the 
 number of keywords). If TRUE, the inclusion index is calculated considering the occurrences of keywords.}
+
+\item{labelsize}{is numerical}
+
+\item{size}{is numerical}
 }
 \value{
 a list containing:

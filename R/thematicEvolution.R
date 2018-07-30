@@ -9,8 +9,8 @@
 #' @param ... is a sequence of names of thematic maps created by \code{\link{thematicMap}} function.
 #' @param weighted is a logical. If FALSE, a thematic nexus is measures by the classical inclusion index (calculated using the 
 #' number of keywords). If TRUE, the inclusion index is calculated considering the occurrences of keywords.
-#' @param labelsize
-#' @param size
+#' @param labelsize is numerical
+#' @param size is numerical
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr

@@ -4,7 +4,7 @@
 \alias{retrievalByAuthorID}
 \title{Get Author Content on SCOPUS by ID}
 \usage{
-retrievalByAuthorID(id, api_key, remove.duplicated = TRUE)
+retrievalByAuthorID(id, api_key, remove.duplicated = TRUE, country = TRUE)
 }
 \arguments{
 \item{id}{is a vector of characters containing the author's SCOPUS IDs. 
@@ -13,6 +13,8 @@ SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.}
 \item{api_key}{is a character. It contains the Elsvier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}}
 
 \item{remove.duplicated}{is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.}
+
+\item{country}{is logical. If TRUE authors' country information will be dowloaded from SCOPUS.}
 }
 \value{
 a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 

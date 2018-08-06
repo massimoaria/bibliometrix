@@ -38,29 +38,31 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
   #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
   #  return()}
   M$TC=as.numeric(M$TC)
-  M=M[M$TC>=min.citations,]
-  if (dim(M)[1]==0){cat("\nNo document has a number of citations above the fixed threshold\n");return(NULL)}
-  
-  M=M[order(M$PY),]
-  N=dim(M)[1]
-  rows=c(1:N)
-  
   if (!("SR" %in% names(M))){M=metaTagExtraction(M,Field="SR")} 
+  M=M[order(M$PY),]
   
-  lCit=Matrix(0, N,N)
+  M2=M[M$TC>=min.citations,]
+  if (dim(M2)[1]==0){cat("\nNo document has a number of citations above the fixed threshold\n");return(NULL)}
+  
+  
+  N=dim(M2)[1]
+  N2=dim(M)[1]
+  rows=c(1:N2)
+  
+  lCit=Matrix(0, N,N2)
   
   switch(M$DB[1],
      ISI={
        ## matching by SR
             for (i in 1:N){
                 if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
-                x=M$SR[i]
-                Year=M$PY[i]
+                x=M2$SR[i]
+                Year=M2$PY[i]
                 pos = grep(x, M$CR[M$PY>=Year])
                 pos = rows[M$PY>=Year][pos]
                 if ("DI" %in% names(M)){
-                  if (!is.na(M$DI[i])){
-                    pos2 = grep(M$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
+                  if (!is.na(M2$DI[i])){
+                    pos2 = grep(M2$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
                     pos2 = rows[M$PY>=Year][pos2]
                     pos=unique(pos,pos2)}
                 }
@@ -72,14 +74,14 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
          },
     SCOPUS={
       ## matching by title and year
-      TI=paste(M$TI," ","\\(",M$PY,"\\)",sep = "")
-      TIb=paste("\\(",M$PY,"\\)"," ",M$TI,sep = "")
+      TI=paste(M2$TI," ","\\(",M2$PY,"\\)",sep = "")
+      TIb=paste("\\(",M2$PY,"\\)"," ",M2$TI,sep = "")
       for (i in 1:N){
         if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
       
         x=TI[i]
         y=TIb[i]
-        Year=M$PY[i]
+        Year=M2$PY[i]
         pos = grep(x, M$CR[M$PY>=Year])
         pos = rows[M$PY>=Year][pos]
         pos2 = grep(y, M$CR[M$PY>=Year])
@@ -94,22 +96,25 @@ histNetwork<-function(M, min.citations = 0, sep = ";"){
   LCS=rowSums(lCit)
 
   ### to assure that LCS cannot be greater than TC
-  ind=which(LCS>M$TC)
-  LCS[ind]=M$TC[ind]
+  ind=which(LCS>M2$TC)
+  LCS[ind]=M2$TC[ind]
   ####
   
-  M$LCS=LCS
-  row.names(lCit)=colnames(lCit)=M$SR
+  M2$LCS=LCS
+  row.names(lCit)=M2$SR
+  colnames(lCit)=M$SR
+  
+  lCit=lCit[,(M$SR %in% M2$SR)]
   
  
-  if (!("DI" %in% names(M))){M$DI=NA}
-  df=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=LCS,GCS=M$TC,stringsAsFactors = F)
+  if (!("DI" %in% names(M2))){M2$DI=NA}
+  df=data.frame(Paper=M2$SR,DOI=M2$DI,Year=M2$PY,LCS=LCS,GCS=M2$TC,stringsAsFactors = F)
   df=df[order(df$Year),]  
   
 
 row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
 
-results=list(NetMatrix=t(lCit),histData=df,M=M,LCS=LCS)
+results=list(NetMatrix=t(lCit),histData=df,M=M2,LCS=LCS)
 
 return(results)
 }

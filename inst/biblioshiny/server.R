@@ -393,7 +393,7 @@ server <- function(input, output) {
   
   output$histPlot <- renderPlot({
     
-    ## Keyword co-occurrences network
+    ## Historiograph
     
     if (values$Histfield=="NA"){
       values$histResults <- histNetwork(values$M, min.citations=quantile(values$M$TC,0.75), sep = ";")
@@ -417,7 +417,23 @@ server <- function(input, output) {
     Data=values$histResults$histData
     Data=Data[ind,]
     Data$DOI<- paste0('<a href=\"http://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
-    DT::datatable(Data, escape = FALSE, rownames = FALSE)
+    DT::datatable(Data, escape = FALSE, rownames = FALSE, 
+                  options = list(pageLength = input$histNodes, dom = 'tip')) %>%
+      formatStyle(names(Data),  backgroundColor = 'gray') %>%
+      formatStyle(
+        'GCS',
+        background = styleColorBar(Data$GCS, 'steelblue'),
+        backgroundSize = '100% 90%',
+        backgroundRepeat = 'no-repeat',
+        backgroundPosition = 'center'
+      ) %>%
+      formatStyle(
+        'LCS',
+        background = styleColorBar(Data$LCS, 'steelblue'),
+        backgroundSize = '100% 90%',
+        backgroundRepeat = 'no-repeat',
+        backgroundPosition = 'center'
+      )
     #return(Data)
     
   })

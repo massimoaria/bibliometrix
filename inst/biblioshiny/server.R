@@ -4,6 +4,7 @@ server <- function(input, output) {
   options(shiny.maxRequestSize=30*1024^2) 
   
   values = reactiveValues()
+  values$results="NA"
   values$log="working..."
   values$load="FALSE"
   values$field="NA"
@@ -94,8 +95,9 @@ server <- function(input, output) {
   
 
   output$summary <- renderPrint({
-    if (!exists("results")){results=biblioAnalysis(values$M)}
-    S=summary(results,k=input$kk,verbose=FALSE)
+    if (values$results=="NA"){
+      values$results=biblioAnalysis(values$M)}
+    S=summary(values$results,k=input$kk,verbose=FALSE)
     
     
     switch(input$summary_type,
@@ -127,11 +129,12 @@ server <- function(input, output) {
   })
   
   output$summaryPlots <- renderPlot({
-    if (!exists("results")){results=biblioAnalysis(values$M)}
+    if (values$results=="NA"){
+      values$results=biblioAnalysis(values$M)}
     k=input$k
     switch(input$plot_type,
            authors={
-             xx=as.data.frame(results$Authors[1:k])
+             xx=as.data.frame(values$results$Authors[1:k])
              g=ggplot2::ggplot(data=xx, aes(x=xx$AU, y=xx$Freq)) +
                geom_bar(stat="identity", fill="steelblue")+
                labs(title="Most productive Authors", x = "Authors")+
@@ -141,7 +144,7 @@ server <- function(input, output) {
              
            },
            countries={
-             xx=results$CountryCollaboration[1:k,]
+             xx=values$results$CountryCollaboration[1:k,]
              xx=xx[order(-(xx$SCP+xx$MCP)),]
              xx1=cbind(xx[,1:2],rep("SCP",k))
              names(xx1)=c("Country","Freq","Collaboration")
@@ -162,10 +165,10 @@ server <- function(input, output) {
                                   coord_flip())
            },
            production={
-             Tab=table(results$Years)
+             Tab=table(values$results$Years)
              
              ## inserting missing years
-             YY=setdiff(seq(min(results$Years),max(results$Years)),names(Tab))
+             YY=setdiff(seq(min(values$results$Years),max(values$results$Years)),names(Tab))
              Y=data.frame(Year=as.numeric(c(names(Tab),YY)),Freq=c(as.numeric(Tab),rep(0,length(YY))))
              Y=Y[order(Y$Year),]
              
@@ -189,8 +192,8 @@ server <- function(input, output) {
                )
            },
            articleTC={
-             Table2=aggregate(results$TotalCitation,by=list(results$Years),length)
-             Table2$xx=aggregate(results$TotalCitation,by=list(results$Years),mean)$x
+             Table2=aggregate(values$results$TotalCitation,by=list(values$results$Years),length)
+             Table2$xx=aggregate(values$results$TotalCitation,by=list(values$results$Years),mean)$x
              Table2$Annual=NA
              d=date()
              d=as.numeric(substring(d,nchar(d)-3,nchar(d)))
@@ -199,7 +202,7 @@ server <- function(input, output) {
              names(Table2)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
              
              ## inserting missing years
-             YY=setdiff(seq(min(results$Years),max(results$Years)),Table2$Year)
+             YY=setdiff(seq(min(values$results$Years),max(values$results$Years)),Table2$Year)
              if (length(YY>0)){
                YY=data.frame(YY,0,0,0,0)
                names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
@@ -226,8 +229,8 @@ server <- function(input, output) {
                )
            },
            annualTC={
-             Table2=aggregate(results$TotalCitation,by=list(results$Years),length)
-             Table2$xx=aggregate(results$TotalCitation,by=list(results$Years),mean)$x
+             Table2=aggregate(values$results$TotalCitation,by=list(values$results$Years),length)
+             Table2$xx=aggregate(values$results$TotalCitation,by=list(values$results$Years),mean)$x
              Table2$Annual=NA
              d=date()
              d=as.numeric(substring(d,nchar(d)-3,nchar(d)))
@@ -236,7 +239,7 @@ server <- function(input, output) {
              names(Table2)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
              
              ## inserting missing years
-             YY=setdiff(seq(min(results$Years),max(results$Years)),Table2$Year)
+             YY=setdiff(seq(min(values$results$Years),max(values$results$Years)),Table2$Year)
              if (length(YY>0)){
                YY=data.frame(YY,0,0,0,0)
                names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")

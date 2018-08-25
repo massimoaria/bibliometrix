@@ -113,7 +113,7 @@ navbarMenu("Descriptive Analysis",
                         conditionalPanel(condition = "input.summary_type != 'tab1'",
                                     numericInput("kk", 
                                       label=("Number of results"), 
-                                      value = 10))
+                                      value = 20))
                       ),
                       mainPanel(
                         shinycssloaders::withSpinner(verbatimTextOutput("summary"))
@@ -139,12 +139,12 @@ navbarMenu("Descriptive Analysis",
                         conditionalPanel(condition = "input.plot_type == 'authors'",
                                          numericInput("k", 
                                                       label=("Number of results"), 
-                                                      value = 10)
+                                                      value = 20)
                         ),
                         conditionalPanel(condition = "input.plot_type == 'countries'",
                                          numericInput("k", 
                                                       h3("Number of results"), 
-                                                      value = 10)
+                                                      value = 20)
                         )
                         
                       ),

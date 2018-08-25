@@ -28,6 +28,8 @@ Imports: stats,
 		 RISmed,
 	     rscopus,
 		 shiny,
+		 shinycssloaders,
+		 shinythemes,
 		 SnowballC,
 		 stringdist,
 		 stringr		 

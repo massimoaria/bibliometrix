@@ -1,12 +1,15 @@
-#library(shiny)
-#library(bibliometrix)
-#library(ggplot2)
-#library(rio)
-#library(DT)
+if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
+if (!(require(rio))){install.packages("rio")} 
+if (!(require(DT))){install.packages("DT")} 
+if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
+if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
+if (!(require(shinythemes))){install.packages("shinythemes")} 
 
 # Main NavBar ----
-ui <-  navbarPage("bibliometrix",
-                  
+options(spinner.size=1, spinner.type=5)
+
+ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix",
+                  theme=shinythemes::shinytheme("slate"),
                   
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
@@ -75,7 +78,7 @@ tabPanel(
       p("Here accept single .txt/.bib/.xslx, or multiple .txt/.bib files compressed in a single .zip archive."),
       tags$hr(),
       
-      verbatimTextOutput("log"),
+      shinycssloaders::withSpinner(verbatimTextOutput("log")),
       
       ### download xlsx
       selectInput('save_file', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'xlsx' = 'xlsx')),
@@ -83,7 +86,7 @@ tabPanel(
               downloadButton("collection.xlsx", "Download"))
     ),
     mainPanel(
-      tableOutput("contents")
+      shinycssloaders::withSpinner(tableOutput("contents"))
     )
   )
 ),
@@ -113,7 +116,7 @@ navbarMenu("Descriptive Analysis",
                                       value = 10))
                       ),
                       mainPanel(
-                        verbatimTextOutput("summary")
+                        shinycssloaders::withSpinner(verbatimTextOutput("summary"))
                       )
                     )
            ),
@@ -146,7 +149,7 @@ navbarMenu("Descriptive Analysis",
                         
                       ),
                       mainPanel(
-                        plotOutput(outputId = "summaryPlots")
+                        shinycssloaders::withSpinner(plotOutput(outputId = "summaryPlots"))
                       )
                       
                     )
@@ -243,7 +246,7 @@ navbarMenu("Conceptual Structure",
                       ),
                     
                     mainPanel(
-                      plotOutput(outputId = "cocPlot")
+                      shinycssloaders::withSpinner(plotOutput(outputId = "cocPlot"))
                       )
                     )
            ), ## End of tabPanel ("CS network")
@@ -287,12 +290,15 @@ navbarMenu("Conceptual Structure",
                       mainPanel("Correspondence Analysis",
                       
                           tabsetPanel(type = "tabs",
-                                  tabPanel("Word Map", plotOutput(
-                                    outputId = "CSPlot1")),
-                                  tabPanel("Most Contributing Papers", plotOutput(
-                                    outputId = "CSPlot2")),
-                                  tabPanel("Most Cited Papers", plotOutput(
-                                    outputId = "CSPlot3"))
+                                  tabPanel("Word Map", 
+                                           shinycssloaders::withSpinner(plotOutput(
+                                    outputId = "CSPlot1"))),
+                                  tabPanel("Most Contributing Papers", 
+                                           shinycssloaders::withSpinner(plotOutput(
+                                    outputId = "CSPlot2"))),
+                                  tabPanel("Most Cited Papers", 
+                                           shinycssloaders::withSpinner(plotOutput(
+                                    outputId = "CSPlot3")))
                           )
                       )
                     )
@@ -310,7 +316,7 @@ navbarMenu("Conceptual Structure",
                                      value = 5)
                     ),
                     mainPanel("Thematic Map",
-                              plotOutput(outputId = "TMPlot")
+                              shinycssloaders::withSpinner(plotOutput(outputId = "TMPlot"))
                               )
                     )
                     
@@ -400,7 +406,7 @@ navbarMenu("Intellectual Structure",
                                      step = 1)
                       ),
                       mainPanel(
-                        plotOutput(outputId = "cocitPlot")
+                        shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))
                       )
                       
                     )
@@ -434,10 +440,12 @@ navbarMenu("Intellectual Structure",
                                   ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
-                                    tabPanel("Graph", plotOutput(
-                                      outputId = "histPlot")),
-                                    tabPanel("Table", DTOutput(
-                                      outputId = "histTable"))
+                                    tabPanel("Graph", 
+                                             shinycssloaders::withSpinner(plotOutput(
+                                      outputId = "histPlot"))),
+                                    tabPanel("Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                      outputId = "histTable")))
                         )
                       )
                         
@@ -532,7 +540,7 @@ navbarMenu("Social Structure",
                                                 step = 1)
                       ),
                       mainPanel(
-                        plotOutput(outputId = "colPlot")
+                        shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))
                       )
                       
                     )
@@ -542,7 +550,10 @@ navbarMenu("Social Structure",
 ), 
 
 
-
+# navbarMenu(("About"),
+#            tabPanel(title = "Help", 
+#                     includeHTML("bibliometrix-vignette.html"))
+#            ),
 
 navbarMenu("Quit", 
            tabPanel(title = "Quit", 

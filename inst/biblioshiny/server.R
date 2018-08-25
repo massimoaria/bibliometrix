@@ -27,7 +27,7 @@ server <- function(input, output) {
     if (is.null(inFile)) {return(NULL)}
     
     if (grepl(".*\\.xlsx",inFile$name)){
-      M <- import(inFile$datapath)
+      M <- rio::import(inFile$datapath)
       values$log<-"Data imported from XLSX file"
       
       ### M row names
@@ -80,7 +80,7 @@ server <- function(input, output) {
       paste("data-", Sys.Date(), ".xlsx", sep="")
     },
     content <- function(file) {
-      export(values$M, file=file)
+      rio::export(values$M, file=file)
     },
     contentType = "xlsx"
   )
@@ -132,7 +132,7 @@ server <- function(input, output) {
     switch(input$plot_type,
            authors={
              xx=as.data.frame(results$Authors[1:k])
-             g=ggplot(data=xx, aes(x=xx$AU, y=xx$Freq)) +
+             g=ggplot2::ggplot(data=xx, aes(x=xx$AU, y=xx$Freq)) +
                geom_bar(stat="identity", fill="steelblue")+
                labs(title="Most productive Authors", x = "Authors")+
                labs(y = "N. of Documents")+
@@ -142,13 +142,16 @@ server <- function(input, output) {
            },
            countries={
              xx=results$CountryCollaboration[1:k,]
+             xx=xx[order(-(xx$SCP+xx$MCP)),]
              xx1=cbind(xx[,1:2],rep("SCP",k))
              names(xx1)=c("Country","Freq","Collaboration")
              xx2=cbind(xx[,c(1,3)],rep("MCP",k))
              names(xx2)=c("Country","Freq","Collaboration")
              xx=rbind(xx2,xx1)
-             g=suppressWarnings(ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
+             xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
+             g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
                                   geom_bar(stat="identity")+
+                                  scale_x_discrete(limits = rev(levels(xx$Country)))+
                                   scale_fill_discrete(name="Collaboration",
                                                       breaks=c("SCP","MCP"))+
                                   labs(title = "Most Productive Countries", x = "Countries", y = "N. of Documents", 
@@ -168,7 +171,7 @@ server <- function(input, output) {
              
              names(Y)=c("Year","Freq")
              
-             g=ggplot(Y, aes(x = Y$Year, y = Y$Freq)) +
+             g=ggplot2::ggplot(Y, aes(x = Y$Year, y = Y$Freq)) +
                geom_line() +
                geom_area(fill = '#002F80', alpha = .5) +
                labs(x = 'Year'
@@ -205,7 +208,7 @@ server <- function(input, output) {
                row.names(Table2)=Table2$Year}
              
              
-             g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +
+             g=ggplot2::ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +
                geom_line() +
                geom_area(fill = '#002F80', alpha = .5) +
                labs(x = 'Year'
@@ -241,7 +244,7 @@ server <- function(input, output) {
                Table2=Table2[order(Table2$Year),]
                row.names(Table2)=Table2$Year}
              
-             g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperArt)) +
+             g=ggplot2::ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperArt)) +
                geom_line() +
                geom_area(fill = '#002F80', alpha = .5) +
                labs(x = 'Year'
@@ -399,7 +402,7 @@ server <- function(input, output) {
     
     }, height = 500, width = 900)
   
-  output$histTable <- renderDT({
+  output$histTable <- DT::renderDT({
     
     if (values$Histfield=="NA"){
       values$histResults <- histNetwork(values$M, min.citations=quantile(values$M$TC,0.75), sep = ";")
@@ -411,7 +414,7 @@ server <- function(input, output) {
     Data=values$histResults$histData
     Data=Data[ind,]
     Data$DOI<- paste0('<a href=\"http://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
-    datatable(Data, escape = FALSE, rownames = FALSE)
+    DT::datatable(Data, escape = FALSE, rownames = FALSE)
     #return(Data)
     
   })

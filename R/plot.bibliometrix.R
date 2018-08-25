@@ -51,7 +51,6 @@ plot.bibliometrix<-function(x, ...){
     line <- readline()}
   if (!is.na(x$CountryCollaboration[1,1])){
   # Countries
-  #barplot(sort(x$Countries,decreasing=TRUE)[1:k],horiz=TRUE,las=2,cex.names=0.6,main="Most Productive Countries",xlab="Articles")
   xx=x$CountryCollaboration[1:k,]
   xx=xx[order(-(xx$SCP+xx$MCP)),]
   xx1=cbind(xx[,1:2],rep("SCP",k))

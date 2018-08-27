@@ -62,19 +62,6 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                                br(),
                                h4(em("bibliometrix")," supports the main stages of the recommended science mapping workflow:"),
                                br(),
-                               # p("1. ",strong("Data collection.")," bibliometrix supports the following sub-stage:",
-                               # br(),
-                               #  em("     a - Data loading and conversion to R data frame."),br(),
-                               #  "2. ",strong("Data Analysis"),", articulated in three sub-stages:",br(),
-                               #  em("     a - Descriptive analysis of a bibliographic data frame;"),br(),
-                               #  em("     b - Network creation for bibliographic coupling, co-citation, collaboration, and co-occurrence analyses;"),br(),
-                               #  em("     c - Normalization (Section 4.4)."),
-                               # br(),
-                               # "3. ",strong("Data visualization"),":",br(),
-                               # "a - Conceptual structure mapping;",br(),
-                               # "b - Network mapping."),
-                               # br(),
-                               
                                div(img(src = "workflow.jpg", height=346, width=800), style="text-align: center;")
                                )
                                

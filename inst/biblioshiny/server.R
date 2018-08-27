@@ -4,7 +4,7 @@ server <- function(input, output) {
   options(shiny.maxRequestSize=30*1024^2) 
   
   values = reactiveValues()
-  values$results="NA"
+  values$results=list("NA")
   values$log="working..."
   values$load="FALSE"
   values$field="NA"
@@ -95,7 +95,7 @@ server <- function(input, output) {
   
 
   output$summary <- renderPrint({
-    if (values$results=="NA"){
+    if (values$results[[1]]=="NA"){
       values$results=biblioAnalysis(values$M)}
     S=summary(values$results,k=input$kk,verbose=FALSE)
     

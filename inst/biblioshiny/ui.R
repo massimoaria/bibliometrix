@@ -4,34 +4,52 @@ if (!(require(DT))){install.packages("DT")}
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
 if (!(require(shinythemes))){install.packages("shinythemes")} 
+ 
+#if (!(require(devtools))){install.packages("devtools")} 
+#if (!(require(bibliometrix))){devtools::install_github("massimoaria/bibliometrix"); require(bibliometrix, quietly=TRUE)} 
+
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 
-ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix",
+ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                   theme=shinythemes::shinytheme("slate"),
                   
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
-                           sidebarLayout(
-                             sidebarPanel(#width=5,
-                               h2("Installation"),
-                               p("bibliometrix is available on CRAN, so you can install it in the usual way from your R console:"),
-                               code('install.packages("bibliometrix")'),
+                           fluidRow(
+                             # sidebarPanel(#width=5,
+                             #   h2("Installation"),
+                             #   p("bibliometrix is available on CRAN, so you can install it in the usual way from your R console:"),
+                             #   code('install.packages("bibliometrix")'),
+                             #   br(),
+                             #   br(),
+                             #   br(),
+                             #   br(),
+                             #   img(src = "logo.jpg", height = 100, width = 200),
+                             #   br(),
+                             #   "bibliometrix is a product of ", 
+                             #   span("M.Aria & C.Cuccurullo", style = "color:blue")
+                             # ),
+                             column(9,
+                                    wellPanel(
+                               h1("Introducing bibliometrix",align = "center"),
+                               br(),
+                               h4(em(strong("bibliometrix: An R-tool for comprehensive science mapping analysis")),align = "center"),
+                               br(),
+                               h6("Aria, M., & Cuccurullo, C. (2017).", strong(" bibliometrix: An R-tool for comprehensive science mapping analysis."), em(" Journal of Informetrics"),", 11(4), 959-975.", align="center"),
+                               br(),
+                               div(img(src = "logo.jpg", height = 400, width = 800), style="text-align: center;"),
                                br(),
                                br(),
+                               h2("Features"),
+                               p(em("bibliometrix")," is an open-source tool for executing a comprehensive science mapping analysis of scientific literature."),
                                br(),
+                               p("It was programmed in R language to be flexible and facilitate integration with other statistical and graphical packages.
+                                 Indeed, bibliometrics is a constantly changing science and bibliometrix has the flexibility to be quickly upgraded and integrated. 
+                                 Its development can address a large and active community of developers formed by prominent researchers."),
                                br(),
-                               img(src = "logo.jpg", height = 100, width = 200),
-                               br(),
-                               "bibliometrix is a product of ", 
-                               span("M.Aria & C.Cuccurullo", style = "color:blue")
-                             ),
-                             mainPanel(
-                               h1("Introducing bibliometrix"),
-                               strong("bibliometrix is an R-tool for comprehensive science mapping analysis"),
-                               br(),
-                               p("Bibliometrix package provides various routines for importing bibliographic data from SCOPUS, 
+                               p(em("bibliometrix"),"provides various routines for importing bibliographic data from SCOPUS, 
                                  Clarivate Analytics' Web of Science, PubMed and Cochrane databases, performing bibliometric 
                                  analysis and building data matrices for co-citation, coupling, scientific collaboration analysis and co-word analysis."),
                                br(),
@@ -39,13 +57,29 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix",
                                  a("bibliometrix website.", 
                                    href = "http://www.bibliometrix.org")),
                                br(),
-                               h2("Features"),
-                               p("- Bla bla bla"),
-                               p("- Bla Bla Bla", 
-                                 strong(" bla bla"),
-                                 " bla bla bla")
+                               
+                               h2("Workflow"),
+                               br(),
+                               h4(em("bibliometrix")," supports the main stages of the recommended science mapping workflow:"),
+                               br(),
+                               # p("1. ",strong("Data collection.")," bibliometrix supports the following sub-stage:",
+                               # br(),
+                               #  em("     a - Data loading and conversion to R data frame."),br(),
+                               #  "2. ",strong("Data Analysis"),", articulated in three sub-stages:",br(),
+                               #  em("     a - Descriptive analysis of a bibliographic data frame;"),br(),
+                               #  em("     b - Network creation for bibliographic coupling, co-citation, collaboration, and co-occurrence analyses;"),br(),
+                               #  em("     c - Normalization (Section 4.4)."),
+                               # br(),
+                               # "3. ",strong("Data visualization"),":",br(),
+                               # "a - Conceptual structure mapping;",br(),
+                               # "b - Network mapping."),
+                               # br(),
+                               
+                               div(img(src = "workflow.jpg", height=346, width=800), style="text-align: center;")
                                )
+                               
                              )
+                           )
 ),
 
 ### Loading page ----

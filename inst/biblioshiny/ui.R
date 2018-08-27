@@ -107,7 +107,8 @@ tabPanel(
               downloadButton("collection.xlsx", "Download"))
     ),
     mainPanel(
-      shinycssloaders::withSpinner(tableOutput("contents"))
+      #shinycssloaders::withSpinner(tableOutput("contents"))
+      shinycssloaders::withSpinner(DT::DTOutput("contents"))
     )
   )
 ),

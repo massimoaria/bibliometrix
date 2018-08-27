@@ -17,7 +17,7 @@ server <- function(input, output) {
   
   
   ### caricamento file
-  output$contents <- renderTable({
+  output$contents <- DT::renderDT({
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
     # 'size', 'type', and 'datapath' columns. The 'datapath'
@@ -72,9 +72,18 @@ server <- function(input, output) {
     values$M <- M
     values$Histfield="NA"
     #return(values$M)
-    return(as.data.frame(apply(M,2,function(x){substring(x,1,50)}),stringsAsFactors = FALSE))
+    MData=as.data.frame(apply(values$M,2,function(x){substring(x,1,50)}),stringsAsFactors = FALSE)
+    MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
+    nome=c("DOI",names(MData)[-length(names(MData))])
+    MData=MData[nome]
+    DT::datatable(MData, escape = FALSE, rownames = FALSE, 
+                  options = list(pageLength = 50, dom = 'tip',
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+                  formatStyle(names(MData),  backgroundColor = 'black',textAlign = 'center') 
     
-  }, striped = TRUE,spacing="xs")
+    
+  })
 
   output$collection.xlsx <- downloadHandler(
     filename = function() {

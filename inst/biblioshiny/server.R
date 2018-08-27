@@ -138,7 +138,7 @@ server <- function(input, output) {
   })
   
   output$summaryPlots <- renderPlot({
-    if (values$results=="NA"){
+    if (values$results[[1]]=="NA"){
       values$results=biblioAnalysis(values$M)}
     k=input$k
     switch(input$plot_type,

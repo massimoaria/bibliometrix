@@ -97,6 +97,14 @@ tabPanel(
               downloadButton("collection.xlsx", "Save"))
     ),
     mainPanel(
+      ## color of datatable
+      tags$head(tags$style(HTML("table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                                  background-color: #9c4242 !important;
+                                  }
+                                  "))),
+      tags$style(HTML(".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  color: #ffffff !important;
+                  }")),
       #shinycssloaders::withSpinner(tableOutput("contents"))
       shinycssloaders::withSpinner(DT::DTOutput("contents"))
     )

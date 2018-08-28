@@ -82,15 +82,15 @@ server <- function(input, output, session) {
     values$Histfield="NA"
     values$results=list("NA")
     #return(values$M)
-    MData=as.data.frame(apply(values$M,2,function(x){substring(x,1,50)}),stringsAsFactors = FALSE)
+    MData=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)
     MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
     nome=c("DOI",names(MData)[-length(names(MData))])
     MData=MData[nome]
     DT::datatable(MData, escape = FALSE, rownames = FALSE, 
-                  options = list(pageLength = 50, dom = 'tip',
+                  options = list(pageLength = 50, dom = 'ftipr',
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1)))), 
                   class = 'cell-border compact stripe') %>%
-                  formatStyle(names(MData),  backgroundColor = 'black',textAlign = 'center') 
+                  formatStyle(names(MData),  backgroundColor = 'black',textAlign = 'center',fontSize = '70%') 
     
     
   })

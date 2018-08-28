@@ -1,8 +1,14 @@
 # Define server logic required to draw a histogram ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   
+  ## stop the R session
+  session$onSessionEnded(stopApp)
+  ##
+  
+  ## file upload max size
   options(shiny.maxRequestSize=30*1024^2) 
   
+  ## initial values
   values = reactiveValues()
   values$results=list("NA")
   values$log="working..."
@@ -13,6 +19,7 @@ server <- function(input, output) {
   values$Title="Network"
   values$Histfield="NA"
   values$histlog="working..."
+  values$kk=0
   
   
   
@@ -107,9 +114,10 @@ server <- function(input, output) {
   
 
   output$summary <- renderPrint({
-    if (values$results[[1]]=="NA"){
-      values$results=biblioAnalysis(values$M)}
-    S=summary(values$results,k=input$kk,verbose=FALSE)
+    
+    if (values$results[[1]]=="NA"){values$results=biblioAnalysis(values$M)}
+    S=summary(object=values$results,k=input$kk,verbose=FALSE)
+    
     
     
     switch(input$summary_type,
@@ -139,6 +147,19 @@ server <- function(input, output) {
     
     #
   })
+  
+  output$results.txt <- downloadHandler(
+    
+    filename = function() {
+      paste("results-", Sys.Date(), ".txt", sep="")
+    },
+    content <- function(file) {
+      values$S_text=capture.output(summary(object=values$results,k=input$kk))
+      write(values$S_text, file, sep="\n")
+    },
+    
+    contentType = "txt"
+  )
   
   output$summaryPlots <- renderPlot({
     if (values$results[[1]]=="NA"){
@@ -560,11 +581,12 @@ server <- function(input, output) {
     
   }, height = 750, width = 900)
   
-  observe({
-    if (length(input$navbar) >0) 
-      stopApp()
-  })
+  #observe({
+  #  if (length(input$navbar) >0) 
+  #    stopApp()
+  #})
   
+ 
   #session$onSessionEnded(stopApp)
   emptyPlot<-function(errortext){
     g=ggplot()+

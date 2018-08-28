@@ -17,7 +17,6 @@ options(spinner.size=1, spinner.type=5)
 ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                   theme=shinythemes::shinytheme("slate"),
                   
-                  
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
                            fluidRow(
@@ -95,7 +94,7 @@ tabPanel(
       ### download xlsx
       selectInput('save_file', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'xlsx' = 'xlsx')),
       conditionalPanel(condition = "input.save_file == 'xlsx'",
-              downloadButton("collection.xlsx", "Download"))
+              downloadButton("collection.xlsx", "Save"))
     ),
     mainPanel(
       #shinycssloaders::withSpinner(tableOutput("contents"))
@@ -123,10 +122,14 @@ navbarMenu("Descriptive Analysis",
                                                 "Most Relevant Keywords"="tab8",
                                                 "All results"="all"),
                                     selected = "tab1"),
+                        
                         conditionalPanel(condition = "input.summary_type != 'tab1'",
                                     numericInput("kk", 
                                       label=("Number of results"), 
-                                      value = 20))
+                                      value = 20)),
+                        selectInput('save_summary', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'txt file' = 'txt')),
+                        conditionalPanel(condition = "input.save_summary == 'txt'",
+                                         downloadButton("results.txt", "Save"))
                       ),
                       mainPanel(
                         shinycssloaders::withSpinner(verbatimTextOutput("summary"))
@@ -604,12 +607,13 @@ navbarMenu("Social Structure",
 #                     includeHTML("bibliometrix-vignette.html"))
 #            ),
 
-navbarMenu("Quit", 
-           tabPanel(title = "Quit", 
-                    value="stop", 
-                    icon = icon("power-off")
-                    )  ## Quit & close menu
-)
+### Quit button ----
+navbarMenu("Quit",
+           tabPanel(actionLink("stop_radiant", "Stop", icon = icon("power-off"), 
+                               onclick = "setTimeout(function(){window.close();}, 100); ")
+           )
+
+  )
 
 ## End of UI           
 )

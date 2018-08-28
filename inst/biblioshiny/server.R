@@ -325,23 +325,44 @@ server <- function(input, output) {
   }, height = 750, width = 900)
   
   output$CSPlot1 <- renderPlot({
+    if ((input$CSfield %in% names(values$M))){
+     
+      tab=tableTag(values$M,input$CSfield)
+      if (length(tab>=2)){
+        
+        minDegree=as.numeric(tab[input$CSn])
+        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
+        plot(values$CS$graph_terms)
+      
+      }else{emptyPlot("Selected field is not included in your data collection")
+        values$CS=list("NA")}
     
-    values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=input$CSn, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
-    plot(values$CS$graph_terms)
+      }else{
+        emptyPlot("Selected field is not included in your data collection")
+        values$CS=list("NA")
+      
+    }
   
   }, height = 650, width = 800)
   
   output$CSPlot2 <- renderPlot({
     
-    #values$CS <- conceptualStructure(values$M, method=input$method , field="ID", minDegree=5, k.max = 8, stemming=F, labelsize=8,documents=20,graph=FALSE)
-    plot(values$CS$graph_documents_Contrib)
+    if (values$CS[[1]]!="NA"){
+      plot(values$CS$graph_documents_Contrib)
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+    }
     
   }, height = 650, width = 800)
   
   output$CSPlot3 <- renderPlot({
     
-    #values$CS <- conceptualStructure(values$M, method=input$method , field="ID", minDegree=5, k.max = 8, stemming=F, labelsize=8,documents=20,graph=FALSE)
-    plot(values$CS$graph_documents_TC)
+    if (values$CS[[1]]!="NA"){
+      plot(values$CS$graph_documents_TC)
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+    }
+    
     
   }, height = 650, width = 800)
   
@@ -500,6 +521,11 @@ server <- function(input, output) {
   })
   
   #session$onSessionEnded(stopApp)
-  
+  emptyPlot<-function(errortext){
+    g=ggplot()+
+      theme_void() + theme(legend.position="none")+
+      annotate("text", x = 4, y = 25, label = errortext)
+    plot(g)
+  }
   
 } ## End of Server

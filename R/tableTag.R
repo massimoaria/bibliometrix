@@ -18,7 +18,12 @@
 #'
 #' @export
 tableTag <- function(M, Tag = "CR", sep = ";"){
-  i<-which(names(M)==Tag)
+  
+  if (Tag %in% c("AB","TI")){
+    M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE)
+    i=dim(M)[2]
+  }else{i<-which(names(M)==Tag)}
+  
   Tab<-unlist(strsplit(as.character(M[,i]),sep))
   Tab<-trim.leading(Tab)
   Tab<-Tab[Tab!=""]

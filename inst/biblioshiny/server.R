@@ -298,10 +298,10 @@ server <- function(input, output) {
     values$Words=data.frame(Terms=names(values$v)[1:n], Frequency=as.numeric(values$v)[1:n])
     
     wordcloud2::wordcloud2(values$Words, size = input$scale, minSize = 0, gridSize =  input$padding,
-               fontFamily = input$font, fontWeight = 'bold',
-               color = 'random-dark', backgroundColor = "black",
+               fontFamily = input$font, fontWeight = 'normal',
+               color = 'random-dark', backgroundColor = "white",
                minRotation = 0, maxRotation = input$rotate/10, shuffle = TRUE,
-               rotateRatio = 0.4, shape = 'circle', ellipticity = 0.65,
+               rotateRatio = 0.7, shape = 'circle', ellipticity = 0.65,
                widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
     
     # d3wordcloud::d3wordcloud(words,freqs, font = input$font, size.scale = input$scale, 

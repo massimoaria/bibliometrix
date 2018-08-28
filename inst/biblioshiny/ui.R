@@ -21,19 +21,7 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
                            fluidRow(
-                             # sidebarPanel(#width=5,
-                             #   h2("Installation"),
-                             #   p("bibliometrix is available on CRAN, so you can install it in the usual way from your R console:"),
-                             #   code('install.packages("bibliometrix")'),
-                             #   br(),
-                             #   br(),
-                             #   br(),
-                             #   br(),
-                             #   img(src = "logo.jpg", height = 100, width = 200),
-                             #   br(),
-                             #   "bibliometrix is a product of ", 
-                             #   span("M.Aria & C.Cuccurullo", style = "color:blue")
-                             # ),
+                             
                              column(9,
                                     wellPanel(
                                h1("Introducing bibliometrix",align = "center"),

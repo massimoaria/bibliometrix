@@ -1,16 +1,4 @@
-if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
-if (!(require(rio))){install.packages("rio")} 
-if (!(require(DT))){install.packages("DT")} 
-if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
-if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
-if (!(require(shinythemes))){install.packages("shinythemes")} 
-if (!(require(wordcloud2))){install.packages("wordcloud2")} 
-
- 
-#if (!(require(devtools))){install.packages("devtools")} 
-#if (!(require(bibliometrix))){devtools::install_github("massimoaria/bibliometrix"); require(bibliometrix, quietly=TRUE)} 
-
-
+## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 
@@ -52,8 +40,18 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                                br(),
                                h4(em("bibliometrix")," supports the main stages of the recommended science mapping workflow:"),
                                br(),
-                               div(img(src = "workflow.jpg", height=346, width=800), style="text-align: center;")
-                               )
+                               div(img(src = "workflow.jpg", height=346, width=800), style="text-align: center;"),
+                               br(),
+                               
+                               h2("Example"),
+                               br(),
+                               p("Step 1 - Download an example at the following", a("link",href = "http://www.bibliometrix.org/datasets/joi.zip"),
+                               ". It includes all articles published by the", em("Journal of Informetrics"), "from 2007 to 2017."),  
+                               p("Step 2 - In the ",strong("Load file") ,"menu, select ",strong("'Web of Knowledge'")," as database and ",strong("'Plaintext'")," as file format."),
+                               p("Step 3 - Choose and load the file", strong("joi.zip")," using the ",strong("browse")," button."),
+                               p("Step 4 - ", strong(em("Then, enjoy working with the app!"))),
+                               br()
+                              )
                                
                              )
                            )

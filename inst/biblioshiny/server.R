@@ -284,6 +284,7 @@ server <- function(input, output) {
     
     n = input$Nodes
     label.n = input$Labels
+    if ((input$field %in% names(values$M))){
     
     if ((dim(values$NetWords)[1])==1 | !(input$field==values$field)){
       
@@ -320,6 +321,9 @@ server <- function(input, output) {
     net=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                     size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
                     label.n=label.n,edges.min=input$edges.min,label.color = F)
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+    }
     
     
   }, height = 750, width = 900)

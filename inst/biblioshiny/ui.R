@@ -4,6 +4,8 @@ if (!(require(DT))){install.packages("DT")}
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
 if (!(require(shinythemes))){install.packages("shinythemes")} 
+if (!(require(wordcloud2))){install.packages("wordcloud2")} 
+
  
 #if (!(require(devtools))){install.packages("devtools")} 
 #if (!(require(bibliometrix))){devtools::install_github("massimoaria/bibliometrix"); require(bibliometrix, quietly=TRUE)} 
@@ -14,6 +16,7 @@ options(spinner.size=1, spinner.type=5)
 
 ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                   theme=shinythemes::shinytheme("slate"),
+                  
                   
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
@@ -175,8 +178,44 @@ navbarMenu("Descriptive Analysis",
                       )
                       
                     )
-           )
+           ),
+           tabPanel("Word Cloud",
+           
+           sidebarLayout(
+             # Sidebar with a slider and selection inputs
+             sidebarPanel(width=3,
+               selectInput("summaryTerms", "Field",
+                           choices = c("Keywords Plus" = "ID",
+                                       "Author's keywords" = "DE",
+                                       "Titles" = "TI",
+                                       "Abstracts" = "AB"),
+                           selected = "ID"),
+               hr(),
+               sliderInput("n_words", label = "Number of words:", min = 10, max = 200, step = 5, value = 50),
+               sliderInput("scale", label = "Font size:", min=1,max=10,step=1,value=1),
+               #selectInput("spiral", label = "Spiral:", choices = c("archimedean", "rectangular")),
+               selectInput("font", label = "Font type:",
+                           choices = c("Impact", "Comic Sans MS (No plz!)" = "Comic Sans MS",
+                                       "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
+                                       "Georgia", "Times New Roman", "Andale Mono")),
+               sliderInput("padding", label = "Padding:", min = 0, max = 5, value = 1, step = 1),
+               sliderInput("rotate", label = "Rotate:", min = 0, max = 20, value = 0, step = 1)
+             ),
+             
+             # Show Word Cloud
+             mainPanel(
+               tabsetPanel(type = "tabs",
+                           tabPanel("Plot",
+                                    wordcloud2::wordcloud2Output("wordcloud", height = "600px")
+                           ),
+                           tabPanel("Table",
+                                    shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
+                           ))
+               
+                    )
+           ))
       ),
+
 ### CONCEPTUAL STRUCTURE ----
 navbarMenu("Conceptual Structure",
            

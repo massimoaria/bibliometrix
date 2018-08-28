@@ -16,6 +16,7 @@ server <- function(input, output) {
   
   
   
+  
   ### caricamento file
   output$contents <- DT::renderDT({
     # input$file1 will be NULL initially. After the user selects
@@ -278,7 +279,49 @@ server <- function(input, output) {
     #plot(results)
     }, height = 500, width =900)
   
-  output$cocPlot <- renderPlot({
+  output$wordcloud <- wordcloud2::renderWordcloud2({
+    
+    switch(input$summaryTerms,
+           ID={values$v=tableTag(values$M,"ID")},
+           DE={values$v=tableTag(values$M,"DE")},
+           TI={
+             if (!("TI_TM" %in% names(values$M))){
+               values$v=tableTag(values$M,"TI")
+             }},
+           AB={if (!("AB_TM" %in% names(values$M))){
+             values$v=tableTag(values$M,"AB")
+           }}
+    )
+    
+    #v=tableTag(values$M,"ID")
+    n=min(c(input$n_words,length(values$v)))
+    values$Words=data.frame(Terms=names(values$v)[1:n], Frequency=as.numeric(values$v)[1:n])
+    
+    wordcloud2::wordcloud2(values$Words, size = input$scale, minSize = 0, gridSize =  input$padding,
+               fontFamily = input$font, fontWeight = 'bold',
+               color = 'random-dark', backgroundColor = "black",
+               minRotation = 0, maxRotation = input$rotate/10, shuffle = TRUE,
+               rotateRatio = 0.4, shape = 'circle', ellipticity = 0.65,
+               widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+    
+    # d3wordcloud::d3wordcloud(words,freqs, font = input$font, size.scale = input$scale, 
+    #                          padding = input$padding, tooltip = TRUE,
+    #                          spiral = input$spiral,
+    #                          rotate.min = input$rotate[1], rotate.max = input$rotate[2])  
+    })
+  
+  output$wordTable <- DT::renderDT({
+    #Words=data.frame(Terms=names(values$v), Frequency=as.numeric(values$v))
+    #names(Words)=c("Terms", "Frequency")
+    DT::datatable(values$Words, rownames = FALSE,
+                  options = list(pageLength = 50, dom = 'tip',
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$Words))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(values$Words),  backgroundColor = 'black',textAlign = 'center')
+  })
+    
+  
+   output$cocPlot <- renderPlot({
     
   ## Keyword co-occurrences network
     

@@ -17,6 +17,7 @@ server <- function(input, output) {
   
   
   
+  
   ### caricamento file
   output$contents <- DT::renderDT({
     # input$file1 will be NULL initially. After the user selects
@@ -72,6 +73,7 @@ server <- function(input, output) {
     #M <- convert2df(D<-readFiles(inFile$datapath), dbsource="isi",format="plaintext")
     values$M <- M
     values$Histfield="NA"
+    values$results=list("NA")
     #return(values$M)
     MData=as.data.frame(apply(values$M,2,function(x){substring(x,1,50)}),stringsAsFactors = FALSE)
     MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
@@ -304,10 +306,6 @@ server <- function(input, output) {
                rotateRatio = 0.7, shape = 'circle', ellipticity = 0.65,
                widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
     
-    # d3wordcloud::d3wordcloud(words,freqs, font = input$font, size.scale = input$scale, 
-    #                          padding = input$padding, tooltip = TRUE,
-    #                          spiral = input$spiral,
-    #                          rotate.min = input$rotate[1], rotate.max = input$rotate[2])  
     })
   
   output$wordTable <- DT::renderDT({

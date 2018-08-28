@@ -1,4 +1,13 @@
 ## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
+
+if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
+if (!(require(rio))){install.packages("rio")} 
+if (!(require(DT))){install.packages("DT")} 
+if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
+if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
+if (!(require(shinythemes))){install.packages("shinythemes")} 
+if (!(require(wordcloud2))){install.packages("wordcloud2")} 
+
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 

@@ -4,7 +4,8 @@
 \alias{cocMatrix}
 \title{Co-occurrence matrix}
 \usage{
-cocMatrix(M, Field = "AU", type = "sparse", sep = ";", binary = TRUE)
+cocMatrix(M, Field = "AU", type = "sparse", sep = ";",
+  binary = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function

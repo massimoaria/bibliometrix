@@ -34,3 +34,4 @@ Other converting functions: \code{\link{cochrane2df}},
   \code{\link{convert2df}}, \code{\link{isi2df}},
   \code{\link{pubmed2df}}, \code{\link{scopus2df}}
 }
+\concept{converting functions}

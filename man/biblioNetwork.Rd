@@ -4,7 +4,8 @@
 \alias{biblioNetwork}
 \title{Creating Bibliographic networks}
 \usage{
-biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
+biblioNetwork(M, analysis = "coupling", network = "authors",
+  sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function

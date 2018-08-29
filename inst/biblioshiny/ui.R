@@ -68,7 +68,7 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
 
 ### Loading page ----
 tabPanel(
-  "Load file", 
+  "Load", 
   sidebarLayout(
     sidebarPanel(width=3,
       selectInput("dbsource", 
@@ -120,7 +120,7 @@ tabPanel(
 
 
 ### Filters page ----
-           tabPanel("Filters",
+           tabPanel("Filter",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,

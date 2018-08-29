@@ -79,6 +79,7 @@ server <- function(input, output, session) {
     
     #M <- convert2df(D<-readFiles(inFile$datapath), dbsource="isi",format="plaintext")
     values$M <- M
+    values$Morig=M
     values$Histfield="NA"
     values$results=list("NA")
     #return(values$M)
@@ -86,14 +87,16 @@ server <- function(input, output, session) {
     MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
     nome=c("DOI",names(MData)[-length(names(MData))])
     MData=MData[nome]
-    DT::datatable(MData, escape = FALSE, rownames = FALSE, 
-                  options = list(pageLength = 50, dom = 'ftipr',
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1)))), 
+    DT::datatable(MData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1)))),  
                   class = 'cell-border compact stripe') %>%
                   formatStyle(names(MData),  backgroundColor = 'black',textAlign = 'center',fontSize = '70%') 
     
     
-  })
+    })
 
   output$collection.xlsx <- downloadHandler(
     filename = function() {
@@ -112,7 +115,57 @@ server <- function(input, output, session) {
     
   })
   
-
+  ### Filters uiOutput
+  output$selectType <- renderUI({
+    artType=sort(unique(values$Morig$DT))
+    selectInput("selectType", "Document Type", 
+                choices = artType,
+                selected = artType,
+                multiple =TRUE )
+  })
+  
+  output$sliderPY <- renderUI({
+    sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY),
+                max = max(values$Morig$PY), value = c(min(values$Morig$PY),max(values$Morig$PY)))
+  })
+  
+  output$selectSource <- renderUI({
+    SO=sort(unique(values$Morig$SO))
+    selectInput("selectSource", "Source", 
+                choices = SO,
+                selected = SO,
+                multiple = TRUE)
+  })
+  
+  output$sliderTC <- renderUI({
+    sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC),
+                max = max(values$Morig$TC), value = c(min(values$Morig$TC),max(values$Morig$TC)))
+  })
+  ### End Filters uiOutput
+  
+  output$dataFiltered <- DT::renderDT({
+    
+    M=values$Morig
+    
+    M=(M[(M$PY>=input$sliderPY[1] & M$PY<=input$sliderPY[2]),])
+    M=(M[(M$TC>=input$sliderTC[1] & M$TC<=input$sliderTC[2]),])
+    indexDT=(ifelse(M$DT %in% input$selectType,TRUE,FALSE))
+    M=(M[indexDT,])
+    indexSO=(ifelse(M$SO %in% input$selectSource,TRUE,FALSE))
+    M=((M[M$SO %in% input$selectSource,]))
+    values$M=M
+    values$results=list("NA") ## to reset summary statistics
+    Mdisp=as.data.frame(apply(M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)
+    
+    DT::datatable(Mdisp, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Mdisp))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(Mdisp),  backgroundColor = 'black',textAlign = 'center', fontSize = '70%')
+  })
+  
   output$summary <- renderPrint({
     
     if (values$results[[1]]=="NA"){values$results=biblioAnalysis(values$M)}
@@ -513,8 +566,11 @@ server <- function(input, output, session) {
     Data=values$histResults$histData
     Data=Data[ind,]
     Data$DOI<- paste0('<a href=\"http://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
-    DT::datatable(Data, escape = FALSE, rownames = FALSE, 
-                  options = list(pageLength = input$histNodes, dom = 'tip')) %>%
+    DT::datatable(Data, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Data))-1))))) %>%
       formatStyle(names(Data),  backgroundColor = 'gray') %>%
       formatStyle(
         'GCS',
@@ -581,13 +637,8 @@ server <- function(input, output, session) {
     
   }, height = 750, width = 900)
   
-  #observe({
-  #  if (length(input$navbar) >0) 
-  #    stopApp()
-  #})
+# common functions
   
- 
-  #session$onSessionEnded(stopApp)
   emptyPlot<-function(errortext){
     g=ggplot()+
       theme_void() + theme(legend.position="none")+

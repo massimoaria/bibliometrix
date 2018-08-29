@@ -118,6 +118,23 @@ tabPanel(
   )
 ),
 
+
+### Filters page ----
+           tabPanel("Filters",
+                    sidebarLayout(
+                      
+                      sidebarPanel(width=3,
+                                   uiOutput("selectType"),
+                                   uiOutput("sliderPY"),
+                                   uiOutput("sliderTC"),
+                                   uiOutput("selectSource")
+                                   
+                      ),
+                      mainPanel(DT::DTOutput("dataFiltered"))
+                    )
+                    
+           ),
+
 ### Descriptive Analysis PAGE ----
 navbarMenu("Descriptive Analysis",
            

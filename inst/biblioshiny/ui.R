@@ -56,7 +56,7 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                                br(),
                                p("Step 1 - Download an example at the following", a("link",href = "http://www.bibliometrix.org/datasets/joi.zip"),
                                ". It includes all articles published by the", em("Journal of Informetrics"), "from 2007 to 2017."),  
-                               p("Step 2 - In the ",strong("Load file") ,"menu, select ",strong("'Web of Knowledge'")," as database and ",strong("'Plaintext'")," as file format."),
+                               p("Step 2 - In the ",strong("Load ") ,"menu, select ",strong("'Web of Knowledge'")," as database and ",strong("'Plaintext'")," as file format."),
                                p("Step 3 - Choose and load the file", strong("joi.zip")," using the ",strong("browse")," button."),
                                p("Step 4 - ", strong(em("Then, enjoy working with the app!"))),
                                br()

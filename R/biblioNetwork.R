@@ -162,9 +162,11 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
   }
   # delete empty vertices
   NetMatrix=NetMatrix[nchar(colnames(NetMatrix))!=0,nchar(colnames(NetMatrix))!=0]
-  
+
   # short label for scopus references
   if (network=="references"){
+    ind=which(regexpr("[A-Za-z]",substr(colnames(NetMatrix),1,1))==1)
+    NetMatrix=NetMatrix[ind,ind]
     LABEL<-labelShort(NetMatrix,db=tolower(M$DB[1]))
     colnames(NetMatrix)=rownames(NetMatrix)=LABEL
   }

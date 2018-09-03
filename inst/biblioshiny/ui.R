@@ -330,7 +330,14 @@ navbarMenu("Conceptual Structure",
                       ),
                     
                     mainPanel(
-                      shinycssloaders::withSpinner(plotOutput(outputId = "cocPlot"))
+                      tabsetPanel(type = "tabs",
+                                  tabPanel("Graph", 
+                                           withSpinner(plotOutput(outputId = "cocPlot"))),
+                                  tabPanel("Table", 
+                                           shinycssloaders::withSpinner(DT::DTOutput(
+                                             outputId = "cocTable")))
+                      )
+                      
                       )
                     )
            ), ## End of tabPanel ("CS network")
@@ -410,7 +417,7 @@ navbarMenu("Conceptual Structure",
 
 ### Intellectual Structure ----
 navbarMenu("Intellectual Structure",
-           
+           ### Co.Citation Network ----
            tabPanel(title="Co-citation Network",
                     sidebarLayout(
                       
@@ -490,13 +497,20 @@ navbarMenu("Intellectual Structure",
                                      step = 1)
                       ),
                       mainPanel(
-                        shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Graph", 
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))),
+                                    tabPanel("Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "cocitTable")))
+                        )
+                        #shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))
                       )
                       
                     )
                     
                     ), ## End of tabPanel "Co-citations"
-           
+           ### Historiograph ----
            tabPanel(title="Historiograph",
                     sidebarLayout(
                       
@@ -624,7 +638,15 @@ navbarMenu("Social Structure",
                                                 step = 1)
                       ),
                       mainPanel(
-                        shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Graph", 
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
+                                    tabPanel("Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "colTable")))
+                        )
+                        
+                        #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))
                       )
                       
                     )

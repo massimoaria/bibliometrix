@@ -393,7 +393,7 @@ server <- function(input, output, session) {
   })
     
   
-   output$cocPlot <- renderPlot({
+  output$cocPlot <- renderPlot({
     
   ## Keyword co-occurrences network
     
@@ -433,7 +433,7 @@ server <- function(input, output, session) {
     if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$size.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
     
-    net=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
+    values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                     size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
                     label.n=label.n,edges.min=input$edges.min,label.color = F)
     }else{
@@ -442,6 +442,20 @@ server <- function(input, output, session) {
     
     
   }, height = 750, width = 900)
+  
+  output$cocTable <- DT::renderDT({
+    
+    cocData=values$cocnet$cluster_res
+    names(cocData)=c("Term", "Cluster", "Btw Centrality")
+    DT::datatable(cocData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cocData))-1))))) %>%
+      formatStyle(names(cocData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
   
   output$CSPlot1 <- renderPlot({
     if ((input$CSfield %in% names(values$M))){
@@ -532,13 +546,27 @@ server <- function(input, output, session) {
     if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$citsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
     
-    net=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
+    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
                     size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
                     labelsize=input$citlabelsize,label.cex=label.cex,
                     label.n=label.n,edges.min=input$citedges.min,label.color = F)
     
     
   }, height = 750, width = 900)
+  
+  output$cocitTable <- DT::renderDT({
+    
+    cocitData=values$cocitnet$cluster_res
+    names(cocitData)=c("Node", "Cluster", "Btw Centrality")
+    DT::datatable(cocitData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cocitData))-1))))) %>%
+      formatStyle(names(cocitData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
   
   output$histPlot <- renderPlot({
     
@@ -629,13 +657,27 @@ server <- function(input, output, session) {
     if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$colsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
     
-    net=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = input$collayout, 
+    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = input$collayout, 
                     size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
                     labelsize=input$collabelsize,label.cex=label.cex,
                     label.n=label.n,edges.min=input$coledges.min,label.color = F, cluster=values$cluster)
     
     
   }, height = 750, width = 900)
+  
+  output$colTable <- DT::renderDT({
+    
+    colData=values$colnet$cluster_res
+    names(colData)=c("Node", "Cluster", "Btw Centrality")
+    DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
+      formatStyle(names(colData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
   
 # common functions
   

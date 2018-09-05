@@ -171,7 +171,11 @@ Open Rstudio, in the console window, digit:
 After the package installationT, t start with the shiny web-interface, digit:
 
 biblioshiny()
- 
+
+## Example for using biblioshiny 
+To try the **biblioshiny** app, we provide a collection downloaded from Web of Knowledge. It includes all articles published by the Journal of Informetrics from 2007 to 2017. 
+
+The file can be downloaded at the following link: http://www.bibliometrix.org/datasets/joy.zip
 
 ## Load a collection
 **biblioshiny** imports and converts data extracted from the two main bibliographic databases: SCOPUS and Clarivate Analytics Web of Science.
@@ -200,6 +204,8 @@ It can be:
 - "Scopus" (for SCOPUS database).
 
 The argument *File format* indicates the file format of the imported collection. It can be "plaintext" or "bibtex" for WOS collection and mandatorily "bibtext" for SCOPUS collection. 
+
+If you have more than a single export file (.txt or .bib), please compress all export files in a single zip archive (.zip). Then you can load it directly with the browse button. **biblioshiny** will automatically merge and convert export files in a single data frame.
 
 Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
 

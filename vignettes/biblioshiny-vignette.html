@@ -315,6 +315,11 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>After the package installationT, t start with the shiny web-interface, digit:</p>
 <p>biblioshiny()</p>
 </div>
+<div id="example-for-using-biblioshiny" class="section level2">
+<h2>Example for using biblioshiny</h2>
+<p>To try the <strong>biblioshiny</strong> app, we provide a collection downloaded from Web of Knowledge. It includes all articles published by the Journal of Informetrics from 2007 to 2017.</p>
+<p>The file can be downloaded at the following link: <a href="http://www.bibliometrix.org/datasets/joy.zip" class="uri">http://www.bibliometrix.org/datasets/joy.zip</a></p>
+</div>
 <div id="load-a-collection" class="section level2">
 <h2>Load a collection</h2>
 <p><strong>biblioshiny</strong> imports and converts data extracted from the two main bibliographic databases: SCOPUS and Clarivate Analytics Web of Science.</p>
@@ -337,6 +342,7 @@ This platform includes many different collections.</p>
 <li><p>“Scopus” (for SCOPUS database).</p></li>
 </ul>
 <p>The argument <em>File format</em> indicates the file format of the imported collection. It can be “plaintext” or “bibtex” for WOS collection and mandatorily “bibtext” for SCOPUS collection.</p>
+<p>If you have more than a single export file (.txt or .bib), please compress all export files in a single zip archive (.zip). Then you can load it directly with the browse button. <strong>biblioshiny</strong> will automatically merge and convert export files in a single data frame.</p>
 <p>Each manuscript contains several elements, such as authors’ names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.</p>
 <p>Data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify.</p>
 <p>The main field tags are:</p>

@@ -1,5 +1,5 @@
 ---
-title: "biblioshiny: A shiny interface to bibliometrix"
+title: "biblioshiny: The shiny interface for bibliometrix"
 author: "Massimo Aria and Corrado Cuccurullo"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

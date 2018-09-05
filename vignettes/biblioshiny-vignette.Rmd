@@ -1,0 +1,370 @@
+---
+title: "biblioshiny: A shiny interface to bibliometrix"
+author: "Massimo Aria and Corrado Cuccurullo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{biblioshiny: A shiny interface to bibliometrix}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<div style="width:450px; height=300px">
+![Figure 1: biblioshiny welcome page](figures/logo_biblioshiny.png)
+</div>
+
+#### http://www.bibliometrix.org
+
+#### Latest version
+```{r echo=FALSE}
+cat(paste("bibliometrix ",packageVersion("bibliometrix")))
+```
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+### Citation for package 'bibliometrix'
+
+
+To cite bibliometrix in publications, please use:
+
+**Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.**
+ 
+&nbsp; 
+
+&nbsp; 
+
+A BibTeX entry for LaTeX users is
+ 
+@Article{,
+
+   author = {Massimo Aria and Corrado Cuccurullo},
+
+   title = {bibliometrix: An R-tool for comprehensive science mapping analysis},
+
+   journal = {Journal of Informetrics},
+
+   volume = {11},
+
+   number = {4},
+
+   pages = {959-975},
+
+   publisher = {Elsevier},
+
+   year = {2017},
+
+   url = {https://doi.org/10.1016/j.joi.2017.08.007},
+
+   }
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+```{r Package citation, eval=FALSE, include=FALSE}
+citation("bibliometrix")
+```
+
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+### Authors' affiliations
+
+#### Dr. Massimo Aria
+
+Associate Professor in Social Statistics 
+
+PhD in Computational Statistics
+
+Laboratory and Research Group STAD Statistics, Technology, Data Analysis
+
+Department of Economics and Statistics 
+
+University of Naples Federico II
+
+email aria@unina.it
+
+http://www.massimoaria.com
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+
+#### Dr. Corrado Cuccurullo
+
+Full Professor in Strategy and Corporate Governance 
+
+PhD in Management
+
+Dep.t of Management and Economics
+
+University of Campania Luigi Vanvitelli
+
+email corrado.cuccurullo@unicampania.it
+
+https://sites.google.com/site/cocuccurunina2/
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp; 
+
+&nbsp;
+
+&nbsp; 
+
+
+
+## Introduction
+
+**biblioshiny** is a shiny app providing a web-interface for **bibliometrix**.
+
+**bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.
+
+bibliometrix is an open-source tool for executing a comprehensive science mapping analysis of scientific literature.
+
+It was programmed in R language to be flexible and facilitate integration with other statistical and graphical packages. Indeed, bibliometrics is a constantly changing science and bibliometrix has the flexibility to be quickly upgraded and integrated. Its development can address a large and active community of developers formed by prominent researchers.
+
+bibliometrix provides various routines for importing bibliographic data from SCOPUS, Clarivate Analytics' Web of Science, PubMed and Cochrane databases, performing bibliometric analysis and building data matrices for co-citation, coupling, scientific collaboration analysis and co-word analysis.
+
+
+For an introduction and live examples, visit the bibliometrix website (http://www.bibliometrix.org).
+
+**biblioshiny** supports scholars in easy use of the main features of **bibliometrix**:
+
+* Data importing and conversion to data frame collection;
+
+* Data filtering;
+
+* Descriptive analysis of the bibliographic collection;
+
+* Analyzing the different architectures of a bibliographic collection through Conceptual, Intellectual and Social structures.
+
+
+## Installation
+
+Download and install the most recent version of R (https://cran.r-project.org/)
+
+Download and install the most recent version of Rstudio (http://www.rstudio.com)
+
+Open Rstudio, in the console window, digit:
+
+*install.packages("bibliometrix", dependencies=TRUE)*      # for installing bibliometrix package and dependencies #
+
+After the package installationT, t start with the shiny web-interface, digit:
+
+biblioshiny()
+ 
+
+## Load a collection
+**biblioshiny** imports and converts data extracted from the two main bibliographic databases: SCOPUS and Clarivate Analytics Web of Science.
+
+*SCOPUS* (http://www.scopus.com), founded in 2004, offers a great deal of flexibility for the bibliometric user.  It permits to query for different fields, such as titles, abstracts, keywords, references and so on. SCOPUS allows for relatively easy downloading data-queries, although there are some limits on very large results sets with over 2,000 items.
+
+The SCOPUS platform allows to only 2000 records at a time. Choose the file type "BibTeX export" and "all available information". The SCOPUS export tool creates one or more export files with the default name "scopus (number).bib". Export files can be separately stored.
+
+*Clarivate Analytics Web of Science (WoS)* (http://www.webofknowledge.com), owned by Clarivate Analytics, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
+This platform includes many different collections.
+
+The WOS platform permits to export only 500 records at a time. 
+
+The Clarivate Analytics Web of Science export tool creates one or more export files with a default name "savedrecs (numeber)" with an extension ".txt" or ".bib" for plain text or BibTeX  format respectively. Export files can be separately stored.
+
+<div style="width:450px">
+![Figure 2: Load menu](figures/Load1.png)
+</div>
+
+The argument *database* indicates from which database the collection has been downloaded. 
+
+It can be: 
+
+- "Web of Knowledge" (for Clarivate Analytics Web of Science database), 
+
+- "Scopus" (for SCOPUS database).
+
+The argument *File format* indicates the file format of the imported collection. It can be "plaintext" or "bibtex" for WOS collection and mandatorily "bibtext" for SCOPUS collection. 
+
+Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
+
+Data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify. 
+
+The main field tags are:
+
+Field Tag  | Description
+---------- | -----------
+AU		     | Authors
+TI		     | Document Title
+SO		     | Publication Name (or Source)
+JI		     | ISO Source Abbreviation
+DT		     | Document Type
+DE		     | Authors' Keywords
+ID		     | Keywords associated by SCOPUS or ISI database
+AB		     | Abstract
+C1		     | Author Address
+RP		     | Reprint Address
+CR		     | Cited References
+TC		     | Times Cited
+PY		     | Year
+SC		     | Subject Category
+UT		     | Unique Article Identifier
+DB		     | Bibliographic Database
+
+
+For a complete list of field tags see http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf
+
+<div style="width:450px; height=300px">
+![Figure 3: Conversion results](figures/Load2.png)
+</div>
+
+## Filter
+Filters are useful to define the boundaries of a collection. **biblioshiny** includes the main filters such as:
+
+- *Document type*. Bibliographic documents have different types, such as articles, reviews, editorials, and so on. The most common science mapping analysis use articles as unit of analysis. Anyway, scholars can be interested in doing a meta-review using the document type "reviews"; 
+
+- *Publication year*. This filter is useful to restrict the timespan. Comparing structures in different timeslices traces its historical evolution. In this case, scholars can see the dynamics of knowledge structures.
+
+- *Total Citations*. Scholars may be interested in selecting the most important articles in a field, known as "citation classics". This articles are considered knowledge and research drivers;
+
+- *Sources*. This filter permits to focus on a specific subset of journals, selected on the bases of relevance, or on a single journal;
+
+<div style="width:450px; height=300px">
+![Figure 4: Filter menu](figures/Filter.png)
+</div>
+
+## Descriptive analysis
+
+The first step is to perform a descriptive analysis of the bibliographic data frame.
+
+### Tables
+The tab "*Tables*" displays main information about the bibliographic data frame and several tables, such as annual scientific production, top manuscripts per number of citations, most productive authors, most productive countries, total citation per country, most relevant sources (journals) and most relevant keywords.
+
+<div style="width:450px; height=300px">
+![Figure 5: Descriptive Analysis menu - Tab "Tables""](figures/Descriptive_tables.png)
+</div>
+
+Main information table describes the collection size in terms of number of documents, number of authors, number of sources, number of keywords, timespan, and average number of citations. 
+
+Furthermore, many different co-authorship indices are shown. In particular, the **Authors per Article index** is calculated as the ratio between the total number of articles and the total number of authors. The **Co-Authors per Articles index** is calculated as the average number of co-authors per article. In this case, the index takes into account the author appearances while for the "authors per article" an author, even if he has published more than one article, is counted only once.
+For that reasons,  *Authors per Article index $\ge$ Co-authors per Article index*.
+
+The **Collaboration Index** (CI) is calculated as Total Authors of Multi-Authored Articles/Total Multi-Authored Articles (Elango and Rajendran, 2012; Koseoglu, 2016). In other word, the Collaboration Index is a Co-authors per Article index calculated only using the multi-authored article set.
+
+### Plots
+The Tab "*Plots*" draws several descriptive plots.
+
+<div style="width:450px; height=300px">
+![Figure 6: Descriptive Analysis menu - Tab "Plots"](figures/Descriptive_plots.png)
+</div>
+
+### Wordcloud
+**biblioshiny** in the descriptive analysis includes also the Tab "Wordcloud"" that draw a wordcloud using keywords or terms in titles and abstracts.
+
+<div style="width:450px; height=300px">
+![Figure 7: Descriptive Analysis menu - Tab "Wordcloud"](figures/Descriptive_wordcloud.png)
+</div>
+
+## Conceptual structure
+
+Co-word networks show the conceptual structure, that uncovers links between concepts through term co-occurences.
+
+Conceptual structure is often used to understand the topics covered by scholars (so-called research front) and identify what are the most important and the most recent issues.
+
+Dividing the whole timespan in different timeslices, through Filter menu, and comparing the conceptual structures is useful to analyze the evolution of topics over time.
+
+**biblioshiny** is able to analyze keywords, but also the terms in the articles' titles and abstracts. It does it using network analysis or correspondance analysis (CA) or multiple correspondance analysis (MCA). CA and MCA visualise the conceptual structure in a two-dimensional plot.
+
+### Co-occurrence network
+
+<div style="width:450px; height=300px">
+![Figure 8: Conceptual Structure - Tab "Co-occurrence Network"](figures/Conceptual_network.png)
+</div>
+
+
+### (Multiple) Correspondence Analysis
+
+<div style="width:450px; height=300px">
+![Figure 9: Conceptual Structure - Tab "Correspondence Analysis"](figures/Conceptual_correspondence.png)
+</div>
+
+### Thematic Map
+Co-word analysis draws clusters of keywords. They are considered as themes, whose density and centrality can be used in classifying themes and mapping in a two-dimensional diagram.
+
+Thematic map is a very intuitive plot and we can analyze themes according to the quadrant in which they are placed: (1) upper-right quadrant: motor-themes; (2) lower-right quadrant: basic themes; (3) lower-left quadrant: emerging or disappearing themes; (4) upper-left quadrant: very specialized/niche themes.
+
+Please see Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.
+
+<div style="width:450px; height=300px">
+![Figure 10: Conceptual Structure - Tab "Thematic Map"](figures/Conceptual_thematic.png)
+</div>
+
+## Intellectual structure
+
+### Co-citation network
+Citation analysis is one of the main classic techniques in bibliometrics. It shows the intellectual structure of a specific field through the linkages between nodes (e.g. authors, papers, journal), while the edges can be differently interpretated depending on the network type, that are namely co-citation, direct citation, bibliographic coupling. Please see Aria, Cuccurullo (2017).
+
+**biblioshiny** can build: 
+
+- (1) a co-citation network that shows relations between cited-reference works (Field: "Papers");
+
+- (2) a co-citation network that uses cited-authors as unit of analysis (Field: "Authors");
+
+- (3) a co-citation network that uses cited-journals as unit of analysis (Field: "Sources").
+
+The useful dimensions to comment the co-citation networks are: (i) centrality and peripherality of nodes, (ii) their proximity and distance, (iii) strength of ties, (iv) clusters, (iiv) bridging contributions.
+
+<div style="width:450px; height=300px">
+![Figure 11: Intellectual Structure - Tab "Co-citation Network"](figures/Intellectual_network.png)
+</div>
+
+### Historiograph
+A historiograph is built on direct citations. It draws the intellectual linkages in a historical order. Cited works of
+thousands of authors contained in a collection of published scientific articles is sufficient for recostructing the historiographic structure of the field, calling out the basic works in it.
+
+<div style="width:450px; height=300px">
+![Figure 12: Intellectual Structure - Tab "Historiograph"](figures/Intellectual_historiograph.png)
+</div>
+
+## Social structure
+
+Collaboration networks show how authors, institutions (e.g. universities or departments) and countries relate to others in a specific field of research. Next figure below is a co-author network. It discovers regular study groups, hidden groups of scholars, and pivotal authors. 
+**biblioshiny** can build also social networks about institutions or countries that uncovers relevant institutions or main countries in a specific research field and their relations.
+
+<div style="width:450px; height=300px">
+![Figure 13: Social Structure - Tab "Collaboration Network" - Field: Authors](figures/Social_authors.png)
+</div>
+
+
+
+## Main Authors' references (about bibliometrics)
+
+Aria, M. & Cuccurullo, C. (2017).  *bibliometrix*: An R-tool for comprehensive science mapping
+  analysis, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007 (https://doi.org/10.1016/j.joi.2017.08.007).
+
+Cuccurullo, C., Aria, M., & Sarto, F. (2016). Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains, *Scientometrics*, DOI: 10.1007/s11192-016-1948-8 (https://doi.org/10.1007/s11192-016-1948-8).
+
+
+Cuccurullo, C., Aria, M., & Sarto, F.  (2015). Twenty years of research on performance management in business and public administration domains. Presentation at the *Correspondence Analysis and Related Methods conference (CARME 2015)* in September 2015 (http://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf).
+
+
+Sarto, F., Cuccurullo, C., & Aria, M. (2014). Exploring healthcare governance literature: systematic review and paths for future research. *Mecosan* (http://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en).
+
+
+Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research on performance management in business and public administration domains. In *Academy of Management Proceedings* (Vol. 2013, No. 1, p. 14270). Academy of Management (https://doi.org/10.5465/AMBPP.2013.14270abstract).
+

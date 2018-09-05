@@ -20,7 +20,7 @@ ui <-  navbarPage("biblioshiny: A shiny app for bibliometrix R-package",
                              
                              column(9,
                                     wellPanel(
-                               h1("Introducing bibliometrix",align = "center"),
+                               h1("biblioshiny: A shiny app for bibliometrix",align = "center"),
                                br(),
                                h4(em(strong("bibliometrix: An R-tool for comprehensive science mapping analysis")),align = "center"),
                                br(),

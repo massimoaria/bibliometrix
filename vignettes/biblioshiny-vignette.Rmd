@@ -4,7 +4,7 @@ author: "Massimo Aria and Corrado Cuccurullo"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{biblioshiny: A shiny interface to bibliometrix}
+  %\VignetteIndexEntry{biblioshiny: The shiny interface for bibliometrix}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

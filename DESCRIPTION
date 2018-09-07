@@ -13,7 +13,7 @@ Description: Tool for quantitative research in scientometrics and bibliometrics.
 License: GPL-3
 URL: http://www.bibliometrix.org
 LazyData: FALSE
-Encoding: latin1
+Encoding: UTF-8
 Depends: R (>= 3.3.0)
 Imports: stats, 
          DT,
@@ -37,7 +37,7 @@ Suggests: knitr,
 		  rmarkdown,
 RoxygenNote: 6.1.0
 NeedsCompilation: no
-Packaged: 2018-08-25 09:40:50 UTC; aria
+Packaged: 2018-09-01 09:40:50 UTC; aria
 Author: Massimo Aria [cre, aut],
   Corrado Cuccurullo [aut]
 Maintainer: Massimo Aria <aria@unina.it>

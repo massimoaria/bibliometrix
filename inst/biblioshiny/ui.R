@@ -80,7 +80,7 @@ tabPanel(
                        selectInput("format", 
                                    label = "File format",
                                    choices = c("Plain Text"="plaintext", 
-                                               "BibTex"="bibtex"),
+                                               "BibTeX"="bibtex"),
                                    selected = "plaintext")),
       fileInput("file1", "Choose a file",
                 multiple = FALSE,
@@ -96,7 +96,9 @@ tabPanel(
       p("Here accept single .txt/.bib/.xslx, or multiple .txt/.bib files compressed in a single .zip archive."),
       tags$hr(),
       
-      shinycssloaders::withSpinner(verbatimTextOutput("log")),
+      uiOutput("textLog"),
+      #shinycssloaders::withSpinner(verbatimTextOutput("log")),
+      
       
       ### download xlsx
       selectInput('save_file', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'xlsx' = 'xlsx')),
@@ -124,6 +126,7 @@ tabPanel(
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   uiOutput("textDim"),
                                    uiOutput("selectType"),
                                    uiOutput("sliderPY"),
                                    uiOutput("sliderTC"),

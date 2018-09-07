@@ -38,7 +38,7 @@ server <- function(input, output, session) {
     
     if (grepl(".*\\.xlsx",inFile$name)){
       M <- rio::import(inFile$datapath)
-      values$log<-"Data imported from XLSX file"
+      #values$log<-"Data imported from XLSX file"
       
       ### M row names
       ### identify duplicated SRs 
@@ -74,7 +74,7 @@ server <- function(input, output, session) {
         D=readFiles(inFile$datapath)
           }
     
-    values$log<- capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+    capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
     }
     
     #M <- convert2df(D<-readFiles(inFile$datapath), dbsource="isi",format="plaintext")
@@ -108,14 +108,21 @@ server <- function(input, output, session) {
     contentType = "xlsx"
   )
   
-  output$log <- renderText({
-    log=gsub("  Art","\\\nArt",values$log)
-    log=gsub("Done!   ","Done!\\\n",log)
-    return(log)
-    
+  output$textLog <- renderUI({
+    #log=gsub("  Art","\\\nArt",values$log)
+    #log=gsub("Done!   ","Done!\\\n",log)
+    log=paste("Number of Documents ",dim(values$M)[1])
+    textInput("textLog", "Conversion results", 
+              value=log)
   })
   
   ### Filters uiOutput
+  output$textDim <- renderUI({
+    dimMatrix=paste("Number of Documents ",dim(values$M)[1])
+    textInput("textDim", "", 
+              value=dimMatrix)
+  })
+  
   output$selectType <- renderUI({
     artType=sort(unique(values$Morig$DT))
     selectInput("selectType", "Document Type", 

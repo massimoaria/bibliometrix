@@ -439,10 +439,11 @@ server <- function(input, output, session) {
     if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
     if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$size.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
+    if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                     size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
-                    label.n=label.n,edges.min=input$edges.min,label.color = F)
+                    label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved)
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
@@ -552,10 +553,11 @@ server <- function(input, output, session) {
     if (label.n>n){label.n=n}
     if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$citsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
+    if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
                     size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
-                    labelsize=input$citlabelsize,label.cex=label.cex,
+                    labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                     label.n=label.n,edges.min=input$citedges.min,label.color = F)
     
     
@@ -663,10 +665,11 @@ server <- function(input, output, session) {
     if (input$colnormalize=="none"){normalize=NULL}else{normalize=input$colnormalize}
     if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$colsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
+    if (input$soc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = input$collayout, 
                     size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
-                    labelsize=input$collabelsize,label.cex=label.cex,
+                    labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                     label.n=label.n,edges.min=input$coledges.min,label.color = F, cluster=values$cluster)
     
     

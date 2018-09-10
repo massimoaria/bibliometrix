@@ -328,7 +328,13 @@ navbarMenu("Conceptual Structure",
                         numericInput("edges.min", 
                                      label=("Min edges"),
                                      value = 1,
-                                     step = 1)
+                                     step = 1),
+                        
+                        selectInput(inputId ="coc.curved",
+                                    label = "Curved edges",
+                                    choices = c("Yes",
+                                                "No"),
+                                    selected = "No")
                         
                       ),
                     
@@ -435,12 +441,12 @@ navbarMenu("Intellectual Structure",
                                                 "Sources" = "CR_SO"),
                                     selected = "CR"),
                         
-                        textInput(inputId = "citSep", 
+                        selectInput(inputId = "citSep", 
                                   label = "Field separator character", 
-                                  value = ";", 
-                                  width = NULL, 
-                                  placeholder = "This character separates references in the 
-                                  CR field of the bibliographic collection. The default is ;"),
+                                  choices = c(";" = ";", 
+                                              ".  " = ".  ",
+                                              "," = ","),
+                                  selected = ";"),
                         
                         selectInput("citlayout", 
                                     label = "Layout",
@@ -497,7 +503,12 @@ navbarMenu("Intellectual Structure",
                         numericInput("citedges.min", 
                                      label=("Min edges"),
                                      value = 1,
-                                     step = 1)
+                                     step = 1),
+                        selectInput(inputId ="cocit.curved",
+                                    label = "Curved edges",
+                                    choices = c("Yes",
+                                                "No"),
+                                    selected = "No")
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -638,7 +649,12 @@ navbarMenu("Social Structure",
                                    numericInput("coledges.min", 
                                                 label=("Min edges"),
                                                 value = 1,
-                                                step = 1)
+                                                step = 1),
+                                   selectInput(inputId ="soc.curved",
+                                               label = "Curved edges",
+                                               choices = c("Yes",
+                                                           "No"),
+                                               selected = "No")
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",

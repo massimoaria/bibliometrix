@@ -242,6 +242,80 @@ navbarMenu("Descriptive Analysis",
            ))
       ),
 
+### Temporal Analysis ----
+navbarMenu("Temporal Analysis",
+           
+           tabPanel("Word Analysis",
+
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   selectInput("growthTerms", "Field",
+                                               choices = c("Keywords Plus" = "ID",
+                                                           "Author's keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   selectInput("cumTerms", "Occurrences",
+                                               choices = c("Cumulate" = "Cum",
+                                                           "Per year" = "noCum"),
+                                               selected = "Cum"),
+                                   selectInput("se", "Confidence Interval",
+                                               choices = c("Yes" = "Yes",
+                                                           "No" = "No"),
+                                               selected = "Yes"),
+                                   hr(),
+                                   sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = 10)
+                                   
+                                   #uiOutput("sliderKwYears")
+                      ),
+
+                      # Show Word Cloud
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "kwGrowthPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
+                                    ))
+
+                      )
+                    )),
+           
+           tabPanel("Reference Spectroscopy",
+                    sidebarLayout(
+                      
+                      sidebarPanel(width=3,
+                                   sliderInput("sliderYears",
+                                               label = "Timespan",
+                                               min = 1700,
+                                               max = as.numeric(substr(Sys.Date(),1,4)),
+                                               step = 10, sep="",
+                                               value = c(1700, as.numeric(substr(Sys.Date(),1,4)))
+                                               ),
+                                   
+                                   selectInput(inputId = "rpysSep", 
+                                               label = "Field separator character", 
+                                               choices = c(";" = ";", 
+                                                           ".  " = ".  ",
+                                                           "," = ","),
+                                               selected = ";")
+                                   
+                      ),
+                    mainPanel(
+                      tabsetPanel(type = "tabs",
+                                  tabPanel("Graph", 
+                                           withSpinner(plotOutput(outputId = "rpysPlot"))),
+                                  tabPanel("RPY Table", 
+                                           shinycssloaders::withSpinner(DT::DTOutput(
+                                             outputId = "rpysTable"))),
+                                  tabPanel("Cited References Table", 
+                                           shinycssloaders::withSpinner(DT::DTOutput(
+                                             outputId = "crTable")))
+                      )
+                    )))),
+
 ### CONCEPTUAL STRUCTURE ----
 navbarMenu("Conceptual Structure",
            

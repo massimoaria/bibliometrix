@@ -20,6 +20,7 @@ server <- function(input, output, session) {
   values$Histfield="NA"
   values$histlog="working..."
   values$kk=0
+  values$M=data.frame(PY=0)
   
   
   
@@ -132,7 +133,7 @@ server <- function(input, output, session) {
   })
   
   output$sliderPY <- renderUI({
-    sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY),
+    sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY),sep="",
                 max = max(values$Morig$PY), value = c(min(values$Morig$PY),max(values$Morig$PY)))
   })
   
@@ -173,6 +174,7 @@ server <- function(input, output, session) {
       formatStyle(names(Mdisp),  backgroundColor = 'black',textAlign = 'center', fontSize = '70%')
   })
   
+  ### Descriptive Analysis
   output$summary <- renderPrint({
     
     if (values$results[[1]]=="NA"){values$results=biblioAnalysis(values$M)}
@@ -220,7 +222,6 @@ server <- function(input, output, session) {
     
     contentType = "txt"
   )
-  
   output$summaryPlots <- renderPlot({
     if (values$results[[1]]=="NA"){
       values$results=biblioAnalysis(values$M)}
@@ -398,8 +399,117 @@ server <- function(input, output, session) {
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$Words),  backgroundColor = 'black',textAlign = 'center')
   })
-    
   
+  ### Temporal Analysis  
+  
+  # output$sliderKwYears <- renderUI({
+  #   sliderInput("sliderKwYears", "Timeslice", min = min(values$M$PY),sep="",
+  #               max = max(values$M$PY), value = c(min(values$M$PY),max(values$M$PY)))
+  # })
+  
+  output$kwGrowthPlot <- renderPlot({
+    
+    if (input$cumTerms=="Cum"){
+      cdf=TRUE
+      laby="Cumulate occurrences"
+    }else{
+      cdf=FALSE
+      laby="Annual occurrences"}
+    if (input$se=="Yes"){se=TRUE}else{se=FALSE}
+    
+    switch(input$growthTerms,
+           ID={
+             values$KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw, cdf = cdf)
+             },
+           DE={values$KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw, cdf = cdf)
+             },
+           TI={
+             if (!("TI_TM" %in% names(values$M))){
+               values$M=termExtraction(values$M,Field = "TI", verbose=FALSE)
+              }
+             values$KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw, cdf = cdf)
+             },
+           AB={
+             if (!("AB_TM" %in% names(values$M))){
+               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE)
+             }
+             values$KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw, cdf = cdf)
+           }
+    )
+    
+    ## period##
+    #values$KW=subset(values$KW, (Year>=input$sliderKwYears[1] & Year<=input$sliderKwYears[1]))
+    
+    
+    term=names(values$KW)[-1]
+    term=rep(term,each=dim(values$KW)[1])
+    n=dim(values$KW)[1]*(dim(values$KW)[2]-1)
+    freq=matrix(as.matrix(values$KW[,-1]),n,1)
+    values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq)
+    
+    g=ggplot(values$DF)+
+      geom_smooth(aes(x=values$DF$Year,y=values$DF$Freq, group=values$DF$Term, color=values$DF$Term),se = se,method = 'loess',formula ='y ~ x')+
+      labs(x = 'Year'
+           , y = laby
+           , title = "Word Growth") +
+      scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=1)])) +
+      geom_hline(aes(yintercept=0, alpha=0.1))+
+      theme(text = element_text(color = "#444444"), legend.position="none"
+            ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
+            ,panel.background = element_rect(fill = '#EFEFEF')
+            ,panel.grid.minor = element_line(color = '#FFFFFF')
+            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,plot.title = element_text(size = 24)
+            ,axis.title = element_text(size = 14, color = '#555555')
+            ,axis.title.y = element_text(vjust = 1, angle = 90)
+            ,axis.title.x = element_text(hjust = 0.95, angle = 0)
+            ,axis.text.x = element_text(size=10)
+      )  
+    DFsmooth=(ggplot_build(g)$data[[1]])
+    maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
+    DF2=subset(DFsmooth, x == maximum)
+    g=g+
+      ggrepel::geom_text_repel(data = DF2, aes(label = unique(values$DF$Term), colour = unique(values$DF$Term), x =DF2$x, y = DF2$y), hjust = -.1)
+    plot(g)
+    
+  },height = 500, width = 900)
+  
+  output$rpysPlot <- renderPlot({
+    values$res <- rpys(values$M, sep=input$rpysSep, timespan=input$sliderYears ,graph=FALSE)
+    #values$res <- rpys(values$M, sep=input$rpysSep, timespan=input$sliderYears ,graph=FALSE)
+    plot(values$res$spectroscopy)
+    
+  },height = 500, width = 900)
+  
+  output$rpysTable <- DT::renderDT({
+    
+    rpysData=values$res$rpysTable
+    
+    DT::datatable(rpysData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(rpysData))-1))))) %>%
+      formatStyle(names(rpysData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
+  
+  output$crTable <- DT::renderDT({
+    
+    crData=values$res$CR
+    names(crData)=c("Year", "Reference")
+    DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(crData))-1))))) %>%
+      formatStyle(names(crData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
+  
+  ### Conceptual Structure
   output$cocPlot <- renderPlot({
     
   ## Keyword co-occurrences network

@@ -4,7 +4,7 @@
 \alias{rpys}
 \title{Reference Publication Year Spectroscopy}
 \usage{
-rpys(M, sep = ";", graph = T)
+rpys(M, sep = ";", timespan = NULL, graph = T)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -13,6 +13,8 @@ articles and variables to Field Tag in the original ISI or SCOPUS file.}
 
 \item{sep}{is the cited-references separator character. This character separates cited-references in the CR
 column of the data frame. The default is \code{sep = ";"}.}
+
+\item{timespan}{is a numeric vector c(min year,max year). The default value is NULL (the entire timespan is considered).}
 
 \item{graph}{is a logical. If TRUE the function plot the spectrography otherwise the plot is created but not drawn down.}
 }

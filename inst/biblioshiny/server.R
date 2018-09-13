@@ -447,8 +447,10 @@ server <- function(input, output, session) {
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
     values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq)
     
+    
+    
     g=ggplot(values$DF)+
-      geom_smooth(aes(x=values$DF$Year,y=values$DF$Freq, group=values$DF$Term, color=values$DF$Term),se = se,method = 'loess',formula ='y ~ x')+
+      geom_smooth(aes(x=values$DF$Year,y=values$DF$Freq, group=values$DF$Term, color=values$DF$Term),se = se,method = "loess",formula ='y ~ x')+
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
@@ -464,22 +466,39 @@ server <- function(input, output, session) {
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
             ,axis.text.x = element_text(size=10)
-      )  
+      )
+        
     DFsmooth=(ggplot_build(g)$data[[1]])
+    DFsmooth$group=factor(DFsmooth$group, labels=levels(values$DF$Term))
+    
     maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
     DF2=subset(DFsmooth, x == maximum)
     g=g+
-      ggrepel::geom_text_repel(data = DF2, aes(label = unique(values$DF$Term), colour = unique(values$DF$Term), x =DF2$x, y = DF2$y), hjust = -.1)
+      ggrepel::geom_text_repel(data = DF2, aes(label = DF2$group, colour = DF2$group, x =DF2$x, y = DF2$y), hjust = -.1)
     plot(g)
     
-  },height = 500, width = 900)
+  },height = 600, width = 900)
+  
+  output$kwGrowthtable <- DT::renderDT({
+    
+    kwData=values$KW
+    
+    DT::datatable(kwData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(kwData))-1))))) %>%
+      formatStyle(names(kwData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
   
   output$rpysPlot <- renderPlot({
     values$res <- rpys(values$M, sep=input$rpysSep, timespan=input$sliderYears ,graph=FALSE)
     #values$res <- rpys(values$M, sep=input$rpysSep, timespan=input$sliderYears ,graph=FALSE)
     plot(values$res$spectroscopy)
     
-  },height = 500, width = 900)
+  },height = 600, width = 900)
   
   output$rpysTable <- DT::renderDT({
     

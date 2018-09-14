@@ -38,6 +38,8 @@ rpys <- function(M, sep=";", timespan=NULL, graph=T){
   Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])
   Fi<-(unlist(Fi))
   
+  ## reference modify for ISI
+  if (M$DB[1]=="ISI"){
   ref<-unlist(lapply(Fi, function(l){
       l<-gsub("\\).*",")",l)
       l<-gsub(","," ",l)
@@ -46,15 +48,28 @@ rpys <- function(M, sep=";", timespan=NULL, graph=T){
       l<-l[nchar(l)>0]
       return(l)
     }))
-ref=ref[!is.na(ref)]   
-Years=trim(yearExtract(ref))
+  }else{
+    ref<-unlist(lapply(Fi, function(l){
+      l<-gsub(","," ",l)
+      l<-gsub(";"," ",l)
+      l<-gsub("\\s+", " ", l)
+      l<-l[nchar(l)>0]
+      return(l)
+    }))
+  }
+  
+ref=ref[!is.na(ref)] 
+Years=yearExtract(ref,db=M$DB[1])
+Years=Years[!is.na(ref)]
+
+
+ref=ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
+Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
+
 CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
 Years=Years[!(Years %in% "")]
-Years=Years[Years>=1700]
+
 RPYS=table(Years)
-#RPYS=as.data.frame(table(Years), stringsAsFactors = FALSE)
-#names(RPYS)=c("Year","Citations")
-#names(RPYS)=as.numeric(RPYS$Year)
 
 ## calculating running median
 yearSeq=as.numeric(names(RPYS))
@@ -84,7 +99,7 @@ g=ggplot()+
        , y = 'Cited References'
        , title = "Reference Publication Year Spectroscopy",
        caption = "Number of Cited References (black line) - Deviation from the 5-Year Median (red line)") +
-  scale_x_continuous(breaks= (X[seq(1,length(X),by=20)])) +
+  scale_x_continuous(breaks= (X[seq(1,length(X),by=round(length(X)/30))])) +
   theme(text = element_text(color = "#444444"), legend.position="none"
         ,plot.caption = element_text(size = 9, hjust = 0.5,
                                      color = "black", face = "bold")
@@ -104,10 +119,22 @@ if (isTRUE(graph)){plot(g)}
     return(result)
 }
 
-yearExtract <- function(string){
+yearExtract <- function(string,db){
+  if (db=="ISI"){
   ind=regexpr(" [[:digit:]]{4} ",string)
+  ind[is.na(ind)]=-1
   string[ind==-1]=" 0000 "
   ind[ind==-1]=1
   attr(ind[ind==-1],"match.length")=6
-unlist(regmatches(string,ind))
+  y=trim(unlist(regmatches(string,ind)))
+  }else{
+    ind=regexpr("\\([[:digit:]]{4}\\)",string)
+    ind[is.na(ind)]=-1
+    string[ind==-1]="(0000)"
+    ind[ind==-1]=1
+    attr(ind[ind==-1],"match.length")=6
+    y=unlist(regmatches(string,ind))
+    y=substr(y,2,5)
+  }
+  return(y)
 }

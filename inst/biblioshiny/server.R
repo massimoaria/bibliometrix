@@ -454,7 +454,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
-      scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=1)])) +
+      scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=round(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")

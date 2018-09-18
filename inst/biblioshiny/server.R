@@ -411,10 +411,10 @@ server <- function(input, output, session) {
     
     if (input$cumTerms=="Cum"){
       cdf=TRUE
-      laby="Cumulate occurrences"
+      laby="Cumulate occurrences (loess smoothing)"
     }else{
       cdf=FALSE
-      laby="Annual occurrences"}
+      laby="Annual occurrences (loess smoothing)"}
     if (input$se=="Yes"){se=TRUE}else{se=FALSE}
     
     switch(input$growthTerms,
@@ -489,6 +489,77 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(kwData))-1))))) %>%
       formatStyle(names(kwData),  backgroundColor = 'gray') 
+    #return(Data)
+    
+  })
+  
+  output$soGrowthPlot <- renderPlot({
+    
+    if (input$SOse=="Yes"){se=TRUE}else{se=FALSE}
+    
+    if (input$cumSO=="Cum"){
+      cdf=TRUE
+      laby="Cumulate occurrences (loess smoothing)"
+    }else{
+      cdf=FALSE
+      laby="Annual occurrences (loess smoothing)"} 
+  
+    values$PYSO=sourceGrowth(values$M,input$topSO, cdf=cdf)
+    
+    term=names(values$PYSO)[-1]
+    term=rep(term,each=dim(values$PYSO)[1])
+    n=dim(values$PYSO)[1]*(dim(values$PYSO)[2]-1)
+    freq=matrix(as.matrix(values$PYSO[,-1]),n,1)
+    values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq)
+    
+    g=ggplot(values$SODF)+
+      geom_smooth(aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source),se=se, method = "loess", formula="y ~ x")+
+      labs(x = 'Year'
+           , y = laby
+           , title = "Source Growth") +
+      scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=round(length(values$PYSO$Year)/20))])) +
+      geom_hline(aes(yintercept=0, alpha=0.1))+
+      theme(text = element_text(color = "#444444"), legend.position="none"
+            ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
+            ,panel.background = element_rect(fill = '#EFEFEF')
+            ,panel.grid.minor = element_line(color = '#FFFFFF')
+            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,plot.title = element_text(size = 24)
+            ,axis.title = element_text(size = 14, color = '#555555')
+            ,axis.title.y = element_text(vjust = 1, angle = 90)
+            ,axis.title.x = element_text(hjust = 0.95, angle = 0)
+            ,axis.text.x = element_text(size=10)
+      )
+    
+    DFsmooth=(ggplot_build(g)$data[[1]])
+    DFsmooth$group=factor(DFsmooth$group, labels=levels(values$SODF$Source))
+    
+    maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
+    DF2=subset(DFsmooth, x == maximum)
+    g=g+
+      ggrepel::geom_text_repel(data = DF2, aes(label = DF2$group, colour = DF2$group, x =DF2$x, y = DF2$y), hjust = -.1)
+    plot(g)
+    
+    
+    # maximum=sort(unique(values$SODF$Year),decreasing=TRUE)[2]
+    # DF2=subset(values$SODF, Year == maximum)
+    # g=g+
+    #   ggrepel::geom_text_repel(data = DF2, aes(label = DF2$Source, colour = DF2$Source, x =DF2$Year, y = DF2$Freq), hjust = -.1)
+    # 
+    # plot(g)
+    
+  },height = 600, width = 900)
+  
+  output$soGrowthtable <- DT::renderDT({
+    
+    soData=values$PYSO
+    
+    DT::datatable(soData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(soData))-1))))) %>%
+      formatStyle(names(soData),  backgroundColor = 'gray') 
     #return(Data)
     
   })
@@ -784,7 +855,7 @@ server <- function(input, output, session) {
                if(!("AU_CO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_CO", sep=";")}
                values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", sep = ";")
                values$Title= "Country Collaboration network"
-               values$cluster="none"
+               #values$cluster="none"
              })
       
     }
@@ -799,7 +870,7 @@ server <- function(input, output, session) {
     values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = input$collayout, 
                     size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
                     labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
-                    label.n=label.n,edges.min=input$coledges.min,label.color = F, cluster=values$cluster)
+                    label.n=label.n,edges.min=input$coledges.min,label.color = F)#, cluster=values$cluster)
     
     
   }, height = 750, width = 900)

@@ -283,6 +283,39 @@ navbarMenu("Temporal Analysis",
                       )
                     )),
            
+           tabPanel("Source Analysis",
+                    
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   selectInput("cumSO", "Occurrences",
+                                               choices = c("Cumulate" = "Cum",
+                                                           "Per year" = "noCum"),
+                                               selected = "Cum"),
+                                   selectInput("SOse", "Confidence Interval",
+                                               choices = c("Yes" = "Yes",
+                                                           "No" = "No"),
+                                               selected = "Yes"),
+                                   hr(),
+                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5)
+                                   
+                                   #uiOutput("sliderKwYears")
+                      ),
+                      
+                      # Show Word Cloud
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
+                                    ))
+                        
+                      )
+                    )),
+           br(),
+           
            tabPanel("Reference Spectroscopy",
                     sidebarLayout(
                       

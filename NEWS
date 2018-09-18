@@ -2,7 +2,12 @@ bibliometrix v2.0.1 (Release date: 2018-09-13)
 ==============
 
 New functionality:
-* added Temporal Analysis to biblioshiny()
+* added Temporal Analysis menu to biblioshiny()
+* added Word Analysis to biblioshiny()
+* added Source Analysis to biblioshiny()
+* added the function rpys() to perform the Reference Publication Year Spectroscopy
+* added the function sourceGrowth to calculate source publication time series
+
 
 
 bibliometrix v2.0.0 (Release date: 2018-09-03)

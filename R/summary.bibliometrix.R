@@ -63,7 +63,7 @@ summary.bibliometrix<-function(object, ...){
   MainInfo[length(MainInfo)+1]=paste("Author Appearances                   ",object$Appearances,"\n")
   MainInfo[length(MainInfo)+1]=paste("Authors of single-authored documents ",object$nAuthors-object$AuMultiAuthoredArt,"\n")
   MainInfo[length(MainInfo)+1]=paste("Authors of multi-authored documents  ",object$AuMultiAuthoredArt,"\n")
-  MainInfo[length(MainInfo)+1]=paste("Single-authored documents            ",format(sum(results$nAUperPaper==1),digits=0),"\n\n")
+  MainInfo[length(MainInfo)+1]=paste("Single-authored documents            ",format(sum(object$nAUperPaper==1),digits=0),"\n\n")
   MainInfo[length(MainInfo)+1]=paste("Documents per Author                 ",format(object$Articles/object$nAuthors,digits=3),"\n")
   MainInfo[length(MainInfo)+1]=paste("Authors per Document                 ",format(object$nAuthors/object$Articles,digits=3),"\n")
   MainInfo[length(MainInfo)+1]=paste("Co-Authors per Documents             ",format(mean(object$nAUperPaper),digits=3),"\n")

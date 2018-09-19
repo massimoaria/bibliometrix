@@ -363,6 +363,17 @@ server <- function(input, output, session) {
     #plot(results)
     }, height = 500, width =900)
   
+  # output$wordcloud.ui <- renderUI({
+  #   wordcloud2::wordcloud2Output("wordcloud", height =  plotHeight())
+  # })
+  # 
+  # plotCount <- reactive({
+  #   req(input$widgetsize)
+  #   as.numeric(input$widgetsize)
+  # })
+  # 
+  # plotHeight <- reactive(plotCount())
+  
   output$wordcloud <- wordcloud2::renderWordcloud2({
     
     switch(input$summaryTerms,
@@ -379,13 +390,19 @@ server <- function(input, output, session) {
     
     #v=tableTag(values$M,"ID")
     n=min(c(input$n_words,length(values$v)))
-    values$Words=data.frame(Terms=names(values$v)[1:n], Frequency=as.numeric(values$v)[1:n])
+    values$Words=data.frame(Terms=names(values$v)[1:n], Frequency=(as.numeric(values$v)[1:n]))
+    W=values$Words
+    switch(input$measure,
+           sqrt={W$Frequency=sqrt(W$Frequency)},
+           log={W$Frequency=log(W$Frequency+1)},
+           log10={W$Frequency=log10(W$Frequency+1)}
+           )
     
-    wordcloud2::wordcloud2(values$Words, size = input$scale, minSize = 0, gridSize =  input$padding,
+    wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
                fontFamily = input$font, fontWeight = 'normal',
-               color = 'random-dark', backgroundColor = "white",
+               color = input$wcCol, backgroundColor = input$wcBGCol,
                minRotation = 0, maxRotation = input$rotate/10, shuffle = TRUE,
-               rotateRatio = 0.7, shape = 'circle', ellipticity = 0.65,
+               rotateRatio = 0.7, shape = input$wcShape, ellipticity = input$ellipticity,
                widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
     
     })
@@ -394,7 +411,9 @@ server <- function(input, output, session) {
     #Words=data.frame(Terms=names(values$v), Frequency=as.numeric(values$v))
     #names(Words)=c("Terms", "Frequency")
     DT::datatable(values$Words, rownames = FALSE,
-                  options = list(pageLength = 50, dom = 'tip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$Words))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$Words),  backgroundColor = 'black',textAlign = 'center')

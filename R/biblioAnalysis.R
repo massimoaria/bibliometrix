@@ -162,7 +162,11 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
     M$AU_CO1=NA
     SCP_MCP=data.frame(Country=rep(NA,1),SCP=rep(NA,1))
 }
-if ("PT" %in% names(M)){Documents=table(M$PT)}else{Documents=NA}
+if ("DT" %in% names(M)){
+  Documents=table(M$DT)
+  n=max(nchar(names(Documents)))
+  names(Documents)=substr(paste(names(Documents),"                                              ",sep=""),1,n+5)
+}else{Documents=NA}
 
 results=list(Articles=dim(M)[1],             # Articles
              Authors=Authors,                # Authors' frequency distribution

@@ -7,6 +7,7 @@ if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=T
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
 if (!(require(shinythemes))){install.packages("shinythemes")} 
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
+if (!require(colourpicker)){install.packages("colourpicker")}
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
@@ -205,7 +206,7 @@ navbarMenu("Descriptive Analysis",
                       
                     )
            ),
-           tabPanel("Word Cloud",
+           tabPanel("WordCloud",
            
            sidebarLayout(
              # Sidebar with a slider and selection inputs
@@ -217,15 +218,35 @@ navbarMenu("Descriptive Analysis",
                                        "Abstracts" = "AB"),
                            selected = "ID"),
                hr(),
-               sliderInput("n_words", label = "Number of words:", min = 10, max = 200, step = 5, value = 50),
-               sliderInput("scale", label = "Font size:", min=1,max=10,step=1,value=1),
-               #selectInput("spiral", label = "Spiral:", choices = c("archimedean", "rectangular")),
-               selectInput("font", label = "Font type:",
+               sliderInput("n_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
+               selectInput("measure", "Word occurrence measure",
+                           choices = c("Frequency" = "freq",
+                                       "Square root" = "sqrt",
+                                       "Log" = "log",
+                                       "Log10" = "log10"),
+                           selected = "freq"),
+               selectInput("wcShape", "Shape",
+                           choices = c("Circle" = "circle",
+                                       "Cardiod" = "cardioid",
+                                       "Diamond" = "diamond",
+                                       "Pentagon" = "pentagon",
+                                       "Star" = "star",
+                                       "Triangle-forward" = "triangle-forward"
+                                       ,"Triangle" = "triangle"),
+                           selected = "circle"),
+               selectInput("font", label = "Font type",
                            choices = c("Impact", "Comic Sans MS (No plz!)" = "Comic Sans MS",
                                        "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
                                        "Georgia", "Times New Roman", "Andale Mono")),
-               sliderInput("padding", label = "Padding:", min = 0, max = 5, value = 1, step = 1),
-               sliderInput("rotate", label = "Rotate:", min = 0, max = 20, value = 0, step = 1)
+               selectInput("wcCol", "Text colors",
+                           choices = c("Random Dark" = "random-dark",
+                                       "Random Light" = "random-light"),
+                                       selected = "random-dark"),
+               colourInput("wcBGCol", label= "Backgroud color",value="white", showColour = "background", returnName=TRUE),
+               sliderInput("scale", label = "Font size", min=0.2,max=5,step=0.1,value=1),
+               sliderInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65),
+               sliderInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1),
+               sliderInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
              ),
              
              # Show Word Cloud

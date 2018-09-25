@@ -141,7 +141,9 @@ tabPanel(
 
 ### Descriptive Analysis PAGE ----
 navbarMenu("Descriptive Analysis",
-           
+           "  ",
+           "  ",
+           "Bibliographic Analysis",
            tabPanel("Tables",
                     sidebarLayout(
                       
@@ -152,23 +154,31 @@ navbarMenu("Descriptive Analysis",
                                                 "Annual Scientific Production"="tab2",
                                                 "Most Productive Authors"="tab3",
                                                 "Most Cited Papers"="tab4",
+                                                "Most Cited References"="tab9",
                                                 "Most Productive Countries"="tab5",
                                                 "Most Cited Countries"="tab6",
                                                 "Most Relevant Sources"="tab7",
-                                                "Most Relevant Keywords"="tab8",
-                                                "All results"="all"),
+                                                "Most Relevant Keywords"="tab8"),
                                     selected = "tab1"),
                         
-                        conditionalPanel(condition = "input.summary_type != 'tab1'",
+                        conditionalPanel(condition = "(input.summary_type != 'tab1') & (input.summary_type != 'tab2') & (input.summary_type != 'tab9')",
                                     numericInput("kk", 
                                       label=("Number of results"), 
                                       value = 20)),
+                        conditionalPanel(condition = "input.summary_type == 'tab9'",
+                                         selectInput(inputId = "sep", 
+                                                     label = "Field separator character", 
+                                                     choices = c(";" = ";", 
+                                                                 ".  " = ".  ",
+                                                                 "," = ","),
+                                                     selected = ";")),
                         selectInput('save_summary', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'txt file' = 'txt')),
                         conditionalPanel(condition = "input.save_summary == 'txt'",
                                          downloadButton("results.txt", "Save"))
                       ),
                       mainPanel(
-                        shinycssloaders::withSpinner(verbatimTextOutput("summary"))
+                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "summary"))
+                        #shinycssloaders::withSpinner(verbatimTextOutput("summary"))
                       )
                     )
            ),
@@ -206,6 +216,9 @@ navbarMenu("Descriptive Analysis",
                       
                     )
            ),
+           "  ",
+           "  ",
+           "Content Analysis",
            tabPanel("WordCloud",
            
            sidebarLayout(
@@ -261,7 +274,9 @@ navbarMenu("Descriptive Analysis",
                
                     )
            )),
-           
+           "  ",
+           "  ",
+           "Temporal Analysis",
            tabPanel("Word Dynamics",
                     
                     sidebarLayout(
@@ -282,12 +297,12 @@ navbarMenu("Descriptive Analysis",
                                                            "No" = "No"),
                                                selected = "Yes"),
                                    hr(),
-                                   sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = 10)
+                                   sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))
                                    
                                    #uiOutput("sliderKwYears")
                       ),
                       
-                      # Show Word Cloud
+                      # 
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
@@ -319,7 +334,7 @@ navbarMenu("Descriptive Analysis",
                                    #uiOutput("sliderKwYears")
                       ),
                       
-                      # Show Word Cloud
+                      # 
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",

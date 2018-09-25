@@ -71,7 +71,7 @@ citations <- function(M, field = "article", sep = ";"){
       })}
   }
   CR=unlist(listCR)
-  CR=gsub("\\.","",CR)
+  #CR=gsub("\\.","",CR)
   CR=CR[nchar(CR)>=3]
   CR=trim.leading(CR)
   CR=sort(table(CR),decreasing=TRUE)

@@ -175,7 +175,7 @@ server <- function(input, output, session) {
   })
   
   ### Descriptive Analysis
-  output$summary <- renderPrint({
+  output$summary <- DT::renderDT({
     
     if (values$results[[1]]=="NA"){values$results=biblioAnalysis(values$M)}
     S=summary(object=values$results,k=input$kk,verbose=FALSE)
@@ -183,33 +183,63 @@ server <- function(input, output, session) {
     
     
     switch(input$summary_type,
-           "tab1"={cat(S$MainInformation)},
-           "tab2"={print(S$AnnualProduction)
-             cat("\n\n")
-             cat("Annual Growth Rate ",round(S$AnnualGrowthRate, digits=2),"%")},
-           "tab3"={print(S$MostProdAuthors)},
-           "tab4"={print(S$MostCitedPapers)},
-           "tab5"={print(S$MostProdCountries)},
-           "tab6"={print(S$TCperCountries)},
-           "tab7"={print(S$MostRelSources)},
-           "tab8"={print(S$MostRelKeywords)},
-           "all"={cat(S$MainInformation)
-                  print(S$AnnualProduction)
-                  cat("\n\n")
-                  print(S$AnnualGrowthRate);cat("\n\n")
-                  print(S$MostProdAuthors);cat("\n\n")
-                  print(S$MostCitedPapers);cat("\n\n")
-                  print(S$MostProdCountries);cat("\n\n")
-                  print(S$TCperCountries);cat("\n\n")
-                  print(S$MostRelSources);cat("\n\n")
-                  print(S$MostRelKeywords);cat("\n\n")
+           "tab1"={
+             #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
+             TAB=data.frame(S$MainInformation)
+             #cat(S$MainInformation)
+             },
+           "tab2"={
+             
+             TAB=S$AnnualProduction
+             names(TAB)=c("Year","Articles")
+             #print(S$AnnualProduction)
+             #cat("\n\n")
+             #cat("Annual Growth Rate ",round(S$AnnualGrowthRate, digits=2),"%")
+             },
+           "tab3"={
+             TAB=S$MostProdAuthors
+             names(TAB)=c("Authors","Articles","Authors-Frac","Articles Fractionalized")
+             #print(S$MostProdAuthors)
+             },
+           "tab4"={
+             TAB=S$MostCitedPapers
+             names(TAB)=c("Paper", "Total Citations","TC per Year")
+             #print(S$MostCitedPapers)
+             },
+           "tab5"={
+             TAB=S$MostProdCountries
+             #print(S$MostProdCountries)
+             },
+           "tab6"={
+             TAB=S$TCperCountries
+             #print(S$TCperCountries)
+             },
+           "tab7"={
+             TAB=S$MostRelSources
+             #print(S$MostRelSources)
+             },
+           "tab8"={
+             TAB=S$MostRelKeywords
+             names(TAB)=c("Author Keywords (DE)", "Articles (DE)","Keywords-Plus (ID)","Articles (ID)")
+             #print(S$MostRelKeywords)
+             },
+           "tab9"={
+             TAB=as.data.frame(citations(values$M,sep=";")$Cited)
+             names(TAB)=c("Cited References", "Citations")
+             #print(S$MostRelKeywords)
            }
-           )
+          )
     
-    
-    #
+    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'black',textAlign = 'center', fontSize = '110%')
   })
-  
+    #
+
   output$results.txt <- downloadHandler(
     
     filename = function() {
@@ -408,8 +438,7 @@ server <- function(input, output, session) {
     })
   
   output$wordTable <- DT::renderDT({
-    #Words=data.frame(Terms=names(values$v), Frequency=as.numeric(values$v))
-    #names(Words)=c("Terms", "Frequency")
+
     DT::datatable(values$Words, rownames = FALSE,
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
@@ -418,13 +447,6 @@ server <- function(input, output, session) {
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$Words),  backgroundColor = 'black',textAlign = 'center')
   })
-  
-  ### Temporal Analysis  
-  
-  # output$sliderKwYears <- renderUI({
-  #   sliderInput("sliderKwYears", "Timeslice", min = min(values$M$PY),sep="",
-  #               max = max(values$M$PY), value = c(min(values$M$PY),max(values$M$PY)))
-  # })
   
   output$kwGrowthPlot <- renderPlot({
     
@@ -438,27 +460,27 @@ server <- function(input, output, session) {
     
     switch(input$growthTerms,
            ID={
-             values$KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw, cdf = cdf)
+             KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw[2], cdf = cdf)
+             
              },
-           DE={values$KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw, cdf = cdf)
+           DE={
+             KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf)
              },
            TI={
              if (!("TI_TM" %in% names(values$M))){
                values$M=termExtraction(values$M,Field = "TI", verbose=FALSE)
-              }
-             values$KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw, cdf = cdf)
+             }
+             KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw[2], cdf = cdf)
              },
            AB={
              if (!("AB_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE)
+              values$M=termExtraction(values$M,Field = "AB", verbose=FALSE)
              }
-             values$KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw, cdf = cdf)
-           }
+             KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw[2], cdf = cdf)
+             }
     )
     
-    ## period##
-    #values$KW=subset(values$KW, (Year>=input$sliderKwYears[1] & Year<=input$sliderKwYears[1]))
-    
+    values$KW=KW[,c(1,seq(input$topkw[1],input$topkw[2])+1)]
     
     term=names(values$KW)[-1]
     term=rep(term,each=dim(values$KW)[1])
@@ -466,14 +488,12 @@ server <- function(input, output, session) {
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
     values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq)
     
-    
-    
     g=ggplot(values$DF)+
       geom_smooth(aes(x=values$DF$Year,y=values$DF$Freq, group=values$DF$Term, color=values$DF$Term),se = se,method = "loess",formula ='y ~ x')+
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
-      scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=round(length(values$KW$Year)/20))])) +
+      scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
@@ -536,7 +556,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = laby
            , title = "Source Growth") +
-      scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=round(length(values$PYSO$Year)/20))])) +
+      scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")

@@ -260,14 +260,10 @@ navbarMenu("Descriptive Analysis",
                            ))
                
                     )
-           ))
-      ),
-
-### Temporal Analysis ----
-navbarMenu("Temporal Analysis",
+           )),
            
-           tabPanel("Word Analysis",
-
+           tabPanel("Word Dynamics",
+                    
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
                       sidebarPanel(width=3,
@@ -290,7 +286,7 @@ navbarMenu("Temporal Analysis",
                                    
                                    #uiOutput("sliderKwYears")
                       ),
-
+                      
                       # Show Word Cloud
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -300,11 +296,11 @@ navbarMenu("Temporal Analysis",
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
                                     ))
-
+                        
                       )
                     )),
            
-           tabPanel("Source Analysis",
+           tabPanel("Source Dynamics",
                     
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
@@ -335,7 +331,6 @@ navbarMenu("Temporal Analysis",
                         
                       )
                     )),
-           br(),
            
            tabPanel("Reference Spectroscopy",
                     sidebarLayout(
@@ -347,7 +342,7 @@ navbarMenu("Temporal Analysis",
                                                max = as.numeric(substr(Sys.Date(),1,4)),
                                                step = 10, sep="",
                                                value = c(1700, as.numeric(substr(Sys.Date(),1,4)))
-                                               ),
+                                   ),
                                    
                                    selectInput(inputId = "rpysSep", 
                                                label = "Field separator character", 
@@ -357,18 +352,19 @@ navbarMenu("Temporal Analysis",
                                                selected = ";")
                                    
                       ),
-                    mainPanel(
-                      tabsetPanel(type = "tabs",
-                                  tabPanel("Graph", 
-                                           withSpinner(plotOutput(outputId = "rpysPlot"))),
-                                  tabPanel("RPY Table", 
-                                           shinycssloaders::withSpinner(DT::DTOutput(
-                                             outputId = "rpysTable"))),
-                                  tabPanel("Cited References Table", 
-                                           shinycssloaders::withSpinner(DT::DTOutput(
-                                             outputId = "crTable")))
-                      )
-                    )))),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Graph", 
+                                             withSpinner(plotOutput(outputId = "rpysPlot"))),
+                                    tabPanel("RPY Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "rpysTable"))),
+                                    tabPanel("Cited References Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "crTable")))
+                        )
+                      )))
+      ),
 
 ### CONCEPTUAL STRUCTURE ----
 navbarMenu("Conceptual Structure",
@@ -452,11 +448,11 @@ navbarMenu("Conceptual Structure",
                           label = "Edge size",
                           min = 0.1,
                           max = 20,
-                          value = 1), 
+                          value = 5), 
                         
                         numericInput("edges.min", 
                                      label=("Min edges"),
-                                     value = 1,
+                                     value = 2,
                                      step = 1),
                         
                         selectInput(inputId ="coc.curved",
@@ -572,10 +568,10 @@ navbarMenu("Intellectual Structure",
                         
                         selectInput(inputId = "citSep", 
                                   label = "Field separator character", 
-                                  choices = c(";" = ";", 
-                                              ".  " = ".  ",
-                                              "," = ","),
-                                  selected = ";"),
+                                  choices = c('";" (Semicolon)' = ";", 
+                                              '".   " (Dot and 3 or more spaces)' = ".   ",
+                                              '"," (Comma)' = ","),
+                                  selected = "';'"),
                         
                         selectInput("citlayout", 
                                     label = "Layout",
@@ -628,12 +624,12 @@ navbarMenu("Intellectual Structure",
                           label = "Edge size",
                           min = 0.1,
                           max = 20,
-                          value = 1), 
+                          value = 5), 
                         
                         numericInput("citedges.min", 
                                      label=("Min edges"),
                                      value = 1,
-                                     step = 1),
+                                     step = 2),
                         selectInput(inputId ="cocit.curved",
                                     label = "Curved edges",
                                     choices = c("Yes",
@@ -775,11 +771,11 @@ navbarMenu("Social Structure",
                                                label = "Edge size",
                                                min = 0.1,
                                                max = 20,
-                                               value = 1), 
+                                               value = 5), 
                                    
                                    numericInput("coledges.min", 
                                                 label=("Min edges"),
-                                                value = 1,
+                                                value = 2,
                                                 step = 1),
                                    selectInput(inputId ="soc.curved",
                                                label = "Curved edges",

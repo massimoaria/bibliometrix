@@ -14,7 +14,7 @@ server <- function(input, output, session) {
   values$log="working..."
   values$load="FALSE"
   values$field="NA"
-  values$citField=values$colField="NA"
+  values$citField=values$colField=values$citSep="NA"
   values$NetWords=values$NetRefs=values$ColNetRefs=matrix(NA,1,1)
   values$Title="Network"
   values$Histfield="NA"
@@ -745,9 +745,10 @@ server <- function(input, output, session) {
     n = input$citNodes
     label.n = input$citLabels
     
-    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField)){
+    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep)){
      
       values$citField=input$citField
+      values$citSep=input$citSep
       
       switch(input$citField,
              CR={

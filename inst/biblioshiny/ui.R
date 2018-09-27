@@ -8,17 +8,18 @@ if (!(require(shinycssloaders))){install.packages("shinycssloaders")}
 if (!(require(shinythemes))){install.packages("shinythemes")} 
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 if (!require(colourpicker)){install.packages("colourpicker")}
+if (!require(networkD3)){install.packages("networkD3")}
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 
 ui <-  navbarPage("biblioshiny: The shiny app for bibliometrix R-package",
-                  theme=shinythemes::shinytheme("slate"),
+                  theme=shinythemes::shinytheme("flatly"),
+                  
                   
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
                            fluidRow(
-                             
                              column(9,
                                     wellPanel(
                                h1("biblioshiny: The shiny app for bibliometrix",align = "center"),
@@ -385,6 +386,9 @@ navbarMenu("Descriptive Analysis",
 navbarMenu("Conceptual Structure",
            
            #### Co-occurrence Network ----
+           "  ",
+           "  ",
+           "Co-Word Analysis",
            tabPanel("Co-occurrence Network",
                     
                     sidebarLayout(
@@ -545,6 +549,9 @@ navbarMenu("Conceptual Structure",
            ), ## End of tabPanel ("Correspondence Analysis")
            
            ### Thematic Map ----
+           "  ",
+           "  ",
+           "Thematic Analysis",
            tabPanel("Thematic Map",
                     sidebarLayout(
                       sidebarPanel(width=3,
@@ -558,6 +565,27 @@ navbarMenu("Conceptual Structure",
                     mainPanel("Thematic Map",
                               shinycssloaders::withSpinner(plotOutput(outputId = "TMPlot"))
                               )
+                    )
+                    
+           ), ## End of tabPanel ("Thematic Map")
+           
+           ### Thematic Evolution ----
+           tabPanel("Thematic Evolution",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   
+                                   helpText("Parameters: "),
+                                   sliderInput("nTE", label="Number of Words",value=250,min=50,max=500,step=10),
+                                   sliderInput("fTE", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
+                                   numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
+                                   "Please, write the cutting points (in year) for your collection",
+                                   uiOutput("sliders"),
+                                   actionButton("applyTE", "Apply!")
+                                   
+                      ),
+                      mainPanel("Thematic Evolution",
+                                shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                )
                     )
                     
            ) ## End of tabPanel ("Thematic Map")

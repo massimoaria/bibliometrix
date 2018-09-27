@@ -94,7 +94,7 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1)))),  
                   class = 'cell-border compact stripe') %>%
-                  formatStyle(names(MData),  backgroundColor = 'black',textAlign = 'center',fontSize = '70%') 
+                  formatStyle(names(MData),  backgroundColor = 'white',textAlign = 'center',fontSize = '70%') 
     
     
     })
@@ -171,7 +171,7 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Mdisp))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(Mdisp),  backgroundColor = 'black',textAlign = 'center', fontSize = '70%')
+      formatStyle(names(Mdisp),  backgroundColor = 'white',textAlign = 'center', fontSize = '70%')
   })
   
   ### Descriptive Analysis
@@ -185,7 +185,7 @@ server <- function(input, output, session) {
     switch(input$summary_type,
            "tab1"={
              #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
-             TAB=data.frame(S$MainInformation)
+             TAB=data.frame(S$MainInformationDF)
              #cat(S$MainInformation)
              },
            "tab2"={
@@ -236,7 +236,7 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'black',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
   })
     #
 
@@ -445,7 +445,7 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$Words))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$Words),  backgroundColor = 'black',textAlign = 'center')
+      formatStyle(names(values$Words),  backgroundColor = 'white',textAlign = 'center')
   })
   
   output$kwGrowthPlot <- renderPlot({
@@ -527,7 +527,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(kwData))-1))))) %>%
-      formatStyle(names(kwData),  backgroundColor = 'gray') 
+      formatStyle(names(kwData),  backgroundColor = 'white') 
     #return(Data)
     
   })
@@ -598,7 +598,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(soData))-1))))) %>%
-      formatStyle(names(soData),  backgroundColor = 'gray') 
+      formatStyle(names(soData),  backgroundColor = 'white') 
     #return(Data)
     
   })
@@ -619,7 +619,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(rpysData))-1))))) %>%
-      formatStyle(names(rpysData),  backgroundColor = 'gray') 
+      formatStyle(names(rpysData),  backgroundColor = 'white') 
     #return(Data)
     
   })
@@ -633,7 +633,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(crData))-1))))) %>%
-      formatStyle(names(crData),  backgroundColor = 'gray') 
+      formatStyle(names(crData),  backgroundColor = 'white') 
     #return(Data)
     
   })
@@ -699,7 +699,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cocData))-1))))) %>%
-      formatStyle(names(cocData),  backgroundColor = 'gray') 
+      formatStyle(names(cocData),  backgroundColor = 'white') 
     #return(Data)
     
   })
@@ -727,7 +727,7 @@ server <- function(input, output, session) {
   
   output$CSPlot2 <- renderPlot({
     
-    if (values$CS[[1]]!="NA"){
+    if (values$CS[[1]][1]!="NA"){
       plot(values$CS$graph_documents_Contrib)
     }else{
       emptyPlot("Selected field is not included in your data collection")
@@ -737,7 +737,7 @@ server <- function(input, output, session) {
   
   output$CSPlot3 <- renderPlot({
     
-    if (values$CS[[1]]!="NA"){
+    if (values$CS[[1]][1]!="NA"){
       plot(values$CS$graph_documents_TC)
     }else{
       emptyPlot("Selected field is not included in your data collection")
@@ -757,6 +757,32 @@ server <- function(input, output, session) {
     plot(Map$map)
     
   }, height = 650, width = 800)
+  
+  output$sliders <- renderUI({
+    numSlices <- as.integer(input$numSlices)
+    lapply(1:numSlices, function(i) {
+      # sliderInput(inputId = paste0("Slice", i), label = paste("Slice", i),
+      #             min=1990,max=2018,value=1990)
+      numericInput(inputId = paste0("Slice", i), label = paste("Slice", i),value=median(values$M$PY),min=min(values$M$PY)+1,max=max(values$M$PY)-1, step=1)
+    })
+  })
+  
+  output$TEPlot <- networkD3::renderSankeyNetwork({
+    
+    input$applyTE
+    
+    values$yearSlices=isolate(as.numeric())
+    isolate(for (i in 1:as.integer(input$numSlices)){
+      if (length(input[[paste0("Slice", i)]])>0){values$yearSlices=c(values$yearSlices,input[[paste0("Slice", i)]])}
+    })
+    
+    if (length(values$yearSlices)>0){
+    values$nexus <- isolate(thematicEvolution(values$M,values$yearSlices,weighted=FALSE,n=input$nTE,minFreq=input$fTE))
+    isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges))
+    }
+      
+    
+  })
   
   output$cocitPlot <- renderPlot({
     
@@ -812,7 +838,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cocitData))-1))))) %>%
-      formatStyle(names(cocitData),  backgroundColor = 'gray') 
+      formatStyle(names(cocitData),  backgroundColor = 'white') 
     #return(Data)
     
   })
@@ -848,7 +874,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Data))-1))))) %>%
-      formatStyle(names(Data),  backgroundColor = 'gray') %>%
+      formatStyle(names(Data),  backgroundColor = 'white') %>%
       formatStyle(
         'GCS',
         background = styleColorBar(Data$GCS, 'steelblue'),
@@ -924,7 +950,7 @@ server <- function(input, output, session) {
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
-      formatStyle(names(colData),  backgroundColor = 'gray') 
+      formatStyle(names(colData),  backgroundColor = 'white') 
     #return(Data)
     
   })

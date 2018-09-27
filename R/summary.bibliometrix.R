@@ -70,12 +70,33 @@ summary.bibliometrix<-function(object, ...){
   CollIndex=format(object$AuMultiAuthoredArt/sum(object$nAUperPaper>1),digits=3)  # Collaboration Index
   MainInfo[length(MainInfo)+1]=paste("Collaboration Index                  ",CollIndex,"\n")
   MainInfo[length(MainInfo)+1]=paste("\n")
+  
+  ## DF table for biblioshiny
+  Description=c("Documents","Sources (Journals, Books, etc.)",
+                "Keywords Plus (ID)","Author's Keywords (DE)","Period","Average citations per documents",
+                "Authors","Author Appearances","Authors of single-authored documents",
+                "Authors of multi-authored documents", "Single-authored documents","Documents per Author",
+                "Authors per Document", "Co-Authors per Documents","Collaboration Index")
+  Results=c(object$Articles,length(object$Sources),length(object$ID), length(object$DE),
+            paste(min(object$Years,na.rm=T),"-",max(object$Years,na.rm=T)),TCm,object$nAuthors,
+            object$Appearances, object$nAuthors-object$AuMultiAuthoredArt, object$AuMultiAuthoredArt,
+            format(sum(object$nAUperPaper==1),digits=0), format(object$Articles/object$nAuthors,digits=3),
+            format(object$nAuthors/object$Articles,digits=3),format(mean(object$nAUperPaper),digits=3), CollIndex)
+  
+  MainInfoDF=data.frame("Description"=Description,"Results"=Results, stringsAsFactors = FALSE)
+  ## End DF table
+  
+  
   if (!is.na(object$Documents[1])){
-  MainInfo[length(MainInfo)+1]=paste("Document types                    ","\n")
-  for (i in 1:length(object$Documents)){
-  MainInfo[length(MainInfo)+1]=paste(names(object$Documents)[i],as.numeric(object$Documents)[i],"\n")  
-  }
-  MainInfo[length(MainInfo)+1]=paste("\n")}
+    MainInfo[length(MainInfo)+1]=paste("Document types                    ","\n")
+    MainInfoDF[dim(MainInfoDF)[1]+1,1:2]=c("","")
+    MainInfoDF[dim(MainInfoDF)[1]+1,1:2]=c("Document types","")
+    for (i in 1:length(object$Documents)){
+      MainInfo[length(MainInfo)+1]=paste(names(object$Documents)[i],as.numeric(object$Documents)[i],"\n")  
+      MainInfoDF[dim(MainInfoDF)[1]+1,1:2]=c(trim(names(object$Documents)[i]),as.numeric(object$Documents)[i])
+    }
+    MainInfo[length(MainInfo)+1]=paste("\n")}
+  
   if (isTRUE(verbose)){cat(MainInfo)}
 
   if (pause==TRUE & isTRUE(verbose)){
@@ -199,7 +220,7 @@ summary.bibliometrix<-function(object, ...){
   if (isTRUE(verbose)){print(AAA,row.names=TRUE);cat("\n")}
   }
 
-  summaryresults=list(MainInformation=MainInfo,AnnualProduction=Y,AnnualGrowthRate=GR,MostProdAuthors=A,MostCitedPapers=MostCitedPapers,MostProdCountries=Co,TCperCountries=AC,MostRelSources=AA,MostRelKeywords=AAA)
+  summaryresults=list(MainInformation=MainInfo,MainInformationDF=MainInfoDF, AnnualProduction=Y,AnnualGrowthRate=GR,MostProdAuthors=A,MostCitedPapers=MostCitedPapers,MostProdCountries=Co,TCperCountries=AC,MostRelSources=AA,MostRelKeywords=AAA)
 
   invisible(summaryresults)
   }

@@ -2,19 +2,18 @@
 % Please edit documentation in R/thematicEvolution.R
 \name{thematicEvolution}
 \alias{thematicEvolution}
-\title{Create an Evolution Thematic Map}
+\title{Perform a Thematic Evolution Analysis}
 \usage{
-thematicEvolution(..., weighted = FALSE, labelsize = 0.5, size = 1)
+thematicEvolution(M, years, n = 250, minFreq = 2)
 }
 \arguments{
-\item{...}{is a sequence of names of thematic maps created by \code{\link{thematicMap}} function.}
+\item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.}
 
-\item{weighted}{is a logical. If FALSE, a thematic nexus is measures by the classical inclusion index (calculated using the 
-number of keywords). If TRUE, the inclusion index is calculated considering the occurrences of keywords.}
+\item{years}{is a numeric vector of two or more unique cut points.}
 
-\item{labelsize}{is numerical}
+\item{n}{is numerical. It indicates the number of words to use in the network analysis}
 
-\item{size}{is numerical}
+\item{minFreq}{is numerical. It indicates the min frequency of words included in to a cluster.}
 }
 \value{
 a list containing:
@@ -23,7 +22,7 @@ a list containing:
 \code{incMatrix}\tab   \tab Some useful statistics about the thematic nexus}
 }
 \description{
-It creates an Evolution thematic map based on co-word network analysis and clustering.
+It performs a Thematic Evolution Analysis based on co-word network analysis and clustering.
 The methodology is inspired by the proposal of Cobo et al. (2011).
 }
 \details{
@@ -33,30 +32,8 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 
 data(scientometrics)
 years=c(2000)
-list_df=timeslice(scientometrics, breaks = years)
-M1=list_df[[1]]
-M2=list_df[[2]]
-NetMatrix1 <- biblioNetwork(M1, analysis = "co-occurrences", 
-              network = "keywords", sep = ";")
-S1 <- normalizeSimilarity(NetMatrix1, type = "association")
-net1 <- networkPlot(NetMatrix1, normalize = "association",n = 50, 
-     Title = "co-occurrence network",type="fruchterman",
-     labelsize = 0.7, halo = FALSE, cluster = "walktrap",remove.isolates=FALSE,
-     remove.multiple=FALSE, noloops=TRUE, weighted=TRUE)
-res1 <- thematicMap(net1, NetMatrix1, S1, minfreq = 1)
-#plot(res1$map)
 
-NetMatrix2 <- biblioNetwork(M2, analysis = "co-occurrences", 
-              network = "keywords", sep = ";")
-S2 <- normalizeSimilarity(NetMatrix2, type = "association")
-net2 <- networkPlot(NetMatrix2, normalize = "association",n = 50, 
-     Title = "co-occurrence network",type="fruchterman",
-     labelsize = 0.7, halo = FALSE, cluster = "walktrap",remove.isolates=FALSE,
-     remove.multiple=FALSE, noloops=TRUE, weighted=TRUE)
-res2 <- thematicMap(net2, NetMatrix2, S2, minfreq = 1)
-#plot(res2$map)
-
-nexus <- thematicEvolution(res1,res2,weighted=FALSE)
+nexus <- thematicEvolution(scientometrics,years,n=100,minFreq=2)
 
 }
 \seealso{

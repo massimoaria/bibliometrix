@@ -8,7 +8,7 @@ if (!(require(shinycssloaders))){install.packages("shinycssloaders")}
 if (!(require(shinythemes))){install.packages("shinythemes")} 
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 if (!require(colourpicker)){install.packages("colourpicker")}
-if (!require(networkD3)){install.packages("networkD3")}
+#if (!require(networkD3)){install.packages("networkD3")}
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)

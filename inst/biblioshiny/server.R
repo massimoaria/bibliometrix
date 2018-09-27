@@ -777,7 +777,7 @@ server <- function(input, output, session) {
     })
     
     if (length(values$yearSlices)>0){
-    values$nexus <- isolate(thematicEvolution(values$M,values$yearSlices,weighted=FALSE,n=input$nTE,minFreq=input$fTE))
+    values$nexus <- isolate(thematicEvolution(values$M,values$yearSlices,n=input$nTE,minFreq=input$fTE))
     isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges))
     }
       

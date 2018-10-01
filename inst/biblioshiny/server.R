@@ -88,13 +88,15 @@ server <- function(input, output, session) {
     MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
     nome=c("DOI",names(MData)[-length(names(MData))])
     MData=MData[nome]
-    DT::datatable(MData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+    
+    DT::datatable(MData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),  
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1)))),  
-                  class = 'cell-border compact stripe') %>%
-                  formatStyle(names(MData),  backgroundColor = 'white',textAlign = 'center',fontSize = '70%') 
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1))))  
+                  ,class = 'cell-border compact stripe')  %>% 
+                  
+                  formatStyle(names(MData),  backgroundColor = 'white', textAlign = 'center',fontSize = '70%') 
     
     
     })
@@ -627,7 +629,7 @@ server <- function(input, output, session) {
   output$crTable <- DT::renderDT({
     
     crData=values$res$CR
-    names(crData)=c("Year", "Reference")
+    names(crData)=c("Year", "Reference", "Citation per Year")
     DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
@@ -689,6 +691,15 @@ server <- function(input, output, session) {
     
     
   }, height = 750, width = 900)
+  
+  output$network.coc <- downloadHandler(
+    filename = "Co_occurrence_network.net",
+    content <- function(file) {
+      igraph::write.graph(values$cocnet$graph_pajek,file=file, format="pajek")
+      #rio::export(values$M, file=file)
+    },
+    contentType = "net"
+  )
   
   output$cocTable <- DT::renderDT({
     

@@ -132,6 +132,11 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     l <- switchLayout(bsk.network,type,vos.path)
     }
   
+  ### graph to write in pajek format ###
+  bsk.save=bsk.network
+  V(bsk.save)$id=V(bsk.save)$name
+  
+  ### 
   
   # Clustering
   if (type!="vosviewer"){
@@ -155,7 +160,9 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     
     
     ## Edge size
-    E(bsk.network)$num=count_multiple(bsk.network, eids = E(bsk.network))
+    E(bsk.network)$num=E(bsk.save)$num=count_multiple(bsk.network, eids = E(bsk.network))
+    if (is.null(weighted)){E(bsk.save)$weight=E(bsk.save)$num}
+    
     if (!is.null(weighted)){
       E(bsk.network)$width <- (E(bsk.network)$weight + min(E(bsk.network)$weight))/max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *edgesize
     } else{
@@ -192,7 +199,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   } else {cluster_res=NA}
   
   
-  net=list(graph=bsk.network, cluster_obj=net_groups, cluster_res=cluster_res)
+  net=list(graph=bsk.network, graph_pajek=bsk.save, cluster_obj=net_groups, cluster_res=cluster_res)
   
   return(net)}
 

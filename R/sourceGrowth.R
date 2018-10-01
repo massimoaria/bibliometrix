@@ -25,8 +25,11 @@
 sourceGrowth<-function(M, top=5, cdf=TRUE){
   PY=min(M$PY,na.rm = T):max(M$PY,na.rm = T)
   WSO=cocMatrix(M,Field="SO")
-  if(is.null(dim(WSO))){WSO=cbind(WSO)}
-  if (top>dim(WSO)[2]){n=dim(WSO)[2]}
+  if(is.null(dim(WSO))){
+    WSO=cbind(WSO)
+    colnames(WSO)=M$SO[1]
+  }
+  if (top>dim(WSO)[2]){top=dim(WSO)[2]}
   
   M$PY=as.character(M$PY)
   WPY=cocMatrix(M,Field="PY")

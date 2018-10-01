@@ -17,11 +17,15 @@ ui <-  navbarPage("biblioshiny: The shiny app for bibliometrix R-package",
                   theme=shinythemes::shinytheme("flatly"),
                   
                   
+                  
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
                            fluidRow(
                              column(9,
                                     wellPanel(
+                                      
+                                      #shinythemes::themeSelector(),
+                                      
                                h1("biblioshiny: The shiny app for bibliometrix",align = "center"),
                                br(),
                                h4(em(strong("bibliometrix: An R-tool for comprehensive science mapping analysis")),align = "center"),
@@ -114,7 +118,7 @@ tabPanel(
                                   }
                                   "))),
       tags$style(HTML(".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-                  color: #ffffff !important;
+                  color: #000000 !important;
                   }")),
       #shinycssloaders::withSpinner(tableOutput("contents"))
       shinycssloaders::withSpinner(DT::DTOutput("contents"))
@@ -394,16 +398,20 @@ navbarMenu("Conceptual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                         
+                                   selectInput('save_cocnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
+                                   conditionalPanel(condition = "input.save_cocnet == 'pajek'",
+                                                    downloadButton("network.coc", "Save")),
                         
-                        helpText("Parameters: "),
+                                  helpText("Parameters: "),
                         
-                        selectInput("field", 
-                                    label = "Field",
-                                    choices = c("Keywords Plus" = "ID", 
+                                  selectInput("field", 
+                                      label = "Field",
+                                      choices = c("Keywords Plus" = "ID", 
                                                 "Author's Keywords" = "DE",
                                                 "Titles" = "TI",
                                                 "Abstracts" = "AB"),
-                                    selected = "ID"),
+                                      selected = "ID"),
                         
                         selectInput("layout", 
                                     label = "Layout",
@@ -480,6 +488,7 @@ navbarMenu("Conceptual Structure",
                                                 "No"),
                                     selected = "No")
                         
+                      
                       ),
                     
                     mainPanel(

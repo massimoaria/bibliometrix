@@ -33,6 +33,7 @@
 rpys <- function(M, sep=";", timespan=NULL, graph=T){
 
   M$CR<-stringr::str_replace_all(as.character(M$CR),"DOI;","DOI ")
+  
   Fi<-strsplit(M[,"CR"],sep)
   Fi<-lapply(Fi,trim.leading)
   Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])
@@ -67,6 +68,7 @@ ref=ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 
 CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
+CR=group_by(CR, CR$Year, CR$Reference) %>% summarise(Freq = length(CR$Reference))
 Years=Years[!(Years %in% "")]
 
 RPYS=table(Years)

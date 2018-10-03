@@ -59,16 +59,16 @@ rpys <- function(M, sep=";", timespan=NULL, graph=T){
     }))
   }
   
-ref=ref[!is.na(ref)] 
+
 Years=yearExtract(ref,db=M$DB[1])
 Years=Years[!is.na(ref)]
-
+ref=ref[!is.na(ref)] 
 
 ref=ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 
 CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
-CR=group_by(CR, CR$Year, CR$Reference) %>% summarise(Freq = length(CR$Reference))
+CR=dplyr::group_by(CR, Year, Reference) %>% dplyr::summarise(Freq = length(Reference))
 Years=Years[!(Years %in% "")]
 
 RPYS=table(Years)

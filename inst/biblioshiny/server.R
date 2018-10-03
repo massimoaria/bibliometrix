@@ -408,27 +408,10 @@ server <- function(input, output, session) {
   
   output$wordcloud <- wordcloud2::renderWordcloud2({
     
-    switch(input$summaryTerms,
-           ID={values$v=tableTag(values$M,"ID")},
-           DE={values$v=tableTag(values$M,"DE")},
-           TI={
-             if (!("TI_TM" %in% names(values$M))){
-               values$v=tableTag(values$M,"TI")
-             }},
-           AB={if (!("AB_TM" %in% names(values$M))){
-             values$v=tableTag(values$M,"AB")
-           }}
-    )
-    
-    #v=tableTag(values$M,"ID")
-    n=min(c(input$n_words,length(values$v)))
-    values$Words=data.frame(Terms=names(values$v)[1:n], Frequency=(as.numeric(values$v)[1:n]))
-    W=values$Words
-    switch(input$measure,
-           sqrt={W$Frequency=sqrt(W$Frequency)},
-           log={W$Frequency=log(W$Frequency+1)},
-           log10={W$Frequency=log10(W$Frequency+1)}
-           )
+    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure)
+   
+    W=resW$W
+    values$Words=resW$Words
     
     wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
                fontFamily = input$font, fontWeight = 'normal',
@@ -629,7 +612,8 @@ server <- function(input, output, session) {
   output$crTable <- DT::renderDT({
     
     crData=values$res$CR
-    names(crData)=c("Year", "Reference", "Citation per Year")
+    crData=crData[order(-as.numeric(crData$Year),-crData$Freq),]
+    names(crData)=c("Year", "Reference", "Local Citations")
     DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
@@ -973,6 +957,33 @@ server <- function(input, output, session) {
       theme_void() + theme(legend.position="none")+
       annotate("text", x = 4, y = 25, label = errortext)
     plot(g)
+  }
+  
+  wordlist <- function(M, Field, n, measure){
+    switch(Field,
+           ID={v=tableTag(values$M,"ID")},
+           DE={v=tableTag(values$M,"DE")},
+           TI={
+             if (!("TI_TM" %in% names(M))){
+               v=tableTag(M,"TI")
+             }},
+           AB={if (!("AB_TM" %in% names(M))){
+             v=tableTag(M,"AB")
+           }}
+    )
+    
+    #v=tableTag(values$M,"ID")
+    n=min(c(n,length(v)))
+    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]))
+    W=Words
+    switch(measure,
+           sqrt={W$Frequency=sqrt(W$Frequency)},
+           log={W$Frequency=log(W$Frequency+1)},
+           log10={W$Frequency=log10(W$Frequency+1)}
+    )
+    
+    results=list(v=v,W=W, Words=Words)
+    return(results)
   }
   
 } ## End of Server

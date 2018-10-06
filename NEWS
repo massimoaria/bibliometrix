@@ -2,6 +2,9 @@ bibliometrix v2.0.1 (Release date: 2018-10-06)
 ==============
 
 New functionality:
+* added Thematic Evolution to biblioshiny()
+* added the function plotThematicEvolution() to draw thematic evolution
+* added Thematic Map to biblioshiny()
 * added TreeMap plot to biblioshiny()
 * added Word Dynamic Analysis biblioshiny()
 * added Source Dynamic Analysis to biblioshiny()

@@ -8,6 +8,7 @@ if (!(require(shinycssloaders))){install.packages("shinycssloaders")}
 if (!(require(shinythemes))){install.packages("shinythemes")} 
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 if (!require(colourpicker)){install.packages("colourpicker")}
+if (!require(treemap)){install.packages("treemap")}
 #if (!require(networkD3)){install.packages("networkD3")}
 
 # Main NavBar ----
@@ -279,6 +280,50 @@ navbarMenu("Descriptive Analysis",
                
                     )
            )),
+           tabPanel("TreeMap",
+                    
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   selectInput("treeTerms", "Field",
+                                               choices = c("Keywords Plus" = "ID",
+                                                           "Author's keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   hr(),
+                                   sliderInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
+                                   selectInput("treemeasure", "Word occurrence measure",
+                                               choices = c("Frequency" = "freq",
+                                                           "Square root" = "sqrt",
+                                                           "Log" = "log",
+                                                           "Log10" = "log10"),
+                                               selected = "freq"),
+                                  selectInput("treeCol", "Text colors",
+                                               choices = c("Accent" = "Accent",
+                                                           "Dark" = "Dark2",
+                                                           "Paired"= "Paired",
+                                                           "Pastel1"="Pastel1",
+                                                           "Pastel2"="Pastel2",
+                                                           "Set1"="Set1",
+                                                           "Set2"="Set2",
+                                                           "Set3"="Set3"),
+                                               selected = "Pastel2"),
+                                   sliderInput("treeFont", label = "Font size", min=6,max=20,step=1,value=10)
+                      ),
+                      
+                      # Show Word Cloud
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput("treemap"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("treeTable"))
+                                    ))
+                        
+                      )
+                    )),
            "  ",
            "  ",
            "Temporal Analysis",
@@ -608,6 +653,9 @@ navbarMenu("Intellectual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   selectInput('save_cocitnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
+                                   conditionalPanel(condition = "input.save_cocitnet == 'pajek'",
+                                                    downloadButton("network.cocit", "Save")),
                         
                         helpText("Parameters: "),
                         
@@ -752,7 +800,10 @@ navbarMenu("Social Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
-                                   
+                                   selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
+                                   conditionalPanel(condition = "input.save_colnet == 'pajek'",
+                                                    downloadButton("network.col", "Save")),
+                                                
                                    helpText("Parameters: "),
                                    
                                    selectInput("colField", 

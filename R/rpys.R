@@ -68,7 +68,9 @@ ref=ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 
 CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
+
 CR=dplyr::group_by(CR, Year, Reference) %>% dplyr::summarise(Freq = length(Reference))
+
 Years=Years[!(Years %in% "")]
 
 RPYS=table(Years)

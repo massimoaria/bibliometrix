@@ -422,6 +422,26 @@ server <- function(input, output, session) {
     
     })
   
+  output$treemap <- renderPlot({
+    
+    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure=input$treemeasure)
+    
+    W=resW$W
+    values$Words=resW$Words
+    
+    treemap::treemap(W, #Your data frame object
+            index=c("Terms"),  #A list of your categorical variables
+            vSize = "Frequency",  #This is your quantitative variable
+            type="index", #Type sets the organization and color scheme of your treemap
+            palette = input$treeCol,  #Select your color palette from the RColorBrewer presets or make your own.
+            title="Word TreeMap", #Customize your title
+            fontsize.title = 14, #Change the font size of the title
+            fontsize.labels = input$treeFont
+    )
+    
+    
+  })
+  
   output$wordTable <- DT::renderDT({
 
     DT::datatable(values$Words, rownames = FALSE,
@@ -432,6 +452,17 @@ server <- function(input, output, session) {
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$Words),  backgroundColor = 'white',textAlign = 'center')
   })
+  
+  output$treeTable <- DT::renderDT({
+    
+    DT::datatable(values$Words, rownames = FALSE,
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$Words))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(values$Words),  backgroundColor = 'white',textAlign = 'center')
+  },height = 600, width = 900)
   
   output$kwGrowthPlot <- renderPlot({
     
@@ -614,7 +645,7 @@ server <- function(input, output, session) {
     crData=values$res$CR
     crData=crData[order(-as.numeric(crData$Year),-crData$Freq),]
     names(crData)=c("Year", "Reference", "Local Citations")
-    DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+    DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
@@ -689,7 +720,7 @@ server <- function(input, output, session) {
     
     cocData=values$cocnet$cluster_res
     names(cocData)=c("Term", "Cluster", "Btw Centrality")
-    DT::datatable(cocData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+    DT::datatable(cocData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
@@ -824,11 +855,20 @@ server <- function(input, output, session) {
     
   }, height = 750, width = 900)
   
+  output$network.cocit <- downloadHandler(
+    filename = "Co_citation_network.net",
+    content <- function(file) {
+      igraph::write.graph(values$cocitnet$graph_pajek,file=file, format="pajek")
+      #rio::export(values$M, file=file)
+    },
+    contentType = "net"
+  )
+  
   output$cocitTable <- DT::renderDT({
     
     cocitData=values$cocitnet$cluster_res
     names(cocitData)=c("Node", "Cluster", "Btw Centrality")
-    DT::datatable(cocitData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+    DT::datatable(cocitData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
@@ -936,11 +976,20 @@ server <- function(input, output, session) {
     
   }, height = 750, width = 900)
   
+  output$network.col <- downloadHandler(
+    filename = "Collaboration_network.net",
+    content <- function(file) {
+      igraph::write.graph(values$colnet$graph_pajek,file=file, format="pajek")
+      #rio::export(values$M, file=file)
+    },
+    contentType = "net"
+  )
+  
   output$colTable <- DT::renderDT({
     
     colData=values$colnet$cluster_res
     names(colData)=c("Node", "Cluster", "Btw Centrality")
-    DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+    DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),

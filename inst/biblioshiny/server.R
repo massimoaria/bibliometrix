@@ -533,7 +533,7 @@ server <- function(input, output, session) {
     DF2=subset(DFsmooth, x == maximum)
     g=g+
       ggrepel::geom_text_repel(data = DF2, aes(label = DF2$group, colour = DF2$group, x =DF2$x, y = DF2$y), hjust = -.1)
-    plot(g)
+    suppressWarnings(plot(g))
     
   },height = 600, width = 900)
   
@@ -597,7 +597,7 @@ server <- function(input, output, session) {
     DF2=subset(DFsmooth, x == maximum)
     g=g+
       ggrepel::geom_text_repel(data = DF2, aes(label = DF2$group, colour = DF2$group, x =DF2$x, y = DF2$y), hjust = -.1)
-    plot(g)
+    suppressWarnings(plot(g))
     
     
     # maximum=sort(unique(values$SODF$Year),decreasing=TRUE)[2]

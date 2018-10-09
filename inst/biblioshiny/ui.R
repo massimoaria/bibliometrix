@@ -345,7 +345,7 @@ navbarMenu("Descriptive Analysis",
                                    selectInput("se", "Confidence Interval",
                                                choices = c("Yes" = "Yes",
                                                            "No" = "No"),
-                                               selected = "Yes"),
+                                               selected = "No"),
                                    hr(),
                                    sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))
                                    
@@ -377,7 +377,7 @@ navbarMenu("Descriptive Analysis",
                                    selectInput("SOse", "Confidence Interval",
                                                choices = c("Yes" = "Yes",
                                                            "No" = "No"),
-                                               selected = "Yes"),
+                                               selected = "No"),
                                    hr(),
                                    sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5)
                                    

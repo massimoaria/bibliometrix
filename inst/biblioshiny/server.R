@@ -511,6 +511,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
+      ylim(0, NA) +
       scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"
@@ -574,6 +575,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = laby
            , title = "Source Growth") +
+      ylim(0, NA) +
       scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"

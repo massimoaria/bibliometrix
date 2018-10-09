@@ -444,9 +444,8 @@ navbarMenu("Conceptual Structure",
                       
                       sidebarPanel(width=3,
                          
-                                   selectInput('save_cocnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
-                                   conditionalPanel(condition = "input.save_cocnet == 'pajek'",
-                                                    downloadButton("network.coc", "Save")),
+                                   actionButton("applyCoc", "Apply!"),
+                                   downloadButton("network.coc", "Save the Network"),
                         
                                   helpText("Parameters: "),
                         
@@ -489,7 +488,7 @@ navbarMenu("Conceptual Structure",
                                     label = "Number of labels",
                                     min = 5,
                                     max = 100,
-                                    value = 30),
+                                    value = 100),
                         
                         selectInput(inputId ="label.cex",
                                     label = "Label cex",
@@ -555,6 +554,8 @@ navbarMenu("Conceptual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   actionButton("applyCA", "Apply!"),
+                                   
                         
                         helpText("Parameters: "),
                         
@@ -610,6 +611,7 @@ navbarMenu("Conceptual Structure",
                     sidebarLayout(
                       sidebarPanel(width=3,
                         
+                                   actionButton("applyTM", "Apply!"),
                         helpText("Parameters: "),
                         
                         numericInput("TMn", 
@@ -653,9 +655,11 @@ navbarMenu("Intellectual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
-                                   selectInput('save_cocitnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
-                                   conditionalPanel(condition = "input.save_cocitnet == 'pajek'",
-                                                    downloadButton("network.cocit", "Save")),
+                                   actionButton("applyCocit", "Apply!"),
+                                   #selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
+                                   #conditionalPanel(condition = "input.save_colnet == 'pajek'",
+                                   downloadButton("network.cocit", "Save the Network"),
+                                   
                         
                         helpText("Parameters: "),
                         
@@ -694,7 +698,7 @@ navbarMenu("Intellectual Structure",
                                     label = "Number of labels",
                                     min = 5,
                                     max = 100,
-                                    value = 20),
+                                    value = 100),
                         
                         selectInput(inputId ="citlabel.cex",
                                     label = "Label cex",
@@ -740,9 +744,11 @@ navbarMenu("Intellectual Structure",
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
                                              shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))),
+                                             
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
-                                               outputId = "cocitTable")))
+                                                outputId = "cocitTable")))
+                                            
                         )
                         #shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))
                       )
@@ -755,6 +761,10 @@ navbarMenu("Intellectual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   actionButton("applyHist", "Apply!"),
+                                   #selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
+                                   #conditionalPanel(condition = "input.save_colnet == 'pajek'",
+                                   
                                    
                                    helpText("Parameters: "),
                                    
@@ -800,9 +810,8 @@ navbarMenu("Social Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
-                                   selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
-                                   conditionalPanel(condition = "input.save_colnet == 'pajek'",
-                                                    downloadButton("network.col", "Save")),
+                                   actionButton("applyCol", "Apply!"),
+                                   downloadButton("network.col", "Save the Network"),
                                                 
                                    helpText("Parameters: "),
                                    
@@ -844,7 +853,7 @@ navbarMenu("Social Structure",
                                                label = "Number of labels",
                                                min = 5,
                                                max = 100,
-                                               value = 20),
+                                               value = 100),
                                    
                                    selectInput(inputId ="collabel.cex",
                                                label = "Label cex",

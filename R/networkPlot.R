@@ -220,7 +220,7 @@ delete.isolates <- function(graph, mode = 'all') {
 ### clusteringNetwork
 
 clusteringNetwork <- function(bsk.network,cluster){
-  colorlist= c(brewer.pal(12, 'Paired'),brewer.pal(12, 'Set3'), brewer.pal(8, 'Set2'),brewer.pal(8, 'Set1'))
+  colorlist= c(brewer.pal(9, 'Set1'), brewer.pal(8, 'Set2'),brewer.pal(12, 'Set3'),brewer.pal(12, 'Paired'))
   
   switch(cluster,
          none={
@@ -249,9 +249,9 @@ clusteringNetwork <- function(bsk.network,cluster){
   
   
   E(bsk.network)$color <- apply(El, 1, function(x){
-                        #print(x)
+                        colorlist= c(brewer.pal(9, 'Set1'), brewer.pal(8, 'Set2'),brewer.pal(12, 'Set3'),brewer.pal(12, 'Paired'))
                         if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]){
-                          C=brewer.pal(12, 'Paired')[V(bsk.network)$community[x[1]]]
+                          C=colorlist[V(bsk.network)$community[x[1]]]
                         }else{C='#E8E8E8'}
                         return(C)
                         })

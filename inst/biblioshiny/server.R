@@ -22,6 +22,8 @@ server <- function(input, output, session) {
   values$kk=0
   values$M=data.frame(PY=0)
   
+
+  
   
   
   
@@ -659,51 +661,9 @@ server <- function(input, output, session) {
   output$cocPlot <- renderPlot({
     
   ## Keyword co-occurrences network
-    
-    n = input$Nodes
-    label.n = input$Labels
-    if ((input$field %in% names(values$M))){
-    
-    if ((dim(values$NetWords)[1])==1 | !(input$field==values$field)){
-      
-      values$field=input$field
-      
-      switch(input$field,
-             ID={
-               values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
-               values$Title= "Keywords Plus Network"
-               },
-             DE={
-               values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
-               values$Title= "Authors' Keywords network"
-               },
-             TI={
-               if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
-               values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
-               values$Title= "Title Words network"
-               },
-             AB={
-               if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
-               values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
-               values$Title= "Abstract Words network"
-               })
-      
-    }
-    
-    if (n>dim(values$NetWords)[1]){n=dim(values$NetWords)[1]}
-    if (label.n>n){label.n=n}
-    if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
-    if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-    if (input$size.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
-    if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
-    
-    values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
-                    size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
-                    label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved)
-    }else{
-      emptyPlot("Selected field is not included in your data collection")
-    }
-    
+    input$applyCoc
+   
+    values <- isolate(cocNetwork(input,values))
     
   }, height = 750, width = 900)
   
@@ -731,24 +691,12 @@ server <- function(input, output, session) {
   })
   
   output$CSPlot1 <- renderPlot({
-    if ((input$CSfield %in% names(values$M))){
-     
-      tab=tableTag(values$M,input$CSfield)
-      if (length(tab>=2)){
-        
-        minDegree=as.numeric(tab[input$CSn])
-        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
-        plot(values$CS$graph_terms)
-      
-      }else{emptyPlot("Selected field is not included in your data collection")
-        values$CS=list("NA")}
     
-      }else{
-        emptyPlot("Selected field is not included in your data collection")
-        values$CS=list("NA")
-      
-    }
-  
+    input$applyCA
+    
+    values <- isolate(CAmap(input,values))
+    
+
   }, height = 650, width = 800)
   
   output$CSPlot2 <- renderPlot({
@@ -774,14 +722,11 @@ server <- function(input, output, session) {
   
   output$TMPlot <- renderPlot({
     
-    NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences",network = "keywords", sep = ";")
-    S <- normalizeSimilarity(NetMatrix, type = "association")
-    capture.output(net1 <- networkPlot(S, n=500, Title = "Keyword co-occurrences",type="fruchterman",
-                        labelsize = 2, halo = F, cluster = "walktrap",remove.isolates=FALSE,
-                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, size=1,edges.min = 2))
-    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMn)
-    plot(Map$map)
+    input$applyTM
     
+    values <- isolate(TMmap(input,values))
+    
+
   }, height = 650, width = 800)
   
   output$sliders <- renderUI({
@@ -814,43 +759,10 @@ server <- function(input, output, session) {
     
     ## Co-citation network
     
-    n = input$citNodes
-    label.n = input$citLabels
+    input$applyCocit
     
-    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep)){
-     
-      values$citField=input$citField
-      values$citSep=input$citSep
-      
-      switch(input$citField,
-             CR={
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", sep = input$citSep)
-               values$Title= "Cited References network"
-               
-             },
-             CR_AU={
-               if(!("CR_AU" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_AU", sep = input$citSep)}
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "authors", sep = input$citSep)
-               values$Title= "Cited Authors network"
-             },
-             CR_SO={
-               if(!("CR_SO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_SO", sep = input$citSep)}
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "sources", sep = input$citSep)
-               values$Title= "Cited Sources network"
-             })
-      
-    }
+    values <- isolate(intellectualStructure(input,values))
     
-    if (n>dim(values$NetRefs)[1]){n=dim(values$NetRefs)[1]}
-    if (label.n>n){label.n=n}
-    if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-    if (input$citsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
-    if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
-    
-    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
-                    size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
-                    labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
-                    label.n=label.n,edges.min=input$citedges.min,label.color = F)
     
     
   }, height = 750, width = 900)
@@ -881,15 +793,11 @@ server <- function(input, output, session) {
   output$histPlot <- renderPlot({
     
     ## Historiograph
+    input$applyHist
     
-    if (values$Histfield=="NA"){
-      values$histResults <- histNetwork(values$M, min.citations=quantile(values$M$TC,0.75), sep = ";")
-      values$Histfield="done"
-      
-    }
+    values <- isolate(historiograph(input,values))
     
-    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5))
-    
+
     }, height = 500, width = 900)
   
   output$histTable <- DT::renderDT({
@@ -931,7 +839,204 @@ server <- function(input, output, session) {
   output$colPlot <- renderPlot({
     
     ## Collaboration network
+    input$applyCol
     
+    
+    values <- isolate(socialStructure(input,values))
+    
+    
+  }, height = 750, width = 900)
+  
+  output$network.col <- downloadHandler(
+    filename = "Collaboration_network.net",
+    content <- function(file) {
+      igraph::write.graph(values$colnet$graph_pajek,file=file, format="pajek")
+      #rio::export(values$M, file=file)
+    },
+    contentType = "net"
+  )
+  
+  output$colTable <- DT::renderDT({
+    
+    colData=values$colnet$cluster_res
+    names(colData)=c("Node", "Cluster", "Btw Centrality")
+    DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
+      formatStyle(names(colData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+  
+
+  # common functions
+  
+  emptyPlot<-function(errortext){
+    g=ggplot()+
+      theme_void() + theme(legend.position="none")+
+      annotate("text", x = 4, y = 25, label = errortext)
+    plot(g)
+  }
+  
+  wordlist <- function(M, Field, n, measure){
+    switch(Field,
+           ID={v=tableTag(values$M,"ID")},
+           DE={v=tableTag(values$M,"DE")},
+           TI={
+             if (!("TI_TM" %in% names(M))){
+               v=tableTag(M,"TI")
+             }},
+           AB={if (!("AB_TM" %in% names(M))){
+             v=tableTag(M,"AB")
+           }}
+    )
+    
+    #v=tableTag(values$M,"ID")
+    n=min(c(n,length(v)))
+    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]))
+    W=Words
+    switch(measure,
+           sqrt={W$Frequency=sqrt(W$Frequency)},
+           log={W$Frequency=log(W$Frequency+1)},
+           log10={W$Frequency=log10(W$Frequency+1)}
+    )
+    
+    results=list(v=v,W=W, Words=Words)
+    return(results)
+  }
+  
+  cocNetwork <- function(input,values){
+    
+    n = input$Nodes
+    label.n = input$Labels
+    if ((input$field %in% names(values$M))){
+      
+      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field)){
+        
+        values$field=input$field
+        
+        switch(input$field,
+               ID={
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
+                 values$Title= "Keywords Plus Network"
+               },
+               DE={
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
+                 values$Title= "Authors' Keywords network"
+               },
+               TI={
+                 if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
+                 values$Title= "Title Words network"
+               },
+               AB={
+                 if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
+                 values$Title= "Abstract Words network"
+               })
+        
+      }
+      
+      if (n>dim(values$NetWords)[1]){n=dim(values$NetWords)[1]}
+      if (label.n>n){label.n=n}
+      if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
+      if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
+      if (input$size.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
+      if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
+      
+      #par(bg="grey92", mar=c(0,0,0,0))
+      values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
+                                size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
+                                label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved)
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+    }
+  }
+  
+  CAmap <- function(input, values){
+    if ((input$CSfield %in% names(values$M))){
+      
+      tab=tableTag(values$M,input$CSfield)
+      if (length(tab>=2)){
+        
+        minDegree=as.numeric(tab[input$CSn])
+        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
+        plot(values$CS$graph_terms)
+        
+      }else{emptyPlot("Selected field is not included in your data collection")
+        values$CS=list("NA")}
+      
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+      values$CS=list("NA")
+      
+    }
+  }
+  
+  TMmap <- function(input,values){
+    NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences",network = "keywords", sep = ";")
+    S <- normalizeSimilarity(NetMatrix, type = "association")
+    capture.output(net1 <- networkPlot(S, n=500, Title = "Keyword co-occurrences",type="fruchterman",
+                                       labelsize = 2, halo = F, cluster = "walktrap",remove.isolates=FALSE,
+                                       remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, size=1,edges.min = 2))
+    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMn)
+    plot(Map$map)
+  }
+  
+  intellectualStructure <- function(input,values){
+    n = input$citNodes
+    label.n = input$citLabels
+    
+    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep)){
+      
+      values$citField=input$citField
+      values$citSep=input$citSep
+      
+      switch(input$citField,
+             CR={
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", sep = input$citSep)
+               values$Title= "Cited References network"
+               
+             },
+             CR_AU={
+               if(!("CR_AU" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_AU", sep = input$citSep)}
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "authors", sep = input$citSep)
+               values$Title= "Cited Authors network"
+             },
+             CR_SO={
+               if(!("CR_SO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_SO", sep = input$citSep)}
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "sources", sep = input$citSep)
+               values$Title= "Cited Sources network"
+             })
+      
+    }
+    
+    if (n>dim(values$NetRefs)[1]){n=dim(values$NetRefs)[1]}
+    if (label.n>n){label.n=n}
+    if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
+    if (input$citsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
+    if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
+    
+    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
+                                size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
+                                labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
+                                label.n=label.n,edges.min=input$citedges.min,label.color = F)
+  }
+  
+  historiograph <- function(input,values){
+    
+    if (values$Histfield=="NA"){
+      values$histResults <- histNetwork(values$M, min.citations=quantile(values$M$TC,0.75), sep = ";")
+      values$Histfield="done"
+      
+    }
+    
+    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5))
+  }
+  
+  socialStructure<-function(input,values){
     n = input$colNodes
     label.n = input$colLabels
     
@@ -969,70 +1074,12 @@ server <- function(input, output, session) {
     if (input$soc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = input$collayout, 
-                    size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
-                    labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
-                    label.n=label.n,edges.min=input$coledges.min,label.color = F)#, cluster=values$cluster)
+                              size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
+                              labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
+                              label.n=label.n,edges.min=input$coledges.min,label.color = F)
     
+    return(values)
     
-  }, height = 750, width = 900)
-  
-  output$network.col <- downloadHandler(
-    filename = "Collaboration_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$colnet$graph_pajek,file=file, format="pajek")
-      #rio::export(values$M, file=file)
-    },
-    contentType = "net"
-  )
-  
-  output$colTable <- DT::renderDT({
-    
-    colData=values$colnet$cluster_res
-    names(colData)=c("Node", "Cluster", "Btw Centrality")
-    DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
-                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
-                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
-      formatStyle(names(colData),  backgroundColor = 'white') 
-    #return(Data)
-    
-  })
-  
-# common functions
-  
-  emptyPlot<-function(errortext){
-    g=ggplot()+
-      theme_void() + theme(legend.position="none")+
-      annotate("text", x = 4, y = 25, label = errortext)
-    plot(g)
-  }
-  
-  wordlist <- function(M, Field, n, measure){
-    switch(Field,
-           ID={v=tableTag(values$M,"ID")},
-           DE={v=tableTag(values$M,"DE")},
-           TI={
-             if (!("TI_TM" %in% names(M))){
-               v=tableTag(M,"TI")
-             }},
-           AB={if (!("AB_TM" %in% names(M))){
-             v=tableTag(M,"AB")
-           }}
-    )
-    
-    #v=tableTag(values$M,"ID")
-    n=min(c(n,length(v)))
-    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]))
-    W=Words
-    switch(measure,
-           sqrt={W$Frequency=sqrt(W$Frequency)},
-           log={W$Frequency=log(W$Frequency+1)},
-           log10={W$Frequency=log10(W$Frequency+1)}
-    )
-    
-    results=list(v=v,W=W, Words=Words)
-    return(results)
   }
   
 } ## End of Server

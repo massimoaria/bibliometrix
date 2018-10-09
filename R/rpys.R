@@ -32,6 +32,7 @@
 
 rpys <- function(M, sep=";", timespan=NULL, graph=T){
 
+  
   M$CR<-stringr::str_replace_all(as.character(M$CR),"DOI;","DOI ")
   
   Fi<-strsplit(M[,"CR"],sep)
@@ -69,7 +70,7 @@ Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 
 CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
 
-CR=dplyr::group_by(CR, Year, Reference) %>% dplyr::summarise(Freq = length(Reference))
+CR=dplyr::group_by(CR, .data$Year, .data$Reference) %>% dplyr::summarise(Freq = length(.data$Reference))
 
 Years=Years[!(Years %in% "")]
 

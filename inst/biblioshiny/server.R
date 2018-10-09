@@ -39,6 +39,7 @@ server <- function(input, output, session) {
     
     if (is.null(inFile)) {return(NULL)}
     
+    ### excel format
     if (grepl(".*\\.xlsx",inFile$name)){
       M <- rio::import(inFile$datapath)
       #values$log<-"Data imported from XLSX file"
@@ -63,29 +64,36 @@ server <- function(input, output, session) {
       row.names(M) <- SR
       
       
-    }else{
-      
-      if (grepl(".*\\.zip",inFile$name)) {
+    }
+    
+    ### zip folder
+    if (grepl(".*\\.zip",inFile$name)) {
         files=unzip(inFile$datapath)
         #files = list.files(pattern = ".txt")
         D = unlist(lapply(files, function(l){
           Dpar=readFiles(l)
           return(Dpar)
           }))
-      
-      }else{
-        D=readFiles(inFile$datapath)
-          }
-    
-    capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+        capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
     }
     
-    #M <- convert2df(D<-readFiles(inFile$datapath), dbsource="isi",format="plaintext")
+    ### txt or bib formats  
+    if (grepl(".*\\.txt",inFile$name) | grepl(".*\\.bib",inFile$name)){
+        D=readFiles(inFile$datapath)
+        capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+    }
+      
+    ### RData format
+    if (grepl(".*\\.RData",inFile$name)) {
+      
+      load(inFile$datapath)
+    }
+    
     values$M <- M
     values$Morig=M
     values$Histfield="NA"
     values$results=list("NA")
-    #return(values$M)
+    
     MData=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)
     MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
     nome=c("DOI",names(MData)[-length(names(MData))])
@@ -103,14 +111,17 @@ server <- function(input, output, session) {
     
     })
 
-  output$collection.xlsx <- downloadHandler(
+  output$collection.save <- downloadHandler(
     filename = function() {
-      paste("data-", Sys.Date(), ".xlsx", sep="")
+      
+      paste("data-", Sys.Date(), ".",input$save_file, sep="")
     },
     content <- function(file) {
-      rio::export(values$M, file=file)
+      switch(input$save_file,
+             xlsx={rio::export(values$M, file=file)})
+      
     },
-    contentType = "xlsx"
+    contentType = input$save_file
   )
   
   output$textLog <- renderUI({

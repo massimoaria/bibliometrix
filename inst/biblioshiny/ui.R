@@ -96,11 +96,12 @@ tabPanel(
                   "text/comma-separated-values,text/plain",
                   ".txt",
                   ".bib",
+                  ".RData",
                   ".xlsx",
                   ".xls",
                   ".zip")
       ),
-      p("Here accept single .txt/.bib/.xslx, or multiple .txt/.bib files compressed in a single .zip archive."),
+      p("Here accept single .txt/.bib/.xslx/.RData files, or multiple .txt/.bib files compressed in a single .zip archive."),
       tags$hr(),
       
       uiOutput("textLog"),
@@ -108,9 +109,9 @@ tabPanel(
       
       
       ### download xlsx
-      selectInput('save_file', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'xlsx' = 'xlsx')),
+      selectInput('save_file', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'Excel' = 'xlsx')),
       conditionalPanel(condition = "input.save_file == 'xlsx'",
-              downloadButton("collection.xlsx", "Save"))
+              downloadButton("collection.save", "Save"))
     ),
     mainPanel(
       ## color of datatable

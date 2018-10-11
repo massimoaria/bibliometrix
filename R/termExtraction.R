@@ -80,9 +80,12 @@ termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remo
     spanish={stopwords=stopwords$es}
     )
   #stopwords=stopwords
-  
+
   # remove all special characters (except "-")
   TERMS=toupper(M[,Field])
+  TERMS=gsub("ELSEVIER B.V. ALL RIGHTS RESERVED","",TERMS)
+  TERMS=gsub("RIGHTS RESERVED","",TERMS)
+  TERMS=gsub("ELSEVIER","",TERMS)
   TERMS=gsub("[^[:alnum:][:blank:]\\-]", "", TERMS)
   
   if (remove.numbers==TRUE){TERMS=gsub("[[:digit:]]","",TERMS)}

@@ -88,16 +88,15 @@ if ("AU" %in% Tags){
   nAU=unlist(lapply(listAU,length))  # num. of authors per paper
   fracAU=unlist(sapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
   AU=unlist(listAU)
-  #AU=gsub(" ", "", unlist(listAU), fixed = TRUE)
-  #if (M$DB[1]=="ISI"){AU=gsub(" ", "", unlist(listAU), fixed = TRUE)} # delete spaces
-  #if (M$DB[1]=="SCOPUS"){AU=sub(" ",",",unlist(listAU),fixed=TRUE);AU=gsub(" ","",AU,fixed=TRUE)}
+
   Authors=sort(table(AU),decreasing=TRUE)
   Authors_frac=aggregate(fracAU,by=list(AU),'sum')
   names(Authors_frac)=c("Author","Frequency")
   Authors_frac=Authors_frac[order(-Authors_frac$Frequency),]
-  FirstAuthors=lapply(listAU,function(l) l[[1]])
-  listAUU=strsplit(as.character(M$AU[nAU>1]),sep)
-  AuMultiAuthoredArt=length(unique(gsub(" ", "", unlist(listAUU), fixed = TRUE)))
+  FirstAuthors=unlist(lapply(listAU,function(l) l[[1]]))
+  
+  AuSingleAuthoredArt=length(unique(FirstAuthors[nAU==1]))
+  AuMultiAuthoredArt=length(Authors)-AuSingleAuthoredArt
   }
 
 #Total Citation Distribution
@@ -171,11 +170,12 @@ if ("DT" %in% names(M)){
 results=list(Articles=dim(M)[1],             # Articles
              Authors=Authors,                # Authors' frequency distribution
              AuthorsFrac=Authors_frac,       # Authors' frequency distribution (fractionalized)
-             FirstAuthors=unlist(FirstAuthors),# First Author's list
+             FirstAuthors=FirstAuthors,      # First Author's list
              nAUperPaper=nAU,                # N. Authors per Paper
              Appearances=sum(nAU),            # Author appearances
              nAuthors=dim(Authors),          # N. of Authors
              AuMultiAuthoredArt=AuMultiAuthoredArt, # N. of Authors of multi-authored articles
+             AuSingleAuthoredArt=AuSingleAuthoredArt, # N. of Authors of single-authored articles
              MostCitedPapers=MostCitedPapers,# Papers sorted by citations
              Years=PY,                       # Years
              FirstAffiliation=unlist(FAffiliation),  # Affiliation of First Author

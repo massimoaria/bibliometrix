@@ -1,7 +1,8 @@
-bibliometrix v2.0.1 (Release date: 2018-10-06)
+bibliometrix v2.0.1 (Release date: 2018-10-09)
 ==============
 
 New functionality:
+* added the possibility to load Rdata files in biblioshiny()
 * added Thematic Evolution to biblioshiny()
 * added the function plotThematicEvolution() to draw thematic evolution
 * added Thematic Map to biblioshiny()

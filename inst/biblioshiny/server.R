@@ -282,6 +282,29 @@ server <- function(input, output, session) {
                coord_flip()
              
            },
+           lotka={
+             L=lotka(values$results)
+             AuProd=L$AuthorProd
+             AuProd$Theoretical=10^(log10(L$C)-2*log10(AuProd[,1]))
+             
+             g=ggplot2::ggplot(AuProd, aes(x = AuProd$N.Articles, y = AuProd$Freq*100)) +
+               geom_line() +
+               geom_area(fill = '#002F80', alpha = .5) +
+               labs(x = 'N. Articles'
+                    , y = '% of total scientific production'
+                    , title = "Author Scientific Productivity") +
+               #scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
+               theme(text = element_text(color = "#444444")
+                     ,panel.background = element_rect(fill = '#EFEFEF')
+                     ,panel.grid.minor = element_line(color = '#FFFFFF')
+                     ,panel.grid.major = element_line(color = '#FFFFFF')
+                     ,plot.title = element_text(size = 24)
+                     ,axis.title = element_text(size = 14, color = '#555555')
+                     ,axis.title.y = element_text(vjust = 1, angle = 90)
+                     ,axis.title.x = element_text(hjust = 0)
+               )
+             
+           },
            countries={
              xx=values$results$CountryCollaboration[1:k,]
              xx=xx[order(-(xx$SCP+xx$MCP)),]
@@ -522,7 +545,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
-      ylim(0, NA) +
+      #ylim(0, NA) +
       scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"
@@ -586,7 +609,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = laby
            , title = "Source Growth") +
-      ylim(0, NA) +
+      #ylim(0, NA) +
       scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
       theme(text = element_text(color = "#444444"), legend.position="none"

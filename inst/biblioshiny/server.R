@@ -242,6 +242,9 @@ server <- function(input, output, session) {
              TAB=as.data.frame(citations(values$M,sep=";")$Cited)
              names(TAB)=c("Cited References", "Citations")
              #print(S$MostRelKeywords)
+           },
+           "tab10"={
+             TAB<-mapworld(values$M)$tab
            }
           )
     
@@ -319,12 +322,15 @@ server <- function(input, output, session) {
                                   scale_x_discrete(limits = rev(levels(xx$Country)))+
                                   scale_fill_discrete(name="Collaboration",
                                                       breaks=c("SCP","MCP"))+
-                                  labs(title = "Most Productive Countries", x = "Countries", y = "N. of Documents", 
+                                  labs(title = "Corresponding Author's Country", x = "Countries", y = "N. of Documents", 
                                        caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
                                   theme_minimal() +
                                   theme(plot.caption = element_text(size = 9, hjust = 0.5,
                                                                     color = "blue", face = "italic"))+
                                   coord_flip())
+           },
+           mapworld={
+             g<-mapworld(values$M)$g
            },
            production={
              Tab=table(values$results$Years)
@@ -376,7 +382,7 @@ server <- function(input, output, session) {
              g=ggplot2::ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +
                geom_line() +
                geom_area(fill = '#002F80', alpha = .5) +
-               labs(x = 'Year'
+               labs(x = 'Publication Year'
                     , y = 'Citations'
                     , title = "Average Article Citations per Year")+
                scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
@@ -412,7 +418,7 @@ server <- function(input, output, session) {
              g=ggplot2::ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperArt)) +
                geom_line() +
                geom_area(fill = '#002F80', alpha = .5) +
-               labs(x = 'Year'
+               labs(x = 'Publication Year'
                     , y = 'Citations'
                     , title = "Average Total Citations per Year")+
                scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
@@ -989,6 +995,56 @@ server <- function(input, output, session) {
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
+  }
+  
+  mapworld <- function(M){
+    M=metaTagExtraction(M,"AU_CO")
+    CO=as.data.frame(tableTag(M,"AU_CO"),stringsAsFactors = FALSE)
+    CO$Tab=gsub("UNITED KINGDOM","UK",CO$Tab)
+    CO$Tab=gsub("KOREA","SOUTH KOREA",CO$Tab)
+    
+    map.world <- map_data("world")
+    map.world$region=toupper(map.world$region)
+    
+    dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
+    
+    country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
+    
+    tab=data.frame(country.prod %>%
+      dplyr::group_by(region) %>%
+      dplyr::summarise(Freq=mean(Freq)))
+    
+    tab=tab[!is.na(tab$Freq),]
+    
+    tab=tab[order(-tab$Freq),]
+    
+    breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
+    names(breaks)=breaks
+    breaks=log(breaks)
+   
+    g=ggplot(country.prod, aes( x = long, y = lat, group = group )) +
+      geom_polygon(aes(fill = log(Freq))) +
+      scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+      guides(fill = guide_legend(reverse = T)) +
+      #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +
+      labs(fill = 'N.Documents'
+           ,title = 'Country Scientific Production'
+           ,x = NULL
+           ,y = NULL) +
+      theme(text = element_text(color = '#333333')
+            ,plot.title = element_text(size = 28)
+            ,plot.subtitle = element_text(size = 14)
+            ,axis.ticks = element_blank()
+            ,axis.text = element_blank()
+            ,panel.grid = element_blank()
+            ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
+            ,plot.background = element_rect(fill = '#FFFFFF')
+            ,legend.position = c(.18,.36)
+            ,legend.background = element_blank()
+            ,legend.key = element_blank()
+      ) 
+    results=list(g=g,tab=tab)
+    return(results)
   }
   
   CAmap <- function(input, values){

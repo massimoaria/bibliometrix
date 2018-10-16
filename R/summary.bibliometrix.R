@@ -16,7 +16,7 @@
 #' \code{AnnualGrowthRate}  \tab   \tab Annual Percentage Growth Rate\cr
 #' \code{MostProdAuthors}   \tab   \tab Most Productive Authors\cr
 #' \code{MostCitedPapers}   \tab   \tab Top manuscripts per number of citations\cr
-#' \code{MostProdCountries} \tab   \tab Most Productive Countries\cr
+#' \code{MostProdCountries} \tab   \tab Corresponding Author's Countries\cr
 #' \code{TCperCountries}    \tab   \tab Total Citation per Countries\cr
 #' \code{MostRelSources}    \tab   \tab Most Relevant Sources\cr
 #' \code{MostRelKeywords}   \tab   \tab Most Relevant Keywords}
@@ -144,7 +144,7 @@ summary.bibliometrix<-function(object, ...){
   kk=k
   if (!is.null(object$Countries)){
   # Most Productive Countries
-    if (isTRUE(verbose)){cat("\nMost Productive Countries (of corresponding authors)\n\n")}
+    if (isTRUE(verbose)){cat("\nCorresponding Author's Countries\n\n")}
 
   if (length(object$Countries)<k) {kk=length(object$Countries)}
 

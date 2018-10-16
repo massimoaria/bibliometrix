@@ -9,7 +9,7 @@ if (!(require(shinythemes))){install.packages("shinythemes")}
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 if (!require(colourpicker)){install.packages("colourpicker")}
 if (!require(treemap)){install.packages("treemap")}
-#if (!require(networkD3)){install.packages("networkD3")}
+
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
@@ -159,13 +159,14 @@ navbarMenu("Descriptive Analysis",
                                     label = "Result:",
                                     choices = c("Main Information about data"="tab1", 
                                                 "Annual Scientific Production"="tab2",
-                                                "Most Productive Authors"="tab3",
+                                                "Corresponding Author's Countries"="tab5",
+                                                "Country Scientific Production"="tab10",
                                                 "Most Cited Papers"="tab4",
                                                 "Most Cited References"="tab9",
-                                                "Most Productive Countries"="tab5",
                                                 "Most Cited Countries"="tab6",
-                                                "Most Relevant Sources"="tab7",
-                                                "Most Relevant Keywords"="tab8"),
+                                                "Most Productive Authors"="tab3",
+                                                "Most Relevant Keywords"="tab8",
+                                                "Most Relevant Sources"="tab7"),
                                     selected = "tab1"),
                         
                         conditionalPanel(condition = "(input.summary_type != 'tab1') & (input.summary_type != 'tab2') & (input.summary_type != 'tab9')",
@@ -200,8 +201,9 @@ navbarMenu("Descriptive Analysis",
                                     label = "Choose the plot",
                                     choices = c("Annual Scientific Production"= "production",
                                                 "Author Scientific Productivity"="lotka",
-                                                "Most Productive Authors"="authors", 
-                                                "Most Productive Countries"="countries",
+                                                "Corresponding Author's Countries"="countries",
+                                                "Country Scientific Production"="mapworld",
+                                                "Most Productive Authors"="authors",
                                                 "Average Article Citations per Year"="articleTC",
                                                 "Average Total Citation per Year"="annualTC"),
                                     selected = "production"),

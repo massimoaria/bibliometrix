@@ -9,6 +9,7 @@ if (!(require(shinythemes))){install.packages("shinythemes")}
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 if (!require(colourpicker)){install.packages("colourpicker")}
 if (!require(treemap)){install.packages("treemap")}
+if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
 
 
 # Main NavBar ----

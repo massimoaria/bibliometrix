@@ -1003,7 +1003,7 @@ server <- function(input, output, session) {
     CO$Tab=gsub("UNITED KINGDOM","UK",CO$Tab)
     CO$Tab=gsub("KOREA","SOUTH KOREA",CO$Tab)
     
-    map.world <- ggplot2::map_data("world")
+    map.world <- map_data("world")
     map.world$region=toupper(map.world$region)
     
     dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))

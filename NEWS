@@ -3,6 +3,7 @@ bibliometrix v2.0.2 (Release date: 2018-10-09)
 
 New functionality:
 * Added Country scientific production in descriptive analysis (biblioshiny)
+* Added country collaboration map layout in biblioshiny
 
 
 

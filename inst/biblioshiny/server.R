@@ -21,10 +21,7 @@ server <- function(input, output, session) {
   values$histlog="working..."
   values$kk=0
   values$M=data.frame(PY=0)
-  
 
-  
-  
   
   
   
@@ -882,12 +879,16 @@ server <- function(input, output, session) {
     
     ## Collaboration network
     input$applyCol
+
+    isolate(
+      if (input$colField=="COL_CO" & input$collayout=="worldmap"){
+        values$colmap=countrycollaboration(values$M,label=FALSE,edgesize=input$coledgesize/2,min.edges=input$coledges.min)
+        plot(values$colmap$g)
+
+      }else{values <- socialStructure(input,values)}
+    )
     
-    
-    values <- isolate(socialStructure(input,values))
-    
-    
-  }, height = 750, width = 900)
+  }, height = 750)#, width = 750
   
   output$network.col <- downloadHandler(
     filename = "Collaboration_network.net",
@@ -900,8 +901,14 @@ server <- function(input, output, session) {
   
   output$colTable <- DT::renderDT({
     
-    colData=values$colnet$cluster_res
-    names(colData)=c("Node", "Cluster", "Btw Centrality")
+    if (input$collayout!="worldmap"){
+      colData=values$colnet$cluster_res
+      names(colData)=c("Node", "Cluster", "Btw Centrality")
+    }else{
+      colData=values$colmap$tab
+      colData=colData[,c(1,2,9)]
+      names(colData)=c("From","To","Frequency")
+      }
     DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
@@ -1165,12 +1172,93 @@ server <- function(input, output, session) {
     if (input$colsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
     if (input$soc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
-    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = input$collayout, 
+    type=input$collayout
+    if (input$collayout=="worldmap"){type="auto"}
+    
+    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = type, 
                               size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F)
     
     return(values)
+    
+  }
+  
+  countrycollaboration <- function(M,label,edgesize,min.edges){
+    M=metaTagExtraction(M,"AU_CO")
+    net=biblioNetwork(M,analysis="collaboration",network="countries")
+    CO=data.frame(Tab=rownames(net),Freq=diag(net),stringsAsFactors = FALSE)
+    bsk.network=igraph::graph_from_adjacency_matrix(net,mode="undirected")
+    COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE),stringsAsFactors = FALSE)
+    
+    map.world <- map_data("world")
+    map.world$region=toupper(map.world$region)
+    map.world$region=gsub("UK","UNITED KINGDOM",map.world$region)
+    map.world$region=gsub("SOUTH KOREA","KOREA",map.world$region)
+    
+    country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
+    
+    #tab=data.frame(country.prod %>%
+    #                 dplyr::group_by(region) %>%
+    #                 dplyr::summarise(Freq=mean(Freq)))
+    
+    #tab=tab[!is.na(tab$Freq),]
+    
+    #tab=tab[order(-tab$Freq),]
+    
+    breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
+    names(breaks)=breaks
+    breaks=log(breaks)
+    data("countries",envir=environment())
+    names(countries)[1]="Tab"
+    
+    COedges=dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
+    COedges=dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
+    COedges=COedges[COedges$V1!=COedges$V2,]
+    COedges=count.duplicates(COedges)
+    tab=COedges
+    COedges=COedges[COedges$count>=min.edges,]
+    
+    g=ggplot(country.prod, aes( x = country.prod$long, y = country.prod$lat, group = country.prod$group )) +
+      geom_polygon(aes(fill = log(Freq))) +
+      scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+      #guides(fill = guide_legend(reverse = T)) +
+      guides(colour=FALSE, fill=FALSE)+
+      geom_curve(data=COedges, aes(x = COedges$Longitude.x , y = COedges$Latitude.x, xend = COedges$Longitude.y, yend = COedges$Latitude.y,     # draw edges as arcs
+                                   color = "firebrick4", size = COedges$count, group=COedges$continent.x),
+                 curvature = 0.33,
+                 alpha = 0.5) +
+      labs(title = "Country Collaboration Map", x = "Latitude", y = "Longitude")+
+      scale_size_continuous(guide = FALSE, range = c(0.25, edgesize))+
+      theme(text = element_text(color = '#333333')
+            ,plot.title = element_text(size = 28)
+            ,plot.subtitle = element_text(size = 14)
+            ,axis.ticks = element_blank()
+            ,axis.text = element_blank()
+            ,panel.grid = element_blank()
+            ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
+            ,plot.background = element_rect(fill = '#FFFFFF')
+            ,legend.position = c(.18,.36)
+            ,legend.background = element_blank()
+            ,legend.key = element_blank()
+      )
+    if (isTRUE(label)){
+      CO=dplyr::inner_join(CO,countries, by=c('Tab'='Tab'))
+      g=g+
+        ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
+                                 hjust = 0, nudge_x = 1, nudge_y = 4,
+                                 size = 3, color = "orange", fontface = "bold")
+    }
+    
+    results=list(g=g,tab=tab)
+    return(results)
+  }
+  
+  count.duplicates <- function(DF){
+    x <- do.call('paste', c(DF, sep = '\r'))
+    ox <- order(x)
+    rl <- rle(x[ox])
+    cbind(DF[ox[cumsum(rl$lengths)],,drop=FALSE],count = rl$lengths)
     
   }
   

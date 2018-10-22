@@ -3,9 +3,12 @@
 \name{countries}
 \alias{countries}
 \title{Index of Countries.}
-\format{A data frame with 198 rows and 1 variable:
+\format{A data frame with 197 rows and 4 variable:
  \describe{
     \item{countries}{country names}
+    \item{continent}{continent names}
+    \item{Longitude}{country centroid longitude}
+    \item{Latitude}{country centroid latitude}
     }}
 \description{
 Data frame containing a normalized index of countries.\cr

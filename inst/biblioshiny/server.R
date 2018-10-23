@@ -1139,7 +1139,7 @@ server <- function(input, output, session) {
     values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
                                 size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
-                                label.n=label.n,edges.min=input$citedges.min,label.color = F)
+                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE)
     return(values)
   }
   

@@ -710,7 +710,7 @@ server <- function(input, output, session) {
     filename = "Co_occurrence_network.net",
     content <- function(file) {
       igraph::write.graph(values$cocnet$graph_pajek,file=file, format="pajek")
-      #rio::export(values$M, file=file)
+      
     },
     contentType = "net"
   )
@@ -767,6 +767,22 @@ server <- function(input, output, session) {
     
 
   }, height = 650, width = 800)
+  
+  output$TMTable <- DT::renderDT({
+    
+    tmData=values$TM$words[,-4]
+    
+    
+    
+    DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
+      formatStyle(names(tmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
   
   output$sliders <- renderUI({
     numSlices <- as.integer(input$numSlices)
@@ -1082,6 +1098,8 @@ server <- function(input, output, session) {
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, size=1,edges.min = 2))
     Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMn)
     plot(Map$map)
+    values$TM=Map
+    return(values)
   }
   
   intellectualStructure <- function(input,values){
@@ -1122,6 +1140,7 @@ server <- function(input, output, session) {
                                 size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F)
+    return(values)
   }
   
   historiograph <- function(input,values){
@@ -1133,6 +1152,7 @@ server <- function(input, output, session) {
     }
     
     values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5))
+  return(values)
   }
   
   socialStructure<-function(input,values){

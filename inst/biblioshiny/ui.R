@@ -624,10 +624,18 @@ navbarMenu("Conceptual Structure",
                                      value = 5)
                     ),
                     mainPanel("Thematic Map",
-                              shinycssloaders::withSpinner(plotOutput(outputId = "TMPlot"))
+                              tabsetPanel(type = "tabs",
+                                tabPanel("Map",
+                                  shinycssloaders::withSpinner(plotOutput(outputId = "TMPlot"))
+                                ),
+                              tabPanel("Table",
+                                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
+                                )
                               )
+                    
                     )
                     
+            )
            ), ## End of tabPanel ("Thematic Map")
            
            ### Thematic Evolution ----

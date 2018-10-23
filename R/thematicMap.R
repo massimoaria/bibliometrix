@@ -75,15 +75,19 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
 
 ### centrality and density
   label_cluster=unique(groups)
+  word_cluster=words[groups]
   centrality=c()
   density=c()
   labels=list()
   
-  df_lab=data.frame(sC=sC,words=words,groups=groups)
-  df_lab$color=color
+  df_lab=data.frame(sC=sC,words=words,groups=groups,color=color,cluster_label="NA",stringsAsFactors = FALSE)
+  
   color=c()
   for (i in label_cluster){
     ind=which(groups==i)
+    w=df_lab$words[ind]
+    wi=which.max(df_lab$sC[ind])
+    df_lab$cluster_label[ind]=paste(w[wi[1:min(c(length(wi),3))]],collapse=";",sep="")
     centrality=c(centrality,sum(sEij[ind,-ind]))
     density=c(density,sum(sEij[ind,ind])/length(ind)*100)
     df_lab_g=df_lab[ind,]
@@ -93,7 +97,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
     labels[[length(labels)+1]]=paste(df_lab_g$words[1:k],collapse = ";")
     color=c(color,df_lab$color[ind[1]])
   }
-
+  #df_lab$cluster_label=gsub(";NA;",";",df_lab$cluster_label)
   centrality=centrality*10
   df=data.frame(centrality=centrality,density=density,rcentrality=rank(centrality),rdensity=rank(density),label=label_cluster,color=color)
   df$name=unlist(labels)
@@ -116,7 +120,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 #plot(g)
-  names(df_lab)=c("Occurrences", "Words", "Cluster", "Color")
+  names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label")
   words=df_lab[order(df_lab$Cluster),]
   words=words[!is.na(words$Color),]
   row.names(df)=NULL

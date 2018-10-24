@@ -10,7 +10,7 @@ networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
   halo = FALSE, cluster = "walktrap", vos.path = NULL, size = 3,
   size.cex = FALSE, curved = FALSE, noloops = TRUE,
   remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
-  edgesize = 1, edges.min = 0)
+  edgesize = 1, edges.min = 0, alpha = 0.5)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -55,7 +55,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{size.cex}{is logical. If TRUE the size of each vertex is proportional to its degree.}
 
-\item{curved}{is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}}
+\item{curved}{is a logical or a number. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}. Curved values are any numbers from 0 to 1.}
 
 \item{noloops}{is logical. If TRUE loops in the network are deleted.}
 
@@ -71,6 +71,8 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 \item{edgesize}{is an integer. It indicates the network edge size.}
 
 \item{edges.min}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
+
+\item{alpha}{is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.}
 }
 \value{
 It is a list containing the following elements:

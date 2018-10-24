@@ -1014,7 +1014,7 @@ server <- function(input, output, session) {
       #par(bg="grey92", mar=c(0,0,0,0))
       values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                                 size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
-                                label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved)
+                                label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha)
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
@@ -1139,7 +1139,7 @@ server <- function(input, output, session) {
     values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
                                 size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
-                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE)
+                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE,alpha=input$cocitAlpha)
     return(values)
   }
   
@@ -1198,7 +1198,7 @@ server <- function(input, output, session) {
     values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = type, 
                               size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
-                              label.n=label.n,edges.min=input$coledges.min,label.color = F)
+                              label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,remove.isolates = T)
     
     return(values)
     
@@ -1282,4 +1282,5 @@ server <- function(input, output, session) {
     
   }
   
+
 } ## End of Server

@@ -33,7 +33,7 @@
 #' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.  
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").
-#' @param curved is a logical. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}
+#' @param curved is a logical or a number. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}. Curved values are any numbers from 0 to 1.
 #' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix. 
 #' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
 #' If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute 
@@ -41,6 +41,7 @@
 #' @param edgesize is an integer. It indicates the network edge size.
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @param label.n is an integer. It indicates the number of vertex labels to draw.
+#' @param alpha is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.
 #' @return It is a list containing the following elements:
 #' \tabular{lll}{
 #' \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
@@ -63,10 +64,11 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, label.color=FALSE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0){
+networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, label.color=FALSE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0,alpha=0.5){
   
   NET=NetMatrix
   bsk.S=TRUE
+  l=NA
   
   if (!is.null(normalize)){
     S=normalizeSimilarity(NetMatrix, type = normalize)
@@ -79,6 +81,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     size.cex=T
   }
   
+  if (alpha<0 & alpha>1){alpha=0.5}
   
   # Create igraph object
   bsk.network <- graph.adjacency(NET,mode="undirected",weighted=weighted)
@@ -153,6 +156,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
       LABEL=V(bsk.network)$name
       if (!is.null(label.n)){
         q=1-(label.n/length(V(bsk.network)$deg))
+        if (q>1){q=1}
+        if (q<0){q=0}
         q=quantile(V(bsk.network)$deg,q)
         LABEL[V(bsk.network)$deg<q]=""
       }
@@ -183,10 +188,16 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     l=layout.norm(l)
     
     if (isTRUE(halo) & cluster!="null"){
-      plot(net_groups,bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = 'black', vertex.label.font = 2, vertex.label = LABEL, main=Title)
+      plot(net_groups,bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, 
+           vertex.label.dist = 0.7, vertex.frame.color = adjustcolor('black',alpha), vertex.label.color = adjustcolor('black',min(c(1,alpha+0.1))),
+           vertex.color=adjustcolor(V(bsk.network1)$color,alpha),
+           vertex.label.font = 2, vertex.label = LABEL, main=Title)
       
     } else{
-      plot(bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, vertex.label.dist = 0.7, vertex.frame.color = 'black', vertex.label.color = lab.color, vertex.label.font = 2, vertex.label = LABEL, main=Title, edge.color=E(bsk.network1)$color)
+      plot(bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, 
+           vertex.label.dist = 0.7, vertex.frame.color = adjustcolor('black',alpha), 
+           vertex.color=adjustcolor(V(bsk.network1)$color,alpha),vertex.label.color = adjustcolor(lab.color, min(c(1,alpha+0.1))), 
+           vertex.label.font = 2, vertex.label = LABEL, main=Title, edge.color=adjustcolor(E(bsk.network1)$color,alpha/2))
     }
     
   }else{net_groups$modularity=rep(1,vcount(bsk.network))} 
@@ -199,7 +210,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   } else {cluster_res=NA}
   
   
-  net=list(graph=bsk.network, graph_pajek=bsk.save, cluster_obj=net_groups, cluster_res=cluster_res)
+  net=list(graph=bsk.network, graph_pajek=bsk.save, cluster_obj=net_groups, cluster_res=cluster_res,layout=l)
   
   return(net)}
 

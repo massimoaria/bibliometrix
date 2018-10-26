@@ -1,9 +1,14 @@
-bibliometrix v2.0.2 (Release date: 2018-10-09)
+bibliometrix v2.0.2 (Release date: 2018-10-26)
 ==============
 
 New functionality:
 * Added Country scientific production in descriptive analysis (biblioshiny)
 * Added country collaboration map layout in biblioshiny
+* Added "opacity" parameter in networkPlot
+* Added "field" parameter in thematicMap
+* Added "field" parameter in thematicEvolution 
+Changes:
+* Now plots show lowercase labels
 
 
 

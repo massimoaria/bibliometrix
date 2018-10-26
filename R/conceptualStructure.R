@@ -141,7 +141,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
            #CW=data.frame(apply(CW,2,factor))
          }
   )
-  
+  colnames(CW)=tolower(colnames(CW))
+  rownames(CW)=tolower(rownames(CW))
   p=dim(CW)[2] 
   quali=NULL
   quanti=NULL

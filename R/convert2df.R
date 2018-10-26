@@ -61,6 +61,7 @@
 #' @import shiny
 #' @import shinycssloaders
 #' @import shinythemes
+#' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise

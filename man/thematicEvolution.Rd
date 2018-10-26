@@ -4,10 +4,12 @@
 \alias{thematicEvolution}
 \title{Perform a Thematic Evolution Analysis}
 \usage{
-thematicEvolution(M, years, n = 250, minFreq = 2)
+thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.}
+
+\item{field}{is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","TI","AB"). Default value is \code{field="ID"}.}
 
 \item{years}{is a numeric vector of two or more unique cut points.}
 
@@ -33,7 +35,7 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 data(scientometrics)
 years=c(2000)
 
-nexus <- thematicEvolution(scientometrics,years,n=100,minFreq=2)
+nexus <- thematicEvolution(scientometrics,field="ID", years=years, n=100,minFreq=2)
 
 }
 \seealso{

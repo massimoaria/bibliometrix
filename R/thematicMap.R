@@ -112,14 +112,14 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity)) +
     geom_point(aes(size=log(as.numeric(df$freq))),shape=20,col=df$color)     # Use hollow circles
-  g=g+geom_label_repel(aes(label=ifelse(df$freq>1,unlist(df$name),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
+  g=g+geom_label_repel(aes(label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
     geom_vline(xintercept = meancentr,linetype=2) + theme(legend.position="none") +
     scale_radius(range=c(1, 50))+labs(x = "Centrality", y = "Density")+
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
-#plot(g)
+
   names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label")
   words=df_lab[order(df_lab$Cluster),]
   words=words[!is.na(words$Color),]

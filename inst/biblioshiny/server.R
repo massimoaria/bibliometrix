@@ -21,6 +21,7 @@ server <- function(input, output, session) {
   values$histlog="working..."
   values$kk=0
   values$M=data.frame(PY=0)
+  values$histsearch="NA"
 
   
   
@@ -803,7 +804,7 @@ server <- function(input, output, session) {
     })
     
     if (length(values$yearSlices)>0){
-    values$nexus <- isolate(thematicEvolution(values$M,values$yearSlices,n=input$nTE,minFreq=input$fTE))
+    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices,n=input$nTE,minFreq=input$fTE))
     isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges))
     }
       
@@ -957,7 +958,7 @@ server <- function(input, output, session) {
              v=tableTag(M,"AB")
            }}
     )
-    
+    names(v)=tolower(names(v))
     #v=tableTag(values$M,"ID")
     n=min(c(n,length(v)))
     Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]))
@@ -1091,7 +1092,27 @@ server <- function(input, output, session) {
   }
   
   TMmap <- function(input,values){
-    NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences",network = "keywords", sep = ";")
+    
+    switch(input$TMfield,
+           ID={
+             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
+             
+           },
+           DE={
+             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
+             
+           },
+           TI={
+             if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
+             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
+             
+           },
+           AB={
+             if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
+             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
+             
+           })
+    
     S <- normalizeSimilarity(NetMatrix, type = "association")
     capture.output(net1 <- networkPlot(S, n=500, Title = "Keyword co-occurrences",type="fruchterman",
                                        labelsize = 2, halo = F, cluster = "walktrap",remove.isolates=FALSE,
@@ -1145,10 +1166,14 @@ server <- function(input, output, session) {
   
   historiograph <- function(input,values){
     
-    if (values$Histfield=="NA"){
-      values$histResults <- histNetwork(values$M, min.citations=quantile(values$M$TC,0.75), sep = ";")
+    if (input$histsearch=="FAST"){
+      min.cit=quantile(values$M$TC,0.75)
+    }else{min.cit=1}
+    
+    if (values$Histfield=="NA" | values$histsearch!=input$histsearch){
+      values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
       values$Histfield="done"
-      
+      values$histsearch=input$histsearch
     }
     
     values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5))

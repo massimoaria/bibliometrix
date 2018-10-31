@@ -6,7 +6,9 @@ New functionality:
 * Added country collaboration map layout in biblioshiny
 * Added "opacity" parameter in networkPlot
 * Added "field" parameter in thematicMap
-* Added "field" parameter in thematicEvolution 
+* Added "field" parameter in thematicEvolution
+* Added bradford() function to identify core sources 
+* Added law analyses (bradford and lotka) in biblioshiny 
 Changes:
 * Now plots show lowercase labels
 

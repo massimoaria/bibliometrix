@@ -151,7 +151,7 @@ tabPanel(
 navbarMenu("Descriptive Analysis",
            "  ",
            "  ",
-           "Bibliographic Analysis",
+           "Impact & Productivity",
            tabPanel("Tables",
                     sidebarLayout(
                       
@@ -201,7 +201,6 @@ navbarMenu("Descriptive Analysis",
                         selectInput("plot_type", 
                                     label = "Choose the plot",
                                     choices = c("Annual Scientific Production"= "production",
-                                                "Author Scientific Productivity"="lotka",
                                                 "Corresponding Author's Countries"="countries",
                                                 "Country Scientific Production"="mapworld",
                                                 "Most Productive Authors"="authors",
@@ -229,7 +228,46 @@ navbarMenu("Descriptive Analysis",
            ),
            "  ",
            "  ",
-           "Content Analysis",
+           "Laws",
+           tabPanel("Bradford's law",
+                    
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                      helpText("dddd")            
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "bradfordPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
+                                    ))
+                      )
+                    
+                      )
+           ),
+           tabPanel("Lotka's law",
+                    
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   helpText("dddd")            
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "lotkaPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
+                                    ))
+                      )
+                      
+                    )
+           ),
+           "  ",
+           "  ",
+           "Contents",
            tabPanel("WordCloud",
            
            sidebarLayout(
@@ -331,7 +369,7 @@ navbarMenu("Descriptive Analysis",
                     )),
            "  ",
            "  ",
-           "Temporal Analysis",
+           "Trends",
            tabPanel("Word Dynamics",
                     
                     sidebarLayout(

@@ -283,29 +283,6 @@ server <- function(input, output, session) {
                coord_flip()
              
            },
-           lotka={
-             L=lotka(values$results)
-             AuProd=L$AuthorProd
-             AuProd$Theoretical=10^(log10(L$C)-2*log10(AuProd[,1]))
-             
-             g=ggplot2::ggplot(AuProd, aes(x = AuProd$N.Articles, y = AuProd$Freq*100)) +
-               geom_line() +
-               geom_area(fill = '#002F80', alpha = .5) +
-               labs(x = 'N. Articles'
-                    , y = '% of total scientific production'
-                    , title = "Author Scientific Productivity") +
-               #scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
-               theme(text = element_text(color = "#444444")
-                     ,panel.background = element_rect(fill = '#EFEFEF')
-                     ,panel.grid.minor = element_line(color = '#FFFFFF')
-                     ,panel.grid.major = element_line(color = '#FFFFFF')
-                     ,plot.title = element_text(size = 24)
-                     ,axis.title = element_text(size = 14, color = '#555555')
-                     ,axis.title.y = element_text(vjust = 1, angle = 90)
-                     ,axis.title.x = element_text(hjust = 0)
-               )
-             
-           },
            countries={
              xx=values$results$CountryCollaboration[1:k,]
              xx=xx[order(-(xx$SCP+xx$MCP)),]
@@ -435,16 +412,60 @@ server <- function(input, output, session) {
     #plot(results)
     }, height = 500, width =900)
   
-  # output$wordcloud.ui <- renderUI({
-  #   wordcloud2::wordcloud2Output("wordcloud", height =  plotHeight())
-  # })
-  # 
-  # plotCount <- reactive({
-  #   req(input$widgetsize)
-  #   as.numeric(input$widgetsize)
-  # })
-  # 
-  # plotHeight <- reactive(plotCount())
+  output$bradfordPlot <- renderPlot({
+    
+    values$bradford=bradford(values$M)
+    values$bradford$graph
+    
+  },height = 600)
+  
+  output$bradfordTable <- DT::renderDT({
+    
+    DT::datatable(values$bradford$table, rownames = FALSE,
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$bradford$table))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center')
+  })
+  
+  output$lotkaPlot <- renderPlot({
+    
+      values$lotka=lotka(biblioAnalysis(values$M))
+      AuProd=values$lotka$AuthorProd
+      AuProd$Theoretical=10^(log10(values$lotka$C)-2*log10(AuProd[,1]))
+      
+      g=ggplot2::ggplot(AuProd, aes(x = AuProd$N.Articles, y = AuProd$Freq*100)) +
+        geom_line() +
+        geom_area(fill = '#002F80', alpha = .5) +
+        labs(x = 'N. Articles'
+             , y = '% of total scientific production'
+             , title = "Author Scientific Productivity") +
+        #scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
+        theme(text = element_text(color = "#444444")
+              ,panel.background = element_rect(fill = '#EFEFEF')
+              ,panel.grid.minor = element_line(color = '#FFFFFF')
+              ,panel.grid.major = element_line(color = '#FFFFFF')
+              ,plot.title = element_text(size = 24)
+              ,axis.title = element_text(size = 14, color = '#555555')
+              ,axis.title.y = element_text(vjust = 1, angle = 90)
+              ,axis.title.x = element_text(hjust = 0)
+        )
+      plot(g)
+      
+  },height = 600)
+  
+  output$lotkaTable <- DT::renderDT({
+    
+    DT::datatable(values$lotka$AuthorProd, rownames = FALSE,
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$lotka$AuthorProd))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(values$lotka$AuthorProd),  backgroundColor = 'white',textAlign = 'center')
+  })
   
   output$wordcloud <- wordcloud2::renderWordcloud2({
     
@@ -905,7 +926,7 @@ server <- function(input, output, session) {
       }else{values <- socialStructure(input,values)}
     )
     
-  }, height = 750)#, width = 750
+  }, heigth = 750)#, width = 750
   
   output$network.col <- downloadHandler(
     filename = "Collaboration_network.net",

@@ -238,6 +238,7 @@ AU_CO<-function(M){
   M$AU_CO=gsub(".", "", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub("UNITED STATES","USA",M$AU_CO)
+  M$AU_CO=gsub("GEORGIA","USA",M$AU_CO)
   M$AU_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU_CO)
   M$AU_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU_CO)
   M$AU_CO=gsub("WALES","UNITED KINGDOM",M$AU_CO)
@@ -288,6 +289,7 @@ AU1_CO<-function(M,sep){
   }
   M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
   M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
+  M$AU1_CO=gsub("GEORGIA","USA",M$AU1_CO)
   M$AU1_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU1_CO)
   M$AU1_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU1_CO)
   M$AU1_CO=gsub("WALES","UNITED KINGDOM",M$AU1_CO)

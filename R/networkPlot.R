@@ -69,6 +69,8 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   NET=NetMatrix
   bsk.S=TRUE
   l=NA
+  net_groups=list()
+  if (type=="vosviewer"){cluster="none"}
   
   if (!is.null(normalize)){
     S=normalizeSimilarity(NetMatrix, type = normalize)
@@ -187,13 +189,13 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     ## Plot the network
     l=layout.norm(l)
     
-    if (isTRUE(halo) & cluster!="null"){
+    if (isTRUE(halo) & cluster!="none"){
       plot(net_groups,bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, 
            vertex.label.dist = 0.7, vertex.frame.color = adjustcolor('black',alpha), vertex.label.color = adjustcolor('black',min(c(1,alpha+0.1))),
            vertex.color=adjustcolor(V(bsk.network1)$color,alpha),
            vertex.label.font = 2, vertex.label = tolower(LABEL), main=Title)
       
-    } else{
+    }else{
       plot(bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, 
            vertex.label.dist = 0.7, vertex.frame.color = adjustcolor('black',alpha), 
            vertex.color=adjustcolor(V(bsk.network1)$color,alpha),vertex.label.color = adjustcolor(lab.color, min(c(1,alpha+0.1))), 

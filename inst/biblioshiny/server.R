@@ -277,6 +277,7 @@ server <- function(input, output, session) {
              xx=as.data.frame(values$results$Authors[1:k])
              g=ggplot2::ggplot(data=xx, aes(x=xx$AU, y=xx$Freq)) +
                geom_bar(stat="identity", fill="steelblue")+
+               scale_x_discrete(limits = rev(levels(xx$AU)))+
                labs(title="Most productive Authors", x = "Authors")+
                labs(y = "N. of Documents")+
                theme_minimal() +

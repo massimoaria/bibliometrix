@@ -4,10 +4,15 @@
 \alias{networkStat}
 \title{Calculating network summary statistics}
 \usage{
-networkStat(object)
+networkStat(object, stat = "network")
 }
 \arguments{
 \item{object}{is a network matrix obtained by the function \code{\link{biblioNetwork}} or an graph object of the class \code{igraph}.}
+
+\item{stat}{is a character. It indicates which statistics are to be calculated. \code{stat = "network"} calculates the statistics related to the network; 
+\code{stat = "all"} calculates the statistics related to the network and the individual nodes that compose it. Default value is \code{stat = "network"}.}
+
+\item{type}{is a character. It indicates which centrality index is calculated. type values can be c("degree", "closeness", "betweenness","eigenvector","pagerank","hub","authority"). Default is "degree".}
 }
 \value{
 It is a list containing the following elements:

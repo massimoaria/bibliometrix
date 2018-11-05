@@ -927,7 +927,7 @@ server <- function(input, output, session) {
       }else{values <- socialStructure(input,values)}
     )
     
-  }, heigth = 750)#, width = 750
+  }, height = 750)#, width = 750
   
   output$network.col <- downloadHandler(
     filename = "Collaboration_network.net",

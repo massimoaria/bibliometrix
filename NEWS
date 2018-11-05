@@ -9,9 +9,12 @@ New functionality:
 * Added "field" parameter in thematicEvolution
 * Added bradford() function to identify core sources 
 * Added law analyses (bradford and lotka) in biblioshiny 
+* Added "stat" parameter in networkStat()
+* Added "type" parameter in networkStat()
+
 Changes:
 * Now plots show lowercase labels
-
+* networkStat() now allows to calculate single centrality indices (using parameters stat and type)
 
 
 bibliometrix v2.0.1 (Release date: 2018-10-09)

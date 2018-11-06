@@ -4,7 +4,7 @@
 \alias{networkStat}
 \title{Calculating network summary statistics}
 \usage{
-networkStat(object, stat = "network")
+networkStat(object, stat = "network", type = "degree")
 }
 \arguments{
 \item{object}{is a network matrix obtained by the function \code{\link{biblioNetwork}} or an graph object of the class \code{igraph}.}
@@ -36,7 +36,7 @@ The function \code{\link{networkStat}} can calculate the main network statistics
 # NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #      network = "references", sep = ";")
 
-# netstat <- networkStat(NetMatrix) 
+# netstat <- networkStat(NetMatrix, stat = "all", type = "degree")
 
 }
 \seealso{

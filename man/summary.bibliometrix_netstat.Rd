@@ -25,7 +25,7 @@ The function \code{summary} computes and returns on display severa statistics bo
 
 #NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 #                   network = "authors", sep = ";")
-#netstat <- networkStat(NetMatrix)
+#netstat <- networkStat(NetMatrix, stat = "all", type = "degree")
 #summary(netstat)
 
 }

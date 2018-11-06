@@ -24,12 +24,12 @@ field can be equal to one of this tags:
 \code{TI}\tab   \tab Terms extracted from titles\cr
 \code{AB}\tab   \tab Terms extracted from abstracts}}
 
-\item{method}{is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis
-or \code{method="MCA"} for Multiple Correspondence Analysis. The default is \code{method="MCA"}}
+\item{method}{is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
+\code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}}
 
-\item{quali.supp}{is a vector indicating the indexes of the categorical supplementary variables.}
+\item{quali.supp}{is a vector indicating the indexes of the categorical supplementary variables. It is used only for CA and MCA.}
 
-\item{quanti.supp}{is a vector indicating the indexes of the quantitative supplementary variables.}
+\item{quanti.supp}{is a vector indicating the indexes of the quantitative supplementary variables. It is used only for CA and MCA.}
 
 \item{minDegree}{is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.}
 
@@ -39,7 +39,7 @@ or \code{method="MCA"} for Multiple Correspondence Analysis. The default is \cod
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}}
 
-\item{documents}{is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10.}
+\item{documents}{is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.}
 
 \item{graph}{is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE}
 }
@@ -48,7 +48,7 @@ It is an object of the class \code{list} containing the following components:
 
 \tabular{lll}{
 net \tab  \tab bipartite network\cr
-res \tab       \tab Results of CA or MCA method\cr
+res \tab       \tab Results of CA, MCA or MDS method\cr
 km.res \tab      \tab Results of cluster analysis\cr
 graph_terms \tab      \tab Conceptual structure map (class "ggplot2")\cr
 graph_documents_Contrib \tab      \tab Factorial map of the documents with the highest contributes (class "ggplot2")\cr
@@ -56,7 +56,7 @@ graph_docuemnts_TC \tab      \tab Factorial map of the most cited documents (cla
 }
 \description{
 The function \code{conceptualStructure} creates a conceptual structure map of 
-a scientific field performing Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA) and Clustering 
+a scientific field performing Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA) or Metric Multidimensional Scaling (MDS) and Clustering 
 of a bipartite network of terms extracted from keyword, title or abstract fields.
 }
 \examples{

@@ -600,7 +600,7 @@ navbarMenu("Conceptual Structure",
            ), ## End of tabPanel ("CS network")
            
            ### Factorial Analysis ----
-           tabPanel("Correspondence Analysis",
+           tabPanel("Factorial Analysis",
                     
                     sidebarLayout(
                       
@@ -610,13 +610,14 @@ navbarMenu("Conceptual Structure",
                         
                                    "  ",
                                    "  ",
-                                   h4(em(strong("CA Parameters: "))),
+                                   h4(em(strong("FA Parameters: "))),
                                    "  ",
                         
                         selectInput("method", 
                                     label = "Method",
                                     choices = c("Correspondence Analysis" = "CA",
-                                                "Multiple Correspondence Analysis" = "MCA"),
+                                                "Multiple Correspondence Analysis" = "MCA",
+                                                "Multidimensional Scaling"= "MDS"),
                                     selected = "CA"),
                         selectInput("CSfield", 
                                     label = "Field",
@@ -646,7 +647,7 @@ navbarMenu("Conceptual Structure",
                         
                       ),
                       
-                      mainPanel("Correspondence Analysis",
+                      mainPanel("Factorial Analysis",
                       
                           tabsetPanel(type = "tabs",
                                   tabPanel("Word Map", 

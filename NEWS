@@ -11,10 +11,13 @@ New functionality:
 * Added law analyses (bradford and lotka) in biblioshiny 
 * Added "stat" parameter in networkStat()
 * Added "type" parameter in networkStat()
+* Added Multidimensional Scaling Analysis in conceptualStructure()
+
 
 Changes:
 * Now plots show lowercase labels
 * networkStat() now allows to calculate single centrality indices (using parameters stat and type)
+* Improved the optimal number of clusters in conceputalStructure(). Now the gap statistics is used
 
 
 bibliometrix v2.0.1 (Release date: 2018-10-09)

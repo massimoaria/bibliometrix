@@ -763,20 +763,29 @@ server <- function(input, output, session) {
   
   output$CSPlot2 <- renderPlot({
     
-    if (values$CS[[1]][1]!="NA"){
-      plot(values$CS$graph_documents_Contrib)
+    if (input$method!="MDS"){
+    
+      if (values$CS[[1]][1]!="NA"){
+        plot(values$CS$graph_documents_Contrib)
+      }else{
+        emptyPlot("Selected field is not included in your data collection")
+      }
     }else{
-      emptyPlot("Selected field is not included in your data collection")
+      emptyPlot("This plot is available only for CA or MCA analyses")
     }
     
   }, height = 650, width = 800)
   
   output$CSPlot3 <- renderPlot({
     
-    if (values$CS[[1]][1]!="NA"){
-      plot(values$CS$graph_documents_TC)
+    if (input$method!="MDS"){
+      if (values$CS[[1]][1]!="NA"){
+        plot(values$CS$graph_documents_TC)
+      }else{
+        emptyPlot("Selected field is not included in your data collection")
+      }
     }else{
-      emptyPlot("Selected field is not included in your data collection")
+      emptyPlot("This plot is available only for CA or MCA analyses")
     }
     
     

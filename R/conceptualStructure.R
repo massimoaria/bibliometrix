@@ -1,7 +1,7 @@
 #' Creating and plotting conceptual structure map of a scientific field
 #'
 #' The function \code{conceptualStructure} creates a conceptual structure map of 
-#' a scientific field performing Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA) and Clustering 
+#' a scientific field performing Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA) or Metric Multidimensional Scaling (MDS) and Clustering 
 #' of a bipartite network of terms extracted from keyword, title or abstract fields.
 #' 
 #' @param M is a data frame obtained by the converting function
@@ -17,21 +17,21 @@
 #'   \code{DE_TM}\tab   \tab Author's Keywords stemmed through the Porter's stemming algorithm\cr
 #'   \code{TI}\tab   \tab Terms extracted from titles\cr
 #'   \code{AB}\tab   \tab Terms extracted from abstracts}
-#' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis
-#'  or \code{method="MCA"} for Multiple Correspondence Analysis. The default is \code{method="MCA"}
+#' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
+#'  \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}
 #' @param minDegree is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.
 #' @param k.max is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 8.
 #' @param stemming is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}
-#' @param quali.supp is a vector indicating the indexes of the categorical supplementary variables.
-#' @param quanti.supp is a vector indicating the indexes of the quantitative supplementary variables.
-#' @param documents is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10.
+#' @param quali.supp is a vector indicating the indexes of the categorical supplementary variables. It is used only for CA and MCA.
+#' @param quanti.supp is a vector indicating the indexes of the quantitative supplementary variables. It is used only for CA and MCA.
+#' @param documents is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.
 #' @param graph is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE
 #' @return It is an object of the class \code{list} containing the following components:
 #'
 #' \tabular{lll}{
 #' net \tab  \tab bipartite network\cr
-#' res \tab       \tab Results of CA or MCA method\cr
+#' res \tab       \tab Results of CA, MCA or MDS method\cr
 #' km.res \tab      \tab Results of cluster analysis\cr
 #' graph_terms \tab      \tab Conceptual structure map (class "ggplot2")\cr
 #' graph_documents_Contrib \tab      \tab Factorial map of the documents with the highest contributes (class "ggplot2")\cr
@@ -141,6 +141,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
            #CW=data.frame(apply(CW,2,factor))
          }
   )
+  
+  
   colnames(CW)=tolower(colnames(CW))
   rownames(CW)=tolower(rownames(CW))
   p=dim(CW)[2] 
@@ -168,14 +170,15 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   docCoord <- results$docCoord
   df_quali <- results$df_quali
   df_quanti <- results$df_quanti
- 
+  
   ### Total Citations of documents
-  if ("TC" %in% names(M)){docCoord$TC=as.numeric(M[rownames(docCoord),"TC"])}
+  if ("TC" %in% names(M) & method!="MDS"){docCoord$TC=as.numeric(M[rownames(docCoord),"TC"])}
   
   
-  # Selection of optimal number of clusters (silhouette method)
-  a=fviz_nbclust((df), kmeans, method = "silhouette",k.max=k.max)['data']
-  clust=as.numeric(a$data[order(-a$data$y),][1,1])
+  # Selection of optimal number of clusters (gap statistics)
+  a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$gap
+  clust=which(rank(a)==1)
+  
   
   # Perform the K-means clustering
   km.res <- kmeans((df), clust, nstart = 25)
@@ -184,7 +187,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     theme_minimal()+
     scale_color_manual(values = cbPalette[1:clust])+
     scale_fill_manual(values = cbPalette[1:clust]) +
-    labs(title= "Conceptual structure map") +
+    labs(title= paste("Conceptual Structure Map - method: ",method,collapse="",sep="")) +
     geom_point() +
     theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"),
           plot.title=element_text(size=labelsize+1,face="bold"))
@@ -215,7 +218,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   if (isTRUE(graph)){plot(b)}
   
   
-  
+  if (method !="MDS"){
   ## Factorial map of most contributing documents
   
   if (documents>dim(docCoord)[1]){documents=dim(docCoord)[1]}
@@ -286,10 +289,15 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     
     if (isTRUE(graph)){plot(b_doc_TC)}
 
+    semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
+    
+  }else{
+
+    semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL)
+    }
   
   
   
-  semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
   return(semanticResults)
 }
 
@@ -336,14 +344,30 @@ factorial<-function(X,method,quanti,quali){
            coord_doc=get_mca_ind(res.mca)
            df_doc=data.frame(coord_doc$coord)
            
-           }
+           },
+         MDS={
+           NetMatrix=Matrix::crossprod(X,X)
+           Net=1-normalizeSimilarity(NetMatrix, type="association")
+           Matrix::diag(Net)=0
+           #Net=as.matrix(Net)
+           res.mca <- Net %>%
+             #dist() %>%          
+             cmdscale()  
+           colnames(res.mca) <- c("Dim.1", "Dim.2")
+           df=data.frame(res.mca)
+           row.names(df)=row.names(Net)
+         }
   )
   
+  if (method!="MDS"){
   #
-  docCoord=as.data.frame(cbind(df_doc,rowSums(coord_doc$contrib)))
-  names(docCoord)=c("dim1","dim2","contrib")
-  docCoord=docCoord[order(-docCoord$contrib),]
-  
-  results=list(res.mca=res.mca,df=df,df_doc=df_doc,df_quali=df_quali,df_quanti=df_quanti,docCoord=docCoord)
+    docCoord=as.data.frame(cbind(df_doc,rowSums(coord_doc$contrib)))
+    names(docCoord)=c("dim1","dim2","contrib")
+    docCoord=docCoord[order(-docCoord$contrib),]
+    
+    results=list(res.mca=res.mca,df=df,df_doc=df_doc,df_quali=df_quali,df_quanti=df_quanti,docCoord=docCoord)
+  }else{
+    results=list(res.mca=res.mca,df=df,df_doc=NA,df_quali=NA,df_quanti=NA,docCoord=NA)
+  }
   return(results)
 }

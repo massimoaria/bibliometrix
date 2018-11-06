@@ -190,7 +190,9 @@ server <- function(input, output, session) {
   ### Descriptive Analysis
   output$summary <- DT::renderDT({
     
-    if (values$results[[1]]=="NA"){values$results=biblioAnalysis(values$M)}
+    ### aggiungere il pulsante apply
+    #if (values$results[[1]]=="NA"){values$results=biblioAnalysis(values$M)}
+    values$results=biblioAnalysis(values$M)
     S=summary(object=values$results,k=input$kk,verbose=FALSE)
     
     

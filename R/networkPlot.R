@@ -198,7 +198,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
     }else{
       plot(bsk.network1, rescale=T, asp=0, ylim=c(-1,1), xlim=c(-1,1), layout = l, edge.curved=curved, 
            vertex.label.dist = 0.7, vertex.frame.color = adjustcolor('black',alpha), 
-           vertex.color=adjustcolor(V(bsk.network1)$color,alpha),vertex.label.color = adjustcolor(lab.color, min(c(1,alpha+0.1))), 
+           vertex.color=adjustcolor(V(bsk.network1)$color,alpha),vertex.label.color = adjustcolor(lab.color, min(c(1,alpha+0.2))), 
            vertex.label.font = 2, vertex.label = tolower(LABEL), main=Title, edge.color=adjustcolor(E(bsk.network1)$color,alpha/2))
     }
     

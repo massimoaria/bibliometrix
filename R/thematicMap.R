@@ -109,7 +109,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   meandens=mean(df$rdensity)
   meancentr=mean(df$rcentrality)
   df=df[df$freq>=minfreq,]
-  
+
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity)) +
     geom_point(aes(size=log(as.numeric(df$freq))),shape=20,col=df$color)     # Use hollow circles
   g=g+geom_label_repel(aes(label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
@@ -124,6 +124,6 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   words=df_lab[order(df_lab$Cluster),]
   words=words[!is.na(words$Color),]
   row.names(df)=NULL
-  results=list(map=g, clusters=df, words=words)
+  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1])
 return(results)
 }

@@ -17,7 +17,7 @@ New functionality:
 Changes:
 * Now plots show lowercase labels
 * networkStat() now allows to calculate single centrality indices (using parameters stat and type)
-* Improved the optimal number of clusters in conceputalStructure(). Now the gap statistics is used
+* Improved the optimal number of clusters in conceputalStructure(). Now the wss criterium is used
 
 
 bibliometrix v2.0.1 (Release date: 2018-10-09)

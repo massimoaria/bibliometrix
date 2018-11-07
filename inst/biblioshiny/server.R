@@ -799,6 +799,11 @@ server <- function(input, output, session) {
     
     values <- isolate(TMmap(input,values))
     
+    validate(
+      need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
+    )
+    
+    plot(values$TM$map)
 
   }, height = 650, width = 800)
   
@@ -838,6 +843,11 @@ server <- function(input, output, session) {
     
     if (length(values$yearSlices)>0){
     values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices,n=input$nTE,minFreq=input$fTE))
+    
+    validate(
+      need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
+    )
+    
     isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges))
     }
       
@@ -1152,7 +1162,7 @@ server <- function(input, output, session) {
                                        labelsize = 2, halo = F, cluster = "walktrap",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, size=1,edges.min = 2))
     Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMn)
-    plot(Map$map)
+    #plot(Map$map)
     values$TM=Map
     return(values)
   }

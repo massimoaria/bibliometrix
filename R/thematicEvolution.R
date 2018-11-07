@@ -92,6 +92,12 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
     res1=res[[(k-1)]]
     res2=res[[(k)]]
     
+    ### check for empty cluster list
+    if (res1$nclust==0 | res2$nclust==0){
+      cat(paste("\nNo topics in the period ",k-1," with this set of input parameters\n\n"))
+      return(list(check=FALSE))
+    }
+    
     ####
      res1$words$Cluster=paste(res1$clusters$name[res1$words$Cluster],"--",LETTERS[k-1],sep="")
      res1$clusters$label=paste(res1$clusters$name,"--",LETTERS[k-1],sep="")
@@ -160,7 +166,7 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
   edges$from=as.numeric(edges$from)
   edges$to=as.numeric(edges$to)
   
-  results=list(Nodes=nodes,Edges=edges,Data=INC)
+  results=list(Nodes=nodes,Edges=edges,Data=INC,check=TRUE)
   
   return(results)
   

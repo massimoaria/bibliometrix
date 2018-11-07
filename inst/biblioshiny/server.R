@@ -1111,6 +1111,7 @@ server <- function(input, output, session) {
       if (length(tab>=2)){
         
         minDegree=as.numeric(tab[input$CSn])
+        
         values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
         plot(values$CS$graph_terms)
         

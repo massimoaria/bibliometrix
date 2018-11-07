@@ -179,7 +179,6 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$gap
   clust=which(rank(a)==1)
   
-  
   # Perform the K-means clustering
   km.res <- kmeans((df), clust, nstart = 25)
   
@@ -222,11 +221,13 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   ## Factorial map of most contributing documents
   
   if (documents>dim(docCoord)[1]){documents=dim(docCoord)[1]}
-    centers=as.data.frame(km.res$centers[,1:2])
+    
+    centers=data.frame(dim1=km.res$centers[,1],dim2=km.res$centers[,2])
     centers$color="red"
     row.names(centers)=paste("cluster",as.character(1:dim(centers)[1]),sep="")
     A=docCoord[1:documents,1:2]
     A$color="grey"
+    
     names(centers)=names(A)
     A=rbind(A,centers)
     x=A$dim1

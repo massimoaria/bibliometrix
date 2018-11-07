@@ -176,8 +176,9 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   
   
   # Selection of optimal number of clusters (gap statistics)
-  a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$gap
-  clust=which(rank(a)==1)
+  #a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$y
+  a=diff(fviz_nbclust((df), kmeans, method = "wss",k.max=k.max)['data']$data$y)
+  clust=which(rank(a)==1)+1
   
   # Perform the K-means clustering
   km.res <- kmeans((df), clust, nstart = 25)

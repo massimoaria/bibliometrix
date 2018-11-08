@@ -12,6 +12,7 @@ New functionality:
 * Added "stat" parameter in networkStat()
 * Added "type" parameter in networkStat()
 * Added Multidimensional Scaling Analysis in conceptualStructure()
+* Added "shortlabel" parameter in bibloNetwork()
 
 
 Changes:

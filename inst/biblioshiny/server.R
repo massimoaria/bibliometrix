@@ -22,6 +22,7 @@ server <- function(input, output, session) {
   values$kk=0
   values$M=data.frame(PY=0)
   values$histsearch="NA"
+  values$citShortlabel="NA"
 
   
   
@@ -1171,14 +1172,15 @@ server <- function(input, output, session) {
     n = input$citNodes
     label.n = input$citLabels
     
-    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep)){
+    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep) | !(input$citShortlabel==values$citShortlabel)){
       
       values$citField=input$citField
       values$citSep=input$citSep
-      
+      if (input$citShortlabel=="Yes"){shortlabel=TRUE}else{shortlabel=FALSE}
+      values$citShortlabel=input$citShortlabel
       switch(input$citField,
              CR={
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", sep = input$citSep)
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", sep = input$citSep, shortlabel=shortlabel)
                values$Title= "Cited References network"
                
              },

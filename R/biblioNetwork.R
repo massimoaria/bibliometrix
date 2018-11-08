@@ -35,6 +35,7 @@
 #' \code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"}, \code{"titles"}, or \code{"abstracts"}.
 #' Default is \code{network = "authors"}.
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
+#' @param shortlabel is logical. IF TRUE, reference labels are stored in a short format. Default is \code{shortlabel=TRUE}.
 #' @return It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{\link{Matrix}}.
 #' @examples
 #' # EXAMPLE 1: Authors collaboration network
@@ -63,7 +64,7 @@
 #' 
 #' @export
 
-biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = ";"){
+biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = ";", shortlabel=TRUE){
   
   crossprod <- Matrix::crossprod
   NetMatrix=NA
@@ -167,8 +168,11 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
   if (network=="references"){
     ind=which(regexpr("[A-Za-z]",substr(colnames(NetMatrix),1,1))==1)
     NetMatrix=NetMatrix[ind,ind]
-    LABEL<-labelShort(NetMatrix,db=tolower(M$DB[1]))
-    colnames(NetMatrix)=rownames(NetMatrix)=LABEL
+    if (isTRUE(shortlabel)){    
+      LABEL<-labelShort(NetMatrix,db=tolower(M$DB[1]))
+      colnames(NetMatrix)=rownames(NetMatrix)=LABEL
+    }
+    
   }
   
   return(NetMatrix)

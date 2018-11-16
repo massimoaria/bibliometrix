@@ -729,7 +729,16 @@ navbarMenu("Conceptual Structure",
                                    
                       ),
                       mainPanel("Thematic Evolution",
-                                shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                
+                                tabsetPanel(type = "tabs",
+                                            tabPanel("Map",
+                                                     shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                            ),
+                                            tabPanel("Table",
+                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                            )
+                                )
+                                
                                 )
                     )
                     

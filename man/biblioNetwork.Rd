@@ -5,7 +5,7 @@
 \title{Creating Bibliographic networks}
 \usage{
 biblioNetwork(M, analysis = "coupling", network = "authors",
-  sep = ";")
+  sep = ";", shortlabel = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
@@ -21,6 +21,8 @@ Default is \code{analysis = "coupling"}.}
 Default is \code{network = "authors"}.}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
+
+\item{shortlabel}{is logical. IF TRUE, reference labels are stored in a short format. Default is \code{shortlabel=TRUE}.}
 }
 \value{
 It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{\link{Matrix}}.

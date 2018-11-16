@@ -855,6 +855,21 @@ server <- function(input, output, session) {
     
   })
   
+  output$TETable <- DT::renderDT({
+    
+    TEData=values$nexus$Data
+    TEData=TEData[TEData$Inc_index>0,]
+    names(TEData)=c("From", "To", "Inclusion Index", "Words", "Occurrences", "Total", "Weighted Inclusion Index")
+    DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TEData))-1))))) %>%
+      formatStyle(names(TEData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+  
   output$cocitPlot <- renderPlot({
     
     ## Co-citation network

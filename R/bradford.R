@@ -16,6 +16,11 @@
 #'
 #' @examples
 #' 
+#' # D <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
+#' 
+#' # M <- convert2df(file = D, dbsource = "isi", format = "bibtex")
+#' 
+#' # BR <- bradford(M)
 #'
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis
 #' @seealso \code{\link{summary}} method for class '\code{bibliometrix}'

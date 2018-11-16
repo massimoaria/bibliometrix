@@ -27,6 +27,11 @@ then the number of journals in each group will be proportional to 1:n:n2.
 }
 \examples{
 
+# D <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
+
+# M <- convert2df(file = D, dbsource = "isi", format = "bibtex")
+
+# BR <- bradford(M)
 
 }
 \seealso{

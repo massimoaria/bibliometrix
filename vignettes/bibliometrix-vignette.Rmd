@@ -234,7 +234,7 @@ The SCOPUS export tool creates an export file with the default name "scopus.bib"
 
 ## bibliometrix installation
 
-Download and install the most recent version of R (https://cran.r-project.org/)
+Download and install the most recent version of R (cran.r-project.org)
 
 Download and install the most recent version of Rstudio (http://www.rstudio.com)
 

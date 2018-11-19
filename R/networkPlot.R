@@ -101,7 +101,9 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   
   # label size
   if (isTRUE(label.cex)){
-    V(bsk.network)$label.cex <- log(1+(deg/max(deg)[1])*labelsize)}else{
+    lsize=log(1+(deg/max(deg)[1]))*labelsize
+    lsize[lsize<0.5]=0.5  ### min labelsize is fixed to 0.5
+    V(bsk.network)$label.cex <- lsize}else{
       V(bsk.network)$label.cex <- labelsize}
   
  # Select number of vertices to plot
@@ -233,7 +235,7 @@ delete.isolates <- function(graph, mode = 'all') {
 ### clusteringNetwork
 
 clusteringNetwork <- function(bsk.network,cluster){
-  colorlist= c(brewer.pal(9, 'Set1'), brewer.pal(8, 'Set2'),brewer.pal(12, 'Set3'),brewer.pal(12, 'Paired'))
+  colorlist= c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   
   switch(cluster,
          none={
@@ -262,7 +264,7 @@ clusteringNetwork <- function(bsk.network,cluster){
   
   
   E(bsk.network)$color <- apply(El, 1, function(x){
-                        colorlist= c(brewer.pal(9, 'Set1'), brewer.pal(8, 'Set2'),brewer.pal(12, 'Set3'),brewer.pal(12, 'Paired'))
+                        colorlist= c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
                         if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]){
                           C=colorlist[V(bsk.network)$community[x[1]]]
                         }else{C='#E8E8E8'}

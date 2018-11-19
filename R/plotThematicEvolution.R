@@ -4,6 +4,7 @@
 #' 
 #' @param Nodes is a list of nodes obtained by \code{\link{thematicEvolution}} function.
 #' @param Edges is a list of edges obtained by \code{\link{thematicEvolution}} function.
+#' @param measure is a character. It can be \code{measure=("inclusion","stability")}.
 #' @return a sankeyPlot
 #' 
 #'
@@ -22,8 +23,16 @@
 #'
 #' @export
 
-plotThematicEvolution<-function(Nodes,Edges){
+plotThematicEvolution<-function(Nodes,Edges,measure="inclusion"){
   
+  switch(measure,
+         inclusion={
+           Edges=Edges[-4]
+         },
+         stability={
+           Edges=Edges[-3]
+         })
+  names(Edges)[3]="weight"
   networkD3::sankeyNetwork(Links = Edges, Nodes = Nodes, Source = "from", Target = "to", 
                            NodeID = "name", Value = "weight", width = 900, fontSize = 12,
                            nodeWidth = 30,  NodeGroup = "group",LinkGroup = "group")

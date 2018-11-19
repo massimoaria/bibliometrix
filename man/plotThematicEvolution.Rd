@@ -4,12 +4,14 @@
 \alias{plotThematicEvolution}
 \title{Plot a Thematic Evolution Analysis}
 \usage{
-plotThematicEvolution(Nodes, Edges)
+plotThematicEvolution(Nodes, Edges, measure = "inclusion")
 }
 \arguments{
 \item{Nodes}{is a list of nodes obtained by \code{\link{thematicEvolution}} function.}
 
 \item{Edges}{is a list of edges obtained by \code{\link{thematicEvolution}} function.}
+
+\item{measure}{is a character. It can be \code{measure=("inclusion","stability")}.}
 }
 \value{
 a sankeyPlot

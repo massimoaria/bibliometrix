@@ -109,7 +109,7 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
     CL1=unique(res1$clusters$label)
     CL2=unique(res2$clusters$label)
     
-    Inc=data.frame(CL1=NA,CL2=NA,Inc_index=NA,Words="NA",Occ=NA,Tot=NA,Inc_Weighted=NA, stringsAsFactors = FALSE)
+    Inc=data.frame(CL1=NA,CL2=NA,Inc_index=NA,Words="NA",Occ=NA,Tot=NA,Inc_Weighted=NA, Tot_CL1=NA,Tot_CL2=NA, Stability=NA, stringsAsFactors = FALSE)
     cont=0
     
     for (ii in 1:length(CL1)){
@@ -129,6 +129,9 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
         Inc[cont,5]=si
         Inc[cont,6]=s1
         Inc[cont,7]=si/s1
+        Inc[cont,8]=length(w1)
+        Inc[cont,9]=length(w2)
+        Inc[cont,10]=length(wi)/(length(w1)+length(w2)-length(wi))
         
         
       }
@@ -146,13 +149,13 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
   }
   
   ### sankey plot data
-  edges = INC[,c(1,2,3)]
+  edges = INC[,c(1,2,3,10)]
   edges=edges[edges[,3]>0,]
   nodes = data.frame("name"=unique(c(edges$CL1,edges$CL2)),stringsAsFactors = FALSE)
   nodes$group=nodes$name
   
   cont=0
-  edges[,4]=edges[,1]
+  edges[,5]=edges[,1]
   for (i in nodes$name){
     
     ind=which(edges[,1]==i)
@@ -162,7 +165,7 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
     cont=cont+1
   }
   
-  names(edges)=c("from","to","weight","group")
+  names(edges)=c("from","to","Inclusion","Stability","group")
   edges$from=as.numeric(edges$from)
   edges$to=as.numeric(edges$to)
   

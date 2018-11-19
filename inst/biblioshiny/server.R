@@ -849,7 +849,7 @@ server <- function(input, output, session) {
       need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
     )
     
-    isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges))
+    isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges, input$TEmeasure))
     }
       
     
@@ -859,7 +859,7 @@ server <- function(input, output, session) {
     
     TEData=values$nexus$Data
     TEData=TEData[TEData$Inc_index>0,]
-    names(TEData)=c("From", "To", "Inclusion Index", "Words", "Occurrences", "Total", "Weighted Inclusion Index")
+    names(TEData)=c("From", "To", "Inclusion Index", "Words", "Occurrences", "Total", "Weighted Inclusion Index", "Total Occ From", "Total Occ To", "Stability Index")
     DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),

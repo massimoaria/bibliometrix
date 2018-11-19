@@ -1,3 +1,11 @@
+bibliometrix v2.0.3 (Release date: 2018-11-19)
+==============
+
+New functionality:
+* Added "measure" parameter in plotThematicEvolution
+
+
+
 bibliometrix v2.0.2 (Release date: 2018-10-26)
 ==============
 

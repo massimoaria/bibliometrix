@@ -31,8 +31,9 @@ It converts a SCOPUS Export file and create a data frame from it, with cases cor
 \seealso{
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 
-Other converting functions: \code{\link{cochrane2df}},
-  \code{\link{convert2df}}, \code{\link{isi2df}},
-  \code{\link{isibib2df}}, \code{\link{pubmed2df}}
+Other converting functions: \code{\link{bib2df}},
+  \code{\link{cochrane2df}}, \code{\link{convert2df}},
+  \code{\link{isi2df}}, \code{\link{isibib2df}},
+  \code{\link{pubmed2df}}
 }
 \concept{converting functions}

@@ -73,13 +73,13 @@ server <- function(input, output, session) {
           Dpar=readFiles(l)
           return(Dpar)
           }))
-        capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+        (M <- convert2df(D, dbsource=input$dbsource,format=input$format))
     }
     
     ### txt or bib formats  
     if (grepl(".*\\.txt",inFile$name) | grepl(".*\\.bib",inFile$name)){
         D=readFiles(inFile$datapath)
-        capture.output(M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+        (M <- convert2df(D, dbsource=input$dbsource,format=input$format))
     }
       
     ### RData format
@@ -1174,10 +1174,10 @@ server <- function(input, output, session) {
            })
     
     S <- normalizeSimilarity(NetMatrix, type = "association")
-    capture.output(net1 <- networkPlot(S, n=500, Title = "Keyword co-occurrences",type="fruchterman",
+    capture.output(net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="fruchterman",
                                        labelsize = 2, halo = F, cluster = "walktrap",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, size=1,edges.min = 2))
-    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMn)
+    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMfreq)
     #plot(Map$map)
     values$TM=Map
     return(values)

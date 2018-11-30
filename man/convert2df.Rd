@@ -69,8 +69,9 @@ biblio_df_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 
 \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 
-Other converting functions: \code{\link{cochrane2df}},
-  \code{\link{isi2df}}, \code{\link{isibib2df}},
-  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
+Other converting functions: \code{\link{bib2df}},
+  \code{\link{cochrane2df}}, \code{\link{isi2df}},
+  \code{\link{isibib2df}}, \code{\link{pubmed2df}},
+  \code{\link{scopus2df}}
 }
 \concept{converting functions}

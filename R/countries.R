@@ -4,7 +4,7 @@
 #' Data are used by \code{\link{biblioAnalysis}} function 
 #' to extract Country Field of Cited References and Authors. 
 #'
-#' @format A data frame with 197 rows and 4 variable:
+#' @format A data frame with 197 rows and 4 variables:
 #'  \describe{
 #'     \item{countries}{country names}
 #'     \item{continent}{continent names}

@@ -391,7 +391,7 @@ For a correct extraction, you need to identify the separator field among differe
 ```{r}
 # M$CR[1]
 ```
-The figure shows the reference string of the first manuscript. In this case, the separator field is `sep = ".  "`.
+The figure shows the reference string of the first manuscript. In this case, the separator field is `sep = ";"`.
 
 <div style="width:900px; height=600px">
 ![Figure 6](figures/cr1.png)
@@ -400,13 +400,13 @@ The figure shows the reference string of the first manuscript. In this case, the
 
 To obtain the most frequent cited manuscripts:
 ```{r Article citation}
-CR <- citations(M, field = "article", sep = ".  ")
+CR <- citations(M, field = "article", sep = ";")
 cbind(CR$Cited[1:10])
 ```
 
 To obtain the most frequent cited first authors:
 ```{r Author citation}
-CR <- citations(M, field = "author", sep = ".  ")
+CR <- citations(M, field = "author", sep = ";")
 cbind(CR$Cited[1:10])
 ```
 
@@ -415,7 +415,7 @@ Local citations measures how many times an author (or a document) included in th
 
 To obtain the most frequent local cited authors:
 ```{r Local Author citation}
-CR <- localCitations(M, sep = ".  ")
+CR <- localCitations(M, sep = ";")
 CR$Authors[1:10,]
 CR$Papers[1:10,]
 ```
@@ -441,18 +441,18 @@ The h-index is an author-level metric that attempts to measure both the producti
 
 The index is based on the set of the scientist's most cited papers and the number of citations that they have received in other publications.
 
-The function *Hindex* calculates the authors' H-index and its variants (g-index and m-index) in a bibliographic collection.
+The function *Hindex* calculates the authors' H-index or the sources' H-index and its variants (g-index and m-index) in a bibliographic collection.
 
-Function arguments are: *M* a bibliographic data frame; *authors* a character vector containing the authors' names for which you want to calculate the H-index. The argument has the form c("SURNAME1 N","SURNAME2 N",...). 
+Function arguments are: *M* a bibliographic data frame; *field* is character element that defines the unit of analysis in terms of authors (field = "auhtor") or sources (field = "source"); *elements* a character vector containing the authors' names (or the sources' names) for which you want to calculate the H-index. The argument has the form c("SURNAME1 N","SURNAME2 N",...). 
 
 In other words, for each author: surname and initials are separated by one blank space. 
-i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *authors* argument is *authors = c("ARIA M", "CUCCURULLO C")*.
+i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *elements* argument is *elements = c("ARIA M", "CUCCURULLO C")*.
 
 To calculate the h-index of Lutz Bornmann in this collection:
 
 ```{r h-index}
 
-indices <- Hindex(M, authors="BORNMANN L", sep = ";",years=10)
+indices <- Hindex(M, field = "author", elements="BORNMANN L", sep = ";", years = 10)
 
 # Bornmann's impact indices:
 indices$H
@@ -468,7 +468,7 @@ To calculate the h-index of the first 10 most productive authors (in this collec
 
 authors=gsub(","," ",names(results$Authors)[1:10])
 
-indices <- Hindex(M, authors, sep = ";",years=50)
+indices <- Hindex(M, field = "author", elements=authors, sep = ";", years = 50)
 
 indices$H
 ```
@@ -796,7 +796,7 @@ net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration
 ```{r Co-citation network, fig.height=7, fig.width=7, warning=FALSE}
 # Create a co-citation network
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
 
 # Plot the network
 net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
@@ -841,10 +841,10 @@ The function \code{histNetwork} generates a chronological direct citation networ
 ```{r Historical Co-citation network, fig.height=7, fig.width=10, warning=FALSE}
 # Create a historical citation network
 options(width=130)
-histResults <- histNetwork(M, min.citations = 10, sep = ".  ")
+histResults <- histNetwork(M, min.citations = 10, sep = ";")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, n=10, size = 10, labelsize=5, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
+net <- histPlot(histResults, n=15, size = 20, labelsize=5, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
 
 ```
 

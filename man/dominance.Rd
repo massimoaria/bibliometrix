@@ -16,8 +16,11 @@ The function \code{dominance} returns a data frame with cases corresponding to t
 
 the data frame variables are:
 \tabular{lll}{
+\code{Author} \tab   \tab Author's name\cr
 \code{Dominance Factor}  \tab   \tab Dominance Factor (DF = FAA / MAA)\cr
-\code{Multi Authored}   \tab   \tab N. of Multi-Authored Articles (MAA)\cr
+\code{Tot Articles}   \tab   \tab N. of Authored Articles (TAA)\cr
+\code{Single Authored}   \tab   \tab N. of Single-Authored Articles (SAA)\cr
+\code{Multi Authored}   \tab   \tab N. of Multi-Authored Articles (MAA=TAA-SAA)\cr
 \code{First Authored} \tab   \tab N. of First Authored Articles (FAA)\cr
 \code{Rank by Articles}    \tab   \tab Author Ranking by N. of Articles\cr
 \code{Rank by DF}    \tab   \tab Author Ranking by Dominance Factor}

@@ -4,6 +4,7 @@ bibliometrix v2.0.3 (Release date: 2018-11-19)
 New functionality:
 * Added "measure" parameter in plotThematicEvolution
 * Added the new function bib2df. It give the possibility to import data from a "generic" bibtex file format  (i.e. Zotero, JabRef, etc.)
+* Added the possibility to calculate H-index for sources
 
 
 Changes:

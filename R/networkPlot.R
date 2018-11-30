@@ -262,9 +262,9 @@ clusteringNetwork <- function(bsk.network,cluster){
   V(bsk.network)$community <- net_groups$membership
   El=as.data.frame(get.edgelist(bsk.network,names=F))
   
-  
+  colorlist= c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   E(bsk.network)$color <- apply(El, 1, function(x){
-                        colorlist= c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
+                        
                         if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]){
                           C=colorlist[V(bsk.network)$community[x[1]]]
                         }else{C='#E8E8E8'}

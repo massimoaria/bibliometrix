@@ -269,21 +269,19 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
   switch(dbsource,
     isi={
       switch(format,
-             bibtex={M=isibib2df(file)},
+             bibtex={M=bib2df(file,dbsource="isi")},
              plaintext={M=isi2df(file)}
       )},
-    scopus={M=scopus2df(file)
+    scopus={M=bib2df(file,dbsource="scopus")
     },
     pubmed={M=pubmed2df(file)
-    M$CR="none"
     },
     cochrane={M=cochrane2df(file)
-    M$CR="none"
     }
 )
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
   if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC=NA}
-  
+  if (!("CR" %in% names(M))){M$CR="none"}
   if (dbsource!="cochrane"){M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
   
   cat("Done!\n\n")
@@ -319,8 +317,6 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
     }
  
   row.names(M) <- SR
-    
-  
   
   return(M)
 

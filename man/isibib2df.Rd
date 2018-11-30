@@ -2,7 +2,7 @@
 % Please edit documentation in R/isibib2df.R
 \name{isibib2df}
 \alias{isibib2df}
-\title{Convert an Clarivate Analitycs WoS Export file into a data frame}
+\title{Convert a Clarivate Analitycs WoS Export file into a data frame}
 \usage{
 isibib2df(D)
 }
@@ -13,7 +13,7 @@ isibib2df(D)
 a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.
 }
 \description{
-It converts an Clarivate Analitycs WoS Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+It converts a Clarivate Analitycs WoS Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
 # A ISI Export file can be read using \\code{\\link{readLines}} function:
@@ -30,8 +30,9 @@ It converts an Clarivate Analitycs WoS Export file and create a data frame from 
 \seealso{
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 
-Other converting functions: \code{\link{cochrane2df}},
-  \code{\link{convert2df}}, \code{\link{isi2df}},
-  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
+Other converting functions: \code{\link{bib2df}},
+  \code{\link{cochrane2df}}, \code{\link{convert2df}},
+  \code{\link{isi2df}}, \code{\link{pubmed2df}},
+  \code{\link{scopus2df}}
 }
 \concept{converting functions}

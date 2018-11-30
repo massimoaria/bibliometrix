@@ -4,14 +4,18 @@
 \alias{Hindex}
 \title{h-index calculation}
 \usage{
-Hindex(M, authors, sep = ";", years = 10)
+Hindex(M, field = "author", elements, sep = ";", years = 10)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
 
-\item{authors}{is a character vector. It contains the the authors' names list for which you want to calculate the H-index. The aurgument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
-i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{authors} argument is \code{authors = c("SEMPRONIO TC", "ARIA M")}.}
+\item{field}{is character. It can be equal to c("author", "source"). field indicates if H-index have to be calculated for a list of authors or for a list of sources. Default
+value is \code{field = "author"}.}
+
+\item{elements}{is a character vector. It contains the the authors' names list or the source list for which you want to calculate the H-index. When the field is
+"author", the aurgument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
+i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.}
 
 \item{sep}{is the field separator character. This character separates auhtors in each string of AU column of the bibiographic data frame. The default is \code{sep = ";"}.}
 
@@ -31,13 +35,15 @@ data(scientometrics)
 
 authors <- c("SMALL H", "CHEN DZ")
 
-Hindex(scientometrics, authors, sep = ";")$H
+Hindex(scientometrics, field = "author", elements = authors, sep = ";")$H
+
+Hindex(scientometrics, field = "source", elements = "SCIENTOMETRICS", sep = ";")$H
 
 ### EXAMPLE 2: Garfield h-index###
  
 data(garfield)
 
-indices=Hindex(garfield, authors="GARFIELD E", sep = ";")
+indices=Hindex(garfield, field = "author", elements = "GARFIELD E", , sep = ";")
 
 # h-index, g-index and m-index of Eugene Garfield
 indices$H

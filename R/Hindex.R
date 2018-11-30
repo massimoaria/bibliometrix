@@ -4,8 +4,11 @@
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 #'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param authors is a character vector. It contains the the authors' names list for which you want to calculate the H-index. The aurgument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
-#' i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{authors} argument is \code{authors = c("SEMPRONIO TC", "ARIA M")}.
+#' @param field is character. It can be equal to c("author", "source"). field indicates if H-index have to be calculated for a list of authors or for a list of sources. Default
+#' value is \code{field = "author"}.
+#' @param elements is a character vector. It contains the the authors' names list or the source list for which you want to calculate the H-index. When the field is
+#' "author", the aurgument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
+#' i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.
 #' @param sep is the field separator character. This character separates auhtors in each string of AU column of the bibiographic data frame. The default is \code{sep = ";"}.
 #' @param years is a integer. It indicates the number of years to consider for Hindex calculation. Default is 10.
 #' @return an object of \code{class} "list". It contains two elements: H is a data frame with h-index, g-index and m-index for each author; CitationList is a list with the bibliographic collection for each author.
@@ -19,13 +22,15 @@
 #'
 #' authors <- c("SMALL H", "CHEN DZ")
 #'
-#' Hindex(scientometrics, authors, sep = ";")$H
+#' Hindex(scientometrics, field = "author", elements = authors, sep = ";")$H
+#' 
+#' Hindex(scientometrics, field = "source", elements = "SCIENTOMETRICS", sep = ";")$H
 #' 
 #' ### EXAMPLE 2: Garfield h-index###
 #'  
 #' data(garfield)
 #'
-#' indices=Hindex(garfield, authors="GARFIELD E", sep = ";")
+#' indices=Hindex(garfield, field = "author", elements = "GARFIELD E", , sep = ";")
 #'
 #' # h-index, g-index and m-index of Eugene Garfield
 #' indices$H
@@ -40,7 +45,7 @@
 #' 
 #' @export
 
-Hindex <- function(M, authors, sep = ";",years=10){
+Hindex <- function(M, field="author", elements, sep = ";",years=10){
   
   M$TC=as.numeric(M$TC)
   M$PY=as.numeric(M$PY)
@@ -49,15 +54,26 @@ Hindex <- function(M, authors, sep = ";",years=10){
   if (min(M$PY)<past){M=M[M$PY>=past,]}
   
   TC2=NULL
-   ## identify manuscripts of the author
-  AU=M$AU
-  AU=gsub(","," ",AU)
-  AU=gsub("  "," ",AU)
+  
+  switch(field,
+         author={
+           AU=M$AU
+           AU=gsub(","," ",AU)
+           AU=gsub("  "," ",AU)
+           Name="Author"
+           },
+         source={
+           AU=M$SO
+           Name="Source"
+         })
+   
+  ## identify manuscripts of the author or of the sources
+  
  
-  H=data.frame(Author=authors,h_index=0,g_index=0,m_index=0,TC=0,NP=0)
+  H=data.frame(Element=elements,h_index=0,g_index=0,m_index=0,TC=0,NP=0)
   TotalCitations=list()
-  for (j in 1:length(authors)){
-    author=authors[j]
+  for (j in 1:length(elements)){
+    author=elements[j]
     ind=which(regexpr(author,AU)!=-1)
     
     if (length(ind)>0){
@@ -79,7 +95,8 @@ Hindex <- function(M, authors, sep = ";",years=10){
     df=data.frame(Authors=substr(M$AU[ind], 1, 30),Journal=substr(M$SO[ind], 1, 30),Year=as.numeric(M$PY[ind]),TotalCitation=M$TC[ind])
     TotalCitations[[j]]=df[order(df$TotalCitation),]
     }
-    }
+  }
+  names(H)[1]=Name
   results=list(H=H,CitationList=TotalCitations)
   return(results)
   }

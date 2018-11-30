@@ -87,7 +87,7 @@ plot.bibliometrix<-function(x, ...){
   Tab=table(x$Years)
   
   ## inserting missing years
-  YY=setdiff(seq(min(x$Years),max(x$Years)),names(Tab))
+  YY=setdiff(seq(min(x$Years, na.rm=TRUE),max(x$Years, na.rm=TRUE)),names(Tab))
   Y=data.frame(Year=as.numeric(c(names(Tab),YY)),Freq=c(as.numeric(Tab),rep(0,length(YY))))
   Y=Y[order(Y$Year),]
   
@@ -130,7 +130,7 @@ plot.bibliometrix<-function(x, ...){
   names(Table2)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
   
   ## inserting missing years
-  YY=setdiff(seq(min(x$Years),max(x$Years)),Table2$Year)
+  YY=setdiff(seq(min(x$Years,na.rm=TRUE),max(x$Years,na.rm=TRUE)),Table2$Year)
   if (length(YY>0)){
   YY=data.frame(YY,0,0,0,0)
   names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")

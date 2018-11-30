@@ -685,10 +685,9 @@ navbarMenu("Conceptual Structure",
                                                            "Titles" = "TI",
                                                            "Abstracts" = "AB"),
                                                selected = "ID"),
-                        numericInput("TMn", 
-                                     label=("Min. word frequency"), 
-                                     value = 5)
-                    ),
+                                   sliderInput("TMn", label="Number of Words",value=250,min=50,max=500,step=10),
+                                   sliderInput("TMfreq", label="Min Cluster Frequency",value=5,min=1,max=100,step=1)
+                                   ),
                     mainPanel("Thematic Map",
                               tabsetPanel(type = "tabs",
                                 tabPanel("Map",

@@ -3,6 +3,12 @@ bibliometrix v2.0.3 (Release date: 2018-11-19)
 
 New functionality:
 * Added "measure" parameter in plotThematicEvolution
+* Added the new function bib2df. It give the possibility to import data from a "generic" bibtex file format  (i.e. Zotero, JabRef, etc.)
+
+
+Changes:
+* Completely rewritten the importing function from bibtex files
+* Solved an issue in dominance(). Now Dominance factor in correctly calculated
 
 
 

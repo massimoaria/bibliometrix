@@ -7,8 +7,11 @@
 #'
 #' the data frame variables are:
 #' \tabular{lll}{
+#' \code{Author} \tab   \tab Author's name\cr
 #' \code{Dominance Factor}  \tab   \tab Dominance Factor (DF = FAA / MAA)\cr
-#' \code{Multi Authored}   \tab   \tab N. of Multi-Authored Articles (MAA)\cr
+#' \code{Tot Articles}   \tab   \tab N. of Authored Articles (TAA)\cr
+#' \code{Single Authored}   \tab   \tab N. of Single-Authored Articles (SAA)\cr
+#' \code{Multi Authored}   \tab   \tab N. of Multi-Authored Articles (MAA=TAA-SAA)\cr
 #' \code{First Authored} \tab   \tab N. of First Authored Articles (FAA)\cr
 #' \code{Rank by Articles}    \tab   \tab Author Ranking by N. of Articles\cr
 #' \code{Rank by DF}    \tab   \tab Author Ranking by Dominance Factor}
@@ -41,36 +44,22 @@ dominance<-function(results, k = 10){
   AU=names(results$Authors)
   
   
-  Mnt=rep(NA,k)
+  Tot=Single=rep(NA,length(FA))
   for (i in 1:length(FA)){
-    Mnt[i]=results$Authors[FA[i] == AU]
+    Single[i]=sum(results$FirstAuthors[results$nAUperPaper==1]==FA[i])
+    Tot[i]=results$Authors[FA[i] == AU]
     
   }
-  Dominance=Nmf/Mnt
+  Dominance=Nmf/(Tot-Single)
   
-  
-  t=0
-  cont=0
-  D=data.frame(matrix(NA,k,3))
-  
-  for (i in 1:length(FA)){
-    if (sum(AU[i]==FA)>0){
-      
-      cont=cont+1
-      D[cont,1]=Dominance[AU[i]==FA]
-      D[cont,2]=results$Authors[i]
-      D[cont,3]=Nmf[AU[i]==FA]
-      
-      row.names(D)[cont]=AU[i]
-    }
-    if (cont==k) break
-  }
-  
-  
-  D$RankbyArticles=1:dim(D)[1]
-  D=D[order(-D[,1]),]
-  D$RankDF=1:dim(D)[1]
-  names(D)=c("Dominance Factor","Multi Authored","First Authored","Rank by Articles","Rank by DF")
+  D=data.frame("Author"=FA,"Dominance Factor"=as.numeric(Dominance),"Articles"=Tot,"Single-Authored"=Single,"Multi-Authored"=Tot-Single,"First-Author"=as.numeric(Nmf))
+  D=D[order(-D[,3]),]
+  D=D[1:k,]
+  D$RankbyArticles=rank(D$Articles,ties.method="min")
+  D=D[order(-D$Dominance.Factor),]
+  D$RankDF=rank(-D$Dominance.Factor,ties.method="min")
+  names(D)=c("Author","Dominance Factor","Tot Articles","Single-Authored","Multi-Authored","First-Authored","Rank by Articles","Rank by DF")
+  row.names(D)=1:k
   return(D)
 }
 

@@ -57,7 +57,7 @@ bib2df<-function(D, dbsource="isi"){
   names(DATA) <- uniqueTag
 
   for (i in 1:nP){
-    print(i)
+    #print(i)
     iP <- Papers[i]
     iPs <- Papers[i+1]-1
     if (i%%100==0 | i==nP) cat("Articles extracted  ",i,"\n")
@@ -89,8 +89,8 @@ bib2df<-function(D, dbsource="isi"){
     }
     
   }
-  
-  DATA$DT2=substr(DATA$DT2,1,regexpr("\\{",DATA$DT2)-1)
+  if ("DT2" %in% names(DATA)){
+  DATA$DT2=substr(DATA$DT2,1,regexpr("\\{",DATA$DT2)-1)}
   
   # remove tags from fields
   for (i in 1:length(Tag)){

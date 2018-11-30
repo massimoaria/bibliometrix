@@ -274,7 +274,8 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
       )},
     scopus={M=bib2df(file,dbsource="scopus")
     },
-    generic={M=bib2df(file,dbsource="generic")
+    generic={print("SI")
+      M=bib2df(file,dbsource="generic")
     },
     pubmed={M=pubmed2df(file)
     },

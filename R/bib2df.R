@@ -57,7 +57,7 @@ bib2df<-function(D, dbsource="isi"){
   names(DATA) <- uniqueTag
 
   for (i in 1:nP){
-    #print(i)
+    print(i)
     iP <- Papers[i]
     iPs <- Papers[i+1]-1
     if (i%%100==0 | i==nP) cat("Articles extracted  ",i,"\n")
@@ -114,6 +114,7 @@ preprocessing <- function(D){
   
   ## normalize bibtex data
   D=trim(D)
+
   #D=gsub("\\.\\s+",";",D) ## for references
   D=gsub("\\s+", " ",D)
   D=gsub("\\{\\[\\}","\\[",D)

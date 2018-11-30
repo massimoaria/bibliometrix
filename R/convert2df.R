@@ -257,9 +257,9 @@
 convert2df<-function(file,dbsource="isi",format="plaintext"){
 
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
-  if (length(setdiff(dbsource,c("isi","scopus","pubmed","cochrane")))>0){
+  if (length(setdiff(dbsource,c("isi","scopus","pubmed","cochrane","generic")))>0){
     cat("\n 'dbsource' argument is not properly specified")
-    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'scopus' or 'pubmed'.\n")}
+    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'scopus', 'generic', or 'pubmed'.\n")}
   if (length(setdiff(format,c("plaintext","bibtex","pubmed","cochrane")))>0){
     cat("\n 'format' argument is not properly specified")
     cat("\n 'format' argument has to be a character string matching 'plaintext or 'bibtex'.\n")}
@@ -273,6 +273,8 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
              plaintext={M=isi2df(file)}
       )},
     scopus={M=bib2df(file,dbsource="scopus")
+    },
+    generic={M=bib2df(file,dbsource="generic")
     },
     pubmed={M=pubmed2df(file)
     },

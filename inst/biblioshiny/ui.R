@@ -227,7 +227,7 @@ navbarMenu("Descriptive Analysis",
                       
                     )
            ),
-           tabPanel("H-Index",
+           tabPanel("H-index",
                     sidebarLayout(
                       
                       

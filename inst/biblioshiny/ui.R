@@ -227,6 +227,25 @@ navbarMenu("Descriptive Analysis",
                       
                     )
            ),
+           tabPanel("H-Index",
+                    sidebarLayout(
+                      
+                      
+                      sidebarPanel(width=3,
+                                   actionButton("applyH", "Apply!"),
+                                   hr(),
+                                   selectInput("unitH", 
+                                               label = "Unit of Analysis",
+                                               choices = c("Authors"= "author",
+                                                           "Sources"="source"),
+                                               selected = "author")
+                                   ),
+                      mainPanel(
+                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "hindexTable"))
+                      )
+                      
+                    )
+           ),
            "  ",
            "  ",
            "Laws",

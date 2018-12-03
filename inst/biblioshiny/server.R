@@ -176,7 +176,8 @@ server <- function(input, output, session) {
     indexSO=(ifelse(M$SO %in% input$selectSource,TRUE,FALSE))
     M=((M[M$SO %in% input$selectSource,]))
     values$M=M
-    values$results=list("NA") ## to reset summary statistics
+    #values$results=list("NA") ## to reset summary statistics
+    values<-initial(values)
     Mdisp=as.data.frame(apply(M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)
     
     DT::datatable(Mdisp, rownames = FALSE, extensions = c("Buttons"),
@@ -415,6 +416,22 @@ server <- function(input, output, session) {
     plot(g)
     #plot(results)
     }, height = 500, width =900)
+  
+  output$hindexTable <- DT::renderDT({
+    
+    input$applyH
+    
+    isolate(values<-hindex(input, values))
+
+    isolate(DT::datatable(values$H, rownames = FALSE,
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$H))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center'))
+   
+  })
   
   output$bradfordPlot <- renderPlot({
     
@@ -1005,6 +1022,22 @@ server <- function(input, output, session) {
     plot(g)
   }
   
+  hindex<-function(input,value){
+    
+    switch(input$unitH,
+           author={
+             AU=gsub(",","",names(tableTag(values$M,"AU")))
+             values$H=Hindex(values$M, field = "author", elements = AU, sep = ";", years=100)$H
+           },
+           source={
+             SO=names(sort(table(M$SO),decreasing = TRUE))
+             values$H=Hindex(values$M, field = "source", elements = SO, sep = ";", years=100)$H
+           }
+    )
+    
+    return(values)
+  }
+  
   wordlist <- function(M, Field, n, measure){
     switch(Field,
            ID={v=tableTag(values$M,"ID")},
@@ -1368,5 +1401,21 @@ server <- function(input, output, session) {
     
   }
   
+  initial<-function(values){
+    values$results=list("NA")
+    values$log="working..."
+    values$load="FALSE"
+    values$field="NA"
+    values$citField=values$colField=values$citSep="NA"
+    values$NetWords=values$NetRefs=values$ColNetRefs=matrix(NA,1,1)
+    values$Title="Network"
+    values$Histfield="NA"
+    values$histlog="working..."
+    values$kk=0
+    values$histsearch="NA"
+    values$citShortlabel="NA"
+    
+    return(values)
+  }
 
 } ## End of Server

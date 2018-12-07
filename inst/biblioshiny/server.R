@@ -1030,7 +1030,7 @@ server <- function(input, output, session) {
              values$H=Hindex(values$M, field = "author", elements = AU, sep = ";", years=100)$H
            },
            source={
-             SO=names(sort(table(M$SO),decreasing = TRUE))
+             SO=names(sort(table(values$M$SO),decreasing = TRUE))
              values$H=Hindex(values$M, field = "source", elements = SO, sep = ";", years=100)$H
            }
     )

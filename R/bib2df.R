@@ -72,7 +72,7 @@ bib2df<-function(D, dbsource="isi"){
         END <- which(regexpr(".*\\}",D[Seq])==1)[1]
         POSEND <- seq(POS,(POS+END-1))
         if (uniqueTag[j]=="C1"){
-          DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=";")
+          DATA[[uniqueTag[j]]][i] <- paste0(DD[POSEND],collapse=";")
         }
         if (uniqueTag[j]=="CR" & length(POSEND)>1){
           DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=";")

@@ -113,8 +113,8 @@ bib2df<-function(D, dbsource="isi"){
 preprocessing <- function(D){
   
   ## normalize bibtex data
+  ind=which(regexpr("\\@",D)==1)
   D=trim(D)
-
   #D=gsub("\\.\\s+",";",D) ## for references
   D=gsub("\\s+", " ",D)
   D=gsub("\\{\\[\\}","\\[",D)
@@ -123,12 +123,13 @@ preprocessing <- function(D){
   D=gsub("\\}\\}","\\}",D)
   
   D=gsub(" = ","=",D)
-  ind=which(regexpr("\\@",D)==1)
+  #ind=which(regexpr("\\@",D)==1)
   D1=D
   D1[ind]=gsub("\\@","manuscript={",D[ind])
   D[ind] <- gsub("\\@","manuscript=",D[ind])
   D1=D1[which(regexpr("=\\{",D1)>-1)]
   Tag<-unique(gsub("(=\\{).*","\\1",D1))
+  D=gsub("@","",D)
   
   txt=list(D=tolower(D),DD=D,Tag=tolower(Tag))
   return(txt)

@@ -1,7 +1,11 @@
-bibliometrix v2.0.3 (Release date: 2018-11-19)
+bibliometrix v2.1.0 (Release date: 2019-01-06)
 ==============
 
 New functionality:
+* biblioshiny networks are now plotted using VisNetwork package.
+* biblioshiny menu have been completely rewritten. Now, descriptive analyses are organized by the unit of analysis
+* Several descriptive plots and tables have been added
+* Added the new funtion authorProdOverTime to calclulate and plot the productivity over the time of the top authors
 * Added "measure" parameter in plotThematicEvolution
 * Added the new function bib2df. It give the possibility to import data from a "generic" bibtex file format  (i.e. Zotero, JabRef, etc.)
 * Added the possibility to calculate H-index for sources
@@ -10,6 +14,7 @@ New functionality:
 Changes:
 * Completely rewritten the importing function from bibtex files
 * Solved an issue in dominance(). Now Dominance factor in correctly calculated
+* Solved sevaral issues in importing functions due to inconsistence in WOS/SCOPUS web-exporting procedures
 
 
 

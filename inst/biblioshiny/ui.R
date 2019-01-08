@@ -10,15 +10,15 @@ if (!(require(wordcloud2))){install.packages("wordcloud2")}
 if (!require(colourpicker)){install.packages("colourpicker")}
 if (!require(treemap)){install.packages("treemap")}
 if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
+if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
 require(Matrix, quietly = TRUE)
-
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 
-ui <-  navbarPage("biblioshiny: The shiny app for bibliometrix R-package",
+ui <-  navbarPage("biblioshiny for bibliometrix",
                   theme=shinythemes::shinytheme("flatly"),
-
+                  
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
                            fluidRow(
@@ -147,113 +147,67 @@ tabPanel(
                     
            ),
 
-### Descriptive Analysis PAGE ----
-navbarMenu("Descriptive Analysis",
+
+### DATASET MENU ----
+navbarMenu("Dataset",
            "  ",
            "  ",
-           "Impact & Productivity",
-           tabPanel("Tables",
+           tabPanel("Main Information",
                     sidebarLayout(
-                      
-                      sidebarPanel(width=3,
-                        selectInput("summary_type", 
-                                    label = "Result:",
-                                    choices = c("Main Information about data"="tab1", 
-                                                "Annual Scientific Production"="tab2",
-                                                "Corresponding Author's Countries"="tab5",
-                                                "Country Scientific Production"="tab10",
-                                                "Most Cited Papers"="tab4",
-                                                "Most Cited References"="tab9",
-                                                "Most Cited Countries"="tab6",
-                                                "Most Productive Authors"="tab3",
-                                                "Most Relevant Keywords"="tab8",
-                                                "Most Relevant Sources"="tab7"),
-                                    selected = "tab1"),
-                        
-                        conditionalPanel(condition = "(input.summary_type != 'tab1') & (input.summary_type != 'tab2') & (input.summary_type != 'tab9')",
-                                    numericInput("kk", 
-                                      label=("Number of results"), 
-                                      value = 20)),
-                        conditionalPanel(condition = "input.summary_type == 'tab9'",
-                                         selectInput(inputId = "sep", 
-                                                     label = "Field separator character", 
-                                                     choices = c("semicolon" = ";", 
-                                                                 "dot and 2 spaces" = ".  ",
-                                                                 "dot and 3 spaces" = ".   ",
-                                                                 "comma" = ","),
-                                                     selected = ";")),
-                        selectInput('save_summary', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'txt file' = 'txt')),
-                        conditionalPanel(condition = "input.save_summary == 'txt'",
-                                         downloadButton("results.txt", "Save"))
-                      ),
+                      sidebarPanel(width=3),
                       mainPanel(
-                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "summary"))
-                        #shinycssloaders::withSpinner(verbatimTextOutput("summary"))
+                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo"))
+                    )
+           )),
+           tabPanel("Annual Scientific Production",
+                    sidebarLayout(
+                      sidebarPanel(width=3),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "AnnualProdPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
+                                    ))
                       )
                     )
-           ),
-           
-           tabPanel("Plots",
+           )
+),
+
+### SOURCES MENU ----
+navbarMenu("Sources",
+           "  ",
+           "  ",
+           #### MOST RELEVANT SOURCES ----
+           tabPanel("Most Relevant Sources",
                     sidebarLayout(
-                      
-                      
                       sidebarPanel(width=3,
-                        
-                        selectInput("plot_type", 
-                                    label = "Choose the plot",
-                                    choices = c("Annual Scientific Production"= "production",
-                                                "Corresponding Author's Countries"="countries",
-                                                "Country Scientific Production"="mapworld",
-                                                "Most Productive Authors"="authors",
-                                                "Average Article Citations per Year"="articleTC",
-                                                "Average Total Citation per Year"="annualTC"),
-                                    selected = "production"),
-                        
-                        conditionalPanel(condition = "input.plot_type == 'authors'",
-                                         numericInput("k", 
-                                                      label=("Number of results"), 
-                                                      value = 20)
-                        ),
-                        conditionalPanel(condition = "input.plot_type == 'countries'",
-                                         numericInput("k", 
-                                                      h3("Number of results"), 
-                                                      value = 20)
-                        )
-                        
-                      ),
-                      mainPanel(
-                        shinycssloaders::withSpinner(plotOutput(outputId = "summaryPlots"))
-                      )
-                      
-                    )
-           ),
-           tabPanel("H-index",
-                    sidebarLayout(
-                      
-                      
-                      sidebarPanel(width=3,
-                                   actionButton("applyH", "Apply!"),
-                                   hr(),
-                                   selectInput("unitH", 
-                                               label = "Unit of Analysis",
-                                               choices = c("Authors"= "author",
-                                                           "Sources"="source"),
-                                               selected = "author")
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostRelSourcesK", 
+                                                label=("Number of Sources"), 
+                                                value = 20)
                                    ),
                       mainPanel(
-                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "hindexTable"))
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelSourcesPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
+                                    ))
                       )
-                      
-                    )
-           ),
-           "  ",
-           "  ",
-           "Laws",
+                      )
+                    ),
+           ### BRADFORD LAW ----
            tabPanel("Bradford's law",
                     
                     sidebarLayout(
                       sidebarPanel(width=3,
-                      helpText("dddd")            
+                                   helpText("dddd")            
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -264,9 +218,133 @@ navbarMenu("Descriptive Analysis",
                                              shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
                                     ))
                       )
-                    
-                      )
+                      
+                    )
            ),
+           ### SOURCE HINDEX MENU ----
+           tabPanel("Source's H-index",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   actionButton("applyHsource", "Apply!"),
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   selectInput("HmeasureSources", 
+                                               label = "Impact measure",
+                                               choices = c("H-Index"="h", 
+                                                           "G-Index"="g",
+                                                           "M-Index"="m",
+                                                           "Total Citation"="tc"),
+                                               selected = "h"),
+                                   "  ",
+                                   numericInput("Hksource", 
+                                                label=("Number of sources"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "SourceHindexPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
+                                    ))
+                      )
+                      
+                    )
+           ),
+           ### SOURCE DYNAMICS MENU ----
+           tabPanel("Source Dynamics",
+                    
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   selectInput("cumSO", "Occurrences",
+                                               choices = c("Cumulate" = "Cum",
+                                                           "Per year" = "noCum"),
+                                               selected = "noCum"),
+                                   selectInput("SOse", "Confidence Interval",
+                                               choices = c("Yes" = "Yes",
+                                                           "No" = "No"),
+                                               selected = "No"),
+                                   hr(),
+                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5)
+                                   
+                                   #uiOutput("sliderKwYears")
+                      ),
+                      
+                      # 
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
+                                    ))
+                        
+                      )
+                    ))
+           
+),
+### AUTHORS MENU ----
+navbarMenu("Authors",
+           "  ",
+           "  ",
+           ### MOST RELEVANT AUTHORS ----
+           "Authors",
+           tabPanel("Most Relevant Authors",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostRelAuthorsK", 
+                                                label=("Number of Authors"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelAuthorsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           
+           ### AUTHOR'S PRODUCTION OVER TIME  ----
+           tabPanel("Author's Production over Time",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("TopAuthorsProdK", 
+                                                label=("Number of Authors"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "TopAuthorsProdPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
+                                    ))
+                      )
+                    )
+           ),
+
+           ### LOTKA LAW ----
            tabPanel("Lotka's law",
                     
                     sidebarLayout(
@@ -285,64 +363,372 @@ navbarMenu("Descriptive Analysis",
                       
                     )
            ),
-           "  ",
-           "  ",
-           "Contents",
-           tabPanel("WordCloud",
-           
-           sidebarLayout(
-             # Sidebar with a slider and selection inputs
-             sidebarPanel(width=3,
-               selectInput("summaryTerms", "Field",
-                           choices = c("Keywords Plus" = "ID",
-                                       "Author's keywords" = "DE",
-                                       "Titles" = "TI",
-                                       "Abstracts" = "AB"),
-                           selected = "ID"),
-               hr(),
-               sliderInput("n_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
-               selectInput("measure", "Word occurrence measure",
-                           choices = c("Frequency" = "freq",
-                                       "Square root" = "sqrt",
-                                       "Log" = "log",
-                                       "Log10" = "log10"),
-                           selected = "freq"),
-               selectInput("wcShape", "Shape",
-                           choices = c("Circle" = "circle",
-                                       "Cardiod" = "cardioid",
-                                       "Diamond" = "diamond",
-                                       "Pentagon" = "pentagon",
-                                       "Star" = "star",
-                                       "Triangle-forward" = "triangle-forward"
-                                       ,"Triangle" = "triangle"),
-                           selected = "circle"),
-               selectInput("font", label = "Font type",
-                           choices = c("Impact", "Comic Sans MS (No plz!)" = "Comic Sans MS",
-                                       "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
-                                       "Georgia", "Times New Roman", "Andale Mono")),
-               selectInput("wcCol", "Text colors",
-                           choices = c("Random Dark" = "random-dark",
-                                       "Random Light" = "random-light"),
-                                       selected = "random-dark"),
-               colourpicker::colourInput("wcBGCol", label= "Backgroud color",value="white", showColour = "background", returnName=TRUE),
-               sliderInput("scale", label = "Font size", min=0.2,max=5,step=0.1,value=1),
-               sliderInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65),
-               sliderInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1),
-               sliderInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
-             ),
-             
-             # Show Word Cloud
-             mainPanel(
-               tabsetPanel(type = "tabs",
-                           tabPanel("Plot",
-                                    wordcloud2::wordcloud2Output("wordcloud", height = "600px")
-                           ),
-                           tabPanel("Table",
-                                    shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
-                           ))
-               
+           ### AUTHOR HINDEX ----
+           tabPanel("Author's H-index",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   actionButton("applyHauthor", "Apply!"),
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   selectInput("HmeasureAuthors", 
+                                               label = "Impact measure",
+                                               choices = c("H-Index"="h", 
+                                                           "G-Index"="g",
+                                                           "M-Index"="m",
+                                                           "Total Citation"="tc"),
+                                               selected = "h"),
+                                   "  ",
+                                   numericInput("Hkauthor", 
+                                                label=("Number of authors"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "AuthorHindexPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))
+                                    ))
+                      )
+                      
                     )
-           )),
+           ),
+           "  ",
+           "  ",
+           "Affiliations",
+           ### MOST RELEVANT AFFILIATION ----
+           tabPanel("Most Relevant Affiliations",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostRelAffiliationsK", 
+                                                label=("Number of Affiliations"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelAffiliationsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           "  ",
+           "  ",
+           "Countries",
+           ### CORRESP AUTHOR'S COUNTRY ----
+           tabPanel("Corresponding Author's Country",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostRelCountriesK", 
+                                                label=("Number of Countries"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelCountriesPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
+                                    ))
+                      )
+                    )
+           ),
+           ### COUNTRY SCIENTIFIC PRODUCTION ----
+           tabPanel("Country Scientific Production",
+                    
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   helpText("dddd")            
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "countryProdPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
+                                    ))
+                      )
+                      
+                    )
+           ),
+           ### MOST CITED COUNTRIES ----
+           tabPanel("Most Cited Countries",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   selectInput("CitCountriesMeasure", 
+                                               label = "Measure",
+                                               choices = c("Total Citations"="TC", 
+                                                           "Average Citations per Year"="TCY"),
+                                               selected = "TC"),
+                                   "  ",
+                                   numericInput("MostCitCountriesK", 
+                                                label=("Number of Countries"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostCitCountriesPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
+                                    ))
+                      )
+                    )
+           )
+),
+### DOCS MENU ----           
+navbarMenu("Documents",
+           "  ",
+           "  ",
+           "Documents",
+           ### CITED DOCS ----
+           tabPanel("Most Global Cited Documents",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostCitDocsK", 
+                                                label=("Number of Documents"), 
+                                                value = 20),
+                                   "  ",
+                                   selectInput("CitDocsMeasure", 
+                                               label = "Measure",
+                                               choices = c("Total Citations"="TC", 
+                                                           "Total Citations per Year"="TCY"),
+                                               selected = "TC"),
+                                   "  "
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostCitDocsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           tabPanel("Most Local Cited Documents",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostLocCitDocsK", 
+                                                label=("Number of Documents"), 
+                                                value = 20),
+                                   "  ",
+                                   selectInput(inputId = "LocCitSep", 
+                                               label = "Field separator character", 
+                                               choices = c(";" = ";", 
+                                                           ".  " = ".  ",
+                                                           "," = ","),
+                                               selected = ";"),
+                                   "  "
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostLocCitDocsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           ### CITED REFERENCES ----
+           "  ",
+           "  ",
+           "Cited References",
+           
+           tabPanel("Most Local Cited References",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostCitRefsK", 
+                                                label=("Number of Documents"), 
+                                                value = 20),
+                                   "  ",
+                                   selectInput(inputId = "CitRefsSep", 
+                                               label = "Field separator character", 
+                                               choices = c(";" = ";", 
+                                                           ".  " = ".  ",
+                                                           "," = ","),
+                                               selected = ";")
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostCitRefsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           ### Reference Spectroscopy ----
+           tabPanel("Reference Spectroscopy",
+                    sidebarLayout(
+                      
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   sliderInput("sliderYears",
+                                               label = "Timespan",
+                                               min = 1700,
+                                               max = as.numeric(substr(Sys.Date(),1,4)),
+                                               step = 10, sep="",
+                                               value = c(1700, as.numeric(substr(Sys.Date(),1,4)))
+                                   ),
+                                   
+                                   selectInput(inputId = "rpysSep", 
+                                               label = "Field separator character", 
+                                               choices = c(";" = ";", 
+                                                           ".  " = ".  ",
+                                                           "," = ","),
+                                               selected = ";")
+                                   
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Graph", 
+                                             withSpinner(plotOutput(outputId = "rpysPlot"))),
+                                    tabPanel("RPY Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "rpysTable"))),
+                                    tabPanel("Cited References Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "crTable")))
+                        )
+                      ))),
+           ### WORDS MENU ----
+           "  ",
+           "  ",
+           "Words",
+           
+           ### MOST REL WORDS ----
+           tabPanel("Most Relevant Words",
+                    
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   selectInput("MostRelWords", "Field",
+                                               choices = c("Keywords Plus" = "ID",
+                                                           "Author's keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   hr(),
+                                   sliderInput("MostRelWordsN", label = "Number of words", min = 2, max = 50, step = 1, value = 10)
+                                   
+                      ),
+                      
+                      # Show Word Cloud
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             withSpinner(plotOutput(outputId = "MostRelWordsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
+                                    ))
+                        
+                      )
+                    )),
+           
+           ### WORDCLOUD ----
+           tabPanel("WordCloud",
+                    
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   selectInput("summaryTerms", "Field",
+                                               choices = c("Keywords Plus" = "ID",
+                                                           "Author's keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   hr(),
+                                   sliderInput("n_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
+                                   selectInput("measure", "Word occurrence measure",
+                                               choices = c("Frequency" = "freq",
+                                                           "Square root" = "sqrt",
+                                                           "Log" = "log",
+                                                           "Log10" = "log10"),
+                                               selected = "freq"),
+                                   selectInput("wcShape", "Shape",
+                                               choices = c("Circle" = "circle",
+                                                           "Cardiod" = "cardioid",
+                                                           "Diamond" = "diamond",
+                                                           "Pentagon" = "pentagon",
+                                                           "Star" = "star",
+                                                           "Triangle-forward" = "triangle-forward"
+                                                           ,"Triangle" = "triangle"),
+                                               selected = "circle"),
+                                   selectInput("font", label = "Font type",
+                                               choices = c("Impact", "Comic Sans MS (No plz!)" = "Comic Sans MS",
+                                                           "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
+                                                           "Georgia", "Times New Roman", "Andale Mono")),
+                                   selectInput("wcCol", "Text colors",
+                                               choices = c("Random Dark" = "random-dark",
+                                                           "Random Light" = "random-light"),
+                                               selected = "random-dark"),
+                                   colourpicker::colourInput("wcBGCol", label= "Backgroud color",value="white", showColour = "background", returnName=TRUE),
+                                   sliderInput("scale", label = "Font size", min=0.2,max=5,step=0.1,value=1),
+                                   sliderInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65),
+                                   sliderInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1),
+                                   sliderInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
+                      ),
+                      
+                      # Show Word Cloud
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             wordcloud2::wordcloud2Output("wordcloud", height = "600px")
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
+                                    ))
+                        
+                      )
+                    )),
+           
+           ### TREEMAP ----
            tabPanel("TreeMap",
                     
                     sidebarLayout(
@@ -362,7 +748,7 @@ navbarMenu("Descriptive Analysis",
                                                            "Log" = "log",
                                                            "Log10" = "log10"),
                                                selected = "freq"),
-                                  selectInput("treeCol", "Text colors",
+                                   selectInput("treeCol", "Text colors",
                                                choices = c("Accent" = "Accent",
                                                            "Dark" = "Dark2",
                                                            "Paired"= "Paired",
@@ -375,7 +761,7 @@ navbarMenu("Descriptive Analysis",
                                    sliderInput("treeFont", label = "Font size", min=6,max=20,step=1,value=10)
                       ),
                       
-                      # Show Word Cloud
+                      # Show TreeMap
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
@@ -387,9 +773,8 @@ navbarMenu("Descriptive Analysis",
                         
                       )
                     )),
-           "  ",
-           "  ",
-           "Trends",
+           
+           ### WORD DYNAMICS ----
            tabPanel("Word Dynamics",
                     
                     sidebarLayout(
@@ -426,73 +811,9 @@ navbarMenu("Descriptive Analysis",
                                     ))
                         
                       )
-                    )),
-           
-           tabPanel("Source Dynamics",
-                    
-                    sidebarLayout(
-                      # Sidebar with a slider and selection inputs
-                      sidebarPanel(width=3,
-                                   selectInput("cumSO", "Occurrences",
-                                               choices = c("Cumulate" = "Cum",
-                                                           "Per year" = "noCum"),
-                                               selected = "noCum"),
-                                   selectInput("SOse", "Confidence Interval",
-                                               choices = c("Yes" = "Yes",
-                                                           "No" = "No"),
-                                               selected = "No"),
-                                   hr(),
-                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5)
-                                   
-                                   #uiOutput("sliderKwYears")
-                      ),
-                      
-                      # 
-                      mainPanel(
-                        tabsetPanel(type = "tabs",
-                                    tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
-                                    ),
-                                    tabPanel("Table",
-                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
-                                    ))
-                        
-                      )
-                    )),
-           
-           tabPanel("Reference Spectroscopy",
-                    sidebarLayout(
-                      
-                      sidebarPanel(width=3,
-                                   sliderInput("sliderYears",
-                                               label = "Timespan",
-                                               min = 1700,
-                                               max = as.numeric(substr(Sys.Date(),1,4)),
-                                               step = 10, sep="",
-                                               value = c(1700, as.numeric(substr(Sys.Date(),1,4)))
-                                   ),
-                                   
-                                   selectInput(inputId = "rpysSep", 
-                                               label = "Field separator character", 
-                                               choices = c(";" = ";", 
-                                                           ".  " = ".  ",
-                                                           "," = ","),
-                                               selected = ";")
-                                   
-                      ),
-                      mainPanel(
-                        tabsetPanel(type = "tabs",
-                                    tabPanel("Graph", 
-                                             withSpinner(plotOutput(outputId = "rpysPlot"))),
-                                    tabPanel("RPY Table", 
-                                             shinycssloaders::withSpinner(DT::DTOutput(
-                                               outputId = "rpysTable"))),
-                                    tabPanel("Cited References Table", 
-                                             shinycssloaders::withSpinner(DT::DTOutput(
-                                               outputId = "crTable")))
-                        )
-                      )))
-      ),
+                    ))
+),
+
 
 ### CONCEPTUAL STRUCTURE ----
 navbarMenu("Conceptual Structure",
@@ -508,7 +829,8 @@ navbarMenu("Conceptual Structure",
                       sidebarPanel(width=3,
                          
                                    actionButton("applyCoc", "Apply!"),
-                                   downloadButton("network.coc", "Save the Network"),
+                                   downloadButton("network.coc", "Save Pajek"),
+                                   downloadButton("networkCoc.fig", "Save Fig."),
                                    "  ",
                                    "  ",
                                    h4(em(strong("Network Parameters: "))),
@@ -552,6 +874,7 @@ navbarMenu("Conceptual Structure",
                                      label=("Min edges"),
                                      value = 2,
                                      step = 1),
+                        #uiOutput("Focus"),
                         "  ",
                         h4(em(strong("Graphical Parameters: "))),
                         "  ",
@@ -576,7 +899,7 @@ navbarMenu("Conceptual Structure",
                                     label = "Label size",
                                     min = 0.0,
                                     max = 10,
-                                    value = 5,
+                                    value = 2,
                                     step = 0.10),
                         
                         selectInput(inputId ="size.cex",
@@ -609,7 +932,7 @@ navbarMenu("Conceptual Structure",
                     mainPanel(
                       tabsetPanel(type = "tabs",
                                   tabPanel("Graph", 
-                                           withSpinner(plotOutput(outputId = "cocPlot"))),
+                                           shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "750px",width = "1100px"))),
                                   tabPanel("Table", 
                                            shinycssloaders::withSpinner(DT::DTOutput(
                                              outputId = "cocTable")))
@@ -778,11 +1101,8 @@ navbarMenu("Intellectual Structure",
                       
                       sidebarPanel(width=3,
                                    actionButton("applyCocit", "Apply!"),
-                                   #selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
-                                   #conditionalPanel(condition = "input.save_colnet == 'pajek'",
-                                   downloadButton("network.cocit", "Save the Network"),
-                                   
-                        
+                                   downloadButton("network.cocit", "Save Pajek"),
+                                   downloadButton("networkCocit.fig", "Save Fig."),
                                    "  ",
                                    "  ",
                                    h4(em(strong("Network Parameters: "))),
@@ -841,7 +1161,7 @@ navbarMenu("Intellectual Structure",
                         sliderInput(inputId = "citLabels",
                                     label = "Number of labels",
                                     min = 5,
-                                    max = 100,
+                                    max = 250,
                                     value = 50),
                         
                         selectInput(inputId ="citlabel.cex",
@@ -854,7 +1174,7 @@ navbarMenu("Intellectual Structure",
                                     label = "Label size",
                                     min = 0.0,
                                     max = 10,
-                                    value = 5,
+                                    value = 2,
                                     step = 0.10),
                         
                         selectInput(inputId ="citsize.cex",
@@ -882,9 +1202,9 @@ navbarMenu("Intellectual Structure",
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
+                                    
                                     tabPanel("Graph", 
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))),
-                                             
+                                             shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "750px",width = "1100px"))),         
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                 outputId = "cocitTable")))
@@ -962,7 +1282,8 @@ navbarMenu("Social Structure",
                       
                       sidebarPanel(width=3,
                                    actionButton("applyCol", "Apply!"),
-                                   downloadButton("network.col", "Save the Network"),
+                                   downloadButton("network.col", "Save Pakek"),
+                                   downloadButton("networkCol.fig", "Save Fig."),
                                                 
                                    "  ",
                                    "  ",
@@ -1020,7 +1341,7 @@ navbarMenu("Social Structure",
                                    sliderInput(inputId = "colLabels",
                                                label = "Number of labels",
                                                min = 5,
-                                               max = 100,
+                                               max = 250,
                                                value = 50),
                                    
                                    selectInput(inputId ="collabel.cex",
@@ -1033,7 +1354,7 @@ navbarMenu("Social Structure",
                                                label = "Label size",
                                                min = 0.0,
                                                max = 10,
-                                               value = 5,
+                                               value = 2,
                                                step = 0.10),
                                    
                                    selectInput(inputId ="colsize.cex",
@@ -1062,7 +1383,8 @@ navbarMenu("Social Structure",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
+                                             shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "750px",width = "1100px"))), 
+                                             #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                outputId = "colTable")))
@@ -1073,8 +1395,45 @@ navbarMenu("Social Structure",
                       
                     )
                     
+           ), ## End of tabPanel "Social Structure" 
+           tabPanel(title="WorldMap Collaboration",
+                    sidebarLayout(
+                      
+                      sidebarPanel(width=3,
+                                   actionButton("applyWM", "Apply!"),
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Network Parameters: "))),
+                                   "  ",
+                                   numericInput("WMedges.min", 
+                                                label=("Min edges"),
+                                                value = 2,
+                                                step = 1),
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   sliderInput(inputId = "WMedgesize",
+                                               label = "Edge size",
+                                               min = 0.1,
+                                               max = 20,
+                                               value = 5)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Graph", 
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "WMPlot"))),
+                                    tabPanel("Table", 
+                                             shinycssloaders::withSpinner(DT::DTOutput(
+                                               outputId = "WMTable")))
+                        )
+                        
+                        #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))
+                      )
+                      
+                    )
+                    
            ) ## End of tabPanel "Social Structure" 
-           
 ), 
 
 

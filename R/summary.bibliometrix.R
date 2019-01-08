@@ -46,7 +46,7 @@ summary.bibliometrix<-function(object, ...){
   if (sum(names(arguments)=="pause")==0){pause=FALSE} else {pause=arguments$pause}
   if (sum(names(arguments)=="width")==0){options(width=120)} else {options(width=arguments$width)}
   if (sum(names(arguments)=="verbose")==0){verbose=TRUE} else {verbose=FALSE}
-  
+  K=k
   Co=NULL
   AC=NULL
   
@@ -118,6 +118,9 @@ summary.bibliometrix<-function(object, ...){
 
   # Most Productive Authors
   if (isTRUE(verbose)){cat("\nMost Productive Authors\n\n")}
+  if (K==Inf){
+    k=length(object$Authors)
+  }
   A=data.frame(cbind(object$Authors[1:k]))
   A$MPA=row.names(A);A=A[,c(2,1)]
   A[,3:4]=object$AuthorsFrac[1:k,]
@@ -132,6 +135,9 @@ summary.bibliometrix<-function(object, ...){
 
   # Most Cited Manuscipts
   if (isTRUE(verbose)){cat("\nTop manuscripts per citations\n\n")}
+  if (K==Inf){
+    k=dim(object$MostCitedPapers)[1]
+  }
   MostCitedPapers=object$MostCitedPapers[1:k,]
   MostCitedPapers=format(MostCitedPapers,justify="left",digits=3)
   row.names(MostCitedPapers)=1:k
@@ -140,7 +146,9 @@ summary.bibliometrix<-function(object, ...){
   if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
-
+  if (K==Inf){
+    k=length(object$Countries)
+  }
   kk=k
   if (!is.null(object$Countries)){
   # Most Productive Countries
@@ -190,6 +198,9 @@ summary.bibliometrix<-function(object, ...){
   if (!is.null(object$Sources)){
   # Most relevant Sources
     if (isTRUE(verbose)){cat("\nMost Relevant Sources\n\n")}
+    if (K==Inf){
+      k=length(object$Sources)
+    }
   kk=k
   if (length(object$Sources)<k){kk=length(object$Sources)}
   AA=data.frame(cbind(object$Sources[1:kk]))
@@ -208,6 +219,9 @@ summary.bibliometrix<-function(object, ...){
   if (!is.null(object$ID) & !is.null(object$DE)){
   # Most relevant Keywords
     if (isTRUE(verbose)){cat("\nMost Relevant Keywords\n\n")}
+    if (K==Inf){
+      k=min(c(length(object$DE),length(object$ID)))
+    }
   AAA=data.frame(cbind(object$DE[1:k]))
   AAA$MPA=row.names(AAA);AAA=AAA[,c(2,1)]
   names(AAA)=c("DE Keywords     ", "Articles")

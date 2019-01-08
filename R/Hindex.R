@@ -70,7 +70,7 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   ## identify manuscripts of the author or of the sources
   
  
-  H=data.frame(Element=elements,h_index=0,g_index=0,m_index=0,TC=0,NP=0)
+  H=data.frame(Element=elements,h_index=0,g_index=0,m_index=0,TC=0,NP=0, stringsAsFactors = FALSE)
   TotalCitations=list()
   for (j in 1:length(elements)){
     author=elements[j]
@@ -92,7 +92,7 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
     }
     #TotalCitations[[j]]=data.frame(Year=as.numeric(M$PY[ind]),TC,Year2=sort(as.numeric(M$PY[ind])),TC2)
     if (length(ind)>0){
-    df=data.frame(Authors=substr(M$AU[ind], 1, 30),Journal=substr(M$SO[ind], 1, 30),Year=as.numeric(M$PY[ind]),TotalCitation=M$TC[ind])
+    df=data.frame(Authors=substr(M$AU[ind], 1, 30),Journal=substr(M$SO[ind], 1, 30),Year=as.numeric(M$PY[ind]),TotalCitation=M$TC[ind], stringsAsFactors = FALSE)
     TotalCitations[[j]]=df[order(df$TotalCitation),]
     }
   }

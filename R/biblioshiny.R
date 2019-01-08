@@ -10,5 +10,6 @@
 #' @export
 
 biblioshiny <- function(){
+  
   runApp(system.file("biblioshiny",package="bibliometrix"),launch.browser = TRUE)
 }

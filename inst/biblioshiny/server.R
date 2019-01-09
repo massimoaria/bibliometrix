@@ -1064,7 +1064,7 @@ server <- function(input, output, session) {
     
   }, height = 650, width = 800)
   
-      ### Temathic Map ----
+      ### Thematic Map ----
   output$TMPlot <- renderPlot({
     
     input$applyTM
@@ -1095,7 +1095,7 @@ server <- function(input, output, session) {
     
   })
   
-      ### Temathic Evolution ----
+      ### Thematic Evolution ----
   output$sliders <- renderUI({
     numSlices <- as.integer(input$numSlices)
     lapply(1:numSlices, function(i) {

@@ -40,6 +40,7 @@
 
 thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   
+  row.names(NetMatrix)=colnames(NetMatrix)=tolower(row.names(NetMatrix))
   net=Net$graph
   if (is.null(S)){S=NetMatrix}
   net_groups <- Net$cluster_obj

@@ -1591,7 +1591,7 @@ server <- function(input, output, session) {
            })
     
     S <- normalizeSimilarity(NetMatrix, type = "association")
-    capture.output(net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="fruchterman",
+    capture.output(net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
                                        labelsize = 2, halo = F,cluster="lovain",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                                        size=1,edges.min = 2))

@@ -70,7 +70,7 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
     #N = dim(NetMatrixk)[1]
     if (n>dim(NetMatrixk)[1]){n = dim(NetMatrixk)[1]}
     netk <- networkPlot(NetMatrixk, normalize = "association",n = n, 
-                        Title = "co-occurrence network",type="fruchterman",
+                        Title = "co-occurrence network",type="auto",
                         size=0.3,size.cex=FALSE,label.cex=FALSE,labelsize = 0.1, halo = FALSE, cluster="lovain",remove.isolates=FALSE,
                         remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.n=0)
     resk <- thematicMap(netk, NetMatrixk, Sk, minfreq = minFreq)

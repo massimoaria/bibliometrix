@@ -457,7 +457,7 @@ server <- function(input, output, session) {
   })
   
   output$TopAuthorsProdPlot <- renderPlot({
-    values$AUProdOverTime <- authorProdOverTime(M, k=input$TopAuthorsProdK)
+    values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK)
     
     plot(values$AUProdOverTime$graph)
   }, height = 550, width =1100)
@@ -549,6 +549,45 @@ server <- function(input, output, session) {
   })
   
       ### Countries ----
+  output$MostRelCountriesPlot <- renderPlot({
+    res <- descriptive(values,type="tab5")
+    values <-res$values
+    k=input$MostRelCountriesK
+    xx=values$results$CountryCollaboration[1:k,]
+    xx=xx[order(-(xx$SCP+xx$MCP)),]
+    xx1=cbind(xx[,1:2],rep("SCP",k))
+    names(xx1)=c("Country","Freq","Collaboration")
+    xx2=cbind(xx[,c(1,3)],rep("MCP",k))
+    names(xx2)=c("Country","Freq","Collaboration")
+    xx=rbind(xx2,xx1)
+    xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
+    g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
+                         geom_bar(stat="identity")+
+                         scale_x_discrete(limits = rev(levels(xx$Country)))+
+                         scale_fill_discrete(name="Collaboration",
+                                             breaks=c("SCP","MCP"))+
+                         labs(title = "Corresponding Author's Country", x = "Countries", y = "N. of Documents", 
+                              caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
+                         theme_minimal() +
+                         theme(plot.caption = element_text(size = 9, hjust = 0.5,
+                                                           color = "blue", face = "italic"))+
+                         coord_flip())
+    
+    plot(g)
+  }, height = 500, width =900)
+  
+  output$MostRelCountriesTable <- DT::renderDT({
+    
+    TAB <- values$TAB
+    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+    
+  })
   
   output$countryProdPlot <- renderPlot({
     values$mapworld<-mapworld(values$M)
@@ -983,15 +1022,13 @@ server <- function(input, output, session) {
     dev.off();file.remove(t) ### end of trick
     
     isolate(values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
-                       labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout))
+                       labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                        shape=input$coc.shape))
     
     isolate(values$network$VIS)
     
   })
-  
-  
 
-  
   output$network.coc <- downloadHandler(
     filename = "Co_occurrence_network.net",
     content <- function(file) {
@@ -1154,7 +1191,8 @@ server <- function(input, output, session) {
     dev.off();file.remove(t) ### end of trick
     
     isolate(values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
-                                       labelsize=input$citlabelsize, opacity=input$cocitAlpha,type=input$citlayout))
+                                       labelsize=input$citlabelsize, opacity=input$cocitAlpha,type=input$citlayout,
+                                        shape=input$cocit.shape))
     
     isolate(values$network$VIS)
 
@@ -1249,7 +1287,8 @@ server <- function(input, output, session) {
     dev.off();file.remove(t) ### end of trick
     
     isolate(values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
-                                       labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout))
+                                       labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
+                                       shape=input$col.shape))
     
     isolate(values$network$VIS)
     
@@ -1592,7 +1631,7 @@ server <- function(input, output, session) {
     
     S <- normalizeSimilarity(NetMatrix, type = "association")
     capture.output(net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
-                                       labelsize = 2, halo = F,cluster="lovain",remove.isolates=FALSE,
+                                       labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                                        size=1,edges.min = 2))
     Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMfreq)
@@ -1655,14 +1694,13 @@ server <- function(input, output, session) {
       if (label.n>n){label.n=n}
       if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
       if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-      if (input$size.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
       if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
       
       #par(bg="grey92", mar=c(0,0,0,0))
       values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
-                                size.cex=size.cex, size=input$size , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
+                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
-                                cluster="lovain")
+                                cluster="louvain")
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
@@ -1701,14 +1739,13 @@ server <- function(input, output, session) {
     if (n>dim(values$NetRefs)[1]){n=dim(values$NetRefs)[1]}
     if (label.n>n){label.n=n}
     if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-    if (input$citsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
     if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
-                                size.cex=size.cex, size=input$citsize , remove.multiple=F, edgesize = input$citedgesize, 
+                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE,
-                                alpha=input$cocitAlpha, cluster="lovain")
+                                alpha=input$cocitAlpha, cluster="louvain")
     return(values)
   }
   
@@ -1746,17 +1783,16 @@ server <- function(input, output, session) {
     if (label.n>n){label.n=n}
     if (input$colnormalize=="none"){normalize=NULL}else{normalize=input$colnormalize}
     if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-    if (input$colsize.cex=="Yes"){size.cex=TRUE}else{size.cex=FALSE}
     if (input$soc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     type=input$collayout
     if (input$collayout=="worldmap"){type="auto"}
     
     values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = type, 
-                              size.cex=size.cex, size=input$colsize , remove.multiple=F, edgesize = input$coledgesize, 
+                              size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
-                              remove.isolates = T, cluster="lovain")
+                              remove.isolates = T, cluster="louvain")
     
     return(values)
     
@@ -1849,7 +1885,7 @@ server <- function(input, output, session) {
       visPhysics(enabled = FALSE) %>% visSave(con)
   }
   
-  igraph2vis<-function(g,curved,labelsize,opacity,type){
+  igraph2vis<-function(g,curved,labelsize,opacity,type,shape){
     
     LABEL=igraph::V(g)$name
     
@@ -1859,12 +1895,7 @@ server <- function(input, output, session) {
     
     vn$nodes$label=LABEL
     vn$edges$num=1
-    Min=min(vn$nodes$font.size)
-    Max=max(vn$nodes$font.size)
-    if (Max>Min){
-      size=(vn$nodes$font.size-Min)/(Max-Min)*10*labelsize+10} else {size=5*labelsize}
-    vn$nodes$font.size=size
-    
+
     ## opacity
     vn$nodes$color=adjustcolor(vn$nodes$color,alpha=min(c(opacity+0.2,1)))
     vn$edges$color=adjustcolor(vn$edges$color,alpha=opacity)
@@ -1873,14 +1904,22 @@ server <- function(input, output, session) {
     vn$edges=unique(vn$edges)
     
     ## labelsize
-    size=(vn$nodes$font.size-min(vn$nodes$font.size))/(max(vn$nodes$font.size,na.rm = T)-min(vn$nodes$font.size))*10*labelsize+10
+    scalemin=20
+    scalemax=150
+    Min=min(vn$nodes$font.size)
+    Max=max(vn$nodes$font.size)
+    if (Max>Min){
+      size=(vn$nodes$font.size-Min)/(Max-Min)*10*labelsize+10
+    } else {size=10*labelsize}
+    size[size<scalemin]=scalemin
+    size[size>scalemax]=scalemax
     vn$nodes$font.size=size
     l<-netLayout(type)
     
     ### TO ADD SHAPE AND FONT COLOR OPTIONS
     
     VIS<-visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-      visNodes(shape="box", font=list(color="black"),scaling=list(label=list(enables=TRUE))) %>%
+      visNodes(shape=shape, font=list(color="black")) %>%
       visIgraphLayout(layout = l) %>%
       visEdges(smooth = curved) %>%
       visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%

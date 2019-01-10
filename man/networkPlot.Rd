@@ -47,7 +47,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{halo}{is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}}
 
-\item{cluster}{is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").}
+\item{cluster}{is a character. It indicates the type of cluster to perform among ("none", optimal", "louvain","infomap","edge_betweenness","walktrap").}
 
 \item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
 

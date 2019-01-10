@@ -207,7 +207,7 @@ navbarMenu("Sources",
                     
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   helpText("dddd")            
+                                   helpText("")            
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -349,7 +349,7 @@ navbarMenu("Authors",
                     
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   helpText("dddd")            
+                                   helpText("")            
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -455,8 +455,8 @@ navbarMenu("Authors",
            tabPanel("Country Scientific Production",
                     
                     sidebarLayout(
-                      sidebarPanel(width=3,
-                                   helpText("dddd")            
+                      sidebarPanel(width=3
+                                   ,helpText("")            
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -641,8 +641,8 @@ navbarMenu("Documents",
            "  ",
            "Words",
            
-           ### MOST REL WORDS ----
-           tabPanel("Most Relevant Words",
+           ### MOST FREQ WORDS ----
+           tabPanel("Most Frequent Words",
                     
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
@@ -830,7 +830,7 @@ navbarMenu("Conceptual Structure",
                          
                                    actionButton("applyCoc", "Apply!"),
                                    downloadButton("network.coc", "Save Pajek"),
-                                   downloadButton("networkCoc.fig", "Save Fig."),
+                                   downloadButton("networkCoc.fig", "Save Fig"),
                                    "  ",
                                    "  ",
                                    h4(em(strong("Network Parameters: "))),
@@ -902,17 +902,14 @@ navbarMenu("Conceptual Structure",
                                     value = 2,
                                     step = 0.10),
                         
-                        selectInput(inputId ="size.cex",
-                                    label = "Size cex",
-                                    choices = c("Yes",
-                                                "No"),
-                                    selected = "Yes"),
-                        
-                        sliderInput(inputId = "size",
-                                    label = "Node size",
-                                    min = 0.1,
-                                    max = 20,
-                                    value = 5),
+                        selectInput(inputId ="coc.shape",
+                                    label = "Node Shape",
+                                    choices = c("Box"="box",
+                                                "Circle"="circle",
+                                                "Database"="database",
+                                                "Ellipse"="ellipse",
+                                                "Text"="text"),
+                                    selected = "box"),
                         sliderInput(
                           inputId = "edgesize",
                           label = "Edge size",
@@ -1102,7 +1099,7 @@ navbarMenu("Intellectual Structure",
                       sidebarPanel(width=3,
                                    actionButton("applyCocit", "Apply!"),
                                    downloadButton("network.cocit", "Save Pajek"),
-                                   downloadButton("networkCocit.fig", "Save Fig."),
+                                   downloadButton("networkCocit.fig", "Save Fig"),
                                    "  ",
                                    "  ",
                                    h4(em(strong("Network Parameters: "))),
@@ -1177,17 +1174,14 @@ navbarMenu("Intellectual Structure",
                                     value = 2,
                                     step = 0.10),
                         
-                        selectInput(inputId ="citsize.cex",
-                                    label = "Size cex",
-                                    choices = c("Yes",
-                                                "No"),
-                                    selected = "Yes"),
-                        
-                        sliderInput(inputId = "citsize",
-                                    label = "Node size",
-                                    min = 0.1,
-                                    max = 20,
-                                    value = 5),
+                        selectInput(inputId ="cocit.shape",
+                                    label = "Node Shape",
+                                    choices = c("Box"="box",
+                                                "Circle"="circle",
+                                                "Database"="database",
+                                                "Ellipse"="ellipse",
+                                                "Text"="text"),
+                                    selected = "box"),
                         sliderInput(inputId = "citedgesize",
                           label = "Edge size",
                           min = 0.1,
@@ -1283,7 +1277,7 @@ navbarMenu("Social Structure",
                       sidebarPanel(width=3,
                                    actionButton("applyCol", "Apply!"),
                                    downloadButton("network.col", "Save Pakek"),
-                                   downloadButton("networkCol.fig", "Save Fig."),
+                                   downloadButton("networkCol.fig", "Save Fig"),
                                                 
                                    "  ",
                                    "  ",
@@ -1357,17 +1351,15 @@ navbarMenu("Social Structure",
                                                value = 2,
                                                step = 0.10),
                                    
-                                   selectInput(inputId ="colsize.cex",
-                                               label = "Size cex",
-                                               choices = c("Yes",
-                                                           "No"),
-                                               selected = "Yes"),
-                                   
-                                   sliderInput(inputId = "colsize",
-                                               label = "Node size",
-                                               min = 0.1,
-                                               max = 20,
-                                               value = 5),
+                                   selectInput(inputId ="col.shape",
+                                               label = "Node Shape",
+                                               choices = c("Box"="box",
+                                                           "Circle"="circle",
+                                                           "Database"="database",
+                                                           "Ellipse"="ellipse",
+                                                           "Text"="text"),
+                                               selected = "box"),
+
                                    sliderInput(inputId = "coledgesize",
                                                label = "Edge size",
                                                min = 0.1,

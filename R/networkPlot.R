@@ -32,7 +32,7 @@
 #' @param label.color is logical. If TRUE, for each vertex, the label color is the same as its cluster. 
 #' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.  
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
-#' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "lovain","infomap","edge_betweenness","walktrap").
+#' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "louvain","infomap","edge_betweenness","walktrap").
 #' @param curved is a logical or a number. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}. Curved values are any numbers from 0 to 1.
 #' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix. 
 #' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
@@ -160,12 +160,16 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
       LABEL=V(bsk.network)$name
       if (!is.null(label.n)){
         q=1-(label.n/length(V(bsk.network)$deg))
+        if (q<=01){
+          LABEL=rep("",length(LABEL))
+          V(bsk.network)$labelsize=10
+        } else {
         if (q>1){q=1}
-        if (q<0){q=0}
         q=quantile(V(bsk.network)$deg,q)
         LABEL[V(bsk.network)$deg<=q]=""
         V(bsk.network)$labelsize=10
         V(bsk.network)$labelsize[V(bsk.network)$deg<=q]=0
+        }
       }
     }
     
@@ -260,6 +264,7 @@ clusteringNetwork <- function(bsk.network,cluster){
   )
   
   V(bsk.network)$color <- colorlist[net_groups$membership]
+  
   ### set egde intra-class colors
   V(bsk.network)$community <- net_groups$membership
   El=as.data.frame(get.edgelist(bsk.network,names=F))
@@ -269,7 +274,7 @@ clusteringNetwork <- function(bsk.network,cluster){
                         
                         if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]){
                           C=colorlist[V(bsk.network)$community[x[1]]]
-                        }else{C='#E8E8E8'}
+                        }else{C='gray70'}
                         return(C)
                         })
   ### end

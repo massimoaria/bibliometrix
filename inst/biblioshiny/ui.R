@@ -1268,7 +1268,8 @@ navbarMenu("Intellectual Structure",
            ),
 
 
-### Collaboration ----
+### Social Structure ####
+           ### Collaboration ----
 navbarMenu("Social Structure",
            
            tabPanel(title="Collaboration Network",
@@ -1309,8 +1310,7 @@ navbarMenu("Social Structure",
                                                            "Kamada & Kawai"="kamada",
                                                            "MultiDimensional Scaling"="mds",
                                                            "Sphere"="sphere",
-                                                           "Star"="star",
-                                                           "World Map (only for Field Country)"="worldmap"),
+                                                           "Star"="star"),
                                                selected = "auto"),
                                    
                                    sliderInput(inputId = "colNodes",

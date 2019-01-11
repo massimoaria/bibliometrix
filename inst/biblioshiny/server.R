@@ -281,7 +281,7 @@ server <- function(input, output, session) {
     g=ggplot2::ggplot(data=xx, aes(x=xx$SO, y=xx$Freq, fill=-xx$Freq)) +
       geom_bar(stat="identity")+
       scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(levels(xx$SO)))+
+      scale_x_discrete(limits = rev((xx$SO)), labels=substr(rev(xx$SO),1,50))+
       labs(title="Most Relevant Sources", x = "Sources")+
       labs(y = "N. of Documents")+
       theme_minimal() +
@@ -753,11 +753,12 @@ server <- function(input, output, session) {
     } else {k=input$MostCitRefsK}
     
     xx=xx[1:k,]
+    #xx[,1]=substr(xx[,1],1,50)
     
     g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2])) +
       geom_bar(stat="identity")+
       scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
+      scale_x_discrete(limits = rev(xx[,1]), labels=substr(rev(xx[,1]),1,50))+
       labs(title="Most Cited References", x = "Documents")+
       labs(y = "Local Citations")+
       theme_minimal() +

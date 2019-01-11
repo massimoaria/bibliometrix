@@ -40,7 +40,7 @@ isi2df<-function(D){
   
   for (i in 1:nP){
     if (i%%100==0 | i==nP) cat("Articles extracted  ",i,"\n")
-    print(i)
+    #print(i)
     iStart=Papers[i]
     if (i==nP){iStop=length(D)} else {iStop=Papers[i+1]-1}
     Seq=seq(iStart,iStop)

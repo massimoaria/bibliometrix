@@ -160,7 +160,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
       LABEL=V(bsk.network)$name
       if (!is.null(label.n)){
         q=1-(label.n/length(V(bsk.network)$deg))
-        if (q<=01){
+        if (q<=0){
           LABEL=rep("",length(LABEL))
           V(bsk.network)$labelsize=10
         } else {

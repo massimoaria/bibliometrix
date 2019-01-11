@@ -166,9 +166,9 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
         } else {
         if (q>1){q=1}
         q=quantile(V(bsk.network)$deg,q)
-        LABEL[V(bsk.network)$deg<=q]=""
+        LABEL[V(bsk.network)$deg<q]=""
         V(bsk.network)$labelsize=10
-        V(bsk.network)$labelsize[V(bsk.network)$deg<=q]=0
+        V(bsk.network)$labelsize[V(bsk.network)$deg<q]=0
         }
       }
     }

@@ -396,7 +396,7 @@ server <- function(input, output, session) {
     
   })
   
-  ### AUHTORS MENU ####
+  ### AUTHORS MENU ####
   
       ### Authors ----
   output$MostRelAuthorsPlot <- renderPlot({

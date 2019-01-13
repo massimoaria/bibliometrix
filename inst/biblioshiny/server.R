@@ -1243,10 +1243,6 @@ server <- function(input, output, session) {
   
   output$histTable <- DT::renderDT({
     
-    if (values$Histfield=="NA"){
-      values$histResults <- histNetwork(values$M, min.citations=quantile(values$M$TC,0.75), sep = ";")
-      values$Histfield="done"
-    }
     LCS=values$histResults$LCS
     s=sort(LCS,decreasing = TRUE)[input$histNodes]
     ind=which(LCS>=s)
@@ -1644,7 +1640,7 @@ server <- function(input, output, session) {
   historiograph <- function(input,values){
     
     if (input$histsearch=="FAST"){
-      min.cit=quantile(values$M$TC,0.75)
+      min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
     }else{min.cit=1}
     
     if (values$Histfield=="NA" | values$histsearch!=input$histsearch){
@@ -1653,7 +1649,7 @@ server <- function(input, output, session) {
       values$histsearch=input$histsearch
     }
     
-    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5))
+    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5, color=FALSE))
   return(values)
   }
   

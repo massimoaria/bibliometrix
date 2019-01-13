@@ -37,8 +37,10 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
   
   #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
   #  return()}
-  min.citations=min(c(1,min.citations))
+  min.citations=max(c(1,min.citations))
   M$TC=as.numeric(M$TC)
+  M=M[!is.na(M$TC),]
+  
   if (!("SR" %in% names(M))){M=metaTagExtraction(M,Field="SR")} 
   M=M[order(M$PY),]
   

@@ -39,14 +39,14 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   }
   df=df[-1,]
   
-  df2<-dplyr::group_by(df, Author,year) %>%
-    dplyr::summarise(freq=length(year),TC=sum(TC),TCpY=sum(TCpY))
+  df2<-dplyr::group_by(df, .data$Author,.data$year) %>%
+    dplyr::summarise(freq=length(.data$year),TC=sum(.data$TC),TCpY=sum(.data$TCpY))
   
   df2=as.data.frame(df2)
   df2$Author=factor(df2$Author,levels=AU[1:k])
   #theme_set(theme_bw())
   
-  g <- ggplot(df2, aes(Author, year))+
+  g <- ggplot(df2, aes(.data$Author, .data$year))+
     geom_point(aes(alpha=df2$TCpY,size = df2$freq), color="dodgerblue4")+ 
     scale_size(range=c(2,6))+
     scale_alpha(range=c(0.3,1))+

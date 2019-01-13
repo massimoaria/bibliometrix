@@ -23,7 +23,9 @@
 
 bib2df<-function(D, dbsource="isi"){
   
+  bibtag <- NULL
   data("bibtag",envir=environment())
+  bibtag=as.data.frame(bibtag)
   
   txt <- preprocessing(D)
   

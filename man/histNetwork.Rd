@@ -4,7 +4,7 @@
 \alias{histNetwork}
 \title{Historical co-citation network}
 \usage{
-histNetwork(M, min.citations = 0, sep = ";")
+histNetwork(M, min.citations = 1, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function

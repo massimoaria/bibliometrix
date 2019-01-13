@@ -127,6 +127,8 @@ SR <- function(M){
       J9=trim(gsub("\\."," ",M$JI))
       SR=paste(FirstAuthors,M$PY,J9,sep=", ")}
   
+  M$SR_FULL<- gsub("\\s+", " ", SR)
+  
   ## assign an unique name to each document
   st<-i<-0
   while(st==0){

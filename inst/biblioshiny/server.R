@@ -8,7 +8,7 @@ server <- function(input, output, session) {
   ## file upload max size
   options(shiny.maxRequestSize=30*1024^2) 
   
-  ## initial values
+  ### initial values ####
   values = reactiveValues()
   values$results=list("NA")
   values$log="working..."
@@ -25,6 +25,7 @@ server <- function(input, output, session) {
   values$citShortlabel="NA"
   values$S=list("NA")
 
+  
   
   
   
@@ -118,7 +119,7 @@ server <- function(input, output, session) {
     },
     content <- function(file) {
       switch(input$save_file,
-             xlsx={rio::export(values$M, file=file)})
+             xlsx={suppressWarnings(rio::export(values$M, file=file))})
       
     },
     contentType = input$save_file

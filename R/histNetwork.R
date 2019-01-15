@@ -41,7 +41,7 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
   M$TC=as.numeric(M$TC)
   M=M[!is.na(M$TC),]
   
-  if (!("SR" %in% names(M))){M=metaTagExtraction(M,Field="SR")} 
+  if (!("SR_FULL" %in% names(M))){M=metaTagExtraction(M,Field="SR")} 
   M=M[order(M$PY),]
   
   M2=M[M$TC>=min.citations,]

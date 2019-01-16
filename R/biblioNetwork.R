@@ -132,13 +132,13 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
              WCR=cocMatrix(M, Field="CR", type = "sparse", sep)
              NetMatrix = crossprod(WCR, WCR)
              ### reduce name length
-             A=row.names(NetMatrix)
-             ind=unlist(regexec("*V[0-9]", A))
-             A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
-             ind=unlist(regexec("*DOI ", A))
-             A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
-             row.names(NetMatrix)=A
-             colnames(NetMatrix)=A
+             # A=row.names(NetMatrix)
+             # ind=unlist(regexec("*V[0-9]", A))
+             # A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+             # ind=unlist(regexec("*DOI ", A))
+             # A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+             # row.names(NetMatrix)=A
+             # colnames(NetMatrix)=A
              ###
            },
            sources={
@@ -170,8 +170,8 @@ biblioNetwork <- function(M, analysis = "coupling", network = "authors", sep = "
     NetMatrix=NetMatrix[ind,ind]
     if (isTRUE(shortlabel)){    
       LABEL<-labelShort(NetMatrix,db=tolower(M$DB[1]))
-      colnames(NetMatrix)=rownames(NetMatrix)=LABEL
-    }
+      LABEL<-removeDuplicatedlabels(LABEL)
+      colnames(NetMatrix)=rownames(NetMatrix)=LABEL}
     
   }
   
@@ -194,7 +194,11 @@ labelShort <- function(NET,db="isi"){
            AU=unlist(lapply(AU, function(l){l[1]}))
            LABEL=paste0(AU, ". ", YEAR, sep="")
          })
-  
+
+  return(LABEL)
+}
+
+removeDuplicatedlabels <- function(LABEL){
   ## assign an unique name to each label
   tab=sort(table(LABEL),decreasing=T)
   dup=names(tab[tab>1])
@@ -204,7 +208,6 @@ labelShort <- function(NET,db="isi"){
       LABEL[ind]=paste0(LABEL[ind],"-",as.character(1:length(ind)),sep="")
     }
   }
-  
-  
   return(LABEL)
 }
+  

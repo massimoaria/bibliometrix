@@ -83,18 +83,21 @@ if (Field=="CR"){Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])}  ## delete not co
 
 # vector of unique units
 uniqueField<-unique(unlist(Fi))
+uniqueField<-uniqueField[!is.na(uniqueField)]
 
 if (Field=="CR"){
   S<-gsub("\\).*",")",uniqueField)
   S<-gsub(","," ",S)
   S<-gsub(";"," ",S)
-  uniqueField<-unique(gsub("\\s+", " ", S))
+  S<-reduceRefs(S)
+  uniqueField<-unique(trim(S))
   Fi<-lapply(Fi, function(l){
     l<-gsub("\\).*",")",l)
     l<-gsub(","," ",l)
     l<-gsub(";"," ",l)
-    l<-gsub("\\s+", " ", l)
     l<-l[nchar(l)>0]
+    l<-reduceRefs(l)
+    l<-trim(l)
     return(l)
   })
 } else {
@@ -116,15 +119,16 @@ if (Field=="CR"){
 
 if (type=="matrix" | !isTRUE(binary)){
   # Initialization of WA matrix
-  WF<-matrix(0,size[1],length(uniqueField))}
-else if (type=="sparse"){WF<-Matrix(0,size[1],length(uniqueField))}
-else {print("error in type argument");return()}
+  WF<-matrix(0,size[1],length(uniqueField))} else if (type=="sparse"){
+    WF<-Matrix(0,size[1],length(uniqueField))} else {print("error in type argument");return()}
 colnames(WF)<-uniqueField
 rownames(WF)<-rownames(M)
   # Population of WA matrix
   for (i in 1:size[1]){
-    if (length(Fi[[i]])>0) {
+    #print(i)
+    if (length(Fi[[i]])>0 & !is.na(Fi[[i]][1])) {
       #print(i)
+      #if (Field=="CR"){Fi[[i]]=reduceRefs(Fi[[i]])}
       if (isTRUE(binary)){
         ## binary counting
       WF[i,uniqueField %in% Fi[[i]]]<-1}else{
@@ -144,3 +148,11 @@ if (type=="sparse" & !isTRUE(binary)){
 return(WF)
 }
 
+reduceRefs<- function(A){
+  
+  ind=unlist(regexec("*V[0-9]", A))
+  A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+  ind=unlist(regexec("*DOI ", A))
+  A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+  return(A)
+}

@@ -214,6 +214,15 @@ AU_CO<-function(M){
   
   M$AU_CO=NA
   C1=M$C1
+  
+  ## remove reprint information from C1
+  C1=unlist(lapply(C1,function(l){
+    l=unlist(strsplit(l,";"))
+    l=l[regexpr("REPRINT AUTHOR",l)==-1]
+    l=paste0(l,collapse=";")
+  }))
+  ###
+  
   C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
   C1=gsub("\\[.*?\\] ", "", C1)
   if (M$DB[1]=="ISI"){ C1=lastChar(C1,last=".")}
@@ -303,7 +312,16 @@ AU1_CO<-function(M,sep){
 
 ### AU_UN field
 AU_UN<-function(M,sep){
-  AFF=gsub("\\[.*?\\] ", "", M$C1)
+  
+  ## remove reprint information from C1
+  C1=M$C1
+  C1=unlist(lapply(C1,function(l){
+    l=unlist(strsplit(l,";"))
+    l=l[regexpr("REPRINT AUTHOR",l)==-1]
+    l=paste0(l,collapse=";")
+  }))
+  ###
+  AFF=gsub("\\[.*?\\] ", "", C1)
   indna=which(is.na(AFF))
   if (length(indna)>0){AFF[indna]=M$RP[indna]}
   nc=nchar(AFF)

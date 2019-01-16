@@ -73,16 +73,22 @@ bib2df<-function(D, dbsource="isi"){
         Seq <- seq(POS,iPs)
         END <- which(regexpr(".*\\}",D[Seq])==1)[1]
         POSEND <- seq(POS,(POS+END-1))
-        if (uniqueTag[j]=="C1"){
+        
+        if (uniqueTag[j]=="C1" & dbsource!="isi"){
           DATA[[uniqueTag[j]]][i] <- paste0(DD[POSEND],collapse=";")
+        } else if (uniqueTag[j]=="C1" & dbsource=="isi"){
+          DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=";")
         }
+        
         if (uniqueTag[j]=="CR" & length(POSEND)>1){
           DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=";")
         } else if (uniqueTag[j]=="CR" & length(POSEND)==1){
           DATA[[uniqueTag[j]]][i] <- paste0(DD[POSEND],collapse=";")
         }
+        
         if (uniqueTag[j]!="C1" & uniqueTag[j]!="CR"){
           DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=" ")} 
+        
         if (uniqueTag[j]=="DI"){
           DOI <- gsub("doi = ","",DD[POS])
           DATA[[uniqueTag[j]]][i] <- gsub(",","",DOI)
@@ -91,6 +97,8 @@ bib2df<-function(D, dbsource="isi"){
     }
     
   }
+    
+  
   if ("DT2" %in% names(DATA)){
   DATA$DT2=substr(DATA$DT2,1,regexpr("\\{",DATA$DT2)-1)}
   

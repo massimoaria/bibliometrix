@@ -9,9 +9,9 @@
 #' @return an object of class \code{character}
 #' @examples
 #'
-#' char <- c("  Alfred", "Mary", " John")
+#' char <- c("Alfred  BJ", "Mary    Beth", "John      John")
 #' char
-#' trim(char)
+#' trimES(char)
 #' 
 #' @export
 trimES <- function( x ) {

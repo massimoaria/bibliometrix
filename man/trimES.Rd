@@ -20,8 +20,8 @@ Deleting extra white spaces from a \code{character} object.
 }
 \examples{
 
-char <- c("  Alfred", "Mary", " John")
+char <- c("Alfred  BJ", "Mary    Beth", "John      John")
 char
-trim(char)
+trimES(char)
 
 }

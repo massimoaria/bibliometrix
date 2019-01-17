@@ -844,7 +844,7 @@ options(width=130)
 histResults <- histNetwork(M, min.citations = 10, sep = ";")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, n=15, size = 20, labelsize=5, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
+net <- histPlot(histResults, n=15, size = 20, labelsize=10, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
 
 ```
 

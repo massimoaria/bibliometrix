@@ -59,9 +59,9 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   switch(field,
          author={
            AU=M$AU
-           AU=trim(gsub(","," ",AU))
+           AU=trimES(gsub(","," ",AU))
            i=which(regexpr("ANONYMOUS",elements)>-1)
-           elements=elements[-i]
+           if(length(i)>0){elements=elements[-i]}
            Name="Author"
            },
          source={
@@ -103,4 +103,5 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   names(H)[1]=Name
   results=list(H=H,CitationList=TotalCitations)
   return(results)
-  }
+}
+

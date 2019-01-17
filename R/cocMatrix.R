@@ -90,14 +90,14 @@ if (Field=="CR"){
   S<-gsub(","," ",S)
   S<-gsub(";"," ",S)
   S<-reduceRefs(S)
-  uniqueField<-unique(trim(S))
+  uniqueField<-unique(trimES(S))
   Fi<-lapply(Fi, function(l){
     l<-gsub("\\).*",")",l)
     l<-gsub(","," ",l)
     l<-gsub(";"," ",l)
     l<-l[nchar(l)>0]
     l<-reduceRefs(l)
-    l<-trim(l)
+    l<-trimES(l)
     return(l)
   })
 } else {

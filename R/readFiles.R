@@ -26,8 +26,11 @@ readFiles <- function(...){
   k=length(arguments)
   D=list()
   enc="UTF-8"
-  for (i in 1:k){D[[i]]=suppressWarnings(readLines(arguments[[i]],encoding = enc))}
+  origEnc=getOption("encoding")
+  if (origEnc=="UTF-8"){options(encoding = "native.enc")}
+    for (i in 1:k){D[[i]]=suppressWarnings(readLines(arguments[[i]],encoding = "UTF-8"))}
   D=unlist(D)
+  options(encoding = origEnc)
   return(D)
-  # warning off
+  
 }

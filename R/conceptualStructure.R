@@ -20,7 +20,7 @@
 #' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
 #'  \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}
 #' @param minDegree is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.
-#' @param k.max is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 8.
+#' @param k.max is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 20.
 #' @param stemming is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}
 #' @param quali.supp is a vector indicating the indexes of the categorical supplementary variables. It is used only for CA and MCA.
@@ -54,7 +54,8 @@
 #' @export
 conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, k.max=5, stemming=FALSE, labelsize=10,documents=10, graph=TRUE){
   
-  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  cbPalette <- c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   
   if (!is.null(quali.supp)){
     QSUPP=data.frame(M[,quali.supp])
@@ -224,10 +225,11 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   if (documents>dim(docCoord)[1]){documents=dim(docCoord)[1]}
     
     centers=data.frame(dim1=km.res$centers[,1],dim2=km.res$centers[,2])
-    centers$color="red"
+    centers$color=cbPalette[1:dim(centers)[1]]
     row.names(centers)=paste("cluster",as.character(1:dim(centers)[1]),sep="")
     A=docCoord[1:documents,1:2]
-    A$color="grey"
+    A=euclDist(A,centers)
+    A$color=cbPalette[A$color]
     
     names(centers)=names(A)
     A=rbind(A,centers)
@@ -245,14 +247,16 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
       geom_point(size = 2, color = A$color)+
       labs(title= "Factorial map of the documents with the highest contributes") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 
-                       fill="steelblue", color = "white", segment.alpha=0.5, segment.color="gray")+
+                       fill=adjustcolor(A$color,alpha.f=0.6), color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
       xlab("dim1")+ ylab("dim2")+
+      geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
+      geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
             axis.title=element_text(size=labelsize,face="bold") ,
-            panel.background = element_rect(fill = "lavender",
-                                            colour = "lavender"),
+            panel.background = element_rect(fill = "lavenderblush",
+                                            colour = "lavenderblush"),
             #size = 1, linetype = "solid"),
             panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
             panel.grid.minor = element_blank())
@@ -262,7 +266,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     ## Factorial map of the most cited documents
     docCoord=docCoord[order(-docCoord$TC),]
     B=docCoord[1:documents,1:2]
-    B$color="grey"
+    B=euclDist(B,centers)
+    B$color=cbPalette[B$color]
     B=rbind(B,centers)
     x=B$dim1
     y=B$dim2
@@ -276,14 +281,16 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
       geom_point(size = 2, color = B$color)+
       labs(title= "Factorial map of the most cited documents") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 
-                       fill="indianred", color = "white", segment.alpha=0.5, segment.color="gray")+
+                       fill=adjustcolor(B$color,alpha.f=0.6), color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
       xlab("dim1")+ ylab("dim2")+
+      geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
+      geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
             axis.title=element_text(size=labelsize,face="bold") ,
-            panel.background = element_rect(fill = "lavender",
-                                          colour = "lavender"),
+            panel.background = element_rect(fill = "lavenderblush",
+                                          colour = "lavenderblush"),
                                             #size = 1, linetype = "solid"),
            panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
            panel.grid.minor = element_blank())
@@ -372,4 +379,18 @@ factorial<-function(X,method,quanti,quali){
     results=list(res.mca=res.mca,df=df,df_doc=NA,df_quali=NA,df_quanti=NA,docCoord=NA)
   }
   return(results)
+}
+
+euclDist<-function(x,y){
+  
+  df=as.data.frame(matrix(NA,dim(x)[1],dim(y)[1]))
+  row.names(df)=row.names(x)
+  colnames(df)=row.names(y)
+  for (i in 1:dim(y)[1]){
+    ref=y[i,1:2]
+    df[,i]=apply(x,1,function(x)sqrt(sum((x-ref)^2)))
+    
+  }
+  x$color=apply(df,1,function(m){which(m==min(m))})
+  return(x)
 }

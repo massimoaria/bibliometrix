@@ -33,7 +33,7 @@ field can be equal to one of this tags:
 
 \item{minDegree}{is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.}
 
-\item{k.max}{is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 8.}
+\item{k.max}{is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 20.}
 
 \item{stemming}{is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.}
 

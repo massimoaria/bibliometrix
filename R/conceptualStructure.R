@@ -172,7 +172,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   df_quanti <- results$df_quanti
   
   ### Total Citations of documents
-  if ("TC" %in% names(M) & method!="MDS"){docCoord$TC=as.numeric(M[rownames(docCoord),"TC"])}
+  if ("TC" %in% names(M) & method!="MDS"){docCoord$TC=as.numeric(M[toupper(rownames(docCoord)),"TC"])}
   
   
   # Selection of optimal number of clusters (gap statistics)
@@ -244,7 +244,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     b_doc=ggplot(aes(x=A$dim1,y=A$dim2,label=A$nomi),data=A)+
       geom_point(size = 2, color = A$color)+
       labs(title= "Factorial map of the documents with the highest contributes") +
-      geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize)), fontface = "bold", 
+      geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 
                        fill="steelblue", color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
@@ -275,7 +275,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     b_doc_TC=ggplot(aes(x=B$dim1,y=B$dim2,label=B$nomi),data=B)+
       geom_point(size = 2, color = B$color)+
       labs(title= "Factorial map of the most cited documents") +
-      geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize)), fontface = "bold", 
+      geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 
                        fill="indianred", color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+

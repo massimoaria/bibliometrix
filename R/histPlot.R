@@ -88,7 +88,7 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
     geom_node_text(aes(label=V(bsk.network)$id, size=labelsize),repel = TRUE)+
     geom_node_point(aes(size = V(bsk.network)$size,color = "grey", alpha=0.1))+
     scale_x_continuous(labels=as.character(seq(min(Years),max(Years))),breaks=seq(min(Years),max(Years)))+
-    scale_color_viridis(discrete = TRUE) +
+    scale_color_brewer() +
     theme_minimal()+
     theme(legend.position='none', panel.background = element_rect(fill='gray97', color='grey97'),
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),

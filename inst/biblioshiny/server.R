@@ -89,7 +89,7 @@ server <- function(input, output, session) {
       
       load(inFile$datapath)
     }
-    
+    values=initial(values)
     values$M <- M
     values$Morig=M
     values$Histfield="NA"

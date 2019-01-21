@@ -139,7 +139,13 @@ tabPanel(
                                    uiOutput("selectType"),
                                    uiOutput("sliderPY"),
                                    uiOutput("sliderTC"),
-                                   uiOutput("selectSource")
+                                   #uiOutput("selectSource"),
+                                   selectInput("bradfordSources", 
+                                               label = "Source by Bradford Law Zones",
+                                               choices = c("Core Sources"="core", 
+                                                           "Core + Zone 2 Sources"="zone2",
+                                                           "All Sources"="all"),
+                                               selected = "all")
                                    
                       ),
                       mainPanel(DT::DTOutput("dataFiltered"))
@@ -337,8 +343,11 @@ navbarMenu("Authors",
                                     tabPanel("Plot",
                                              shinycssloaders::withSpinner(plotOutput(outputId = "TopAuthorsProdPlot"))
                                     ),
-                                    tabPanel("Table",
+                                    tabPanel("Table - Top Authors' Production per Year",
                                              shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
+                                    ),
+                                    tabPanel("Table - Top Author's Documents",
+                                             shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
                                     ))
                       )
                     )

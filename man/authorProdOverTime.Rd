@@ -17,6 +17,7 @@ authorProdOverTime(M, k = 10, graph = TRUE)
 The function \code{authorProdOverTime} returns a list containing two objects:
 \tabular{lll}{
 \code{dfAU}  \tab   \tab is a data frame\cr
+\code{dfpapersAU}\tab    \tab is a data frame\cr
 \code{graph}   \tab   \tab a ggplot object}
 }
 \description{

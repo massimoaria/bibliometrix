@@ -33,11 +33,11 @@ SO=sort(table(M$SO),decreasing = TRUE)
 n=sum(SO)
 cumSO=cumsum(SO)
 cutpoints=round(c(1,n*0.33,n*0.67,Inf))
-groups=cut(cumSO,breaks = cutpoints,labels=c("Zone 1", "ZOne 2", "Zone 3"))
+groups=cut(cumSO,breaks = cutpoints,labels=c("Zone 1", "Zone 2", "Zone 3"))
 a=length(which(cumSO<n*0.33))+1
 b=length(which(cumSO<n*0.67))+1
 Z=c(rep("Zone 1",a),rep("Zone 2",b-a),rep("Zone 3",length(cumSO)-b))
-df=data.frame(SO=names(cumSO),Rank=1:length(cumSO),Freq=as.numeric(SO),cumFreq=cumSO,Zone=Z)
+df=data.frame(SO=names(cumSO),Rank=1:length(cumSO),Freq=as.numeric(SO),cumFreq=cumSO,Zone=Z, stringsAsFactors = FALSE)
 
 g=ggplot2::ggplot(df, aes(x = log(df$Rank), y = df$Freq)) +
   geom_line() +

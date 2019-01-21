@@ -7,6 +7,7 @@
 #' @return The function \code{authorProdOverTime} returns a list containing two objects:
 #' \tabular{lll}{
 #' \code{dfAU}  \tab   \tab is a data frame\cr
+#' \code{dfpapersAU}\tab    \tab is a data frame\cr
 #' \code{graph}   \tab   \tab a ggplot object}
 #'
 #' @examples
@@ -28,13 +29,14 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   k=min(k,length(AU))
   AU=AU[1:k]
   #AU=names(AU)
-  df=data.frame("Author"="NA","year"=NA, "TC"=NA,"TCpY"=NA,stringsAsFactors = FALSE)
+  df=data.frame("Author"="NA","year"=NA, "TI"="NA","SO"="NA","DOI"="NA", "TC"=NA,"TCpY"=NA,stringsAsFactors = FALSE)
   Y=as.numeric(substr(Sys.time(),1,4))
+  if (!("DI" %in% names(M))){M$DI="NA"}
   for (i in 1:length(AU)){
    
     ind=which(regexpr(AU[i],M$AU)>-1)
     TCpY=M$TC[ind]/(Y-M$PY[ind]+1)
-    dfAU=data.frame("Author"=rep(AU[i],length(ind)),"year"=M$PY[ind],"TC"=M$TC[ind], "TCpY"=TCpY,stringsAsFactors = TRUE)
+    dfAU=data.frame("Author"=rep(AU[i],length(ind)),"year"=M$PY[ind],"TI"=M$TI[ind],"SO"=M$SO[ind],"DOI"=M$DI[ind],"TC"=M$TC[ind], "TCpY"=TCpY,stringsAsFactors = TRUE)
     df=rbind(df,dfAU)
   }
   df=df[-1,]
@@ -69,7 +71,8 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
     geom_line(data=df2, aes(x = df2$Author, y = df2$year),size=1.0, color="firebrick", alpha=0.3 )+
     scale_x_discrete(limits = rev(levels(df2$Author)))+
     coord_flip()
-  res <- list(dfAU=df2,graph=g)
+  df$DOI=as.character(df$DOI)
+  res <- list(dfAU=df2,dfPapersAU=df,graph=g)
   if (isTRUE(graph)){plot(g)}
   return(res)
 }

@@ -172,13 +172,23 @@ server <- function(input, output, session) {
   output$dataFiltered <- DT::renderDT({
     
     M=values$Morig
-    
-    M=(M[(M$PY>=input$sliderPY[1] & M$PY<=input$sliderPY[2]),])
-    M=(M[(M$TC>=input$sliderTC[1] & M$TC<=input$sliderTC[2]),])
-    indexDT=(ifelse(M$DT %in% input$selectType,TRUE,FALSE))
-    M=(M[indexDT,])
-    indexSO=(ifelse(M$SO %in% input$selectSource,TRUE,FALSE))
-    M=((M[M$SO %in% input$selectSource,]))
+    B=bradford(M)$table
+    M=subset(M, M$PY>=input$sliderPY[1] & M$PY<=input$sliderPY[2])
+    M=subset(M, M$TC>=input$sliderTC[1] & M$TC<=input$sliderTC[2])
+    M=subset(M, M$DT %in% input$selectType)
+    switch(input$bradfordSources,
+           "core"={
+             SO=B$SO[B$Zone %in% "Zone 1"]
+           },
+           "zone2"={
+             SO=B$SO[B$Zone %in% c("Zone 1", "Zone 2")]
+           },
+           "all"={SO=B$SO})
+    M=M[M$SO %in% SO,]
+    #indexDT=(ifelse(M$DT %in% input$selectType,TRUE,FALSE))
+    #M=(M[indexDT,])
+    #indexSO=(ifelse(M$SO %in% input$selectSource,TRUE,FALSE))
+    #M=((M[M$SO %in% input$selectSource,]))
     values$M=M
     #values$results=list("NA") ## to reset summary statistics
     values<-initial(values)
@@ -274,15 +284,19 @@ server <- function(input, output, session) {
     res <- descriptive(values,type="tab7")
     values <-res$values
     
-    xx=as.data.frame(values$results$Sources)
+    #xx=as.data.frame(values$results$Sources)
+    xx<- values$TAB
     if (input$MostRelSourcesK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelSourcesK}
-    xx=xx[1:k,]
-    g=ggplot2::ggplot(data=xx, aes(x=xx$SO, y=xx$Freq, fill=-xx$Freq)) +
+    #xx=xx[1:k,]
+    xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
+    xx$Articles=as.numeric(xx$Articles)
+    
+    g=ggplot2::ggplot(data=xx, aes(x=xx$Sources, y=xx$Articles, fill=-xx$Articles)) +
       geom_bar(stat="identity")+
       scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev((xx$SO)), labels=substr(rev(xx$SO),1,50))+
+      scale_x_discrete(limits = rev((xx$Sources)), labels=substr(rev(xx$Sources),1,50))+
       labs(title="Most Relevant Sources", x = "Sources")+
       labs(y = "N. of Documents")+
       theme_minimal() +
@@ -453,7 +467,8 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$H))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center')
+      formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center') %>%
+      formatRound(names(values$H)[4], 3)
     
   })
   
@@ -471,7 +486,22 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
+      formatRound(names(TAB)[dim(TAB)[2]], 3)
+    
+  })
+  
+  output$TopAuthorsProdTablePapers <- DT::renderDT({
+    TAB <- values$AUProdOverTime$dfPapersAU
+    TAB$DOI=paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    DT::datatable(TAB, rownames = FALSE, escape = FALSE,extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
+      formatRound(names(TAB)[dim(TAB)[2]], 3)
     
   })
   
@@ -509,7 +539,8 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$lotka$AuthorProd))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$lotka$AuthorProd),  backgroundColor = 'white',textAlign = 'center')
+      formatStyle(names(values$lotka$AuthorProd),  backgroundColor = 'white',textAlign = 'center') %>%
+      formatRound(names(values$lotka$AuthorProd)[3], 3)
   })
   
       ### Affiliations ----

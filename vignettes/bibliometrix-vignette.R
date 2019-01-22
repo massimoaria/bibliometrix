@@ -63,6 +63,16 @@ indices <- Hindex(M, field = "author", elements=authors, sep = ";", years = 50)
 
 indices$H
 
+## ----AuthorProdOverTime, fig.height=6, fig.width=8-----------------------
+
+topAU <- authorProdOverTime(M, k = 10, graph = TRUE)
+
+## Table: Author's productivity per year
+head(topAU$dfAU)
+
+## Table: Auhtor's documents list
+#head(topAU$dfPapersAU)
+
 ## ----Lotka law-----------------------------------------------------------
 L <- lotka(results)
 

@@ -474,6 +474,25 @@ indices$H
 ```
 
 
+## Top-Authors' Productivity over the Time
+
+The function *AuthorProdOverTime* calculates and plots the authors' production (in terms of number of publications, and total citations per year) over the time.
+
+Function arguments are: *M* a bibliographic data frame; *k* is the number of *k* Top Authors; *graph* is a logical. If *graph=TRUE*, the function plots the author production over time graph. 
+
+```{r AuthorProdOverTime, fig.height=6, fig.width=8}
+
+topAU <- authorProdOverTime(M, k = 10, graph = TRUE)
+
+## Table: Author's productivity per year
+head(topAU$dfAU)
+
+## Table: Auhtor's documents list
+#head(topAU$dfPapersAU)
+```
+
+
+
 ## Lotka's Law coefficient estimation
 The function *lotka* estimates Lotka's law coefficients for scientific productivity (Lotka A.J., 1926).
 

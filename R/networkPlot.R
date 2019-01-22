@@ -210,7 +210,10 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
            vertex.label.font = 2, vertex.label = LABEL, main=Title, edge.color=adjustcolor(E(bsk.network1)$color,alpha/2))
     }
     
-  }else{net_groups$modularity=rep(1,vcount(bsk.network))} 
+  }else{
+    net_groups$modularity=rep(1,vcount(bsk.network))
+    bsk.network1=bsk.network
+  } 
   
   ## Output
   if (cluster!="none" & type!="vosviewer"){

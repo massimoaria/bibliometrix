@@ -1033,6 +1033,12 @@ navbarMenu("Conceptual Structure",
                                                            "Titles" = "TI",
                                                            "Abstracts" = "AB"),
                                                selected = "ID"),
+                                   conditionalPanel(
+                                     condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
+                                   selectInput("stemming", label="Word Stemming",
+                                               choices = c("Yes" = TRUE,
+                                                           "No" = FALSE),
+                                               selected = FALSE)),
                                    sliderInput("TMn", label="Number of Words",value=250,min=50,max=500,step=10),
                                    sliderInput("TMfreq", label="Min Cluster Frequency",value=5,min=1,max=100,step=1)
                                    ),

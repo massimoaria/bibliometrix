@@ -1648,12 +1648,14 @@ server <- function(input, output, session) {
              
            },
            TI={
-             if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
+             #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
+             values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)
              NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
              
            },
            AB={
-             if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
+             #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
+             values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)
              NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
              
            })
@@ -1662,7 +1664,7 @@ server <- function(input, output, session) {
     capture.output(net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
                                        labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
-                                       size=1,edges.min = 2))
+                                       size=1,edges.min = 1))
     Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMfreq)
     #plot(Map$map)
     values$TM=Map

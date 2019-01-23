@@ -269,7 +269,7 @@ server <- function(input, output, session) {
   
   output$MostRelSourcesTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABSo
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -283,7 +283,7 @@ server <- function(input, output, session) {
   output$MostRelSourcesPlot <- renderPlot({
     res <- descriptive(values,type="tab7")
     values <-res$values
-    
+    values$TABSo<-values$TAB
     #xx=as.data.frame(values$results$Sources)
     xx<- values$TAB
     if (input$MostRelSourcesK>dim(xx)[1]){
@@ -417,6 +417,7 @@ server <- function(input, output, session) {
   output$MostRelAuthorsPlot <- renderPlot({
     res <- descriptive(values,type="tab3")
     values <-res$values
+    values$TABAu<-values$TAB
     
     xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
     if (input$MostRelAuthorsK>dim(xx)[1]){
@@ -438,7 +439,7 @@ server <- function(input, output, session) {
   
   output$MostRelAuthorsTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABAu
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -548,6 +549,7 @@ server <- function(input, output, session) {
   output$MostRelAffiliationsPlot <- renderPlot({
     res <- descriptive(values,type="tab11")
     values <-res$values
+    values$TABAff <- values$TAB
     
     xx=as.data.frame(values$results$Affiliations, stringsAsFactors = FALSE)
     if (input$MostRelAffiliationsK>dim(xx)[1]){
@@ -569,7 +571,7 @@ server <- function(input, output, session) {
   
   output$MostRelAffiliationsTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABAff
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -584,6 +586,8 @@ server <- function(input, output, session) {
   output$MostRelCountriesPlot <- renderPlot({
     res <- descriptive(values,type="tab5")
     values <-res$values
+    values$TABCo <- values$TAB
+    
     k=input$MostRelCountriesK
     xx=values$results$CountryCollaboration[1:k,]
     xx=xx[order(-(xx$SCP+xx$MCP)),]
@@ -610,7 +614,7 @@ server <- function(input, output, session) {
   
   output$MostRelCountriesTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABCo
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -642,6 +646,7 @@ server <- function(input, output, session) {
   output$MostCitCountriesPlot <- renderPlot({
     res <- descriptive(values,type="tab6")
     values <-res$values
+    values$TABCitCo <- values$TAB
     
     xx=values$TAB
     xx[,2]=as.numeric(xx[,2])
@@ -673,7 +678,7 @@ server <- function(input, output, session) {
   
   output$MostCitCountriesTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABCitCo
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -690,6 +695,7 @@ server <- function(input, output, session) {
   output$MostCitDocsPlot <- renderPlot({
     res <- descriptive(values,type="tab4")
     values <-res$values
+    values$TABGlobDoc <- values$TAB
     
     if (input$CitDocsMeasure=="TC"){
       xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[2], stringsAsFactors = FALSE,row.names=NULL)
@@ -719,7 +725,7 @@ server <- function(input, output, session) {
   
   output$MostCitDocsTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABGlobDoc
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -736,7 +742,7 @@ server <- function(input, output, session) {
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],stringsAsFactors = FALSE)
     
-    values$TAB=xx
+    values$TABLocDoc=xx
     
     if (input$MostLocCitDocsK>dim(xx)[1]){
       k=dim(xx)[1]
@@ -759,7 +765,7 @@ server <- function(input, output, session) {
   
   output$MostLocCitDocsTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABLocDoc
     TAB$DOI<- paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
@@ -777,9 +783,9 @@ server <- function(input, output, session) {
     CR=citations(values$M,sep=input$CitRefsSep)$Cited
     TAB=data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
     names(TAB)=c("Cited References", "Citations")
-    values$TAB=TAB
+    values$TABCitRef=TAB
     
-    xx=values$TAB
+    xx=values$TABCitRef
     if (input$MostCitRefsK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostCitRefsK}
@@ -802,7 +808,7 @@ server <- function(input, output, session) {
   
   output$MostCitRefsTable <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABCitRef
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -856,9 +862,9 @@ server <- function(input, output, session) {
     
     TAB=data.frame(names(WR),as.numeric(WR),stringsAsFactors = FALSE)
     names(TAB)=c("Words", "Occurrences")
-    values$TAB=TAB
+    values$TABWord=TAB
     
-    xx=values$TAB
+    xx=values$TABWord
     if (input$MostRelWordsN>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelWordsN}
@@ -886,7 +892,7 @@ server <- function(input, output, session) {
   output$MostRelWordsTable <- DT::renderDT({
     
     
-    TAB <- values$TAB
+    TAB <- values$TABWord
     
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
@@ -919,7 +925,7 @@ server <- function(input, output, session) {
     resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure=input$treemeasure)
     
     W=resW$W
-    values$Words=resW$Words
+    values$WordsT=resW$Words
     
     treemap::treemap(W, #Your data frame object
             index=c("Terms"),  #A list of your categorical variables
@@ -947,7 +953,7 @@ server <- function(input, output, session) {
   
   output$treeTable <- DT::renderDT({
     
-    DT::datatable(values$Words, rownames = FALSE,
+    DT::datatable(values$WordsT, rownames = FALSE,
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),

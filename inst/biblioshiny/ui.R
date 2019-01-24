@@ -79,6 +79,8 @@ tabPanel(
   "Load", 
   sidebarLayout(
     sidebarPanel(width=3,
+                 h3(em(strong("Loading and Converting "))),
+                 br(),
       selectInput("dbsource", 
                   label = "Database",
                   choices = c("Web of Knowledge"="isi", 
@@ -135,6 +137,8 @@ tabPanel(
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Filtering "))),
+                                   br(),
                                    uiOutput("textDim"),
                                    uiOutput("selectType"),
                                    uiOutput("sliderPY"),
@@ -161,10 +165,8 @@ navbarMenu("Dataset",
            tabPanel("Main Information",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
-                                   h4(em(strong("Main Information about the collecion "))),
-                                   "  "),
+                                   h3(em(strong("Main Information about the collecion "))),
+                                   br()),
                       mainPanel(
                         shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo"))
                     )
@@ -174,7 +176,7 @@ navbarMenu("Dataset",
                       sidebarPanel(width=3,
                                    "  ",
                                    "  ",
-                                   h4(em(strong("Annual Scientific Production "))),
+                                   h3(em(strong("Annual Scientific Production "))),
                                    "  "
                                    ),
                       mainPanel(
@@ -198,8 +200,8 @@ navbarMenu("Sources",
            tabPanel("Most Relevant Sources",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Relevant Sources "))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostRelSourcesK", 
@@ -222,7 +224,9 @@ navbarMenu("Sources",
                     
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   helpText("")            
+                                   h3(em(strong("Source clustering"))),
+                                   h4(em(strong("through Bradford's Law "))),
+                                   br()            
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -237,11 +241,11 @@ navbarMenu("Sources",
                     )
            ),
            ### SOURCE HINDEX MENU ----
-           tabPanel("Source's H-index",
+           tabPanel("Source Impact",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Source Impact"))),
+                                   br(),            
                                    actionButton("applyHsource", "Apply!"),
                                    "  ",
                                    "  ",
@@ -278,6 +282,8 @@ navbarMenu("Sources",
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
                       sidebarPanel(width=3,
+                                   h3(em(strong("Source Dynamics"))),
+                                   br(),   
                                    selectInput("cumSO", "Occurrences",
                                                choices = c("Cumulate" = "Cum",
                                                            "Per year" = "noCum"),
@@ -315,8 +321,8 @@ navbarMenu("Authors",
            tabPanel("Most Relevant Authors",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Relevant Authors"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostRelAuthorsK", 
@@ -336,11 +342,11 @@ navbarMenu("Authors",
            ),
            
            ### AUTHOR'S PRODUCTION OVER TIME  ----
-           tabPanel("Author's Production over Time",
+           tabPanel("Authors' Production over Time",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Authors' Production over Time"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("TopAuthorsProdK", 
@@ -367,7 +373,9 @@ navbarMenu("Authors",
                     
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   helpText("")            
+                                   h3(em(strong("Author Productivity"))),
+                                   h4(em(strong("through Lotka's Law"))),
+                                   br()         
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -382,11 +390,11 @@ navbarMenu("Authors",
                     )
            ),
            ### AUTHOR HINDEX ----
-           tabPanel("Author's H-index",
+           tabPanel("Author Impact",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Author Impact"))),
+                                   br(),
                                    actionButton("applyHauthor", "Apply!"),
                                    "  ",
                                    "  ",
@@ -424,8 +432,8 @@ navbarMenu("Authors",
            tabPanel("Most Relevant Affiliations",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Relevant Affiliations"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostRelAffiliationsK", 
@@ -450,8 +458,8 @@ navbarMenu("Authors",
            tabPanel("Corresponding Author's Country",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Corresponding Author's Country"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostRelCountriesK", 
@@ -473,8 +481,9 @@ navbarMenu("Authors",
            tabPanel("Country Scientific Production",
                     
                     sidebarLayout(
-                      sidebarPanel(width=3
-                                   ,helpText("")            
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Country Scientific Production"))),
+                                   br()
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -492,8 +501,8 @@ navbarMenu("Authors",
            tabPanel("Most Cited Countries",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Cited Countries"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    selectInput("CitCountriesMeasure", 
@@ -527,8 +536,8 @@ navbarMenu("Documents",
            tabPanel("Most Global Cited Documents",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Global Cited Documents"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostCitDocsK", 
@@ -556,8 +565,8 @@ navbarMenu("Documents",
            tabPanel("Most Local Cited Documents",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Local Cited Documents"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostLocCitDocsK", 
@@ -591,8 +600,8 @@ navbarMenu("Documents",
            tabPanel("Most Local Cited References",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Most Local Cited References"))),
+                                   br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",
                                    numericInput("MostCitRefsK", 
@@ -622,9 +631,9 @@ navbarMenu("Documents",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
-                                   "  ",
-                                   "  ",
-                                   h4(em(strong("Graphical Parameters: "))),
+                                   h3(em(strong("Reference Spectroscopy"))),
+                                   br(),
+                                   h4(em(strong("Parameters: "))),
                                    "  ",
                                    sliderInput("sliderYears",
                                                label = "Timespan",
@@ -665,6 +674,10 @@ navbarMenu("Documents",
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
                       sidebarPanel(width=3,
+                                   h3(em(strong("Most Frequent Words"))),
+                                   br(),
+                                   h4(em(strong("Parameters:"))),
+                                   " ",
                                    selectInput("MostRelWords", "Field",
                                                choices = c("Keywords Plus" = "ID",
                                                            "Author's keywords" = "DE",
@@ -695,6 +708,10 @@ navbarMenu("Documents",
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
                       sidebarPanel(width=3,
+                                   h3(em(strong("WordCloud"))),
+                                   br(),
+                                   h4(em(strong("Graphical Parameters:"))),
+                                   " ",
                                    selectInput("summaryTerms", "Field",
                                                choices = c("Keywords Plus" = "ID",
                                                            "Author's keywords" = "DE",
@@ -752,6 +769,10 @@ navbarMenu("Documents",
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
                       sidebarPanel(width=3,
+                                   h3(em(strong("TreeMap "))),
+                                   br(),
+                                   h4(em(strong("Graphical Parameters:"))),
+                                   " ",
                                    selectInput("treeTerms", "Field",
                                                choices = c("Keywords Plus" = "ID",
                                                            "Author's keywords" = "DE",
@@ -798,6 +819,10 @@ navbarMenu("Documents",
                     sidebarLayout(
                       # Sidebar with a slider and selection inputs
                       sidebarPanel(width=3,
+                                   h3(em(strong("Word Dynamics"))),
+                                   br(),
+                                   h4(em(strong("Graphical Parameters:"))),
+                                   " ",
                                    selectInput("growthTerms", "Field",
                                                choices = c("Keywords Plus" = "ID",
                                                            "Author's keywords" = "DE",
@@ -845,6 +870,8 @@ navbarMenu("Conceptual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Co-occurrence Network"))),
+                                   br(),
                          
                                    actionButton("applyCoc", "Apply!"),
                                    downloadButton("network.coc", "Save Pajek"),
@@ -963,6 +990,8 @@ navbarMenu("Conceptual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Factorial Analysis"))),
+                                   br(),
                                    actionButton("applyCA", "Apply!"),
                                    
                         
@@ -1029,6 +1058,8 @@ navbarMenu("Conceptual Structure",
            tabPanel("Thematic Map",
                     sidebarLayout(
                       sidebarPanel(width=3,
+                                   h3(em(strong("Thematic MaP"))),
+                                   br(),
                         
                                    actionButton("applyTM", "Apply!"),
                                    "  ",
@@ -1070,9 +1101,8 @@ navbarMenu("Conceptual Structure",
            tabPanel("Thematic Evolution",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   
-                                   "  ",
-                                   "  ",
+                                   h3(em(strong("Thematic Evolution"))),
+                                   br(),
                                    h4(em(strong("TE Parameters: "))),
                                    "  ",
                                    selectInput("TEfield", 
@@ -1121,6 +1151,8 @@ navbarMenu("Intellectual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Co-cocitation Network"))),
+                                   br(),
                                    actionButton("applyCocit", "Apply!"),
                                    downloadButton("network.cocit", "Save Pajek"),
                                    downloadButton("networkCocit.fig", "Save Fig"),
@@ -1239,6 +1271,8 @@ navbarMenu("Intellectual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Historiograph "))),
+                                   br(),
                                    actionButton("applyHist", "Apply!"),
                                    #selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
                                    #conditionalPanel(condition = "input.save_colnet == 'pajek'",
@@ -1246,7 +1280,7 @@ navbarMenu("Intellectual Structure",
                                    
                                    "  ",
                                    "  ",
-                                   h4(em(strong("Network Parameters: "))),
+                                   h4(em(strong("Historiograph Parameters: "))),
                                    "  ",
                                    
                                    sliderInput(inputId = "histNodes",
@@ -1300,6 +1334,8 @@ navbarMenu("Social Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Collaboration Network"))),
+                                   br(),
                                    actionButton("applyCol", "Apply!"),
                                    downloadButton("network.col", "Save Pakek"),
                                    downloadButton("networkCol.fig", "Save Fig"),
@@ -1412,14 +1448,17 @@ navbarMenu("Social Structure",
                     )
                     
            ), ## End of tabPanel "Social Structure" 
-           tabPanel(title="WorldMap Collaboration",
+           ### Collaboration WorldMap ----
+           tabPanel(title="Collaboration WorldMap",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
+                                   h3(em(strong("Collaboration WorldMap"))),
+                                   br(),
                                    actionButton("applyWM", "Apply!"),
                                    "  ",
                                    "  ",
-                                   h4(em(strong("Network Parameters: "))),
+                                   h4(em(strong("Map Parameters: "))),
                                    "  ",
                                    numericInput("WMedges.min", 
                                                 label=("Min edges"),

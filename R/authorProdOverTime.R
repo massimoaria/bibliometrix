@@ -65,7 +65,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
           ,axis.text.x = element_text(face="bold")
           ,axis.text.y = element_text(face="bold")
     )+
-    labs(title="Top-Authors' Productivity over the Time", 
+    labs(title="Top-Authors' Production over the Time", 
          x="Author",
          y="Year")+
     geom_line(data=df2, aes(x = df2$Author, y = df2$year),size=1.0, color="firebrick", alpha=0.3 )+

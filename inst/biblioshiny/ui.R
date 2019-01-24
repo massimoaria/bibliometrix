@@ -160,14 +160,23 @@ navbarMenu("Dataset",
            "  ",
            tabPanel("Main Information",
                     sidebarLayout(
-                      sidebarPanel(width=3),
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Main Information about the collecion "))),
+                                   "  "),
                       mainPanel(
                         shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo"))
                     )
            )),
            tabPanel("Annual Scientific Production",
                     sidebarLayout(
-                      sidebarPanel(width=3),
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("Annual Scientific Production "))),
+                                   "  "
+                                   ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",

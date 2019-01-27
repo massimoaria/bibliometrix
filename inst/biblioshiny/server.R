@@ -222,7 +222,7 @@ server <- function(input, output, session) {
     
   })
   
-  output$AnnualProdPlot <- renderPlot({
+  output$AnnualProdPlot <- renderPlotly({
     res <- descriptive(values,type="tab2")
     values <-res$values
     Tab=table(values$results$Years)
@@ -234,9 +234,9 @@ server <- function(input, output, session) {
     
     names(Y)=c("Year","Freq")
     
-    g=ggplot2::ggplot(Y, aes(x = Y$Year, y = Y$Freq)) +
-      geom_line() +
-      geom_area(fill = '#002F80', alpha = .5) +
+    g=ggplot2::ggplot(Y, aes(x = Y$Year, y = Y$Freq, text=paste("Year: ",Y$Year,"\nN .of Documents: ",Y$Freq))) +
+      geom_line(aes(group="NA")) +
+      geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
       labs(x = 'Year'
            , y = 'Articles'
            , title = "Annual Scientific Production") +
@@ -250,11 +250,74 @@ server <- function(input, output, session) {
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
       )
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$AnnualProdTable <- DT::renderDT({
     TAB <- values$TAB
+    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+    
+  })
+  
+  output$AnnualTotCitperYearPlot <- renderPlotly({
+    
+    if (values$results[[1]]=="NA"){
+      values$results=biblioAnalysis(values$M)}
+    x=values$results
+    
+    # Total Citation Plot
+    Table2=aggregate(x$TotalCitation,by=list(x$Years),length)
+    Table2$xx=aggregate(x$TotalCitation,by=list(x$Years),mean)$x
+    Table2$Annual=NA
+    d=date()
+    d=as.numeric(substring(d,nchar(d)-3,nchar(d)))
+    Table2$Years=d-Table2$Group.1
+    Table2$Annual=Table2$xx/Table2$Years
+    names(Table2)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
+    
+    ## inserting missing years
+    YY=setdiff(seq(min(x$Years,na.rm=TRUE),max(x$Years,na.rm=TRUE)),Table2$Year)
+    if (length(YY>0)){
+      YY=data.frame(YY,0,0,0,0)
+      names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
+      Table2=rbind(Table2,YY)
+      Table2=Table2[order(Table2$Year),]
+      row.names(Table2)=Table2$Year}
+    
+    values$AnnualTotCitperYear=Table2
+    Table2$group="A"
+    
+    g=ggplot(Table2, aes(x = Table2$Year, y =Table2$MeanTCperYear,text=paste("Year: ",Table2$Year,"\nAverage Citations per Year: ",round(Table2$MeanTCperYear,1)))) +
+      geom_line(aes(x = Table2$Year, y = Table2$MeanTCperYear, group=Table2$group)) +
+      geom_area(aes(x = Table2$Year, y = Table2$MeanTCperYear, group=Table2$group),fill = '#002F80', alpha = .5) +
+      labs(x = 'Year'
+           , y = 'Citations'
+           , title = "Average Article Citations per Year")+
+      scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
+      theme(text = element_text(color = "#444444")
+            ,panel.background = element_rect(fill = '#EFEFEF')
+            ,panel.grid.minor = element_line(color = '#FFFFFF')
+            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,plot.title = element_text(size = 24)
+            ,axis.title = element_text(size = 14, color = '#555555')
+            ,axis.title.y = element_text(vjust = 1, angle = 0)
+            ,axis.title.x = element_text(hjust = 0)
+      )
+    
+    plot.ly(g)
+   
+    
+  })
+  
+  output$AnnualTotCitperYearTable <- DT::renderDT({
+    
+    TAB <- values$AnnualTotCitperYear
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
@@ -280,7 +343,7 @@ server <- function(input, output, session) {
     
   })
   
-  output$MostRelSourcesPlot <- renderPlot({
+  output$MostRelSourcesPlot <- renderPlotly({
     res <- descriptive(values,type="tab7")
     values <-res$values
     values$TABSo<-values$TAB
@@ -292,26 +355,28 @@ server <- function(input, output, session) {
     #xx=xx[1:k,]
     xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
     xx$Articles=as.numeric(xx$Articles)
+    xx$Sources=substr(xx$Sources,1,50)
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx$Sources, y=xx$Articles, fill=-xx$Articles)) +
-      geom_bar(stat="identity")+
+    
+    g=ggplot2::ggplot(data=xx, aes(x=xx$Sources, y=xx$Articles, fill=-xx$Articles,text=paste("Source: ",xx$Sources,"\nN. of Documents: ",xx$Articles))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev((xx$Sources)), labels=substr(rev(xx$Sources),1,50))+
+      scale_x_discrete(limits = rev(xx$Sources))+
       labs(title="Most Relevant Sources", x = "Sources")+
       labs(y = "N. of Documents")+
-      theme_minimal() +
+      theme_minimal()+
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
-  output$bradfordPlot <- renderPlot({
+  output$bradfordPlot <- renderPlotly({
     
     values$bradford=bradford(values$M)
-    values$bradford$graph
+    plot.ly(values$bradford$graph)
     
-  },height = 600)
+  })#,height = 600)
   
   output$bradfordTable <- DT::renderDT({
     
@@ -324,15 +389,15 @@ server <- function(input, output, session) {
       formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center')
   })
   
-  output$SourceHindexPlot <- renderPlot({
+  output$SourceHindexPlot <- renderPlotly({
     
     input$applyHsource
     
     isolate(res <- Hindex_plot(values,type="source"))
     
-    isolate(plot(res$g))
+    isolate(plot.ly(res$g))
    
-  }, height = 500, width =900)
+  })#, height = 500, width =900)
   
   output$SourceHindexTable <- DT::renderDT({
     
@@ -414,28 +479,47 @@ server <- function(input, output, session) {
   ### AUTHORS MENU ####
   
       ### Authors ----
-  output$MostRelAuthorsPlot <- renderPlot({
+  output$MostRelAuthorsPlot <- renderPlotly({
     res <- descriptive(values,type="tab3")
     values <-res$values
     values$TABAu<-values$TAB
     
-    xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
+    #xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
+    xx=values$TABAu
+    switch(input$AuFreqMeasure,
+           t={
+             lab="N. of Documents"
+             xx=xx[,1:2]
+             },
+           p={xx=xx[,1:2]
+              xx[,2]=as.numeric(xx[,2])/dim(values$M)[1]*100
+              lab="N. of Documents (in %)"
+                },
+           f={
+             xx=xx[,3:4]
+             lab="N. of Documents (Fractionalized)"
+             })
+    
+    xx[,2]=as.numeric(xx[,2])
+    
     if (input$MostRelAuthorsK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelAuthorsK}
+    
     xx=xx[1:k,]
-    g=ggplot2::ggplot(data=xx, aes(x=xx$AU, y=xx$Freq, fill=-xx$Freq)) +
-      geom_bar(stat="identity")+
+    xx[,2]=round(xx[,2],1)
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Author: ",xx[,1],"\n",lab,": ",xx[,2]))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx$AU))+
+      scale_x_discrete(limits = rev(xx[,1]))+
       labs(title="Most Relevant Authors", x = "Authors")+
-      labs(y = "N. of Documents")+
+      labs(y = lab)+
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostRelAuthorsTable <- DT::renderDT({
     
@@ -450,15 +534,15 @@ server <- function(input, output, session) {
     
   })
  
-  output$AuthorHindexPlot <- renderPlot({
+  output$AuthorHindexPlot <- renderPlotly({
     
     input$applyHauthor
     
     isolate(res <- Hindex_plot(values,type="author"))
     
-    isolate(plot(res$g))
+    isolate(plot.ly(res$g))
     
-  }, height = 500, width =900)
+  })#, height = 500, width =900)
   
   output$AuthorHindexTable <- DT::renderDT({
     
@@ -473,11 +557,12 @@ server <- function(input, output, session) {
     
   })
   
-  output$TopAuthorsProdPlot <- renderPlot({
+  output$TopAuthorsProdPlot <- renderPlotly({
     values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK)
     
-    plot(values$AUProdOverTime$graph)
-  }, height = 550, width =1100)
+    plot.ly(values$AUProdOverTime$graph)
+    
+  })#, height = 550, width =1100)
   
   output$TopAuthorsProdTable <- DT::renderDT({
     TAB <- values$AUProdOverTime$dfAU
@@ -506,15 +591,17 @@ server <- function(input, output, session) {
     
   })
   
-  output$lotkaPlot <- renderPlot({
+  output$lotkaPlot <- renderPlotly({
     
     values$lotka=lotka(biblioAnalysis(values$M))
     AuProd=values$lotka$AuthorProd
     AuProd$Theoretical=10^(log10(values$lotka$C)-2*log10(AuProd[,1]))
     
-    g=ggplot2::ggplot(AuProd, aes(x = AuProd$N.Articles, y = AuProd$Freq*100)) +
-      geom_line() +
-      geom_area(fill = '#002F80', alpha = .5) +
+    g=ggplot2::ggplot(AuProd, aes(x = AuProd$N.Articles, y = AuProd$Freq*100, text=paste("N.Articles: ",AuProd$N.Articles,"\n% of production: ",round(AuProd$Freq*100,1)))) +
+      geom_line(aes(group="NA")) +
+      geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
+      geom_line(aes(y=AuProd$Theoretical*100, group="NA"),linetype = "dashed",color="black",alpha=0.8)+
+      xlim(0,max(AuProd$N.Articles)+1)+
       labs(x = 'N. Articles'
            , y = '% of total scientific production'
            , title = "Author Scientific Productivity") +
@@ -528,9 +615,9 @@ server <- function(input, output, session) {
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0)
       )
-    plot(g)
+    plot.ly(g)
     
-  },height = 600)
+  })#,height = 600)
   
   output$lotkaTable <- DT::renderDT({
     
@@ -1389,6 +1476,19 @@ server <- function(input, output, session) {
   }) 
   
   ### COMMON FUNCTIONS ####
+  plot.ly <- function(g){
+    ggplotly(g, tooltip = "text") %>% 
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             ))
+  }
   
   emptyPlot<-function(errortext){
     g=ggplot()+
@@ -1450,12 +1550,12 @@ server <- function(input, output, session) {
     if (type=="author"){
       K=input$Hkauthor
       measure=input$HmeasureAuthors
-      title="Authors' Impact"
+      title="Author Impact"
       xn="Authors"
     } else {
       K=input$Hksource
       measure=input$HmeasureSources
-      title="Sources' Impact"
+      title="Source Impact"
       xn="Sources"
     }
     if (K>dim(xx)[1]){
@@ -1471,9 +1571,9 @@ server <- function(input, output, session) {
     xx=xx[order(-xx[,m]),]
     xx=xx[1:k,c(1,m)]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2])) +
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste(xn,": ",xx[,1],"\nImpact measure: ",xx[,2]))) +
       #geom_bar(stat="identity", fill="steelblue")+
-      geom_bar(stat="identity")+
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev((xx[,1])))+
       labs(title=title, x = xn)+

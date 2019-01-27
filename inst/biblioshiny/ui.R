@@ -11,6 +11,7 @@ if (!require(colourpicker)){install.packages("colourpicker")}
 if (!require(treemap)){install.packages("treemap")}
 if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
 if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
+if (!require(plotly)){install.packages("plotly"); require(plotly, quietly=TRUE)}
 require(Matrix, quietly = TRUE)
 
 # Main NavBar ----
@@ -165,7 +166,7 @@ navbarMenu("Dataset",
            tabPanel("Main Information",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   h3(em(strong("Main Information about the collecion "))),
+                                   h3(em(strong("Main Information about the collection "))),
                                    br()),
                       mainPanel(
                         shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo"))
@@ -182,10 +183,29 @@ navbarMenu("Dataset",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "AnnualProdPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
+                                    ))
+                      )
+                    )
+           ),
+           tabPanel("Average Citations per Year",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h3(em(strong("Average Citations per Year "))),
+                                   "  "
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = 700))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("AnnualTotCitperYearTable"))
                                     ))
                       )
                     )
@@ -211,7 +231,7 @@ navbarMenu("Sources",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelSourcesPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot",height = 700))
                                     ),
                                     tabPanel("Table",
                                               shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
@@ -231,7 +251,7 @@ navbarMenu("Sources",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "bradfordPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
@@ -240,7 +260,7 @@ navbarMenu("Sources",
                       
                     )
            ),
-           ### SOURCE HINDEX MENU ----
+           ### SOURCE IMPACT MENU ----
            tabPanel("Source Impact",
                     sidebarLayout(
                       sidebarPanel(width=3,
@@ -267,7 +287,7 @@ navbarMenu("Sources",
                         
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "SourceHindexPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
@@ -327,12 +347,19 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("MostRelAuthorsK", 
                                                 label=("Number of Authors"), 
-                                                value = 20)
+                                                value = 20),
+                                   "  ",
+                                   selectInput("AuFreqMeasure", 
+                                               label = "Frequency measure",
+                                               choices = c("N. of Documents "="t", 
+                                                           "Percentage"="p",
+                                                           "Frequency Fractionalized"="f"),
+                                               selected = "t")
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelAuthorsPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
@@ -341,7 +368,7 @@ navbarMenu("Authors",
                     )
            ),
            
-           ### AUTHOR'S PRODUCTION OVER TIME  ----
+           ### AUTHORS' PRODUCTION OVER TIME  ----
            tabPanel("Authors' Production over Time",
                     sidebarLayout(
                       sidebarPanel(width=3,
@@ -356,7 +383,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "TopAuthorsProdPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "TopAuthorsProdPlot", height=700))
                                     ),
                                     tabPanel("Table - Top Authors' Production per Year",
                                              shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
@@ -380,7 +407,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "lotkaPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
@@ -389,7 +416,7 @@ navbarMenu("Authors",
                       
                     )
            ),
-           ### AUTHOR HINDEX ----
+           ### AUTHOR IMPACT ----
            tabPanel("Author Impact",
                     sidebarLayout(
                       sidebarPanel(width=3,
@@ -416,7 +443,7 @@ navbarMenu("Authors",
                         
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "AuthorHindexPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))

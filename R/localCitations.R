@@ -7,6 +7,7 @@
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 #'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
 #' @param sep is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.
+#' @param fast.search is logical. if true, the function calculates local citations only for 25 percent top cited documents.
 #' @return an object of \code{class} "list" containing author local citations and docuemnt local citations.
 #'
 #' 
@@ -26,9 +27,13 @@
 #' 
 #' @export
 
-localCitations <- function(M, sep = ";"){
+localCitations <- function(M, fast.search=FALSE, sep = ";"){
   
-  H=histNetwork(M,min.citations = 1,sep=sep)
+  if (isTRUE(fast.search)){
+    loccit=quantile(as.numeric(M$TC),0.75)
+  } else {loccit=1}
+  
+  H=histNetwork(M,min.citations = loccit, sep=sep)
   LCS=H$histData
   M=H$M
   rm(H)

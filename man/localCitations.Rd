@@ -4,11 +4,13 @@
 \alias{localCitations}
 \title{Author local citations}
 \usage{
-localCitations(M, sep = ";")
+localCitations(M, fast.search = FALSE, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+
+\item{fast.search}{is logical. if true, the function calculates local citations only for 25 percent top cited documents.}
 
 \item{sep}{is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.}
 }

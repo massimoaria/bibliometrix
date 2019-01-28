@@ -93,18 +93,18 @@ if (length(timespan)==2){
   Y=Y[indTime]
   diffMedian=diffMedian[indTime]
 }
-
+df=data.frame(X=X,Y=Y,diffMedian=diffMedian,stringsAsFactors = FALSE)
 RPYS=data.frame(Year=names(Y),Citations=Y,diffMedian5=diffMedian)
-g=ggplot()+
-  geom_line(aes(x=X,y=Y)) +
-  geom_area(fill = '#002F80', alpha = .5) +
+g=ggplot(df, aes(x=df$X,y=df$Y,text=paste("Year: ",df$X,"\nN. of References: ",df$Y)))+
+  geom_line(aes(group="NA")) +
+  geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
   geom_hline(aes(yintercept=0, color = 'grey'))+
-  geom_line(aes(x=X,y=diffMedian, color="firebrick"))+
+  geom_line(aes(x=df$X,y=df$diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'
        , y = 'Cited References'
        , title = "Reference Publication Year Spectroscopy",
        caption = "Number of Cited References (black line) - Deviation from the 5-Year Median (red line)") +
-  scale_x_continuous(breaks= (X[seq(1,length(X),by=round(length(X)/30))])) +
+  scale_x_continuous(breaks= (df$X[seq(1,length(df$X),by=round(length(df$X)/30))])) +
   theme(text = element_text(color = "#444444"), legend.position="none"
         ,plot.caption = element_text(size = 9, hjust = 0.5,
                                      color = "black", face = "bold")

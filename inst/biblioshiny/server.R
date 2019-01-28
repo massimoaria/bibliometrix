@@ -633,7 +633,7 @@ server <- function(input, output, session) {
   
       ### Affiliations ----
   
-  output$MostRelAffiliationsPlot <- renderPlot({
+  output$MostRelAffiliationsPlot <- renderPlotly({
     res <- descriptive(values,type="tab11")
     values <-res$values
     values$TABAff <- values$TAB
@@ -643,8 +643,8 @@ server <- function(input, output, session) {
       k=dim(xx)[1]
     } else {k=input$MostRelAffiliationsK}
     xx=xx[1:k,]
-    g=ggplot2::ggplot(data=xx, aes(x=xx$AFF, y=xx$Freq, fill=-xx$Freq)) +
-      geom_bar(stat="identity")+
+    g=ggplot2::ggplot(data=xx, aes(x=xx$AFF, y=xx$Freq, fill=-xx$Freq, text=paste("Affiliation: ",xx$AFF,"\nN.of Documents: ",xx$Freq))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx$AFF))+
       labs(title="Most Relevant Affiliations", x = "Affiliations")+
@@ -653,8 +653,8 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostRelAffiliationsTable <- DT::renderDT({
     
@@ -670,7 +670,7 @@ server <- function(input, output, session) {
   })
   
       ### Countries ----
-  output$MostRelCountriesPlot <- renderPlot({
+  output$MostRelCountriesPlot <- renderPlotly({
     res <- descriptive(values,type="tab5")
     values <-res$values
     values$TABCo <- values$TAB
@@ -684,8 +684,8 @@ server <- function(input, output, session) {
     names(xx2)=c("Country","Freq","Collaboration")
     xx=rbind(xx2,xx1)
     xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
-    g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
-                         geom_bar(stat="identity")+
+    g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration, text=paste("Country: ",xx$Country,"\nN.of Documents: ",xx$Freq))) +
+                         geom_bar(aes(group="NA"),stat="identity")+
                          scale_x_discrete(limits = rev(levels(xx$Country)))+
                          scale_fill_discrete(name="Collaboration",
                                              breaks=c("SCP","MCP"))+
@@ -696,8 +696,8 @@ server <- function(input, output, session) {
                                                            color = "blue", face = "italic"))+
                          coord_flip())
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostRelCountriesTable <- DT::renderDT({
     
@@ -712,10 +712,10 @@ server <- function(input, output, session) {
     
   })
   
-  output$countryProdPlot <- renderPlot({
+  output$countryProdPlot <- renderPlotly({
     values$mapworld<-mapworld(values$M)
-    plot(values$mapworld$g)
-  }, height = 500, width =900)
+    plot.ly(values$mapworld$g)
+  })#, height = 500, width =900)
   
   output$countryProdTable <- DT::renderDT({
     
@@ -730,7 +730,7 @@ server <- function(input, output, session) {
     
   })
   
-  output$MostCitCountriesPlot <- renderPlot({
+  output$MostCitCountriesPlot <- renderPlotly({
     res <- descriptive(values,type="tab6")
     values <-res$values
     values$TABCitCo <- values$TAB
@@ -750,8 +750,8 @@ server <- function(input, output, session) {
       laby="N. of Citations per Year"
     }
    
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2])) +
-      geom_bar(stat="identity")+
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2],text=paste("Country: ",xx[,1],"\n",laby,": ",xx[,2]))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx[,1]))+
       labs(title="Most Cited Countries", x = "Countries")+
@@ -760,8 +760,8 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostCitCountriesTable <- DT::renderDT({
     
@@ -779,7 +779,7 @@ server <- function(input, output, session) {
   ### DOCUMENTS MENU ####
   
       ### Documents ----
-  output$MostCitDocsPlot <- renderPlot({
+  output$MostCitDocsPlot <- renderPlotly({
     res <- descriptive(values,type="tab4")
     values <-res$values
     values$TABGlobDoc <- values$TAB
@@ -797,7 +797,7 @@ server <- function(input, output, session) {
     
     xx=xx[1:k,]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2])) +
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Document: ", xx[,1],"\nGlobal Citations: ",xx[,2]))) +
       geom_bar(stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx[,1]))+
@@ -807,8 +807,8 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostCitDocsTable <- DT::renderDT({
     
@@ -823,9 +823,9 @@ server <- function(input, output, session) {
     
   })
   
-  output$MostLocCitDocsPlot <- renderPlot({
+  output$MostLocCitDocsPlot <- renderPlotly({
     
-    TAB <-localCitations(values$M, sep = input$LocCitSep)$Paper
+    TAB <-localCitations(values$M, fast.search=TRUE, sep = input$LocCitSep)$Paper
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],stringsAsFactors = FALSE)
     
@@ -837,8 +837,8 @@ server <- function(input, output, session) {
     
     xx=xx[1:k,]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,4], fill=-xx[,4])) +
-      geom_bar(stat="identity")+
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,4], fill=-xx[,4], text=paste("Document: ",xx[,1],"\nLocal Citations: ",xx[,4]))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx[,1]))+
       labs(title="Most Local Cited Documents", x = "Documents")+
@@ -847,8 +847,8 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostLocCitDocsTable <- DT::renderDT({
     
@@ -866,7 +866,7 @@ server <- function(input, output, session) {
   
       ### Cited References ----
   
-  output$MostCitRefsPlot <- renderPlot({
+  output$MostCitRefsPlot <- renderPlotly({
     CR=citations(values$M,sep=input$CitRefsSep)$Cited
     TAB=data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
     names(TAB)=c("Cited References", "Citations")
@@ -880,8 +880,8 @@ server <- function(input, output, session) {
     xx=xx[1:k,]
     #xx[,1]=substr(xx[,1],1,50)
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2])) +
-      geom_bar(stat="identity")+
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Reference: ",xx[,1],"\nLocal Citations: ",xx[,2]))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx[,1]), labels=substr(rev(xx[,1]),1,50))+
       labs(title="Most Cited References", x = "Documents")+
@@ -890,8 +890,8 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostCitRefsTable <- DT::renderDT({
     
@@ -906,12 +906,12 @@ server <- function(input, output, session) {
     
   })
   
-  output$rpysPlot <- renderPlot({
-    values$res <- rpys(values$M, sep=input$rpysSep, timespan=input$sliderYears ,graph=FALSE)
+  output$rpysPlot <- renderPlotly({
+    values$res <- rpys(values$M, sep=input$rpysSep, graph=FALSE)
     #values$res <- rpys(values$M, sep=input$rpysSep, timespan=input$sliderYears ,graph=FALSE)
-    plot(values$res$spectroscopy)
+    plot.ly(values$res$spectroscopy)
     
-  },height = 600, width = 900)
+  })#,height = 600, width = 900)
   
   output$rpysTable <- DT::renderDT({
     
@@ -944,7 +944,7 @@ server <- function(input, output, session) {
 
       ### Words ----
   
-  output$MostRelWordsPlot <- renderPlot({
+  output$MostRelWordsPlot <- renderPlotly({
     WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity")$v
     
     TAB=data.frame(names(WR),as.numeric(WR),stringsAsFactors = FALSE)
@@ -963,8 +963,8 @@ server <- function(input, output, session) {
            TI={lab="Title's Words"},
            AB={lab="Abstract's Words"})
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2])) +
-      geom_bar(stat="identity")+
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste(lab,": ",xx[,1],"\nOccurrences: ",xx[,2]))) +
+      geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx[,1]))+
       labs(title="Most Relevant Words", x = lab)+
@@ -973,8 +973,8 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
-    plot(g)
-  }, height = 500, width =900)
+    plot.ly(g)
+  })#, height = 500, width =900)
   
   output$MostRelWordsTable <- DT::renderDT({
     
@@ -1695,8 +1695,8 @@ server <- function(input, output, session) {
     names(breaks)=breaks
     breaks=log(breaks)
    
-    g=ggplot(country.prod, aes( x = long, y = lat, group = group )) +
-      geom_polygon(aes(fill = log(Freq))) +
+    g=ggplot(country.prod, aes( x = long, y = lat, group=group, text=paste("Country: ",country.prod$region,"\nN.of Documents: ",country.prod$Freq))) +
+      geom_polygon(aes(fill = log(Freq), group=group)) +
       scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
       guides(fill = guide_legend(reverse = T)) +
       #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +

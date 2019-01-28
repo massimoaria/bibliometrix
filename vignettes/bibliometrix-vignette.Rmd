@@ -415,9 +415,9 @@ Local citations measures how many times an author (or a document) included in th
 
 To obtain the most frequent local cited authors:
 ```{r Local Author citation}
-CR <- localCitations(M, sep = ";")
-CR$Authors[1:10,]
-CR$Papers[1:10,]
+#CR <- localCitations(M, sep = ";")
+#CR$Authors[1:10,]
+#CR$Papers[1:10,]
 ```
 
 

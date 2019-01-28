@@ -37,7 +37,7 @@ Imports: stats,
 		 stringr		 
 Suggests: knitr, 
 		  rmarkdown,
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 NeedsCompilation: no
 Packaged: 2018-11-15 09:40:50 UTC; aria
 Author: Massimo Aria [cre, aut],

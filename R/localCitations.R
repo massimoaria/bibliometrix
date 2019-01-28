@@ -10,7 +10,6 @@
 #' @return an object of \code{class} "list" containing author local citations and docuemnt local citations.
 #'
 #' 
-#'
 #' @examples
 #'  
 #' data(scientometrics)
@@ -29,7 +28,7 @@
 
 localCitations <- function(M, sep = ";"){
   
-  H=histNetwork(M,sep=sep)
+  H=histNetwork(M,min.citations = 1,sep=sep)
   LCS=H$histData
   M=H$M
   rm(H)

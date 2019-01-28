@@ -470,7 +470,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelAffiliationsPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
@@ -496,7 +496,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostRelCountriesPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
@@ -515,7 +515,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "countryProdPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
@@ -545,7 +545,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostCitCountriesPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
@@ -581,7 +581,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostCitDocsPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
@@ -611,7 +611,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostLocCitDocsPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot",height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
@@ -645,7 +645,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "MostCitRefsPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
@@ -662,13 +662,13 @@ navbarMenu("Documents",
                                    br(),
                                    h4(em(strong("Parameters: "))),
                                    "  ",
-                                   sliderInput("sliderYears",
-                                               label = "Timespan",
-                                               min = 1700,
-                                               max = as.numeric(substr(Sys.Date(),1,4)),
-                                               step = 10, sep="",
-                                               value = c(1700, as.numeric(substr(Sys.Date(),1,4)))
-                                   ),
+                                   # sliderInput("sliderYears",
+                                   #             label = "Timespan",
+                                   #             min = 1700,
+                                   #             max = as.numeric(substr(Sys.Date(),1,4)),
+                                   #             step = 10, sep="",
+                                   #             value = c(1700, as.numeric(substr(Sys.Date(),1,4)))
+                                   # ),
                                    
                                    selectInput(inputId = "rpysSep", 
                                                label = "Field separator character", 
@@ -681,7 +681,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
-                                             withSpinner(plotOutput(outputId = "rpysPlot"))),
+                                             withSpinner(plotlyOutput(outputId = "rpysPlot", height = 700))),
                                     tabPanel("RPY Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                outputId = "rpysTable"))),
@@ -720,7 +720,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             withSpinner(plotOutput(outputId = "MostRelWordsPlot"))
+                                             withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))

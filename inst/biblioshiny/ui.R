@@ -1130,6 +1130,8 @@ navbarMenu("Conceptual Structure",
                       sidebarPanel(width=3,
                                    h3(em(strong("Thematic Evolution"))),
                                    br(),
+                                   actionButton("applyTE", "Apply!"),
+                                   br(),
                                    h4(em(strong("TE Parameters: "))),
                                    "  ",
                                    selectInput("TEfield", 
@@ -1149,8 +1151,8 @@ navbarMenu("Conceptual Structure",
                                                selected = "inclusion"),
                                    numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
                                    "Please, write the cutting points (in year) for your collection",
-                                   uiOutput("sliders"),
-                                   actionButton("applyTE", "Apply!")
+                                   uiOutput("sliders")
+                                   
                                    
                       ),
                       mainPanel("Thematic Evolution",

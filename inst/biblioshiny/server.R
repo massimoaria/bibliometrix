@@ -106,7 +106,6 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1))))  
                   ,class = 'cell-border compact stripe')  %>% 
-                  
                   formatStyle(names(MData),  backgroundColor = 'white', textAlign = 'center',fontSize = '70%') 
     
     
@@ -558,7 +557,7 @@ server <- function(input, output, session) {
   })
   
   output$TopAuthorsProdPlot <- renderPlotly({
-    values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK)
+    values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
     
     plot.ly(values$AUProdOverTime$graph)
     
@@ -1571,7 +1570,7 @@ server <- function(input, output, session) {
     xx=xx[order(-xx[,m]),]
     xx=xx[1:k,c(1,m)]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste(xn,": ",xx[,1],"\nImpact measure: ",xx[,2]))) +
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste(xn,": ",xx[,1],"\n", names(values$H)[m],": ",xx[,2]))) +
       #geom_bar(stat="identity", fill="steelblue")+
       geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+

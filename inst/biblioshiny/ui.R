@@ -1085,7 +1085,7 @@ navbarMenu("Conceptual Structure",
            tabPanel("Thematic Map",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   h3(em(strong("Thematic MaP"))),
+                                   h3(em(strong("Thematic Map"))),
                                    br(),
                         
                                    actionButton("applyTM", "Apply!"),

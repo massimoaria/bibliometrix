@@ -601,9 +601,9 @@ server <- function(input, output, session) {
       geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
       geom_line(aes(y=AuProd$Theoretical*100, group="NA"),linetype = "dashed",color="black",alpha=0.8)+
       xlim(0,max(AuProd$N.Articles)+1)+
-      labs(x = 'N. Articles'
-           , y = '% of total scientific production'
-           , title = "Author Scientific Productivity") +
+      labs(x = 'Documents written'
+           , y = '% of Authors'
+           , title = "The Frequency Distribution of Scientific Productivity") +
       #scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
             ,panel.background = element_rect(fill = '#EFEFEF')
@@ -619,7 +619,7 @@ server <- function(input, output, session) {
   })#,height = 600)
   
   output$lotkaTable <- DT::renderDT({
-    
+    names(values$lotka$AuthorProd)=c("Documents written","N. of Authors","Proportion of Authors")
     DT::datatable(values$lotka$AuthorProd, rownames = FALSE,
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),

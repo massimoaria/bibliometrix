@@ -35,7 +35,7 @@ lotka<-function(results){
   AuthorProd=aggregate(AUdf,by=list(AUdf$Freq),"length")
   AuthorProd[,2]=as.numeric(AuthorProd[,2])
   AuthorProd[,3]=AuthorProd[,2]/sum(AuthorProd[,2])
-  names(AuthorProd)=c("N.Articles written","N.Authors","Freq")
+  names(AuthorProd)=c("N.Articles","N.Authors","Freq")
   LOTKA=(lm(log10(Freq)~log10(N.Articles),data=AuthorProd))
   Yt=LOTKA$coeff[1]-2*log10(AuthorProd[,1])
   p=suppressWarnings(ks.test(AuthorProd[,3],10^Yt,exact=FALSE)$p.value)

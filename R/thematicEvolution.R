@@ -169,7 +169,7 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
   edges$from=as.numeric(edges$from)
   edges$to=as.numeric(edges$to)
   
-  results=list(Nodes=nodes,Edges=edges,Data=INC,check=TRUE)
+  results=list(Nodes=nodes,Edges=edges,Data=INC,check=TRUE, TM=res)
   
   return(results)
   

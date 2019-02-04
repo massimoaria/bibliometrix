@@ -4,7 +4,8 @@
 \alias{plotThematicEvolution}
 \title{Plot a Thematic Evolution Analysis}
 \usage{
-plotThematicEvolution(Nodes, Edges, measure = "inclusion")
+plotThematicEvolution(Nodes, Edges, measure = "inclusion",
+  min.flow = 0)
 }
 \arguments{
 \item{Nodes}{is a list of nodes obtained by \code{\link{thematicEvolution}} function.}
@@ -12,6 +13,8 @@ plotThematicEvolution(Nodes, Edges, measure = "inclusion")
 \item{Edges}{is a list of edges obtained by \code{\link{thematicEvolution}} function.}
 
 \item{measure}{is a character. It can be \code{measure=("inclusion","stability")}.}
+
+\item{min.flow}{is numerical. It indicates the minimum value of measure to plot a flow.}
 }
 \value{
 a sankeyPlot

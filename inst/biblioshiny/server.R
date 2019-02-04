@@ -1227,7 +1227,7 @@ server <- function(input, output, session) {
   }, height = 650, width = 800)
   
       ### Thematic Map ----
-  output$TMPlot <- renderPlot({
+  output$TMPlot <- renderPlotly({
     
     input$applyTM
     
@@ -1237,9 +1237,9 @@ server <- function(input, output, session) {
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
     )
     
-    plot(values$TM$map)
+    plot.ly(values$TM$map)
 
-  }, height = 650, width = 800)
+  })#, height = 650, width = 800)
   
   output$TMTable <- DT::renderDT({
     
@@ -1271,23 +1271,68 @@ server <- function(input, output, session) {
     
     input$applyTE
     
-    values$yearSlices=isolate(as.numeric())
+    values$yearSlices <- isolate(as.numeric())
     isolate(for (i in 1:as.integer(input$numSlices)){
       if (length(input[[paste0("Slice", i)]])>0){values$yearSlices=c(values$yearSlices,input[[paste0("Slice", i)]])}
     })
     
     if (length(values$yearSlices)>0){
-    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices,n=input$nTE,minFreq=input$fTE))
+    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE))
     
     validate(
       need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
     )
     
-    isolate(plotThematicEvolution(values$nexus$Nodes,values$nexus$Edges, input$TEmeasure))
+    isolate(plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE))
     }
       
     
   })
+  
+  output$TMPlot1 <-  renderPlotly({
+    
+    #input$applyTM
+    if (length(values$nexus$TM)>=1){
+        plot.ly(values$nexus$TM[[1]]$map)
+    } else (emptyPlot("You do not requested this period!"))
+    
+  })#, height = 650, width = 800)
+  
+  output$TMPlot2 <-  renderPlotly({
+    
+    #input$applyTM
+    if (length(values$nexus$TM)>=2){
+      plot.ly(values$nexus$TM[[2]]$map)
+    } else (emptyPlot("You do not requested this period!"))
+    
+  })#, height = 650, width = 800)
+  
+  output$TMPlot3 <-  renderPlotly({
+    
+    #input$applyTM
+    if (length(values$nexus$TM)>=3){
+      plot.ly(values$nexus$TM[[3]]$map)
+    } else (emptyPlot("You do not requested this period!"))
+    
+  })#, height = 650, width = 800)
+  
+  output$TMPlot4 <-  renderPlotly({
+    
+    #input$applyTM
+    if (length(values$nexus$TM)>=4){
+      plot.ly(values$nexus$TM[[4]]$map)
+    } else (emptyPlot("You do not requested this period!"))
+    
+  })#, height = 650, width = 800)
+  
+  output$TMPlot5 <-  renderPlotly({
+    
+    #input$applyTM
+    if (length(values$nexus$TM)>=5){
+      plot.ly(values$nexus$TM[[5]]$map)
+    } else (emptyPlot("You do not requested this period!"))
+    
+  })#, height = 650, width = 800)
   
   output$TETable <- DT::renderDT({
     
@@ -1766,11 +1811,13 @@ server <- function(input, output, session) {
            })
     
     S <- normalizeSimilarity(NetMatrix, type = "association")
-    capture.output(net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
+    t = tempfile();pdf(file=t) #### trick to hide igraph plot
+    net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
                                        labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
-                                       size=1,edges.min = 1))
-    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMfreq)
+                                       size=1,edges.min = 1)
+    dev.off();file.remove(t) ### end of trick
+    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMfreq, size=input$sizeTM, repel=FALSE)
     #plot(Map$map)
     values$TM=Map
     return(values)
@@ -1836,7 +1883,7 @@ server <- function(input, output, session) {
       values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
-                                cluster="louvain")
+                                cluster=input$cocCluster)
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
@@ -1881,7 +1928,7 @@ server <- function(input, output, session) {
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE,
-                                alpha=input$cocitAlpha, cluster="louvain")
+                                alpha=input$cocitAlpha, cluster=input$cocitCluster)
     return(values)
   }
   
@@ -1928,7 +1975,7 @@ server <- function(input, output, session) {
                               size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
-                              remove.isolates = T, cluster="louvain")
+                              remove.isolates = T, cluster=input$colCluster)
     
     return(values)
     

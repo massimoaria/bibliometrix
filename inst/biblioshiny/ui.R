@@ -916,14 +916,14 @@ navbarMenu("Conceptual Structure",
                                       selected = "ID"),
                         
                         selectInput("layout", 
-                                    label = "Layout",
-                                    choices = c("auto", 
-                                                "circle",
-                                                "fruchterman",
-                                                "kamada",
-                                                "mds",
-                                                "sphere",
-                                                "star"),
+                                    label = "Network Layout",
+                                    choices = c("Automatic layout"="auto", 
+                                                "Circle"="circle",
+                                                "Fruchterman & Reingold"="fruchterman",
+                                                "Kamada & Kawai"="kamada",
+                                                "MultiDimensional Scaling"="mds",
+                                                "Sphere"="sphere",
+                                                "Star"="star"),
                                     selected = "auto"),
                         
                         selectInput("normalize", 
@@ -936,11 +936,22 @@ navbarMenu("Conceptual Structure",
                                                 "equivalence"),
                                     selected = "association"),
                         
+                        selectInput("cocCluster", 
+                                    label = "Clustering Algorithm",
+                                    choices = c("None" = "none", 
+                                                "Edge Betweenness" = "edge_betweenness",
+                                                "InfoMap" = "infomap",
+                                                "Leading Eigenvalues" = "leading_eigen",
+                                                "Louvain" = "louvain",
+                                                "Spinglass" = "spinglass",
+                                                "Walktrap" = "walktrap"),
+                                    selected = "walktrap"),
+                        
                         sliderInput(inputId = "Nodes",
                                     label = "Number of Nodes",
                                     min = 5,
                                     max = 1000,
-                                    value = 30),
+                                    value = 50),
                         
                         numericInput("edges.min", 
                                      label=("Min edges"),
@@ -1057,7 +1068,7 @@ navbarMenu("Conceptual Structure",
                           value = 10),
                         numericInput("CSdoc", 
                                      label=("Num. of documents"), 
-                                     value = 10)
+                                     value = 20)
                         
                       ),
                       
@@ -1107,12 +1118,13 @@ navbarMenu("Conceptual Structure",
                                                            "No" = FALSE),
                                                selected = FALSE)),
                                    sliderInput("TMn", label="Number of Words",value=250,min=50,max=500,step=10),
-                                   sliderInput("TMfreq", label="Min Cluster Frequency",value=5,min=1,max=100,step=1)
+                                   sliderInput("TMfreq", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
+                                   sliderInput("sizeTM", label="Label size",value=0.3,min=0.1,max=1,step=0.05)
                                    ),
                     mainPanel("Thematic Map",
                               tabsetPanel(type = "tabs",
                                 tabPanel("Map",
-                                  shinycssloaders::withSpinner(plotOutput(outputId = "TMPlot"))
+                                  shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = 700))
                                 ),
                               tabPanel("Table",
                                 shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
@@ -1141,6 +1153,7 @@ navbarMenu("Conceptual Structure",
                                                            "Titles" = "TI",
                                                            "Abstracts" = "AB"),
                                                selected = "ID"),
+                                   
                                    sliderInput("nTE", label="Number of Words",value=250,min=50,max=500,step=10),
                                    sliderInput("fTE", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
                                    selectInput("TEmeasure", 
@@ -1149,6 +1162,10 @@ navbarMenu("Conceptual Structure",
                                                            "Stability Index" = "stability"
                                                            ),
                                                selected = "inclusion"),
+                                   sliderInput("minFlowTE", label="Min Weigth Index",value=0.1,min=0.02,max=1,step=0.02),
+                                   sliderInput("sizeTE", label="Label size",value=0.3,min=0.1,max=1,step=0.05),
+                                   br(),
+                                   h4(em(strong("Time Slices: "))),
                                    numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
                                    "Please, write the cutting points (in year) for your collection",
                                    uiOutput("sliders")
@@ -1158,11 +1175,26 @@ navbarMenu("Conceptual Structure",
                       mainPanel("Thematic Evolution",
                                 
                                 tabsetPanel(type = "tabs",
-                                            tabPanel("Map",
+                                            tabPanel("TE Map",
                                                      shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
                                             ),
-                                            tabPanel("Table",
+                                            tabPanel("TE Table",
                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                            ),
+                                            tabPanel("TM Period 1",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
+                                            ),
+                                            tabPanel("TM Period 2",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = 700))
+                                            ),
+                                            tabPanel("TM Period 3",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = 700))
+                                            ),
+                                            tabPanel("TM Period 4",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = 700))
+                                            ),
+                                            tabPanel("TM Period 5",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = 700))
                                             )
                                 )
                                 
@@ -1171,6 +1203,7 @@ navbarMenu("Conceptual Structure",
                     
            ) ## End of tabPanel ("Thematic Map")
            
+          
 ),
 
 ### Intellectual Structure ----
@@ -1205,15 +1238,26 @@ navbarMenu("Intellectual Structure",
                                   selected = "';'"),
                         
                         selectInput("citlayout", 
-                                    label = "Layout",
-                                    choices = c("auto", 
-                                                "circle",
-                                                "fruchterman",
-                                                "kamada",
-                                                "mds",
-                                                "sphere",
-                                                "star"),
+                                    label = "Network Layout",
+                                    choices = c("Automatic layout"="auto", 
+                                                "Circle"="circle",
+                                                "Fruchterman & Reingold"="fruchterman",
+                                                "Kamada & Kawai"="kamada",
+                                                "MultiDimensional Scaling"="mds",
+                                                "Sphere"="sphere",
+                                                "Star"="star"),
                                     selected = "auto"),
+                        
+                        selectInput("cocitCluster", 
+                                    label = "Clustering Algorithm",
+                                    choices = c("None" = "none", 
+                                                "Edge Betweenness" = "edge_betweenness",
+                                                "InfoMap" = "infomap",
+                                                "Leading Eigenvalues" = "leading_eigen",
+                                                "Louvain" = "louvain",
+                                                "Spinglass" = "spinglass",
+                                                "Walktrap" = "walktrap"),
+                                    selected = "walktrap"),
                         
                         sliderInput(inputId = "citNodes",
                                     label = "Number of Nodes",
@@ -1401,6 +1445,17 @@ navbarMenu("Social Structure",
                                                            "Sphere"="sphere",
                                                            "Star"="star"),
                                                selected = "auto"),
+                                   
+                                   selectInput("colCluster", 
+                                               label = "Clustering Algorithm",
+                                               choices = c("None" = "none", 
+                                                           "Edge Betweenness" = "edge_betweenness",
+                                                           "InfoMap" = "infomap",
+                                                           "Leading Eigenvalues" = "leading_eigen",
+                                                           "Louvain" = "louvain",
+                                                           "Spinglass" = "spinglass",
+                                                           "Walktrap" = "walktrap"),
+                                               selected = "walktrap"),
                                    
                                    sliderInput(inputId = "colNodes",
                                                label = "Number of Nodes",

@@ -11,6 +11,7 @@
 #' @param years is a numeric vector of two or more unique cut points.
 #' @param n is numerical. It indicates the number of words to use in the network analysis
 #' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.
+#' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
@@ -30,7 +31,7 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
+thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5){
   
   #net=list()
   #arguments <- list(...)
@@ -73,7 +74,7 @@ thematicEvolution <- function(M, field="ID", years,n=250,minFreq=2){
                         Title = "co-occurrence network",type="auto",
                         size=0.3,size.cex=FALSE,label.cex=FALSE,labelsize = 0.1, halo = FALSE, cluster="louvain",remove.isolates=FALSE,
                         remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.n=0)
-    resk <- thematicMap(netk, NetMatrixk, Sk, minfreq = minFreq)
+    resk <- thematicMap(netk, NetMatrixk, Sk, minfreq = minFreq, repel=FALSE, size=size)
     #S[[k]]=Sk
     #net[[k]]=netk
     res[[k]]=resk

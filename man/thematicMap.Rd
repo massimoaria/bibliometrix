@@ -4,7 +4,8 @@
 \alias{thematicMap}
 \title{Create a thematic map}
 \usage{
-thematicMap(Net, NetMatrix, S = NULL, minfreq = 5)
+thematicMap(Net, NetMatrix, S = NULL, minfreq = 5, size = 0.5,
+  repel = TRUE)
 }
 \arguments{
 \item{Net}{is a igraph object created by \code{\link{networkPlot}} function.}
@@ -16,6 +17,10 @@ thematicMap(Net, NetMatrix, S = NULL, minfreq = 5)
 If S is NULL, map is created using co-occurrence counts.}
 
 \item{minfreq}{is a integer. It indicates the minimun frequency of a cluster.}
+
+\item{size}{is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).}
+
+\item{repel}{is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.}
 }
 \value{
 a list containing:

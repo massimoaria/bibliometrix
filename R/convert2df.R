@@ -63,10 +63,13 @@
 #' @import shinythemes
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
+# #' @importFrom dplyr filter
+#' @importFrom dplyr arrange
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @importFrom dplyr anti_join
 #' @importFrom dplyr left_join
+#' @importFrom dplyr top_n
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
 #' @importFrom networkD3 sankeyNetwork
@@ -130,7 +133,10 @@
 #' @importFrom igraph cluster_optimal
 #' @importFrom igraph cluster_infomap
 #' @importFrom igraph cluster_edge_betweenness
+#' @importFrom igraph cluster_fast_greedy
 #' @importFrom igraph cluster_louvain
+#' @importFrom igraph cluster_leading_eigen
+#' @importFrom igraph cluster_spinglass
 #' @importFrom igraph count_multiple
 #' @importFrom igraph membership
 #' @importFrom igraph layout.norm

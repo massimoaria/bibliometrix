@@ -13,6 +13,8 @@
 #' @param S is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 
 #' If S is NULL, map is created using co-occurrence counts.
 #' @param minfreq is a integer. It indicates the minimun frequency of a cluster.
+#' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
+#' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
@@ -38,23 +40,24 @@
 #'
 #' @export
 
-thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
+thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5, size=0.5, repel=TRUE){
+  #. = NULL
   
   row.names(NetMatrix)=colnames(NetMatrix)=tolower(row.names(NetMatrix))
   net=Net$graph
   if (is.null(S)){S=NetMatrix}
   net_groups <- Net$cluster_obj
-  groups=net_groups$membership
-  words=net_groups$name
+  group=net_groups$membership
+  word=net_groups$name
   color=V(net)$color
   color[is.na(color)]="#D3D3D3"
   
   ###
-  W=intersect(row.names(NetMatrix),words)
+  W=intersect(row.names(NetMatrix),word)
   index=which(row.names(NetMatrix) %in% W)
-  ii=which(words %in% W)
-  words=words[ii]
-  groups=groups[ii]
+  ii=which(word %in% W)
+  word=word[ii]
+  group=group[ii]
   color=color[ii]
   ###
   
@@ -75,17 +78,17 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
 
 
 ### centrality and density
-  label_cluster=unique(groups)
-  word_cluster=words[groups]
+  label_cluster=unique(group)
+  word_cluster=word[group]
   centrality=c()
   density=c()
   labels=list()
   
-  df_lab=data.frame(sC=sC,words=words,groups=groups,color=color,cluster_label="NA",stringsAsFactors = FALSE)
+  df_lab=data.frame(sC=sC,words=word,groups=group,color=color,cluster_label="NA",stringsAsFactors = FALSE)
   
   color=c()
   for (i in label_cluster){
-    ind=which(groups==i)
+    ind=which(group==i)
     w=df_lab$words[ind]
     wi=which.max(df_lab$sC[ind])
     df_lab$cluster_label[ind]=paste(w[wi[1:min(c(length(wi),3))]],collapse=";",sep="")
@@ -99,23 +102,52 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
     color=c(color,df_lab$color[ind[1]])
   }
   #df_lab$cluster_label=gsub(";NA;",";",df_lab$cluster_label)
+  
   centrality=centrality*10
   df=data.frame(centrality=centrality,density=density,rcentrality=rank(centrality),rdensity=rank(density),label=label_cluster,color=color)
   df$name=unlist(labels)
   df=df[order(df$label),]
+  df_lab <- df_lab[df_lab$sC>=minfreq,]
+  df=df[(df$name %in% intersect(df$name,df_lab$cluster_label)),]
+  
   row.names(df)=df$label
-  A=aggregate(df_lab$sC,by=list(groups),'max')
+  
+  A <- group_by(df_lab, .data$groups) %>% summarise(freq = sum(.data$sC)) %>% as.data.frame
+  
   df$freq=A[,2]
+  
+  W <- df_lab %>% group_by(.data$groups) %>% dplyr::filter(.data$sC>1) %>% 
+    arrange(-.data$sC, .by_group = TRUE) %>% 
+    dplyr::top_n(10, .data$sC) %>%
+    summarise(wordlist = paste(.data$words,.data$sC,collapse="\n")) %>% as.data.frame()
+  
+  df$words=W[,2]
   
   meandens=mean(df$rdensity)
   meancentr=mean(df$rcentrality)
-  df=df[df$freq>=minfreq,]
+  #df=df[df$freq>=minfreq,]
+  
+  rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
+  rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
+  xlimits=c(meancentr-rangex,meancentr+rangex)
+  ylimits=c(meandens-rangey,meandens+rangey)
+  
 
-  g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity)) +
-    geom_point(aes(size=log(as.numeric(df$freq))),shape=20,col=df$color)     # Use hollow circles
-  g=g+geom_label_repel(aes(label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3,angle=0)+ geom_hline(yintercept = meandens,linetype=2) +
-    geom_vline(xintercept = meancentr,linetype=2) + theme(legend.position="none") +
-    scale_radius(range=c(1, 50))+labs(x = "Centrality", y = "Density")+
+  g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity, text=(df$words))) +
+    geom_point(group="NA",aes(size=log(as.numeric(df$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
+  
+  if (isTRUE(repel)){
+  g=g+geom_label_repel(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3*(1+size),angle=0)}else{
+    g=g+geom_text(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3*(1+size),angle=0)
+  }
+  
+    g=g+geom_hline(yintercept = meandens,linetype=2, color=adjustcolor("black",alpha.f=0.7)) +
+    geom_vline(xintercept = meancentr,linetype=2, color=adjustcolor("black",alpha.f=0.7)) + 
+      theme(legend.position="none") +
+    scale_radius(range=c(15*size, 100*size))+
+      labs(x = "Centrality", y = "Density")+
+      xlim(xlimits)+
+      ylim(ylimits)+
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),
@@ -124,6 +156,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5){
   names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label")
   words=df_lab[order(df_lab$Cluster),]
   words=words[!is.na(words$Color),]
+  words$Cluster=as.numeric(factor(words$Cluster))
   row.names(df)=NULL
   results=list(map=g, clusters=df, words=words,nclust=dim(df)[1])
 return(results)

@@ -32,7 +32,7 @@
 #' @param label.color is logical. If TRUE, for each vertex, the label color is the same as its cluster. 
 #' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.  
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
-#' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "louvain","infomap","edge_betweenness","walktrap").
+#' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "louvain","infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @param curved is a logical or a number. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}. Curved values are any numbers from 0 to 1.
 #' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix. 
 #' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
@@ -254,6 +254,12 @@ clusteringNetwork <- function(bsk.network,cluster){
            net_groups <- cluster_optimal(bsk.network)},
          louvain={
            net_groups <- cluster_louvain(bsk.network)},
+         fast_greedy={
+           net_groups <- cluster_fast_greedy(bsk.network)},
+         leading_eigen={
+           net_groups <- cluster_leading_eigen(bsk.network)},
+         spinglass={
+           net_groups <- cluster_spinglass(bsk.network)},
          infomap={
            net_groups <- cluster_infomap(bsk.network)},
          edge_betweenness={

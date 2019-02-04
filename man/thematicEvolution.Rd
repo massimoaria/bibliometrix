@@ -4,7 +4,8 @@
 \alias{thematicEvolution}
 \title{Perform a Thematic Evolution Analysis}
 \usage{
-thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2)
+thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2,
+  size = 0.5)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.}
@@ -16,6 +17,8 @@ thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2)
 \item{n}{is numerical. It indicates the number of words to use in the network analysis}
 
 \item{minFreq}{is numerical. It indicates the min frequency of words included in to a cluster.}
+
+\item{size}{is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).}
 }
 \value{
 a list containing:

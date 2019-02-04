@@ -1108,26 +1108,53 @@ navbarMenu("Conceptual Structure",
                       mainPanel("Thematic Evolution",
                                 
                                 tabsetPanel(type = "tabs",
-                                            tabPanel("TE Map",
-                                                     shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                            tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
+                                              tabPanel("Map",
+                                                       shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                                      ),
+                                              tabPanel("Table",
+                                                       shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                                      ))
                                             ),
-                                            tabPanel("TE Table",
-                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                            tabPanel("Time Slice 1", tabsetPanel(type="tabs",
+                                              tabPanel("Thematic Map",
+                                                       shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
+                                                      ),
+                                              tabPanel("Network",
+                                                       shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "750px",width = "1100px"))
+                                                       ))      
                                             ),
-                                            tabPanel("TM Period 1",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
+                                            tabPanel("Time Slice 2", tabsetPanel(type="tabs",
+                                                                                            tabPanel("Thematic Map",
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = 700))
+                                                                                            ),
+                                                                                            tabPanel("Network",
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "750px",width = "1100px"))
+                                                                                            ))      
                                             ),
-                                            tabPanel("TM Period 2",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = 700))
+                                            tabPanel("Time Slice 3", tabsetPanel(type="tabs",
+                                                                                            tabPanel("Thematic Map",
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = 700))
+                                                                                            ),
+                                                                                            tabPanel("Network",
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "750px",width = "1100px"))
+                                                                                            ))      
                                             ),
-                                            tabPanel("TM Period 3",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = 700))
+                                            tabPanel("Time Slice 4", tabsetPanel(type="tabs",
+                                                                                            tabPanel("Thematic Map",
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = 700))
+                                                                                            ),
+                                                                                            tabPanel("Network",
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "750px",width = "1100px"))
+                                                                                            ))      
                                             ),
-                                            tabPanel("TM Period 4",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = 700))
-                                            ),
-                                            tabPanel("TM Period 5",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = 700))
+                                            tabPanel("Time Slice 5", tabsetPanel(type="tabs",
+                                                                                            tabPanel("Thematic Map",
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = 700))
+                                                                                            ),
+                                                                                            tabPanel("Network",
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "750px",width = "1100px"))
+                                                                                            ))      
                                             )
                                 )
                                 

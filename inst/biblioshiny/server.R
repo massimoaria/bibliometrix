@@ -1289,6 +1289,21 @@ server <- function(input, output, session) {
     
   })
   
+  output$TETable <- DT::renderDT({
+    
+    TEData=values$nexus$Data
+    TEData=TEData[TEData$Inc_index>0,]
+    names(TEData)=c("From", "To", "Inclusion Index", "Words", "Occurrences", "Total", "Weighted Inclusion Index", "Total Occ From", "Total Occ To", "Stability Index")
+    DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TEData))-1))))) %>%
+      formatStyle(names(TEData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+  
   output$TMPlot1 <-  renderPlotly({
     
     #input$applyTM
@@ -1334,20 +1349,71 @@ server <- function(input, output, session) {
     
   })#, height = 650, width = 800)
   
-  output$TETable <- DT::renderDT({
+  output$NetPlot1 <- renderVisNetwork({
+    k=1
+    values$network1<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
+                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                shape=input$coc.shape)
     
-    TEData=values$nexus$Data
-    TEData=TEData[TEData$Inc_index>0,]
-    names(TEData)=c("From", "To", "Inclusion Index", "Words", "Occurrences", "Total", "Weighted Inclusion Index", "Total Occ From", "Total Occ To", "Stability Index")
-    DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+    values$network1$VIS
+    
+  })
+  
+  output$NetPlot2 <- renderVisNetwork({
+    k=2
+    values$network2<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
+                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                shape=input$coc.shape)
+    
+    values$network2$VIS
+    
+  })
+  
+  output$NetPlot3 <- renderVisNetwork({
+    k=3
+    values$network3<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
+                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                shape=input$coc.shape)
+    
+    values$network3$VIS
+    
+  })
+  
+  output$NetPlot4 <- renderVisNetwork({
+    k=4
+    values$network4<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
+                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                shape=input$coc.shape)
+    
+    values$network4$VIS
+    
+  })
+  
+  output$NetPlot5 <- renderVisNetwork({
+    k=5
+    values$network5<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
+                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                shape=input$coc.shape)
+    
+    values$network5$VIS
+    
+  })
+  
+  output$TMTable1 <- DT::renderDT({
+    
+    tmData=values$nexus$TM$words[,-4]
+    
+    DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TEData))-1))))) %>%
-      formatStyle(names(TEData),  backgroundColor = 'white') 
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
+      formatStyle(names(tmData),  backgroundColor = 'white') 
     #return(Data)
     
   })
+  
+ 
   
   ### INTELLECTUAL STRUCTURE ####
   

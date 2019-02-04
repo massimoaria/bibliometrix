@@ -73,11 +73,12 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5){
     netk <- networkPlot(NetMatrixk, normalize = "association",n = n, 
                         Title = "co-occurrence network",type="auto",
                         size=0.3,size.cex=FALSE,label.cex=FALSE,labelsize = 0.1, halo = FALSE, cluster="louvain",remove.isolates=FALSE,
-                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.n=0)
+                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.n=n)
     resk <- thematicMap(netk, NetMatrixk, Sk, minfreq = minFreq, repel=FALSE, size=size)
     #S[[k]]=Sk
     #net[[k]]=netk
     res[[k]]=resk
+    net[[k]]=netk
   }
   dev.off() 
   
@@ -87,7 +88,7 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5){
     print("Error")
     return()
   }
-  net=list()
+  #net=list()
   incMatrix=list()
   for (k in 2:K){
     res1=res[[(k-1)]]
@@ -170,7 +171,7 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5){
   edges$from=as.numeric(edges$from)
   edges$to=as.numeric(edges$to)
   
-  results=list(Nodes=nodes,Edges=edges,Data=INC,check=TRUE, TM=res)
+  results=list(Nodes=nodes,Edges=edges,Data=INC,check=TRUE, TM=res, Net=net)
   
   return(results)
   

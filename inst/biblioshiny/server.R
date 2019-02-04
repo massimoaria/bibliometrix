@@ -1294,7 +1294,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=1){
         plot.ly(values$nexus$TM[[1]]$map)
-    } else (emptyPlot("You do not requested this period!"))
+    } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
   
@@ -1303,7 +1303,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=2){
       plot.ly(values$nexus$TM[[2]]$map)
-    } else (emptyPlot("You do not requested this period!"))
+    } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
   
@@ -1312,7 +1312,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=3){
       plot.ly(values$nexus$TM[[3]]$map)
-    } else (emptyPlot("You do not requested this period!"))
+    } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
   
@@ -1321,7 +1321,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=4){
       plot.ly(values$nexus$TM[[4]]$map)
-    } else (emptyPlot("You do not requested this period!"))
+    } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
   
@@ -1330,7 +1330,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=5){
       plot.ly(values$nexus$TM[[5]]$map)
-    } else (emptyPlot("You do not requested this period!"))
+    } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
   
@@ -1537,7 +1537,7 @@ server <- function(input, output, session) {
   emptyPlot<-function(errortext){
     g=ggplot()+
       theme_void() + theme(legend.position="none")+
-      annotate("text", x = 4, y = 25, label = errortext)
+      annotate("text", x = 4, y = 25, label = errortext, size=10)
     plot(g)
   }
   

@@ -891,7 +891,7 @@ navbarMenu("Conceptual Structure",
            #### Co-occurrence Network ----
            "  ",
            "  ",
-           "Co-Word Analysis",
+           "Network Approach",
            tabPanel("Co-occurrence Network",
                     
                     sidebarLayout(
@@ -1022,7 +1022,123 @@ navbarMenu("Conceptual Structure",
                     )
            ), ## End of tabPanel ("CS network")
            
+           ### Thematic Map ----
+           #"  ",
+           #"  ",
+           #"Thematic Analysis",
+           tabPanel("Thematic Map",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Thematic Map"))),
+                                   br(),
+                                   
+                                   actionButton("applyTM", "Apply!"),
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("TM Parameters: "))),
+                                   "  ",
+                                   selectInput("TMfield", 
+                                               label = "Field",
+                                               choices = c("Keywords Plus" = "ID", 
+                                                           "Author's Keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   conditionalPanel(
+                                     condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
+                                     selectInput("stemming", label="Word Stemming",
+                                                 choices = c("Yes" = TRUE,
+                                                             "No" = FALSE),
+                                                 selected = FALSE)),
+                                   sliderInput("TMn", label="Number of Words",value=250,min=50,max=500,step=10),
+                                   sliderInput("TMfreq", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
+                                   sliderInput("sizeTM", label="Label size",value=0.3,min=0.1,max=1,step=0.05)
+                      ),
+                      mainPanel("Thematic Map",
+                                tabsetPanel(type = "tabs",
+                                            tabPanel("Map",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = 700))
+                                            ),
+                                            tabPanel("Table",
+                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
+                                            )
+                                )
+                                
+                      )
+                      
+                    )
+           ), ## End of tabPanel ("Thematic Map")
+           
+           ### Thematic Evolution ----
+           tabPanel("Thematic Evolution",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Thematic Evolution"))),
+                                   br(),
+                                   actionButton("applyTE", "Apply!"),
+                                   br(),
+                                   h4(em(strong("TE Parameters: "))),
+                                   "  ",
+                                   selectInput("TEfield", 
+                                               label = "Field",
+                                               choices = c("Keywords Plus" = "ID", 
+                                                           "Author's Keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   
+                                   sliderInput("nTE", label="Number of Words",value=250,min=50,max=500,step=10),
+                                   sliderInput("fTE", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
+                                   selectInput("TEmeasure", 
+                                               label = "Weight index",
+                                               choices = c("Inclusion Index" = "inclusion", 
+                                                           "Stability Index" = "stability"
+                                               ),
+                                               selected = "inclusion"),
+                                   sliderInput("minFlowTE", label="Min Weigth Index",value=0.1,min=0.02,max=1,step=0.02),
+                                   sliderInput("sizeTE", label="Label size",value=0.3,min=0.1,max=1,step=0.05),
+                                   br(),
+                                   h4(em(strong("Time Slices: "))),
+                                   numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
+                                   "Please, write the cutting points (in year) for your collection",
+                                   uiOutput("sliders")
+                                   
+                                   
+                      ),
+                      mainPanel("Thematic Evolution",
+                                
+                                tabsetPanel(type = "tabs",
+                                            tabPanel("TE Map",
+                                                     shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                            ),
+                                            tabPanel("TE Table",
+                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                            ),
+                                            tabPanel("TM Period 1",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
+                                            ),
+                                            tabPanel("TM Period 2",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = 700))
+                                            ),
+                                            tabPanel("TM Period 3",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = 700))
+                                            ),
+                                            tabPanel("TM Period 4",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = 700))
+                                            ),
+                                            tabPanel("TM Period 5",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = 700))
+                                            )
+                                )
+                                
+                      )
+                    )
+                    
+           ), ## End of tabPanel ("Thematic Map")
            ### Factorial Analysis ----
+           "  ",
+           "  ",
+           "Factorial Approach",
            tabPanel("Factorial Analysis",
                     
                     sidebarLayout(
@@ -1087,121 +1203,9 @@ navbarMenu("Conceptual Structure",
                           )
                       )
                     )
-           ), ## End of tabPanel ("Correspondence Analysis")
+           ) ## End of tabPanel ("Correspondence Analysis")
            
-           ### Thematic Map ----
-           "  ",
-           "  ",
-           "Thematic Analysis",
-           tabPanel("Thematic Map",
-                    sidebarLayout(
-                      sidebarPanel(width=3,
-                                   h3(em(strong("Thematic Map"))),
-                                   br(),
-                        
-                                   actionButton("applyTM", "Apply!"),
-                                   "  ",
-                                   "  ",
-                                   h4(em(strong("TM Parameters: "))),
-                                   "  ",
-                                   selectInput("TMfield", 
-                                               label = "Field",
-                                               choices = c("Keywords Plus" = "ID", 
-                                                           "Author's Keywords" = "DE",
-                                                           "Titles" = "TI",
-                                                           "Abstracts" = "AB"),
-                                               selected = "ID"),
-                                   conditionalPanel(
-                                     condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
-                                   selectInput("stemming", label="Word Stemming",
-                                               choices = c("Yes" = TRUE,
-                                                           "No" = FALSE),
-                                               selected = FALSE)),
-                                   sliderInput("TMn", label="Number of Words",value=250,min=50,max=500,step=10),
-                                   sliderInput("TMfreq", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
-                                   sliderInput("sizeTM", label="Label size",value=0.3,min=0.1,max=1,step=0.05)
-                                   ),
-                    mainPanel("Thematic Map",
-                              tabsetPanel(type = "tabs",
-                                tabPanel("Map",
-                                  shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = 700))
-                                ),
-                              tabPanel("Table",
-                                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
-                                )
-                              )
-                    
-                    )
-                    
-            )
-           ), ## End of tabPanel ("Thematic Map")
-           
-           ### Thematic Evolution ----
-           tabPanel("Thematic Evolution",
-                    sidebarLayout(
-                      sidebarPanel(width=3,
-                                   h3(em(strong("Thematic Evolution"))),
-                                   br(),
-                                   actionButton("applyTE", "Apply!"),
-                                   br(),
-                                   h4(em(strong("TE Parameters: "))),
-                                   "  ",
-                                   selectInput("TEfield", 
-                                               label = "Field",
-                                               choices = c("Keywords Plus" = "ID", 
-                                                           "Author's Keywords" = "DE",
-                                                           "Titles" = "TI",
-                                                           "Abstracts" = "AB"),
-                                               selected = "ID"),
-                                   
-                                   sliderInput("nTE", label="Number of Words",value=250,min=50,max=500,step=10),
-                                   sliderInput("fTE", label="Min Cluster Frequency",value=5,min=1,max=100,step=1),
-                                   selectInput("TEmeasure", 
-                                               label = "Weight index",
-                                               choices = c("Inclusion Index" = "inclusion", 
-                                                           "Stability Index" = "stability"
-                                                           ),
-                                               selected = "inclusion"),
-                                   sliderInput("minFlowTE", label="Min Weigth Index",value=0.1,min=0.02,max=1,step=0.02),
-                                   sliderInput("sizeTE", label="Label size",value=0.3,min=0.1,max=1,step=0.05),
-                                   br(),
-                                   h4(em(strong("Time Slices: "))),
-                                   numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
-                                   "Please, write the cutting points (in year) for your collection",
-                                   uiOutput("sliders")
-                                   
-                                   
-                      ),
-                      mainPanel("Thematic Evolution",
-                                
-                                tabsetPanel(type = "tabs",
-                                            tabPanel("TE Map",
-                                                     shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
-                                            ),
-                                            tabPanel("TE Table",
-                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
-                                            ),
-                                            tabPanel("TM Period 1",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
-                                            ),
-                                            tabPanel("TM Period 2",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = 700))
-                                            ),
-                                            tabPanel("TM Period 3",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = 700))
-                                            ),
-                                            tabPanel("TM Period 4",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = 700))
-                                            ),
-                                            tabPanel("TM Period 5",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = 700))
-                                            )
-                                )
-                                
-                                )
-                    )
-                    
-           ) ## End of tabPanel ("Thematic Map")
+
            
           
 ),

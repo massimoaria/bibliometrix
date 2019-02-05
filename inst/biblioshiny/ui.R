@@ -1122,7 +1122,10 @@ navbarMenu("Conceptual Structure",
                                                                                             ),
                                                                                           tabPanel("Network",
                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "750px",width = "1100px"))
-                                                                                            ))      
+                                                                                            ),
+                                                                                          tabPanel("Table",
+                                                                                                    shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
+                                                                                          ))      
                                             ),
                                             tabPanel("Time Slice 2", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -1130,7 +1133,10 @@ navbarMenu("Conceptual Structure",
                                                                                             ),
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "750px",width = "1100px"))
-                                                                                            ))      
+                                                                                            ),
+                                                                                            tabPanel("Table",
+                                                                                                    shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
+                                                                                            )) 
                                             ),
                                             tabPanel("Time Slice 3", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -1138,7 +1144,10 @@ navbarMenu("Conceptual Structure",
                                                                                             ),
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "750px",width = "1100px"))
-                                                                                            ))      
+                                                                                            ),
+                                                                                            tabPanel("Table",
+                                                                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
+                                                                                            )) 
                                             ),
                                             tabPanel("Time Slice 4", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -1146,7 +1155,10 @@ navbarMenu("Conceptual Structure",
                                                                                             ),
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "750px",width = "1100px"))
-                                                                                            ))      
+                                                                                            ),
+                                                                                            tabPanel("Table",
+                                                                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
+                                                                                            )) 
                                             ),
                                             tabPanel("Time Slice 5", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -1154,7 +1166,10 @@ navbarMenu("Conceptual Structure",
                                                                                             ),
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "750px",width = "1100px"))
-                                                                                            ))      
+                                                                                            ),
+                                                                                            tabPanel("Table",
+                                                                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
+                                                                                            ))
                                             )
                                 )
                                 

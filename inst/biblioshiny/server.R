@@ -1309,7 +1309,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=1){
         plot.ly(values$nexus$TM[[1]]$map)
-    } else (emptyPlot("You have selected fewer periods!"))
+    } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
   
@@ -1318,7 +1318,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=2){
       plot.ly(values$nexus$TM[[2]]$map)
-    } else (emptyPlot("You have selected fewer periods!"))
+    } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
   
@@ -1327,7 +1327,7 @@ server <- function(input, output, session) {
     #input$applyTM
     if (length(values$nexus$TM)>=3){
       plot.ly(values$nexus$TM[[3]]$map)
-    } else (emptyPlot("You have selected fewer periods!"))
+    } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
   
@@ -1401,7 +1401,7 @@ server <- function(input, output, session) {
   
   output$TMTable1 <- DT::renderDT({
     
-    tmData=values$nexus$TM$words[,-4]
+    tmData=values$nexus$TM[[1]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
@@ -1413,7 +1413,61 @@ server <- function(input, output, session) {
     
   })
   
+  output$TMTable2 <- DT::renderDT({
+    
+    tmData=values$nexus$TM[[2]]$words[,-4]
+    
+    DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
+      formatStyle(names(tmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
  
+  output$TMTable3 <- DT::renderDT({
+    
+    tmData=values$nexus$TM[[3]]$words[,-4]
+    
+    DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
+      formatStyle(names(tmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+  
+  output$TMTable4 <- DT::renderDT({
+    
+    tmData=values$nexus$TM[[4]]$words[,-4]
+    
+    DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
+      formatStyle(names(tmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+  
+  output$TMTable5 <- DT::renderDT({
+    
+    tmData=values$nexus$TM[[5]]$words[,-4]
+    
+    DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
+      formatStyle(names(tmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
   
   ### INTELLECTUAL STRUCTURE ####
   

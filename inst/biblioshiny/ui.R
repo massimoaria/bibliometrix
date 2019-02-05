@@ -1117,12 +1117,12 @@ navbarMenu("Conceptual Structure",
                                                       ))
                                             ),
                                             tabPanel("Time Slice 1", tabsetPanel(type="tabs",
-                                              tabPanel("Thematic Map",
-                                                       shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
-                                                      ),
-                                              tabPanel("Network",
-                                                       shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "750px",width = "1100px"))
-                                                       ))      
+                                                                                          tabPanel("Thematic Map",
+                                                                                                    shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
+                                                                                            ),
+                                                                                          tabPanel("Network",
+                                                                                                    shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "750px",width = "1100px"))
+                                                                                            ))      
                                             ),
                                             tabPanel("Time Slice 2", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",

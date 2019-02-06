@@ -894,8 +894,16 @@ server <- function(input, output, session) {
   
   output$MostCitRefsTable <- DT::renderDT({
     
-    TAB <- values$TABCitRef
-    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+   TAB <- values$TABCitRef
+   
+   TAB$link <- gsub("[[:punct:]]" , " ",reduceRefs(TAB[,1]))
+   
+
+   TAB$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=it&as_sdt=0%2C5&q=',TAB$link,'\" target=\"_blank\">','link','</a>')
+   
+   TAB=TAB[,c(3,1,2)]
+   names(TAB)[1]="Google Scholar"
+    DT::datatable(TAB, rownames = FALSE, escape=FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
@@ -1240,6 +1248,16 @@ server <- function(input, output, session) {
     plot.ly(values$TM$map)
 
   })#, height = 650, width = 800)
+  
+  output$NetPlot <- renderVisNetwork({
+    
+    values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
+                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                shape=input$coc.shape)
+    
+    values$networkTM$VIS
+    
+  })
   
   output$TMTable <- DT::renderDT({
     
@@ -1669,6 +1687,16 @@ server <- function(input, output, session) {
     
   }
   
+  reduceRefs<- function(A){
+    
+    ind=unlist(regexec("*V[0-9]", A))
+    A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+    ind=unlist(regexec("*DOI ", A))
+    A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+    return(A)
+  }
+  
+  
   initial <- function(values){
     values$results=list("NA")
     values$log="working..."
@@ -1932,12 +1960,12 @@ server <- function(input, output, session) {
     
     S <- normalizeSimilarity(NetMatrix, type = "association")
     t = tempfile();pdf(file=t) #### trick to hide igraph plot
-    net1 <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
+    net <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
                                        labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
                                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
-                                       size=1,edges.min = 1)
+                                       size=1,edges.min = 1, label.n=input$TMn)
     dev.off();file.remove(t) ### end of trick
-    Map=thematicMap(net1, NetMatrix, S = S, minfreq=input$TMfreq, size=input$sizeTM, repel=FALSE)
+    Map=thematicMap(net, NetMatrix, S = S, minfreq=input$TMfreq, size=input$sizeTM, repel=FALSE)
     #plot(Map$map)
     values$TM=Map
     return(values)

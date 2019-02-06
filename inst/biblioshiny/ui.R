@@ -1011,7 +1011,7 @@ navbarMenu("Conceptual Structure",
                     
                     mainPanel(
                       tabsetPanel(type = "tabs",
-                                  tabPanel("Graph", 
+                                  tabPanel("Map", 
                                            shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "750px",width = "1100px"))),
                                   tabPanel("Table", 
                                            shinycssloaders::withSpinner(DT::DTOutput(
@@ -1059,6 +1059,8 @@ navbarMenu("Conceptual Structure",
                                             tabPanel("Map",
                                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = 700))
                                             ),
+                                            tabPanel("Network",
+                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "750px",width = "1100px"))),
                                             tabPanel("Table",
                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
                                             )

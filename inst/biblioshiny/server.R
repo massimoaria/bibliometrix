@@ -896,10 +896,10 @@ server <- function(input, output, session) {
     
    TAB <- values$TABCitRef
    
-   TAB$link <- gsub("[[:punct:]]" , " ",reduceRefs(TAB[,1]))
+   TAB$link <- trimES(gsub("[[:punct:]]" , " ",reduceRefs(TAB[,1])))
    
 
-   TAB$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=it&as_sdt=0%2C5&q=',TAB$link,'\" target=\"_blank\">','link','</a>')
+   TAB$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',TAB$link,'\" target=\"_blank\">','link','</a>')
    
    TAB=TAB[,c(3,1,2)]
    names(TAB)[1]="Google Scholar"

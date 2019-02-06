@@ -1968,6 +1968,7 @@ server <- function(input, output, session) {
     Map=thematicMap(net, NetMatrix, S = S, minfreq=input$TMfreq, size=input$sizeTM, repel=FALSE)
     #plot(Map$map)
     values$TM=Map
+    values$TM$net=net
     return(values)
   }
   

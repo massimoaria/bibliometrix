@@ -1,3 +1,15 @@
+bibliometrix v2.1.1 (Release date: 2019-02-07)
+==============
+
+New functionality:
+* biblioshiny: all plots are now dynamic (using plot.ly or VisNetwork)
+* biblioshiny: added new plots in dataset menu
+* biblioshiny: Menu "Conceptual Structure" has been re-organized
+* the function thematicMap has been completely rewritten. Now it automatically calculate the network and plots the map.
+
+
+
+
 bibliometrix v2.1.0 (Release date: 2019-01-06)
 ==============
 

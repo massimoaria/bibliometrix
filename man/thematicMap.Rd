@@ -4,19 +4,20 @@
 \alias{thematicMap}
 \title{Create a thematic map}
 \usage{
-thematicMap(Net, NetMatrix, S = NULL, minfreq = 5, size = 0.5,
-  repel = TRUE)
+thematicMap(M, field = "ID", n = 250, minfreq = 5,
+  stemming = FALSE, size = 0.5, repel = TRUE)
 }
 \arguments{
-\item{Net}{is a igraph object created by \code{\link{networkPlot}} function.}
+\item{M}{is a bibliographic dataframe.}
 
-\item{NetMatrix}{is a co-occurence matrix obtained by the network functions 
+\item{field}{is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE", "TI", "AB")}.
 \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.}
 
-\item{S}{is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 
-If S is NULL, map is created using co-occurrence counts.}
+\item{n}{is an integer. It indicates the number of terms to include in the analysis.}
 
 \item{minfreq}{is a integer. It indicates the minimun frequency of a cluster.}
+
+\item{stemming}{is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).}
 
 \item{size}{is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).}
 
@@ -40,13 +41,7 @@ two-dimesional map the typological themes of a domain.
 \examples{
 
 data(scientometrics)
-NetMatrix <- biblioNetwork(scientometrics, analysis = "co-occurrences", 
-              network = "keywords", sep = ";")
-S <- normalizeSimilarity(NetMatrix, type = "association")
-net <- networkPlot(S, n = 100, Title = "co-occurrence network",type="fruchterman",
-     labelsize = 0.7, halo = FALSE, cluster = "walktrap",remove.isolates=FALSE,
-     remove.multiple=FALSE, noloops=TRUE, weighted=TRUE)
-res <- thematicMap(net, NetMatrix, S)
+res <- thematicMap(scientometrics, field = "ID", n = 250, minfreq = 5, size = 0.5, repel = TRUE)
 plot(res$map)
 
 }

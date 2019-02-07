@@ -1239,7 +1239,8 @@ server <- function(input, output, session) {
     
     input$applyTM
     
-    values <- isolate(TMmap(input,values))
+    #values <- isolate(TMmap(input,values))
+    values$TM <- isolate(thematicMap(values$M, field=input$TMfield, n=input$TMn, minfreq=input$TMfreq, stemming=input$TMstemming, size=input$sizeTM, repel=FALSE))
     
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -1295,7 +1296,7 @@ server <- function(input, output, session) {
     })
     
     if (length(values$yearSlices)>0){
-    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE))
+    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, repel=FALSE))
     
     validate(
       need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")

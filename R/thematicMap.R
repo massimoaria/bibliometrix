@@ -7,12 +7,12 @@
 #' two-dimesional map the typological themes of a domain.
 #' 
 #' 
-#' @param Net is a igraph object created by \code{\link{networkPlot}} function.
-#' @param NetMatrix is a co-occurence matrix obtained by the network functions 
+#' @param M is a bibliographic dataframe.
+#' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE", "TI", "AB")}.
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
-#' @param S is a similarity matrix obtained by the \code{\link{normalizeSimilarity}} function. 
-#' If S is NULL, map is created using co-occurrence counts.
+#' @param n is an integer. It indicates the number of terms to include in the analysis.
 #' @param minfreq is a integer. It indicates the minimun frequency of a cluster.
+#' @param stemming is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @return a list containing:
@@ -25,13 +25,7 @@
 #' @examples
 #' 
 #' data(scientometrics)
-#' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-occurrences", 
-#'               network = "keywords", sep = ";")
-#' S <- normalizeSimilarity(NetMatrix, type = "association")
-#' net <- networkPlot(S, n = 100, Title = "co-occurrence network",type="fruchterman",
-#'      labelsize = 0.7, halo = FALSE, cluster = "walktrap",remove.isolates=FALSE,
-#'      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE)
-#' res <- thematicMap(net, NetMatrix, S)
+#' res <- thematicMap(scientometrics, field = "ID", n = 250, minfreq = 5, size = 0.5, repel = TRUE)
 #' plot(res$map)
 #'
 #' @seealso \code{\link{biblioNetwork}} function to compute a bibliographic network.
@@ -40,12 +34,40 @@
 #'
 #' @export
 
-thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5, size=0.5, repel=TRUE){
-  #. = NULL
+thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, repel=TRUE){
+  
+  switch(field,
+         ID={
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
+           
+         },
+         DE={
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
+           
+         },
+         TI={
+           #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
+           M=termExtraction(M,Field="TI",verbose=FALSE, stemming = stemming)
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", sep = ";")
+           
+         },
+         AB={
+           #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
+           M=termExtraction(M,Field="AB",verbose=FALSE, stemming = stemming)
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "abstracts", sep = ";")
+           
+         })
+  
+  S <- normalizeSimilarity(NetMatrix, type = "association")
+  t = tempfile();pdf(file=t) #### trick to hide igraph plot
+  Net <- networkPlot(S, n=n, Title = "Keyword co-occurrences",type="auto",
+                     labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
+                     remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
+                     size=1,edges.min = 1, label.n=n)
+  dev.off();file.remove(t) ### end of trick
   
   row.names(NetMatrix)=colnames(NetMatrix)=tolower(row.names(NetMatrix))
   net=Net$graph
-  if (is.null(S)){S=NetMatrix}
   net_groups <- Net$cluster_obj
   group=net_groups$membership
   word=net_groups$name
@@ -60,15 +82,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5, size=0.5, repel=TRUE)
   group=group[ii]
   color=color[ii]
   ###
-  
-  
-  # 
-  # if (length(words)>length(index)){
-  #   ii=which(words==setdiff(words,row.names(S)))
-  #   words=words[-ii]
-  #   groups=groups[-ii]
-  #   color=color[-ii]
-  # }
+
 
   C=diag(NetMatrix)
 
@@ -158,6 +172,7 @@ thematicMap <- function(Net, NetMatrix, S=NULL, minfreq=5, size=0.5, repel=TRUE)
   words=words[!is.na(words$Color),]
   words$Cluster=as.numeric(factor(words$Cluster))
   row.names(df)=NULL
-  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1])
+
+  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net)
 return(results)
 }

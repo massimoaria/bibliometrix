@@ -11,7 +11,9 @@
 #' @param years is a numeric vector of two or more unique cut points.
 #' @param n is numerical. It indicates the number of words to use in the network analysis
 #' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.
+#' @param stemming is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
+#' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
@@ -31,7 +33,7 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5){
+thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, stemming=FALSE, repel=TRUE){
   
   #net=list()
   #arguments <- list(...)
@@ -47,38 +49,11 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5){
     
     Mk=list_df[[k]]
     
-    switch(field,
-           ID={
-             NetMatrixk <- biblioNetwork(Mk, analysis = "co-occurrences", network = "keywords", sep = ";")
-             
-           },
-           DE={
-             NetMatrixk <- biblioNetwork(Mk, analysis = "co-occurrences", network = "author_keywords", sep = ";")
-             
-           },
-           TI={
-             if(!("TI_TM" %in% names(Mk))){Mk=termExtraction(Mk,Field="TI",verbose=FALSE)}
-             NetMatrixk <- biblioNetwork(Mk, analysis = "co-occurrences", network = "titles", sep = ";")
-             
-           },
-           AB={
-             if(!("AB_TM" %in% names(Mk))){Mk=termExtraction(Mk,Field="AB",verbose=FALSE)}
-             NetMatrixk <- biblioNetwork(Mk, analysis = "co-occurrences", network = "abstracts", sep = ";")
-             
-           })
-    
-    Sk <- normalizeSimilarity(NetMatrixk, type = "association")
-    #N = dim(NetMatrixk)[1]
-    if (n>dim(NetMatrixk)[1]){n = dim(NetMatrixk)[1]}
-    netk <- networkPlot(NetMatrixk, normalize = "association",n = n, 
-                        Title = "co-occurrence network",type="auto",
-                        size=0.3,size.cex=FALSE,label.cex=FALSE,labelsize = 0.1, halo = FALSE, cluster="louvain",remove.isolates=FALSE,
-                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.n=n)
-    resk <- thematicMap(netk, NetMatrixk, Sk, minfreq = minFreq, repel=FALSE, size=size)
+    resk <- thematicMap(Mk, field=field, n=n, minfreq=minFreq, stemming=stemming, size=size, repel=repel)
     #S[[k]]=Sk
     #net[[k]]=netk
     res[[k]]=resk
-    net[[k]]=netk
+    net[[k]]=resk$net
   }
   dev.off() 
   

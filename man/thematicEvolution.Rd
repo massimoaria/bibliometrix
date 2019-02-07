@@ -5,7 +5,7 @@
 \title{Perform a Thematic Evolution Analysis}
 \usage{
 thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2,
-  size = 0.5)
+  size = 0.5, stemming = FALSE, repel = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.}
@@ -19,6 +19,10 @@ thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2,
 \item{minFreq}{is numerical. It indicates the min frequency of words included in to a cluster.}
 
 \item{size}{is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).}
+
+\item{stemming}{is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).}
+
+\item{repel}{is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.}
 }
 \value{
 a list containing:

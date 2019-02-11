@@ -6,7 +6,7 @@ server <- function(input, output, session) {
   ##
   
   ## file upload max size
-  options(shiny.maxRequestSize=30*1024^2) 
+  options(shiny.maxRequestSize=100*1024^2) 
   
   ### initial values ####
   values = reactiveValues()

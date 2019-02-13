@@ -86,6 +86,7 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
         x=TI[i]
         y=TIb[i]
         Year=M2$PY[i]
+        x=trimws(gsub("\\[.+?]","",x)) 
         pos = grep(x, M$CR[M$PY>=Year])
         pos = rows[M$PY>=Year][pos]
         pos2 = grep(y, M$CR[M$PY>=Year])

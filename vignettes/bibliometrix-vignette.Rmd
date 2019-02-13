@@ -366,6 +366,10 @@ For that reasons,  *Authors per Article index $\ge$ Co-authors per Article index
 
 The **Collaboration Index** (CI) is calculated as Total Authors of Multi-Authored Articles/Total Multi-Authored Articles (Elango and Rajendran, 2012; Koseoglu, 2016). In other word, the Collaboration Index is a Co-authors per Article index calculated only using the multi-authored article set.
 
+Elango, B., & Rajendran, P. (2012). Authorship trends and collaboration pattern in the marine sciences literature: a scientometric study. International Journal of Information Dissemination and Technology, 2(3), 166.
+
+Koseoglu, M. A. (2016). Mapping the institutional collaboration network of strategic management research: 1980–2014. Scientometrics, 109(1), 203-226.
+
 
 *summary* accepts two additional arguments. *k* is a formatting value that indicates the number of rows of each table. *pause* is a logical value (TRUE or FALSE) used to allow (or not) pause in screen scrolling.
 Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
@@ -424,6 +428,8 @@ To obtain the most frequent local cited authors:
 ## Authors' Dominance ranking
 
 The function *dominance* calculates the authors' dominance ranking as proposed by Kumar & Kumar, 2008.
+
+Kumar, S., & Kumar, S. (2008). Collaboration in research productivity in oil seed research institutes of India. In Proceedings of Fourth International Conference on Webometrics, Informetrics and Scientometrics.
 
 Function arguments are: *results* (object of class *bibliometrix*) obtained by *biblioAnalysis*; and *k* (the number of authors to consider in the analysis).
 
@@ -853,7 +859,9 @@ CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemm
 ```
 
 ## Historical Direct Citation Network
-The historiographic map is a graph proposed by E. Garfield to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
+The historiographic map is a graph proposed by E. Garfield (2004) to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
+
+Garfield, E. (2004). Historiographic mapping of knowledge domains literature. Journal of Information Science, 30(2), 119-145.
 
 The function \code{histNetwork} generates a chronological direct citation network matrix which can be plotted using *histPlot*:
 

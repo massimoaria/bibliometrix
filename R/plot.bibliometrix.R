@@ -5,8 +5,8 @@
 #' @param ... can accept two arguments:\cr 
 #' \code{k} is an integer, used for plot formatting (number of objects). Default value is 10.\cr
 #' \code{pause} is a logical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.
-#' @return The function \code{plot} returns a set of plots of the object of class \code{bibliometrix} 
-#' and a dataframe of citation analysis.
+#' @return The function \code{plot} returns a list of plots of class \code{ggplot2}. 
+#' 
 #'
 #' @examples
 #' data(scientometrics)
@@ -25,6 +25,7 @@
 plot.bibliometrix<-function(x, ...){
 
   if (class(x)!="bibliometrix"){cat('\n argument "x" have to be an object of class "bibliometrix"\n');return(NA)}
+  graphs=list()
   
   arguments <- list(...)
   if (sum(names(arguments)=="k")==0){k=10} else {k=arguments$k}
@@ -37,7 +38,7 @@ plot.bibliometrix<-function(x, ...){
   # Authors
   #barplot(x$Authors[1:k],horiz=TRUE,las=2,cex.names=0.5,main="Most Productive Authors",xlab="Articles")
   xx=as.data.frame(x$Authors[1:k])
-  g=ggplot(data=xx, aes(x=xx$AU, y=xx$Freq)) +
+  g=ggplot(data=xx, aes(x=.data$AU, y=.data$Freq)) +
     geom_bar(stat="identity", fill="steelblue")+
     labs(title="Most productive Authors", x = "Authors")+
     labs(y = "N. of Documents")+
@@ -45,6 +46,7 @@ plot.bibliometrix<-function(x, ...){
     coord_flip()
   plot(g)
   
+  graphs$MostProdAuthors=g
   
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
@@ -71,7 +73,8 @@ plot.bibliometrix<-function(x, ...){
           color = "blue", face = "italic"))+
     coord_flip())
   plot(g)
-  }
+  graphs$MostProdCountries=g
+  } else {graphs$MostProdCountries=NA}
   
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
@@ -110,6 +113,8 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.x = element_text(hjust = 0)
     )   
   plot(g)
+  graphs$AnnualScientProd=g
+  
   
   Table2=NA
   if(!(x$DB %in% c("COCHRANE","PUBMED"))){
@@ -156,6 +161,7 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.x = element_text(hjust = 0)
     )   
   plot(g)
+  graphs$AverArtCitperYear=g
   
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
@@ -178,8 +184,11 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.x = element_text(hjust = 0, angle = 0)
     )   
   plot(g)
-  
+  graphs$AverTotCitperYear=g
+  } else {
+    graphs$AverArtCitperYear=NA
+    graphs$AverTotCitperYear=NA
   }
-  invisible(Table2)
+  invisible(graphs)
   
 }

@@ -57,7 +57,7 @@ citations <- function(M, field = "article", sep = ";"){
     if (M$DB[1]=="ISI"){ 
       listCR=lapply(listCR, function(l){
         ListL=lapply(strsplit(unlist(l),","),function(x) x[1])
-        l=unlist(ListL)
+        l=trimws(trimES(gsub("[[:punct:]]"," ",unlist(ListL))))
       })}
     if (M$DB[1]=="SCOPUS"){ 
       listCR=lapply(listCR, function(l){
@@ -67,7 +67,7 @@ citations <- function(M, field = "article", sep = ";"){
           if (length(ind)==0) ind=1
           x=unlist(a[[1]][1:(ind[1]-1)])
         })
-        l=unlist(ListL)
+        l=trimws(trimES(gsub("[[:punct:]]"," ",unlist(ListL))))
       })}
   }
   CR=unlist(listCR)

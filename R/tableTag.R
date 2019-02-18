@@ -24,8 +24,15 @@ tableTag <- function(M, Tag = "CR", sep = ";"){
     i=dim(M)[2]
   }else{i<-which(names(M)==Tag)}
   
+  if (Tag=="C1"){
+    M$C1=gsub("\\[.+?]","",M$C1) 
+  }
+  
   Tab<-unlist(strsplit(as.character(M[,i]),sep))
-  Tab<-trim.leading(Tab)
+  
+  ### inserted to remove punct and extra spaces ####
+  Tab<-trimws(trimES(gsub("[[:punct:]]"," ",Tab)))
+  ####
   Tab<-Tab[Tab!=""]
   Tab<-sort(table(Tab),decreasing=TRUE)
   return(Tab)

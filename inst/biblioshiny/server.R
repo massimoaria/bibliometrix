@@ -633,14 +633,24 @@ server <- function(input, output, session) {
       ### Affiliations ----
   
   output$MostRelAffiliationsPlot <- renderPlotly({
-    res <- descriptive(values,type="tab11")
+    
+    if (input$disAff=="Y"){
+      res <- descriptive(values,type="tab11")
+      xx=as.data.frame(values$results$Affiliations, stringsAsFactors = FALSE)
+    }else{
+      res <- descriptive(values,type="tab12")
+        xx=values$TAB
+        names(xx)=c("AFF","Freq")
+        }
+    
     values <-res$values
     values$TABAff <- values$TAB
     
-    xx=as.data.frame(values$results$Affiliations, stringsAsFactors = FALSE)
+    
     if (input$MostRelAffiliationsK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelAffiliationsK}
+    
     xx=xx[1:k,]
     g=ggplot2::ggplot(data=xx, aes(x=xx$AFF, y=xx$Freq, fill=-xx$Freq, text=paste("Affiliation: ",xx$AFF,"\nN.of Documents: ",xx$Freq))) +
       geom_bar(aes(group="NA"),stat="identity")+
@@ -1828,6 +1838,13 @@ server <- function(input, output, session) {
            "tab11"={
              TAB=as.data.frame(values$results$Affiliations,stringsAsFactors = FALSE)
              names(TAB)=c("Affiliations", "Articles")
+           },
+           "tab12"={
+             TAB=tableTag(values$M,"C1")
+             TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB),stringsAsFactors = FALSE)
+             TAB=TAB[nchar(TAB[,1])>4,]
+             #names(TAB)=c("Affiliations", "Articles")
+             
            }
     )
     values$TAB=TAB

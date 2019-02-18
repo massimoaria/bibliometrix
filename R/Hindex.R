@@ -72,7 +72,7 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   ## identify manuscripts of the author or of the sources
   
  
-  H=data.frame(Element=elements,h_index=0,g_index=0,m_index=0,TC=0,NP=0, stringsAsFactors = FALSE)
+  H=data.frame(Element=elements,h_index=0,g_index=0,m_index=0,TC=0,NP=0, PY_start=NA,stringsAsFactors = FALSE)
   TotalCitations=list()
   for (j in 1:length(elements)){
     author=elements[j]
@@ -84,6 +84,7 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
     range=as.numeric(format(Sys.Date(),'%Y'))-min(as.numeric(M$PY[ind]))+1
     H[j,6]=length(ind)
     H[j,5]=sum(M$TC[ind])
+    H[j,7]=min(as.numeric(M$PY[ind]))
     TC=sort(as.numeric(M$TC[ind]))
     TCC=sort(as.numeric(M$TC[ind]),decreasing = TRUE)
       for (i in 1:length(TC)){

@@ -155,7 +155,8 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
     CO=M$AU1_CO
 
     Country=tableTag(M,"AU1_CO")
-    SCP_MCP=countryCollaboration(M,Country,k=dim(Country),sep)
+    
+    SCP_MCP=countryCollaboration(M,Country,k=length(Country),sep)
   
 }else{
     M$AU_CO1=NA

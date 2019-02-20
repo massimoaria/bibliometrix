@@ -187,7 +187,7 @@ summary.bibliometrix<-function(object, ...){
   Co2=data.frame(Country=object$CO,TotalCitation=object$TotalCitation)
   Co2=Co2[!is.na(Co2[,1]),]
   AC=Co2 %>% group_by(.data$Country) %>% 
-    summarize("Total Citations"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
+    summarise("Total Citations"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
     as.data.frame(.data,stringasfactor=FALSE)
   
   names(AC)=c("Country     ", "Total Citations", "Average Article Citations")

@@ -157,7 +157,7 @@ summary.bibliometrix<-function(object, ...){
   if (length(object$Countries)<k) {kk=length(object$Countries)}
 
   #object$Countries=as.array(object$Countries)
-  Co=data.frame(Country=names(object$Countries[1:kk]), Articles=as.numeric(object$Countries),Freq=0)
+  Co=data.frame(Country=names(object$Countries[1:kk]), Articles=as.numeric(object$Countries)[1:kk],Freq=0)
   #Co$Country=row.names(Co)
   #names(Co)=c("Country  ","Articles","Freq")
   Co$Freq=as.numeric(Co[,2])/sum(object$Countries)

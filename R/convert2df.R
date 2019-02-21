@@ -308,6 +308,11 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
   ### SR field creation
   suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
   
+  ## AU normalization
+  M$AU=unlist(lapply(strsplit(M$AU,";"), function(x){
+    x=trimws(trimES(gsub("[[:punct:]]"," ",x)))
+    x=paste(x,collapse=";")
+  }))
   
   ### identify duplicated SRs 
     SR=M$SR

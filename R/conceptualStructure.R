@@ -20,6 +20,7 @@
 #' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
 #'  \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}
 #' @param minDegree is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.
+#' @param clust is an integer or a character. If clust="auto", the numebr of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.
 #' @param k.max is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 20.
 #' @param stemming is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}
@@ -52,7 +53,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, k.max=5, stemming=FALSE, labelsize=10,documents=10, graph=TRUE){
+conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, clust="auto", k.max=5, stemming=FALSE, labelsize=10,documents=10, graph=TRUE){
   
   #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   cbPalette <- c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
@@ -178,11 +179,23 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   
   # Selection of optimal number of clusters (gap statistics)
   #a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$y
-  a=diff(fviz_nbclust((df), kmeans, method = "wss",k.max=k.max)['data']$data$y)
-  clust=which(rank(a)==1)+1
+  if (clust=="auto"){
+      a=diff(fviz_nbclust((df), kmeans, method = "wss",k.max=k.max)['data']$data$y)
+      clust=which(rank(a)==1)+1}else{clust=max(2,min(as.numeric(clust),k.max))}
   
   # Perform the K-means clustering
-  km.res <- kmeans((df), clust, nstart = 25)
+  #km.res <- kmeans((df), clust, nstart = 25)
+  #if (clust=="auto"){clust=-1}else{clust=max(2,min(as.numeric(clust),k.max))}
+  km.res = hcut(df, k=clust,max=8,graph=FALSE, method="average")
+  #clust=as.numeric(max(levels(km.res$data.clust$clust)))
+  
+  km.res$data.clust=cbind(km.res$data,km.res$cluster)
+  names(km.res$data.clust)[3]="clust"
+  centers<- km.res$data.clust %>% group_by(.data$clust) %>% 
+    summarise("Dim.1"=mean(.data$Dim.1),"Dim.2"=mean(.data$Dim.2)) %>% 
+    as.data.frame()
+  
+  km.res$centers=centers[,c(2,3,1)]
   
   b=fviz_cluster(km.res, stand=FALSE, data = df,labelsize=labelsize, repel = TRUE)+
     theme_minimal()+
@@ -218,6 +231,20 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   
   if (isTRUE(graph)){plot(b)}
   
+  b_dend <- fviz_dend(km.res, rect = TRUE, k=clust, 
+                                       labelsize=labelsize, main="Topic Dendrogram",
+                                       k_colors = cbPalette[clust:1])+ 
+    #scale_color_manual(values = cbPalette[(clust+1):1])+
+    #scale_fill_manual(values = cbPalette[(clust+1):1])+
+    theme(plot.title=element_text(size=labelsize+1,face="bold"), 
+          axis.title=element_text(size=labelsize,face="bold") ,
+          panel.background = element_rect(fill = "white",
+                                          colour = "white"),
+          #size = 1, linetype = "solid"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+  
+  if (isTRUE(graph)){plot(b_dend)}
   
   if (method !="MDS"){
   ## Factorial map of most contributing documents
@@ -298,11 +325,11 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     
     if (isTRUE(graph)){plot(b_doc_TC)}
 
-    semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
+    semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
     
   }else{
 
-    semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL)
+    semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL)
     }
   
   

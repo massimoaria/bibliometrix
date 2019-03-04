@@ -36,6 +36,8 @@ server <- function(input, output, session) {
     # 'size', 'type', and 'datapath' columns. The 'datapath'
     # column will contain the local filenames where the data can
     # be found.
+    input$applyLoad
+    isolate({
     inFile <- input$file1
     
     if (is.null(inFile)) {return(NULL)}
@@ -68,6 +70,7 @@ server <- function(input, output, session) {
     }
     
     ### zip folder
+   
     if (grepl(".*\\.zip",inFile$name)) {
         files=unzip(inFile$datapath)
         #files = list.files(pattern = ".txt")
@@ -81,20 +84,26 @@ server <- function(input, output, session) {
                      })
     }
     
+    
     ### txt or bib formats  
+    isolate(
     if (grepl(".*\\.txt",inFile$name) | grepl(".*\\.bib",inFile$name)){
         D=readFiles(inFile$datapath)
-        withProgress(message = 'Calculation in progress',
+        withProgress(message = 'Conversion in progress',
                      value = 0, {
                        M <- convert2df(D, dbsource=input$dbsource,format=input$format)
                      })
     }
-      
+    ) 
     ### RData format
+    
     if (grepl(".*\\.RData",inFile$name)) {
       
       load(inFile$datapath)
     }
+   
+    
+    
     values=initial(values)
     values$M <- M
     values$Morig=M
@@ -114,7 +123,7 @@ server <- function(input, output, session) {
                   ,class = 'cell-border compact stripe')  %>% 
                   formatStyle(names(MData),  backgroundColor = 'white', textAlign = 'center',fontSize = '70%') 
     
-    
+    })
     })
 
   output$collection.save <- downloadHandler(
@@ -133,7 +142,9 @@ server <- function(input, output, session) {
   output$textLog <- renderUI({
     #log=gsub("  Art","\\\nArt",values$log)
     #log=gsub("Done!   ","Done!\\\n",log)
-    log=paste("Number of Documents ",dim(values$M)[1])
+    k=dim(values$M)[1]
+    if (k==1){k=0}
+    log=paste("Number of Documents ",k)
     textInput("textLog", "Conversion results", 
               value=log)
   })
@@ -147,6 +158,7 @@ server <- function(input, output, session) {
   })
   
   output$selectType <- renderUI({
+    
     artType=sort(unique(values$Morig$DT))
     selectInput("selectType", "Document Type", 
                 choices = artType,
@@ -155,6 +167,7 @@ server <- function(input, output, session) {
   })
   
   output$sliderPY <- renderUI({
+    
     sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY),sep="",
                 max = max(values$Morig$PY), value = c(min(values$Morig$PY),max(values$Morig$PY)))
   })
@@ -165,12 +178,14 @@ server <- function(input, output, session) {
                 choices = SO,
                 selected = SO,
                 multiple = TRUE)
+    
   })
   
   output$sliderTC <- renderUI({
+
     sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC),
                 max = max(values$Morig$TC), value = c(min(values$Morig$TC),max(values$Morig$TC)))
-  })
+    })
   ### End Filters uiOutput
   
   
@@ -190,22 +205,19 @@ server <- function(input, output, session) {
            },
            "all"={SO=B$SO})
     M=M[M$SO %in% SO,]
-    #indexDT=(ifelse(M$DT %in% input$selectType,TRUE,FALSE))
-    #M=(M[indexDT,])
-    #indexSO=(ifelse(M$SO %in% input$selectSource,TRUE,FALSE))
-    #M=((M[M$SO %in% input$selectSource,]))
-    values$M=M
-    #values$results=list("NA") ## to reset summary statistics
     values<-initial(values)
-    Mdisp=as.data.frame(apply(M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)
-    
+    values$M=M
+    Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)    
+    if (dim(Mdisp)[1]>0){
     DT::datatable(Mdisp, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Mdisp))-1)))), 
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Mdisp))-1)))),
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(Mdisp),  backgroundColor = 'white',textAlign = 'center', fontSize = '70%')
+    }else{Mdisp=data.frame(Message="Empty collection",stringsAsFactors = FALSE, row.names = " ")}
+    
   })
   
   
@@ -529,7 +541,6 @@ server <- function(input, output, session) {
   })
   
   ### AUTHORS MENU ####
-  
       ### Authors ----
   output$MostRelAuthorsPlot <- renderPlotly({
     res <- descriptive(values,type="tab3")
@@ -1302,6 +1313,17 @@ server <- function(input, output, session) {
     
   }, height = 650, width = 800)
   
+  output$CSPlot4 <- renderPlot({
+    
+    
+      if (values$CS[[1]][1]!="NA"){
+        plot(values$CS$graph_dendogram)
+      }else{
+        emptyPlot("Selected field is not included in your data collection")
+        }
+
+  }, height = 650, width = 800)
+  
       ### Thematic Map ----
   output$TMPlot <- renderPlotly({
     
@@ -1993,7 +2015,7 @@ server <- function(input, output, session) {
     return(results)
   }
       
-      ### Strucutre fuctions ----
+      ### Structure fuctions ----
   CAmap <- function(input, values){
     if ((input$CSfield %in% names(values$M))){
       
@@ -2002,7 +2024,7 @@ server <- function(input, output, session) {
         
         minDegree=as.numeric(tab[input$CSn])
         
-        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
+        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
         plot(values$CS$graph_terms)
         
       }else{emptyPlot("Selected field is not included in your data collection")

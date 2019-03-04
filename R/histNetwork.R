@@ -59,6 +59,8 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
      ISI={
        ## matching by SR
             for (i in 1:N){
+              if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/N)}
+              
                 if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
                 x=M2$SR_FULL[i]
                 Year=M2$PY[i]
@@ -81,6 +83,8 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
       TI=paste(M2$TI," ","\\(",M2$PY,"\\)",sep = "")
       TIb=paste("\\(",M2$PY,"\\)"," ",M2$TI,sep = "")
       for (i in 1:N){
+        if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/N)}
+        
         if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
       
         x=TI[i]

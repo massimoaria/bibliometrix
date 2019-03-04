@@ -75,13 +75,19 @@ server <- function(input, output, session) {
           Dpar=readFiles(l)
           return(Dpar)
           }))
-        (M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+        withProgress(message = 'Calculation in progress',
+                     value = 0, {
+        M <- convert2df(D, dbsource=input$dbsource,format=input$format)
+                     })
     }
     
     ### txt or bib formats  
     if (grepl(".*\\.txt",inFile$name) | grepl(".*\\.bib",inFile$name)){
         D=readFiles(inFile$datapath)
-        (M <- convert2df(D, dbsource=input$dbsource,format=input$format))
+        withProgress(message = 'Calculation in progress',
+                     value = 0, {
+                       M <- convert2df(D, dbsource=input$dbsource,format=input$format)
+                     })
     }
       
     ### RData format
@@ -329,19 +335,6 @@ server <- function(input, output, session) {
   
   ### SOURCES MENU ####
   
-  output$MostRelSourcesTable <- DT::renderDT({
-    
-    TAB <- values$TABSo
-    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
-                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
-                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
-                  class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
-  })
-  
   output$MostRelSourcesPlot <- renderPlotly({
     res <- descriptive(values,type="tab7")
     values <-res$values
@@ -370,6 +363,62 @@ server <- function(input, output, session) {
     plot.ly(g)
   })#, height = 500, width =900)
   
+  output$MostRelSourcesTable <- DT::renderDT({
+    
+    TAB <- values$TABSo
+    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+    
+  })
+  
+  output$MostRelCitSourcesPlot <- renderPlotly({
+    
+    values$M=metaTagExtraction(values$M,"CR_SO")
+    TAB=tableTag(values$M,"CR_SO")
+    TAB=data.frame(Sources=names(TAB),Articles=as.numeric(TAB),stringsAsFactors = FALSE)
+    values$TABSoCit<-TAB
+    #xx=as.data.frame(values$results$Sources)
+    xx<- TAB
+    if (input$MostRelCitSourcesK>dim(xx)[1]){
+      k=dim(xx)[1]
+    } else {k=input$MostRelCitSourcesK}
+    #xx=xx[1:k,]
+    xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
+    xx$Articles=as.numeric(xx$Articles)
+    xx$Sources=substr(xx$Sources,1,50)
+    
+    
+    g=ggplot2::ggplot(data=xx, aes(x=xx$Sources, y=xx$Articles, fill=-xx$Articles,text=paste("Source: ",xx$Sources,"\nN. of Documents: ",xx$Articles))) +
+      geom_bar(aes(group="NA"),stat="identity")+
+      scale_fill_continuous(type = "gradient")+
+      scale_x_discrete(limits = rev(xx$Sources))+
+      labs(title="Most Cited Sources", x = "Sources")+
+      labs(y = "N. of Documents")+
+      theme_minimal()+
+      guides(fill=FALSE)+
+      coord_flip()
+    
+    plot.ly(g)
+  })#, height = 500, width =900)
+  
+  output$MostRelCitSourcesTable <- DT::renderDT({
+    
+    TAB <- values$TABSoCit
+    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy', 'csv', 'excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+    
+  })
+  
   output$bradfordPlot <- renderPlotly({
     
     values$bradford=bradford(values$M)
@@ -392,7 +441,11 @@ server <- function(input, output, session) {
     
     input$applyHsource
     
-    isolate(res <- Hindex_plot(values,type="source"))
+    withProgress(message = 'Calculation in progress',
+                 value = 0, {
+                   isolate(res <- Hindex_plot(values,type="source"))
+                 })
+    
     
     isolate(plot.ly(res$g))
    
@@ -537,7 +590,10 @@ server <- function(input, output, session) {
     
     input$applyHauthor
     
-    isolate(res <- Hindex_plot(values,type="author"))
+    withProgress(message = 'Calculation in progress',
+                 value = 0, {
+                   isolate(res <- Hindex_plot(values,type="author"))
+                 })
     
     isolate(plot.ly(res$g))
     
@@ -833,8 +889,10 @@ server <- function(input, output, session) {
   })
   
   output$MostLocCitDocsPlot <- renderPlotly({
-    
-    TAB <-localCitations(values$M, fast.search=TRUE, sep = input$LocCitSep)$Paper
+    withProgress(message = 'Calculation in progress',
+                 value = 0, {
+                   TAB <-localCitations(values$M, fast.search=TRUE, sep = input$LocCitSep)$Paper
+                 })
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],stringsAsFactors = FALSE)
     
@@ -1554,7 +1612,12 @@ server <- function(input, output, session) {
     ## Historiograph
     input$applyHist
     
-    values <- isolate(historiograph(input,values))
+    
+      withProgress(message = 'Calculation in progress',
+                   value = 0, {
+                     values <- isolate(historiograph(input,values))
+                   })
+      
     
 
     }, height = 500, width = 900)

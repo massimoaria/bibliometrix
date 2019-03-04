@@ -59,6 +59,8 @@ bib2df<-function(D, dbsource="isi"){
   names(DATA) <- uniqueTag
 
   for (i in 1:nP){
+    
+    if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/nP)}
     #print(i)
     iP <- Papers[i]
     iPs <- Papers[i+1]-1

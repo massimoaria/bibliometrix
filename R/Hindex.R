@@ -76,6 +76,9 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   TotalCitations=list()
   for (j in 1:length(elements)){
     author=elements[j]
+    
+    if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/length(elements), detail=paste0("\nAuthor: ",author))}
+    
     if (field=="source"){ind=which(AU==author)} else{
       ind=which(regexpr(author,AU)!=-1)
     }

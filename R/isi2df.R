@@ -39,6 +39,9 @@ isi2df<-function(D){
   specialSep=c("AU","AF","CR","C1","RP")
   
   for (i in 1:nP){
+    
+    if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/nP)}
+    
     if (i%%100==0 | i==nP) cat("Articles extracted  ",i,"\n")
     #print(i)
     iStart=Papers[i]

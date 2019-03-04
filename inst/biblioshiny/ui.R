@@ -239,6 +239,29 @@ navbarMenu("Sources",
                       )
                       )
                     ),
+           #### MOST RELEVANT CITED SOURCES ----
+           tabPanel("Most Cited Sources",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Most Cited Sources (from Reference Lists)"))),
+                                   br(),
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostRelCitSourcesK", 
+                                                label=("Number of Sources"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot",height = 700))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostRelCitSourcesTable"))
+                                    ))
+                      )
+                    )
+           ),
            ### BRADFORD LAW ----
            tabPanel("Bradford's law",
                     

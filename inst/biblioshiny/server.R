@@ -78,7 +78,7 @@ server <- function(input, output, session) {
           Dpar=readFiles(l)
           return(Dpar)
           }))
-        withProgress(message = 'Calculation in progress',
+        withProgress(message = 'Conversion in progress',
                      value = 0, {
         M <- convert2df(D, dbsource=input$dbsource,format=input$format)
                      })
@@ -1322,7 +1322,7 @@ server <- function(input, output, session) {
         emptyPlot("Selected field is not included in your data collection")
         }
 
-  }, height = 650, width = 800)
+  }, height = 650, width = 1000)
   
       ### Thematic Map ----
   output$TMPlot <- renderPlotly({

@@ -19,7 +19,9 @@
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
 #' \code{clusters}\tab   \tab Centrality and Density values for each cluster. \cr
-#' \code{words}\tab   \tab A list of words following in each cluster}
+#' \code{words}\tab   \tab A list of words following in each cluster\cr
+#' \code{nclust}\tab   \tab The number of clusters\cr
+#' \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
 #' 
 #'
 #' @examples

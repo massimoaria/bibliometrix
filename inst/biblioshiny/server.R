@@ -152,8 +152,8 @@ server <- function(input, output, session) {
   ### FILTERS MENU ####
   ### Filters uiOutput
   output$textDim <- renderUI({
-    dimMatrix=paste("Number of Documents ",dim(values$M)[1])
-    textInput("textDim", "", 
+    dimMatrix=paste("Documentsp ",dim(values$M)[1]," of ",dim(values$Morig)[1])
+    textInput("textDim", "Number of Documents", 
               value=dimMatrix)
   })
   

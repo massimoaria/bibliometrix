@@ -1729,9 +1729,11 @@ server <- function(input, output, session) {
       ### WPPlot ----
   output$WMPlot<- renderPlot({
       
-      #input$applyWM
-      values$WMmap=countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min)
-      plot(values$WMmap$g)
+      input$applyWM
+      isolate({
+        values$WMmap=countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min)
+        plot(values$WMmap$g)
+      })
       #isolate(values$WMmap=countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min))
       #isolate(plot(values$WMmap$g))
       

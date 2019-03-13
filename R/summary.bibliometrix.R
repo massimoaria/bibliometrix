@@ -156,14 +156,10 @@ summary.bibliometrix<-function(object, ...){
 
   if (length(object$Countries)<k) {kk=length(object$Countries)}
 
-  #object$Countries=as.array(object$Countries)
   Co=data.frame(Country=names(object$Countries[1:kk]), Articles=as.numeric(object$Countries)[1:kk],Freq=0)
-  #Co$Country=row.names(Co)
-  #names(Co)=c("Country  ","Articles","Freq")
   Co$Freq=as.numeric(Co[,2])/sum(object$Countries)
   Co=cbind(Co,object$CountryCollaboration[1:kk,2:3])
   Co$MCP_Ratio=Co$MCP/Co$Articles
-  #names(Co)=c("Country  ","Articles","Frequency")
   Co=format(Co,justify="left",digits=3)
   row.names(Co)=1:kk
   if (isTRUE(verbose)){print(Co,row.names=TRUE);cat("\n")}
@@ -176,19 +172,12 @@ summary.bibliometrix<-function(object, ...){
 
   # Total Citation per Country
   if (isTRUE(verbose)){cat("\nTotal Citations per Country\n\n")}
-  # ind=which(!is.na(object$TotalCitation))
-  # AC=aggregate(object$TotalCitation[ind],list(object$CO[ind]),"sum")
-  # CC=object$Countries[sort(row.names(object$Countries))]
-  # CC2=intersect(AC[,1],rownames(CC))
-  # AC$Articles=object$Countries[CC2]
-  # AC=AC[order(-AC[,2]),];AC=AC[,c(1,3,2)]
-  # AC$TCperArticles=AC[,3]/AC[,2]
-  # AC=AC[,-2]
+
   Co2=data.frame(Country=object$CO,TotalCitation=object$TotalCitation)
   Co2=Co2[!is.na(Co2[,1]),]
   AC=Co2 %>% group_by(.data$Country) %>% 
-    summarise("Total Citations"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
-    as.data.frame(.data,stringasfactor=FALSE)
+    summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
+    arrange(-.data$TC) %>% as.data.frame(.data,stringasfactor=FALSE)
   
   names(AC)=c("Country     ", "Total Citations", "Average Article Citations")
   AC=format(AC,justify="left",digits=3)[1:kk,]

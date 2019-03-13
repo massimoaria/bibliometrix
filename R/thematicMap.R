@@ -61,6 +61,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
          })
   
   S <- normalizeSimilarity(NetMatrix, type = "association")
+  #S=NetMatrix
   t = tempfile();pdf(file=t) #### trick to hide igraph plot
   Net <- networkPlot(S, n=n, Title = "Keyword co-occurrences",type="auto",
                      labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,

@@ -49,7 +49,7 @@ localCitations <- function(M, fast.search=FALSE, sep = ";"){
     LCS=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=M$LCS,GCS=M$TC)
     LCS=LCS[order(-LCS$LCS),]
   }
-  CR=list(Authors=AU,Papers=LCS)
+  CR=list(Authors=AU,Papers=LCS, M=M)
   return(CR)
   
 }

@@ -75,18 +75,45 @@ citations <- function(M, field = "article", sep = ";"){
   CR=CR[nchar(CR)>=3]
   CR=trim.leading(CR)
   CR=sort(table(CR),decreasing=TRUE)
+  
+  
   if (field=="article"){
-    listCR=strsplit(rownames(CR),",")
-    Year=unlist(lapply(listCR, function(l){
-      if (length(l)>1){
-      l=suppressWarnings(as.numeric(l[2]))} else{l=NA}
-      }))
-    SO=unlist(lapply(listCR, function(l){
-      if (length(l)>2){
-      l=l[3]} else{l=NA}
-    }))
-    SO=trim.leading(SO)
+    switch(M$DB[1],
+           ISI={
+             listCR=strsplit(rownames(CR),",")
+             Year=unlist(lapply(listCR, function(l){
+               if (length(l)>1){
+                 l=suppressWarnings(as.numeric(l[2]))} else{l=NA}
+             }))
+             SO=unlist(lapply(listCR, function(l){
+               if (length(l)>2){
+                 l=l[3]} else{l=NA}
+             }))
+             SO=trim.leading(SO)
+           },
+           SCOPUS={
+             REF=names(CR)
+             y=yearSoExtract(REF)
+             Year=as.numeric(y$Year)
+             SO=y$SO
+           })
   }
   CR=list(Cited=CR,Year=Year,Source=SO)
   return(CR)
+}
+
+
+yearSoExtract <- function(string){
+  ## for scopus references
+    ind=regexpr("\\([[:digit:]]{4}\\)",string)
+    ind[is.na(ind)]=-1
+    string[ind==-1]="(0000)"
+    ind[ind==-1]=1
+    attr(ind[ind==-1],"match.length")=6
+    y=unlist(regmatches(string,ind))
+    Year=substr(y,2,5)
+    
+    SO=sub(",.*$","",substr(string,ind+7,nchar(string)))
+    y=list(Year=Year,SO=SO)
+  return(y)
 }

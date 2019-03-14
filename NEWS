@@ -1,3 +1,17 @@
+bibliometrix v2.1.2 (Release date: 2019-03-14)
+==============
+
+New functionality:
+*biblioshiny: new dendrogram plot in factorial analysis (Conceptual Structure)
+*biblioshiny: added the number of cluster argument in factorial analysis (Conceptual Structure)
+*biblioshiny: added Most Cited Sources (from References) in Sources
+*biblioshiny: added disambiguation parameter in affiliation
+*Speed improvements in several functions
+
+
+
+
+
 bibliometrix v2.1.1 (Release date: 2019-02-07)
 ==============
 

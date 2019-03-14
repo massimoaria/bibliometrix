@@ -35,37 +35,38 @@ rpys <- function(M, sep=";", timespan=NULL, graph=T){
   
   M$CR<-stringr::str_replace_all(as.character(M$CR),"DOI;","DOI ")
   
-  Fi<-strsplit(M[,"CR"],sep)
-  Fi<-lapply(Fi,trim.leading)
-  Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])
-  Fi<-(unlist(Fi))
-  
-  ## reference modify for ISI
-  if (M$DB[1]=="ISI"){
-  ref<-unlist(lapply(Fi, function(l){
-      l<-gsub("\\).*",")",l)
-      l<-gsub(","," ",l)
-      l<-gsub(";"," ",l)
-      l<-gsub("\\s+", " ", l)
-      l<-l[nchar(l)>0]
-      return(l)
-    }))
-  }else{
-    ref<-unlist(lapply(Fi, function(l){
-      l<-gsub(","," ",l)
-      l<-gsub(";"," ",l)
-      l<-gsub("\\s+", " ", l)
-      l<-l[nchar(l)>0]
-      return(l)
-    }))
-  }
+  ref<-unlist(strsplit(M[,"CR"],sep))
+  # Fi<-lapply(Fi,trim.leading)
+  # Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])
+  # Fi<-(unlist(Fi))
+  # 
+  # ## reference modify for ISI
+  # if (M$DB[1]=="ISI"){
+  # ref<-unlist(lapply(Fi, function(l){
+  #     l<-gsub("\\).*",")",l)
+  #     l<-gsub(","," ",l)
+  #     l<-gsub(";"," ",l)
+  #     l<-gsub("\\s+", " ", l)
+  #     l<-l[nchar(l)>0]
+  #     return(l)
+  #   }))
+  # }else{
+  #   ref<-unlist(lapply(Fi, function(l){
+  #     l<-gsub(","," ",l)
+  #     l<-gsub(";"," ",l)
+  #     l<-gsub("\\s+", " ", l)
+  #     l<-l[nchar(l)>0]
+  #     return(l)
+  #   }))
+  # }
   
 
 Years=yearExtract(ref,db=M$DB[1])
-Years=Years[!is.na(ref)]
-ref=ref[!is.na(ref)] 
+ind=which(!is.na(ref) & nchar(ref)>3)
+Years=Years[ind]
+ref=ref[ind] 
 
-ref=ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
+ref=trim(ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))])
 Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
 
 CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
@@ -99,11 +100,11 @@ g=ggplot(df, aes(x=df$X,y=df$Y,text=paste("Year: ",df$X,"\nN. of References: ",d
   geom_line(aes(group="NA")) +
   geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
   geom_hline(aes(yintercept=0, color = 'grey'))+
-  geom_line(aes(x=df$X,y=df$diffMedian, color="firebrick", group="NA"))+
+  geom_line(aes(x=df$X,y=(df$diffMedian*2+mean(range(df$Y))), color="firebrick", group="NA"))+
+  scale_y_continuous(sec.axis = sec_axis(~(.-mean(range(df$Y)))*2, name = "Deviation form 5-Year Median"))+
   labs(x = 'Year'
        , y = 'Cited References'
-       , title = "Reference Publication Year Spectroscopy",
-       caption = "Number of Cited References (black line) - Deviation from the 5-Year Median (red line)") +
+       , title = "Reference Publication Year Spectroscopy") +
   scale_x_continuous(breaks= (df$X[seq(1,length(df$X),by=round(length(df$X)/30))])) +
   theme(text = element_text(color = "#444444"), legend.position="none"
         ,plot.caption = element_text(size = 9, hjust = 0.5,

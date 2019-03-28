@@ -179,16 +179,24 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   
   # Selection of optimal number of clusters (gap statistics)
   #a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$y
+  km.res=hclust(dist(df),method="average")
+  
   if (clust=="auto"){
-      a=diff(fviz_nbclust((df), kmeans, method = "wss",k.max=k.max)['data']$data$y)
-      clust=which(rank(a)==1)+1}else{clust=max(2,min(as.numeric(clust),k.max))}
+      clust=min((length(km.res$height)-which.max(diff(km.res$height))+1),k.max)
+      #a=diff(fviz_nbclust((df), kmeans, method = "wss",k.max=k.max)['data']$data$y)
+      #clust=which(rank(a)==1)+1
+      }else{clust=max(2,min(as.numeric(clust),k.max))}
   
   # Perform the K-means clustering
   #km.res <- kmeans((df), clust, nstart = 25)
   #if (clust=="auto"){clust=-1}else{clust=max(2,min(as.numeric(clust),k.max))}
-  km.res = hcut(df, k=clust,max=8,graph=FALSE, method="average")
-  #clust=as.numeric(max(levels(km.res$data.clust$clust)))
   
+  
+  
+  #km.res = hcut(df, k=clust, max=8,graph=FALSE, method="average")
+  #clust=as.numeric(max(levels(km.res$data.clust$clust)))
+  km.res$data=df
+  km.res$cluster=cutree(km.res,k=clust)
   km.res$data.clust=cbind(km.res$data,km.res$cluster)
   names(km.res$data.clust)[3]="clust"
   centers<- km.res$data.clust %>% group_by(.data$clust) %>% 

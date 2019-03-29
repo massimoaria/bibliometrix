@@ -24,6 +24,7 @@ server <- function(input, output, session) {
   values$histsearch="NA"
   values$citShortlabel="NA"
   values$S=list("NA")
+  values$GR="NA"
 
   
   
@@ -237,6 +238,13 @@ server <- function(input, output, session) {
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
+  })
+  
+  output$CAGR <- renderText({
+    Y=table(values$M$PY)
+    ny=dim(Y)[1]
+    values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
+    paste("Annual Growth Rate: ",values$GR,"%",collapse="",sep="")
   })
   
   output$AnnualProdPlot <- renderPlotly({
@@ -1274,6 +1282,7 @@ server <- function(input, output, session) {
   })
   
       ### Correspondence Analysis ----
+
   output$CSPlot1 <- renderPlot({
     
     input$applyCA
@@ -1323,6 +1332,39 @@ server <- function(input, output, session) {
         }
 
   }, height = 650, width = 1000)
+  
+  output$CSTableW <- DT::renderDT({
+    
+    WData=data.frame(word=row.names(values$CS$res$col$coord), values$CS$res$col$coord, 
+                      cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+    WData$Dim.1=round(WData$Dim.1,2)
+    WData$Dim.2=round(WData$Dim.2,2)
+
+    DT::datatable(WData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(WData))-1))))) %>%
+      formatStyle(names(WData),  backgroundColor = 'white')
+    #return(Data)
+    
+  })
+  
+  output$CSTableD <- DT::renderDT({
+    
+    CSData=values$CS$docCoord
+    CSData=data.frame(Documents=row.names(CSData),CSData,stringsAsFactors = FALSE)
+    CSData$dim1=round(CSData$dim1,2)
+    CSData$dim2=round(CSData$dim2,2)
+    CSData$contrib=round(CSData$contrib,2)
+    DT::datatable(CSData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(CSData))-1))))) %>%
+      formatStyle(names(CSData),  backgroundColor = 'white') 
+    
+  })
   
       ### Thematic Map ----
   output$TMPlot <- renderPlotly({
@@ -1809,6 +1851,7 @@ server <- function(input, output, session) {
     values$histsearch="NA"
     values$citShortlabel="NA"
     values$S=list("NA")
+    values$GR="NA"
     
     return(values)
   }

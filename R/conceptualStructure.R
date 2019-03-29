@@ -183,18 +183,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   
   if (clust=="auto"){
       clust=min((length(km.res$height)-which.max(diff(km.res$height))+1),k.max)
-      #a=diff(fviz_nbclust((df), kmeans, method = "wss",k.max=k.max)['data']$data$y)
-      #clust=which(rank(a)==1)+1
       }else{clust=max(2,min(as.numeric(clust),k.max))}
   
-  # Perform the K-means clustering
-  #km.res <- kmeans((df), clust, nstart = 25)
-  #if (clust=="auto"){clust=-1}else{clust=max(2,min(as.numeric(clust),k.max))}
-  
-  
-  
-  #km.res = hcut(df, k=clust, max=8,graph=FALSE, method="average")
-  #clust=as.numeric(max(levels(km.res$data.clust$clust)))
   km.res$data=df
   km.res$cluster=cutree(km.res,k=clust)
   km.res$data.clust=cbind(km.res$data,km.res$cluster)
@@ -262,8 +252,11 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     centers=data.frame(dim1=km.res$centers[,1],dim2=km.res$centers[,2])
     centers$color=cbPalette[1:dim(centers)[1]]
     row.names(centers)=paste("cluster",as.character(1:dim(centers)[1]),sep="")
-    A=docCoord[1:documents,1:2]
-    A=euclDist(A,centers)
+    #A=docCoord[1:documents,1:2]
+    #A=docCoord[,1:2]
+    A=euclDist(docCoord[,1:2],centers)
+    docCoord$Cluster=A$color
+    A=A[1:documents,]
     A$color=cbPalette[A$color]
     
     names(centers)=names(A)

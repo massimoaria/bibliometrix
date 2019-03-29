@@ -44,11 +44,12 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
   K=length(list_df)
   S=net=res=list()
   
+  Y=NULL
   pdf(file = NULL)  ## to prevent the network plotting
   for (k in 1:K){
     
     Mk=list_df[[k]]
-    
+    Y[k]=paste(min(Mk$PY),"-",max(Mk$PY),sep="",collapse="")
     resk <- thematicMap(Mk, field=field, n=n, minfreq=minFreq, stemming=stemming, size=size, repel=repel)
     #S[[k]]=Sk
     #net[[k]]=netk
@@ -76,10 +77,10 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
     }
     
     ####
-     res1$words$Cluster=paste(res1$clusters$name[res1$words$Cluster],"--",LETTERS[k-1],sep="")
-     res1$clusters$label=paste(res1$clusters$name,"--",LETTERS[k-1],sep="")
-     res2$words$Cluster=paste(res2$clusters$name[res2$words$Cluster],"--",LETTERS[k],sep="")
-     res2$clusters$label=paste(res2$clusters$name,"--",LETTERS[k],sep="")
+     res1$words$Cluster=paste(res1$clusters$name[res1$words$Cluster],"--",Y[k-1],sep="")
+     res1$clusters$label=paste(res1$clusters$name,"--",Y[k-1],sep="")
+     res2$words$Cluster=paste(res2$clusters$name[res2$words$Cluster],"--",Y[k],sep="")
+     res2$clusters$label=paste(res2$clusters$name,"--",Y[k],sep="")
     ##
     
     

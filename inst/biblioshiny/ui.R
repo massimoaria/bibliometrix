@@ -1,5 +1,5 @@
 ## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
-
+if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
 if (!(require(rio))){install.packages("rio")} 
 if (!(require(DT))){install.packages("DT")} 
@@ -179,7 +179,10 @@ navbarMenu("Dataset",
                                    "  ",
                                    "  ",
                                    h3(em(strong("Annual Scientific Production "))),
-                                   "  "
+                                   "  ",
+                                   br(),
+                                   verbatimTextOutput("CAGR")
+                                   #uiOutput("textCAGR")
                                    ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -1242,6 +1245,7 @@ navbarMenu("Conceptual Structure",
                                                 "Titles" = "TI",
                                                 "Abstracts" = "AB"),
                                     selected = "ID"),
+                        
                         numericInput("CSn", 
                                      label=("Number of terms"), 
                                      value = 50),
@@ -1289,7 +1293,12 @@ navbarMenu("Conceptual Structure",
                                     outputId = "CSPlot2"))),
                                   tabPanel("Most Cited Papers", 
                                            shinycssloaders::withSpinner(plotOutput(
-                                    outputId = "CSPlot3")))
+                                    outputId = "CSPlot3"))),
+                                  tabPanel("Words by Cluster",
+                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))),
+                                  tabPanel("Articles by Cluster",
+                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD")))
+                                  
                           )
                       )
                     )

@@ -1316,7 +1316,7 @@ navbarMenu("Intellectual Structure",
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
-                                   h3(em(strong("Co-cocitation Network"))),
+                                   h3(em(strong("Co-citation Network"))),
                                    br(),
                                    actionButton("applyCocit", "Apply!"),
                                    downloadButton("network.cocit", "Save Pajek"),

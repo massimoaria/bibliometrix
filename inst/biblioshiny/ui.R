@@ -380,7 +380,7 @@ navbarMenu("Authors",
                                                label = "Frequency measure",
                                                choices = c("N. of Documents "="t", 
                                                            "Percentage"="p",
-                                                           "Frequency Fractionalized"="f"),
+                                                           "Fractionalized Frequency"="f"),
                                                selected = "t")
                       ),
                       mainPanel(
@@ -1513,7 +1513,7 @@ navbarMenu("Social Structure",
                                    h3(em(strong("Collaboration Network"))),
                                    br(),
                                    actionButton("applyCol", "Apply!"),
-                                   downloadButton("network.col", "Save Pakek"),
+                                   downloadButton("network.col", "Save Pajek"),
                                    downloadButton("networkCol.fig", "Save Fig"),
                                                 
                                    "  ",

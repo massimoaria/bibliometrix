@@ -214,12 +214,12 @@ navbarMenu("Dataset",
                       )
                     )
            ),
-           tabPanel("3 Fields Plot",
+           tabPanel("Three-Fields Plot",
                     sidebarLayout(
                       sidebarPanel(width=3,
                                    "  ",
                                    "  ",
-                                   h3(em(strong("3 Fields Plot "))),
+                                   h3(em(strong("Three-Fields Plot "))),
                                    "  ",
                                    actionButton("apply3F", "Apply!"),
                                    br(),

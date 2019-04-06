@@ -79,6 +79,7 @@
 #' @importFrom DT renderDT
 #' @importFrom DT datatable
 #' @importFrom stringdist stringdistmatrix
+#' @importFrom reshape2 melt
 #' @importFrom rscopus affiliation_retrieval
 #' @importFrom rscopus author_df_orig
 #' @importFrom rscopus author_search

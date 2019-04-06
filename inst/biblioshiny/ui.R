@@ -213,6 +213,62 @@ navbarMenu("Dataset",
                                     ))
                       )
                     )
+           ),
+           tabPanel("3 Fields Plot",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   "  ",
+                                   "  ",
+                                   h3(em(strong("3 Fields Plot "))),
+                                   "  ",
+                                   actionButton("apply3F", "Apply!"),
+                                   br(),
+                                   selectInput("CentralField",
+                                               label = "Central Field",
+                                               choices = c("Authors" = "AU",
+                                                           "Affiliations" = "AU_UN",
+                                                           "Countries"="AU_CO",
+                                                           "Keywords" = "DE",
+                                                           "Keywords Plus" = "ID",
+                                                           "Titles" = "TI_TM",
+                                                           "Abstract" = "AB_TM",
+                                                           "Sources" = "SO",
+                                                           "References" = "CR",
+                                                           "Cited Sources" = "CR_SO"),
+                                               selected = "AU"),
+                                   selectInput("LeftField",
+                                               label = "Left Field",
+                                               choices = c("Authors" = "AU",
+                                                           "Affiliations" = "AU_UN",
+                                                           "Countries"="AU_CO",
+                                                           "Keywords" = "DE",
+                                                           "Keywords Plus" = "ID",
+                                                           "Titles" = "TI_TM",
+                                                           "Abstract" = "AB_TM",
+                                                           "Sources" = "SO",
+                                                           "References" = "CR",
+                                                           "Cited Sources" = "CR_SO"),
+                                                           selected = "DE"),
+                                   selectInput("RightField",
+                                               label = "Right Field",
+                                               choices = c("Authors" = "AU",
+                                                           "Affiliations" = "AU_UN",
+                                                           "Countries"="AU_CO",
+                                                           "Keywords" = "DE",
+                                                           "Keywords Plus" = "ID",
+                                                           "Titles" = "TI_TM",
+                                                           "Abstract" = "AB_TM",
+                                                           "Sources" = "SO",
+                                                           "References" = "CR",
+                                                           "Cited Sources" = "CR_SO"),
+                                                           selected = "SO")
+                                   ),
+                      mainPanel(
+                        #tabPanel("Plot",
+                                 shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "ThreeFielsPlot",height = "600px"))
+                        #            )
+                      )
+                    )
            )
 ),
 

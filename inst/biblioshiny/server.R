@@ -670,6 +670,7 @@ server <- function(input, output, session) {
     values$lotka=lotka(biblioAnalysis(values$M))
     AuProd=values$lotka$AuthorProd
     AuProd$Theoretical=10^(log10(values$lotka$C)-2*log10(AuProd[,1]))
+    AuProd$Theoretical=AuProd$Theoretical/sum(AuProd$Theoretical)
     
     g=ggplot2::ggplot(AuProd, aes(x = AuProd$N.Articles, y = AuProd$Freq*100, text=paste("N.Articles: ",AuProd$N.Articles,"\n% of production: ",round(AuProd$Freq*100,1)))) +
       geom_line(aes(group="NA")) +

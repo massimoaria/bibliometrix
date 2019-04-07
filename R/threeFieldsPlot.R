@@ -40,21 +40,24 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20), width=120
   }
   
   
+  Binary=rep(FALSE,3)
+  ind=which(fields %in% "CR")
+  if (length(ind)>0) Binary[ind]=TRUE
   
   ### Document x Attribute matrix Field LEFT
-  WL=cocMatrix(M,fields[1], binary=FALSE)
+  WL=cocMatrix(M,fields[1], binary=Binary[1])
   n1=n[1]
   TopL=names(sort(Matrix::colSums(WL),decreasing = TRUE))[1:n1]
   WL=WL[,TopL]
   
   ### Document x Attribute matrix Field MIDDLE
-  WM=cocMatrix(M,fields[2], binary=FALSE)
+  WM=cocMatrix(M,fields[2], binary=Binary[2])
   n2=n[2]
   TopM=names(sort(Matrix::colSums(WM),decreasing = TRUE))[1:n2]
   WM=WM[,TopM]
   
   ### Document x Attribute matrix Field RIGHT
-  WR=cocMatrix(M,fields[3], binary=FALSE)
+  WR=cocMatrix(M,fields[3], binary=Binary[3])
   n3=n[3]
   TopR=names(sort(Matrix::colSums(WR),decreasing = TRUE))[1:n3]
   WR=WR[,TopR]

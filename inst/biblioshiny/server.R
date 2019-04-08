@@ -982,7 +982,7 @@ server <- function(input, output, session) {
       geom_bar(aes(group="NA"),stat="identity")+
       scale_fill_continuous(type = "gradient")+
       scale_x_discrete(limits = rev(xx[,1]), labels=substr(rev(xx[,1]),1,50))+
-      labs(title="Most Cited References", x = "Documents")+
+      labs(title="Most Cited References", x = "References")+
       labs(y = "Local Citations")+
       theme_minimal() +
       guides(fill=FALSE)+

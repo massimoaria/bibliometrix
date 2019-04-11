@@ -66,6 +66,7 @@
 #' @export
 networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plot", type="kamada", label=TRUE, labelsize=1, label.cex=FALSE, label.color=FALSE, label.n=NULL, halo=FALSE, cluster="walktrap", vos.path=NULL, size=3, size.cex=FALSE, curved=FALSE, noloops=TRUE, remove.multiple=TRUE,remove.isolates=FALSE,weighted=NULL,edgesize=1,edges.min=0,alpha=0.5){
   
+  S=NULL
   NET=NetMatrix
   bsk.S=TRUE
   l=NA
@@ -223,7 +224,7 @@ networkPlot<-function(NetMatrix, normalize=NULL, n=NULL, degree=NULL, Title="Plo
   } else {cluster_res=NA}
   
   
-  net=list(graph=bsk.network1, graph_pajek=bsk.save, cluster_obj=net_groups, cluster_res=cluster_res,layout=l)
+  net=list(graph=bsk.network1, graph_pajek=bsk.save, cluster_obj=net_groups, cluster_res=cluster_res,layout=l,S=S)
   
   return(net)}
 

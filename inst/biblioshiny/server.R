@@ -1423,7 +1423,7 @@ server <- function(input, output, session) {
       ### Thematic Evolution ----
   output$sliders <- renderUI({
     numSlices <- as.integer(input$numSlices)
-    v=quantile(M$PY, seq(0,1,by=(1/(numSlices+1))))
+    v=quantile(values$M$PY, seq(0,1,by=(1/(numSlices+1))))
     v=round(v[-c(1,length(v))],0)
     lapply(1:numSlices, function(i) {
       # sliderInput(inputId = paste0("Slice", i), label = paste("Cutting Year", i),

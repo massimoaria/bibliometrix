@@ -144,6 +144,7 @@ if (type=="sparse" & !isTRUE(binary)){
 }
 
   WF=WF[,!is.na(uniqueField)]
+  #WF=attrPY(M,WF)  # Median Year of each attribute
   
 return(WF)
 }
@@ -156,3 +157,4 @@ reduceRefs<- function(A){
   A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
   return(A)
 }
+

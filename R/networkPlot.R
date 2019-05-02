@@ -287,6 +287,8 @@ clusteringNetwork <- function(bsk.network,cluster){
                         }else{C='gray70'}
                         return(C)
                         })
+  E(bsk.network)$lty=1
+  E(bsk.network)$lty[E(bsk.network)$color=="gray70"]=5
   ### end
   
   cl=list()

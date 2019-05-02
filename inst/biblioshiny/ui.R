@@ -300,10 +300,10 @@ navbarMenu("Sources",
                       )
                     ),
            #### MOST RELEVANT CITED SOURCES ----
-           tabPanel("Most Cited Sources",
+           tabPanel("Most Local Cited Sources",
                     sidebarLayout(
                       sidebarPanel(width=3,
-                                   h3(em(strong("Most Cited Sources (from Reference Lists)"))),
+                                   h3(em(strong("Most Local Cited Sources (from Reference Lists)"))),
                                    br(),
                                    h4(em(strong("Graphical Parameters: "))),
                                    "  ",

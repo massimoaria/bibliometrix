@@ -2194,7 +2194,7 @@ server <- function(input, output, session) {
       
       #par(bg="grey92", mar=c(0,0,0,0))
       values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
-                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize, labelsize=input$labelsize,label.cex=label.cex,
+                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
                                 cluster=input$cocCluster)
     }else{
@@ -2238,7 +2238,7 @@ server <- function(input, output, session) {
     if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
     values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
-                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize, 
+                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE,
                                 alpha=input$cocitAlpha, cluster=input$cocitCluster)
@@ -2285,7 +2285,7 @@ server <- function(input, output, session) {
     if (input$collayout=="worldmap"){type="auto"}
     
     values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = type, 
-                              size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize, 
+                              size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
                               remove.isolates = T, cluster=input$colCluster)
@@ -2391,7 +2391,9 @@ server <- function(input, output, session) {
     
     vn$nodes$label=LABEL
     vn$edges$num=1
-
+    vn$edges$dashes=FALSE
+    vn$edges$dashes[vn$edges$lty==2]=TRUE
+  
     ## opacity
     vn$nodes$color=adjustcolor(vn$nodes$color,alpha=min(c(opacity+0.2,1)))
     vn$edges$color=adjustcolor(vn$edges$color,alpha=opacity)

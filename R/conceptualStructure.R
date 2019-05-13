@@ -201,6 +201,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     scale_fill_manual(values = cbPalette[1:clust]) +
     labs(title= paste("Conceptual Structure Map - method: ",method,collapse="",sep="")) +
     geom_point() +
+    xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
+    ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))+
     theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"),
           plot.title=element_text(size=labelsize+1,face="bold"))
   
@@ -278,7 +280,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
                        fill=adjustcolor(A$color,alpha.f=0.6), color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
-      xlab("dim1")+ ylab("dim2")+
+      xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
+      ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))+
       geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
@@ -312,7 +315,8 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
                        fill=adjustcolor(B$color,alpha.f=0.6), color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
-      xlab("dim1")+ ylab("dim2")+
+      xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
+      ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))+
       geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
@@ -402,7 +406,12 @@ factorial<-function(X,method,quanti,quali){
     names(docCoord)=c("dim1","dim2","contrib")
     docCoord=docCoord[order(-docCoord$contrib),]
     
+    # Benzecrì eigenvalue correction
+    res.mca <- eigCorrection(res.mca)
+    
     results=list(res.mca=res.mca,df=df,df_doc=df_doc,df_quali=df_quali,df_quanti=df_quanti,docCoord=docCoord)
+    
+    
   }else{
     results=list(res.mca=res.mca,df=df,df_doc=NA,df_quali=NA,df_quanti=NA,docCoord=NA)
   }
@@ -421,4 +430,19 @@ euclDist<-function(x,y){
   }
   x$color=apply(df,1,function(m){which(m==min(m))})
   return(x)
+}
+
+eigCorrection <- function(res) {
+  # Benzecri correction calculation
+  
+  n <- nrow(res$eig)
+  
+  
+  e <- res$eig[,1]
+  eigBenz <- ((n / (n - 1)) ^ 2) * ((e - (1 / n)) ^ 2)
+  eigBenz[e< 1/n] <- 0
+  perc <- eigBenz / sum(eigBenz) * 100
+  cumPerc = cumsum(perc)
+  res$eigCorr <- data.frame(eig=e, eigBenz=eigBenz, perc=perc, cumPerc=cumPerc)
+  return(res)
 }

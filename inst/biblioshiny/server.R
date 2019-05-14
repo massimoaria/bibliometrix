@@ -1347,8 +1347,20 @@ server <- function(input, output, session) {
   
   output$CSTableW <- DT::renderDT({
     
-    WData=data.frame(word=row.names(values$CS$res$col$coord), values$CS$res$col$coord, 
-                      cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+    switch(input$method,
+           CA={
+             WData=data.frame(word=row.names(values$CS$res$col$coord), values$CS$res$col$coord, 
+                              cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+           },
+           MCA={
+             WData=data.frame(word=row.names(values$CS$res$var$coord), values$CS$res$var$coord, 
+                              cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE) 
+           },
+           MDS={
+             WData=data.frame(word=row.names(values$CS$res), values$CS$res, 
+                              cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+           })
+    
     WData$Dim.1=round(WData$Dim.1,2)
     WData$Dim.2=round(WData$Dim.2,2)
 

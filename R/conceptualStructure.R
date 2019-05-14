@@ -201,10 +201,12 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     scale_fill_manual(values = cbPalette[1:clust]) +
     labs(title= paste("Conceptual Structure Map - method: ",method,collapse="",sep="")) +
     geom_point() +
-    xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
-    ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))+
     theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"),
           plot.title=element_text(size=labelsize+1,face="bold"))
+   if (method!="MDS"){
+     b=b+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
+       ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))
+   }else{b=b+xlab("Dim 1")+ylab("Dim 2")}
   
   if (!is.null(quali.supp)){
     s_df_quali=df_quali[(abs(df_quali[,1]) >= quantile(abs(df_quali[,1]),0.75) | abs(df_quali[,2]) >= quantile(abs(df_quali[,2]),0.75)),]
@@ -280,8 +282,6 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
                        fill=adjustcolor(A$color,alpha.f=0.6), color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
-      xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
-      ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))+
       geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
@@ -291,6 +291,11 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
             #size = 1, linetype = "solid"),
             panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
             panel.grid.minor = element_blank())
+    
+    if (method!="MDS"){
+      b_doc=b_doc+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
+        ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))
+    }else{b_doc=b_doc+xlab("Dim 1")+ylab("Dim 2")}
       
     if (isTRUE(graph)){plot(b_doc)}
     

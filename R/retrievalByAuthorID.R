@@ -157,14 +157,29 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE)
   M$RP=unlist(lapply(strsplit(M$C1,";"), function(l){
     l=l[1]
   }))
-  M$CR=NA
+  M$CR<-NA
+  M$J9<-M$JI<-M$SO
+  ### SR field creation
+  suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
+  ### identify duplicated SRs 
+  SR=M$SR
+  tab=table(SR)
+  tab2=table(tab)
+  ind=as.numeric(names(tab2))
+  ind=ind[which(ind>1)]
+  if (length(ind)>0){
+    for (i in ind){
+      indice=names(which(tab==i))
+      for (j in indice){
+        indice2=which(SR==j)
+        SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
+      }
+    }
+  }
   
+  row.names(M) <- SR
   
-  
-  
-  
-  
-  results=list(M=M,authorDocuments=M_list)
+  results <- list(M=M,authorDocuments=M_list)
   return(results)
 }
 

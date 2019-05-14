@@ -1,9 +1,10 @@
-bibliometrix v2.2.1 (Release date: soon)
+bibliometrix v2.2.1 (Release date: ...soon)
 ==============
 
 New functionality:
 *ConceptualStructure: Added the Benzecrì eigenvalue correction
 *ConceptualStructure: Added the explained variance information in the plot axis labels
+
 
 
 bibliometrix v2.2.0 (Release date: 2019-05-02)
@@ -25,7 +26,8 @@ New functionality:
 *biblioshiny: added disambiguation parameter in affiliation
 *Speed improvements in several functions
 
-
+Changes:
+* retrievalByAuthorID: Now, even when there is an error, the function continues to download the data
 
 
 

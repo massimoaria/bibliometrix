@@ -61,13 +61,13 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   if (!is.null(quali.supp)){
     QSUPP=data.frame(M[,quali.supp])
     names(QSUPP)=names(M)[quali.supp]
-    row.names(QSUPP)=row.names(M)
+    row.names(QSUPP)=tolower(row.names(M))
   }
   
   if (!is.null(quanti.supp)){
     SUPP=data.frame(M[,quanti.supp])
     names(SUPP)=names(M)[quanti.supp]
-    row.names(SUPP)=row.names(M)
+    row.names(SUPP)=tolower(row.names(M))
   }
   binary=FALSE
   if (method=="MCA"){binary=TRUE}

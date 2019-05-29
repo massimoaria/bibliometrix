@@ -169,8 +169,8 @@ server <- function(input, output, session) {
   
   output$sliderPY <- renderUI({
     
-    sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY),sep="",
-                max = max(values$Morig$PY), value = c(min(values$Morig$PY),max(values$Morig$PY)))
+    sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY,na.rm=T),sep="",
+                max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T),max(values$Morig$PY,na.rm=T)))
   })
   
   output$selectSource <- renderUI({
@@ -1349,12 +1349,14 @@ server <- function(input, output, session) {
     
     switch(input$method,
            CA={
-             WData=data.frame(word=row.names(values$CS$res$col$coord), values$CS$res$col$coord, 
-                              cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+             WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
+                              stringsAsFactors = FALSE)
+             names(WData)[4]="cluster"
            },
            MCA={
-             WData=data.frame(word=row.names(values$CS$res$var$coord), values$CS$res$var$coord, 
-                              cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE) 
+             WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
+                              stringsAsFactors = FALSE)
+             names(WData)[4]="cluster"
            },
            MDS={
              WData=data.frame(word=row.names(values$CS$res), values$CS$res, 

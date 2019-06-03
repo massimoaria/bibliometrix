@@ -4,7 +4,7 @@
 #' 
 #' @param Nodes is a list of nodes obtained by \code{\link{thematicEvolution}} function.
 #' @param Edges is a list of edges obtained by \code{\link{thematicEvolution}} function.
-#' @param measure is a character. It can be \code{measure=("inclusion","stability")}.
+#' @param measure is a character. It can be \code{measure=("inclusion","stability", "weighted")}.
 #' @param min.flow is numerical. It indicates the minimum value of measure to plot a flow.
 #' @return a sankeyPlot
 #' 
@@ -28,13 +28,18 @@ plotThematicEvolution<-function(Nodes,Edges,measure="inclusion", min.flow=0){
   
   switch(measure,
          inclusion={
-           Edges=Edges[-4]
+           Edges=Edges[-c(4,5)]
          },
          stability={
-           Edges=Edges[-3]
+           Edges=Edges[-c(3,5)]
+         },
+         weighted={
+           Edges=Edges[,-c(3,4)]
          })
+  
   names(Edges)[3]="weight"
   Edges=Edges[Edges$weight>=min.flow,]
+  Edges$weigth=Edges$weigth*100
   networkD3::sankeyNetwork(Links = Edges, Nodes = Nodes, Source = "from", Target = "to", 
                            NodeID = "name", Value = "weight", width = 900, fontSize = 12,
                            nodeWidth = 30,  NodeGroup = "group",LinkGroup = "group")

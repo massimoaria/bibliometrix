@@ -111,7 +111,6 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
         Inc[cont,9]=length(w2)
         Inc[cont,10]=length(wi)/(length(w1)+length(w2)-length(wi))
         
-        
       }
     }
     
@@ -127,13 +126,13 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
   }
   
   ### sankey plot data
-  edges = INC[,c(1,2,3,10)]
+  edges = INC[,c(1,2,3,7,10)]
   edges=edges[edges[,3]>0,]
   nodes = data.frame("name"=unique(c(edges$CL1,edges$CL2)),stringsAsFactors = FALSE)
   nodes$group=nodes$name
   
   cont=0
-  edges[,5]=edges[,1]
+  edges[,6]=edges[,1]
   for (i in nodes$name){
     
     ind=which(edges[,1]==i)
@@ -143,7 +142,7 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
     cont=cont+1
   }
   
-  names(edges)=c("from","to","Inclusion","Stability","group")
+  names(edges)=c("from","to","Inclusion","Stability","Inc_W","group")
   edges$from=as.numeric(edges$from)
   edges$to=as.numeric(edges$to)
   

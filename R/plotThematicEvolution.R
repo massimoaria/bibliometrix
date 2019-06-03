@@ -39,7 +39,7 @@ plotThematicEvolution<-function(Nodes,Edges,measure="inclusion", min.flow=0){
   
   names(Edges)[3]="weight"
   Edges=Edges[Edges$weight>=min.flow,]
-  Edges$weigth=Edges$weigth*100
+  Edges$weight=Edges$weight*100
   networkD3::sankeyNetwork(Links = Edges, Nodes = Nodes, Source = "from", Target = "to", 
                            NodeID = "name", Value = "weight", width = 900, fontSize = 12,
                            nodeWidth = 30,  NodeGroup = "group",LinkGroup = "group")

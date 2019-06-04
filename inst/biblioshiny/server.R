@@ -1473,14 +1473,17 @@ server <- function(input, output, session) {
   output$TETable <- DT::renderDT({
     
     TEData=values$nexus$Data
-    TEData=TEData[TEData$Inc_index>0,]
-    names(TEData)=c("From", "To", "Inclusion Index", "Words", "Occurrences", "Total", "Weighted Inclusion Index", "Total Occ From", "Total Occ To", "Stability Index")
+    TEData=TEData[TEData$Inc_index>0,-c(4,8)]
+    names(TEData)=c("From", "To", "Words", "Weighted Inclusion Index", "Inclusion Index", "Occurrences", "Stability Index")
     DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = c('pageLength','copy','excel', 'pdf', 'print'),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TEData))-1))))) %>%
-      formatStyle(names(TEData),  backgroundColor = 'white') 
+      formatStyle(names(TEData),  backgroundColor = 'white') %>%
+      formatRound(names(TEData)[4], 2) %>%
+      formatRound(names(TEData)[5], 2) %>%
+      formatRound(names(TEData)[7], 2) 
     #return(Data)
     
   })

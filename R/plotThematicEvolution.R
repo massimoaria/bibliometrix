@@ -31,10 +31,10 @@ plotThematicEvolution<-function(Nodes,Edges,measure="inclusion", min.flow=0){
            Edges=Edges[-c(4,5)]
          },
          stability={
-           Edges=Edges[-c(3,5)]
+           Edges=Edges[-c(3,4)]
          },
          weighted={
-           Edges=Edges[,-c(3,4)]
+           Edges=Edges[,-c(3,5)]
          })
   
   names(Edges)[3]="weight"

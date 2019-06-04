@@ -82,40 +82,27 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
      res2$words$Cluster=paste(res2$clusters$name[res2$words$Cluster],"--",Y[k],sep="")
      res2$clusters$label=paste(res2$clusters$name,"--",Y[k],sep="")
     ##
+
+    cluster1 <- res1$words %>% group_by(.data$Cluster_Label) %>% mutate(len=length(.data$Words), tot=sum(.data$Occurrences))
+    cluster2 <- res2$words %>% group_by(.data$Cluster_Label) %>% mutate(len=length(.data$Words), tot=sum(.data$Occurrences))
+    A <- inner_join(cluster1, cluster2, by = "Words") %>% 
+      group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
+      rowwise() %>%
+      mutate(min=min(.data$Occurrences.x,.data$Occurrences.y), Occ=sum(.data$Occurrences.x), tot=min(.data$tot.x,.data$tot.y)) %>%
+      ungroup()
     
+    B <- A %>% 
+      group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
+      summarize(CL1=.data$Cluster.x[1],CL2=.data$Cluster.y[1], 
+                Words=paste0(.data$Words,collapse=";",sep=""),
+                sum=sum(.data$min), 
+                Inc_Weighted=sum(.data$min)/min(.data$tot), 
+                Inc_index=length(.data$Words)/min(.data$len.x,.data$len.y), 
+                Occ=.data$Occ[1], Tot=.data$tot[1], 
+                Stability=length(.data$Words)/(.data$len.x[1]+.data$len.y[1]-length(.data$Words))) %>%
+      data.frame()
     
-    CL1=unique(res1$clusters$label)
-    CL2=unique(res2$clusters$label)
-    
-    Inc=data.frame(CL1=NA,CL2=NA,Inc_index=NA,Words="NA",Occ=NA,Tot=NA,Inc_Weighted=NA, Tot_CL1=NA,Tot_CL2=NA, Stability=NA, stringsAsFactors = FALSE)
-    cont=0
-    
-    for (ii in 1:length(CL1)){
-      i=CL1[ii]
-      w1=as.character(res1$words$Words[res1$words$Cluster==i])
-      for (jj in 1:length(CL2)){
-        j=CL2[jj]
-        cont=cont+1
-        w2=as.character(res2$words$Words[res2$words$Cluster==j])  
-        Inc[cont,1]=i
-        Inc[cont,2]=j
-        Inc[cont,3]=length(intersect(w1,w2))/min(length(w1),length(w2))
-        Inc[cont,4]=paste(intersect(w1,w2),collapse=";")
-        wi=intersect(w1,w2)
-        si=sum(res1$words$Occurrences[res1$words$Words %in% wi])
-        s1=min(c(res1$clusters$freq[res1$clusters$label==i],res2$clusters$freq[res2$clusters$label==j]),na.rm=T)
-        Inc[cont,5]=si
-        Inc[cont,6]=s1
-        Inc[cont,7]=si/s1
-        Inc[cont,8]=length(w1)
-        Inc[cont,9]=length(w2)
-        Inc[cont,10]=length(wi)/(length(w1)+length(w2)-length(wi))
-        
-      }
-    }
-    
-    incMatrix[[k-1]]=Inc
-    
+    incMatrix[[k-1]]=B 
   }
   
   INC=incMatrix[[1]]
@@ -126,7 +113,7 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
   }
   
   ### sankey plot data
-  edges = INC[,c(1,2,3,7,10)]
+  edges = INC[,c("CL1","CL2","Inc_index","Inc_Weighted","Stability")]
   edges=edges[edges[,3]>0,]
   nodes = data.frame("name"=unique(c(edges$CL1,edges$CL2)),stringsAsFactors = FALSE)
   nodes$group=nodes$name
@@ -142,11 +129,11 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
     cont=cont+1
   }
   
-  names(edges)=c("from","to","Inclusion","Stability","Inc_W","group")
+  names(edges)=c("from","to","Inclusion","Inc_Weighted","Stability","group")
   edges$from=as.numeric(edges$from)
   edges$to=as.numeric(edges$to)
   
-  results=list(Nodes=nodes,Edges=edges,Data=INC,check=TRUE, TM=res, Net=net)
+  results=list(Nodes=nodes,Edges=edges,Data=INC[,-c(1,2)],check=TRUE, TM=res, Net=net)
   
   return(results)
   

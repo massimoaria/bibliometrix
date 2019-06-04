@@ -93,7 +93,7 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
     
     B <- A %>% 
       group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
-      summarize(CL1=.data$Cluster.x[1],CL2=.data$Cluster.y[1], 
+      summarise(CL1=.data$Cluster.x[1],CL2=.data$Cluster.y[1], 
                 Words=paste0(.data$Words,collapse=";",sep=""),
                 sum=sum(.data$min), 
                 Inc_Weighted=sum(.data$min)/min(.data$tot), 

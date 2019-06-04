@@ -66,8 +66,12 @@
 # #' @importFrom dplyr filter
 #' @importFrom dplyr arrange
 #' @importFrom dplyr group_by
+#' @importFrom dplyr mutate
+#' @importFrom dplyr ungroup
+#' @importFrom dplyr rowwise
 #' @importFrom dplyr summarise
 #' @importFrom dplyr anti_join
+#' @importFrom dplyr inner_join
 #' @importFrom dplyr left_join
 #' @importFrom dplyr top_n
 #' @importFrom grDevices dev.off

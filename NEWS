@@ -4,6 +4,8 @@ bibliometrix v2.2.1 (Release date: ...soon)
 New functionality:
 *ConceptualStructure: Added the Benzecrì eigenvalue correction
 *ConceptualStructure: Added the explained variance information in the plot axis labels
+*ThematicEvolution: new measure "Inclusion Index weighted by Term Occurrences"
+*New dataset: management: The use of bibliometric approaches in business and management disciplines.
 
 
 

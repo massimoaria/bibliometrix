@@ -133,6 +133,7 @@ preprocessing <- function(D){
   #D=gsub("\\}\\]\\}","\\]",D)
   D=gsub("\\{\\{","\\{",D)
   D=gsub("\\}\\}","\\}",D)
+  D=gsub("\\{''\\}","",D)
   
   D=gsub(" = ","=",D)
   #ind=which(regexpr("\\@",D)==1)

@@ -125,7 +125,6 @@ colnames(WF)<-uniqueField
 rownames(WF)<-rownames(M)
   # Population of WA matrix
   for (i in 1:size[1]){
-    #print(i)
     if (length(Fi[[i]])>0 & !is.na(Fi[[i]][1])) {
       #print(i)
       #if (Field=="CR"){Fi[[i]]=reduceRefs(Fi[[i]])}
@@ -134,7 +133,8 @@ rownames(WF)<-rownames(M)
       WF[i,uniqueField %in% Fi[[i]]]<-1}else{
         ## full counting
         tab=table(Fi[[i]])
-        WF[i,names(tab)]=tab
+        name=names(tab)
+        WF[i,name[nchar(name)>0]]=tab[nchar(name)>0]
         }
       }
 	}

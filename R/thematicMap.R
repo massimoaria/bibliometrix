@@ -182,7 +182,6 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   #View(res$words)
   if (field %in% c("ID", "DE")) {
-    words = res$words
     ID = paste(TERMS, ";", sep = "")
     for (i in 1:nrow(words)) {
       w = paste(words$Words[i], ";", sep = "")

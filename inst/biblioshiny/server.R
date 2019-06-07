@@ -2165,7 +2165,7 @@ server <- function(input, output, session) {
       values$histsearch=input$histsearch
     }
     
-    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5, color=FALSE))
+    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize))
   return(values)
   }
   

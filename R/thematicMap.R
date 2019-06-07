@@ -41,11 +41,11 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   switch(field,
          ID={
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
-           
+           TERMS=tolower(M$ID)
          },
          DE={
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
-           
+           TERMS=tolower(M$DE)
          },
          TI={
            #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
@@ -177,6 +177,21 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   words$Cluster=as.numeric(factor(words$Cluster))
   row.names(df)=NULL
 
-  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net)
+  ### Adding column Topics
+  M$TOPIC=""
+  
+  #View(res$words)
+  if (field %in% c("ID", "DE")) {
+    words = res$words
+    ID = paste(TERMS, ";", sep = "")
+    for (i in 1:nrow(words)) {
+      w = paste(words$Words[i], ";", sep = "")
+      TOPIC = paste(words$Cluster_Label[i], ";", sep = "")
+      ind = which(regexpr(w, ID) > -1)
+      M$TOPIC[ind] = paste(M$TOPIC[ind], TOPIC, sep = "")
+    }
+  } else {M$TOPIC="NA"}
+  
+  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net, TOPIC=M$TOPIC)
 return(results)
 }

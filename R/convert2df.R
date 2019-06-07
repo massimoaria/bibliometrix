@@ -105,6 +105,7 @@
 #' @importFrom igraph degree
 #' @importFrom igraph plot.igraph
 #' @importFrom igraph delete.vertices
+#' @importFrom igraph decompose.graph
 #' @importFrom igraph E
 #' @importFrom igraph E<-
 #' @importFrom igraph V

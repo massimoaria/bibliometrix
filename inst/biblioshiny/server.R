@@ -184,8 +184,8 @@ server <- function(input, output, session) {
   
   output$sliderTC <- renderUI({
 
-    sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC),
-                max = max(values$Morig$TC), value = c(min(values$Morig$TC),max(values$Morig$TC)))
+    sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC, na.rm=T),
+                max = max(values$Morig$TC, na.rm=T), value = c(min(values$Morig$TC, na.rm=T),max(values$Morig$TC,na.rm=T)))
     })
   ### End Filters uiOutput
   

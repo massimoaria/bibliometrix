@@ -8,7 +8,7 @@ New functionality:
 *thematicMap: Added the possibility to associate more than one label to each cluster (argument n.labels)
 *thematicEvolution: Added the possibility to associate more than one label to each cluster (argument n.labels)
 *biblioshiny: Integrated new functionality of conceptualStructure, thematicMap and thematicEvolution
-*New dataset: management: The use of bibliometric approaches in business and management disciplines.
+*New dataset: management: The use of bibliometric approaches in business and management disciplines
 
 
 

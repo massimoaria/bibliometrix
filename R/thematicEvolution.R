@@ -13,6 +13,7 @@
 #' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.
 #' @param stemming is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
+#' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @return a list containing:
 #' \tabular{lll}{
@@ -33,7 +34,7 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, stemming=FALSE, repel=TRUE){
+thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, stemming=FALSE, n.labels=1, repel=TRUE){
   
   #net=list()
   #arguments <- list(...)
@@ -50,7 +51,7 @@ thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, s
     
     Mk=list_df[[k]]
     Y[k]=paste(min(Mk$PY),"-",max(Mk$PY),sep="",collapse="")
-    resk <- thematicMap(Mk, field=field, n=n, minfreq=minFreq, stemming=stemming, size=size, repel=repel)
+    resk <- thematicMap(Mk, field=field, n=n, minfreq=minFreq, stemming=stemming, size=size, n.labels=n.labels, repel=repel)
     #S[[k]]=Sk
     #net[[k]]=netk
     res[[k]]=resk

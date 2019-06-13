@@ -14,6 +14,7 @@
 #' @param minfreq is a integer. It indicates the minimun frequency of a cluster.
 #' @param stemming is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
+#' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @return a list containing:
 #' \tabular{lll}{
@@ -36,7 +37,7 @@
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, repel=TRUE){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
   
   switch(field,
          ID={
@@ -141,6 +142,16 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   df$words=W[,2]
   
+  ### number of labels for each cluster
+  labels=gsub("\\d", "",df$words)
+  L=unlist(lapply(labels, function(l){
+    l=strsplit(l," \\\n")
+    l=paste(l[[1]][1:min(n.labels,lengths(l))], collapse="\n")
+  }))
+  df$name_full=L
+  ###
+  
+  
   meandens=mean(df$rdensity)
   meancentr=mean(df$rcentrality)
   #df=df[df$freq>=minfreq,]
@@ -155,8 +166,8 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
     geom_point(group="NA",aes(size=log(as.numeric(df$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
   
   if (isTRUE(repel)){
-  g=g+geom_label_repel(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3*(1+size),angle=0)}else{
-    g=g+geom_text(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name)),'')),size=3*(1+size),angle=0)
+  g=g+geom_label_repel(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)}else{
+    g=g+geom_text(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)
   }
   
     g=g+geom_hline(yintercept = meandens,linetype=2, color=adjustcolor("black",alpha.f=0.7)) +

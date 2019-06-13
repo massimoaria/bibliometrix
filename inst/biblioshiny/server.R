@@ -1398,7 +1398,7 @@ server <- function(input, output, session) {
     input$applyTM
     
     #values <- isolate(TMmap(input,values))
-    values$TM <- isolate(thematicMap(values$M, field=input$TMfield, n=input$TMn, minfreq=input$TMfreq, stemming=input$TMstemming, size=input$sizeTM, repel=FALSE))
+    values$TM <- isolate(thematicMap(values$M, field=input$TMfield, n=input$TMn, minfreq=input$TMfreq, stemming=input$TMstemming, size=input$sizeTM, n.labels=input$TMn.labels, repel=FALSE))
     
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -1458,7 +1458,7 @@ server <- function(input, output, session) {
     })
     
     if (length(values$yearSlices)>0){
-    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, repel=FALSE))
+    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, n.labels=input$TEn.labels, repel=FALSE))
     
     validate(
       need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -2115,45 +2115,7 @@ server <- function(input, output, session) {
     }
   }
   
-  TMmap <- function(input,values){
-    
-    switch(input$TMfield,
-           ID={
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
-             
-           },
-           DE={
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
-             
-           },
-           TI={
-             #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
-             values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
-             
-           },
-           AB={
-             #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
-             values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
-             
-           })
-    
-    S <- normalizeSimilarity(NetMatrix, type = "association")
-    t = tempfile();pdf(file=t) #### trick to hide igraph plot
-    net <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
-                                       labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
-                                       remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
-                                       size=1,edges.min = 1, label.n=input$TMn)
-    dev.off();file.remove(t) ### end of trick
-    Map=thematicMap(net, NetMatrix, S = S, minfreq=input$TMfreq, size=input$sizeTM, repel=FALSE)
-    #plot(Map$map)
-    values$TM=Map
-    values$TM$net=net
-    return(values)
-  }
-  
-  historiograph <- function(input,values){
+ historiograph <- function(input,values){
     
     if (input$histsearch=="FAST"){
       min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)

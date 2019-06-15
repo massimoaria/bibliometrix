@@ -63,9 +63,10 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
            i=which(regexpr("ANONYMOUS",elements)>-1)
            if(length(i)>0){elements=elements[-i]}
            Name="Author"
+           AU=paste(";",AU,";",sep="")
            },
          source={
-           AU=M$SO
+           SO=M$SO
            Name="Source"
          })
    
@@ -79,8 +80,8 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
     
     if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/length(elements), detail=paste0("\nAuthor: ",author))}
     
-    if (field=="source"){ind=which(AU==author)} else{
-      ind=which(regexpr(author,AU)!=-1)
+    if (field=="source"){ind=which(SO==author)} else{
+      ind=which(regexpr(paste(";",author,";",sep=""),AU)!=-1)
     }
     
     if (length(ind)>0){

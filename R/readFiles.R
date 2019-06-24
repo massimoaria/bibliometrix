@@ -32,6 +32,7 @@ readFiles <- function(...){
       D[[i]]=suppressWarnings(
         iconv(readLines(arguments[[i]],encoding = "UTF-8"),"latin1", "ASCII", sub="")
         #conv(readLines(arguments[[i]]))
+        
         )
       }
   D=unlist(D)

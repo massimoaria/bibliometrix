@@ -3,14 +3,14 @@
 #' It calculates frequency distribution of citations.
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param field is a character. It can be "article" or "author" to obtain frequency distribution of cited citations or cited authors (only first authors for ISI database) respectively. The default is \code{field = "article"}.
-#' @param sep is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.
+#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics Web of Science file.
+#' @param field is a character. It can be "article" or "author" to obtain frequency distribution of cited citations or cited authors (only first authors for WoS database) respectively. The default is \code{field = "article"}.
+#' @param sep is the field separator character. This character separates citations in each string of CR column of the bibliographic data frame. The default is \code{sep = ";"}.
 #' @return an object of \code{class} "list"  containing the following components:
 #'
 #' \tabular{lll}{
 #' Cited \tab  \tab the most frequent cited manuscripts or authors\cr
-#' Year \tab       \tab the pubblication year (only for cited article analysis)\cr
+#' Year \tab       \tab the publication year (only for cited article analysis)\cr
 #' Source \tab      \tab the journal (only for cited article analysis)}
 #'
 #' 

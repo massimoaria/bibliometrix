@@ -3,11 +3,11 @@
 #' It calculates yearly occurrences of top keywords/terms.
 #'
 #' @param M is a data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to articles and variables to Field Tag in the original ISI or SCOPUS file.
+#'        It is a data matrix with cases corresponding to articles and variables to Field Tag in the original WoS or SCOPUS file.
 #' @param Tag is a character object. It indicates one of the keyword field tags of the
 #'   standard ISI WoS Field Tag codify (ID or DE) or a field tag created by \code{\link{termExtraction}} function (TI_TM, AB_TM, etc.).
 #' @param sep is the field separator character. This character separates strings in each keyword column of the data frame. The default is \code{sep = ";"}.
-#' @param top is a numeric. It indicates the number of top keywords to analize. The default value is 10.
+#' @param top is a numeric. It indicates the number of top keywords to analyze. The default value is 10.
 #' @param cdf is a logical. If TRUE, the function calculates the cumulative occurrences distribution. 
 #' @return an object of class \code{data.frame}
 #' @examples

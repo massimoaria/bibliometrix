@@ -18,9 +18,9 @@ M \tab      \tab the bibliographic data frame}
 
 is a network matrix obtained by the function \code{\link{histNetwork}}.}
 
-\item{n}{is integer. It defines the numebr of vertices to plot.}
+\item{n}{is integer. It defines the number of vertices to plot.}
 
-\item{size}{is an integer. It define the point size of the vertices. Default value is 5.}
+\item{size}{is an integer. It defines the point size of the vertices. Default value is 5.}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}}
 

@@ -20,7 +20,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
 
-\item{degree}{is an integer. It idicates the min frequency of a vertex. If degree is not NULL, n is ignored.}
+\item{degree}{is an integer. It indicates the min frequency of a vertex. If degree is not NULL, n is ignored.}
 
 \item{Title}{is a character indicating the plot title.}
 

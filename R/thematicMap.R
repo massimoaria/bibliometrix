@@ -4,16 +4,20 @@
 #' The methodology is inspired by the proposal of Cobo et al. (2011). 
 #' 
 #' \code{thematicMap} starts from a co-occurrence keyword network to plot in a 
-#' two-dimesional map the typological themes of a domain.
+#' two-dimesional map the typological themes of a domain.\cr\cr
+#' 
+#' Reference:\cr
+#' Cobo, M. J., López-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 
+#' and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 #' 
 #' 
 #' @param M is a bibliographic dataframe.
 #' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE", "TI", "AB")}.
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param n is an integer. It indicates the number of terms to include in the analysis.
-#' @param minfreq is a integer. It indicates the minimun frequency of a cluster.
-#' @param stemming is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).
-#' @param size is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).
+#' @param minfreq is a integer. It indicates the minimum frequency of a cluster.
+#' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
+#' @param size is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @return a list containing:

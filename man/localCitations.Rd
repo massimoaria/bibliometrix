@@ -8,14 +8,14 @@ localCitations(M, fast.search = FALSE, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.}
 
 \item{fast.search}{is logical. if true, the function calculates local citations only for 25 percent top cited documents.}
 
-\item{sep}{is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.}
+\item{sep}{is the field separator character. This character separates citations in each string of CR column of the bibliographic data frame. The default is \code{sep = ";"}.}
 }
 \value{
-an object of \code{class} "list" containing author local citations and docuemnt local citations.
+an object of \code{class} "list" containing author local citations and document local citations.
 }
 \description{
 It calculates local citations (LCS) of authors and documents of a bibliographic collection.

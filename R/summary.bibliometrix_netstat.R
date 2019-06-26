@@ -4,7 +4,7 @@
 #' @param object is the object for which a summary is desired.
 #' @param ... can accept two arguments:\cr
 #' \code{k} integer, used for table formatting (number of rows). Default value is 10.\cr
-#' @return The function \code{summary} computes and returns on display severa statistics both at netowrk and vertex level.
+#' @return The function \code{summary} computes and returns on display several statistics both at network and vertex level.
 #'
 #' 
 #'

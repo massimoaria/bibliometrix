@@ -13,7 +13,8 @@ scopus2df(D)
 a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.
 }
 \description{
-It converts a SCOPUS Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+It is an internal function used by \code{\link{convert2df}} to convert a SCOPUS Export file and create a data frame from it, 
+with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
 # A SCOPUS Export file can be read using \\code{\\link{readFiles}} function:

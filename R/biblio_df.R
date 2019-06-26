@@ -1,10 +1,10 @@
 #' Dataset of "Bibliometrics" manuscripts.
 #'
-#' The set of manuscripts which the title containing the word "bibliometrics" and published in a journal indexed by ISI WoK database.\cr
+#' The set of manuscripts which the title containing the word "bibliometrics" and published in a journal indexed by Clarivate Analytics WoS database.\cr
 #' Period: 2006 - 2015\cr
-#' Database: \href{http://www.webofknowledge.com}{ISI Web of Knowledge}\cr
+#' Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 #'
-#' @format #' A data frame with 99 rows (manuscripts) and 16 variables (ISI tag field):
+#' @format #' A data frame with 99 rows (manuscripts) and 16 variables (WOS tag field):
 #' \describe{
 #' \item{AU}{Authors}
 #' \item{TI}{Document Title}

@@ -4,13 +4,13 @@
 \alias{convert2df}
 \title{Convert a Clarivate Analytics WoS, SCOPUS and COCHRANE Database Export files or RISmed PubMed/MedLine object into a data frame}
 \usage{
-convert2df(file, dbsource = "isi", format = "plaintext")
+convert2df(file, dbsource = "wos", format = "plaintext")
 }
 \arguments{
 \item{file}{can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
 b) an object of the class \code{pubmed (package RISmed)} containing a collection obtained from a query performed with RISmed package.}
 
-\item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"scopus"} or \code{pubmed}. Default is \code{dbsource = "isi"}.}
+\item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"} or \code{pubmed}. Default is \code{dbsource = "isi"}.}
 
 \item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"bibtex"} or \code{"plaintext"}. Default is \code{format = "plaintext"}.}
 }
@@ -43,7 +43,7 @@ for a complete list of field tags see: \href{http://www.bibliometrix.org/documen
 It converts a SCOPUS, Clarivate Analytics WoS and COCHRANE Database export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 }
 \details{
-Actually the function allows to convert both SCOPUS/WoS files in bibtext format and just WoS files in plain text format.
+Actually the function allows to convert both SCOPUS/WoS files in bibtex format and just WoS files in plain text format.
 }
 \examples{
 # An ISI or SCOPUS Export file can be read using \\code{\\link{readLines}} function:

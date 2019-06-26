@@ -2,11 +2,11 @@
 #'
 #' It converts a SCOPUS, Clarivate Analytics WoS and COCHRANE Database export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
-#' Actually the function allows to convert both SCOPUS/WoS files in bibtext format and just WoS files in plain text format.
+#' Actually the function allows to convert both SCOPUS/WoS files in bibtex format and just WoS files in plain text format.
 #'
 #' @param file can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
 #' b) an object of the class \code{pubmed (package RISmed)} containing a collection obtained from a query performed with RISmed package.
-#' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"scopus"} or \code{pubmed}. Default is \code{dbsource = "isi"}.
+#' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"} or \code{pubmed}. Default is \code{dbsource = "isi"}.
 #' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"bibtex"} or \code{"plaintext"}. Default is \code{format = "plaintext"}.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
 #'
@@ -268,17 +268,19 @@
 #' @importFrom SnowballC wordStem
 #' @importFrom SnowballC getStemLanguages
 
-convert2df<-function(file,dbsource="isi",format="plaintext"){
+convert2df<-function(file,dbsource="wos",format="plaintext"){
 
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
-  if (length(setdiff(dbsource,c("isi","scopus","pubmed","cochrane","generic")))>0){
+  if (length(setdiff(dbsource,c("isi","wos","scopus","pubmed","cochrane","generic")))>0){
     cat("\n 'dbsource' argument is not properly specified")
-    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'scopus', 'generic', or 'pubmed'.\n")}
+    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'wos', 'scopus', 'generic', or 'pubmed'.\n")}
   if (length(setdiff(format,c("plaintext","bibtex","pubmed","cochrane")))>0){
     cat("\n 'format' argument is not properly specified")
     cat("\n 'format' argument has to be a character string matching 'plaintext or 'bibtex'.\n")}
   if (length(setdiff(format,c("plaintext","bibtex")))>0){
     file=iconv(file, "latin1", "ASCII", sub="")}
+  
+  if (dbsource=="wos") dbsource="isi"
   
   switch(dbsource,
     isi={
@@ -288,8 +290,7 @@ convert2df<-function(file,dbsource="isi",format="plaintext"){
       )},
     scopus={M=bib2df(file,dbsource="scopus")
     },
-    generic={print("SI")
-      M=bib2df(file,dbsource="generic")
+    generic={M=bib2df(file,dbsource="generic")
     },
     pubmed={M=pubmed2df(file)
     },

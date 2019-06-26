@@ -1,10 +1,10 @@
 #' Meta-Field Tag Extraction
 #'
-#' It extracts other field tags, different from the standard ISI/SCOPUS codify.
+#' It extracts other field tags, different from the standard WoS/SCOPUS codify.
 #' @param M is a data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to articles and variables to Field Tag in the original ISI or SCOPUS file.
-#' @param Field is a character object. New tag exctracted from aggregated data is specified by this string. 
-#' Field can be equal to one of this tags:
+#'        It is a data matrix with cases corresponding to articles and variables to Field Tag in the original WoS or SCOPUS file.
+#' @param Field is a character object. New tag extracted from aggregated data is specified by this string. 
+#' Field can be equal to one of these tags:
 #' \tabular{lll}{
 #' \code{"CR_AU"}\tab   \tab First Author of each cited reference\cr
 #' \code{"CR_SO"}\tab   \tab Source of each cited reference\cr

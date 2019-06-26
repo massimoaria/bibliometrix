@@ -13,7 +13,7 @@
 \code{k} integer, used for table formatting (number of rows). Default value is 10.\cr}
 }
 \value{
-The function \code{summary} computes and returns on display severa statistics both at netowrk and vertex level.
+The function \code{summary} computes and returns on display several statistics both at network and vertex level.
 }
 \description{
 \code{summary} method for class '\code{bibliometrix_netstat}'

@@ -1,6 +1,7 @@
 #' Convert a PubMed/MedLine collection into a data frame
 #'
-#' It converts a PubMed/MedLine collection (obtained through a query performed with RISmed package) and create a data frame from it, with cases corresponding to articles and variables to Field Tags as proposed by Clarivate Analytics WoS.
+#' It is an internal function used by \code{\link{convert2df}} to convert a PubMed/MedLine collection (obtained through a query performed with RISmed package) 
+#' and create a data frame from it, with cases corresponding to articles and variables to Field Tags as proposed by Clarivate Analytics WoS.
 #'
 #' @param D is an object of class MedLine (package "RISmed") containing data resulting of a query performed on MedLine using the package RISmed.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags as proposed by Clarivate Analytics WoS.
@@ -14,8 +15,8 @@
 #' # M <- pubmed2df(D)
 #'
 #' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
-#' @seealso \code{\link{isi2df}} for converting Clarivate Analitics WoS Export file (in plaintex format)
-#' @seealso \code{\link{isibib2df}} for converting Clarivate Analitics WoS Export file (in bibtex format)
+#' @seealso \code{\link{isi2df}} for converting Clarivate Analytics WoS Export file (in plaintex format)
+#' @seealso \code{\link{isibib2df}} for converting Clarivate Analytics WoS Export file (in bibtex format)
 #' @family converting functions
 #' @export
 

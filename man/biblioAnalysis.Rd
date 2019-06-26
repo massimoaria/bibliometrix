@@ -8,7 +8,7 @@ biblioAnalysis(M, sep = ";")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics Web of Science file.}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
 }
@@ -23,27 +23,27 @@ An object of \code{class} "bibliometrix" is a list containing the following comp
 Articles \tab  \tab the total number of manuscripts\cr
 Authors \tab       \tab the authors' frequency distribution\cr
 AuthorsFrac \tab      \tab the authors' frequency distribution (fractionalized)\cr
-FirstAuthors \tab      \tab first author of each manuscript\cr
+FirstAuthors \tab      \tab corresponding author of each manuscript\cr
 nAUperPaper \tab      \tab the number of authors per manuscript\cr
 Appearances \tab      \tab the number of author appearances\cr
 nAuthors \tab       \tab the number of authors\cr
 AuMultiAuthoredArt \tab      \tab the number of authors of multi-authored articles\cr
-MostCitedPapers \tab      \tab The list of manuscripts sorted by citations\cr
-Years \tab      \tab pubblication year of each manuscript\cr
+MostCitedPapers \tab      \tab the list of manuscripts sorted by citations\cr
+Years \tab      \tab publication year of each manuscript\cr
 FirstAffiliation \tab      \tab the affiliation of the first author\cr
 Affiliations \tab      \tab the frequency distribution of affiliations (of all co-authors for each paper)\cr
 Aff_frac \tab      \tab the fractionalized frequency distribution of affiliations (of all co-authors for each paper)\cr
 CO \tab      \tab the affiliation country of the first author\cr
 Countries \tab      \tab the affiliation countries' frequency distribution\cr
-CountryCollaboration \tab      \tab Intracountry (SCP) and intercountry (MCP) collaboration indices\cr
+CountryCollaboration \tab      \tab Intra-country (SCP) and intercountry (MCP) collaboration indices\cr
 TotalCitation \tab      \tab the number of times each manuscript has been cited\cr
 TCperYear \tab      \tab the yearly average number of times each manuscript has been cited\cr
 Sources \tab      \tab the frequency distribution of sources (journals, books, etc.)\cr
 DE \tab      \tab the frequency distribution of authors' keywords\cr
-ID \tab      \tab the frequency distribution of keywords associated to the manuscript bySCOPUS and Thomson Reuters' ISI Web of Knowledge database}
+ID \tab      \tab the frequency distribution of keywords associated to the manuscript by SCOPUS and Clarivate Analytics Web of Science database}
 }
 \description{
-It performs a bibliometric analysis of a dataset imported from SCOPUS and Thomson Reuters' ISI Web of Knowledge databases.
+It performs a bibliometric analysis of a dataset imported from SCOPUS and Clarivate Analytics Web of Science databases.
 }
 \examples{
 data(scientometrics)
@@ -54,7 +54,7 @@ summary(results, k = 10, pause = FALSE)
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame.
 
 \code{\link{summary}} to obtain a summary of the results.
 

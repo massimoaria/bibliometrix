@@ -227,7 +227,7 @@ net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = 
 
 # Conceptual Structure using keywords (method="CA")
 
-CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
+CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, clust=5, stemming=FALSE, labelsize=10, documents=10)
 
 
 

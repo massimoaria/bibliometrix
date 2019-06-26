@@ -8,9 +8,9 @@ keywordAssoc(M, sep = ";", n = 10, excludeKW = NA)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.}
 
-\item{sep}{is the field separator character. This character separates keywords in each string of ID and DE columns of the bibiographic data frame. The default is \code{sep = ";"}.}
+\item{sep}{is the field separator character. This character separates keywords in each string of ID and DE columns of the bibliographic data frame. The default is \code{sep = ";"}.}
 
 \item{n}{is a integer. It indicates the number of authors' keywords to associate to each keyword plus. The default is \code{n = 10}.}
 
@@ -36,7 +36,7 @@ KWlist[[1]][1:10]
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert a WoS or SCOPUS Export file in a bibliographic data frame.
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis.
 

@@ -359,7 +359,7 @@ server <- function(input, output, session) {
     
     isolate({
     fields=c(input$LeftField, input$CentralField, input$RightField)
-    threeFieldsPlot(values$M, fields=fields,n=c(20,20,20), width=1200,height=600)
+    threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn), width=1200,height=600)
     })
     
   })

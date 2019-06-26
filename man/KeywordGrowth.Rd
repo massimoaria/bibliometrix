@@ -8,14 +8,14 @@ KeywordGrowth(M, Tag = "ID", sep = ";", top = 10, cdf = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to articles and variables to Field Tag in the original ISI or SCOPUS file.}
+It is a data matrix with cases corresponding to articles and variables to Field Tag in the original WoS or SCOPUS file.}
 
 \item{Tag}{is a character object. It indicates one of the keyword field tags of the
 standard ISI WoS Field Tag codify (ID or DE) or a field tag created by \code{\link{termExtraction}} function (TI_TM, AB_TM, etc.).}
 
 \item{sep}{is the field separator character. This character separates strings in each keyword column of the data frame. The default is \code{sep = ";"}.}
 
-\item{top}{is a numeric. It indicates the number of top keywords to analize. The default value is 10.}
+\item{top}{is a numeric. It indicates the number of top keywords to analyze. The default value is 10.}
 
 \item{cdf}{is a logical. If TRUE, the function calculates the cumulative occurrences distribution.}
 }

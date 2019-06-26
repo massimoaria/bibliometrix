@@ -11,7 +11,7 @@
 \item{JI}{ISO Source Abbreviation}
 \item{DT}{Document Type}
 \item{DE}{Author Keywords}
-\item{ID}{Keywords associated by ISI or SCOPUS database}
+\item{ID}{Keywords associated by WoS or SCOPUS database}
 \item{AB}{Abstract}
 \item{C1}{Author Address}
 \item{RP}{Reprint Address}
@@ -30,5 +30,5 @@
 Manuscripts about the topics "co-citation analysis" and 
 "coupling analysis" published on Scientometrics Journal.\cr
 Period: 1985 - 2015\cr
-Database: \href{http://www.webofknowledge.com}{ISI Web of Knowledge}\cr
+Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 }

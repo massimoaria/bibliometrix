@@ -6,7 +6,7 @@
 #' @param M is a bibliographic data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 #'   manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
-#'   Analitics' Web of Knowledge file.
+#'   Analitics Web of Science file.
 #' @param min.citations is an integer. It sets the minimum number of citations 
 #'   for the documents included in the analysis. The default is \code{min.citations = 0}.
 #' @param sep is the field separator character. This character separates strings

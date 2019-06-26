@@ -8,7 +8,7 @@
 #' @param normalize is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
 #' Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.
 #' @param n is an integer. It indicates the number of vertices to plot.
-#' @param degree is an integer. It idicates the min frequency of a vertex. If degree is not NULL, n is ignored.
+#' @param degree is an integer. It indicates the min frequency of a vertex. If degree is not NULL, n is ignored.
 #' @param type is a character object. It indicates the network map layout:
 #' 
 #' \tabular{lll}{

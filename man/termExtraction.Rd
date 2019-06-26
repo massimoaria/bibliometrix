@@ -10,7 +10,7 @@ termExtraction(M, Field = "TI", stemming = FALSE,
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to articles and variables to Field Tag in the original ISI or SCOPUS file.}
+It is a data matrix with cases corresponding to articles and variables to Field Tag in the original WoS or SCOPUS file.}
 
 \item{Field}{is a character object. It indicates the field tag of textual data :
 \tabular{lll}{
@@ -30,7 +30,7 @@ The default is \code{Field = "TI"}.}
 
 \item{keep.terms}{is a character vector. It contains a list of compound words "formed by two or more terms" to keep in their original form in the term extraction process. The default is \code{keep.terms = NULL}.}
 
-\item{synonyms}{is a character vector. Each element contains a list of synonyms, separeted by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 
 \item{verbose}{is logical. If TRUE the function prints the most frequent terms extracted from documents. The default is \code{verbose=TRUE}.}
 }
@@ -38,7 +38,7 @@ The default is \code{Field = "TI"}.}
 the bibliometric data frame with a new column containing terms about the field tag indicated in the argument \code{Field}.
 }
 \description{
-It extracts terms from a textual field (abstract, title, author's keywords, etc.) of a bibliographic data frame.
+It extracts terms from a text field (abstract, title, author's keywords, etc.) of a bibliographic data frame.
 }
 \examples{
 # Example 1: Term extraction from titles
@@ -84,7 +84,7 @@ synonyms=synonyms, verbose=TRUE)
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame.
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis
 }

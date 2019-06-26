@@ -4,7 +4,7 @@
 #' @param object is the object for which a summary is desired.
 #' @param ... can accept two arguments:\cr
 #' \code{k} integer, used for table formatting (number of rows). Default value is 10.\cr
-#' \code{pause} locical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.\cr
+#' \code{pause} logical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.\cr
 #' \code{width} integer, used to define screen output width. Default value is \code{width = 120}.
 #' \code{verbose} logical, used to allow screen output. Default is TRUE.
 #' @return The function \code{summary} computes and returns a list of summary statistics of the object of class \code{bibliometrics}.

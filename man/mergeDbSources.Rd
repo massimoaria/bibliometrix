@@ -2,7 +2,7 @@
 % Please edit documentation in R/mergeDbSources.R
 \name{mergeDbSources}
 \alias{mergeDbSources}
-\title{Merge bibliographic data frames from SCOPUS and ISI WOS}
+\title{Merge bibliographic data frames from SCOPUS and WoS}
 \usage{
 mergeDbSources(..., remove.duplicated = TRUE)
 }
@@ -15,7 +15,7 @@ mergeDbSources(..., remove.duplicated = TRUE)
 the value returned from \code{mergeDbSources} is a bibliographic data frame.
 }
 \description{
-Merge bibliografic data frames from different databases (ISI and SCOPUS) into a single one.
+Merge bibliographic data frames from different databases (WoS and SCOPUS) into a single one.
 }
 \details{
 bibliographic data frames are obtained by the converting function \code{\link{convert2df}}. 

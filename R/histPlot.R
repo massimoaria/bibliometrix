@@ -12,8 +12,8 @@
 #' M \tab      \tab the bibliographic data frame}
 #' 
 #' is a network matrix obtained by the function \code{\link{histNetwork}}. 
-#' @param n is integer. It defines the numebr of vertices to plot.
-#' @param size is an integer. It define the point size of the vertices. Default value is 5.
+#' @param n is integer. It defines the number of vertices to plot.
+#' @param size is an integer. It defines the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}
 #' @param verbose is logical. If TRUE, results are printed on screen.
 #' @return It is a network object of the class \code{igraph}.

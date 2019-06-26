@@ -1,6 +1,7 @@
-#' Convert an ISI WoK Export file into a data frame
+#' Convert a Clarivate Analytics WoS Export file into a data frame
 #'
-#' It converts an ISI Wok Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+#' It is an internal function used by \code{\link{convert2df}} to convert a Clarivate Analytics WoS Export file 
+#' and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 #'
 #' @param D is a character array containing data read from a ISI Export file (in plain text format).
 #' @return a data frame with cases corresponding to articles and variables to Field Tag in the original ISI file.

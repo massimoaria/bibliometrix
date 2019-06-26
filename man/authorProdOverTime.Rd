@@ -9,7 +9,7 @@ authorProdOverTime(M, k = 10, graph = TRUE)
 \arguments{
 \item{M}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
 
-\item{k}{is a integer. It is the number of top auhtors to analize and plot. Default is \code{k = 10}.}
+\item{k}{is a integer. It is the number of top authors to analyze and plot. Default is \code{k = 10}.}
 
 \item{graph}{is logical. If TRUE the function plots the author production over time graph. Default is \code{graph = TRE}.}
 }

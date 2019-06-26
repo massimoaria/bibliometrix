@@ -190,5 +190,5 @@ Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research on perfor
 
 }
 
-\keyword{Science Mapping, Bibliometrics, Clarivate Analytics Web of Science, Scopus, citations, co-citation, citation-network, coupling, co-authors, co-occurence, collaboration, co-word analysis}
+\keyword{Science Mapping, Bibliometrics, Clarivate Analytics Web of Science, Scopus, citations, co-citation, network, co-authors, co-occurence, collaboration, co-word analysis}
 

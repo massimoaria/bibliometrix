@@ -8,7 +8,8 @@
 #' Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014). 
 #' Detecting the historical roots of research fields by reference publication 
 #' year spectroscopy (RPYS). Journal of the Association for Information Science and Technology, 
-#' 65(4), 751-764.)\cr\cr
+#' 65(4), 751-764.\cr\cr
+#' 
 #' @param M is a data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 #'   articles and variables to Field Tag in the original ISI or SCOPUS file.

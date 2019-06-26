@@ -4,6 +4,8 @@
 #'
 #' The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
 #' The network map can be plotted using internal R routines or using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
+#' 
+#' 
 #' @param NetMatrix is a network matrix obtained by the function \code{\link{biblioNetwork}}. 
 #' @param normalize is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
 #' Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.

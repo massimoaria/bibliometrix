@@ -43,7 +43,7 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 two-dimesional map the typological themes of a domain.\cr\cr
 
 Reference:\cr
-Cobo, M. J., López-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 
+Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 
 and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 }
 \examples{

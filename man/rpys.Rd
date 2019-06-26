@@ -32,7 +32,7 @@ Reference:\cr
 Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014). 
 Detecting the historical roots of research fields by reference publication 
 year spectroscopy (RPYS). Journal of the Association for Information Science and Technology, 
-65(4), 751-764.)\cr\cr
+65(4), 751-764.\cr\cr
 }
 \examples{
 

@@ -40,8 +40,8 @@ Journal of the American Society for Information Science and Technology, 59(1), 7
 Van Eck, N.J., Waltman, L., Van den Berg, J., & Kaymak, U. (2006). Visualizing the computational intelligence field. 
 IEEE Computational Intelligence Magazine, 1(4), 6– 10.\cr
 Van Eck, N.J., & Waltman, L. (2007). Bibliometric mapping of the computational intelligence field. 
-International Journal of Uncertainty, Fuzziness and Knowledge‐Based Systems, 15(5), 625– 645\cr.
-Van Eck, N. J., & Waltman, L. (2009). How to normalize cooccurrence data? An analysis of some well‐known similarity measures. 
+International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 15(5), 625– 645\cr.
+Van Eck, N. J., & Waltman, L. (2009). How to normalize cooccurrence data? An analysis of some well-known similarity measures. 
 Journal of the American society for information science and technology, 60(8), 1635-1651.\cr
 Zitt, M., Bassecoulard, E., & Okubo, Y. (2000). Shadows of the past in international cooperation: 
 Collaboration profiles of the top five producers of science. Scientometrics, 47(3), 627– 657.\cr

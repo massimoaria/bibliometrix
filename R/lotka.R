@@ -2,6 +2,7 @@
 #'
 #' It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926}).\cr\cr
 #' 
+#' Reference:
 #' Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the Washington academy of sciences, 16(12), 317-323.\cr
 #' 
 #' @param results is an object of the class '\code{bibliometrix}' for which the analysis of the authors' dominance ranking is desired.

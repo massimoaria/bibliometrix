@@ -26,6 +26,7 @@
 #' -- Title content co-occurrences (analysis = "co-occurrences", network = "titles")\cr
 #' -- Abstract content co-occurrences (analysis = "co-occurrences", network = "abstracts")\cr\cr
 #'
+#' References:\cr
 #' Batagelj, V., & Cerinsek, M. (2013). On bibliographic networks. Scientometrics, 96(3), 845-864.\cr
 #' Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of Informetrics, 11(4), 959-975.\cr
 #'

@@ -21,10 +21,7 @@ articles and variables to Field Tag in the original WoS or SCOPUS file.}
   Cited References}
 
   for a complete list of filed tags see:
-  \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr
-  
-Batagelj, V., & Cerinsek, M. (2013). On bibliographic networks. Scientometrics, 96(3), 845-864.\cr
-Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of Informetrics, 11(4), 959-975.\cr}
+  \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr}
 
 \item{type}{indicates the output format of co-occurrences: \tabular{lll}{
 \code{type = "matrix"} \tab   \tab produces an object of class
@@ -48,6 +45,10 @@ a co-occurrence matrix with cases corresponding to manuscripts and variables to 
 This co-occurrence matrix can be transformed into a collection of compatible
 networks. Through matrix multiplication you can obtain different networks. 
 The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
+
+References:\cr
+Batagelj, V., & Cerinsek, M. (2013). On bibliographic networks. Scientometrics, 96(3), 845-864.\cr
+Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of Informetrics, 11(4), 959-975.\cr
 }
 \examples{
 # EXAMPLE 1: Articles x Authors co-occurrence matrix

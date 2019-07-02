@@ -11,8 +11,9 @@ bibliometrix
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
-
-<img src="http://www.bibliometrix.org/logo.png" align="middle" width="400"  />
+<p align="center">
+<img src="http://www.bibliometrix.org/logo.png" width="300"  />
+</p>
 
 ## Overview
 

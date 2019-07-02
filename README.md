@@ -1,4 +1,3 @@
-<p align="center">
 
 bibliometrix
 ====================================
@@ -12,7 +11,7 @@ bibliometrix
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 
-
+<p align="center">
 <img src="http://www.bibliometrix.org/logo.png" width="300"  />
 </p>
 

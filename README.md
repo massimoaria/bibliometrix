@@ -14,7 +14,7 @@ bibliometrix
 
 [![Logo](http://www.bibliometrix.org/logo.png  | width=100)](http://www.bibliometrix.org)
 
-<img src="http://www.bibliometrix.org/logo.png" width="200" height="200" />
+<img src="http://www.bibliometrix.org/logo.png" width="200"  />
 
 ## Overview
 

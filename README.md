@@ -32,6 +32,38 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 * Building and plotting matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
 
+**bibliometrix** inludes a **biblioshiny: bibliometrix for no-coders**
+
+biblioshiny is a shiny app providing a web-interface for bibliometrix.
+
+It supports scholars in easy use of the main features of bibliometrix:
+
+* Data importing and conversion to data frame collection
+
+* Data filtering
+
+* Analytics and Plots for three different level metrics:
+
+    - Sources  
+
+    - Authors  
+
+    - Documents   
+
+* Analysis of three structures of Knowledge (K-structures):  
+
+    - Conceptual Structure  
+
+    - Intellectual Structure  
+
+    - Social Strucutre
+
+
+
+**How to use biblioshiny**
+
+Please follow the biiblioshiny tutorial at www.bibliometrix.org/biblioshiny 
+
 ## Suggested citation
 
 If you use this package for your research, we would appreciate a citation.

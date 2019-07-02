@@ -32,6 +32,8 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 * Building and plotting matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
 
+## biblioshiny
+
 **bibliometrix** inludes a **biblioshiny: bibliometrix for no-coders**
 
 biblioshiny is a shiny app providing a web-interface for bibliometrix.
@@ -60,9 +62,9 @@ It supports scholars in easy use of the main features of bibliometrix:
 
 
 
-**How to use biblioshiny**
+### How to use biblioshiny
 
-Please follow the biiblioshiny tutorial at www.bibliometrix.org/biblioshiny 
+Please follow the biblioshiny tutorial at www.bibliometrix.org/biblioshiny 
 
 ## Suggested citation
 
@@ -99,7 +101,7 @@ Stable version from CRAN
 install.packages("bibliometrix")
 ```
 
-Or development version from GitHub
+Developers version from GitHub
 
 
 ```r

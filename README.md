@@ -12,7 +12,7 @@ bibliometrix
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 
-[![Logo](http://www.bibliometrix.org/logo_small.png)](http://www.bibliometrix.org)
+[![Logo](http://www.bibliometrix.org/logo.png)](http://www.bibliometrix.org)
 
 ## Overview
 

@@ -36,7 +36,7 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 
 **bibliometrix** includes **biblioshiny: bibliometrix for no-coders**
 
-**biblioshiny* is a *shiny app providing a web-interface for bibliometrix*.
+**biblioshiny** is a *shiny app providing a web-interface for bibliometrix*.
 
 It supports scholars in easy use of the main features of bibliometrix:
 

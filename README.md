@@ -14,6 +14,8 @@ bibliometrix
 
 [![Logo](http://www.bibliometrix.org/logo.png  | width=100)](http://www.bibliometrix.org)
 
+<img src="https://camo.githubusercontent.com/..." data-canonical-src="http://www.bibliometrix.org/logo.png" width="200" height="200" />
+
 ## Overview
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.

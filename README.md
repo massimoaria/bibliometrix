@@ -12,8 +12,8 @@ bibliometrix
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 
-[![Logo](http://www.bibliometrix.org/logo_small.jpg)](http://www.bibliometrix.org)
-
+[![Logo](http://www.bibliometrix.org/logo.png)](http://www.bibliometrix.org)
+<img src="inst/logo/logo.png" align="right" width="120" />
 ## Overview
 
 **bibliometrix** package provides a set of tools for quantitative research in bibliometrics and scientometrics.

@@ -69,7 +69,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   #S=NetMatrix
   t = tempfile();pdf(file=t) #### trick to hide igraph plot
   Net <- networkPlot(NetMatrix, normalize="association",n=n, Title = "Keyword co-occurrences",type="auto",
-                     labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
+                     labelsize = 2, halo = F,cluster="louvain",remove.isolates=TRUE,
                      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                      size=1,edges.min = 1, label.n=n)
   dev.off();file.remove(t) ### end of trick

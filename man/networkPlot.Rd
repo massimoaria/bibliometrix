@@ -5,7 +5,7 @@
 \title{Plotting Bibliographic networks}
 \usage{
 networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
-  Title = "Plot", type = "kamada", label = TRUE, labelsize = 1,
+  Title = "Plot", type = "auto", label = TRUE, labelsize = 1,
   label.cex = FALSE, label.color = FALSE, label.n = NULL,
   halo = FALSE, cluster = "walktrap", vos.path = NULL, size = 3,
   size.cex = FALSE, curved = FALSE, noloops = TRUE,
@@ -24,7 +24,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{Title}{is a character indicating the plot title.}
 
-\item{type}{is a character object. It indicates the network map layout:
+\item{type}{is a character object. It indicates the network map layout: 
 
 \tabular{lll}{
 \code{type="auto"}\tab   \tab Automatic layout selection\cr
@@ -32,8 +32,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 \code{type="sphere"}\tab   \tab Sphere layout\cr
 \code{type="mds"}\tab   \tab Multidimensional Scaling layout\cr
 \code{type="fruchterman"}\tab   \tab Fruchterman-Reingold layout\cr
-\code{type="kamada"}\tab   \tab  Kamada-Kawai layout\cr
-\code{type="vosviewer"}\tab   \tab Network is plotted using VOSviewer software\cr}}
+\code{type="kamada"}\tab   \tab  Kamada-Kawai layout}}
 
 \item{label}{is logical. If TRUE vertex labels are plotted.}
 
@@ -86,21 +85,22 @@ It is a list containing the following elements:
 }
 \details{
 The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
-The network map can be plotted using internal R routines or using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 }
 \examples{
-# EXAMPLE Co-citation network
+# EXAMPLE Keywordd co-occurrence network
 
-data(scientometrics)
+data(management)
 
-NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
-network = "references", sep = ";")
+NetMatrix <- biblioNetwork(management, analysis = "co-occurrences", 
+network = "keywords", sep = ";")
 
-net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
+net <- networkPlot(NetMatrix, n = 30, type = "auto", Title = "Co-occurrence Network",labelsize=1) 
 
 }
 \seealso{
 \code{\link{biblioNetwork}} to compute a bibliographic network.
+
+\code{\link{net2VOSviewer}} to export and plot the network with VOSviewer software.
 
 \code{\link{cocMatrix}} to compute a co-occurrence matrix.
 

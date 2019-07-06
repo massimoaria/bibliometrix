@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: An R-Tool for Comprehensive Science Mapping Analysis
-Version: 2.2.1
+Version: 2.2.2
 Date: 2019-06-26
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
@@ -36,8 +36,10 @@ Imports: stats,
 		 SnowballC,
 		 stringdist,
 		 stringr		 
-Suggests: knitr, 
-		  rmarkdown,
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0)
 RoxygenNote: 6.1.1
 NeedsCompilation: no
 Packaged: 2019-06-26 09:40:50 UTC; aria

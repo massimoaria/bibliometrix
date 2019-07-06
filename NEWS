@@ -1,3 +1,15 @@
+bibliometrix v2.2.2 (Release date: )
+==============
+
+New functionality:
+* net2VOSviewer: introduced this new function to export and plot networks in VOSviewer software
+
+Changes:
+* networkPlot: Fixed an issue with "remove.isolates" argument
+* networkPlot: Removed vosviewer option in "type" argument. Now networks can be exported in VOSviewer using the new function net2VOSviewer()
+
+
+
 bibliometrix v2.2.1 (Release date: 2019-06-26)
 ==============
 

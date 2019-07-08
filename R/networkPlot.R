@@ -77,7 +77,7 @@ networkPlot <-
            label.color = FALSE,
            label.n = NULL,
            halo = FALSE,
-           cluster = "walktrap",
+           cluster = "louvain",
            vos.path = NULL,
            size = 3,
            size.cex = FALSE,
@@ -158,10 +158,11 @@ networkPlot <-
       if (n > dim(NetMatrix)[1]) {
         n <- dim(NetMatrix)[1]
       }
-      NetDegree <- unname(sort(deg, decreasing = TRUE)[n])
-      bsk.network <- delete.vertices(bsk.network, which(deg < NetDegree))
+      nodes <- names(sort(deg, decreasing = TRUE)[1:n])
+      
+      bsk.network <- delete.vertices(bsk.network, which(!(V(bsk.network)$name %in% nodes)))
       if (!isTRUE(bsk.S)) {
-        bsk.S <- delete.vertices(bsk.S, which(deg < NetDegree))
+        bsk.S <- delete.vertices(bsk.S,  which(!(V(bsk.S)$name %in% nodes)))
       }
     }
     

@@ -111,7 +111,7 @@ termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remo
     listTERMS=lapply(listTERMS,function(l){
       s=(strsplit(synonyms,split=";"))
       
-      for (i in length(synonyms)){
+      for (i in 1:length(synonyms)){
         
         ind=which(l %in% trim(s[[i]]))
         if (length(ind)>0){l[ind]=trim(s[[i]][1])}

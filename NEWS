@@ -2,7 +2,9 @@ bibliometrix v2.2.2 (Release date: )
 ==============
 
 New functionality:
+* biblioshiny: added "remove isolated nodes" option in network analysis
 * net2VOSviewer: introduced this new function to export and plot networks in VOSviewer software
+
 
 Changes:
 * networkPlot: Fixed an issue with "remove.isolates" argument

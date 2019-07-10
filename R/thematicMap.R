@@ -168,16 +168,17 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
 
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity, text=(df$words))) +
     geom_point(group="NA",aes(size=log(as.numeric(df$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
-  
-  if (isTRUE(repel)){
-  g=g+geom_label_repel(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)}else{
-    g=g+geom_text(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)
+  if (size>0){
+    if (isTRUE(repel)){
+      g=g+geom_label_repel(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)}else{
+      g=g+geom_text(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)
+    }
   }
   
     g=g+geom_hline(yintercept = meandens,linetype=2, color=adjustcolor("black",alpha.f=0.7)) +
     geom_vline(xintercept = meancentr,linetype=2, color=adjustcolor("black",alpha.f=0.7)) + 
       theme(legend.position="none") +
-    scale_radius(range=c(15*size, 100*size))+
+    scale_radius(range=c(5*(1+size), 30*(1+size)))+
       labs(x = "Centrality", y = "Density")+
       xlim(xlimits)+
       ylim(ylimits)+

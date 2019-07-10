@@ -112,13 +112,14 @@ if (Field=="CR"){
   S<-sub("\\;",",",S)
   S<-sub("\\;",",",S)
   S<-gsub("\\;.*","",S)
-  uniqueField<-unique(S)
+  uniqueField<-unique(trimws(S))
   Fi<-lapply(Fi, function(l){
     l<-gsub("\\,",";",l)
     l<-sub("\\;",",",l)
     l<-sub("\\;",",",l)
     l<-gsub("\\;.*","",l)
     l<-l[nchar(l)>0]
+    l<-trimws(l)
     return(l)
   })
   }

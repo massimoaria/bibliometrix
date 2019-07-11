@@ -1265,7 +1265,7 @@ server <- function(input, output, session) {
   
   output$trendTopicsTable <- DT::renderDT({
     
-    tpData=values$trendTopis$df
+    tpData=values$trendTopics$df_graph
     
     DT::datatable(tpData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',

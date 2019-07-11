@@ -7,6 +7,7 @@
 #' @param timespan is a vector with the min and max year. If it is = NULL, the analysis is performed on the entire period. Default is \code{timespan = NULL}.
 #' @param min.freq is an integer. It indicates the min frequency of the items to include in the analysis
 #' @param n.items is an integer. I indicates the maximun number of items per year to include in the plot.
+#' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}.
 #' @param graph is logical. If TRUE the function plots Filed Tag distribution by Year graph. Default is \code{graph = TRUE}.
 #' @return The function \code{fieldByYear} returns a list containing threeobjects:
 #' \tabular{lll}{
@@ -31,6 +32,7 @@ fieldByYear <- function(M,
                         timespan = NULL,
                         min.freq = 1,
                         n.items = 5,
+                        labelsize = 5,
                         graph = TRUE) {
   
   A <- cocMatrix(M, Field = field, binary = FALSE)
@@ -61,11 +63,12 @@ fieldByYear <- function(M,
     top_n(n.items, .data$freq)
   
   g <- ggplot(df, aes(x = year, y = log(freq))) +
-    geom_point() +
-    geom_text_repel(aes(label = tolower(item))) +
+    geom_point(color = adjustcolor("black", alpha.f = 0.5)) +
+    geom_text_repel(aes(label = tolower(item)), size=5, color=adjustcolor("royalblue4", alpha.f = 0.7)) +
     scale_x_continuous(breaks = seq(min(df$year, na.rm = TRUE), max(df$year, na.rm = TRUE), by = 2)) +
     ylab("log(frequency)") +
     xlab("year") +
+    labs(title= "Trend Topics") +
     theme(
       legend.position = 'right'
       ,
@@ -79,7 +82,7 @@ fieldByYear <- function(M,
       ,
       plot.title = element_text(size = 24)
       ,
-      axis.title = element_text(size = 14, color = '#555555')
+      axis.title = element_text(size = 12, color = '#555555')
       ,
       axis.title.y = element_text(
         vjust = 1,

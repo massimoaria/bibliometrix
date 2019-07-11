@@ -1240,8 +1240,43 @@ server <- function(input, output, session) {
     
   })
   
+      #### Trend Topics ####
+  output$trendSliderPY <- renderUI({
+    
+    sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
+                max = max(values$M$PY,na.rm=T), value = c(min(values$M$PY,na.rm=T),max(values$M$PY,na.rm=T)))
+  })
+  
+  output$trendTopicsPlot <- renderPlot({
+    
+    input$applyTrendTopics
+    isolate({
+      if (input$trendTerms %in% c("TI","AB")){
+        values$M=termExtraction(values$M, Field = input$trendTerms, stemming = input$trendStemming, verbose = FALSE)
+        field=paste(input$trendTerms,"_TM",sep="")
+      } else {field=input$trendTerms}
+      values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
+                                        n.items = input$trendNItems, labelsize = input$trendSize, graph = FALSE)
+      plot(values$trendTopics$graph)
+    })
+    
+  },height = 700)
 
   
+  output$trendTopicsTable <- DT::renderDT({
+    
+    tpData=values$trendTopis$df
+    
+    DT::datatable(tpData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tpData))-1))))) %>%
+      formatStyle(names(tpData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+    
   ### Conceptual Structure  #####
 
       ### Co-occurrences network ----

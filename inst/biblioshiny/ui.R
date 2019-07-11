@@ -980,6 +980,54 @@ navbarMenu("Documents",
                                     ))
                         
                       )
+                    )),
+           ### TREND TOPICS ----
+           tabPanel("Trend Topics",
+                    
+                    sidebarLayout(
+                      # Sidebar with a slider and selection inputs
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Trend Topics"))),
+                                   br(),
+                                   
+                                   actionButton("applyTrendTopics", "Apply!"),
+                                   h4(em(strong("Method Parameters:"))),
+                                   " ",
+                                   selectInput("trendTerms", "Field",
+                                               choices = c("Keywords Plus" = "ID",
+                                                           "Author's keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "ID"),
+                                   conditionalPanel(
+                                     condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
+                                     selectInput("trendStemming", label="Word Stemming",
+                                                 choices = c("Yes" = TRUE,
+                                                             "No" = FALSE),
+                                                 selected = FALSE)),
+                                   uiOutput("trendSliderPY"),
+                                   hr(),
+                                   h4(em(strong("Graphical Parameters:"))),
+                                   " ",
+                                   #uiOutput("trendMinFreq"),
+                                   sliderInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
+                                   sliderInput("trendNItems", label = "N. of Words per Year", min = 1, max = 20, step = 1, value = 5),
+                                   sliderInput("trendSize", label = "Word label size", min = 0, max = 20, step = 1, value = 5)
+                                   
+                                   
+                      ),
+                      
+                      # 
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotOutput(outputId = "trendTopicsPlot"))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
+                                    ))
+                        
+                      )
                     ))
 ),
 

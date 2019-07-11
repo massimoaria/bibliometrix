@@ -5,7 +5,7 @@
 \title{Field Tag distribution by Year}
 \usage{
 fieldByYear(M, field = "ID", timespan = NULL, min.freq = 1,
-  n.items = 5, graph = TRUE)
+  n.items = 5, labelsize = 5, graph = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
@@ -18,6 +18,8 @@ standard ISI WoS Field Tag codify.}
 \item{min.freq}{is an integer. It indicates the min frequency of the items to include in the analysis}
 
 \item{n.items}{is an integer. I indicates the maximun number of items per year to include in the plot.}
+
+\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}.}
 
 \item{graph}{is logical. If TRUE the function plots Filed Tag distribution by Year graph. Default is \code{graph = TRUE}.}
 }

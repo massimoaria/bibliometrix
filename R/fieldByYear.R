@@ -63,8 +63,8 @@ fieldByYear <- function(M,
     top_n(n.items, .data$freq)
   
   g <- ggplot(df, aes(x = year, y = log(freq))) +
-    geom_point(color = adjustcolor("black", alpha.f = 0.5)) +
-    geom_text_repel(aes(label = tolower(item)), size=5, color=adjustcolor("royalblue4", alpha.f = 0.7)) +
+    geom_point(color = adjustcolor("royalblue4", alpha.f = 0.5), size = 1) +
+    geom_text_repel(aes(label = tolower(item)), size=labelsize, color=adjustcolor("royalblue4", alpha.f = 0.7)) +
     scale_x_continuous(breaks = seq(min(df$year, na.rm = TRUE), max(df$year, na.rm = TRUE), by = 2)) +
     ylab("log(frequency)") +
     xlab("year") +
@@ -82,7 +82,7 @@ fieldByYear <- function(M,
       ,
       plot.title = element_text(size = 24)
       ,
-      axis.title = element_text(size = 12, color = '#555555')
+      axis.title = element_text(size = 14, color = '#555555')
       ,
       axis.title.y = element_text(
         vjust = 1,

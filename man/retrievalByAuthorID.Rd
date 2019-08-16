@@ -15,7 +15,7 @@ SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.}
 
 \item{remove.duplicated}{is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.}
 
-\item{country}{is logical. If TRUE authors' country information will be dowloaded from SCOPUS.}
+\item{country}{is logical. If TRUE authors' country information will be downloaded from SCOPUS.}
 }
 \value{
 a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
@@ -73,5 +73,5 @@ Uses SCOPUS API search to get information about documents on a set of authors us
 
 }
 \seealso{
-\code{\link{idByAuthor}} for downloading auhtor information and SCOPUS ID.
+\code{\link{idByAuthor}} for downloading author information and SCOPUS ID.
 }

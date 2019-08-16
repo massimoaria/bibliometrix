@@ -1,6 +1,7 @@
 #' Convert a SCOPUS Export file into a data frame
 #'
-#' It converts a SCOPUS Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+#' It is an internal function used by \code{\link{convert2df}} to convert a SCOPUS Export file and create a data frame from it, 
+#' with cases corresponding to articles and variables to Field Tag in the original file.
 #'
 #' @param D is a character array containing data read from a SCOPUS Export file (in bibtex format).
 #' @return a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.

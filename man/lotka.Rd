@@ -22,7 +22,11 @@ the list contains the following objects:
 \code{AuthorProd}    \tab   \tab Authors' Productivity frequency table}
 }
 \description{
-It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926})
+It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926}).\cr\cr
+}
+\details{
+Reference:
+Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the Washington academy of sciences, 16(12), 317-323.\cr
 }
 \examples{
 data(scientometrics)

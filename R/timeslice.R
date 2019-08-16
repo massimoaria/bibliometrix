@@ -5,9 +5,9 @@
 #' 
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
+#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.
 #' @param breaks is a numeric vector of two or more unique cut points. 
-#' @param k is a integer value giving the number of intervals into which the data frame is to be cut. \code{k} is used only in case \code{breaks} argument is not provided. The default is \code{k = 5}.
+#' @param k is an integer value giving the number of intervals into which the data frame is to be cut. \code{k} is used only in case \code{breaks} argument is not provided. The default is \code{k = 5}.
 #' @return the value returned from \code{split} is a list containing the data frames for each sub-period.
 #'
 #' 

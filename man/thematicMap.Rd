@@ -5,7 +5,7 @@
 \title{Create a thematic map}
 \usage{
 thematicMap(M, field = "ID", n = 250, minfreq = 5,
-  stemming = FALSE, size = 0.5, repel = TRUE)
+  stemming = FALSE, size = 0.5, n.labels = 1, repel = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic dataframe.}
@@ -15,11 +15,13 @@ thematicMap(M, field = "ID", n = 250, minfreq = 5,
 
 \item{n}{is an integer. It indicates the number of terms to include in the analysis.}
 
-\item{minfreq}{is a integer. It indicates the minimun frequency of a cluster.}
+\item{minfreq}{is a integer. It indicates the minimum frequency of a cluster.}
 
-\item{stemming}{is logical. If it is TRUE the word (from titles or abtracts) will be stemmed (using the Porter's algorithm).}
+\item{stemming}{is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).}
 
-\item{size}{is numerical. It indicates del size of the cluster circles and is a numebr in the range (0.01,1).}
+\item{size}{is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).}
+
+\item{n.labels}{is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.}
 
 \item{repel}{is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.}
 }
@@ -38,7 +40,11 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 }
 \details{
 \code{thematicMap} starts from a co-occurrence keyword network to plot in a 
-two-dimesional map the typological themes of a domain.
+two-dimesional map the typological themes of a domain.\cr\cr
+
+Reference:\cr
+Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 
+and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 }
 \examples{
 

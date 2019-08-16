@@ -2,22 +2,28 @@
 #'
 #' \code{cocMatrix} computes co-occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
 #'
-#' This co-occurrence matrix can be tranformed into a collection of compatible
+#' This co-occurrence matrix can be transformed into a collection of compatible
 #' networks. Through matrix multiplication you can obtain different networks. 
-#' The fuction follows the approach proposed by Batagely and Cerinsek (2013).\cr\cr
+#' The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
+#' 
+#' References:\cr
+#' Batagelj, V., & Cerinsek, M. (2013). On bibliographic networks. Scientometrics, 96(3), 845-864.\cr
+#' Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of Informetrics, 11(4), 959-975.\cr
+#' 
 #' @param M is a data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-#'   articles and variables to Field Tag in the original ISI or SCOPUS file.
+#'   articles and variables to Field Tag in the original WoS or SCOPUS file.
 #' @param Field is a character object. It indicates one of the field tags of the
-#'   standard ISI WoS Field Tag codify. Field can be equal to one of this tags:
+#'   standard ISI WoS Field Tag codify. Field can be equal to one of these tags:
 #'   \tabular{lll}{ \code{AU}\tab   \tab Authors\cr \code{SO}\tab   \tab
 #'   Publication Name (or Source)\cr \code{JI}\tab   \tab ISO Source
 #'   Abbreviation\cr \code{DE}\tab   \tab Author Keywords\cr \code{ID}\tab
-#'   \tab Keywords associated by ISI or SCOPUS database \cr \code{CR}\tab   \tab
+#'   \tab Keywords associated by WoS or SCOPUS database \cr \code{CR}\tab   \tab
 #'   Cited References}
 #'
 #'   for a complete list of filed tags see:
-#'   \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
+#'   \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr
+#'   
 #'
 #' @param type indicates the output format of co-occurrences: \tabular{lll}{
 #'   \code{type = "matrix"} \tab   \tab produces an object of class
@@ -106,13 +112,14 @@ if (Field=="CR"){
   S<-sub("\\;",",",S)
   S<-sub("\\;",",",S)
   S<-gsub("\\;.*","",S)
-  uniqueField<-unique(S)
+  uniqueField<-unique(trimws(S))
   Fi<-lapply(Fi, function(l){
     l<-gsub("\\,",";",l)
     l<-sub("\\;",",",l)
     l<-sub("\\;",",",l)
     l<-gsub("\\;.*","",l)
     l<-l[nchar(l)>0]
+    l<-trimws(l)
     return(l)
   })
   }
@@ -125,7 +132,6 @@ colnames(WF)<-uniqueField
 rownames(WF)<-rownames(M)
   # Population of WA matrix
   for (i in 1:size[1]){
-    #print(i)
     if (length(Fi[[i]])>0 & !is.na(Fi[[i]][1])) {
       #print(i)
       #if (Field=="CR"){Fi[[i]]=reduceRefs(Fi[[i]])}
@@ -134,7 +140,8 @@ rownames(WF)<-rownames(M)
       WF[i,uniqueField %in% Fi[[i]]]<-1}else{
         ## full counting
         tab=table(Fi[[i]])
-        WF[i,names(tab)]=tab
+        name=names(tab)
+        WF[i,name[nchar(name)>0]]=tab[nchar(name)>0]
         }
       }
 	}

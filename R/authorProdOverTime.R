@@ -2,8 +2,8 @@
 #'
 #' It calculates and plots the author production (in terms of number of publications) over the time. 
 #' @param M is a bibliographic data frame obtained by \code{\link{convert2df}} function.
-#' @param k is a integer. It is the number of top auhtors to analize and plot. Default is \code{k = 10}.
-#' @param graph is logical. If TRUE the function plots the author production over time graph. Default is \code{graph = TRE}.
+#' @param k is a integer. It is the number of top authors to analyze and plot. Default is \code{k = 10}.
+#' @param graph is logical. If TRUE the function plots the author production over time graph. Default is \code{graph = TRUE}.
 #' @return The function \code{authorProdOverTime} returns a list containing two objects:
 #' \tabular{lll}{
 #' \code{dfAU}  \tab   \tab is a data frame\cr

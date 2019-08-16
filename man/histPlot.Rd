@@ -4,8 +4,8 @@
 \alias{histPlot}
 \title{Plotting historical co-citation network}
 \usage{
-histPlot(histResults, n = 20, size.cex = TRUE, size = 5,
-  labelsize = 0.8, arrowsize = 0.1, edgesize = 2, color = TRUE)
+histPlot(histResults, n = 20, size = 5, labelsize = 5,
+  verbose = TRUE)
 }
 \arguments{
 \item{histResults}{is an object of \code{class} "list" containing the following components:
@@ -18,19 +18,13 @@ M \tab      \tab the bibliographic data frame}
 
 is a network matrix obtained by the function \code{\link{histNetwork}}.}
 
-\item{n}{is integer. It defines the numebr of vertices to plot.}
+\item{n}{is integer. It defines the number of vertices to plot.}
 
-\item{size.cex}{is logical. If TRUE the point size of each vertex is proportional to its degree. Default value is TRUE.}
+\item{size}{is an integer. It defines the point size of the vertices. Default value is 5.}
 
-\item{size}{is an integer. It define the point size of the vertices. Default value is 5.}
+\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}}
 
-\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}}
-
-\item{arrowsize}{is numerical. It indicates the edge arrow size.}
-
-\item{edgesize}{is numerical. It indicates the edge size.}
-
-\item{color}{is logical. If TRUE, egdes are colored according to citing references.}
+\item{verbose}{is logical. If TRUE, results are printed on screen.}
 }
 \value{
 It is a network object of the class \code{igraph}.
@@ -48,7 +42,7 @@ data(scientometrics)
 
 histResults <- histNetwork(scientometrics, sep = ";")
 
-net <- histPlot(histResults, n=20, size.cex=TRUE, size = 5, arrowsize=0.3)
+net <- histPlot(histResults, n=20, labelsize = 5)
 
 }
 \seealso{

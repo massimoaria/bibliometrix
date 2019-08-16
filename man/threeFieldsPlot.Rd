@@ -9,9 +9,9 @@ threeFieldsPlot(M, fields = c("AU", "DE", "SO"), n = c(20, 20, 20),
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.}
 
-\item{fields}{is a character vector. It indicates the fields to analize using the standard WoS field tags. 
+\item{fields}{is a character vector. It indicates the fields to analyze using the standard WoS field tags. 
 Default is \code{fields = c("AU","DE", "SO")}.}
 
 \item{n}{is a integer vector. It indicates how many items to plot, for each of the three fields. 

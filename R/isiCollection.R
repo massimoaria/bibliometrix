@@ -1,8 +1,8 @@
-#' "Bibliometrics" manuscripts from ISI WOS.
+#' "Bibliometrics" manuscripts from Clarivate Analytics WoS.
 #'
 #' Manuscripts including the term "bibliometrics" in the title.\cr
 #' Period: 1985 - 2017\cr
-#' Database: \href{http://www.webofknowledge.com}{ISI Web of Knowledge}\cr
+#' Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 #' Format: bibtex\cr
 #'
 #' @format A data frame with 329 rows and 16 variables:
@@ -13,7 +13,7 @@
 #' \item{JI}{ISO Source Abbreviation}
 #' \item{DT}{Document Type}
 #' \item{DE}{Author Keywords}
-#' \item{ID}{Keywords associated by ISI or SCOPUS database}
+#' \item{ID}{Keywords associated by WoS or SCOPUS database}
 #' \item{AB}{Abstract}
 #' \item{C1}{Author Address}
 #' \item{RP}{Reprint Address}

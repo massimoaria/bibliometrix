@@ -16,20 +16,23 @@ column of the data frame. The default is \code{sep = ";"}.}
 
 \item{timespan}{is a numeric vector c(min year,max year). The default value is NULL (the entire timespan is considered).}
 
-\item{graph}{is a logical. If TRUE the function plot the spectrography otherwise the plot is created but not drawn down.}
+\item{graph}{is a logical. If TRUE the function plot the spectroscopy otherwise the plot is created but not drawn down.}
 }
 \value{
-a list containing the spectroscopy (class ggplot2) and two dataframes with the number of citation 
-per year and the list of the cited-references for each year, respectively.
+a list containing the spectroscopy (class ggplot2) and two dataframes with the number of citations
+per year and the list of the cited references for each year, respectively.
 }
 \description{
 \code{rpys} computes a Reference Publication Year Spectroscopy for detecting 
 the Historical Roots of Research Fields.
 The method was introduced by Marx et al., 2014.\cr\cr
-(Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014). 
+}
+\details{
+Reference:\cr
+Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014). 
 Detecting the historical roots of research fields by reference publication 
 year spectroscopy (RPYS). Journal of the Association for Information Science and Technology, 
-65(4), 751-764.)\cr\cr
+65(4), 751-764.\cr\cr
 }
 \examples{
 

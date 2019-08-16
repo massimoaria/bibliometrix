@@ -1,10 +1,10 @@
 #' Number of documents published annually per Top Sources
 #'
-#' It calculates yearly published docuemnts of the top sources.
+#' It calculates yearly published documents of the top sources.
 #'
 #' @param M is a data frame obtained by the converting function \code{\link{convert2df}}.
 #'        It is a data matrix with cases corresponding to articles and variables to Field Tag in the original ISI or SCOPUS file.
-#' @param top is a numeric. It indicates the number of top sources to analize. The default value is 5.
+#' @param top is a numeric. It indicates the number of top sources to analyze. The default value is 5.
 #' @param cdf is a logical. If TRUE, the function calculates the cumulative occurrences distribution. 
 #' @return an object of class \code{data.frame}
 #' @examples

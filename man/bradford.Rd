@@ -23,7 +23,10 @@ Bradford's law is a pattern first described by (\cite{Samuel C. Bradford, 1934})
 of searching for references in science journals.
 
 One formulation is that if journals in a field are sorted by number of articles into three groups, each with about one-third of all articles, 
-then the number of journals in each group will be proportional to 1:n:n2.
+then the number of journals in each group will be proportional to 1:n:n2.\cr\cr
+
+Reference:\cr
+Bradford, S. C. (1934). Sources of information on specific subjects. Engineering, 137, 85-86.\cr
 }
 \examples{
 

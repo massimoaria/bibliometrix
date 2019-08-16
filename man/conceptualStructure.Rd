@@ -16,7 +16,7 @@ articles and variables to Field Tag in the original ISI or SCOPUS file.}
 
 \item{field}{is a character object. It indicates one of the field tags of the
 standard ISI WoS Field Tag codify. 
-field can be equal to one of this tags:
+field can be equal to one of these tags:
 \tabular{lll}{ 
 \code{ID}\tab   \tab Keywords Plus associated by ISI or SCOPUS database\cr 
 \code{DE}\tab   \tab Author's keywords\cr 
@@ -32,17 +32,17 @@ field can be equal to one of this tags:
 
 \item{quanti.supp}{is a vector indicating the indexes of the quantitative supplementary variables. It is used only for CA and MCA.}
 
-\item{minDegree}{is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.}
+\item{minDegree}{is an integer. It indicates the minimum occurrences of terms to analize and plot. The default value is 2.}
 
-\item{clust}{is an integer or a character. If clust="auto", the numebr of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.}
+\item{clust}{is an integer or a character. If clust="auto", the number of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.}
 
-\item{k.max}{is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 20.}
+\item{k.max}{is an integer. It indicates the maximum number of cluster to keep. The default value is 5. The max value is 20.}
 
 \item{stemming}{is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}}
 
-\item{documents}{is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.}
+\item{documents}{is an integer. It indicates the number of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.}
 
 \item{graph}{is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE}
 }

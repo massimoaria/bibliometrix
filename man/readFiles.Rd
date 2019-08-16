@@ -7,16 +7,16 @@
 readFiles(...)
 }
 \arguments{
-\item{...}{is a sequence of names of files downaloaded from ISI WOS.(in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format).}
+\item{...}{is a sequence of names of files downloaded from WOS.(in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format).}
 }
 \value{
 a character vector of length the number of lines read.
 }
 \description{
-It loads a sequence of SCOPUS and Thomson Reuters' ISI Web of Knowledge export files and create a large character vector from it.
+It loads a sequence of SCOPUS and Clarivate Analytics WoS export files and create a large character vector from it.
 }
 \examples{
-# ISI or SCOPUS Export files can be read using \\code{\\link{readFiles}} function:
+# WoS or SCOPUS Export files can be read using \\code{\\link{readFiles}} function:
 
 # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 

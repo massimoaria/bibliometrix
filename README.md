@@ -1,9 +1,8 @@
 
-
 bibliometrix
 ====================================
 
-## An R-tool for comprehensive science mapping analysis.
+## An R-tool for comprehensive science mapping analysis. 
 
 [![bibliometrix: An R-tool for comprehensive science mapping analysis.](http://www.bibliometrix.org/altro/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
@@ -12,7 +11,9 @@ bibliometrix
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 
-[![Logo](http://www.bibliometrix.org/logo_small.jpg)](http://www.bibliometrix.org)
+<p align="center">
+<img src="http://www.bibliometrix.org/logo.png" width="300"  />
+</p>
 
 ## Overview
 
@@ -30,6 +31,40 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 
 * Building and plotting matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
+
+## biblioshiny
+
+**bibliometrix** includes **biblioshiny: bibliometrix for no-coders**
+
+**biblioshiny** is a *shiny app providing a web-interface for bibliometrix*.
+
+It supports scholars in easy use of the main features of bibliometrix:
+
+* Data importing and conversion to data frame collection
+
+* Data filtering
+
+* Analytics and Plots for three different level metrics:
+
+    - Sources  
+
+    - Authors  
+
+    - Documents   
+
+* Analysis of three structures of Knowledge (K-structures):  
+
+    - Conceptual Structure  
+
+    - Intellectual Structure  
+
+    - Social Strucutre
+
+
+
+### How to use biblioshiny
+
+Please follow the biblioshiny tutorial at www.bibliometrix.org/biblioshiny 
 
 ## Suggested citation
 
@@ -66,7 +101,7 @@ Stable version from CRAN
 install.packages("bibliometrix")
 ```
 
-Or development version from GitHub
+Developers version from GitHub
 
 
 ```r

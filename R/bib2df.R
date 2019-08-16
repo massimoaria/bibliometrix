@@ -1,6 +1,6 @@
 #' Convert a bibtex file into a data frame
 #'
-#' It converts a bibtex file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+#' It is an internal function used by \code{\link{convert2df}} to convert a bibtex file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 #'
 #' @param D is a character array containing bibliographic data in bibtex format.
 #' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"scopus"} or \code{generic}. Default is \code{dbsource = "isi"}.
@@ -133,6 +133,7 @@ preprocessing <- function(D){
   #D=gsub("\\}\\]\\}","\\]",D)
   D=gsub("\\{\\{","\\{",D)
   D=gsub("\\}\\}","\\}",D)
+  D=gsub("\\{''\\}","",D)
   
   D=gsub(" = ","=",D)
   #ind=which(regexpr("\\@",D)==1)

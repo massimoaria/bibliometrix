@@ -3,13 +3,13 @@
 #' It calculates the authors' h-index and its variants.
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
+#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.
 #' @param field is character. It can be equal to c("author", "source"). field indicates if H-index have to be calculated for a list of authors or for a list of sources. Default
 #' value is \code{field = "author"}.
-#' @param elements is a character vector. It contains the the authors' names list or the source list for which you want to calculate the H-index. When the field is
-#' "author", the aurgument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
-#' i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.
-#' @param sep is the field separator character. This character separates auhtors in each string of AU column of the bibiographic data frame. The default is \code{sep = ";"}.
+#' @param elements is a character vector. It contains the authors' names list or the source list for which you want to calculate the H-index. When the field is
+#' "author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
+#' i.e for the authors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.
+#' @param sep is the field separator character. This character separates authors in each string of AU column of the bibliographic data frame. The default is \code{sep = ";"}.
 #' @param years is a integer. It indicates the number of years to consider for Hindex calculation. Default is 10.
 #' @return an object of \code{class} "list". It contains two elements: H is a data frame with h-index, g-index and m-index for each author; CitationList is a list with the bibliographic collection for each author.
 #'
@@ -38,7 +38,7 @@
 #' # Papers and total citations
 #' indices$CitationList[[1]]
 #'
-#' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame. 
+#' @seealso \code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame. 
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis.
 #' @seealso \code{\link{summary}} to obtain a summary of the results.
 #' @seealso \code{\link{plot}} to draw some useful plots of the results.
@@ -63,9 +63,10 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
            i=which(regexpr("ANONYMOUS",elements)>-1)
            if(length(i)>0){elements=elements[-i]}
            Name="Author"
+           AU=paste(";",AU,";",sep="")
            },
          source={
-           AU=M$SO
+           SO=M$SO
            Name="Source"
          })
    
@@ -79,8 +80,8 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
     
     if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/length(elements), detail=paste0("\nAuthor: ",author))}
     
-    if (field=="source"){ind=which(AU==author)} else{
-      ind=which(regexpr(author,AU)!=-1)
+    if (field=="source"){ind=which(SO==author)} else{
+      ind=which(regexpr(paste(";",author,";",sep=""),AU)!=-1)
     }
     
     if (length(ind)>0){

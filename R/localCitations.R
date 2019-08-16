@@ -5,10 +5,10 @@
 #' Local citations measure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection.
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param sep is the field separator character. This character separates citations in each string of CR column of the bibiographic data frame. The default is \code{sep = ";"}.
+#'        It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.
+#' @param sep is the field separator character. This character separates citations in each string of CR column of the bibliographic data frame. The default is \code{sep = ";"}.
 #' @param fast.search is logical. if true, the function calculates local citations only for 25 percent top cited documents.
-#' @return an object of \code{class} "list" containing author local citations and docuemnt local citations.
+#' @return an object of \code{class} "list" containing author local citations and document local citations.
 #'
 #' 
 #' @examples

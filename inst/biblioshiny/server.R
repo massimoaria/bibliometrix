@@ -184,8 +184,8 @@ server <- function(input, output, session) {
   
   output$sliderTC <- renderUI({
 
-    sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC),
-                max = max(values$Morig$TC), value = c(min(values$Morig$TC),max(values$Morig$TC)))
+    sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC, na.rm=T),
+                max = max(values$Morig$TC, na.rm=T), value = c(min(values$Morig$TC, na.rm=T),max(values$Morig$TC,na.rm=T)))
     })
   ### End Filters uiOutput
   
@@ -359,7 +359,7 @@ server <- function(input, output, session) {
     
     isolate({
     fields=c(input$LeftField, input$CentralField, input$RightField)
-    threeFieldsPlot(values$M, fields=fields,n=c(20,20,20), width=1200,height=600)
+    threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn), width=1200,height=600)
     })
     
   })
@@ -1240,8 +1240,43 @@ server <- function(input, output, session) {
     
   })
   
+      #### Trend Topics ####
+  output$trendSliderPY <- renderUI({
+    
+    sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
+                max = max(values$M$PY,na.rm=T), value = c(min(values$M$PY,na.rm=T),max(values$M$PY,na.rm=T)))
+  })
+  
+  output$trendTopicsPlot <- renderPlot({
+    
+    input$applyTrendTopics
+    isolate({
+      if (input$trendTerms %in% c("TI","AB")){
+        values$M=termExtraction(values$M, Field = input$trendTerms, stemming = input$trendStemming, verbose = FALSE)
+        field=paste(input$trendTerms,"_TM",sep="")
+      } else {field=input$trendTerms}
+      values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
+                                        n.items = input$trendNItems, labelsize = input$trendSize, graph = FALSE)
+      plot(values$trendTopics$graph)
+    })
+    
+  },height = 700)
 
   
+  output$trendTopicsTable <- DT::renderDT({
+    
+    tpData=values$trendTopics$df_graph
+    
+    DT::datatable(tpData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = c('pageLength','copy','excel', 'pdf', 'print'),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tpData))-1))))) %>%
+      formatStyle(names(tpData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+    
   ### Conceptual Structure  #####
 
       ### Co-occurrences network ----
@@ -1398,7 +1433,7 @@ server <- function(input, output, session) {
     input$applyTM
     
     #values <- isolate(TMmap(input,values))
-    values$TM <- isolate(thematicMap(values$M, field=input$TMfield, n=input$TMn, minfreq=input$TMfreq, stemming=input$TMstemming, size=input$sizeTM, repel=FALSE))
+    values$TM <- isolate(thematicMap(values$M, field=input$TMfield, n=input$TMn, minfreq=input$TMfreq, stemming=input$TMstemming, size=input$sizeTM, n.labels=input$TMn.labels, repel=FALSE))
     
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -1458,7 +1493,7 @@ server <- function(input, output, session) {
     })
     
     if (length(values$yearSlices)>0){
-    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, repel=FALSE))
+    values$nexus <- isolate(thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, n.labels=input$TEn.labels, repel=FALSE))
     
     validate(
       need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -2115,45 +2150,7 @@ server <- function(input, output, session) {
     }
   }
   
-  TMmap <- function(input,values){
-    
-    switch(input$TMfield,
-           ID={
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
-             
-           },
-           DE={
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
-             
-           },
-           TI={
-             #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
-             values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
-             
-           },
-           AB={
-             #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
-             values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)
-             NetMatrix <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
-             
-           })
-    
-    S <- normalizeSimilarity(NetMatrix, type = "association")
-    t = tempfile();pdf(file=t) #### trick to hide igraph plot
-    net <- networkPlot(S, n=input$TMn, Title = "Keyword co-occurrences",type="auto",
-                                       labelsize = 2, halo = F,cluster="louvain",remove.isolates=FALSE,
-                                       remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
-                                       size=1,edges.min = 1, label.n=input$TMn)
-    dev.off();file.remove(t) ### end of trick
-    Map=thematicMap(net, NetMatrix, S = S, minfreq=input$TMfreq, size=input$sizeTM, repel=FALSE)
-    #plot(Map$map)
-    values$TM=Map
-    values$TM$net=net
-    return(values)
-  }
-  
-  historiograph <- function(input,values){
+ historiograph <- function(input,values){
     
     if (input$histsearch=="FAST"){
       min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
@@ -2165,7 +2162,7 @@ server <- function(input, output, session) {
       values$histsearch=input$histsearch
     }
     
-    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size.cex=TRUE , size =input$histsize, labelsize = input$histlabelsize, arrowsize = 0.5, color=FALSE))
+    values$histlog<- capture.output(values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize))
   return(values)
   }
   
@@ -2213,7 +2210,7 @@ server <- function(input, output, session) {
       values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
-                                cluster=input$cocCluster)
+                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"))
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
@@ -2257,7 +2254,7 @@ server <- function(input, output, session) {
     values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
-                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = FALSE,
+                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
                                 alpha=input$cocitAlpha, cluster=input$cocitCluster)
     return(values)
   }
@@ -2305,7 +2302,7 @@ server <- function(input, output, session) {
                               size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
-                              remove.isolates = T, cluster=input$colCluster)
+                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster)
     
     return(values)
     

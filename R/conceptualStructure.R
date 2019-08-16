@@ -9,7 +9,7 @@
 #'   articles and variables to Field Tag in the original ISI or SCOPUS file.
 #' @param field is a character object. It indicates one of the field tags of the
 #'   standard ISI WoS Field Tag codify. 
-#'   field can be equal to one of this tags:
+#'   field can be equal to one of these tags:
 #'   \tabular{lll}{ 
 #'   \code{ID}\tab   \tab Keywords Plus associated by ISI or SCOPUS database\cr 
 #'   \code{DE}\tab   \tab Author's keywords\cr 
@@ -19,14 +19,14 @@
 #'   \code{AB}\tab   \tab Terms extracted from abstracts}
 #' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
 #'  \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}
-#' @param minDegree is an integer. It indicates the minimun occurrences of terms to analize and plot. The default value is 2.
-#' @param clust is an integer or a character. If clust="auto", the numebr of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.
-#' @param k.max is an integer. It indicates the maximum numebr of cluster to keep. The default value is 5. The max value is 20.
+#' @param minDegree is an integer. It indicates the minimum occurrences of terms to analize and plot. The default value is 2.
+#' @param clust is an integer or a character. If clust="auto", the number of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.
+#' @param k.max is an integer. It indicates the maximum number of cluster to keep. The default value is 5. The max value is 20.
 #' @param stemming is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}
 #' @param quali.supp is a vector indicating the indexes of the categorical supplementary variables. It is used only for CA and MCA.
 #' @param quanti.supp is a vector indicating the indexes of the quantitative supplementary variables. It is used only for CA and MCA.
-#' @param documents is an integer. It indicates the numer of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.
+#' @param documents is an integer. It indicates the number of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.
 #' @param graph is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE
 #' @return It is an object of the class \code{list} containing the following components:
 #'

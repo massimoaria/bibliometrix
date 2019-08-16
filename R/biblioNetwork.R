@@ -2,12 +2,13 @@
 #'
 #' \code{biblioNetwork} creates different bibliographic networks from a bibliographic data frame.
 #'
-#' The function \code{\link{biblioNetwork}} can create a collection of bibliographic networks following the approach proposed by Batagely and Cerinsek (2013).\cr\cr
+#' The function \code{\link{biblioNetwork}} can create a collection of bibliographic networks 
+#' following the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 #' Typical networks output of \code{biblioNetwork} are:\cr\cr
 #' #### Collaboration Networks ############\cr
 #' -- Authors collaboration (analysis = "collaboration", network = "authors")\cr
 #' -- University collaboration (analysis = "collaboration", network = universities")\cr
-#' -- Country collabortion (analysis = "collaboration", network = "countries")\cr\cr
+#' -- Country collaboration (analysis = "collaboration", network = "countries")\cr\cr
 #' #### Co-citation Networks ##############\cr
 #' -- Authors co-citation (analysis = "co-citation", network = "authors")\cr
 #' -- Reference co-citation (analysis = "co-citation", network = "references")\cr
@@ -25,13 +26,17 @@
 #' -- Title content co-occurrences (analysis = "co-occurrences", network = "titles")\cr
 #' -- Abstract content co-occurrences (analysis = "co-occurrences", network = "abstracts")\cr\cr
 #'
+#' References:\cr
+#' Batagelj, V., & Cerinsek, M. (2013). On bibliographic networks. Scientometrics, 96(3), 845-864.\cr
+#' Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of Informetrics, 11(4), 959-975.\cr
+#'
 #' @param M is a bibliographic data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-#'   manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
-#' @param analysis is a character object. It indicates the type of analysis have to be performed.
+#'   manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.
+#' @param analysis is a character object. It indicates the type of analysis can be performed.
 #'   \code{analysis} argument can be \code{"collaboration"}, \code{"coupling"}, \code{"co-occurrences"}  or \code{"co-citation"}.
 #'   Default is \code{analysis = "coupling"}.
-#' @param network is a character object. It indicates the network typology. The \code{network} aurgument can be
+#' @param network is a character object. It indicates the network typology. The \code{network} argument can be
 #' \code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"}, \code{"titles"}, or \code{"abstracts"}.
 #' Default is \code{network = "authors"}.
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.

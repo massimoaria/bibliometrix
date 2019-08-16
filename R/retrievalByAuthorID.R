@@ -6,7 +6,7 @@
 #' SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.
 #' @param api_key is a character. It contains the Elsvier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}
 #' @param remove.duplicated is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.
-#' @param country is logical. If TRUE authors' country information will be dowloaded from SCOPUS.
+#' @param country is logical. If TRUE authors' country information will be downloaded from SCOPUS.
 #' @return a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
 #' M includes the entire bibliographic collection downloaded from SCOPUS.
 #' The main field tags are:
@@ -57,7 +57,7 @@
 #' # M <- res$M  # the entire bibliographic data frame
 #' # M <- res$authorDocuments # the list containing a bibliographic data frame for each author
 #' 
-#' @seealso \code{\link{idByAuthor}} for downloading auhtor information and SCOPUS ID.
+#' @seealso \code{\link{idByAuthor}} for downloading author information and SCOPUS ID.
 #' 
 #' @export
 #' 

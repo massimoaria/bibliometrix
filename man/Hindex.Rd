@@ -8,16 +8,16 @@ Hindex(M, field = "author", elements, sep = ";", years = 10)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.}
+It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.}
 
 \item{field}{is character. It can be equal to c("author", "source"). field indicates if H-index have to be calculated for a list of authors or for a list of sources. Default
 value is \code{field = "author"}.}
 
-\item{elements}{is a character vector. It contains the the authors' names list or the source list for which you want to calculate the H-index. When the field is
-"author", the aurgument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
-i.e for the auhtors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.}
+\item{elements}{is a character vector. It contains the authors' names list or the source list for which you want to calculate the H-index. When the field is
+"author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
+i.e for the authors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.}
 
-\item{sep}{is the field separator character. This character separates auhtors in each string of AU column of the bibiographic data frame. The default is \code{sep = ";"}.}
+\item{sep}{is the field separator character. This character separates authors in each string of AU column of the bibliographic data frame. The default is \code{sep = ";"}.}
 
 \item{years}{is a integer. It indicates the number of years to consider for Hindex calculation. Default is 10.}
 }
@@ -53,7 +53,7 @@ indices$CitationList[[1]]
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame.
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis.
 

@@ -10,7 +10,7 @@
 #' i.e. df[1,1:3]<-c("aria","massimo","naples")
 #' When affiliation is not specified, the field df$affiliation have to be NA.
 #' i.e. df[2,1:3]<-c("cuccurullo","corrado", NA)
-#' @param api_key is a character. It contains the Elsvier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}
+#' @param api_key is a character. It contains the Elsevier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}
 #' @return a data frame with cases corresponding to authors and variables to author's information and ID got from SCOPUS.
 #' @examples
 #' ## Request a personal API Key to Elsevier web page https://dev.elsevier.com/sc_apis.html

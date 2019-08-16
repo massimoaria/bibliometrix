@@ -2,7 +2,7 @@
 % Please edit documentation in R/isi2df.R
 \name{isi2df}
 \alias{isi2df}
-\title{Convert an ISI WoK Export file into a data frame}
+\title{Convert a Clarivate Analytics WoS Export file into a data frame}
 \usage{
 isi2df(D)
 }
@@ -13,7 +13,8 @@ isi2df(D)
 a data frame with cases corresponding to articles and variables to Field Tag in the original ISI file.
 }
 \description{
-It converts an ISI Wok Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
+It is an internal function used by \code{\link{convert2df}} to convert a Clarivate Analytics WoS Export file 
+and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
 # A group of ISI Export files can be read using \\code{\\link{readFiles}} function:

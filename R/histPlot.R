@@ -12,13 +12,10 @@
 #' M \tab      \tab the bibliographic data frame}
 #' 
 #' is a network matrix obtained by the function \code{\link{histNetwork}}. 
-#' @param n is integer. It defines the numebr of vertices to plot.
-#' @param size.cex is logical. If TRUE the point size of each vertex is proportional to its degree. Default value is TRUE.
-#' @param size is an integer. It define the point size of the vertices. Default value is 5.
-#' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=1}
-#' @param arrowsize is numerical. It indicates the edge arrow size.
-#' @param edgesize is numerical. It indicates the edge size.
-#' @param color is logical. If TRUE, egdes are colored according to citing references.
+#' @param n is integer. It defines the number of vertices to plot.
+#' @param size is an integer. It defines the point size of the vertices. Default value is 5.
+#' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}
+#' @param verbose is logical. If TRUE, results are printed on screen.
 #' @return It is a network object of the class \code{igraph}.
 #' 
 #' @examples
@@ -28,18 +25,18 @@
 #'
 #' histResults <- histNetwork(scientometrics, sep = ";")
 #' 
-#' net <- histPlot(histResults, n=20, size.cex=TRUE, size = 5, arrowsize=0.3)
+#' net <- histPlot(histResults, n=20, labelsize = 5)
 #' 
 #' @seealso \code{\link{histNetwork}} to compute a historical co-citation network.
 #' @seealso \code{\link{cocMatrix}} to compute a co-occurrence matrix.
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,arrowsize=0.1, edgesize=2, color=TRUE){
+histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
+  colorlist= c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   ## legacy with old argument size
   if (isTRUE(size)){
-    size.cex=TRUE
     size=5
   }
   
@@ -59,12 +56,15 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
   RR=lapply(R,function(l){
       l=l[1:2]
       l=paste(l[1],l[2],sep=",")})
-  V(bsk.network)$id <- unlist(RR)
+  V(bsk.network)$id <- tolower(unlist(RR))
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- LCS
-  if (isTRUE(size.cex)){V(bsk.network)$size <- (deg/max(deg)[1])*size}else{
-    V(bsk.network)$size=rep(size,length(V(bsk.network)))}
+  V(bsk.network)$size=size
+    #rep(size,length(V(bsk.network)))}
+  
+  Years=histResults$histData$Year[ind]
+  V(bsk.network)$years=Years
   
   # Remove loops
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
@@ -74,80 +74,80 @@ histPlot<-function(histResults, n=20, size.cex=TRUE, size = 5, labelsize = 0.8,a
   #V(bsk.network)$color <- 'red'
   
   # define network layout
-  Years=histResults$histData$Year[ind]
-  bsk.network <- histLayout(NET,bsk.network,Years,color=color,edgesize=edgesize)
   
-  layout_m <- create_layout(bsk.network, layout = 'nicely')#, algorithm = 'kk')
-  layout_m$x=Years
+  E(bsk.network)$color="slategray1"
+  
+  bsk.network=delete.isolates(bsk.network)
+  dg<-decompose.graph(bsk.network)
+
+  layout_m <- create_layout(bsk.network, layout = 'nicely')
+  layout_m$cluster=0
+  rr=0
+  for (k in 1:length(dg)){
+    bsk=dg[[k]]
+    
+    a=ifelse(layout_m$name %in% V(bsk)$name,k,0)
+    layout_m$cluster=layout_m$cluster+a
+    Min=min(layout_m$y[layout_m$cluster==k])-1
+    layout_m$y[layout_m$cluster==k]=layout_m$y[layout_m$cluster==k]+(rr-Min)
+    rr=max(layout_m$y[layout_m$cluster==k])
+  }
+  bsk=bsk.network
+  wp=membership(cluster_infomap(bsk,modularity = FALSE))
+  layout_m$x=layout_m$years
   
   g=ggraph(layout_m) +
-    geom_edge_arc(aes(width = 0.2, color=as.factor(E(bsk.network)$color)), curvature = 0.1, 
-          check_overlap = T, edge_alpha = 0.2, 
-          arrow = grid::arrow(angle = 10, unit(0.3, "inches")))+
-    scale_edge_colour_discrete(as.factor(E(bsk.network)$color))+
-    geom_node_text(aes(label=V(bsk.network)$id, size=labelsize),repel = TRUE)+
-    geom_node_point(aes(size = V(bsk.network)$size,color = "grey", alpha=0.1))+
-    scale_x_continuous(labels=as.character(seq(min(Years),max(Years))),breaks=seq(min(Years),max(Years)))+
+    geom_edge_arc(width = 1, curvature = 0.05, 
+          check_overlap = T, edge_alpha = 0.5, color="grey",
+          arrow = grid::arrow(angle = 10, unit(0.15, "inches")))+
+    #geom_eddge_arc()+
+    #scale_edge_colour_discrete(as.factor(E(bsk.network)$color))+
+    geom_node_text(aes(label=V(bsk)$id), size=labelsize,repel = TRUE, color=colorlist[wp],alpha=0.8)+
+    #geom_node_point(aes(size = V(bsk)$size,color = "dodgerblue4", alpha=0.1))+
+    geom_node_point(size = V(bsk)$size,color = "royalblue4", alpha=0.15)+
     scale_color_brewer() +
+    scale_x_continuous(labels=as.character(seq(min(Years),max(Years))),breaks=seq(min(Years),max(Years)))+
     theme_minimal()+
     theme(legend.position='none', panel.background = element_rect(fill='gray97', color='grey97'),
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),
           axis.title.y = element_blank(), axis.title.x = element_blank(),
+          axis.line.x = element_line(size = 3, colour = "grey80"),
           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(),
-          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold"),
-          axis.line.x = element_line(size = 3, colour = "grey80"))+
+          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold"))+
     labs(title = "Historical Direct Citation Network")
   
   plot(g)
+
   
   
-    # Plot the chronological co-citation network
- # l=layout.norm(l)
- # plot(bsk.network,rescale=T,asp=0,ylim=c(-1,1),xlim=c(-1,1),layout = l, vertex.color="lightblue", 
- #      vertex.label.dist = 0.3, vertex.frame.color = 'black', vertex.label.color = 'black', 
- #      vertex.label.font = 1, vertex.label = V(bsk.network)$id, vertex.label.cex = labelsize, 
- #      edge.arrow.size=arrowsize, main="Historical Direct Citation Network",edge.curved=T)
-  
-  cat("\n Legend\n\n")
-  
-  Data=histResults$histData
-  Data=Data[ind,]
-  print(Data)
+  if (isTRUE(verbose)) {
+    cat("\n Legend\n\n")
+    Data = histResults$histData
+    Data = Data[ind, ]
+    print(Data)
+  }
   
   return(bsk.network)
 }
 
 
-### layout function
-histLayout <- function(NET,bsk.network,Years,color=color,edgesize=edgesize){
-  
-  diag(NET)=0
-  
-  up=triu(NET)
-  
-  V(bsk.network)$cited=colSums(NET)-(rowSums(up)/max(NET))
-  V(bsk.network)$citing=rowSums(NET)
-  V(bsk.network)$year=Years
-  
-  edges=get.edgelist(bsk.network)
-  
-  A=apply(NET,2,function(x){
-    x[x>0]=sum(x)
-    return(x)
-  })
-   E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
-  
-  ### color
-  if (isTRUE(color)){
-  B=as.matrix(NET)
-  for (i in 1:dim(NET)[2]){
-    ind=which(B[,i]>0)
-    if (length(ind)>0){B[ind,i]=i}
-  }
-  
-  E(bsk.network)$color=suppressWarnings(t(B)[t(B)>0])
-  }else{E(bsk.network)$color="#E8E8E8"}
-  
- 
-  return(bsk.network)
+# ### layout function
+# histLayout <- function(NET,bsk.network,Years,edgesize=edgesize){
+#   
+#   diag(NET)=0
+#   
+#   up=triu(NET)
+# 
+#   A=apply(NET,2,function(x){
+#     x[x>0]=sum(x)
+#     return(x)
+#   })
+#    E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
+#   
+#    return(bsk.network)
+# }
+
+delete.isolates <- function(graph, mode = 'all') {
+  isolates <- which(degree(graph, mode = mode) == 0) - 1
+  delete.vertices(graph, names(isolates))
 }

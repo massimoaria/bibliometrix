@@ -9,7 +9,7 @@ duplicatedMatching(M, Field = "TI", tol = 0.95)
 \arguments{
 \item{M}{is the bibliographic data frame.}
 
-\item{Field}{is a character object. It indicates one of the field tags used to identify duplicated records. Field can be equal to one of this tags: TI (title), AB (abstract), UT (manuscript ID).}
+\item{Field}{is a character object. It indicates one of the field tags used to identify duplicated records. Field can be equal to one of these tags: TI (title), AB (abstract), UT (manuscript ID).}
 
 \item{tol}{is a numeric value giving the minimum relative similarity to match two manuscripts. Default value is \code{tol = 0.95}.}
 }
@@ -21,7 +21,7 @@ Search duplicated records in a dataframe.
 }
 \details{
 A bibliographic data frame is obtained by the converting function \code{\link{convert2df}}. 
-It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Thomson Reuters' ISI Web of Knowledge file.
+It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.
 The function identifies duplicated records in a bibliographic data frame and deletes them. 
 Duplicate entries are identified through the restricted Damerau-Levenshtein distance. 
 Two manuscripts that have a relative similarity measure greater than \code{tol} argument are stored in the output data frame only once.
@@ -39,7 +39,7 @@ dim(newM)
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame.
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis.
 

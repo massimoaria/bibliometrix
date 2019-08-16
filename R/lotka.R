@@ -1,6 +1,10 @@
 #' Lotka's law coefficient estimation
 #'
-#' It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926})
+#' It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926}).\cr\cr
+#' 
+#' Reference:
+#' Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the Washington academy of sciences, 16(12), 317-323.\cr
+#' 
 #' @param results is an object of the class '\code{bibliometrix}' for which the analysis of the authors' dominance ranking is desired.
 #' @return The function \code{lotka} returns a list of summary statistics of the Lotka's law estimation of an object of class \code{bibliometrix}.
 #'

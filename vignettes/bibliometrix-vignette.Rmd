@@ -161,14 +161,14 @@ This platform includes many different collections.
 *PubMed* comprises more than 28 million citations for biomedical literature from MEDLINE, life science journals, and online books. Citations may include links to full-text content from PubMed Central and publisher websites.
 
 ## Data acquisition
-Bibliographic data may be obtained by querying the SCOPUS or ISI WoK database by diverse fields, such as topic, author, journal, timespan, and so on.
+Bibliographic data may be obtained by querying the SCOPUS or Clarivate Analytics Web of Science (WoS) database by diverse fields, such as topic, author, journal, timespan, and so on.
 
 In this example, we show how to download data, querying a term in the manuscript title field.
 
 We choose the generic term "bibliometrics".
 
 ### Querying from Clarivate Analytics WoS
-At the link http://www.webofknowledge.com , select Web of Science Core Collection database. 
+At the link http://www.webofknowledge.com, select Web of Science Core Collection database. 
 
 Write the keyword "bibliometrics" in the search field and select title from the drop-down menu (see figure 1).  
 
@@ -204,9 +204,7 @@ The export tool allows you to select the diverse fields to save. So, select the 
 
 To download an export file, in an appropriate format for the *bibliometrix* package, make sure to select the option "**Save to Other File Formats**" and choose Bibtex or Plain Text.
 
-Please pay attention that BibTeX  import function is faster than plain text.
-
-The WOS platform permits to export only 500 records at a time. 
+The WoS platform permits to export only 500 records at a time. 
 
 The Clarivate Analytics Web of Science export tool creates an export file with a default name "savedrecs" with an extension ".txt" or ".bib" for plain text or BibTeX  format respectively. Export files can be separately stored.
 
@@ -335,17 +333,17 @@ List element       | Description
 Articles		 | the total number of manuscripts
 Authors		   | the authors' frequency distribution
 AuthorsFrac	 | the authors' frequency distribution (fractionalized)
-FirstAuthors | first author of each manuscript
+FirstAuthors | corresponding author of each manuscript
 nAUperPaper	 | the number of authors per manuscript
 Appearances |  the number of author appearances
 nAuthors		 | the number of authors
 AuMultiAuthoredArt | the number of authors of multi-authored articles
 MostCitedPapers | the list of manuscripts sorted by citations
 Years		     | publication year of each manuscript
-FirstAffiliation | the affiliation of the first author
+FirstAffiliation | the affiliation of the corresponding author
 Affiliations | the frequency distribution of affiliations (of all co-authors for each paper)
 Aff_frac		 | the fractionalized frequency distribution of affiliations (of all co-authors for each paper)
-CO		       | the affiliation country of the first author
+CO		       | the affiliation country of the corresponding author
 Countries		 | the affiliation countries' frequency distribution
 CountryCollaboration | the intra-country (SCP) and inter-country (MCP) collaboration indices
 TotalCitation | 		 the number of times each manuscript has been cited
@@ -415,7 +413,7 @@ cbind(CR$Cited[1:10])
 ```
 
 The function *localCitations* generates the frequency table of the most local cited authors.
-Local citations measures how many times an author (or a document) included in this collection have been cited by other authors also in the collection.
+Local citations measure how many times an author (or a document) included in this collection have been cited by other authors also in the collection.
 
 To obtain the most frequent local cited authors:
 ```{r Local Author citation}
@@ -726,7 +724,7 @@ netstat <- networkStat(NetMatrix)
 
 This group of statistics allows to describe the structural properties of a network:
 
-* **Size** is the number of verticex composing the network;
+* **Size** is the number of vertices composing the network;
 
 * **Density** is the proportion of present edges from all possible edges in the network;
 
@@ -738,7 +736,7 @@ This group of statistics allows to describe the structural properties of a netwo
 
 * **Degree centralization** is the normalized degree of the overall network;
 
-* **Closeness centralization** is the normalized inverse of the vertex’s average geodesic distance to others in the network;
+* **Closeness centralization** is the normalized inverse of the vertex average geodesic distance to others in the network;
 
 * **Eigenvector centralization** is the first eigenvector of the graph matrix;
 
@@ -854,7 +852,7 @@ Here, we show an example using the function *conceptualStructure* that performs 
 
 # Conceptual Structure using keywords (method="CA")
 
-CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
+CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, clust=5, stemming=FALSE, labelsize=10, documents=10)
 
 ```
 
@@ -871,7 +869,7 @@ options(width=130)
 histResults <- histNetwork(M, min.citations = 10, sep = ";")
 
 # Plot a historical co-citation network
-net <- histPlot(histResults, n=15, size = 20, labelsize=10, size.cex=TRUE, arrowsize = 0.5, color = TRUE)
+net <- histPlot(histResults, n=15, size = 10, labelsize=5)
 
 ```
 

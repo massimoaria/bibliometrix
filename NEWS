@@ -1,9 +1,28 @@
-bibliometrix v2.2.1 (Release date: ...soon)
+bibliometrix v2.2.2 (Release date: )
 ==============
 
 New functionality:
-*ConceptualStructure: Added the Benzecrì eigenvalue correction
-*ConceptualStructure: Added the explained variance information in the plot axis labels
+* biblioshiny: added "remove isolated nodes" option in network analysis
+* net2VOSviewer: introduced this new function to export and plot networks in VOSviewer software
+
+
+Changes:
+* networkPlot: Fixed an issue with "remove.isolates" argument
+* networkPlot: Removed vosviewer option in "type" argument. Now networks can be exported in VOSviewer using the new function net2VOSviewer()
+
+
+
+bibliometrix v2.2.1 (Release date: 2019-06-26)
+==============
+
+New functionality:
+*conceptualStructure: Added the Benzecrì eigenvalue correction
+*conceptualStructure: Added the explained variance information in the plot axis labels
+*thematicEvolution: new measure "Inclusion Index weighted by Term Occurrences"
+*thematicMap: Added the possibility to associate more than one label to each cluster (argument n.labels)
+*thematicEvolution: Added the possibility to associate more than one label to each cluster (argument n.labels)
+*biblioshiny: Integrated new functionality of conceptualStructure, thematicMap and thematicEvolution
+*New dataset: management: The use of bibliometric approaches in business and management disciplines
 
 
 
@@ -136,7 +155,7 @@ bibliometrix v1.9.3 (Release date: 2018-05-15)
 
 New functionality:
 * Added the possibility to import collections from COCHRANE Database in convert2df()
-* Completely rewritten concepualStructure() function. 
+* Completely rewritten conceptualStructure() function. 
   Now it performs CA and MCA method and plots factorial maps of documents.
 * Added binary argument in cocMatrix(). It allows to build up a document x attribute matrix using both binary and full counting
 
@@ -225,7 +244,7 @@ bibliometrix v1.4 (Release date: 2017-01-24)
 
 New functionality:
 
-* concepualStructure() creates and plots conceptual structure map of a scientific field
+* conceptualStructure() creates and plots conceptual structure map of a scientific field
 * histPlot() plots historical co-citation network
 * networkPlot() plots Bibliographic networks
 * readFiles() loads a sequence of ISI or SCOPUS Export files into a large character object

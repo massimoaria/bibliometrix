@@ -10,7 +10,7 @@ sourceGrowth(M, top = 5, cdf = TRUE)
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to articles and variables to Field Tag in the original ISI or SCOPUS file.}
 
-\item{top}{is a numeric. It indicates the number of top sources to analize. The default value is 5.}
+\item{top}{is a numeric. It indicates the number of top sources to analyze. The default value is 5.}
 
 \item{cdf}{is a logical. If TRUE, the function calculates the cumulative occurrences distribution.}
 }
@@ -18,7 +18,7 @@ It is a data matrix with cases corresponding to articles and variables to Field 
 an object of class \code{data.frame}
 }
 \description{
-It calculates yearly published docuemnts of the top sources.
+It calculates yearly published documents of the top sources.
 }
 \examples{
 

@@ -1,6 +1,6 @@
-#' Merge bibliographic data frames from SCOPUS and ISI WOS  
+#' Merge bibliographic data frames from SCOPUS and WoS  
 #'
-#' Merge bibliografic data frames from different databases (ISI and SCOPUS) into a single one.
+#' Merge bibliographic data frames from different databases (WoS and SCOPUS) into a single one.
 #' 
 #' bibliographic data frames are obtained by the converting function \code{\link{convert2df}}. 
 #' The function merges data frames identifying common tag fields and duplicated records.

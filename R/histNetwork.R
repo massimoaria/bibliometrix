@@ -7,8 +7,8 @@
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 #'   manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
 #'   Analitics Web of Science file.
-#' @param min.citations is an integer. It sets the minimum number of citations 
-#'   for the documents included in the analysis. The default is \code{min.citations = 0}.
+#' @param min.citations is a positive integer. It sets the minimum number of citations 
+#'   for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
 #' @return \code{histNetwork} returns an object of \code{class} "list"

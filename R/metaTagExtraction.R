@@ -112,7 +112,10 @@ SR <- function(M){
       l=sub(" ",",",l, fixed = TRUE)
       l=sub(",,",",",l, fixed = TRUE)
       l=gsub(" ","",l, fixed = TRUE)})}
-  FirstAuthors=gsub(","," ",unlist(lapply(listAU,function(l) l[[1]])))
+  FirstAuthors=gsub(","," ",unlist(lapply(listAU, function(l){
+    if (length(l>0)) {l=l[[1]]} else (l="NA")
+    return(l)
+  })))
   
   if (!is.null(M$J9)){
     ## replace full title in no iso names

@@ -76,29 +76,38 @@ bib2df<-function(D, dbsource="isi"){
         END <- which(regexpr(".*\\}",D[Seq])==1)[1]
         POSEND <- seq(POS,(POS+END-1))
         
+        ### Affiliations
         if (uniqueTag[j]=="C1" & dbsource!="isi"){
           DATA[[uniqueTag[j]]][i] <- paste0(DD[POSEND],collapse=";")
         } else if (uniqueTag[j]=="C1" & dbsource=="isi"){
           DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=";")
         }
         
+        ### References
         if (uniqueTag[j]=="CR" & length(POSEND)>1){
           DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=";")
         } else if (uniqueTag[j]=="CR" & length(POSEND)==1){
           DATA[[uniqueTag[j]]][i] <- paste0(DD[POSEND],collapse=";")
         }
         
-        if (uniqueTag[j]!="C1" & uniqueTag[j]!="CR"){
-          DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=" ")} 
+        ### Funding and Acknowledgements
+        if (uniqueTag[j] %in% c("FU","FX")){
+          DATA[[uniqueTag[j]]][i] <- paste0(DD[POSEND], collapse=" ")} 
         
+        ### DOI
         if (uniqueTag[j]=="DI"){
           DOI <- gsub("doi = ","",DD[POS])
           DATA[[uniqueTag[j]]][i] <- gsub(",","",DOI)
         }
+        
+        ### all other categories
+        if (!(uniqueTag[j] %in% c("C1","CR","DI","FU","FX"))){
+          DATA[[uniqueTag[j]]][i] <- paste0(gsub(";",",",DD[POSEND]),collapse=" ")} 
       }
     }
-    
   }
+    
+  
     
   
   if ("DT2" %in% names(DATA)){
@@ -127,7 +136,6 @@ preprocessing <- function(D){
   ## normalize bibtex data
   ind=which(regexpr("\\@",D)==1)
   D=trim(D)
-  #D=gsub("\\.\\s+",";",D) ## for references
   D=gsub("\\s+", " ",D)
   D=gsub("\\{\\[\\}","\\[",D)
   #D=gsub("\\}\\]\\}","\\]",D)
@@ -136,7 +144,6 @@ preprocessing <- function(D){
   D=gsub("\\{''\\}","",D)
   
   D=gsub(" = ","=",D)
-  #ind=which(regexpr("\\@",D)==1)
   D1=D
   D1[ind]=gsub("\\@","manuscript={",D[ind])
   D[ind] <- gsub("\\@","manuscript=",D[ind])

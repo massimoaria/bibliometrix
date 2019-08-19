@@ -31,9 +31,9 @@ timeslice <- function(M,breaks=NA,k=5){
   M$PY=as.numeric(M$PY)
   period=list()
   if (is.na(breaks[1]) & is.numeric(k)){
-    breaks=(floor(seq(min(M$PY)-1,max(M$PY),length.out=k+1)))}
+    breaks=(floor(seq(min(M$PY,na.rm=TRUE)-1,max(M$PY,na.rm=TRUE),length.out=k+1)))}
   
-  else {breaks=c(min(M$PY)-1,breaks,max(M$PY))}
+  else {breaks=c(min(M$PY,na.rm=TRUE)-1,breaks,max(M$PY,na.rm=TRUE))}
     df=cut(M$PY,breaks)
     N=levels(df)
     ind=as.numeric(df)

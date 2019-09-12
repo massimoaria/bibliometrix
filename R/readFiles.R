@@ -36,6 +36,7 @@ readFiles <- function(...){
       }
   D=unlist(D)
   options(encoding = origEnc)
+  Encoding(D) <- "UTF-8"
   return(D)
   
 }

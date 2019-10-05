@@ -44,7 +44,7 @@
 #'
 #' data(biblio)
 #'
-#' biblio_df_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
+#' biblio_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 #'
 #' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
 #' @seealso \code{\link{isibib2df}} for converting ISI Export file (in bibtex format)
@@ -65,6 +65,7 @@
 #' @importFrom dplyr %>%
 # #' @importFrom dplyr filter
 #' @importFrom dplyr arrange
+#' @importFrom dplyr desc
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
 #' @importFrom dplyr ungroup
@@ -267,17 +268,18 @@
 #' @importFrom utils adist
 #' @importFrom SnowballC wordStem
 #' @importFrom SnowballC getStemLanguages
+#' @importFrom rio import
 
 convert2df<-function(file,dbsource="wos",format="plaintext"){
 
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
-  if (length(setdiff(dbsource,c("isi","wos","scopus","pubmed","cochrane","generic")))>0){
+  if (length(setdiff(dbsource,c("isi","wos","scopus","pubmed","cochrane","generic", "dimensions")))>0){
     cat("\n 'dbsource' argument is not properly specified")
-    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'wos', 'scopus', 'generic', or 'pubmed'.\n")}
-  if (length(setdiff(format,c("plaintext","bibtex","pubmed","cochrane")))>0){
+    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'wos', 'scopus', 'generic', 'dimensions', or 'pubmed'.\n")}
+  if (length(setdiff(format,c("plaintext","bibtex","pubmed","cochrane", "csv", "excel")))>0){
     cat("\n 'format' argument is not properly specified")
-    cat("\n 'format' argument has to be a character string matching 'plaintext or 'bibtex'.\n")}
-  if (length(setdiff(format,c("plaintext","bibtex")))>0){
+    cat("\n 'format' argument has to be a character string matching 'plaintext', 'bibtex', 'csv' or 'excel'.\n")}
+  if (length(setdiff(format,c("plaintext","bibtex","csv","excel")))>0){
     file=iconv(file, "latin1", "ASCII", sub="")}
   
   if (dbsource=="wos") dbsource="isi"
@@ -285,16 +287,18 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   switch(dbsource,
     isi={
       switch(format,
-             bibtex={M=bib2df(file,dbsource="isi")},
-             plaintext={M=isi2df(file)}
+             bibtex={M <- bib2df(file,dbsource="isi")},
+             plaintext={M <- isi2df(file)}
       )},
-    scopus={M=bib2df(file,dbsource="scopus")
+    scopus={M <- bib2df(file,dbsource="scopus")
     },
-    generic={M=bib2df(file,dbsource="generic")
+    generic={M <- bib2df(file,dbsource="generic")
     },
-    pubmed={M=pubmed2df(file)
+    pubmed={M <- pubmed2df(file)
     },
-    cochrane={M=cochrane2df(file)
+    cochrane={M <- cochrane2df(file)
+    },
+    dimensions={M <- dimensions2df(file, format = format)
     }
 )
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
@@ -304,6 +308,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   cat("Done!\n\n")
   
+  if (dbsource!="dimensions"){
   ## AU_UN field creation
   if ("C1" %in% names(M)){
     cat("\nGenerating affiliation field tag AU_UN from C1:  ")
@@ -313,15 +318,16 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     } else{
     M$C1=NA
     M$AU_UN=NA}
-
-  ### SR field creation
-  suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
   
   ## AU normalization
   M$AU=unlist(lapply(strsplit(M$AU,";"), function(x){
     x=trimws(trimES(gsub("[[:punct:]]"," ",x)))
     x=paste(x,collapse=";")
   }))
+  }
+  
+  ### SR field creation
+  suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
   
   ### identify duplicated SRs 
     SR=M$SR

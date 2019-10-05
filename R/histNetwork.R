@@ -64,6 +64,7 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
                 if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
                 x=M2$SR_FULL[i]
                 Year=M2$PY[i]
+                #print(i)
                 pos = grep(x, M$CR[M$PY>=Year])
                 pos = rows[M$PY>=Year][pos]
                 if ("DI" %in% names(M)){

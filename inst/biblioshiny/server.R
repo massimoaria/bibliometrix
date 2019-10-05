@@ -38,103 +38,215 @@ server <- function(input, output, session) {
     # column will contain the local filenames where the data can
     # be found.
     input$applyLoad
-    isolate({
-    inFile <- input$file1
-    
-    if (is.null(inFile)) {return(NULL)}
-    
-    ### excel format
-    if (grepl(".*\\.xlsx",inFile$name)){
-      M <- rio::import(inFile$datapath)
-      #values$log<-"Data imported from XLSX file"
-      
-      ### M row names
-      ### identify duplicated SRs 
-      SR=M$SR
-      tab=table(SR)
-      tab2=table(tab)
-      ind=as.numeric(names(tab2))
-      ind=ind[which(ind>1)]
-      if (length(ind)>0){
-        for (i in ind){
-          indice=names(which(tab==i))
-          for (j in indice){
-            indice2=which(SR==j)
-            SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
-          }
-        }
-      }
-      
-      row.names(M) <- SR
-      
-      
-    }
-    
-    ### zip folder
-   
-    if (grepl(".*\\.zip",inFile$name)) {
-        files=unzip(inFile$datapath)
-        #files = list.files(pattern = ".txt")
-        D = unlist(lapply(files, function(l){
-          Dpar=readFiles(l)
-          return(Dpar)
-          }))
-        withProgress(message = 'Conversion in progress',
-                     value = 0, {
-        M <- convert2df(D, dbsource=input$dbsource,format=input$format)
-                     })
-    }
-    
-    
-    ### txt or bib formats  
-    isolate(
-    if (grepl(".*\\.txt",inFile$name) | grepl(".*\\.bib",inFile$name)){
-        D=readFiles(inFile$datapath)
-        withProgress(message = 'Conversion in progress',
-                     value = 0, {
-                       M <- convert2df(D, dbsource=input$dbsource,format=input$format)
-                     })
-    }
-    ) 
-    ### RData format
-    
-    if (grepl(".*\\.RData",inFile$name)) {
-      
-      load(inFile$datapath)
-    }
-   
-    
-    
-    values=initial(values)
-    values$M <- M
-    values$Morig=M
-    values$Histfield="NA"
-    values$results=list("NA")
-    
-    MData=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)
-    MData$DOI<- paste0('<a href=\"http://doi.org/',MData$DI,'\" target=\"_blank\">',MData$DI,'</a>')
-    nome=c("DOI",names(MData)[-length(names(MData))])
-    MData=MData[nome]
-    
-    DT::datatable(MData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),  
-                  options = list(pageLength = 50, dom = 'Bfrtip',
-                                 buttons = c('pageLength','copy', 'pdf', 'print'),
-                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(MData))-1))))  
-                  ,class = 'cell-border compact stripe')  %>% 
-                  formatStyle(names(MData),  backgroundColor = 'white', textAlign = 'center',fontSize = '70%') 
-    
-    })
-    })
 
+    isolate({
+      
+     inFile <- input$file1
+          
+          if (!is.null(inFile) & input$load=="import") {
+            ext <- getFileNameExtension(inFile$datapath)
+            switch(
+              input$dbsource,
+              isi = {
+                switch(ext,
+                       ###  WoS ZIP Files
+                       zip = {
+                         files = unzip(inFile$datapath)
+                         D = unlist(lapply(files, function(l) {
+                           Dpar = readFiles(l)
+                           return(Dpar)
+                         }))
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(D,
+                                                        dbsource = input$dbsource,
+                                                        format = input$format)
+                                      })
+                       },
+                       ### WoS Txt/Bib Files
+                       {
+                         D = readFiles(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(D,
+                                                        dbsource = input$dbsource,
+                                                        format = input$format)
+                                      })
+                       })
+              },
+              scopus = {
+                switch(ext,
+                       ###  Scopus ZIP Files
+                       zip = {
+                         files = unzip(inFile$datapath)
+                         D = unlist(lapply(files, function(l) {
+                           Dpar = readFiles(l)
+                           return(Dpar)
+                         }))
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(D,
+                                                        dbsource = input$dbsource,
+                                                        format = input$format)
+                                      })
+                       },
+                       ### WoS Txt/Bib Files
+                       {
+                         D = readFiles(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(D,
+                                                        dbsource = input$dbsource,
+                                                        format = "bibtex")
+                                      })
+                       })
+              },
+              dimensions = {
+                switch(ext,
+                       ###  Dimensions ZIP Files
+                       zip = {
+                         files = unzip(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <-
+                                          convert2df(files,
+                                                     dbsource = input$dbsource,
+                                                     format = input$format)
+                                      })
+                       },
+                       ### Dimensions Xlsx/csv Files
+                       xlsx = {
+                         #D = readFiles(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <-
+                                          convert2df(
+                                            inFile$datapath,
+                                            dbsource = "dimensions",
+                                            format = "excel"
+                                          )
+                                      })
+                       },
+                       csv = {
+                         #D = readFiles(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <-
+                                          convert2df(
+                                            inFile$datapath,
+                                            dbsource = "dimensions",
+                                            format = "csv"
+                                          )
+                                      })
+                       })
+                
+              }
+            )
+            
+          } else if (!is.null(inFile) & input$load=="load") {
+        ext <- tolower(getFileNameExtension(inFile$datapath))
+        print(ext)
+        switch(ext,
+               ### excel format
+               xlsx={
+                 M <- rio::import(inFile$datapath)
+                 ### M row names
+                 ### identify duplicated SRs 
+                 SR=M$SR
+                 tab=table(SR)
+                 tab2=table(tab)
+                 ind=as.numeric(names(tab2))
+                 ind=ind[which(ind>1)]
+                 if (length(ind)>0){
+                   for (i in ind){
+                     indice=names(which(tab==i))
+                     for (j in indice){
+                       indice2=which(SR==j)
+                       SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
+                     }
+                   }
+                 }
+                 
+                 row.names(M) <- SR
+               },
+               ### RData format
+               rdata={
+                 load(inFile$datapath)
+               },
+               rda={
+                 load(inFile$datapath)
+               },
+               rds={
+                 load(inFile$datapath)
+               })
+          } else if (is.null(inFile)) {return(NULL)}
+      
+      values = initial(values)
+      values$M <- M
+      values$Morig = M
+      values$Histfield = "NA"
+      values$results = list("NA")
+      
+      MData = as.data.frame(apply(values$M, 2, function(x) {
+        substring(x, 1, 150)
+      }), stringsAsFactors = FALSE)
+      MData$DOI <-
+        paste0(
+          '<a href=\"http://doi.org/',
+          MData$DI,
+          '\" target=\"_blank\">',
+          MData$DI,
+          '</a>'
+        )
+      nome = c("DOI", names(MData)[-length(names(MData))])
+      MData = MData[nome]
+      DT::datatable(
+        MData,
+        escape = FALSE,
+        rownames = FALSE,
+        extensions = c("Buttons"),
+        options = list(
+          pageLength = 50,
+          dom = 'Bfrtip',
+          buttons = c('pageLength', 'copy', 'pdf', 'print'),
+          lengthMenu = list(
+            c(10, 25, 50, -1),
+            c('10 rows', '25 rows', '50 rows', 'Show all')
+          ),
+          columnDefs = list(list(
+            className = 'dt-center', targets = 0:(length(names(MData)) - 1)
+          ))
+        )
+        ,
+        class = 'cell-border compact stripe'
+      )  %>%
+        formatStyle(
+          names(MData),
+          backgroundColor = 'white',
+          textAlign = 'center',
+          fontSize = '70%'
+        ) 
+      
+    }) 
+   
+})
+
+  
+
+  
+  
   output$collection.save <- downloadHandler(
     filename = function() {
       
-      paste("data-", Sys.Date(), ".",input$save_file, sep="")
+      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
     },
     content <- function(file) {
       switch(input$save_file,
-             xlsx={suppressWarnings(rio::export(values$M, file=file))})
+             xlsx={suppressWarnings(rio::export(values$M, file=file))},
+             RData={
+               M=values$M
+               save(M, file=file)
+             })
       
     },
     contentType = input$save_file
@@ -1866,6 +1978,20 @@ server <- function(input, output, session) {
   }) 
   
   ### COMMON FUNCTIONS ####
+  getFileNameExtension <- function (fn) {
+    # remove a path
+    splitted    <- strsplit(x=fn, split='/')[[1]]   
+    # or use .Platform$file.sep in stead of '/'
+    fn          <- splitted [length(splitted)]
+    ext         <- ''
+    splitted    <- strsplit(x=fn, split='\\.')[[1]]
+    l           <-length (splitted)
+    if (l > 1 && sum(splitted[1:(l-1)] != ''))  ext <-splitted [l] 
+    # the extention must be the suffix of a non-empty name    
+    ext
+  }
+  
+  
   plot.ly <- function(g){
     ggplotly(g, tooltip = "text") %>% 
       config(displaylogo = FALSE,
@@ -2079,7 +2205,7 @@ server <- function(input, output, session) {
   }
   
   mapworld <- function(M){
-    M=metaTagExtraction(M,"AU_CO")
+    if (!("AU_CO" %in% names(M))){M=metaTagExtraction(M,"AU_CO")}
     CO=as.data.frame(tableTag(M,"AU_CO"),stringsAsFactors = FALSE)
     CO$Tab=gsub("UNITED KINGDOM","UK",CO$Tab)
     CO$Tab=gsub("KOREA","SOUTH KOREA",CO$Tab)
@@ -2211,6 +2337,21 @@ server <- function(input, output, session) {
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
                                 cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"))
+      if (input$cocyears=="Yes"){
+        Y=fieldByYear(values$M, field = input$field, graph=FALSE)
+        g=values$cocnet$graph
+        label=igraph::V(g)$name
+        ind=which(tolower(Y$df$item) %in% label)
+        df=Y$df[ind,]
+        
+        #bluefunc <- colorRampPalette(c("lightblue", "darkblue"))
+        #col=bluefunc((diff(range(df$year))+1)*10)
+        col=heat.colors((diff(range(df$year))+1)*10)
+        igraph::V(g)$color=col[(max(df$year)-df$year+1)*10]
+        igraph::V(g)$year=df$year
+        values$cocnet$graph=g
+      }
+      
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }

@@ -3,13 +3,14 @@
 \name{bibtag}
 \alias{bibtag}
 \title{Tag list and bibtex fields.}
-\format{A data frame with 39 rows and 4 variables:
+\format{A data frame with 40 rows and 5 variables:
  \describe{
-    \item{TAG}{country names}
-    \item{SCOPUS}{continent names}
-    \item{ISI}{country centroid longitude}
-    \item{GENERIC}{country centroid latitude}
+    \item{TAG}{Tag Fields}
+    \item{SCOPUS}{Scopus bibtex fields}
+    \item{ISI}{WOS/ISI bibtex fields}
+    \item{GENERIC}{Generic bibtex fields}
+    \item{DIMENSIONS}{DIMENSIONS cvs/xlsx fields}
     }}
 \description{
-Data frame containing a list of tags and corresponding WoS and SCOPUS bibtex field.
+Data frame containing a list of tags and corresponding: WoS, SCOPUS and generic bibtex fields; and Dimensions.ai csv and xlsx fields.
 }

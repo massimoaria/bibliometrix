@@ -34,7 +34,7 @@ with cases corresponding to articles and variables to Field Tag in the original 
 
 Other converting functions: \code{\link{bib2df}},
   \code{\link{cochrane2df}}, \code{\link{convert2df}},
-  \code{\link{isi2df}}, \code{\link{isibib2df}},
-  \code{\link{pubmed2df}}
+  \code{\link{dimensions2df}}, \code{\link{isi2df}},
+  \code{\link{isibib2df}}, \code{\link{pubmed2df}}
 }
 \concept{converting functions}

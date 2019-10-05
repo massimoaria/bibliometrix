@@ -374,7 +374,10 @@ AU_UN<-function(M,sep){
   
   
   ## identification of Corresponding author affiliation
-  RP=M$RP
+  if (!("RP" %in% names(M))){
+    M$RP <- NA
+  }
+  RP <- M$RP
   RP[is.na(RP)]=M$C1[is.na(RP)]
   AFF=gsub("\\[.*?\\] ", "", RP)
   indna=which(is.na(AFF))

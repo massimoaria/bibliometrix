@@ -18,7 +18,8 @@
 #' @examples
 #' data(management)
 #' timespan=c(2005,2015)
-#' res <- fieldByYear(management, field = "ID", timespan = timespan, min.freq = 5, n.items = 5, graph = TRUE)
+#' res <- fieldByYear(management, field = "ID", timespan = timespan, 
+#'                     min.freq = 5, n.items = 5, graph = TRUE)
 
 #'
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis
@@ -62,9 +63,9 @@ fieldByYear <- function(M,
     group_by(.data$year) %>%
     top_n(n.items, .data$freq)
   
-  g <- ggplot(df, aes(x = year, y = log(freq))) +
+  g <- ggplot(df, aes(x = df$year, y = log(df$freq))) +
     geom_point(color = adjustcolor("royalblue4", alpha.f = 0.5), size = 1) +
-    geom_text_repel(aes(label = tolower(item)), size=labelsize, color=adjustcolor("royalblue4", alpha.f = 0.7)) +
+    geom_text_repel(aes(label = tolower(df$item)), size=labelsize, color=adjustcolor("royalblue4", alpha.f = 0.7)) +
     scale_x_continuous(breaks = seq(min(df$year, na.rm = TRUE), max(df$year, na.rm = TRUE), by = 2)) +
     ylab("log(frequency)") +
     xlab("year") +

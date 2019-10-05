@@ -57,7 +57,7 @@ Actually the function allows to convert both SCOPUS/WoS files in bibtex format a
 
 data(biblio)
 
-biblio_df_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
+biblio_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 
 }
 \seealso{

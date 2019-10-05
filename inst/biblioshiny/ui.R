@@ -46,7 +46,7 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
                                  Its development can address a large and active community of developers formed by prominent researchers."),
                                br(),
                                p(em("bibliometrix"),"provides various routines for importing bibliographic data from SCOPUS, 
-                                 Clarivate Analytics' Web of Science, PubMed and Cochrane databases, performing bibliometric 
+                                 Clarivate Analytics' Web of Science, Dimensions, PubMed and Cochrane databases, performing bibliometric 
                                  analysis and building data matrices for co-citation, coupling, scientific collaboration analysis and co-word analysis."),
                                br(),
                                p("For an introduction and live examples, visit the ",

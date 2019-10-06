@@ -10,7 +10,7 @@ convert2df(file, dbsource = "wos", format = "plaintext")
 \item{file}{can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
 b) an object of the class \code{pubmed (package RISmed)} containing a collection obtained from a query performed with RISmed package.}
 
-\item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions} or \code{pubmed}. Default is \code{dbsource = "isi"}.}
+\item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.}
 
 \item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"bibtex"}, \code{"plaintext"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.}
 }

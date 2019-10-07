@@ -228,7 +228,7 @@ summary.bibliometrix<-function(object, ...){
   AAA=format(AAA,justify="left",digits=3)
   row.names(AAA)=1:k
   if (isTRUE(verbose)){print(AAA,row.names=TRUE);cat("\n")}
-  }
+  } else (AAA=NULL)
 
   summaryresults=list(MainInformation=MainInfo,MainInformationDF=MainInfoDF, AnnualProduction=Y,AnnualGrowthRate=GR,MostProdAuthors=A,MostCitedPapers=MostCitedPapers,MostProdCountries=Co,TCperCountries=AC,MostRelSources=AA,MostRelKeywords=AAA)
 

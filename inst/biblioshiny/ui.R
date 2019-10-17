@@ -85,7 +85,7 @@ tabPanel(
                  br(),
                  selectInput("load", 
                              label = "Please, choose what to do",
-                             choices = c("Make a choice"="null",
+                             choices = c(" "="null",
                                          "Import raw file(s)"="import", 
                                          "Load bibliometrix file(s)"="load"),
                              selected = "null"),
@@ -138,12 +138,13 @@ tabPanel(
       h3(em(strong("Export a bibliometrix file "))),
       br(),
       ### download xlsx
-      selectInput('save_file', 'Save as:', choices = c('Excel' = 'xlsx',
+      selectInput('save_file', 'Save as:', choices = c(' ' ='null',
+                                                       'Excel' = 'xlsx',
                                                        'R Data Format' = 'RData'),
-                  selected = 'xlsx'),
-      downloadButton("collection.save", "Export")
-      #conditionalPanel(condition = "input.save_file == 'xlsx'",
-      #        downloadButton("collection.save", "Save"))
+                  selected = 'null'),
+      #downloadButton("collection.save", "Export")
+      conditionalPanel(condition = "input.save_file != 'null'",
+              downloadButton("collection.save", "Export"))
     ),
     mainPanel(
       ## color of datatable

@@ -321,7 +321,8 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   ## AU normalization
   M$AU=unlist(lapply(strsplit(M$AU,";"), function(x){
-    x=trimws(trimES(gsub("[[:punct:]]"," ",x)))
+    x=trimws(trimES(gsub("[^[:alnum:][-]']"," ",x)))
+    #x=trimws(trimES(gsub("[[:punct:]]"," ",x)))
     x=paste(x,collapse=";")
   }))
   }

@@ -41,6 +41,7 @@
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @param label.n is an integer. It indicates the number of vertex labels to draw.
 #' @param alpha is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.
+#' @param verbose is a logical. If TRUE, network will be plotted. Default is \code{verbose = TRUE}.
 #' @return It is a list containing the following elements:
 #' \tabular{lll}{
 #' \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
@@ -88,7 +89,8 @@ networkPlot <-
            weighted = NULL,
            edgesize = 1,
            edges.min = 0,
-           alpha = 0.5) {
+           alpha = 0.5,
+           verbose = TRUE) {
     
     S <- NULL
     
@@ -271,59 +273,38 @@ networkPlot <-
       }
       
       
-      ## Plot the network
+      
       #l <- layout.norm(l)
       
+      ## Setting Network Attributes
+      graph_attr(net$graph, "alpha") <- alpha
+      graph_attr(bsk.network, "ylim") <- c(-1,1)
+      graph_attr(bsk.network, "xlim") <- c(-1,1)
+      graph_attr(bsk.network, "rescale") <- TRUE
+      graph_attr(bsk.network, "asp") <- 0
+      graph_attr(bsk.network, "layout") <- l
+      graph_attr(bsk.network, "main") <- Title
+      E(bsk.network)$curved = curved
+      V(bsk.network)$label.dist = 0.7
+      V(bsk.network)$frame.color = adjustcolor('black', alpha)
+      V(bsk.network)$color <- adjustcolor(V(bsk.network)$color, alpha)
+      V(bsk.network)$label.color <- adjustcolor('black', min(c(1, alpha + 0.1)))
+      V(bsk.network)$label.font = 2
+      V(bsk.network)$label = LABEL
+      
+      
+      ## Plot the network
       if (isTRUE(halo) & cluster != "none") {
-        plot(
-          net_groups,
-          bsk.network,
-          rescale = T,
-          asp = 0,
-          ylim = c(-1, 1),
-          xlim = c(-1, 1),
-          layout = l,
-          edge.curved = curved,
-          vertex.label.dist = 0.7,
-          vertex.frame.color = adjustcolor('black', alpha),
-          vertex.label.color = adjustcolor('black', min(c(1, alpha + 0.1))),
-          vertex.color = adjustcolor(V(bsk.network)$color, alpha),
-          vertex.label.font = 2,
-          vertex.label = LABEL,
-          main = Title
-        )
+        
+        if (isTRUE(verbose)){plot(net_groups,bsk.network)}
         
       } else{
-        plot(
-          bsk.network,
-          rescale = T,
-          asp = 0,
-          ylim = c(-1, 1),
-          xlim = c(-1, 1),
-          layout = l,
-          edge.curved = curved,
-          vertex.label.dist = 0.7,
-          vertex.frame.color = adjustcolor('black', alpha),
-          vertex.color = adjustcolor(V(bsk.network)$color, alpha),
-          vertex.label.color = adjustcolor(lab.color, min(c(1, alpha + 0.2))),
-          vertex.label.font = 2,
-          vertex.label = LABEL,
-          main = Title,
-          edge.color = adjustcolor(E(bsk.network)$color, alpha / 2)
-        )
+        E(bsk.network)$color = adjustcolor(E(bsk.network)$color, alpha / 2)
+        
+        if (isTRUE(verbose)){plot(bsk.network)}
+        
       }
       
-    #} 
-    #else{
-    #   net_groups$modularity <- rep(1, vcount(bsk.network))
-    #   if (!isTRUE(bsk.S)) {
-    #     l <- switchLayout(bsk.S, type, vos.path)
-    #   } else{
-    #     l <- switchLayout(bsk.network, type, vos.path)
-    #   }
-    #   
-    # }
-    
     ## Output
     if (cluster != "none") {
       cluster_res <- data.frame(net_groups$names,

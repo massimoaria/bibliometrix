@@ -10,7 +10,7 @@ networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
   halo = FALSE, cluster = "louvain", vos.path = NULL, size = 3,
   size.cex = FALSE, curved = FALSE, noloops = TRUE,
   remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
-  edgesize = 1, edges.min = 0, alpha = 0.5)
+  edgesize = 1, edges.min = 0, alpha = 0.5, verbose = TRUE)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
@@ -72,6 +72,8 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 \item{edges.min}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
 
 \item{alpha}{is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.}
+
+\item{verbose}{is a logical. If TRUE, network will be plotted. Default is \code{verbose = TRUE}.}
 }
 \value{
 It is a list containing the following elements:

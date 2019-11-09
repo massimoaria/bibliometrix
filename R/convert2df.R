@@ -112,6 +112,7 @@
 #' @importFrom igraph V
 #' @importFrom igraph V<-
 #' @importFrom igraph vcount
+#' @importFrom igraph graph_attr
 #' @importFrom igraph edge_density
 #' @importFrom igraph transitivity
 #' @importFrom igraph diameter

@@ -145,7 +145,7 @@ server <- function(input, output, session) {
             
           } else if (!is.null(inFile) & input$load=="load") {
         ext <- tolower(getFileNameExtension(inFile$datapath))
-        print(ext)
+        #print(ext)
         switch(ext,
                ### excel format
                xlsx={

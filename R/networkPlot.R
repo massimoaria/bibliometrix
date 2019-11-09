@@ -277,13 +277,13 @@ networkPlot <-
       #l <- layout.norm(l)
       
       ## Setting Network Attributes
-      graph_attr(net$graph, "alpha") <- alpha
-      graph_attr(bsk.network, "ylim") <- c(-1,1)
-      graph_attr(bsk.network, "xlim") <- c(-1,1)
-      graph_attr(bsk.network, "rescale") <- TRUE
-      graph_attr(bsk.network, "asp") <- 0
-      graph_attr(bsk.network, "layout") <- l
-      graph_attr(bsk.network, "main") <- Title
+      igraph::graph_attr(net$graph, "alpha") <- alpha
+      igraph::graph_attr(bsk.network, "ylim") <- c(-1,1)
+      igraph::graph_attr(bsk.network, "xlim") <- c(-1,1)
+      igraph::graph_attr(bsk.network, "rescale") <- TRUE
+      igraph::graph_attr(bsk.network, "asp") <- 0
+      igraph::graph_attr(bsk.network, "layout") <- l
+      igraph::graph_attr(bsk.network, "main") <- Title
       E(bsk.network)$curved = curved
       V(bsk.network)$label.dist = 0.7
       V(bsk.network)$frame.color = adjustcolor('black', alpha)

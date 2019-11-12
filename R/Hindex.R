@@ -52,7 +52,7 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   M$PY=as.numeric(M$PY)
   Today=as.numeric(substr(Sys.time(),1,4))
   past=Today-years
-  if (min(M$PY)<past){M=M[M$PY>=past,]}
+  if (min(M$PY, na.rm = TRUE)<past){M=M[M$PY>=past,]}
   
   TC2=NULL
   

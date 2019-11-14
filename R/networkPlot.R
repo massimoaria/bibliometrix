@@ -277,7 +277,7 @@ networkPlot <-
       #l <- layout.norm(l)
       
       ## Setting Network Attributes
-      igraph::graph_attr(net$graph, "alpha") <- alpha
+      igraph::graph_attr(bsk.network, "alpha") <- alpha
       igraph::graph_attr(bsk.network, "ylim") <- c(-1,1)
       igraph::graph_attr(bsk.network, "xlim") <- c(-1,1)
       igraph::graph_attr(bsk.network, "rescale") <- TRUE

@@ -123,7 +123,7 @@ networkPlot <-
     
     
     # vertex labels
-    V(bsk.network)$name <- (colnames(NetMatrix))
+    V(bsk.network)$name <- colnames(NetMatrix)
     
     
     # Compute node degrees (#links) and use that to set node size:

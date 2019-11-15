@@ -67,12 +67,17 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   #S <- normalizeSimilarity(NetMatrix, type = "association")
   #S=NetMatrix
-  t = tempfile();pdf(file=t) #### trick to hide igraph plot
-  Net <- networkPlot(NetMatrix, normalize="association",n=n, Title = "Keyword co-occurrences",type="auto",
+  #t = tempfile();pdf(file=t) #### trick to hide igraph plot
+  if (nrow(NetMatrix)>0){
+    Net <- networkPlot(NetMatrix, normalize="association",n=n, Title = "Keyword co-occurrences",type="auto",
                      labelsize = 2, halo = F,cluster="louvain",remove.isolates=TRUE,
                      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
-                     size=1,edges.min = 1, label.n=n)
-  dev.off();file.remove(t) ### end of trick
+                     size=1,edges.min = 1, label.n=n, verbose = FALSE)
+  }else{
+    cat("\n\nNetwork matrix is empty!\nThe analysis cannot be performed\n\n")
+    return()
+  }
+  #dev.off();file.remove(t) ### end of trick
   S=Net$S
   
   row.names(NetMatrix)=colnames(NetMatrix)=tolower(row.names(NetMatrix))
@@ -182,6 +187,10 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
       labs(x = "Centrality", y = "Density")+
       xlim(xlimits)+
       ylim(ylimits)+
+      geom_text(x=xlimits[1]+0.5, y=ylimits[2], label="Niche Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      geom_text(x=xlimits[2]-1, y=ylimits[2], label="Motor Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      geom_text(x=xlimits[2]-1, y=ylimits[1], label="Basic or\nTransversal Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      geom_text(x=xlimits[1]+1, y=ylimits[1], label="Emerging or\nDeclining Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),

@@ -1,3 +1,25 @@
+bibliometrix v2.3.2 (Release date: )
+==============
+
+New functionality:
+* biblioshiny: Introduced a new export windows to export the collection into an excel/RData file
+* biblioshiny: Assigned custom names to excel export buttons for all tables
+
+bibliometrix v2.3.1 (Release date: 2019-11-01)
+==============
+
+New functionality:
+* biblioshiny: added the support to Dimensions files
+* convert2df(): added the support to Dimensions files
+* dimensions2df(): introduced ths new function to import and convert Dimensions cvs/xlsx files
+
+
+Changes:
+* bug fixes in many functions
+
+
+
+
 bibliometrix v2.2.2 (Release date: )
 ==============
 

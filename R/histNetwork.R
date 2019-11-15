@@ -11,6 +11,7 @@
 #'   for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
+#' @param verbose is logical. If TRUE, results are printed on screen.
 #' @return \code{histNetwork} returns an object of \code{class} "list"
 #'   containing the following components:
 #'
@@ -33,7 +34,7 @@
 #'
 #' @export
 
-histNetwork<-function(M, min.citations = 1, sep = ";"){
+histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
   
   #if (M$DB[1]!="ISI"){cat("\nSorry, but for the moment histNetwork works only with WoS collections\n\n")
   #  return()}
@@ -61,7 +62,7 @@ histNetwork<-function(M, min.citations = 1, sep = ";"){
             for (i in 1:N){
               if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/N)}
               
-                if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
+                if ((i%%100==0 | i==N) & isTRUE(verbose)) cat("Articles analysed  ",i,"\n")
                 x=M2$SR_FULL[i]
                 Year=M2$PY[i]
                 #print(i)

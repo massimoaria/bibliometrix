@@ -1796,9 +1796,9 @@ server <- function(input, output, session) {
   
     input$applyCoc
     
-    t = tempfile();pdf(file=t) #### trick to hide igraph plot
+    #t = tempfile();pdf(file=t) #### trick to hide igraph plot
     values <- isolate(cocNetwork(input,values))
-    dev.off();file.remove(t) ### end of trick
+    #dev.off();file.remove(t) ### end of trick
     
     isolate(values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                        labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
@@ -2347,9 +2347,9 @@ server <- function(input, output, session) {
     
     input$applyCocit
     
-    t = tempfile();pdf(file=t) #### trick to hide igraph plot
+    #t = tempfile();pdf(file=t) #### trick to hide igraph plot
     values <- isolate(intellectualStructure(input,values))
-    dev.off();file.remove(t) ### end of trick
+    #dev.off();file.remove(t) ### end of trick
     
     isolate(values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                        labelsize=input$citlabelsize, opacity=input$cocitAlpha,type=input$citlayout,
@@ -2472,9 +2472,9 @@ server <- function(input, output, session) {
     
     input$applyCol
     
-    t = tempfile();pdf(file=t) #### trick to hide igraph plot
+    #t = tempfile();pdf(file=t) #### trick to hide igraph plot
     values <- isolate(socialStructure(input,values))
-    dev.off();file.remove(t) ### end of trick
+    #dev.off();file.remove(t) ### end of trick
     
     isolate(values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                        labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
@@ -2932,7 +2932,7 @@ server <- function(input, output, session) {
       values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
-                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"))
+                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), verbose = FALSE)
       if (input$cocyears=="Yes"){
         Y=fieldByYear(values$M, field = input$field, graph=FALSE)
         g=values$cocnet$graph
@@ -2992,7 +2992,7 @@ server <- function(input, output, session) {
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
-                                alpha=input$cocitAlpha, cluster=input$cocitCluster)
+                                alpha=input$cocitAlpha, cluster=input$cocitCluster, verbose = FALSE)
     return(values)
   }
   
@@ -3039,7 +3039,7 @@ server <- function(input, output, session) {
                               size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
-                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster)
+                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster, verbose = FALSE)
     
     return(values)
     

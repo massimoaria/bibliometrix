@@ -1,6 +1,8 @@
 ## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
 if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
+if (!(require(shinyFiles))){install.packages("shiny"); require(shinyFiles, quietly=TRUE)} 
+if (!(require(fs))){install.packages("shiny"); require(fs, quietly=TRUE)} 
 if (!(require(rio))){install.packages("rio")} 
 if (!(require(DT))){install.packages("DT")} 
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
@@ -137,14 +139,19 @@ tabPanel(
       
       h3(em(strong("Export a bibliometrix file "))),
       br(),
+     
       ### download xlsx
       selectInput('save_file', 'Save as:', choices = c(' ' ='null',
-                                                       'Excel' = 'xlsx',
-                                                       'R Data Format' = 'RData'),
+                                                       'Excel/R format' = 'xlsx'),
                   selected = 'null'),
+     ### prova
+     conditionalPanel(condition = "input.save_file != 'null'",
+     shinySaveButton("save", "Save file", "Save file as ...", filetype=list(xlsx="xlsx", RData="RData")))#,
+     
+     ###FINE PROVA
       #downloadButton("collection.save", "Export")
-      conditionalPanel(condition = "input.save_file != 'null'",
-              downloadButton("collection.save", "Export"))
+     # conditionalPanel(condition = "input.save_file != 'null'",
+    #          downloadButton("collection.save", "Export"))
     ),
     mainPanel(
       ## color of datatable

@@ -32,25 +32,24 @@ server <- function(input, output, session) {
   
   ### LOAD MENU ####
   
-  observe({
-    volumes <- c(Home = fs::path_home(), getVolumes()())
-    shinyFileSave(input, "save", roots=volumes, session=session)
-    fileinfo <- parseSavePath(volumes, input$save)
-    #data <- data.frame(a=c(1,2))
-    if (nrow(fileinfo) > 0) {
-      ext <- tolower(getFileNameExtension(fileinfo$datapath))
-      #print(ext)
-      switch(ext,
-             xlsx={
-               rio::export(values$M, file=as.character(fileinfo$datapath))
-               },
-             rdata={
-               M=values$M
-               save(M, file=as.character(fileinfo$datapath))
-             })
-    }
-  })
-  
+  # observe({
+  #   volumes <- c(Home = fs::path_home(), getVolumes()())
+  #   shinyFileSave(input, "save", roots=volumes, session=session)
+  #   fileinfo <- parseSavePath(volumes, input$save)
+  #   #data <- data.frame(a=c(1,2))
+  #   if (nrow(fileinfo) > 0) {
+  #     ext <- tolower(getFileNameExtension(fileinfo$datapath))
+  #     #print(ext)
+  #     switch(ext,
+  #            xlsx={
+  #              rio::export(values$M, file=as.character(fileinfo$datapath))
+  #              },
+  #            rdata={
+  #              M=values$M
+  #              save(M, file=as.character(fileinfo$datapath))
+  #            })
+  #   }
+  # })
   
   
   output$contents <- DT::renderDT({
@@ -247,22 +246,22 @@ server <- function(input, output, session) {
    
 })
 
- # output$collection.save <- downloadHandler(
- #    filename = function() {
- #      
- #      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
- #    },
- #    content <- function(file) {
- #      switch(input$save_file,
- #             xlsx={suppressWarnings(rio::export(values$M, file=file))},
- #             RData={
- #               M=values$M
- #               save(M, file=file)
- #             })
- #      
- #    },
- #    contentType = input$save_file
- #  )
+ output$collection.save <- downloadHandler(
+    filename = function() {
+
+      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
+    },
+    content <- function(file) {
+      switch(input$save_file,
+             xlsx={suppressWarnings(rio::export(values$M, file=file))},
+             RData={
+               M=values$M
+               save(M, file=file)
+             })
+
+    },
+    contentType = input$save_file
+  )
   
   output$textLog <- renderUI({
     #log=gsub("  Art","\\\nArt",values$log)

@@ -4,7 +4,7 @@
 \alias{histNetwork}
 \title{Historical co-citation network}
 \usage{
-histNetwork(M, min.citations = 1, sep = ";")
+histNetwork(M, min.citations = 1, sep = ";", verbose = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
@@ -17,6 +17,8 @@ for the documents included in the analysis. It can be greater than or equal to 1
 
 \item{sep}{is the field separator character. This character separates strings
 in CR column of the data frame. The default is \code{sep = ";"}.}
+
+\item{verbose}{is logical. If TRUE, results are printed on screen.}
 }
 \value{
 \code{histNetwork} returns an object of \code{class} "list"

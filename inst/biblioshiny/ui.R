@@ -1,8 +1,8 @@
 ## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
 if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
-if (!(require(shinyFiles))){install.packages("shiny"); require(shinyFiles, quietly=TRUE)} 
-if (!(require(fs))){install.packages("shiny"); require(fs, quietly=TRUE)} 
+#if (!(require(shinyFiles))){install.packages("shiny"); require(shinyFiles, quietly=TRUE)} 
+#if (!(require(fs))){install.packages("shiny"); require(fs, quietly=TRUE)} 
 if (!(require(rio))){install.packages("rio")} 
 if (!(require(DT))){install.packages("DT")} 
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
@@ -141,19 +141,23 @@ tabPanel(
       br(),
      
       ### download xlsx
-      selectInput('save_file', 'Save as:', choices = c(' ' ='null',
-                                                       'Excel/R format' = 'xlsx'),
-                  selected = 'null'),
-     ### prova
-     conditionalPanel(condition = "input.save_file != 'null'",
-     shinySaveButton("save", "Save file", "Save file as ...", filetype=list(xlsx="xlsx", RData="RData")))#,
-     
-     ###FINE PROVA
-      #downloadButton("collection.save", "Export")
+     #  selectInput('save_file', 'Save as:', choices = c(' ' ='null',
+     #                                                   'Excel/R format' = 'xlsx'),
+     #              selected = 'null'),
+     # ### prova
      # conditionalPanel(condition = "input.save_file != 'null'",
-    #          downloadButton("collection.save", "Export"))
-    ),
-    mainPanel(
+     # shinySaveButton("save", "Save file", "Save file as ...", filetype=list(xlsx="xlsx", RData="RData")))#,
+     # 
+     # ###FINE PROVA
+     ### download xlsx
+     selectInput('save_file', 'Save as:', choices = c(' ' ='null',
+                                                      'Excel' = 'xlsx',
+                                                      'R Data Format' = 'RData'),
+                 selected = 'null'),
+     conditionalPanel(condition = "input.save_file != 'null'",
+                      downloadButton("collection.save", "Export"))
+     ),
+     mainPanel(
       ## color of datatable
       tags$head(tags$style(HTML("table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;

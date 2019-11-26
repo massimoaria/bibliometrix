@@ -251,7 +251,7 @@ The export file can be read by R using the function *readFiles*:
 
 ```{r Data loading}
 
-D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
+D <- readFiles("https://www.bibliometrix.org/datasets/savedrecs.bib")
 ```
 
 D is a large character vector. 
@@ -359,8 +359,8 @@ It displays main information about the bibliographic data frame and several tabl
 
 Main information table describes the collection size in terms of number of documents, number of authors, number of sources, number of keywords, timespan, and average number of citations. 
 
-Furthermore, many different co-authorship indices are shown. In particular, the **Authors per Article index** is calculated as the ratio between the total number of articles and the total number of authors. The **Co-Authors per Articles index** is calculated as the average number of co-authors per article. In this case, the index takes into account the author appearances while for the "authors per article" an author, even if he has published more than one article, is counted only once.
-For that reasons,  *Authors per Article index $\ge$ Co-authors per Article index*.
+Furthermore, many different co-authorship indices are shown. In particular, the **Authors per Article index** is calculated as the ratio between the total number of authors and the total number of articles. The **Co-Authors per Articles index** is calculated as the average number of co-authors per article. In this case, the index takes into account the author appearances while for the "authors per article" an author, even if he has published more than one article, is counted only once.
+For that reasons,  *Authors per Article index $\le$ Co-authors per Article index*.
 
 The **Collaboration Index** (CI) is calculated as Total Authors of Multi-Authored Articles/Total Multi-Authored Articles (Elango and Rajendran, 2012; Koseoglu, 2016). In other word, the Collaboration Index is a Co-authors per Article index calculated only using the multi-authored article set.
 

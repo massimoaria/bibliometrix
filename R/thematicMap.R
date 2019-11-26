@@ -170,6 +170,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   xlimits=c(meancentr-rangex,meancentr+rangex)
   ylimits=c(meandens-rangey,meandens+rangey)
   
+ #quadrant_names=rep(" ",4) ## empty tooltips for quadrant names
 
   g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity, text=(df$words))) +
     geom_point(group="NA",aes(size=log(as.numeric(df$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
@@ -187,10 +188,10 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
       labs(x = "Centrality", y = "Density")+
       xlim(xlimits)+
       ylim(ylimits)+
-      geom_text(x=xlimits[1]+0.5, y=ylimits[2], label="Niche Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-      geom_text(x=xlimits[2]-1, y=ylimits[2], label="Motor Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-      geom_text(x=xlimits[2]-1, y=ylimits[1], label="Basic or\nTransversal Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-      geom_text(x=xlimits[1]+1, y=ylimits[1], label="Emerging or\nDeclining Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      #geom_text(x=xlimits[1]+0.5, y=ylimits[2], label="Niche Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      #geom_text(x=xlimits[2]-1, y=ylimits[2], label="Motor Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      #geom_text(x=xlimits[2]-1, y=ylimits[1], label="Basic or\nTransversal Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
+      #geom_text(x=xlimits[1]+1, y=ylimits[1], label="Emerging or\nDeclining Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),

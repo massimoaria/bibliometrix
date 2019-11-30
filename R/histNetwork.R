@@ -82,8 +82,8 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
          },
     SCOPUS={
       ## matching by title and year
-      TI=paste(M2$TI," ","\\(",M2$PY,"\\)",sep = "")
-      TIb=paste("\\(",M2$PY,"\\)"," ",M2$TI,sep = "")
+      TI=paste(M2$TI," ","(",M2$PY,")",sep = "")
+      TIb=paste("(",M2$PY,")"," ",M2$TI,sep = "")
       for (i in 1:N){
         if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/N)}
         
@@ -92,10 +92,11 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
         x=TI[i]
         y=TIb[i]
         Year=M2$PY[i]
-        x=trimws(gsub("\\[.+?]","",x)) 
-        pos = grep(x, M$CR[M$PY>=Year])
+        x=trimws(x) 
+        y=trimws(y) 
+        pos = grep(x, M$CR[M$PY>=Year], fixed = TRUE)
         pos = rows[M$PY>=Year][pos]
-        pos2 = grep(y, M$CR[M$PY>=Year])
+        pos2 = grep(y, M$CR[M$PY>=Year], fixed = TRUE)
         pos2 = rows[M$PY>=Year][pos2]
         pos=unique(pos,pos2)
         if (length(pos)>0){

@@ -63,7 +63,7 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
        ## matching by SR
             for (i in 1:N){
               session=shiny::getDefaultReactiveDomain()
-              if (!is.null(session) && !is.null(session$progressStack)) {
+              if (!is.null(session) && session$progressStack$size() != 0) {
                 shiny::incProgress(1/N)
               }
               
@@ -91,7 +91,7 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
        TIb=paste("(",M2$PY,")"," ",M2$TI,sep = "")
        for (i in 1:N){
          session=shiny::getDefaultReactiveDomain()
-         if (!is.null(session) && !is.null(session$progressStack)) {
+         if (!is.null(session) && session$progressStack$size() != 0) {
            shiny::incProgress(1/N)
          }
          

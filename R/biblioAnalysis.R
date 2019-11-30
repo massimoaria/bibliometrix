@@ -49,7 +49,6 @@
 #' @export
 
 biblioAnalysis<-function(M,sep=";"){
-
   # initialize variables
   Authors=NULL
   Authors_frac=NULL
@@ -86,7 +85,7 @@ if ("AU" %in% Tags){
   listAU=strsplit(as.character(M$AU),sep)
   listAU=lapply(listAU, function(l) trim(l))
   nAU=unlist(lapply(listAU,length))  # num. of authors per paper
-  fracAU=unlist(sapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
+  fracAU=unlist(lapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
   AU=unlist(listAU)
 
   Authors=sort(table(AU),decreasing=TRUE)

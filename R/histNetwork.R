@@ -56,62 +56,60 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
   
   lCit=Matrix(0, N,N2)
   
-  
-  
   switch(M$DB[1],
-     ISI={
-       ## matching by SR
-            for (i in 1:N){
-              session=shiny::getDefaultReactiveDomain()
-              if (!is.null(session) && session$progressStack$size() != 0) {
-                shiny::incProgress(1/N)
-              }
-              
-              if ((i%%100==0 | i==N) & isTRUE(verbose)) cat("Articles analysed  ",i,"\n")
-              x=M2$SR_FULL[i]
-              Year=M2$PY[i]
-              #print(i)
-              pos = grep(x, M$CR[M$PY>=Year])
-              pos = rows[M$PY>=Year][pos]
-              if ("DI" %in% names(M)){
-                if (!is.na(M2$DI[i])){
-                  pos2 = grep(M2$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
-                  pos2 = rows[M$PY>=Year][pos2]
-                  pos=unique(pos,pos2)}
-              }
-              
-              if (length(pos)>0){
-                lCit[i,pos]=1
-              }
-            }
-     },
-     SCOPUS={
-       ## matching by title and year
-       TI=paste(M2$TI," ","(",M2$PY,")",sep = "")
-       TIb=paste("(",M2$PY,")"," ",M2$TI,sep = "")
-       for (i in 1:N){
-         session=shiny::getDefaultReactiveDomain()
-         if (!is.null(session) && session$progressStack$size() != 0) {
-           shiny::incProgress(1/N)
-         }
-         
-         if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
-         
-         x=TI[i]
-         y=TIb[i]
-         Year=M2$PY[i]
-         x=trimws(x) 
-         y=trimws(y) 
-         pos = grep(x, M$CR[M$PY>=Year], fixed = TRUE)
-         pos = rows[M$PY>=Year][pos]
-         pos2 = grep(y, M$CR[M$PY>=Year], fixed = TRUE)
-         pos2 = rows[M$PY>=Year][pos2]
-         pos=unique(pos,pos2)
-         if (length(pos)>0){
-           lCit[i,pos]=1
-         }
-       }
-     })
+         ISI={
+           ## matching by SR
+           for (i in 1:N){
+             session=shiny::getDefaultReactiveDomain()
+             if (!is.null(session) && session$progressStack$size() != 0) {
+               shiny::incProgress(1/N)
+             }
+             
+             if ((i%%100==0 | i==N) & isTRUE(verbose)) cat("Articles analysed  ",i,"\n")
+             x=M2$SR_FULL[i]
+             Year=M2$PY[i]
+             #print(i)
+             pos = grep(x, M$CR[M$PY>=Year])
+             pos = rows[M$PY>=Year][pos]
+             if ("DI" %in% names(M)){
+               if (!is.na(M2$DI[i])){
+                 pos2 = grep(M2$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
+                 pos2 = rows[M$PY>=Year][pos2]
+                 pos=unique(pos,pos2)}
+             }
+             
+             if (length(pos)>0){
+               lCit[i,pos]=1
+             }
+           }
+         },
+         SCOPUS={
+           ## matching by title and year
+           TI=paste(M2$TI," ","(",M2$PY,")",sep = "")
+           TIb=paste("(",M2$PY,")"," ",M2$TI,sep = "")
+           for (i in 1:N){
+             session=shiny::getDefaultReactiveDomain()
+             if (!is.null(session) && session$progressStack$size() != 0) {
+               shiny::incProgress(1/N)
+             }
+             
+             if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
+             
+             x=TI[i]
+             y=TIb[i]
+             Year=M2$PY[i]
+             x=trimws(x) 
+             y=trimws(y) 
+             pos = grep(x, M$CR[M$PY>=Year], fixed = TRUE)
+             pos = rows[M$PY>=Year][pos]
+             pos2 = grep(y, M$CR[M$PY>=Year], fixed = TRUE)
+             pos2 = rows[M$PY>=Year][pos2]
+             pos=unique(pos,pos2)
+             if (length(pos)>0){
+               lCit[i,pos]=1
+             }
+           }
+         })
   
   LCS=rowSums(lCit)
   

@@ -57,55 +57,62 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
   lCit=Matrix(0, N,N2)
   
   switch(M$DB[1],
-     ISI={
-       ## matching by SR
-            for (i in 1:N){
-              if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/N)}
-              
-                if ((i%%100==0 | i==N) & isTRUE(verbose)) cat("Articles analysed  ",i,"\n")
-                x=M2$SR_FULL[i]
-                Year=M2$PY[i]
-                #print(i)
-                pos = grep(x, M$CR[M$PY>=Year])
-                pos = rows[M$PY>=Year][pos]
-                if ("DI" %in% names(M)){
-                  if (!is.na(M2$DI[i])){
-                    pos2 = grep(M2$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
-                    pos2 = rows[M$PY>=Year][pos2]
-                    pos=unique(pos,pos2)}
-                }
-    
-                if (length(pos)>0){
-                  lCit[i,pos]=1
-                }
-            }
+         ISI={
+           ## matching by SR
+           for (i in 1:N){
+             session=shiny::getDefaultReactiveDomain()
+             if (!is.null(session) && session$progressStack$size() != 0) {
+               shiny::incProgress(1/N)
+             }
+             
+             if ((i%%100==0 | i==N) & isTRUE(verbose)) cat("Articles analysed  ",i,"\n")
+             x=M2$SR_FULL[i]
+             Year=M2$PY[i]
+             #print(i)
+             pos = grep(x, M$CR[M$PY>=Year])
+             pos = rows[M$PY>=Year][pos]
+             if ("DI" %in% names(M)){
+               if (!is.na(M2$DI[i])){
+                 pos2 = grep(M2$DI[i],M$CR[M$PY>=Year],fixed=TRUE)
+                 pos2 = rows[M$PY>=Year][pos2]
+                 pos=unique(pos,pos2)}
+             }
+             
+             if (length(pos)>0){
+               lCit[i,pos]=1
+             }
+           }
          },
-    SCOPUS={
-      ## matching by title and year
-      TI=paste(M2$TI," ","\\(",M2$PY,"\\)",sep = "")
-      TIb=paste("\\(",M2$PY,"\\)"," ",M2$TI,sep = "")
-      for (i in 1:N){
-        if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/N)}
-        
-        if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
-      
-        x=TI[i]
-        y=TIb[i]
-        Year=M2$PY[i]
-        x=trimws(gsub("\\[.+?]","",x)) 
-        pos = grep(x, M$CR[M$PY>=Year])
-        pos = rows[M$PY>=Year][pos]
-        pos2 = grep(y, M$CR[M$PY>=Year])
-        pos2 = rows[M$PY>=Year][pos2]
-        pos=unique(pos,pos2)
-        if (length(pos)>0){
-          lCit[i,pos]=1
-        }
-      }
-  })
+         SCOPUS={
+           ## matching by title and year
+           TI=paste(M2$TI," ","(",M2$PY,")",sep = "")
+           TIb=paste("(",M2$PY,")"," ",M2$TI,sep = "")
+           for (i in 1:N){
+             session=shiny::getDefaultReactiveDomain()
+             if (!is.null(session) && session$progressStack$size() != 0) {
+               shiny::incProgress(1/N)
+             }
+             
+             if (i%%100==0 | i==N) cat("Articles analysed  ",i,"\n")
+             
+             x=TI[i]
+             y=TIb[i]
+             Year=M2$PY[i]
+             x=trimws(x) 
+             y=trimws(y) 
+             pos = grep(x, M$CR[M$PY>=Year], fixed = TRUE)
+             pos = rows[M$PY>=Year][pos]
+             pos2 = grep(y, M$CR[M$PY>=Year], fixed = TRUE)
+             pos2 = rows[M$PY>=Year][pos2]
+             pos=unique(pos,pos2)
+             if (length(pos)>0){
+               lCit[i,pos]=1
+             }
+           }
+         })
   
   LCS=rowSums(lCit)
-
+  
   ### to assure that LCS cannot be greater than TC
   ind=which(LCS>M2$TC)
   LCS[ind]=M2$TC[ind]
@@ -117,15 +124,15 @@ histNetwork<-function(M, min.citations = 1, sep = ";", verbose = TRUE){
   
   lCit=lCit[,(M$SR %in% M2$SR)]
   
- 
+  
   if (!("DI" %in% names(M2))){M2$DI=NA}
   df=data.frame(Paper=M2$SR,DOI=M2$DI,Year=M2$PY,LCS=LCS,GCS=M2$TC,stringsAsFactors = F)
   df=df[order(df$Year),]  
   
-
-row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
-
-results=list(NetMatrix=t(lCit),histData=df,M=M2,LCS=LCS)
-
-return(results)
+  
+  row.names(df)=paste(df$Year,rep("-",dim(df)[1]),1:dim(df)[1])
+  
+  results=list(NetMatrix=t(lCit),histData=df,M=M2,LCS=LCS)
+  
+  return(results)
 }

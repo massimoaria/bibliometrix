@@ -42,9 +42,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
   LCS=histResults$LCS
   NET=histResults$NetMatrix
-  
-  ## selecting the first n vertices
-  s=sort(LCS,decreasing = TRUE)[n]
+  ## selecting the first n vertices or all if smaller
+  s=sort(LCS,decreasing = TRUE)[min(n, length(LCS))]
   ind=which(LCS>=s)
   NET=NET[ind,ind]
   LCS=LCS[ind]

@@ -2796,7 +2796,7 @@ server <- function(input, output, session) {
            },
            "tab13"={
              CR<-citations(values$M,field="author")
-             TAB=data.frame(Authors=names(TAB), Citations=as.numeric(TAB),stringsAsFactors = FALSE)
+             TAB=data.frame(Authors=names(CR$Cited), Citations=as.numeric(CR$Cited),stringsAsFactors = FALSE)
            }
     )
     values$TAB=TAB

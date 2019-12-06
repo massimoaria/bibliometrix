@@ -848,19 +848,48 @@ server <- function(input, output, session) {
     plot.ly(g)
   })#, height = 500, width =900)
   
-  output$MostRelAuthorsTable <- DT::renderDT({
+  output$MostCitAuthorsPlot <- renderPlotly({
+    res <- descriptive(values,type="tab13")
+    values <-res$values
+    values$TABAuCit<-values$TAB
     
-    TAB <- values$TABAu
+    #xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
+    xx <- values$TABAuCit
+    lab <- "Citations"
+    xx[,2]=as.numeric(xx[,2])
+    
+    if (input$MostCitAuthorsK>dim(xx)[1]){
+      k=dim(xx)[1]
+    } else {k=input$MostCitAuthorsK}
+    
+    xx=xx[1:k,]
+    xx[,2]=round(xx[,2],1)
+    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Author: ",xx[,1],"\n",lab,": ",xx[,2]))) +
+      geom_bar(aes(group="NA"),stat="identity")+
+      scale_fill_continuous(type = "gradient")+
+      scale_x_discrete(limits = rev(xx[,1]))+
+      labs(title="Most Local Cited Authors", x = "Authors")+
+      labs(y = lab)+
+      theme_minimal() +
+      guides(fill=FALSE)+
+      coord_flip()
+    
+    plot.ly(g)
+  })#, height = 500, width =900)
+  
+  output$MostCitAuthorsTable <- DT::renderDT({
+    
+    TAB <- values$TABAuCit
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
-                                                     filename = 'Most_Relevant_Authors',
+                                                     filename = 'Most_Local_Cited_Authors',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'excel',
-                                                     filename = 'Most_Relevant_Authors',
+                                                     filename = 'Most_Local_Cited_Authors',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'pdf',
@@ -2764,6 +2793,10 @@ server <- function(input, output, session) {
              TAB=TAB[nchar(TAB[,1])>4,]
              #names(TAB)=c("Affiliations", "Articles")
              
+           },
+           "tab13"={
+             CR<-citations(values$M,field="author")
+             TAB=data.frame(Authors=names(TAB), Citations=as.numeric(TAB),stringsAsFactors = FALSE)
            }
     )
     values$TAB=TAB

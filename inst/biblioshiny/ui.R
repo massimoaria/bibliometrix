@@ -498,6 +498,30 @@ navbarMenu("Authors",
                     )
            ),
            
+           ### MOST LOCAL CITED AUTHORS
+           tabPanel("Most Local Cited Authors",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Most Local Cited Authors"))),
+                                   br(),
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostCitAuthorsK", 
+                                                label=("Number of Authors"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = 700))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           
            ### AUTHORS' PRODUCTION OVER TIME  ----
            tabPanel("Authors' Production over Time",
                     sidebarLayout(
@@ -524,6 +548,7 @@ navbarMenu("Authors",
                       )
                     )
            ),
+           
 
            ### LOTKA LAW ----
            tabPanel("Lotka's law",

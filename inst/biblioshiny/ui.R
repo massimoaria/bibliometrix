@@ -1320,7 +1320,7 @@ navbarMenu("Conceptual Structure",
                                                            "Stability Index" = "stability"
                                                ),
                                                selected = "weighted"),
-                                   sliderInput("minFlowTE", label="Min Weigth Index",value=0.1,min=0.02,max=1,step=0.02),
+                                   sliderInput("minFlowTE", label="Min Weight Index",value=0.1,min=0.02,max=1,step=0.02),
                                    sliderInput("sizeTE", label="Label size",value=0.3,min=0.0,max=1,step=0.05),
                                    sliderInput("TEn.labels", label="Number of Labels (for each cluster)",value=1,min=1,max=5,step=1),
                                    br(),

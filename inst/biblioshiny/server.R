@@ -848,6 +848,33 @@ server <- function(input, output, session) {
     plot.ly(g)
   })#, height = 500, width =900)
   
+  output$MostRelAuthorsTable <- DT::renderDT({
+    
+    TAB <- values$TABAu
+    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 20, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Most_Local_Cited_Authors',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Most_Local_Cited_Authors',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Most_Relevant_Authors',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                  class = 'cell-border compact stripe') %>%
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+    
+  })
+  
   output$MostCitAuthorsPlot <- renderPlotly({
     res <- descriptive(values,type="tab13")
     values <-res$values

@@ -221,7 +221,7 @@ AU_CO<-function(M){
   ## remove reprint information from C1
   C1=unlist(lapply(C1,function(l){
     l=unlist(strsplit(l,";"))
-    l=l[regexpr("REPRINT AUTHOR",l)==-1]
+    #l=l[regexpr("REPRINT AUTHOR",l)==-1]
     l=paste0(l,collapse=";")
   }))
   ###
@@ -320,7 +320,7 @@ AU_UN<-function(M,sep){
   C1=M$C1
   C1=unlist(lapply(C1,function(l){
     l=unlist(strsplit(l,";"))
-    l=l[regexpr("REPRINT AUTHOR",l)==-1]
+    #l=l[regexpr("REPRINT AUTHOR",l)==-1]
     l=paste0(l,collapse=";")
   }))
   ###

@@ -325,7 +325,8 @@ networkPlot <-
       cluster_obj = net_groups,
       cluster_res = cluster_res,
       layout = l,
-      S = S
+      S = S,
+      nodeDegree = sort(deg, decreasing = T) 
     )
     
     return(net)

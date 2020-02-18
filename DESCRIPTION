@@ -1,8 +1,8 @@
 Package: bibliometrix
 Type: Package
 Title: An R-Tool for Comprehensive Science Mapping Analysis
-Version: 2.3.2
-Date: 2019-11-23
+Version: 2.3.3
+Date: 2020-02-13
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
 Description: Tool for quantitative research in scientometrics and bibliometrics.
@@ -11,7 +11,8 @@ Description: Tool for quantitative research in scientometrics and bibliometrics.
 	and PubMed (<https://www.ncbi.nlm.nih.gov/pubmed/>) databases, performing bibliometric analysis 
     and building networks for co-citation, coupling, scientific collaboration and co-word analysis.
 License: GPL-3
-URL: http://www.bibliometrix.org
+URL: https://www.bibliometrix.org, https://github.com/massimoaria/bibliometrix
+BugReports: https://github.com/massimoaria/bibliometrix/issues
 LazyData: FALSE
 Encoding: UTF-8
 Depends: R (>= 3.3.0)

@@ -30,6 +30,7 @@
 #'   \code{matrix}\cr \code{type = "sparse"} \tab   \tab produces an object of
 #'   class \code{dgMatrix} of the package \code{\link{Matrix}}. "sparse"
 #'   argument generates a compact representation of the matrix.}
+#' @param n is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.
 #' @param sep is the field separator character. This character separates strings in each 
 #' column of the data frame. The default is \code{sep = ";"}.
 #' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency. 
@@ -60,7 +61,7 @@
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @export
 
-cocMatrix<-function(M, Field = "AU", type = "sparse", sep = ";",binary=TRUE){
+cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE){
 #
 # The function creates co-occurences data between Works and Field
 #
@@ -152,6 +153,15 @@ if (type=="sparse" & !isTRUE(binary)){
 
   WF=WF[,!is.na(uniqueField)]
   #WF=attrPY(M,WF)  # Median Year of each attribute
+  
+  # select n items
+  if (!is.null(n)){
+    n <- min(c(n, dim(WF)[2]))
+    deg <- colSums(WF)
+    nodes <- names(sort(deg, decreasing = TRUE)[1:n])
+    WF <- WF[,nodes]
+  }
+  
   
 return(WF)
 }

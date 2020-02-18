@@ -4,6 +4,9 @@ bibliometrix v2.3.3 (Release date: )
 New functionality:
 * biblioshiny: Added "Most Local Cited Authors" analysis in Author Menu
 
+Changes:
+* cocMatrix: added the argument "n" to set the number of items to include in the occurrences matrix
+* biblioNetwork: added the argument "n" to set the number of items to include in the co-occurrences matrix
 
 
 bibliometrix v2.3.2 (Release date: 2019-11-23)

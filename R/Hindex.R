@@ -88,11 +88,11 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
     range=as.numeric(format(Sys.Date(),'%Y'))-min(as.numeric(M$PY[ind]))+1
     H[j,6]=length(ind)
     H[j,5]=sum(M$TC[ind])
-    H[j,7]=min(as.numeric(M$PY[ind]))
+    H[j,7]=min(as.numeric(M$PY[ind]), na.rm = TRUE)
     TC=sort(as.numeric(M$TC[ind]))
     TCC=sort(as.numeric(M$TC[ind]),decreasing = TRUE)
       for (i in 1:length(TC)){
-        TC2[i]=mean(TCC[1:i])
+        TC2[i]=mean(TCC[1:i], na.rm=TRUE)
         if (TC2[i]>=i){H[j,3]=i}
         if (length(TC[TC>=i])>=i){
         H[j,2]=i

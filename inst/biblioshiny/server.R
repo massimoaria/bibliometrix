@@ -2710,12 +2710,12 @@ server <- function(input, output, session) {
       
       switch(type,
              author={
-               AU=trim(gsub(",","",names(tableTag(values$M,"AU"))))
-               values$H=Hindex(values$M, field = "author", elements = AU, sep = ";", years=Inf)$H
+               AU <- trim(gsub(",","",names(tableTag(values$M,"AU"))))
+               values$H <- Hindex(values$M, field = "author", elements = AU, sep = ";", years=Inf)$H
              },
              source={
-               SO=names(sort(table(values$M$SO),decreasing = TRUE))
-               values$H=Hindex(values$M, field = "source", elements = SO, sep = ";", years=Inf)$H
+               SO <- names(sort(table(values$M$SO),decreasing = TRUE))
+               values$H <- Hindex(values$M, field = "source", elements = SO, sep = ";", years=Inf)$H
              }
       )
       

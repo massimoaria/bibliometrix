@@ -10,7 +10,6 @@ bibliometrix
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
-<span class="__dimensions_badge_embed__" data-doi="10.1016/j.joi.2017.08.007"></span><script async src="https://badge.dimensions.ai/badge.js" charset="utf-8"></script>
 
 <p align="center">
 <img src="http://www.bibliometrix.org/logo.png" width="300"  />

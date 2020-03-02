@@ -78,7 +78,7 @@ Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for comprehensive sci
 
 ## Community
 
-Official website:   http://www.bibliometrix.org
+Official website:   https://www.bibliometrix.org
 
 CRAN page:          https://cran.r-project.org/package=bibliometrix
     
@@ -127,7 +127,7 @@ The export file can be read by R using the function *readFiles*:
 ```{r Data loading}
 ## An example from bibliometrix vignettes
 
-D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
+D <- readFiles("https://www.bibliometrix.org/datasets/savedrecs.bib")
 ```
 
 D is a large character vector. 

@@ -199,7 +199,7 @@ results=list(Articles=dim(M)[1],             # Articles
   return(results)
 }
 countryCollaboration<-function(M,Country,k,sep){
-  M=metaTagExtraction(M,Field="AU_CO",sep)
+  if (!("AU1_CO" %in% names(M))){M=metaTagExtraction(M,Field="AU_CO",sep)}
   M$SCP=0
   M$SCP_CO=NA
   for (i in 1:dim(M)[1]){

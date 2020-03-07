@@ -4,8 +4,7 @@
 \alias{cocMatrix}
 \title{Co-occurrence matrix}
 \usage{
-cocMatrix(M, Field = "AU", type = "sparse", sep = ";",
-  binary = TRUE)
+cocMatrix(M, Field = "AU", type = "sparse", n = NULL, sep = ";", binary = TRUE)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -28,6 +27,8 @@ articles and variables to Field Tag in the original WoS or SCOPUS file.}
 \code{matrix}\cr \code{type = "sparse"} \tab   \tab produces an object of
 class \code{dgMatrix} of the package \code{\link{Matrix}}. "sparse"
 argument generates a compact representation of the matrix.}}
+
+\item{n}{is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.}
 
 \item{sep}{is the field separator character. This character separates strings in each 
 column of the data frame. The default is \code{sep = ";"}.}

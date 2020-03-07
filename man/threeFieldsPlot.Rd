@@ -4,8 +4,13 @@
 \alias{threeFieldsPlot}
 \title{Three Fields Plot}
 \usage{
-threeFieldsPlot(M, fields = c("AU", "DE", "SO"), n = c(20, 20, 20),
-  width = 1200, height = 600)
+threeFieldsPlot(
+  M,
+  fields = c("AU", "DE", "SO"),
+  n = c(20, 20, 20),
+  width = 1200,
+  height = 600
+)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.

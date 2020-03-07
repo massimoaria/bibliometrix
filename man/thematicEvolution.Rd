@@ -4,8 +4,17 @@
 \alias{thematicEvolution}
 \title{Perform a Thematic Evolution Analysis}
 \usage{
-thematicEvolution(M, field = "ID", years, n = 250, minFreq = 2,
-  size = 0.5, stemming = FALSE, n.labels = 1, repel = TRUE)
+thematicEvolution(
+  M,
+  field = "ID",
+  years,
+  n = 250,
+  minFreq = 2,
+  size = 0.5,
+  stemming = FALSE,
+  n.labels = 1,
+  repel = TRUE
+)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.}

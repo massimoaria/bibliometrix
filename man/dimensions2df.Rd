@@ -37,9 +37,13 @@ It is an internal function used by \code{\link{convert2df}} to convert a Dimensi
 
 \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 
-Other converting functions: \code{\link{bib2df}},
-  \code{\link{cochrane2df}}, \code{\link{convert2df}},
-  \code{\link{isi2df}}, \code{\link{isibib2df}},
-  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
+Other converting functions: 
+\code{\link{bib2df}()},
+\code{\link{cochrane2df}()},
+\code{\link{convert2df}()},
+\code{\link{isi2df}()},
+\code{\link{isibib2df}()},
+\code{\link{pubmed2df}()},
+\code{\link{scopus2df}()}
 }
 \concept{converting functions}

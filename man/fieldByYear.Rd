@@ -4,8 +4,15 @@
 \alias{fieldByYear}
 \title{Field Tag distribution by Year}
 \usage{
-fieldByYear(M, field = "ID", timespan = NULL, min.freq = 1,
-  n.items = 5, labelsize = 5, graph = TRUE)
+fieldByYear(
+  M,
+  field = "ID",
+  timespan = NULL,
+  min.freq = 1,
+  n.items = 5,
+  labelsize = 5,
+  graph = TRUE
+)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}

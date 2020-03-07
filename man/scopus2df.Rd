@@ -17,7 +17,7 @@ It is an internal function used by \code{\link{convert2df}} to convert a SCOPUS 
 with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
-# A SCOPUS Export file can be read using \\code{\\link{readFiles}} function:
+# A SCOPUS Export file can be read using \code{\link{readFiles}} function:
 
 # largechar <- readFiles('filename1.bib','filename2.bib2,...)
 
@@ -32,9 +32,13 @@ with cases corresponding to articles and variables to Field Tag in the original 
 \seealso{
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 
-Other converting functions: \code{\link{bib2df}},
-  \code{\link{cochrane2df}}, \code{\link{convert2df}},
-  \code{\link{dimensions2df}}, \code{\link{isi2df}},
-  \code{\link{isibib2df}}, \code{\link{pubmed2df}}
+Other converting functions: 
+\code{\link{bib2df}()},
+\code{\link{cochrane2df}()},
+\code{\link{convert2df}()},
+\code{\link{dimensions2df}()},
+\code{\link{isi2df}()},
+\code{\link{isibib2df}()},
+\code{\link{pubmed2df}()}
 }
 \concept{converting functions}

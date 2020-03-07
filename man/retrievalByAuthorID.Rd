@@ -4,8 +4,7 @@
 \alias{retrievalByAuthorID}
 \title{Get Author Content on SCOPUS by ID}
 \usage{
-retrievalByAuthorID(id, api_key, remove.duplicated = TRUE,
-  country = TRUE)
+retrievalByAuthorID(id, api_key, remove.duplicated = TRUE, country = TRUE)
 }
 \arguments{
 \item{id}{is a vector of characters containing the author's SCOPUS IDs. 

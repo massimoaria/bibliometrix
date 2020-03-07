@@ -20,7 +20,7 @@ It estimates and draws the Bradford's law source distribution.
 }
 \details{
 Bradford's law is a pattern first described by (\cite{Samuel C. Bradford, 1934}) that estimates the exponentially diminishing returns 
-of searching for references in science journals.
+of searching for references in science journals. 
 
 One formulation is that if journals in a field are sorted by number of articles into three groups, each with about one-third of all articles, 
 then the number of journals in each group will be proportional to 1:n:n2.\cr\cr

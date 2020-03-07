@@ -33,9 +33,13 @@ and create a data frame from it, with cases corresponding to articles and variab
 
 \code{\link{isibib2df}} for converting Clarivate Analytics WoS Export file (in bibtex format)
 
-Other converting functions: \code{\link{bib2df}},
-  \code{\link{cochrane2df}}, \code{\link{convert2df}},
-  \code{\link{dimensions2df}}, \code{\link{isi2df}},
-  \code{\link{isibib2df}}, \code{\link{scopus2df}}
+Other converting functions: 
+\code{\link{bib2df}()},
+\code{\link{cochrane2df}()},
+\code{\link{convert2df}()},
+\code{\link{dimensions2df}()},
+\code{\link{isi2df}()},
+\code{\link{isibib2df}()},
+\code{\link{scopus2df}()}
 }
 \concept{converting functions}

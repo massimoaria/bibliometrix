@@ -4,8 +4,14 @@
 \alias{biblioNetwork}
 \title{Creating Bibliographic networks}
 \usage{
-biblioNetwork(M, analysis = "coupling", network = "authors",
-  sep = ";", shortlabel = TRUE)
+biblioNetwork(
+  M,
+  analysis = "coupling",
+  network = "authors",
+  n = NULL,
+  sep = ";",
+  shortlabel = TRUE
+)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
@@ -19,6 +25,8 @@ Default is \code{analysis = "coupling"}.}
 \item{network}{is a character object. It indicates the network typology. The \code{network} argument can be
 \code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"}, \code{"titles"}, or \code{"abstracts"}.
 Default is \code{network = "authors"}.}
+
+\item{n}{is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
 

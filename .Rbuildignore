@@ -7,6 +7,8 @@
 ^.*\.RData$
 ^.*\.jar
 ^.*\.net
+^.*\.csv
+^.*\.xml
 LICENCE.*$
 Rubbish
 ^_gh-pages$

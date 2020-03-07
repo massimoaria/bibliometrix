@@ -17,7 +17,7 @@ It is an internal function used by \code{\link{convert2df}} to convert a Clariva
 and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
-# A group of ISI Export files can be read using \\code{\\link{readFiles}} function:
+# A group of ISI Export files can be read using \code{\link{readFiles}} function:
 
 # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 
@@ -29,9 +29,13 @@ and create a data frame from it, with cases corresponding to articles and variab
 \seealso{
 \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
 
-Other converting functions: \code{\link{bib2df}},
-  \code{\link{cochrane2df}}, \code{\link{convert2df}},
-  \code{\link{dimensions2df}}, \code{\link{isibib2df}},
-  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
+Other converting functions: 
+\code{\link{bib2df}()},
+\code{\link{cochrane2df}()},
+\code{\link{convert2df}()},
+\code{\link{dimensions2df}()},
+\code{\link{isibib2df}()},
+\code{\link{pubmed2df}()},
+\code{\link{scopus2df}()}
 }
 \concept{converting functions}

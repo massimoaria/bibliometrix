@@ -16,7 +16,7 @@ a data frame with cases corresponding to articles and variables to Field Tag in 
 It converts a Cochrane Database Export file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
 }
 \examples{
-# A group of Cochrane Database Export files can be read using \\code{\\link{readFiles}} function:
+# A group of Cochrane Database Export files can be read using \code{\link{readFiles}} function:
 
 # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 
@@ -29,9 +29,13 @@ It converts a Cochrane Database Export file and create a data frame from it, wit
 \seealso{
 \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
 
-Other converting functions: \code{\link{bib2df}},
-  \code{\link{convert2df}}, \code{\link{dimensions2df}},
-  \code{\link{isi2df}}, \code{\link{isibib2df}},
-  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
+Other converting functions: 
+\code{\link{bib2df}()},
+\code{\link{convert2df}()},
+\code{\link{dimensions2df}()},
+\code{\link{isi2df}()},
+\code{\link{isibib2df}()},
+\code{\link{pubmed2df}()},
+\code{\link{scopus2df}()}
 }
 \concept{converting functions}

@@ -16,7 +16,7 @@ a character vector of length the number of lines read.
 It loads a sequence of SCOPUS and Clarivate Analytics WoS export files and create a large character vector from it.
 }
 \examples{
-# WoS or SCOPUS Export files can be read using \\code{\\link{readFiles}} function:
+# WoS or SCOPUS Export files can be read using \code{\link{readFiles}} function:
 
 # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 

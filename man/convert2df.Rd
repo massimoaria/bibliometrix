@@ -46,7 +46,7 @@ It converts a SCOPUS, Clarivate Analytics WoS, Dimensions and COCHRANE Database 
 Actually the function allows to convert both SCOPUS/WoS files in bibtex format and just WoS files in plain text format.
 }
 \examples{
-# An ISI or SCOPUS Export file can be read using \\code{\\link{readLines}} function:
+# An ISI or SCOPUS Export file can be read using \code{\link{readLines}} function:
 
 # D <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 
@@ -69,9 +69,13 @@ biblio_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 
 \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 
-Other converting functions: \code{\link{bib2df}},
-  \code{\link{cochrane2df}}, \code{\link{dimensions2df}},
-  \code{\link{isi2df}}, \code{\link{isibib2df}},
-  \code{\link{pubmed2df}}, \code{\link{scopus2df}}
+Other converting functions: 
+\code{\link{bib2df}()},
+\code{\link{cochrane2df}()},
+\code{\link{dimensions2df}()},
+\code{\link{isi2df}()},
+\code{\link{isibib2df}()},
+\code{\link{pubmed2df}()},
+\code{\link{scopus2df}()}
 }
 \concept{converting functions}

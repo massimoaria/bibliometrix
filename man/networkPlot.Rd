@@ -4,13 +4,33 @@
 \alias{networkPlot}
 \title{Plotting Bibliographic networks}
 \usage{
-networkPlot(NetMatrix, normalize = NULL, n = NULL, degree = NULL,
-  Title = "Plot", type = "auto", label = TRUE, labelsize = 1,
-  label.cex = FALSE, label.color = FALSE, label.n = NULL,
-  halo = FALSE, cluster = "louvain", vos.path = NULL, size = 3,
-  size.cex = FALSE, curved = FALSE, noloops = TRUE,
-  remove.multiple = TRUE, remove.isolates = FALSE, weighted = NULL,
-  edgesize = 1, edges.min = 0, alpha = 0.5, verbose = TRUE)
+networkPlot(
+  NetMatrix,
+  normalize = NULL,
+  n = NULL,
+  degree = NULL,
+  Title = "Plot",
+  type = "auto",
+  label = TRUE,
+  labelsize = 1,
+  label.cex = FALSE,
+  label.color = FALSE,
+  label.n = NULL,
+  halo = FALSE,
+  cluster = "louvain",
+  vos.path = NULL,
+  size = 3,
+  size.cex = FALSE,
+  curved = FALSE,
+  noloops = TRUE,
+  remove.multiple = TRUE,
+  remove.isolates = FALSE,
+  weighted = NULL,
+  edgesize = 1,
+  edges.min = 0,
+  alpha = 0.5,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}

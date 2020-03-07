@@ -9,7 +9,7 @@
 #' 
 #' @export
 
-biblioshiny <- function(){
+biblioshiny <- function(port=8080, browser=TRUE){
   
-  runApp(system.file("biblioshiny",package="bibliometrix"),launch.browser = TRUE)
+  runApp(system.file("biblioshiny",package="bibliometrix"),port = port,launch.browser = browser)
 }

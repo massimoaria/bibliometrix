@@ -4,8 +4,16 @@
 \alias{thematicMap}
 \title{Create a thematic map}
 \usage{
-thematicMap(M, field = "ID", n = 250, minfreq = 5,
-  stemming = FALSE, size = 0.5, n.labels = 1, repel = TRUE)
+thematicMap(
+  M,
+  field = "ID",
+  n = 250,
+  minfreq = 5,
+  stemming = FALSE,
+  size = 0.5,
+  n.labels = 1,
+  repel = TRUE
+)
 }
 \arguments{
 \item{M}{is a bibliographic dataframe.}

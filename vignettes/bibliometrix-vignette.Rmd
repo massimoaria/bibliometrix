@@ -8,10 +8,11 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+<center>
 <div style="width:450px; height=300px">
 ![bibliometrix](figures/logo.jpg)
 </div>
+</center>
 
 #### http://www.bibliometrix.org
 
@@ -83,7 +84,7 @@ citation("bibliometrix")
 
 #### Dr. Massimo Aria
 
-Associate Professor in Social Statistics 
+Full Professor in Social Statistics 
 
 PhD in Computational Statistics
 
@@ -417,9 +418,9 @@ Local citations measure how many times an author (or a document) included in thi
 
 To obtain the most frequent local cited authors:
 ```{r Local Author citation}
-#CR <- localCitations(M, sep = ";")
-#CR$Authors[1:10,]
-#CR$Papers[1:10,]
+CR <- localCitations(M, sep = ";")
+CR$Authors[1:10,]
+CR$Papers[1:10,]
 ```
 
 
@@ -581,12 +582,12 @@ Following this approach, you can compute several bipartite networks:
 
 * Citation network
 ```{r}
-# A <- cocMatrix(M, Field = "CR", sep = ".  ")
+A <- cocMatrix(M, Field = "CR", sep = ".  ")
 ```
 
 * Author network
 ```{r}
-# A <- cocMatrix(M, Field = "AU", sep = ";")
+ A <- cocMatrix(M, Field = "AU", sep = ";")
 ```
 
 * Country network
@@ -602,12 +603,12 @@ M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
 
 * Author keyword network
 ```{r}
-# A <- cocMatrix(M, Field = "DE", sep = ";")
+A <- cocMatrix(M, Field = "DE", sep = ";")
 ```
 
 * Keyword Plus network
 ```{r}
-# A <- cocMatrix(M, Field = "ID", sep = ";")
+A <- cocMatrix(M, Field = "ID", sep = ";")
 ```
 
 * Etc.
@@ -640,7 +641,7 @@ The function *biblioNetwork* calculates, starting from a bibliographic  data fra
 
 The following code calculates a classical article coupling network:
 ```{r}
-# NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", sep = ".  ")
 ```
 
 Articles with only a few references, therefore, would tend to be more weakly bibliographically coupled, if coupling strength is measured simply according to the number of references that articles contain in common. 
@@ -694,12 +695,12 @@ The diagonal element $ac_{i}$ is the number of manuscripts authored or co-author
 
 Using the function *biblioNetwork*, you can calculate an authors' collaboration network:
 ```{r}
-# NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "authors", sep = ";")
+NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "authors", sep = ";")
 ```
 
 or a country collaboration network:
 ```{r}
-# NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
+NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 ```
 
 ## Descriptive analysis of network graph characteristics

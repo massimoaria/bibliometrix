@@ -4,10 +4,20 @@
 \alias{conceptualStructure}
 \title{Creating and plotting conceptual structure map of a scientific field}
 \usage{
-conceptualStructure(M, field = "ID", method = "MCA",
-  quali.supp = NULL, quanti.supp = NULL, minDegree = 2,
-  clust = "auto", k.max = 5, stemming = FALSE, labelsize = 10,
-  documents = 10, graph = TRUE)
+conceptualStructure(
+  M,
+  field = "ID",
+  method = "MCA",
+  quali.supp = NULL,
+  quanti.supp = NULL,
+  minDegree = 2,
+  clust = "auto",
+  k.max = 5,
+  stemming = FALSE,
+  labelsize = 10,
+  documents = 10,
+  graph = TRUE
+)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function

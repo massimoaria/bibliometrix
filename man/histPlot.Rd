@@ -4,8 +4,7 @@
 \alias{histPlot}
 \title{Plotting historical co-citation network}
 \usage{
-histPlot(histResults, n = 20, size = 5, labelsize = 5,
-  verbose = TRUE)
+histPlot(histResults, n = 20, size = 5, labelsize = 5, verbose = TRUE)
 }
 \arguments{
 \item{histResults}{is an object of \code{class} "list" containing the following components:

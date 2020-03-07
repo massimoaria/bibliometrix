@@ -4,9 +4,17 @@
 \alias{termExtraction}
 \title{Term extraction tool from textual fields of a manuscript}
 \usage{
-termExtraction(M, Field = "TI", stemming = FALSE,
-  language = "english", remove.numbers = TRUE, remove.terms = NULL,
-  keep.terms = NULL, synonyms = NULL, verbose = TRUE)
+termExtraction(
+  M,
+  Field = "TI",
+  stemming = FALSE,
+  language = "english",
+  remove.numbers = TRUE,
+  remove.terms = NULL,
+  keep.terms = NULL,
+  synonyms = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.

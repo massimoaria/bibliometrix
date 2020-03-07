@@ -4,8 +4,7 @@
 \alias{plotThematicEvolution}
 \title{Plot a Thematic Evolution Analysis}
 \usage{
-plotThematicEvolution(Nodes, Edges, measure = "inclusion",
-  min.flow = 0)
+plotThematicEvolution(Nodes, Edges, measure = "inclusion", min.flow = 0)
 }
 \arguments{
 \item{Nodes}{is a list of nodes obtained by \code{\link{thematicEvolution}} function.}

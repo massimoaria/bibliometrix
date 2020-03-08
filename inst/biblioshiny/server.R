@@ -2,7 +2,7 @@
 server <- function(input, output, session) {
  
   ## stop the R session
-  session$onSessionEnded(stopApp)
+  # session$onSessionEnded(stopApp)
   ##
   
   ## file upload max size

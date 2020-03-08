@@ -17,7 +17,7 @@
 #' 
 #' @export
 
-biblioshiny <- function(port = NULL, launch.browser=TRUE){
-  
-  runApp(system.file("biblioshiny",package="bibliometrix"),launch.browser = launch.browser, port = port)
+biblioshiny <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE){
+ 
+  runApp(system.file("biblioshiny", package = "bibliometrix"), host = host, port = port, launch.browser = launch.browser)
 }

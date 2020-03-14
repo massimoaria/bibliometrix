@@ -85,7 +85,7 @@ topAU <- authorProdOverTime(M, k = 10, graph = TRUE)
 ## Table: Author's productivity per year
 head(topAU$dfAU)
 
-## Table: Auhtor's documents list
+## Table: Author's documents list
 #head(topAU$dfPapersAU)
 
 

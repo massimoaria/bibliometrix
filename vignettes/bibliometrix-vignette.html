@@ -937,7 +937,7 @@ This platform includes many different collections.</p>
 <p>The h-index is an author-level metric that attempts to measure both the productivity and citation impact of the publications of a scientist or scholar.</p>
 <p>The index is based on the set of the scientist’s most cited papers and the number of citations that they have received in other publications.</p>
 <p>The function <em>Hindex</em> calculates the authors’ H-index or the sources’ H-index and its variants (g-index and m-index) in a bibliographic collection.</p>
-<p>Function arguments are: <em>M</em> a bibliographic data frame; <em>field</em> is character element that defines the unit of analysis in terms of authors (field = “auhtor”) or sources (field = “source”); <em>elements</em> a character vector containing the authors’ names (or the sources’ names) for which you want to calculate the H-index. The argument has the form c(“SURNAME1 N”,“SURNAME2 N”,…).</p>
+<p>Function arguments are: <em>M</em> a bibliographic data frame; <em>field</em> is character element that defines the unit of analysis in terms of authors (field = “author”) or sources (field = “source”); <em>elements</em> a character vector containing the authors’ names (or the sources’ names) for which you want to calculate the H-index. The argument has the form c(“SURNAME1 N”,“SURNAME2 N”,…).</p>
 <p>In other words, for each author: surname and initials are separated by one blank space. i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, <em>elements</em> argument is <em>elements = c(“ARIA M”, “CUCCURULLO C”)</em>.</p>
 <p>To calculate the h-index of Lutz Bornmann in this collection:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">indices &lt;-<span class="st"> </span><span class="kw">Hindex</span>(M, <span class="dt">field =</span> <span class="st">&quot;author&quot;</span>, <span class="dt">elements=</span><span class="st">&quot;BORNMANN L&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;;&quot;</span>, <span class="dt">years =</span> <span class="dv">10</span>)</a>
@@ -991,7 +991,7 @@ This platform includes many different collections.</p>
 ## 4 BORNMANN L 2012    1   2  0.2500000
 ## 5 BORNMANN L 2013    3  39  5.5714286
 ## 6 BORNMANN L 2014    2   4  0.6666667</code></pre>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="co">## Table: Auhtor&#39;s documents list</span></a>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="co">## Table: Author&#39;s documents list</span></a>
 <a class="sourceLine" id="cb27-2" title="2"><span class="co">#head(topAU$dfPapersAU)</span></a></code></pre></div>
 </div>
 <div id="lotkas-law-coefficient-estimation" class="section level2">

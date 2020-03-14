@@ -447,7 +447,7 @@ The index is based on the set of the scientist's most cited papers and the numbe
 
 The function *Hindex* calculates the authors' H-index or the sources' H-index and its variants (g-index and m-index) in a bibliographic collection.
 
-Function arguments are: *M* a bibliographic data frame; *field* is character element that defines the unit of analysis in terms of authors (field = "auhtor") or sources (field = "source"); *elements* a character vector containing the authors' names (or the sources' names) for which you want to calculate the H-index. The argument has the form c("SURNAME1 N","SURNAME2 N",...). 
+Function arguments are: *M* a bibliographic data frame; *field* is character element that defines the unit of analysis in terms of authors (field = "author") or sources (field = "source"); *elements* a character vector containing the authors' names (or the sources' names) for which you want to calculate the H-index. The argument has the form c("SURNAME1 N","SURNAME2 N",...). 
 
 In other words, for each author: surname and initials are separated by one blank space. 
 i.e for the authors ARIA MASSIMO and CUCCURULLO CORRADO, *elements* argument is *elements = c("ARIA M", "CUCCURULLO C")*.
@@ -491,7 +491,7 @@ topAU <- authorProdOverTime(M, k = 10, graph = TRUE)
 ## Table: Author's productivity per year
 head(topAU$dfAU)
 
-## Table: Auhtor's documents list
+## Table: Author's documents list
 #head(topAU$dfPapersAU)
 ```
 

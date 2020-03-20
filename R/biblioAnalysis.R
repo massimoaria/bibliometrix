@@ -113,10 +113,14 @@ if ("TC" %in% Tags){
 }
 
 # References
-#if ("CR" %in% Tags){CR=tableTag(M,"CR",sep)}
+nReferences <- 0
+if ("CR" %in% Tags){
+  CR <- tableTag(M,"CR",sep)
+  nReferences <- length(CR)
+  }
 
 # ID Keywords
-if ("ID" %in% Tags){ID=tableTag(M,"ID",sep)}
+if ("ID" %in% Tags){ID <- tableTag(M,"ID",sep)}
 
 # DE Keywords
 if ("DE" %in% Tags){DE=tableTag(M,"DE",sep)}
@@ -193,6 +197,7 @@ results=list(Articles=dim(M)[1],             # Articles
              DE=DE,                          # Keywords
              ID=ID,                          # Authors' keywords
              Documents=Documents,
+             nReferences = nReferences,      # N. of References
              DB=M$DB[1])
   class(results)<-"bibliometrix"
 

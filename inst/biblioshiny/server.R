@@ -364,7 +364,7 @@ server <- function(input, output, session) {
     values <-res$values
     
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 30, dom = 'Bfrtip',ordering=F,
+                  options = list(pageLength = 50, dom = 'Bfrtip',ordering=F,
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -380,11 +380,14 @@ server <- function(input, output, session) {
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'print')), 
-                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
+                                 #lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 #columnDefs = list(list(className = 'dt-center', targets = "_all"),
+                                #              list(width = '50px', targets = 0)), 
+                                columnDefs = list(list(className = 'dt-center', targets = "_all"),
+                                                  list(width = '350px', targets = 0))),
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
+      formatStyle(names(TAB)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
+      formatStyle(names(TAB)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
   
   output$CAGR <- renderText({

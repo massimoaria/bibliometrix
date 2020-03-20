@@ -21,9 +21,9 @@
 #' @examples
 #' # EXAMPLE Citation network
 #'
-#' data(scientometrics)
+#' data(management)
 #'
-#' histResults <- histNetwork(scientometrics, sep = ";")
+#' histResults <- histNetwork(management, sep = ";")
 #' 
 #' net <- histPlot(histResults, n=20, labelsize = 5)
 #' 
@@ -40,7 +40,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
     size=5
   }
   
-  LCS=histResults$LCS
+  #LCS=histResults$LCS
+  LCS <- colSums(histResults$NetMatrix)
   NET=histResults$NetMatrix
   ## selecting the first n vertices or all if smaller
   s=sort(LCS,decreasing = TRUE)[min(n, length(LCS))]

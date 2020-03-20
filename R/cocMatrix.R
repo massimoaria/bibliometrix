@@ -77,7 +77,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
 #crossprod <- Matrix::crossprod
 size<-dim(M)
 
-if (Field=="CR"){M$CR<-str_replace_all(as.character(M$CR),"DOI;","DOI ")}
+if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
 
 if (Field %in% names(M)){
   Fi<-strsplit(M[,Field],sep)} else{return(print(paste("Field",Field,"is not a column name of input data frame")))}

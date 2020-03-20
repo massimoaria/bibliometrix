@@ -36,7 +36,7 @@
 rpys <- function(M, sep=";", timespan=NULL, graph=T){
 
   
-  M$CR<-stringr::str_replace_all(as.character(M$CR),"DOI;","DOI ")
+  M$CR<-gsub("DOI;","DOI ", as.character(M$CR))
   
   Fi<-strsplit(M[,"CR"],sep)
   Fi<-lapply(Fi,trim.leading)

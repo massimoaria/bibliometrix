@@ -180,6 +180,12 @@ postprocessing <-function(DATA,dbsource){
            if ("TC" %in% names(DATA)){
              DATA$TC <- as.numeric(sub("\\D*(\\d+).*", "\\1", DATA$TC))
            }
+           # CR post-processing
+           if ("CR" %in% names(DATA)){
+             # reomve dots after DOIs
+             DATA$CR <- gsub("\\.;", ";", DATA$CR)
+             DATA$CR <- substr(DATA$CR,1,(nchar(DATA$CR)-1))
+           }
            # Year
            if ("PY" %in% names(DATA)){
              DATA$PY <- as.numeric(sub("\\D*(\\d+).*", "\\1", DATA$PY))

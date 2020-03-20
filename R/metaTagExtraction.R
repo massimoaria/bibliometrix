@@ -50,7 +50,7 @@ metaTagExtraction<-function(M, Field = "CR_AU", sep = ";", aff.disamb=TRUE){
 
 ### data cleaning
   if ("CR" %in% names(M)){
-    M$CR=str_replace_all(as.character(M$CR),"DOI;","DOI ")
+    M$CR=gsub("DOI;","DOI ",as.character(M$CR))
   }
   
   
@@ -155,7 +155,7 @@ CR_AU<-function(M,sep){
   
   # vector of cited authors
   for (i in 1:size[1]){
-    FCAU[[i]]=str_replace_all(trim.leading(sub(",.*", "", listCAU[[i]])), "[[:punct:]]", "")
+    FCAU[[i]]=gsub("[[:punct:]]", "",trim.leading(sub(",.*", "", listCAU[[i]])))
     CCR[i]=paste(FCAU[[i]],collapse=";")}
   
   M$CR_AU=CCR

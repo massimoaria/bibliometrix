@@ -44,16 +44,17 @@ citations <- function(M, field = "article", sep = ";"){
   CR=NULL
   Year=NULL
   SO=NULL
+  listCR=strsplit(M$CR,sep)
   
-  if (field=="article"){
-    listCR=strsplit(M$CR,sep)
-    listCR=lapply(listCR, function(l){
-      l=l[grep(",",l)]
-      })
+  ## check for empty CR
+  if (sum(nchar(listCR)>3, na.rm = TRUE)==0){
+    cat("\nReference metadata field 'CR' is empty!!\n\n")
+    return(NA)
   }
   
+  
   if (field=="author"){
-    listCR=strsplit(M$CR,sep)
+    #listCR=strsplit(M$CR,sep)
     if (M$DB[1]=="ISI"){ 
       listCR=lapply(listCR, function(l){
         ListL=lapply(strsplit(unlist(l),","),function(x) x[1])
@@ -70,6 +71,15 @@ citations <- function(M, field = "article", sep = ";"){
         l=trimws(trimES(gsub("[[:punct:]]"," ",unlist(ListL))))
       })}
   }
+  
+  
+  if (field=="article"){
+    #listCR=strsplit(M$CR,sep)
+    listCR=lapply(listCR, function(l){
+      l=l[grep(",",l)]
+    })
+  }
+  
   CR=unlist(listCR)
   #CR=gsub("\\.","",CR)
   CR=CR[nchar(CR)>=3]

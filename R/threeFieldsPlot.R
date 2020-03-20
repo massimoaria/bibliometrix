@@ -70,12 +70,14 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20), width=120
   colnames(LM)=row.names(MR)=(n1+1):(n2+n1)
   colnames(MR)=(n2+n1+1):(n1+n2+n3)
   
-  LMm=reshape2::melt(as.matrix(LM))
+  LMm=meltx(as.matrix(LM))
   LMm$group=NA
-  MRm=reshape2::melt(as.matrix(MR))
+  MRm=meltx(as.matrix(MR))
   MRm$group=NA
   
   Edges=rbind(LMm,MRm)
+  Edges$Var1 <- as.numeric(Edges$Var1)
+  Edges$Var2 <- as.numeric(Edges$Var2)
   names(Edges)=c("from","to","Value","group")
   Edges$from=Edges$from-1
   Edges$to=Edges$to-1
@@ -96,4 +98,18 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20), width=120
                            nodeWidth = 30,  NodeGroup = "group",LinkGroup = "group")
   
   
+}
+
+## function to melt data
+meltx <- function(LM) {
+  var1 <- rep((1:nrow(LM)), nrow(LM))
+  var2 <- sort(var1)
+  LMM <-
+    data.frame(
+      Var1 = rownames(LM)[var1],
+      Var2 = colnames(LM)[var2],
+      value = matrix(LM, length(LM), 1),
+      stringsAsFactors = FALSE
+    )
+  return(LMM)
 }

@@ -54,23 +54,28 @@
 #' 
 #' @export
 #' @import stats
+#' @import dimensionsR
 #' @import ggplot2
 #' @import RISmed
 #' @import ggrepel
 #' @import ggraph
+#' @import pubmedR
 #' @import shiny
 #' @import shinycssloaders
 #' @import shinythemes
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
-# #' @importFrom dplyr filter
+# @importFrom dplyr filter
 #' @importFrom dplyr arrange
 #' @importFrom dplyr desc
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
 #' @importFrom dplyr ungroup
+#' @importFrom dplyr rename
 #' @importFrom dplyr rowwise
 #' @importFrom dplyr summarise
+#' @importFrom dplyr summarize
+#' @importFrom dplyr select
 #' @importFrom dplyr anti_join
 #' @importFrom dplyr inner_join
 #' @importFrom dplyr left_join
@@ -84,7 +89,7 @@
 #' @importFrom DT renderDT
 #' @importFrom DT datatable
 #' @importFrom stringdist stringdistmatrix
-#' @importFrom reshape2 melt
+# @importFrom reshape2 melt
 #' @importFrom rscopus affiliation_retrieval
 #' @importFrom rscopus author_df_orig
 #' @importFrom rscopus author_search
@@ -102,6 +107,8 @@
 #' @importFrom factoextra fviz_dend
 #' @importFrom factoextra hcut
 #' @importFrom igraph get.edgelist
+#' @importFrom igraph graph_from_data_frame
+#' @importFrom igraph as_adjacency_matrix
 #' @importFrom igraph graph.adjacency
 #' @importFrom igraph degree
 #' @importFrom igraph plot.igraph
@@ -257,9 +264,9 @@
 #' @importFrom Matrix updown
 #' @importFrom Matrix which
 #' @importFrom Matrix writeMM
-#' @importFrom stringr str_replace_all
-#' @importFrom stringr str_detect
-#' @importFrom stringr str_replace
+#' @importFrom stringr str_locate_all
+# @importFrom stringr str_detect
+# @importFrom stringr str_replace
 #' @importFrom graphics barplot
 #' @importFrom graphics legend
 #' @importFrom graphics lines

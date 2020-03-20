@@ -867,7 +867,7 @@ The function \code{histNetwork} generates a chronological direct citation networ
 ```{r Historical Co-citation network, fig.height=7, fig.width=10, warning=FALSE}
 # Create a historical citation network
 options(width=130)
-histResults <- histNetwork(M, min.citations = 10, sep = ";")
+histResults <- histNetwork(M, min.citations = 1, sep = ";")
 
 # Plot a historical co-citation network
 net <- histPlot(histResults, n=15, size = 10, labelsize=5)

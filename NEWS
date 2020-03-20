@@ -1,14 +1,19 @@
-bibliometrix v2.3.3 (Release date: )
+bibliometrix v2.4.0 (Release date: 2020 )
 ==============
 
 New functionality:
 * biblioshiny: Added "Most Local Cited Authors" analysis in Author Menu
-* biblioshiny: biblioshiny() added the arguments port and launch.browser 
+* biblioshiny: biblioshiny() added the arguments port, host and launch.browser 
 
 Changes:
-* cocMatrix: added the argument "n" to set the number of items to include in the occurrences matrix
-* biblioNetwork: added the argument "n" to set the number of items to include in the co-occurrences matrix
-* networkPlot: now  it returns also the object nodeDegree
+* Removed dependence to reshape2 package
+* Added dependencies to dimensionsR and pubmedR packages 
+* histNetwork: the function has been completely rewritten to improve matching accuracy and speed
+* biblioAnalysis: Now it reterns also the numebr of references (nReferences)
+* summary: Changed the layout of "Main Information about Data" table
+* cocMatrix: Added the argument "n" to set the number of items to include in the occurrences matrix
+* biblioNetwork: Added the argument "n" to set the number of items to include in the co-occurrences matrix
+* networkPlot: Now it returns also the object nodeDegree
 
 
 bibliometrix v2.3.2 (Release date: 2019-11-23)

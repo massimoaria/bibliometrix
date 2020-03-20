@@ -208,7 +208,7 @@ navbarMenu("Dataset",
                                    h3(em(strong("Main Information about the collection "))),
                                    br()),
                       mainPanel(
-                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo"))
+                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 500))
                     )
            )),
            tabPanel("Annual Scientific Production",

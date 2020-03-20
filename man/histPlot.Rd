@@ -37,9 +37,9 @@ The function \code{\link{histPlot}} can plot a historical co-citation network pr
 \examples{
 # EXAMPLE Citation network
 
-data(scientometrics)
+data(management)
 
-histResults <- histNetwork(scientometrics, sep = ";")
+histResults <- histNetwork(management, sep = ";")
 
 net <- histPlot(histResults, n=20, labelsize = 5)
 

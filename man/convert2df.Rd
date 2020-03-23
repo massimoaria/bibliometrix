@@ -2,17 +2,18 @@
 % Please edit documentation in R/convert2df.R
 \name{convert2df}
 \alias{convert2df}
-\title{Convert a Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or RISmed PubMed/MedLine object into a data frame}
+\title{Convert a Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or \code{pubmedR} and \code{dimensionsR} json/xml objects into a data frame}
 \usage{
 convert2df(file, dbsource = "wos", format = "plaintext")
 }
 \arguments{
 \item{file}{can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
-b) an object of the class \code{pubmed (package RISmed)} containing a collection obtained from a query performed with RISmed package.}
+b) an object of the class \code{pubmed (package pubmedR)} containing a collection obtained from a query performed with pubmedR package.
+c) an object of the class \code{dimensions (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}
 
 \item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.}
 
-\item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"bibtex"}, \code{"plaintext"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.}
+\item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"api"}, \code{"bibtex"}, \code{"plaintext"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.}
 }
 \value{
 a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
@@ -40,12 +41,14 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
-It converts a SCOPUS, Clarivate Analytics WoS, Dimensions and COCHRANE Database export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
+It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR json/xml 
+objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 }
 \details{
 Actually the function allows to convert both SCOPUS/WoS files in bibtex format and just WoS files in plain text format.
 }
 \examples{
+
 # An ISI or SCOPUS Export file can be read using \code{\link{readLines}} function:
 
 # D <- readFiles('filename1.txt','filename2.txt','filename3.txt')
@@ -66,8 +69,6 @@ biblio_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
 \code{\link{isibib2df}} for converting ISI Export file (in bibtex format)
 
 \code{\link{isi2df}} for converting ISI Export file (in plain text format)
-
-\code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 
 Other converting functions: 
 \code{\link{bib2df}()},

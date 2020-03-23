@@ -1,13 +1,15 @@
-#' Convert a Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or RISmed PubMed/MedLine object into a data frame
+#' Convert a Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or \code{pubmedR} and \code{dimensionsR} json/xml objects into a data frame
 #'
-#' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions and COCHRANE Database export files or RISmed PubMed/MedLine object into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
+#' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR json/xml 
+#' objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
 #' Actually the function allows to convert both SCOPUS/WoS files in bibtex format and just WoS files in plain text format.
 #'
 #' @param file can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
-#' b) an object of the class \code{pubmed (package RISmed)} containing a collection obtained from a query performed with RISmed package.
+#' b) an object of the class \code{pubmed (package pubmedR)} containing a collection obtained from a query performed with pubmedR package.
+#' c) an object of the class \code{dimensions (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.
 #' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.
-#' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"bibtex"}, \code{"plaintext"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.
+#' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"api"}, \code{"bibtex"}, \code{"plaintext"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
 #'
 #' data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify. The main field tags are:
@@ -33,6 +35,7 @@
 #' for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 #' 
 #' @examples
+#' 
 #' # An ISI or SCOPUS Export file can be read using \code{\link{readLines}} function:
 #'
 #' # D <- readFiles('filename1.txt','filename2.txt','filename3.txt')
@@ -41,7 +44,7 @@
 #' # in plain text or bibtex format.
 #'
 #' #  biblio <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
-#'
+#' 
 #' data(biblio)
 #'
 #' biblio_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
@@ -49,14 +52,14 @@
 #' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
 #' @seealso \code{\link{isibib2df}} for converting ISI Export file (in bibtex format)
 #' @seealso \code{\link{isi2df}} for converting ISI Export file (in plain text format)
-#' @seealso \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
+# @seealso \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
 #' @family converting functions
 #' 
 #' @export
 #' @import stats
 #' @import dimensionsR
 #' @import ggplot2
-#' @import RISmed
+# @import RISmed
 #' @import ggrepel
 #' @import ggraph
 #' @import pubmedR
@@ -284,10 +287,10 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   if (length(setdiff(dbsource,c("isi","wos","scopus","pubmed","cochrane","generic", "dimensions")))>0){
     cat("\n 'dbsource' argument is not properly specified")
     cat("\n 'dbsource' argument has to be a character string matching 'isi, 'wos', 'scopus', 'generic', 'dimensions', or 'pubmed'.\n")}
-  if (length(setdiff(format,c("plaintext","bibtex","pubmed","cochrane", "csv", "excel")))>0){
+  if (length(setdiff(format,c("api","plaintext","bibtex","pubmed","cochrane", "csv", "excel")))>0){
     cat("\n 'format' argument is not properly specified")
-    cat("\n 'format' argument has to be a character string matching 'plaintext', 'bibtex', 'csv' or 'excel'.\n")}
-  if (length(setdiff(format,c("plaintext","bibtex","csv","excel")))>0){
+    cat("\n 'format' argument has to be a character string matching 'api', 'plaintext', 'bibtex', 'csv' or 'excel'.\n")}
+  if (length(setdiff(format,c("api","plaintext","bibtex","csv","excel")))>0){
     file=iconv(file, "latin1", "ASCII", sub="")}
   
   if (dbsource=="wos") dbsource="isi"
@@ -302,11 +305,25 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     },
     generic={M <- bib2df(file,dbsource="generic")
     },
-    pubmed={M <- pubmed2df(file)
-    },
+    pubmed={
+      switch(format,
+             api={
+               M <- pmApi2df(file)
+               M <- metaTagExtraction(M, "SR")
+               row.names(M) <- M$SR
+             })
+               },
     cochrane={M <- cochrane2df(file)
     },
-    dimensions={M <- dimensions2df(file, format = format)
+    dimensions={
+      switch(format,
+             api={
+               M <- dsApi2df(file)
+               M <- metaTagExtraction(M, "SR")
+               row.names(M) <- M$SR
+             },
+             {M <- dimensions2df(file, format = format)})
+      
     }
 )
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
@@ -316,7 +333,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   cat("Done!\n\n")
   
-  if (dbsource!="dimensions"){
+  if (!(dbsource %in% c("dimensions", "pubmed"))){
   ## AU_UN field creation
   if ("C1" %in% names(M)){
     cat("\nGenerating affiliation field tag AU_UN from C1:  ")
@@ -330,7 +347,6 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   ## AU normalization
   M$AU=unlist(lapply(strsplit(M$AU,";"), function(x){
     x=trimws(trimES(gsub("[^[:alnum:][-]']"," ",x)))
-    #x=trimws(trimES(gsub("[[:punct:]]"," ",x)))
     x=paste(x,collapse=";")
   }))
   }
@@ -338,23 +354,23 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   ### SR field creation
   suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
   
-  ### identify duplicated SRs 
-    SR=M$SR
-    tab=table(SR)
-    tab2=table(tab)
-    ind=as.numeric(names(tab2))
-    ind=ind[which(ind>1)]
-    if (length(ind)>0){
-      for (i in ind){
-        indice=names(which(tab==i))
-        for (j in indice){
-          indice2=which(SR==j)
-          SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
-        }
-      }
-    }
+  # ### identify duplicated SRs 
+  #   SR=M$SR
+  #   tab=table(SR)
+  #   tab2=table(tab)
+  #   ind=as.numeric(names(tab2))
+  #   ind=ind[which(ind>1)]
+  #   if (length(ind)>0){
+  #     for (i in ind){
+  #       indice=names(which(tab==i))
+  #       for (j in indice){
+  #         indice2=which(SR==j)
+  #         SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
+  #       }
+  #     }
+  #   }
  
-  row.names(M) <- SR
+  row.names(M) <- M$SR
   
   return(M)
 

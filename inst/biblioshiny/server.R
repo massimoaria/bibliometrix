@@ -25,6 +25,12 @@ server <- function(input, output, session) {
   values$citShortlabel="NA"
   values$S=list("NA")
   values$GR="NA"
+  values$dsToken <- "Wrong account or password"
+  values$dsSample <- 0
+  values$dsQuery <- ""
+  values$pmQuery <- " "
+  values$pmSample <- 0
+  values$ApiOk=0
 
   
   
@@ -32,27 +38,7 @@ server <- function(input, output, session) {
   
   ### LOAD MENU ####
   
-  # observe({
-  #   volumes <- c(Home = fs::path_home(), getVolumes()())
-  #   shinyFileSave(input, "save", roots=volumes, session=session)
-  #   fileinfo <- parseSavePath(volumes, input$save)
-  #   #data <- data.frame(a=c(1,2))
-  #   if (nrow(fileinfo) > 0) {
-  #     ext <- tolower(getFileNameExtension(fileinfo$datapath))
-  #     #print(ext)
-  #     switch(ext,
-  #            xlsx={
-  #              rio::export(values$M, file=as.character(fileinfo$datapath))
-  #              },
-  #            rdata={
-  #              M=values$M
-  #              save(M, file=as.character(fileinfo$datapath))
-  #            })
-  #   }
-  # })
-  
-  
-  output$contents <- DT::renderDT({
+ output$contents <- DT::renderDT({
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
     # 'size', 'type', and 'datapath' columns. The 'datapath'
@@ -262,16 +248,367 @@ server <- function(input, output, session) {
     },
     contentType = input$save_file
   )
+ 
+ output$collection.save_api <- downloadHandler(
+   filename = function() {
+     
+     paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file_api, sep="")
+   },
+   content <- function(file) {
+     switch(input$save_file_api,
+            xlsx={suppressWarnings(rio::export(values$M, file=file))},
+            RData={
+              M=values$M
+              save(M, file=file)
+            })
+     
+   },
+   contentType = input$save_file_api
+ )
   
   output$textLog <- renderUI({
-    #log=gsub("  Art","\\\nArt",values$log)
-    #log=gsub("Done!   ","Done!\\\n",log)
     k=dim(values$M)[1]
     if (k==1){k=0}
     log=paste("Number of Documents ",k)
     textInput("textLog", "Conversion results", 
               value=log)
   })
+  
+  ### API MENU ####
+  ### API MENU: Dimensions ####
+  
+  ### Dimensions modal ####
+  dsModal <- function(failed = FALSE) {
+    modalDialog(
+      title = "Dimensions API",
+      size = "l",
+      
+      h4(em(
+        strong("1) Get a token using your Dimensions credentials")
+      )),
+      textInput(
+        "dsAccount",
+        "Account",
+        "",
+        width = NULL,
+        placeholder = NULL
+      ),
+      textInput(
+        "dsPassword",
+        "Password",
+        "",
+        width = NULL,
+        placeholder = NULL
+      ),
+      actionButton("dsToken", "Get a token "),
+      h5(tags$b("Token")),
+      verbatimTextOutput("tokenLog", placeholder = FALSE),
+      tags$hr(),
+      h4(em(strong("2) Create a query"))),
+      textInput(
+        "dsWords",
+        "Words",
+        "",
+        width = NULL,
+        placeholder = NULL
+      ),
+      selectInput(
+        "dsFullsearch",
+        label = "search field",
+        choices = c("Title and Abstract only" = FALSE,
+                    "Full text" = TRUE),
+        selected = FALSE
+      ),
+      textInput(
+        "dsCategories",
+        "Science Categories",
+        "",
+        width = NULL,
+        placeholder = NULL
+      ),
+      numericInput("dsStartYear", "Start Year", value = 1990),
+      numericInput("dsEndYear", "Start Year", value = as.numeric(substr(Sys.time(), 1, 4))),
+      
+      
+      actionButton("dsQuery", "Create the query "),
+      
+      h5(tags$b("Your query")),
+      verbatimTextOutput("queryLog", placeholder = FALSE),
+      h5(tags$b("Documents returned using your query")),
+      verbatimTextOutput("sampleLog", placeholder = FALSE),
+      
+      
+      uiOutput("sliderLimit"),
+      
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("dsok", "OK")
+      )
+    )
+  }
+  
+  # Show modal when button is clicked.
+  observeEvent(input$dsShow, {
+    showModal(dsModal())
+  })
+  
+  observeEvent(input$dsok, {
+    removeModal()
+    values$M <- data.frame(Message="Waiting for data")
+  })
+
+  output$tokenLog <- renderText({ 
+    input$dsToken 
+    isolate({
+      capture.output(Token <- dsAuth(username = input$dsAccount, password = input$dsPassword))
+      #Token <- dsAuth(username = input$dsAccount, password = input$dsPassword)
+      if (Token==1){
+        values$dsToken <- "Wrong account or password"
+      }else{
+        values$dsToken <- Token
+      }
+      values$dsToken
+     
+    })
+  })
+  
+  output$queryLog <- renderText({ 
+    input$dsQuery
+    isolate({
+      values$dsQuery <- dsQueryBuild(item = "publications", 
+                                   words = input$dsWords, 
+                                   full.search = input$dsFullsearch,
+                                   type = "article", 
+                                   categories = input$dsCategories, 
+                                   start_year = input$dsStartYear, end_year = input$dsEndYear)
+      values$dsQuery
+     #textInput("queryLog", "Defined query ", value=values$dsQuery)
+    })
+    
+  })
+  
+  output$queryLog2 <- renderText({ 
+    values$dsQuery
+  })
+ 
+  output$sampleLog <- renderText({ 
+    input$dsQuery
+    isolate({
+      dsSample <- 0
+      capture.output(dsSample <- dsApiRequest(token = values$dsToken, query = values$dsQuery, limit = 0))
+      if (class(dsSample)=="numeric"){
+        values$dsSample <- 0
+      }else{values$dsSample <- dsSample$total_count}
+      mes <- paste("Dimensions returns ",values$dsSample, " documents", collapse="",sep="")
+      mes
+    })
+  }) 
+  
+  output$sampleLog2 <- renderText({ 
+    if (values$ApiOk==1) {n <- nrow(values$M)}else{n <- 0}
+    mes <- paste("Dimensions API returns ",n, " documents", collapse="",sep="")
+    values$ApiOk=0
+    return(mes)
+  }) 
+  
+  output$sliderLimit <- renderUI({
+    
+    sliderInput("sliderLimit", "Total document to downalod", min = 1,
+                max = values$dsSample, value = values$dsSample, step = 1)
+  })
+  
+  ### API MENU: PubMed ####
+  ### PubMed modal ####
+  pmModal <- function(failed = FALSE) {
+    modalDialog(
+      title = "PubMed API",
+      size = "l",
+      h4(em(strong(
+        "1) Generate a valid query"
+      ))),
+      textInput(
+        "pmQueryText",
+        "Search terms",
+        " ",
+        width = NULL,
+        placeholder = NULL
+      ),
+      numericInput("pmStartYear", "Start Year", value = 1990),
+      numericInput("pmEndYear", "Start Year", value = as.numeric(substr(Sys.time(
+      ), 1, 4))),
+      actionButton("pmQuery", "Try the query "),
+      h5(tags$b("Query Translation")),
+      verbatimTextOutput("pmQueryLog", placeholder = FALSE),
+      #h5(tags$b("Generated query")),
+      h5(tags$b("Documents returned using your query")),
+      verbatimTextOutput("pmSampleLog", placeholder = FALSE),
+      tags$hr(),
+      h4(em(
+        strong("2) Choose how many documents to download")
+      )),
+      
+      uiOutput("pmSliderLimit"),
+      
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("pmok", "OK")
+      )
+    )
+  }
+  
+  # Show modal when button is clicked.
+  observeEvent(input$pmShow, {
+    showModal(pmModal())
+  })
+  
+  observeEvent(input$pmok, {
+    removeModal()
+  })
+  
+  output$pmQueryLog <- renderText({ 
+    input$pmQuery
+    isolate({
+      query = paste(input$pmQueryText,"[Title/Abstract] AND english[LA] AND Journal Article[PT] AND "
+                    ,input$pmStartYear,":",input$pmEndYear,"[DP]", sep="")
+      res <- pmQueryTotalCount(query = query, api_key = NULL)
+      if (class(res)=="list"){
+      values$pmSample <- res$total_count
+      values$pmQuery <- res$query_translation}
+      values$pmQuery <- res$query_translation
+    })
+  })
+  
+  output$pmQueryLog2 <- renderText({ 
+    values$pmQuery
+  })
+  
+  output$pmSampleLog <- renderText({ 
+    input$pmQuery
+    isolate({
+      mes <- paste("PubMed returns ",values$pmSample, " documents", collapse="",sep="")
+      mes
+    })
+  }) 
+  output$pmSampleLog2 <- renderText({ 
+    if (values$ApiOk==1) {n <- nrow(values$M)}else{n <- 0}
+    
+      mes <- paste("PubMed API returns ",n, " documents", collapse="",sep="")
+      values$ApiOk <- 0
+      return(mes)
+  }) 
+  
+  output$pmSliderLimit <- renderUI({
+    sliderInput("pmSliderLimit", "Total document to downalod", min = 1,
+                max = values$pmSample, value = values$pmSample, step = 1)
+  })
+  ### API MENU: Content Download ####
+  observe({
+    if (input$apiApply==0) return()
+    
+    isolate({
+      values = initial(values)
+      values$M <- data.frame(Message="Waiting for data")
+      
+      switch(input$dbapi,
+             ds={
+               if (input$dsWords!="") {
+                   #capture.output(
+                   D <-
+                     dsApiRequest(
+                       token = values$dsToken,
+                       query = values$dsQuery,
+                       limit = input$sliderLimit
+                     )
+                   #)
+                   M <- convert2df(D, "dimensions", "api")
+                   values$ApiOk <- 1
+                   values$M <- M
+                   values$Morig = M
+                   
+                   values$Histfield = "NA"
+                   values$results = list("NA")
+                   
+                   contentTable(values)
+                 }
+             },
+             pubmed={
+               #if (exists("input$pmQueryText")){
+               if (input$pmQueryText !=" ") {
+                 #capture.output(
+                 D <-
+                   pmApiRequest(
+                     query = values$pmQuery,
+                     limit = input$pmSliderLimit,
+                     api_key = NULL
+                   )
+                   #)
+                 M <- convert2df(D, "pubmed", "api")
+                 values$ApiOk <- 1
+                 values$M <- M
+                 values$Morig = M
+                 
+                 values$Histfield = "NA"
+                 values$results = list("NA")
+                 
+                 #contentTable(values)
+               }
+               
+             })
+    })
+  })
+  
+  
+  output$apiContents <- DT::renderDT({
+    observe({
+      if (input$apiApply==0) return()
+    })
+      
+    
+        if (nrow(values$M) == 1 & ncol(values$M) == 1) {
+      M <- data.frame(Message="Waiting for data")
+    }else{
+      contentTable(values)
+    }
+    
+  })
+  
+  ### function returns a formatted data.table
+  contentTable <- function(values){
+    MData = as.data.frame(apply(values$M, 2, function(x) {
+      substring(x, 1, 150)
+    }), stringsAsFactors = FALSE)
+    MData$DOI <-
+      paste0(
+        '<a href=\"http://doi.org/',
+        MData$DI,
+        '\" target=\"_blank\">',
+        MData$DI,
+        '</a>'
+      )
+    nome = c("DOI", names(MData)[-length(names(MData))])
+    MData = MData[nome]
+    DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
+                  options = list(
+                    pageLength = 50,
+                    dom = 'Bfrtip',
+                    buttons = list(list(extend = 'pageLength'),
+                                   list(extend = 'print')),
+                    lengthMenu = list(c(10, 25, 50, -1),
+                                      c('10 rows', '25 rows', '50 rows', 'Show all')),
+                    columnDefs = list(list(
+                      className = 'dt-center', targets = 0:(length(names(MData)) - 1)
+                    ))
+                  ),
+                  class = 'cell-border compact stripe'
+    )  %>%
+      formatStyle(
+        names(MData),
+        backgroundColor = 'white',
+        textAlign = 'center',
+        fontSize = '70%'
+      )
+  }
+  
   
   ### FILTERS MENU ####
   ### Filters uiOutput

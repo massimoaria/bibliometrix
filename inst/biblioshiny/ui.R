@@ -16,6 +16,8 @@ if (!require(maps)){install.packages("maps"); require(maps, quietly=TRUE)}
 if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
 if (!require(plotly)){install.packages("plotly"); require(plotly, quietly=TRUE)}
 require(Matrix, quietly = TRUE)
+require(dimensionsR)
+require(pubmedR)
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
@@ -78,99 +80,221 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
 ),
 
 ### Loading page ----
-
-tabPanel(
-  "Data", 
-  sidebarLayout(
-    sidebarPanel(width=3,
-                 h3(em(strong("Import or Load "))),
-                 br(),
-                 selectInput("load", 
-                             label = "Please, choose what to do",
-                             choices = c(" "="null",
-                                         "Import raw file(s)"="import", 
-                                         "Load bibliometrix file(s)"="load"),
-                             selected = "null"),
-                 #br(),
-     conditionalPanel(condition = "input.load == 'import'",
-                  selectInput("dbsource", 
-                  label = "Database",
-                  choices = c("Web of Science (WoS/WoK)"="isi", 
-                              "Scopus"="scopus",
-                              "Dimensions"="dimensions"),
-                  selected = "isi")),
-      conditionalPanel(condition = "input.dbsource == 'isi' & input.load == 'import'",
-                       selectInput("format", 
-                                   label = "File format",
-                                   choices = c("Plain Text"="plaintext", 
-                                               "BibTeX"="bibtex"),
-                                   selected = "plaintext")),
-      conditionalPanel(condition = "input.dbsource == 'dimensions' & input.load == 'import'",
-                       selectInput("format", 
-                                   label = "File format",
-                                   choices = c("Excel (Topic Analysis)"="excel",
-                                               "CSV (bibliometric mapping)"="csv"),
-                                   selected = "excel")),
-      
-     
-     conditionalPanel(condition = "input.load != 'null'",
-     fileInput("file1", "Choose a file",
-                multiple = FALSE,
-                accept = c(
-                  ".csv",
-                  ".txt",
-                  ".bib",
-                  ".xlsx",
-                  ".zip",
-                  ".xls",
-                  ".rdata",
-                  ".rda",
-                  ".rds")
-      )),
-      #h6("Here accept single .txt/.bib/.csv/.xslx/.RData files, or multiple .txt/.bib/.csv files compressed in a single .zip archive."),
-     conditionalPanel(condition = "input.load != 'null'",
-                      actionButton("applyLoad", "Start ")),
-      tags$hr(),
-      
-      uiOutput("textLog"),
-      #shinycssloaders::withSpinner(verbatimTextOutput("log")),
-      
-      tags$hr(),
-      
-      h3(em(strong("Export a bibliometrix file "))),
-      br(),
-     
-      ### download xlsx
-     #  selectInput('save_file', 'Save as:', choices = c(' ' ='null',
-     #                                                   'Excel/R format' = 'xlsx'),
-     #              selected = 'null'),
-     # ### prova
-     # conditionalPanel(condition = "input.save_file != 'null'",
-     # shinySaveButton("save", "Save file", "Save file as ...", filetype=list(xlsx="xlsx", RData="RData")))#,
-     # 
-     # ###FINE PROVA
-     ### download xlsx
-     selectInput('save_file', 'Save as:', choices = c(' ' ='null',
-                                                      'Excel' = 'xlsx',
-                                                      'R Data Format' = 'RData'),
-                 selected = 'null'),
-     conditionalPanel(condition = "input.save_file != 'null'",
-                      downloadButton("collection.save", "Export"))
-     ),
-     mainPanel(
-      ## color of datatable
-      tags$head(tags$style(HTML("table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+### DATASET MENU ----
+navbarMenu("Data",
+           "  ",
+           "  ",
+           tabPanel("Import or Load files",
+                    sidebarLayout(
+                      sidebarPanel(
+                        width = 3,
+                        h3(em(strong("Import or Load "))),
+                        br(),
+                        selectInput(
+                          "load",
+                          label = "Please, choose what to do",
+                          choices = c(
+                            " " = "null",
+                            "Import raw file(s)" = "import",
+                            "Load bibliometrix file(s)" = "load"
+                          ),
+                          selected = "null"
+                        ),
+                        #br(),
+                        conditionalPanel(
+                          condition = "input.load == 'import'",
+                          selectInput(
+                            "dbsource",
+                            label = "Database",
+                            choices = c(
+                              "Web of Science (WoS/WoK)" = "isi",
+                              "Scopus" = "scopus",
+                              "Dimensions" = "dimensions"
+                            ),
+                            selected = "isi"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.dbsource == 'isi' & input.load == 'import'",
+                          selectInput(
+                            "format",
+                            label = "File format",
+                            choices = c("Plain Text" = "plaintext",
+                                        "BibTeX" = "bibtex"),
+                            selected = "plaintext"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.dbsource == 'dimensions' & input.load == 'import'",
+                          selectInput(
+                            "format",
+                            label = "File format",
+                            choices = c(
+                              "Excel (Topic Analysis)" = "excel",
+                              "CSV (bibliometric mapping)" =
+                                "csv"
+                            ),
+                            selected = "excel"
+                          )
+                        ),
+                        
+                        
+                        conditionalPanel(
+                          condition = "input.load != 'null'",
+                          fileInput(
+                            "file1",
+                            "Choose a file",
+                            multiple = FALSE,
+                            accept = c(
+                              ".csv",
+                              ".txt",
+                              ".bib",
+                              ".xlsx",
+                              ".zip",
+                              ".xls",
+                              ".rdata",
+                              ".rda",
+                              ".rds"
+                            )
+                          )
+                        ),
+                        #h6("Here accept single .txt/.bib/.csv/.xslx/.RData files, or multiple .txt/.bib/.csv files compressed in a single .zip archive."),
+                        conditionalPanel(condition = "input.load != 'null'",
+                                         actionButton("applyLoad", "Start ")),
+                        tags$hr(),
+                        
+                        uiOutput("textLog"),
+                        #shinycssloaders::withSpinner(verbatimTextOutput("log")),
+                        
+                        tags$hr(),
+                        
+                        h3(em(strong(
+                          "Export a bibliometrix file "
+                        ))),
+                        br(),
+                        
+                        selectInput(
+                          'save_file',
+                          'Save as:',
+                          choices = c(
+                            ' ' = 'null',
+                            'Excel' = 'xlsx',
+                            'R Data Format' = 'RData'
+                          ),
+                          selected = 'null'
+                        ),
+                        conditionalPanel(condition = "input.save_file != 'null'",
+                                         downloadButton("collection.save", "Export"))
+                      ),
+                      mainPanel(
+                        ## color of datatable
+                        tags$head(tags$style(
+                          HTML(
+                            "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
                                   }
-                                  "))),
-      tags$style(HTML(".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                                  "
+                          )
+                        )),
+                        tags$style(
+                          HTML(
+                            ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
                   color: #000000 !important;
-                  }")),
-      #shinycssloaders::withSpinner(tableOutput("contents"))
-      shinycssloaders::withSpinner(DT::DTOutput("contents"))
-    )
-  )
-),
+                  }"
+                          )
+                        ),
+                        shinycssloaders::withSpinner(DT::DTOutput("contents"))
+                      )
+                    )),
+           tabPanel("Gather data using APIs",
+                    sidebarLayout(
+                      sidebarPanel(
+                        width = 3,
+                        h3(em(strong(
+                          "Gather data using APIs "
+                        ))),
+                        br(),
+                        
+                        selectInput(
+                          "dbapi",
+                          label = "Database",
+                          choices = c("DS Dimensions" = "ds",
+                                      "PubMed" = "pubmed"),
+                          selected = "pubmed"
+                        ),
+                        ### Dimenions API ####
+                        conditionalPanel(
+                          condition = "input.dbapi == 'ds'",
+                          br(),
+                          actionButton("dsShow",  h5(strong("1.  Configure API request"))),
+
+                          h5(tags$b("Your Query")),
+                          verbatimTextOutput("queryLog2", placeholder = FALSE),
+                          h5(tags$b("Documents returned using your query")),
+                          verbatimTextOutput("sampleLog2", placeholder = FALSE),
+                          # 
+                          # 
+                          # uiOutput("sliderLimit"),
+                          
+                          
+                        ),
+                        ### Pubmed API ####
+                        conditionalPanel(
+                          condition = "input.dbapi == 'pubmed'",
+                          br(),
+                          actionButton("pmShow", h5(strong("1.  Configure API request"))),
+
+                          h5(tags$b("Your Query")),
+                          verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
+                          h5(tags$b("Documents returned using your query")),
+                          verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
+                          
+                        ),
+                        tags$hr(),
+                        #h4(em(strong("Gather metadata"))),
+                        actionButton("apiApply", h5(strong("2.  Download metadata"))),
+                        tags$hr(),
+                        
+                        h3(em(strong(
+                          "Export a bibliometrix file "
+                        ))),
+                        br(),
+                        
+                        selectInput(
+                          'save_file_api',
+                          'Save as:',
+                          choices = c(
+                            ' ' = 'null',
+                            'Excel' = 'xlsx',
+                            'R Data Format' = 'RData'
+                          ),
+                          selected = 'null'
+                        ),
+                        conditionalPanel(condition = "input.save_file_api != 'null'",
+                                         downloadButton("collection.save_api", "Export"))
+                      ),
+                      mainPanel(
+                        ## color of datatable
+                        tags$head(tags$style(
+                          HTML(
+                            "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                                  background-color: #9c4242 !important;
+                                  }
+                                  "
+                          )
+                        )),
+                        tags$style(
+                          HTML(
+                            ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  color: #000000 !important;
+                  }"
+                          )
+                        ),
+                        #shinycssloaders::withSpinner(tableOutput("contents"))
+                        shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
+                      )
+                    ))
+), 
 
 
 ### Filters page ----

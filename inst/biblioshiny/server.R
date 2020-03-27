@@ -293,13 +293,12 @@ server <- function(input, output, session) {
         width = NULL,
         placeholder = NULL
       ),
-      textInput(
-        "dsPassword",
-        "Password",
-        "",
-        width = NULL,
-        placeholder = NULL
-      ),
+      passwordInput("dsPassword",
+                    "Password",
+                    "",
+                    width = NULL,
+                    placeholder = NULL),
+      
       actionButton("dsToken", "Get a token "),
       h5(tags$b("Token")),
       verbatimTextOutput("tokenLog", placeholder = FALSE),

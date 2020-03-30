@@ -1,26 +1,3 @@
-#' Convert a bibtex file into a data frame
-#'
-#' It is an internal function used by \code{\link{convert2df}} to convert a bibtex file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
-#'
-#' @param D is a character array containing bibliographic data in bibtex format.
-#' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"scopus"} or \code{generic}. Default is \code{dbsource = "isi"}.
-#' @return a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.
-#' @examples
-#' # A ISI Export file can be read using \code{\link{readLines}} function:
-#'
-#' # largechar <- readFiles('filename1.bib','filename2.bib2,...)
-#'
-#' # filename.bib is a bibtex file in plain text format.
-#'
-#' # largechar <- readFiles('http://www.bibliometrix.org/datasets/ranking.bib')
-#' 
-#' # ranking <- bib2df(largechar)
-#'
-#' @seealso \code{\link{isi2df}} for converting ISI Export file (in plain text format)
-#' @family converting functions
-#' 
-#' @export
-
 bib2df<-function(D, dbsource="isi"){
   
   bibtag <- NULL

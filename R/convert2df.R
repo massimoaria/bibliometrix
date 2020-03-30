@@ -1,17 +1,23 @@
-#' Convert a Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or \code{pubmedR} and \code{dimensionsR} json/xml objects into a data frame
+#' Import and Convert Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or \code{pubmedR} and \code{dimensionsR} json/xml objects into a data frame
 #'
 #' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR json/xml 
 #' objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
-#' Actually the function allows to convert both SCOPUS/WoS files in bibtex format and just WoS files in plain text format.
-#'
-#' @param file can be: a) a character array containing data read from a Clarivate Analytics WoS Export file (in plain text or bibtex format) or SCOPUS Export file (exclusively in bibtex format);
-#' b) an object of the class \code{pubmed (package pubmedR)} containing a collection obtained from a query performed with pubmedR package.
-#' c) an object of the class \code{dimensions (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.
+#' @param file a character array containing a sequence of object names coming from: 
+#' \tabular{lll}{
+#' a)\tab \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
+#' b)\tab \tab SCOPUS (exclusively in bibtex format '.bib');\cr
+#' c)\tab \tab Digital Science Dimensions (in csv '.csv' or excel '.xlsx' formats);\cr
+#' d)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
+#' e)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}
 #' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.
-#' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"api"}, \code{"bibtex"}, \code{"plaintext"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.
+#' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"api"}, \code{"bibtex"}, \code{"plaintext"}, \code{"endnote"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
-#'
+#' 
+#' I.e We have three files downlaod from Web of Science in plaintext format, file will be:
+#' 
+#' file <- c("filename1.txt", "filename2.txt", "filename3.txt") 
+#' 
 #' data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify. The main field tags are:
 #'
 #' \tabular{lll}{
@@ -36,281 +42,68 @@
 #' 
 #' @examples
 #' 
-#' # An ISI or SCOPUS Export file can be read using \code{\link{readLines}} function:
-#'
-#' # D <- readFiles('filename1.txt','filename2.txt','filename3.txt')
-#'
-#' # filename1.txt, filename2.txt and filename3.txt are WoS or SCOPUS Export file 
-#' # in plain text or bibtex format.
-#'
-#' #  biblio <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
+#' # Example:
+#' # Import and convert a Web of Science collection form an export file in plaintext format:
 #' 
-#' data(biblio)
+#' \dontrun{
+#' files <- 'https://www.bibliometrix.org/datasets/bibliometrics_articles.txt'
+#' 
+#' M <- convert2df(file = files, dbsource = 'wos', format = "plaintext")
+#' }
 #'
-#' biblio_df <- convert2df(file = biblio, dbsource = "isi", format = "bibtex")
-#'
-#' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
-#' @seealso \code{\link{isibib2df}} for converting ISI Export file (in bibtex format)
-#' @seealso \code{\link{isi2df}} for converting ISI Export file (in plain text format)
-# @seealso \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
-#' @family converting functions
 #' 
 #' @export
-#' @import stats
-#' @import dimensionsR
-#' @import ggplot2
-# @import RISmed
-#' @import ggrepel
-#' @import ggraph
-#' @import pubmedR
-#' @import shiny
-#' @import shinycssloaders
-#' @import shinythemes
-#' @importFrom grDevices adjustcolor
-#' @importFrom dplyr %>%
-# @importFrom dplyr filter
-#' @importFrom dplyr arrange
-#' @importFrom dplyr desc
-#' @importFrom dplyr group_by
-#' @importFrom dplyr mutate
-#' @importFrom dplyr ungroup
-#' @importFrom dplyr rename
-#' @importFrom dplyr rowwise
-#' @importFrom dplyr summarise
-#' @importFrom dplyr summarize
-#' @importFrom dplyr select
-#' @importFrom dplyr anti_join
-#' @importFrom dplyr inner_join
-#' @importFrom dplyr left_join
-#' @importFrom dplyr top_n
-#' @importFrom grDevices dev.off
-#' @importFrom grDevices pdf
-#' @importFrom networkD3 sankeyNetwork
-#' @importFrom networkD3 sankeyNetworkOutput
-#' @importFrom networkD3 renderSankeyNetwork
-#' @importFrom DT DTOutput
-#' @importFrom DT renderDT
-#' @importFrom DT datatable
-#' @importFrom stringdist stringdistmatrix
-# @importFrom reshape2 melt
-#' @importFrom rscopus affiliation_retrieval
-#' @importFrom rscopus author_df_orig
-#' @importFrom rscopus author_search
-#' @importFrom rscopus get_complete_author_info
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom FactoMineR MCA
-#' @importFrom FactoMineR CA
-#' @importFrom FactoMineR PCA
-#' @importFrom factoextra get_mca_var
-#' @importFrom factoextra get_mca_ind
-#' @importFrom factoextra get_ca_row
-#' @importFrom factoextra get_ca_col
-#' @importFrom factoextra fviz_nbclust
-#' @importFrom factoextra fviz_cluster
-#' @importFrom factoextra fviz_dend
-#' @importFrom factoextra hcut
-#' @importFrom igraph get.edgelist
-#' @importFrom igraph graph_from_data_frame
-#' @importFrom igraph as_adjacency_matrix
-#' @importFrom igraph graph.adjacency
-#' @importFrom igraph degree
-#' @importFrom igraph plot.igraph
-#' @importFrom igraph delete.vertices
-#' @importFrom igraph decompose.graph
-#' @importFrom igraph E
-#' @importFrom igraph E<-
-#' @importFrom igraph V
-#' @importFrom igraph V<-
-#' @importFrom igraph vcount
-#' @importFrom igraph graph_attr
-#' @importFrom igraph edge_density
-#' @importFrom igraph transitivity
-#' @importFrom igraph diameter
-#' @importFrom igraph degree_distribution
-#' @importFrom igraph centr_degree
-#' @importFrom igraph centr_clo
-#' @importFrom igraph centr_betw
-#' @importFrom igraph centr_eigen
-#' @importFrom igraph mean_distance
-#' @importFrom igraph closeness
-#' @importFrom igraph eigen_centrality
-#' @importFrom igraph arpack_defaults
-#' @importFrom igraph authority_score
-#' @importFrom igraph page_rank
-#' @importFrom igraph hub_score
-#' @importFrom igraph graph_from_incidence_matrix
-#' @importFrom igraph graph_from_adjacency_matrix
-#' @importFrom igraph simplify
-#' @importFrom igraph layout.auto
-#' @importFrom igraph layout.circle
-#' @importFrom igraph layout.sphere
-#' @importFrom igraph layout.mds
-#' @importFrom igraph layout.kamada.kawai
-#' @importFrom igraph layout.fruchterman.reingold
-#' @importFrom igraph layout.star
-#' @importFrom igraph write.graph
-#' @importFrom igraph cluster_walktrap
-#' @importFrom igraph cluster_optimal
-#' @importFrom igraph cluster_infomap
-#' @importFrom igraph cluster_edge_betweenness
-#' @importFrom igraph cluster_fast_greedy
-#' @importFrom igraph cluster_louvain
-#' @importFrom igraph cluster_leading_eigen
-#' @importFrom igraph cluster_spinglass
-#' @importFrom igraph count_multiple
-#' @importFrom igraph membership
-#' @importFrom igraph layout.norm
-#' @importFrom igraph delete.edges
-#' @importFrom igraph betweenness
-#' @importFrom Matrix %&%
-#' @importFrom Matrix abIseq
-#' @importFrom Matrix abIseq1
-#' @importFrom Matrix all.equal
-#' @importFrom Matrix anyDuplicatedT
-#' @importFrom Matrix Arith
-#' @importFrom Matrix as.array
-#' @importFrom Matrix as.matrix
-#' @importFrom Matrix band
-#' @importFrom Matrix bandSparse
-#' @importFrom Matrix bdiag
-#' @importFrom Matrix cbind2
-#' @importFrom Matrix chol
-#' @importFrom Matrix chol2inv
-#' @importFrom Matrix Cholesky
-#' @importFrom Matrix coerce
-#' @importFrom Matrix colMeans
-#' @importFrom Matrix colSums
-#' @importFrom Matrix Compare
-#' @importFrom Matrix condest
-#' @importFrom Matrix cov2cor
-#' @importFrom Matrix crossprod
-#' @importFrom Matrix det
-#' @importFrom Matrix determinant
-#' @importFrom Matrix diag
-#' @importFrom Matrix diag<-
-#' @importFrom Matrix diagN2U
-#' @importFrom Matrix Diagonal
-#' @importFrom Matrix diagU2N
-#' @importFrom Matrix diff
-#' @importFrom Matrix drop
-#' @importFrom Matrix drop0
-#' @importFrom Matrix expand
-#' @importFrom Matrix expm
-#' @importFrom Matrix fac2sparse
-#' @importFrom Matrix forceSymmetric
-#' @importFrom Matrix format
-#' @importFrom Matrix formatSparseM
-#' @importFrom Matrix formatSpMatrix
-#' @importFrom Matrix graph2T
-#' @importFrom Matrix head
-#' @importFrom Matrix image
-#' @importFrom Matrix invPerm
-#' @importFrom Matrix is.null.DN
-#' @importFrom Matrix isDiagonal
-#' @importFrom Matrix isLDL
-#' @importFrom Matrix isSymmetric
-#' @importFrom Matrix isTriangular
-#' @importFrom Matrix kronecker
-#' @importFrom Matrix Logic
-#' @importFrom Matrix lu
-#' @importFrom Matrix Math
-#' @importFrom Matrix Math2
-#' @importFrom Matrix Matrix
-#' @importFrom Matrix MatrixClass
-#' @importFrom Matrix mean
-#' @importFrom Matrix nnzero
-#' @importFrom Matrix norm
-#' @importFrom Matrix onenormest
-#' @importFrom Matrix Ops
-#' @importFrom Matrix pack
-#' @importFrom Matrix print
-#' @importFrom Matrix printSpMatrix
-#' @importFrom Matrix printSpMatrix2
-#' @importFrom Matrix qr
-#' @importFrom Matrix qr.coef
-#' @importFrom Matrix qr.fitted
-#' @importFrom Matrix qr.Q
-#' @importFrom Matrix qr.qty
-#' @importFrom Matrix qr.qy
-#' @importFrom Matrix qr.R
-#' @importFrom Matrix qr.resid
-#' @importFrom Matrix qrR
-#' @importFrom Matrix rankMatrix
-#' @importFrom Matrix rbind2
-#' @importFrom Matrix rcond
-#' @importFrom Matrix readHB
-#' @importFrom Matrix readMM
-#' @importFrom Matrix rep2abI
-#' @importFrom Matrix rowMeans
-#' @importFrom Matrix rowSums
-#' @importFrom Matrix rsparsematrix
-#' @importFrom Matrix show
-#' @importFrom Matrix skewpart
-#' @importFrom Matrix solve
-#' @importFrom Matrix sparse.model.matrix
-#' @importFrom Matrix sparseMatrix
-#' @importFrom Matrix sparseVector
-#' @importFrom Matrix spMatrix
-#' @importFrom Matrix summary
-#' @importFrom Matrix Summary
-#' @importFrom Matrix symmpart
-#' @importFrom Matrix t
-#' @importFrom Matrix T2graph
-#' @importFrom Matrix tail
-#' @importFrom Matrix tcrossprod
-#' @importFrom Matrix tril
-#' @importFrom Matrix triu
-#' @importFrom Matrix uniqTsparse
-#' @importFrom Matrix unname
-#' @importFrom Matrix unpack
-#' @importFrom Matrix update
-#' @importFrom Matrix updown
-#' @importFrom Matrix which
-#' @importFrom Matrix writeMM
-#' @importFrom stringr str_locate_all
-# @importFrom stringr str_detect
-# @importFrom stringr str_replace
-#' @importFrom graphics barplot
-#' @importFrom graphics legend
-#' @importFrom graphics lines
-#' @importFrom graphics plot
-#' @importFrom graphics par
-#' @importFrom utils data
-#' @importFrom utils adist
-#' @importFrom SnowballC wordStem
-#' @importFrom SnowballC getStemLanguages
-#' @importFrom rio import
 
 convert2df<-function(file,dbsource="wos",format="plaintext"){
 
-  cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
-  if (length(setdiff(dbsource,c("isi","wos","scopus","pubmed","cochrane","generic", "dimensions")))>0){
-    cat("\n 'dbsource' argument is not properly specified")
-    cat("\n 'dbsource' argument has to be a character string matching 'isi, 'wos', 'scopus', 'generic', 'dimensions', or 'pubmed'.\n")}
-  if (length(setdiff(format,c("api","plaintext","bibtex","pubmed","cochrane", "csv", "excel")))>0){
-    cat("\n 'format' argument is not properly specified")
-    cat("\n 'format' argument has to be a character string matching 'api', 'plaintext', 'bibtex', 'csv' or 'excel'.\n")}
-  if (length(setdiff(format,c("api","plaintext","bibtex","csv","excel")))>0){
-    file=iconv(file, "latin1", "ASCII", sub="")}
+  allowed_formats <- c('api', 'bibtex', 'csv', 'endnote','excel','plaintext') 
+  allowed_db <- c('cochrane','dimensions','generic','isi','pubmed','scopus','wos')
   
-  if (dbsource=="wos") dbsource="isi"
+  cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
+  if (length(setdiff(dbsource,allowed_db))>0){
+    cat("\n 'dbsource' argument is not properly specified")
+    cat("\n 'dbsource' argument has to be a character string matching one among:",allowed_db, "\n")
+    }
+  if (length(setdiff(format,allowed_formats))>0){
+    cat("\n 'format' argument is not properly specified")
+    cat("\n 'format' argument has to be a character string matching one among:",allowed_formats,"\n")
+  }
+  
+  ### da controllare
+  if (length(setdiff(format,c("api","plaintext","bibtex","csv","excel", "endnote")))>0){
+    D <- importFiles(file)
+    D <- iconv(D, "latin1", "ASCII", sub="")}
+  
+  if (dbsource=="wos") dbsource <- "isi"
+  if (format=="endnote") format <- "plaintext"
   
   switch(dbsource,
     isi={
       switch(format,
-             bibtex={M <- bib2df(file,dbsource="isi")},
-             plaintext={M <- isi2df(file)}
+             bibtex={
+               D <- importFiles(file)
+              M <- bib2df(D,dbsource="isi")
+               },
+             plaintext={
+               D <- importFiles(file)
+               M <- isi2df(D)
+               }
       )},
-    scopus={M <- bib2df(file,dbsource="scopus")
+    scopus={
+      D <- importFiles(file)
+      M <- bib2df(D,dbsource="scopus")
     },
-    generic={M <- bib2df(file,dbsource="generic")
+    generic={
+      D <- importFiles(file)
+      M <- bib2df(D,dbsource="generic")
     },
     pubmed={
       switch(format,
              api={
                M <- pmApi2df(file)
-               M <- metaTagExtraction(M, "SR")
-               row.names(M) <- M$SR
+               M$DB <- "PUBMED"
+               #M <- metaTagExtraction(M, "SR")
+               #row.names(M) <- M$SR
              })
                },
     cochrane={M <- cochrane2df(file)
@@ -319,8 +112,9 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
       switch(format,
              api={
                M <- dsApi2df(file)
-               M <- metaTagExtraction(M, "SR")
-               row.names(M) <- M$SR
+               M$DB <- "DIMENSIONS"
+               #M <- metaTagExtraction(M, "SR")
+               #row.names(M) <- M$SR
              },
              {M <- dimensions2df(file, format = format)})
       
@@ -333,45 +127,54 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   cat("Done!\n\n")
   
-  if (!(dbsource %in% c("dimensions", "pubmed"))){
-  ## AU_UN field creation
-  if ("C1" %in% names(M)){
-    cat("\nGenerating affiliation field tag AU_UN from C1:  ")
-    
-    M <- metaTagExtraction(M, Field="AU_UN")
-    cat("Done!\n\n")
+  if (!(dbsource %in% c("dimensions", "pubmed"))) {
+    ## AU_UN field creation
+    if ("C1" %in% names(M)) {
+      cat("\nGenerating affiliation field tag AU_UN from C1:  ")
+      
+      M <- metaTagExtraction(M, Field = "AU_UN")
+      cat("Done!\n\n")
     } else{
-    M$C1=NA
-    M$AU_UN=NA}
-  
-  ## AU normalization
-  M$AU=unlist(lapply(strsplit(M$AU,";"), function(x){
-    x=trimws(trimES(gsub("[^[:alnum:][-]']"," ",x)))
-    x=paste(x,collapse=";")
-  }))
+      M$C1 = NA
+      M$AU_UN = NA
+    }
+    
+    ## AU normalization
+    M$AU = unlist(lapply(strsplit(M$AU, ";"), function(x) {
+      x = trimws(trimES(gsub("[^[:alnum:][-]']", " ", x)))
+      x = paste(x, collapse = ";")
+    }))
   }
   
   ### SR field creation
   suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
-  
-  # ### identify duplicated SRs 
-  #   SR=M$SR
-  #   tab=table(SR)
-  #   tab2=table(tab)
-  #   ind=as.numeric(names(tab2))
-  #   ind=ind[which(ind>1)]
-  #   if (length(ind)>0){
-  #     for (i in ind){
-  #       indice=names(which(tab==i))
-  #       for (j in indice){
-  #         indice2=which(SR==j)
-  #         SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
-  #       }
-  #     }
-  #   }
- 
   row.names(M) <- M$SR
+  
+  ### bibliometrix>DB class
+  class(M) <- c("data.frame","bibliometrixDB")
   
   return(M)
 
+}
+
+
+importFiles <- function(...){
+  
+  arguments <- unlist(list(...))
+  k=length(arguments)
+  D=list()
+  enc="UTF-8"
+  origEnc=getOption("encoding")
+  if (origEnc=="UTF-8"){options(encoding = "native.enc")}
+  for (i in 1:k){
+    D[[i]]=suppressWarnings(
+      iconv(readLines(arguments[i],encoding = "UTF-8"),"latin1", "ASCII", sub="")
+      #conv(readLines(arguments[[i]]))
+    )
+  }
+  D=unlist(D)
+  options(encoding = origEnc)
+  Encoding(D) <- "UTF-8"
+  return(D)
+  
 }

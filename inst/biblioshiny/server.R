@@ -58,11 +58,11 @@ server <- function(input, output, session) {
                 switch(ext,
                        ###  WoS ZIP Files
                        zip = {
-                         files = unzip(inFile$datapath)
-                         D = unlist(lapply(files, function(l) {
-                           Dpar = readFiles(l)
-                           return(Dpar)
-                         }))
+                         D = unzip(inFile$datapath)
+                         # D = unlist(lapply(files, function(l) {
+                         #   Dpar = readFiles(l)
+                         #   return(Dpar)
+                         # }))
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
                                         M <- convert2df(D,
@@ -72,10 +72,10 @@ server <- function(input, output, session) {
                        },
                        ### WoS Txt/Bib Files
                        {
-                         D = readFiles(inFile$datapath)
+                         #D = readFiles(inFile$datapath)
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
-                                        M <- convert2df(D,
+                                        M <- convert2df(inFile$datapath,
                                                         dbsource = input$dbsource,
                                                         format = input$format)
                                       })
@@ -85,11 +85,12 @@ server <- function(input, output, session) {
                 switch(ext,
                        ###  Scopus ZIP Files
                        zip = {
-                         files = unzip(inFile$datapath)
-                         D = unlist(lapply(files, function(l) {
-                           Dpar = readFiles(l)
-                           return(Dpar)
-                         }))
+                         D <- unzip(inFile$datapath)
+                         # files = unzip(inFile$datapath)
+                         # D = unlist(lapply(files, function(l) {
+                         #   Dpar = readFiles(l)
+                         #   return(Dpar)
+                         # }))
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
                                         M <- convert2df(D,
@@ -99,10 +100,10 @@ server <- function(input, output, session) {
                        },
                        ### WoS Txt/Bib Files
                        {
-                         D = readFiles(inFile$datapath)
+                         #D = readFiles(inFile$datapath)
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
-                                        M <- convert2df(D,
+                                        M <- convert2df(inFile$datapath,
                                                         dbsource = input$dbsource,
                                                         format = "bibtex")
                                       })

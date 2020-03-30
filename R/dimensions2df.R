@@ -1,28 +1,3 @@
-#' Convert a Dimensions export file into a data frame
-#'
-#' It is an internal function used by \code{\link{convert2df}} to convert a Dimensions CSV(bibliomentric mapping)/Excel file and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
-#'
-#' @param file is a character vector containing Dimensions CSV/Excel file names.
-#' @param format is a character indicating the format of the Dimensions export files. \code{format} can be \code{"csv"} or \code{"excel"}. Default is \code{format = "csv"}.
-#' @return a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.
-#' @examples
-#'
-#' ## Dimensions CSV (for bibliomentric mapping) file format example
-#' # file <- c("filename1.csv", "filename2.csv")
-#' # M <- dimensions2df(file, format = "csv")
-#' 
-#' ## Dimensions Excel file format example
-#' # file <- c("filename1.xlsx, "filename2.xlsx")
-#' # M <- dimensions2df(file, format = "xlsx")
-#'
-#' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
-#' @seealso \code{\link{isibib2df}} for converting ISI Export file (in bibtex format)
-#' @seealso \code{\link{isi2df}} for converting ISI Export file (in plain text format)
-#' @seealso \code{\link{pubmed2df}} for converting an object of the class pubmed (RISmed package)
-#' @family converting functions
-#' 
-#' @export
-
 dimensions2df <- function(file, format = "csv") {
   
   switch(format,

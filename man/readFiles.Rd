@@ -2,7 +2,7 @@
 % Please edit documentation in R/readFiles.R
 \name{readFiles}
 \alias{readFiles}
-\title{Load a sequence of ISI or SCOPUS Export files into a large character object}
+\title{DEPRECATED: Load a sequence of ISI or SCOPUS Export files into a large character object}
 \usage{
 readFiles(...)
 }
@@ -13,7 +13,7 @@ readFiles(...)
 a character vector of length the number of lines read.
 }
 \description{
-It loads a sequence of SCOPUS and Clarivate Analytics WoS export files and create a large character vector from it.
+The function readFiled is deprecated. You can import and convert your export files directly using the function \code{\link{convert2df}}.
 }
 \examples{
 # WoS or SCOPUS Export files can be read using \code{\link{readFiles}} function:

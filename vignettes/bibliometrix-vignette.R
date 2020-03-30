@@ -7,12 +7,10 @@ cat(paste("bibliometrix ",packageVersion("bibliometrix")))
 ## ----bibliometrix loading-----------------------------------------------------
 library(bibliometrix)   ### load bibliometrix package
 
-## ----Data loading-------------------------------------------------------------
-
-D <- readFiles("https://www.bibliometrix.org/datasets/savedrecs.bib")
-
 ## ----Data converting----------------------------------------------------------
-M <- convert2df(D, dbsource = "isi", format = "bibtex")
+file <- "https://www.bibliometrix.org/datasets/savedrecs.bib"
+
+M <- convert2df(file = file, dbsource = "isi", format = "bibtex")
 
 ## ----biblioAnalysis-----------------------------------------------------------
 results <- biblioAnalysis(M, sep = ";")

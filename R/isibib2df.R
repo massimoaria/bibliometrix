@@ -6,20 +6,10 @@
 #' @param D is a character array containing data read from an WoS Export file (in bibtex format).
 #' @return a data frame with cases corresponding to articles and variables to Field Tag in the original SCOPUS file.
 #' @examples
-#' # A ISI Export file can be read using \code{\link{readLines}} function:
-#'
-#' # largechar <- readFiles('filename1.bib','filename2.bib2,...)
-#'
-#' # filename.bib is a Clarivate Analytics WoS Export file in plain text format.
-#'
-#' # largechar <- readFiles('http://www.bibliometrix.org/datasets/ranking.bib')
-#' 
-#' # ranking <- isibib2df(largechar)
 #'
 #' @seealso \code{\link{isi2df}} for converting ISI Export file (in plain text format)
 #' @family converting functions
 #' 
-#' @export
 
 isibib2df<-function(D){
 

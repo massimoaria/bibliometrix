@@ -318,11 +318,11 @@ AU_UN<-function(M,sep){
   
   ## remove reprint information from C1
   C1=M$C1
-  C1=unlist(lapply(C1,function(l){
-    l=unlist(strsplit(l,";"))
-    #l=l[regexpr("REPRINT AUTHOR",l)==-1]
-    l=paste0(l,collapse=";")
-  }))
+  # C1=unlist(lapply(C1,function(l){
+  #   l=unlist(strsplit(l,";"))
+  #   #l=l[regexpr("REPRINT AUTHOR",l)==-1]
+  #   l=paste0(l,collapse=";")
+  # }))
   ###
   AFF=gsub("\\[.*?\\] ", "", C1)
   indna=which(is.na(AFF))

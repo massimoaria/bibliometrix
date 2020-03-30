@@ -1,23 +1,3 @@
-#' Convert a Clarivate Analytics WoS Export file into a data frame
-#'
-#' It is an internal function used by \code{\link{convert2df}} to convert a Clarivate Analytics WoS Export file 
-#' and create a data frame from it, with cases corresponding to articles and variables to Field Tag in the original file.
-#'
-#' @param D is a character array containing data read from a ISI Export file (in plain text format).
-#' @return a data frame with cases corresponding to articles and variables to Field Tag in the original ISI file.
-#' @examples
-#' # A group of ISI Export files can be read using \code{\link{readFiles}} function:
-#'
-#' # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
-#'
-#' # scientometrics_text <- readFiles('http://www.bibliometrix.org/datasets/scientometrics.txt')
-#' # data(scientometrics_text)
-#' # scient_df <- isi2df(scientometrics_text)
-#'
-#' @seealso \code{\link{scopus2df}} for converting SCOPUS Export file (in bibtex format)
-#' @family converting functions
-#' @export
-
 isi2df<-function(D){
 
   Papers=which(regexpr("PT ",D)==1)  # first row of each document

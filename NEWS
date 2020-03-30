@@ -1,29 +1,31 @@
-bibliometrix v2.4.0 (Release date: 2020 )
+bibliometrix v3.0.0 (Release date: 2020 )
 ==============
 
-New functionality:
-* bibliometrix: Now it is possible to gather data directly usign DS Dimensions or PubMed APIs
+New functionalities:
+* bibliometrix: Now it is possible to gather data directly using DS Dimensions or PubMed APIs
 * biblioshiny: Added "Most Local Cited Authors" analysis in Author Menu
-* biblioshiny: biblioshiny() added the arguments port, host and launch.browser 
-* convert2df: Now it imports json/xml collections downloaded using DS Dimensions or PubMed APIs
+* biblioshiny: biblioshiny() added the arguments port, host, and launch.browser 
+* convert2df: Now it imports and converts json/xml collections downloaded using DS Dimensions or PubMed APIs
 
 Changes:
-* Removed dependence to reshape2 package
-* Removed dependence to RISmed package
 * Added dependencies to dimensionsR and pubmedR packages 
 * histNetwork: the function has been completely rewritten to improve matching accuracy and speed
-* biblioAnalysis: Now it reterns also the numebr of references (nReferences)
+* biblioAnalysis: Now it returns also the number of references (nReferences)
 * summary: Changed the layout of "Main Information about Data" table
 * cocMatrix: Added the argument "n" to set the number of items to include in the occurrences matrix
 * biblioNetwork: Added the argument "n" to set the number of items to include in the co-occurrences matrix
 * networkPlot: Now it returns also the object nodeDegree
+* Converting family internal functions are no longer visible to users.
+* Removed the function readFiles. Its functionalities are now included in convert2df
+* Removed dependence to reshape2 package
+* Removed dependence to RISmed package
 
 
 bibliometrix v2.3.2 (Release date: 2019-11-23)
 ==============
 
 New functionality:
-* biblioshiny: Introduced a new export windows to export the collection into an excel/RData file
+* biblioshiny: Introduced a new export window to export the collection into an excel/RData file
 * biblioshiny: Assigned custom names to excel export buttons for all tables
 
 bibliometrix v2.3.1 (Release date: 2019-11-01)
@@ -82,8 +84,8 @@ bibliometrix v2.1.2 (Release date: 2019-03-14)
 ==============
 
 New functionality:
-*biblioshiny: new dendrogram plot in factorial analysis (Conceptual Structure)
-*biblioshiny: added the number of cluster argument in factorial analysis (Conceptual Structure)
+*biblioshiny: new dendrogram plot in the factorial analysis (Conceptual Structure)
+*biblioshiny: added the number of cluster argument in the factorial analysis (Conceptual Structure)
 *biblioshiny: added Most Cited Sources (from References) in Sources
 *biblioshiny: added disambiguation parameter in affiliation
 *Speed improvements in several functions
@@ -100,7 +102,7 @@ New functionality:
 * biblioshiny: all plots are now dynamic (using plot.ly or VisNetwork)
 * biblioshiny: added new plots in dataset menu
 * biblioshiny: Menu "Conceptual Structure" has been re-organized
-* the function thematicMap has been completely rewritten. Now it automatically calculate the network and plots the map.
+* the function thematicMap has been completely rewritten. Now it automatically calculates the network and plots the map.
 
 
 
@@ -110,18 +112,18 @@ bibliometrix v2.1.0 (Release date: 2019-01-06)
 
 New functionality:
 * biblioshiny networks are now plotted using VisNetwork package.
-* biblioshiny menu have been completely rewritten. Now, descriptive analyses are organized by the unit of analysis
+* biblioshiny menu has been completely rewritten. Now, descriptive analyses are organized by the unit of analysis
 * Several descriptive plots and tables have been added
-* Added the new funtion authorProdOverTime to calclulate and plot the productivity over the time of the top authors
+* Added the new function authorProdOverTime to calculate and plot the productivity over the time of the top authors
 * Added "measure" parameter in plotThematicEvolution
-* Added the new function bib2df. It give the possibility to import data from a "generic" bibtex file format  (i.e. Zotero, JabRef, etc.)
+* Added the new function bib2df. It gives the possibility to import data from a "generic" bibtex file format  (i.e. Zotero, JabRef, etc.)
 * Added the possibility to calculate H-index for sources
 
 
 Changes:
 * Completely rewritten the importing function from bibtex files
-* Solved an issue in dominance(). Now Dominance factor in correctly calculated
-* Solved sevaral issues in importing functions due to inconsistence in WOS/SCOPUS web-exporting procedures
+* Solved an issue in dominance(). Now Dominance factor is correctly calculated
+* Solved several issues in importing functions due to inconsistence in WOS/SCOPUS web-exporting procedures
 
 
 
@@ -144,7 +146,7 @@ New functionality:
 
 Changes:
 * Now plots show lowercase labels
-* networkStat() now allows to calculate single centrality indices (using parameters stat and type)
+* networkStat() now allows calculating single centrality indices (using parameters stat and type)
 * Improved the optimal number of clusters in conceputalStructure(). Now the wss criterium is used
 
 
@@ -199,7 +201,7 @@ bibliometrix v1.9.3 (Release date: 2018-05-15)
 New functionality:
 * Added the possibility to import collections from COCHRANE Database in convert2df()
 * Completely rewritten conceptualStructure() function. 
-  Now it performs CA and MCA method and plots factorial maps of documents.
+  Now it performs CA and MCA methods and plots factorial maps of documents.
 * Added binary argument in cocMatrix(). It allows to build up a document x attribute matrix using both binary and full counting
 
 
@@ -235,7 +237,7 @@ bibliometrix v1.8 (Release date: 2017-08-30)
 Changes:
 * improved historiograph algorithm in histNetwork()
 * improved network layout in histPlot()
-* added new SR field in the bibliographic dataframe
+* added new SR field in the bibliographic data frame
 * improved importing functions
 
 
@@ -409,8 +411,7 @@ Changes:
 
 New functionality:
 * citations() generates the frequency table of the most cited references or the most cited first authors (of references).
-* lotka() now performs Kolmogorov-Smirnoff two sample test among observed and theoretical Lotka's distributions.
+* lotka() now performs Kolmogorov-Smirnoff two-sample test among observed and theoretical Lotka's distributions.
 
 Bug Fixes:
 * Minor fixes in importing routines and summary function.
-      

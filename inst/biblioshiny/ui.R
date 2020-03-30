@@ -148,7 +148,7 @@ navbarMenu("Data",
                             accept = c(
                               ".csv",
                               ".txt",
-                              ".ciw"
+                              ".ciw",
                               ".bib",
                               ".xlsx",
                               ".zip",

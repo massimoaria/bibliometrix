@@ -121,28 +121,21 @@ library('bibliometrix')
 
 ## Data loading and converting
 
-The export file can be read by R using the function *readFiles*:
+The export file can be read and converted using by R using the function *convert2df*:
+
+**convert2df**(*file*, *dbsource*, *format*)
+
+The argument *file* is a character vector containing the name of export files downloaded from SCOPUS, Clarivate Analytics WOS, Digital Science Dimenions, PubMed or Cochrane CDSR website. *file* can also contains the name of a json/xlm object download using  Digital Science Dimenions or PubMed APIs (through the packages *dimensionsR* and *pubmedR*.
+
+es. file <- c("file1.txt","file2.txt", ...)
 
 
-```{r Data loading}
+```{r Data loading and Converting}
 ## An example from bibliometrix vignettes
 
-D <- readFiles("https://www.bibliometrix.org/datasets/savedrecs.bib")
-```
+file <- "https://www.bibliometrix.org/datasets/savedrecs.bib"
 
-D is a large character vector. 
-*readFiles* argument contains the name of files downloaded from SCOPUS, Clarivate Analytics WOS, or Cochrane CDSR website.
-
-The function *readFiles* combines all the text files onto a single large character vector. Furthermore, the format is converted into UTF-8.
-
-es. D <- readFiles("file1.txt","file2.txt", ...)
-
-
-The object D can be converted in a  data frame using the function *convert2df*:
-
-
-```{r Data converting}
-M <- convert2df(D, dbsource = "isi", format = "bibtex")
+M <- convert2df(file = file, dbsource = "isi", format = "bibtex")
 ```
 
 *convert2df* creates a bibliographic data frame with cases corresponding to manuscripts and variables to Field Tag in the original export file.

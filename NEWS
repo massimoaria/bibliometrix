@@ -2,13 +2,15 @@ bibliometrix v3.0.0 (Release date: 2020 )
 ==============
 
 New functionalities:
-* bibliometrix: Now it is possible to gather data directly using DS Dimensions or PubMed APIs
+* bibliometrix: Now it is possible to gather data directly using 'DS Dimensions' or 'NCBI PubMed' APIs
 * biblioshiny: Added "Most Local Cited Authors" analysis in Author Menu
 * biblioshiny: biblioshiny() added the arguments port, host, and launch.browser 
-* convert2df: Now it imports and converts json/xml collections downloaded using DS Dimensions or PubMed APIs
+* convert2df: Now it imports and converts json/xml collections downloaded using 'DS Dimensions' or 'NCBI PubMed' APIs
+* convert2df: Now it imports and converts export files downlaoded from 'NCBI PubMed' in pubmed format
 
 Changes:
-* Added dependencies to dimensionsR and pubmedR packages 
+* Added dependence to dimensionsR and pubmedR packages to gather data using APIs
+* Added dependence to tidyr package 
 * histNetwork: the function has been completely rewritten to improve matching accuracy and speed
 * biblioAnalysis: Now it returns also the number of references (nReferences)
 * summary: Changed the layout of "Main Information about Data" table

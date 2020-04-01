@@ -56,7 +56,7 @@
 
 convert2df<-function(file,dbsource="wos",format="plaintext"){
 
-  allowed_formats <- c('api', 'bibtex', 'csv', 'endnote','excel','plaintext') 
+  allowed_formats <- c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed') 
   allowed_db <- c('cochrane','dimensions','generic','isi','pubmed','scopus','wos')
   
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
@@ -77,51 +77,64 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   if (dbsource=="wos") dbsource <- "isi"
   if (format=="endnote") format <- "plaintext"
   
-  switch(dbsource,
-    isi={
+  
+  switch(
+    dbsource,
+    ## db WOS
+    isi = {
       switch(format,
-             bibtex={
+             bibtex = {
                D <- importFiles(file)
-              M <- bib2df(D,dbsource="isi")
-               },
-             plaintext={
+               M <- bib2df(D, dbsource = "isi")
+             },
+             plaintext = {
                D <- importFiles(file)
                M <- isi2df(D)
-               }
-      )},
-    scopus={
-      D <- importFiles(file)
-      M <- bib2df(D,dbsource="scopus")
+             })
     },
-    generic={
+    ## db SCOPUS
+    scopus = {
       D <- importFiles(file)
-      M <- bib2df(D,dbsource="generic")
+      M <- bib2df(D, dbsource = "scopus")
     },
-    pubmed={
+    ## db GENERIC BIBTEX
+    generic = {
+      D <- importFiles(file)
+      M <- bib2df(D, dbsource = "generic")
+    },
+    ## db PUBMED
+    pubmed = {
       switch(format,
-             api={
+             api = {
                M <- pmApi2df(file)
                M$DB <- "PUBMED"
-               #M <- metaTagExtraction(M, "SR")
-               #row.names(M) <- M$SR
+             },
+             {
+               D <- importFiles(file)
+               M <- pubmed2df(D) 
              })
-               },
-    cochrane={M <- cochrane2df(file)
     },
-    dimensions={
+    ## db COCHRANE
+    cochrane = {
+      M <- cochrane2df(file)
+    },
+    ## db DIMENSIONS
+    dimensions = {
       switch(format,
-             api={
+             api = {
                M <- dsApi2df(file)
                M$DB <- "DIMENSIONS"
                #M <- metaTagExtraction(M, "SR")
                #row.names(M) <- M$SR
              },
-             {M <- dimensions2df(file, format = format)})
+             {
+               M <- dimensions2df(file, format = format)
+             })
       
     }
-)
-  if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY=NA}
-  if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC=NA}
+  )
+  if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY <- NA}
+  if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC <- 0}
   if (!("CR" %in% names(M))){M$CR="none"}
   if (dbsource!="cochrane"){M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
   
@@ -144,6 +157,18 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
       x = trimws(trimES(gsub("[^[:alnum:][-]']", " ", x)))
       x = paste(x, collapse = ";")
     }))
+  }
+  
+  if ((dbsource == "pubmed") & (format == "pubmed")) {
+    if ("C1" %in% names(M)) {
+      cat("\nGenerating affiliation field tag AU_UN from C1:  ")
+      
+      M <- metaTagExtraction(M, Field = "AU_UN")
+      cat("Done!\n\n")
+    } else{
+      M$C1 = NA
+      M$AU_UN = NA
+    }
   }
   
   ### SR field creation

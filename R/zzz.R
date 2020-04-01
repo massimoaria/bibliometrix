@@ -8,6 +8,8 @@
 #' @import shiny
 #' @import shinycssloaders
 #' @import shinythemes
+#' @importFrom tidyr gather
+#' @importFrom tidyr spread
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
 # @importFrom dplyr filter

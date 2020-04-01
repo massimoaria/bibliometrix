@@ -84,6 +84,7 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
 navbarMenu("Data",
            "  ",
            "  ",
+           ### Import or Load files ####
            tabPanel("Import or Load files",
                     sidebarLayout(
                       sidebarPanel(
@@ -109,7 +110,8 @@ navbarMenu("Data",
                             choices = c(
                               "Web of Science (WoS/WoK)" = "isi",
                               "Scopus" = "scopus",
-                              "Dimensions" = "dimensions"
+                              "Dimensions" = "dimensions",
+                              "PubMed" = "pubmed"
                             ),
                             selected = "isi"
                           )
@@ -135,6 +137,17 @@ navbarMenu("Data",
                                 "csv"
                             ),
                             selected = "excel"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.dbsource == 'pubmed' & input.load == 'import'",
+                          selectInput(
+                            "format",
+                            label = "File format",
+                            choices = c(
+                              "PubMed txt format" = "pubmed"
+                            ),
+                            selected = "pubmed"
                           )
                         ),
                         

@@ -210,7 +210,7 @@ AU_CO<-function(M){
   size=dim(M)[1]
   data("countries",envir=environment())
   countries=as.character(countries[[1]])
-  if (M$DB[1]=="ISI"){
+  if (M$DB[1] %in% c("ISI", "PUBMED")){
     countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))
   } else if (M$DB[1]=="SCOPUS"){
     countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}

@@ -1,73 +1,67 @@
 pubmed2df<-function(D){
   
-  records=D
-  rm(D)
-  ## Author 
-  AU=unlist(lapply(Author(records),function(a){
-    paste(paste(a$LastName,a$Initials,sep=" "),collapse =";")}))
+  D <- D[nchar(D)>0]  # remove empty rows
   
-  ## Total citations
-  cat("\nDownloading updated citations from PubMed/MedLine...\n\n")
-  TC=Cited(records)
+  for (i in 1:length(D)){
+    if (substr(D[i],1,4)=="    ") substr(D[i],1,4) <- substr(D[i-1],1,4) 
+  }
   
+  Papers=which(regexpr("PMID-",D)==1)  # first row of each document
+  nP=length(Papers)  # number of docuemnts
   
-  ## Country
-  AU_CO=Country(records)
+  rowPapers <- diff(c(Papers, length(D)+1))
   
-  ## DOI
-  DI=ELocationID(records)
+  numPapers <- rep(1:nP,rowPapers)
   
-  ## Source ISO
-  JI=ISOAbbreviation(records)
+  DATA <- data.frame(Tag = substr(D,1,4), content = substr(D,7,nchar(D)), Paper=numPapers, stringsAsFactors = FALSE)
+  DATA$Tag <- gsub(" ","",DATA$Tag)
+  df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
+    summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
+    arrange(.data$Tag, .data$Paper) %>%
+    spread("Tag","cont") %>% ungroup() %>%
+    rename(C1 = AD,
+           OI = AUID,
+           AF = FAU,
+           IS = IP,
+           SO2 = SO,
+           SO = JT,
+           J9 = TA,
+           DE = MH,
+           PP = PG,
+           DT = PT,
+           VL = VI,
+           PY = DP
+           ) %>%
+    as.data.frame()
   
-  ## ISSN
-  ISSN=ISSN(records)
+  # extract DOIs
+  df$DI <- trimws(unlist(lapply(strsplit(df$LID,"\\["), "[",1)))
+  df$PY <- as.numeric(substr(df$PY,1,4))
   
-  ## Volume
-  VOL=Volume(records)
+  ### replace "---" with ";"
+  tagsComma <- c("AU","AF","DE","AID","OT","PHST","DT")
+  df1 <- data.frame(lapply(df[tagsComma],function(x){
+    gsub("---",";",x)
+  }),stringsAsFactors = FALSE)
   
-  ## Issue
-  ISSUE=Issue(records)
+  ### replace "---" with " "
+  otherTags <- setdiff(names(df),tagsComma)
+  df2 <- data.frame(lapply(df[otherTags],function(x){
+    trimES(gsub("---"," ",x))
+  }),stringsAsFactors = FALSE)
+  df <- cbind(df1,df2)
+  rm(df1,df2)
   
-  ## Language
-  LT=Language(records)
+  df$DB <- "PUBMED"
   
-  ## Affiliation
-  AFF=unlist(lapply(Affiliation(records),function(a){
-    paste(a,collapse =";")}))
+  # remove * char from keywords
+  df$DE <- df$ID <- gsub("\\*","",df$DE)
+  df <- data.frame(lapply(df,toupper),stringsAsFactors = FALSE)
   
-  ## Title
-  TI=ArticleTitle(records)
+  # add sep ; to affiliations
+  df$C1 <- gsub("\\.",".;",df$C1)
+  df$RP <- NA
   
-  ## Abstract
-  AB=AbstractText(records)
-  
-  ## Pub year
-  PY=YearPubmed(records)
-  
-  ## Pub type
-  DT=unlist(lapply(PublicationType(records),function(a){
-    paste(a,collapse =";")}))
-  
-  ## Article ID
-  UT=ArticleId(records)
-  
-  ## Mesh
-  MESH=unlist(lapply(Mesh(records),function(a){
-    if (is.data.frame(a)){
-      a=paste(a$Heading,collapse =";")}else{a='NA'}
-  }))
-  
-  
-  DATA <- data.frame('AU'=AU, 'TI'=TI,'AB'=AB,'PY'=PY, 'DT'=DT, 
-                            'MESH'=MESH, 'TC'=TC, 'SO'=JI, 'J9'=JI, 'JI'=JI, 'DI'=DI,'ISSN'=ISSN, 
-                            'VOL'=VOL, 'ISSUE'=ISSUE, 'LT'=LT, 'C1'=AFF, 'RP'=AFF, 'ID'=MESH,'DE'=MESH,
-                            'UT'=UT, 'AU_CO'=AU_CO, stringsAsFactors = FALSE)
-  DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
-  DATA$DB = "PUBMED"
-  
-  
-  return(DATA)
+  return(df)
 }
-
 

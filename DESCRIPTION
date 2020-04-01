@@ -38,7 +38,8 @@ Imports: stats,
 		 shinythemes,
 		 SnowballC,
 		 stringdist,
-		 stringr		 
+		 stringr,
+		 tidyr		 
 Suggests: 
     knitr,
     rmarkdown,

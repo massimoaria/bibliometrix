@@ -20,18 +20,18 @@ pubmed2df<-function(D){
     arrange(.data$Tag, .data$Paper) %>%
     pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
     ungroup() %>%
-    rename(C1 = AD,
-           OI = AUID,
-           AF = FAU,
-           IS = IP,
-           SO2 = SO,
-           SO = JT,
-           J9 = TA,
-           DE = MH,
-           PP = PG,
-           DT = PT,
-           VL = VI,
-           PY = DP
+    rename(C1 = .data$AD,
+           OI = .data$AUID,
+           AF = .data$FAU,
+           IS = .data$IP,
+           SO2 =.data$ SO,
+           SO = .data$JT,
+           J9 = .data$TA,
+           DE = .data$MH,
+           PP = .data$PG,
+           DT = .data$PT,
+           VL = .data$VI,
+           PY = .data$DP
            ) %>%
     as.data.frame()
   

@@ -53,7 +53,7 @@ scientometrics$AU_CO[1:10]
 
 }
 \seealso{
-\code{\link{scopus2df}} for converting ISO or SCPUS Export file into a data frame.
+\code{\link{convert2df}} for importing and converting bibliographic files into a data frame.
 
 \code{\link{biblioAnalysis}} function for bibliometric analysis
 }

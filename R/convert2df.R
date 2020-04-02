@@ -130,8 +130,6 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
              api = {
                M <- dsApi2df(file)
                M$DB <- "DIMENSIONS"
-               #M <- metaTagExtraction(M, "SR")
-               #row.names(M) <- M$SR
              },
              {
                M <- dimensions2df(file, format = format)

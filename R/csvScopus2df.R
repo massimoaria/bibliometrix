@@ -1,6 +1,17 @@
 csvScopus2df <- function(file){
   
-  DATA <- rio::import(file, quote='"')
+  
+  ## import all files in a single data frame
+  for (i in 1:length(file)){
+    D <- rio::import(file[i], quote='"')
+    
+    if (i>1){
+      l <- intersect(l,names(D))
+      DATA <- rbind(DATA[l],D[l])
+    }else{
+      l <- names(D)
+      DATA <- D}
+  }
   
   ## Post-Processing
 

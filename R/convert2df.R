@@ -94,8 +94,14 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     },
     ## db SCOPUS
     scopus = {
-      D <- importFiles(file)
-      M <- bib2df(D, dbsource = "scopus")
+      switch(format,
+             bibtex = {
+               D <- importFiles(file)
+               M <- bib2df(D, dbsource = "scopus")
+             },
+             csv = {
+               M <- csvScopus2df(file)
+             })
     },
     ## db GENERIC BIBTEX
     generic = {

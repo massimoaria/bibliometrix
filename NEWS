@@ -7,6 +7,7 @@ New functionalities:
 * biblioshiny: biblioshiny() added the arguments port, host, and launch.browser 
 * convert2df: Now it imports and converts json/xml collections downloaded using 'DS Dimensions' or 'NCBI PubMed' APIs
 * convert2df: Now it imports and converts export files downlaoded from 'NCBI PubMed' in pubmed format
+* convert2df: Now it imports and converts export files downlaoded from 'Scopus' in csv format
 
 Changes:
 * Added dependence to dimensionsR and pubmedR packages to gather data using APIs

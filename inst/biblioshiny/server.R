@@ -109,6 +109,28 @@ server <- function(input, output, session) {
                                       })
                        })
               },
+              pubmed = {
+                switch(ext,
+                       ###  Scopus ZIP Files
+                       zip = {
+                         D <- unzip(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(D,
+                                                        dbsource = input$dbsource,
+                                                        format = "pubmed")
+                                      })
+                       },
+                       ### WoS Txt/Bib Files
+                       txt = {
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(inFile$datapath,
+                                                        dbsource = input$dbsource,
+                                                        format = input$format)
+                                      })
+                       })
+              },
               dimensions = {
                 switch(ext,
                        ###  Dimensions ZIP Files

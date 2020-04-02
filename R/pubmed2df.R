@@ -18,7 +18,8 @@ pubmed2df<-function(D){
   df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
     summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
     arrange(.data$Tag, .data$Paper) %>%
-    spread("Tag","cont") %>% ungroup() %>%
+    pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
+    ungroup() %>%
     rename(C1 = AD,
            OI = AUID,
            AF = FAU,
@@ -61,6 +62,7 @@ pubmed2df<-function(D){
   # add sep ; to affiliations
   df$C1 <- gsub("\\.",".;",df$C1)
   df$RP <- NA
+  df <- df[names(df)!="Paper"]
   
   return(df)
 }

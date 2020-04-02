@@ -10,6 +10,8 @@
 #' @import shinythemes
 #' @importFrom tidyr gather
 #' @importFrom tidyr spread
+#' @importFrom tidyr pivot_wider
+#' @importFrom tidyr pivot_longer
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
 # @importFrom dplyr filter

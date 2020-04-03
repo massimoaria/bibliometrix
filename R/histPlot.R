@@ -34,15 +34,15 @@
 #' @export
 histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
-  colorlist= c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
+  colorlist <-  c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   ## legacy with old argument size
   if (isTRUE(size)){
-    size=5
+    size <- 5
   }
   
   #LCS=histResults$LCS
   LCS <- colSums(histResults$NetMatrix)
-  NET=histResults$NetMatrix
+  NET <- histResults$NetMatrix
   ## selecting the first n vertices or all if smaller
   s=sort(LCS,decreasing = TRUE)[min(n, length(LCS))]
   ind=which(LCS>=s)
@@ -50,21 +50,22 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   LCS=LCS[ind]
   
   # Create igraph object
-  bsk.network=graph_from_adjacency_matrix(NET, mode = c("directed"),weighted = NULL)
+  bsk.network <- graph_from_adjacency_matrix(NET, mode = c("directed"),weighted = NULL)
   
-  R=strsplit(names(V(bsk.network)),",")
-  RR=lapply(R,function(l){
+  R <- strsplit(names(V(bsk.network)),",")
+  RR <- lapply(R,function(l){
       l=l[1:2]
       l=paste(l[1],l[2],sep=",")})
   V(bsk.network)$id <- tolower(unlist(RR))
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- LCS
-  V(bsk.network)$size=size
+  V(bsk.network)$size <- size
     #rep(size,length(V(bsk.network)))}
   
-  Years=histResults$histData$Year[ind]
-  V(bsk.network)$years=Years
+  #Years=histResults$histData$Year[ind]
+  Years <- as.numeric(unlist(str_extract_all(unlist(RR),"[[:digit:]]{4}$")))
+  V(bsk.network)$years <- Years
   
   # Remove loops
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
@@ -75,35 +76,32 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
   # define network layout
   
-  E(bsk.network)$color="slategray1"
+  E(bsk.network)$color <- "slategray1"
   
-  bsk.network=delete.isolates(bsk.network)
-  dg<-decompose.graph(bsk.network)
+  bsk.network <- delete.isolates(bsk.network)
+  dg <- decompose.graph(bsk.network)
 
   layout_m <- create_layout(bsk.network, layout = 'nicely')
-  layout_m$cluster=0
-  rr=0
+  layout_m$cluster <- 0
+  rr <- 0
   for (k in 1:length(dg)){
-    bsk=dg[[k]]
+    bsk <- dg[[k]]
     
-    a=ifelse(layout_m$name %in% V(bsk)$name,k,0)
-    layout_m$cluster=layout_m$cluster+a
-    Min=min(layout_m$y[layout_m$cluster==k])-1
-    layout_m$y[layout_m$cluster==k]=layout_m$y[layout_m$cluster==k]+(rr-Min)
-    rr=max(layout_m$y[layout_m$cluster==k])
+    a <- ifelse(layout_m$name %in% V(bsk)$name,k,0)
+    layout_m$cluster <- layout_m$cluster+a
+    Min <- min(layout_m$y[layout_m$cluster==k])-1
+    layout_m$y[layout_m$cluster==k] <- layout_m$y[layout_m$cluster==k]+(rr-Min)
+    rr <- max(layout_m$y[layout_m$cluster==k])
   }
-  bsk=bsk.network
-  wp=membership(cluster_infomap(bsk,modularity = FALSE))
-  layout_m$x=layout_m$years
+  bsk <- bsk.network
+  wp <- membership(cluster_infomap(bsk,modularity = FALSE))
+  layout_m$x <- layout_m$years
   
-  g=ggraph(layout_m) +
-    geom_edge_arc(width = 1, curvature = 0.05, 
+  g <- ggraph(layout_m) +
+    geom_edge_arc(width = 1, strength = 0.05, 
           check_overlap = T, edge_alpha = 0.5, color="grey",
           arrow = grid::arrow(angle = 10, unit(0.15, "inches")))+
-    #geom_eddge_arc()+
-    #scale_edge_colour_discrete(as.factor(E(bsk.network)$color))+
     geom_node_text(aes(label=V(bsk)$id), size=labelsize,repel = TRUE, color=colorlist[wp],alpha=0.8)+
-    #geom_node_point(aes(size = V(bsk)$size,color = "dodgerblue4", alpha=0.1))+
     geom_node_point(size = V(bsk)$size,color = "royalblue4", alpha=0.15)+
     scale_color_brewer() +
     scale_x_continuous(labels=as.character(seq(min(Years),max(Years))),breaks=seq(min(Years),max(Years)))+
@@ -122,8 +120,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
   if (isTRUE(verbose)) {
     cat("\n Legend\n\n")
-    Data = histResults$histData
-    Data = Data[ind, ]
+    Data <-  histResults$histData
+    Data <-  Data[ind, ]
     print(Data)
   }
   

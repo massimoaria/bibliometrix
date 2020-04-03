@@ -127,6 +127,16 @@ navbarMenu("Data",
                           )
                         ),
                         conditionalPanel(
+                          condition = "input.dbsource == 'scopus' & input.load == 'import'",
+                          selectInput(
+                            "format",
+                            label = "File format",
+                            choices = c("BibTeX" = "bibtex",
+                                        "CSV" = "csv"),
+                            selected = "bibtex"
+                          )
+                        ),
+                        conditionalPanel(
                           condition = "input.dbsource == 'dimensions' & input.load == 'import'",
                           selectInput(
                             "format",

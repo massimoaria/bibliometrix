@@ -59,10 +59,6 @@ server <- function(input, output, session) {
                        ###  WoS ZIP Files
                        zip = {
                          D = unzip(inFile$datapath)
-                         # D = unlist(lapply(files, function(l) {
-                         #   Dpar = readFiles(l)
-                         #   return(Dpar)
-                         # }))
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
                                         M <- convert2df(D,
@@ -71,8 +67,7 @@ server <- function(input, output, session) {
                                       })
                        },
                        ### WoS Txt/Bib Files
-                       {
-                         #D = readFiles(inFile$datapath)
+                      {
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
                                         M <- convert2df(inFile$datapath,
@@ -98,8 +93,19 @@ server <- function(input, output, session) {
                                                         format = input$format)
                                       })
                        },
-                       ### WoS Txt/Bib Files
-                       {
+                       ### Scopus CSV/Bib Files
+                       csv = {
+                         
+                         #D = readFiles(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(inFile$datapath,
+                                                        dbsource = input$dbsource,
+                                                        format = "csv")
+                                      })
+                        },
+                       bib = {
+                         
                          #D = readFiles(inFile$datapath)
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
@@ -108,10 +114,11 @@ server <- function(input, output, session) {
                                                         format = "bibtex")
                                       })
                        })
+                
               },
               pubmed = {
                 switch(ext,
-                       ###  Scopus ZIP Files
+                       ###  Pubmed ZIP Files
                        zip = {
                          D <- unzip(inFile$datapath)
                          withProgress(message = 'Conversion in progress',
@@ -121,13 +128,13 @@ server <- function(input, output, session) {
                                                         format = "pubmed")
                                       })
                        },
-                       ### WoS Txt/Bib Files
+                       ### Pubmed txt Files
                        txt = {
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
                                         M <- convert2df(inFile$datapath,
                                                         dbsource = input$dbsource,
-                                                        format = input$format)
+                                                        format = "pubmed")
                                       })
                        })
               },
@@ -1725,7 +1732,7 @@ server <- function(input, output, session) {
   output$MostLocCitDocsPlot <- renderPlotly({
     withProgress(message = 'Calculation in progress',
                  value = 0, {
-                   TAB <-localCitations(values$M, fast.search=TRUE, sep = input$LocCitSep)$Paper
+                   TAB <-localCitations(values$M, fast.search=FALSE, sep = input$LocCitSep)$Paper
                  })
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],stringsAsFactors = FALSE)

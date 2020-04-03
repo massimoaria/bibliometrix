@@ -45,6 +45,8 @@ histNetwork<-function(M, min.citations = 1, sep = ";", network = TRUE, verbose =
     return(NA)
   }
   
+  M$TC[is.na(M$TC)] <- 0
+  
   if (db == "ISI") db <- "WOS"
   switch(db,
          WOS={
@@ -229,7 +231,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
       l <-
         data.frame(
           ref = L[[i]],
-          paper = rep(i, length(L[[i]][, 1])),
+          paper = rep(papers[i], length(L[[i]][, 1])),
           stringsAsFactors = FALSE
         )
     })

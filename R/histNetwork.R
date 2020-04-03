@@ -102,7 +102,7 @@ wos <- function(M, min.citations, sep, network, verbose){
   }
   # Local cited documents by DOI and reference item
   #M=M[papers,]
-  M$LABEL <- paste(M$SR_FULL, "DOI", M$DI)
+  M$LABEL <- paste(M$SR_FULL, "DOI", toupper(M$DI))
   
   CR$LABEL <- paste(CR$SR, "DOI",CR$DI)
   

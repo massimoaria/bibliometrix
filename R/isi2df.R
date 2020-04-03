@@ -1,79 +1,59 @@
 isi2df<-function(D){
-
-  Papers=which(regexpr("PT ",D)==1)  # first row of each document
-
-  nP=length(Papers)  # number of docuemnts
-
-  Tag=which(regexpr("  ",D)==-1)   # first row of each field tags 
-  lt=length(Tag)   # number of field tags
-  st1=seq(1,(lt-1))
   
-  uniqueTag=unique(substr(D[Tag[st1]],1,2))  # list of field tags
-  uniqueTag=uniqueTag[nchar(uniqueTag)==2]
-  uniqueTag=uniqueTag[uniqueTag!="FN" & uniqueTag!="VR"]
-
-  ## Bibliographic data frame initialization
-  DATA=data.frame(matrix(NA,nP,length(uniqueTag)))
-  names(DATA)=uniqueTag
+  D <- D[nchar(D)>0]  # remove empty rows
+  D <- D[!(substr(D,1,3) %in% c("FN ", "VR "))]
   
-  ## Fields which need to be collapsed with ";" 
-  specialSep=c("AU","AF","CR","C1","RP")
-  
-  for (i in 1:nP){
-    
-    if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/nP)}
-    
-    if (i%%100==0 | i==nP) cat("Articles extracted  ",i,"\n")
-    #print(i)
-    iStart=Papers[i]
-    if (i==nP){iStop=length(D)} else {iStop=Papers[i+1]-1}
-    Seq=seq(iStart,iStop)
-    pTag=iStart+which(regexpr("  ",D[Seq])==1)-1
-
-    for (j in uniqueTag){
-      
-      ## choose the correct separator for the current field
-      if (j %in% specialSep){sep=";"}else{sep=" "}
-      #####################################################
-      
-      indTag=iStart+which(regexpr(j,D[Seq])==1)-1
-      if (length(indTag)>0){
-        it=0
-        repeat {
-          if (sum(pTag>(indTag+it))==0){break}
-          if (pTag[pTag>indTag+it][1]-(indTag+it)==1){it=it+1} else {break}}
-
-        DATA[[j]][i]=paste(D[indTag:(indTag+it)],collapse=sep)
-        DATA[[j]][i]=substr(DATA[[j]][i],4,nchar(DATA[[j]][i]))} else {DATA[[j]][i]=NA}
-    }
+  for (i in 1:length(D)){
+    if (substr(D[i],1,3)=="   ") substr(D[i],1,3) <- substr(D[i-1],1,3) 
   }
+  Papers <- which(substr(D,1,3)=="PT ") # first row of each document
+  nP=length(Papers)  # number of documents
+  
+  rowPapers <- diff(c(Papers, length(D)+1))
+  
+  numPapers <- rep(1:nP,rowPapers)
+  
+  DATA <- data.frame(Tag = substr(D,1,3), content = substr(D,4,nchar(D)), Paper=numPapers, stringsAsFactors = FALSE)
+  DATA$Tag <- gsub(" ","",DATA$Tag)
+  df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
+    summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
+    arrange(.data$Tag, .data$Paper) %>%
+    pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
+    ungroup() %>%
+    as.data.frame()
+  
+  
+  df$PY <- as.numeric(df$PY)
+  
+  ### replace "---" with ";"
+  tagsComma <- c("AU","AF","DE","ID","CR")
+  df1 <- data.frame(lapply(df[tagsComma],function(x){
+    gsub("---",";",x)
+  }),stringsAsFactors = FALSE)
+  
+  ### replace "---" with " "
+  otherTags <- setdiff(names(df),tagsComma)
+  df2 <- data.frame(lapply(df[otherTags],function(x){
+    trimES(gsub("---"," ",x))
+  }),stringsAsFactors = FALSE)
+  df <- cbind(df1,df2)
+  rm(df1,df2)
+  
+  df$DB <- "ISI"
+  
+  # Authors
+  df$AU <- trimES(gsub(","," ",df$AU))
+  
+  # Toupper
+  DI <- df$DI
+  df <- data.frame(lapply(df,toupper),stringsAsFactors = FALSE)
+  df$DI <- DI
+  
+  # add sep ; to affiliations
+  df$C1 <- gsub("\\.",".;",df$C1)
 
+  df <- df[names(df)!="Paper"]
   
-  DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
-  
-  ## remove extra spaces
-  DATA <- data.frame(lapply(DATA,function(x){x=gsub("\\s+", " ", x)}),stringsAsFactors = FALSE)
-  
-  DATA$UT=gsub("WOS:","ISI",DATA$UT)
-  
-  if ("PY" %in% names(DATA)){DATA$PY=as.numeric(DATA$PY)}
-  
-  DATA$DB="ISI"
-  
-  # Authors' names cleaning (surname and initials)
-  listAU=strsplit(DATA$AU, ";")
-  listAU=lapply(listAU,function(l){
-    l=gsub(",", ' ', l,fixed=TRUE)
-    l=gsub(".", '', l,fixed=TRUE)
-    l=gsub("\\s+", " ",l)
-    l=trim(l)
-    l=paste(l,collapse=";")
-  })
-  
-  
-  DATA$AU=unlist(listAU)
-  if (names(DATA)[1]!="PT"){DATA=DATA[,-(which(names(DATA)=="X.U.FEFF.F"))]}
-  return(DATA)
+  return(df)
 }
-
 

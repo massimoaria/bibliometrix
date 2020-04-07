@@ -1,0 +1,105 @@
+---
+title: "Bibliometrix: Data Importing and Converting"
+author: "Massimo Aria"
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_vignette:
+      number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Data Importing and Converting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# A common workflow to search and export bibliographic collections
+
+All databases follow a common workflow to search and export bibliographic collection, manily based on three step: *1. Write and submit a query*, *2. Refine search results* and *3. Export search results*. 
+
+## **Write and submit a query**\
+A query is usually based on a set of terms linked by boolean operators. The search engine will query the db to identify records matching the query.\
+i.e. TI = (bibliometric AND analysis), search engine will search for all the records in which the title will contain the words 'bibliometric' and 'analysis' simultaneously.
+
+## **Refine search results**\
+Search results can be rifined by applying some filtering criteria on additional fields.\
+i.e. selecting Document Type = 'Journal Article' AND Language = 'English' AND Timespan = 1990:2020 AND Subject Category = 'Management' 
+
+## **Export search results**\
+In this step, the user must choose which metadata he wants to download and the export file format to save the results.\
+
+`In order to be able to work, *bibliometrix* requires a minimum set of metadata which are mandatory (i.e.     Auhtors' name, Title, Journal title, Affiliation, Publication year, etc.). Our advice is to always select all the metadata fields so as to be sure you can perform all the analyzes implemented in *bibliometrix*.`\
+
+All databases support a variety of different export formats, some commercial (i.e. EndNote, Mendeley, etc.) and some standard (i.e. html, plaintext, BibTeX, etc.).
+The choice of a suitable export file will have to consider the Table 1.\
+
+
+# Supported data sources
+
+***Bibliometrix*** can import bibliographic database files and references manager files, or can download data through APIs.\ 
+
+Bibliometrix supports bibliographic database files from *Web of Science*, *Scopus*, *Dimensions*, *PubMed* and *Cochrane Library*.
+
+In Table 1, we reports the complete list of export file format supported by bibliometrix for each database.
+
+
+
++-----------------+----------------------------------+--------------------------+--------------+
+|Source           | URL                              |  Format                  | Extension    |
++=================+==================================+==========================+==============+
+|Web of Science   | https://www.webofknowledge.com/  | - 'BibTeX'               | - '.bib'     |
+|                 |                                  | - 'plaintext'            | - '.txt'     |
+|                 |                                  | - 'EndNote Desktop       | - '.ciw'     |
++-----------------+----------------------------------+--------------------------+--------------+
+|Scopus           | https://www.scopus.com/          | - 'BibTeX'               | - '.bib'     |
+|                 |                                  | - 'CSV export'           | - '.txt'     |
++-----------------+----------------------------------+--------------------------+--------------+
+|Dimensions       | https://app.dimensions.ai/       | - 'Bibliometric mapping' | - '.csv'     |
+|                 |                                  | - 'Excel'                | - '.xlsx'    |
++-----------------+----------------------------------+--------------------------+--------------+
+|PubMed           | https://pubmed.ncbi.nlm.nih.gov/ | - 'PubMed export file'   | - '.txt'     |
++-----------------+----------------------------------+--------------------------+--------------+
+|Cochrane Library | https://www.cochranelibrary.com/ | - 'plaintext'            | - '.txt'     |
++-----------------+----------------------------------+--------------------------+--------------+
+
+Table: Table 1. Export file formats supported by bibliometrix
+
+
+Furthermore, bibliometrix provides support for the APIs of Dimensions, NCBI PubMed and Scopus, using functions from packages dimensionsR (https://github.com/massimoaria/dimensionsR), pubmedR (https://github.com/massimoaria/pubmedR) and rscopus (https://github.com/muschellij2/rscopus), respectively (see Table 2).
+
++-----------------+---------------------------------------------------+------------------------------+---------+
+|Source           | API Key request                                   | API Access                   | Format  |
++=================+===================================================+==============================+=========+
+|Dimensions       | Free for scientometric projects                   | By an account and password\  | json    |
+|                 | https://www.dimensions.ai/scientometric-research/ |                              |         |
++-----------------+---------------------------------------------------+------------------------------+---------+
+|PubMed           | Free\                                             | Any key (3 requests/s)\      | xml     |
+|                 | https://www.ncbi.nlm.nih.gov/account/             | By a key (10 requests/s)     |         |
++-----------------+---------------------------------------------------+------------------------------+---------+
+|Scopus           | Commercial or Institutional subscription\         | By a key (10 requests/s)     | xml     |
+|                 | https://dev.elsevier.com/                         |                              |         |
++-----------------+---------------------------------------------------+------------------------------+---------+
+
+Table: Table 2. API data gathering systems supported by bibliometrix
+
+
+
+# How to import a set of export data files
+
+As already stated, *bibliometrix* works with several data format coming from different sources.
+
+Here, we briefly show how to import and convert data from each bibliographic database.
+
+
+## How to import data from Web of Science
+
+*Clarivate Analytics Web of Science (WoS)* (http://www.webofknowledge.com) is one of the world’s most trusted publisher-independent global citation database. It was founded by Eugene Garfield, one of the pioneers of bibliometrics. This platform includes many different collections and allows to export data in several different file formats.
+
+*bibliometrix* supports three export formats: BibTeX, plaintext and EndNote Desktop.
+
+

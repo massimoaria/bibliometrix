@@ -12,9 +12,9 @@
 
 <meta name="author" content="Massimo Aria" />
 
-<meta name="date" content="2020-04-03" />
+<meta name="date" content="2020-04-07" />
 
-<title>Data Importing and Converting</title>
+<title>Bibliometrix: Data Importing and Converting</title>
 
 
 
@@ -213,22 +213,50 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Data Importing and Converting</h1>
+<h1 class="title toc-ignore">Bibliometrix: Data Importing and Converting</h1>
 <h4 class="author">Massimo Aria</h4>
-<h4 class="date">2020-04-03</h4>
+<h4 class="date">2020-04-07</h4>
 
 
 
-<div id="supported-data-sources" class="section level2">
-<h2>Supported data sources</h2>
-<p>Bibliometrix can import bibliographic database files and references manager files, or can download data through APIs.</p>
-<p>Bibliometrix supports bibliographic database files from Web of Science, Scopus, Dimensions, PubMed and Cochrane. Furthermore, support is provided for the APIs of Digital Science Dimensions, NCBI PubMed and Scopus.</p>
-<table style="width:100%;">
+<div id="a-common-workflow-to-search-and-export-bibliographic-collections" class="section level1">
+<h1><span class="header-section-number">1</span> A common workflow to search and export bibliographic collections</h1>
+<p>All databases follow a common workflow to search and export bibliographic collection, manily based on three step: <em>1. Write and submit a query</em>, <em>2. Refine search results</em> and <em>3. Export search results</em>.</p>
+<div id="write-and-submit-a-query" class="section level2">
+<h2><span class="header-section-number">1.1</span> <strong>Write and submit a query</strong><br />
+</h2>
+<p>A query is usually based on a set of terms linked by boolean operators. The search engine will query the db to identify records matching the query.<br />
+i.e. TI = (bibliometric AND analysis), search engine will search for all the records in which the title will contain the words ‘bibliometric’ and ‘analysis’ simultaneously.</p>
+</div>
+<div id="refine-search-results" class="section level2">
+<h2><span class="header-section-number">1.2</span> <strong>Refine search results</strong><br />
+</h2>
+<p>Search results can be rifined by applying some filtering criteria on additional fields.<br />
+i.e. selecting Document Type = ‘Journal Article’ AND Language = ‘English’ AND Timespan = 1990:2020 AND Subject Category = ‘Management’</p>
+</div>
+<div id="export-search-results" class="section level2">
+<h2><span class="header-section-number">1.3</span> <strong>Export search results</strong><br />
+</h2>
+<p>In this step, the user must choose which metadata he wants to download and the export file format to save the results.<br />
+</p>
+<p><code>In order to be able to work, *bibliometrix* requires a minimum set of metadata which are mandatory (i.e.     Auhtors&#39; name, Title, Journal title, Affiliation, Publication year, etc.). Our advice is to always select all the metadata fields so as to be sure you can perform all the analyzes implemented in *bibliometrix*.</code><br />
+</p>
+<p>All databases support a variety of different export formats, some commercial (i.e. EndNote, Mendeley, etc.) and some standard (i.e. html, plaintext, BibTeX, etc.). The choice of a suitable export file will have to consider the Table 1.<br />
+</p>
+</div>
+</div>
+<div id="supported-data-sources" class="section level1">
+<h1><span class="header-section-number">2</span> Supported data sources</h1>
+<p><strong><em>Bibliometrix</em></strong> can import bibliographic database files and references manager files, or can download data through APIs. </p>
+<p>Bibliometrix supports bibliographic database files from <em>Web of Science</em>, <em>Scopus</em>, <em>Dimensions</em>, <em>PubMed</em> and <em>Cochrane Library</em>.</p>
+<p>In Table 1, we reports the complete list of export file format supported by bibliometrix for each database.</p>
+<table>
+<caption>Table 1. Export file formats supported by bibliometrix</caption>
 <colgroup>
-<col width="17%"></col>
-<col width="37%"></col>
-<col width="29%"></col>
-<col width="16%"></col>
+<col width="18%"></col>
+<col width="36%"></col>
+<col width="28%"></col>
+<col width="15%"></col>
 </colgroup>
 <thead>
 <tr class="header">
@@ -240,7 +268,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </thead>
 <tbody>
 <tr class="odd">
-<td>Scopus</td>
+<td>Web of Science</td>
 <td><a href="https://www.webofknowledge.com/" class="uri">https://www.webofknowledge.com/</a></td>
 <td><ul>
 <li>‘BibTeX’</li>
@@ -254,7 +282,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ul></td>
 </tr>
 <tr class="even">
-<td>Web of Science</td>
+<td>Scopus</td>
 <td><a href="https://www.scopus.com/" class="uri">https://www.scopus.com/</a></td>
 <td><ul>
 <li>‘BibTeX’</li>
@@ -277,8 +305,80 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li>‘.xlsx’</li>
 </ul></td>
 </tr>
+<tr class="even">
+<td>PubMed</td>
+<td><a href="https://pubmed.ncbi.nlm.nih.gov/" class="uri">https://pubmed.ncbi.nlm.nih.gov/</a></td>
+<td><ul>
+<li>‘PubMed export file’</li>
+</ul></td>
+<td><ul>
+<li>‘.txt’</li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td>Cochrane Library</td>
+<td><a href="https://www.cochranelibrary.com/" class="uri">https://www.cochranelibrary.com/</a></td>
+<td><ul>
+<li>‘plaintext’</li>
+</ul></td>
+<td><ul>
+<li>‘.txt’</li>
+</ul></td>
+</tr>
 </tbody>
 </table>
+<p>Furthermore, bibliometrix provides support for the APIs of Dimensions, NCBI PubMed and Scopus, using functions from packages dimensionsR (<a href="https://github.com/massimoaria/dimensionsR" class="uri">https://github.com/massimoaria/dimensionsR</a>), pubmedR (<a href="https://github.com/massimoaria/pubmedR" class="uri">https://github.com/massimoaria/pubmedR</a>) and rscopus (<a href="https://github.com/muschellij2/rscopus" class="uri">https://github.com/muschellij2/rscopus</a>), respectively (see Table 2).</p>
+<table>
+<caption>Table 2. API data gathering systems supported by bibliometrix</caption>
+<colgroup>
+<col width="16%"></col>
+<col width="46%"></col>
+<col width="27%"></col>
+<col width="9%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Source</th>
+<th>API Key request</th>
+<th>API Access</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dimensions</td>
+<td>Free for scientometric projects <a href="https://www.dimensions.ai/scientometric-research/" class="uri">https://www.dimensions.ai/scientometric-research/</a></td>
+<td>By an account and password<br />
+</td>
+<td>json</td>
+</tr>
+<tr class="even">
+<td>PubMed</td>
+<td>Free<br />
+<a href="https://www.ncbi.nlm.nih.gov/account/" class="uri">https://www.ncbi.nlm.nih.gov/account/</a></td>
+<td>Any key (3 requests/s)<br />
+By a key (10 requests/s)</td>
+<td>xml</td>
+</tr>
+<tr class="odd">
+<td>Scopus</td>
+<td>Commercial or Institutional subscription<br />
+<a href="https://dev.elsevier.com/" class="uri">https://dev.elsevier.com/</a></td>
+<td>By a key (10 requests/s)</td>
+<td>xml</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="how-to-import-a-set-of-export-data-files" class="section level1">
+<h1><span class="header-section-number">3</span> How to import a set of export data files</h1>
+<p>As already stated, <em>bibliometrix</em> works with several data format coming from different sources.</p>
+<p>Here, we briefly show how to import and convert data from each bibliographic database.</p>
+<div id="how-to-import-data-from-web-of-science" class="section level2">
+<h2><span class="header-section-number">3.1</span> How to import data from Web of Science</h2>
+<p><em>Clarivate Analytics Web of Science (WoS)</em> (<a href="http://www.webofknowledge.com" class="uri">http://www.webofknowledge.com</a>) is one of the world’s most trusted publisher-independent global citation database. It was founded by Eugene Garfield, one of the pioneers of bibliometrics. This platform includes many different collections and allows to export data in several different file formats.</p>
+<p><em>bibliometrix</em> supports three export formats: BibTeX, plaintext and EndNote Desktop.</p>
+</div>
 </div>
 
 

@@ -5,10 +5,11 @@ New functionalities:
 * bibliometrix: Now it is possible to gather data directly using 'DS Dimensions' or 'NCBI PubMed' APIs
 * biblioshiny: Added "Most Local Cited Authors" analysis in Author Menu
 * biblioshiny: biblioshiny() added the arguments port, host, and launch.browser 
+* biblioshiny: Now it is possible to import and convert 'PubMed' and 'Cochrane Library' export files
 * convert2df: Now it imports and converts json/xml collections downloaded using 'DS Dimensions' or 'NCBI PubMed' APIs
 * convert2df: Now it imports and converts export files downlaoded from 'NCBI PubMed' in pubmed format
 * convert2df: Now it imports and converts export files downlaoded from 'Scopus' in csv format
-* convert2df: The routine to convert data from WOS plaintext has been completely rewritten to be extremely more accurate and faster.
+* convert2df: The routine to convert data from WOS, PubMed and Cochrane plaintext files has been completely rewritten to be extremely more accurate and faster.
 
 Changes:
 * Added dependence to dimensionsR and pubmedR packages to gather data using APIs

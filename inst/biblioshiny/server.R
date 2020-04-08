@@ -6,7 +6,7 @@ server <- function(input, output, session) {
   ##
   
   ## file upload max size
-  options(shiny.maxRequestSize=100*1024^2) 
+  options(shiny.maxRequestSize=200*1024^2) 
   
   ### initial values ####
   values = reactiveValues()
@@ -81,11 +81,6 @@ server <- function(input, output, session) {
                        ###  Scopus ZIP Files
                        zip = {
                          D <- unzip(inFile$datapath)
-                         # files = unzip(inFile$datapath)
-                         # D = unlist(lapply(files, function(l) {
-                         #   Dpar = readFiles(l)
-                         #   return(Dpar)
-                         # }))
                          withProgress(message = 'Conversion in progress',
                                       value = 0, {
                                         M <- convert2df(D,
@@ -112,6 +107,30 @@ server <- function(input, output, session) {
                                         M <- convert2df(inFile$datapath,
                                                         dbsource = input$dbsource,
                                                         format = "bibtex")
+                                      })
+                       })
+                
+              },
+              cochrane = {
+                switch(ext,
+                       ###  Cochrane ZIP Files
+                       zip = {
+                         D <- unzip(inFile$datapath)
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(D,
+                                                        dbsource = input$dbsource,
+                                                        format = "plaintext")
+                                      })
+                       },
+                       ### Cochrane txt files
+                       {
+                         
+                         withProgress(message = 'Conversion in progress',
+                                      value = 0, {
+                                        M <- convert2df(inFile$datapath,
+                                                        dbsource = input$dbsource,
+                                                        format = "plaintext")
                                       })
                        })
                 

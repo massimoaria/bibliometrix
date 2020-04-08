@@ -1,8 +1,6 @@
 ## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
 if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
-#if (!(require(shinyFiles))){install.packages("shiny"); require(shinyFiles, quietly=TRUE)} 
-#if (!(require(fs))){install.packages("shiny"); require(fs, quietly=TRUE)} 
 if (!(require(rio))){install.packages("rio")} 
 if (!(require(DT))){install.packages("DT")} 
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
@@ -111,7 +109,8 @@ navbarMenu("Data",
                               "Web of Science (WoS/WoK)" = "isi",
                               "Scopus" = "scopus",
                               "Dimensions" = "dimensions",
-                              "PubMed" = "pubmed"
+                              "PubMed" = "pubmed",
+                              "Cochrane Library" = "cochrane"
                             ),
                             selected = "isi"
                           )
@@ -124,6 +123,15 @@ navbarMenu("Data",
                             choices = c("Plain Text" = "plaintext",
                                         "EndNote Desktop" = "plaintext",
                                         "BibTeX" = "bibtex"),
+                            selected = "plaintext"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.dbsource == 'cochrane' & input.load == 'import'",
+                          selectInput(
+                            "format",
+                            label = "File format",
+                            choices = c("Plain Text" = "plaintext"),
                             selected = "plaintext"
                           )
                         ),

@@ -20,6 +20,7 @@ cochrane2df<-function(D){
            "UT" = "ID",
            "ID" = "KY",
            "URL" = "US",
+           "DI" = "DOI",
            "NR" = "NO") %>%
     as.data.frame()
   
@@ -49,7 +50,7 @@ cochrane2df<-function(D){
   # Toupper
   DI <- df$DI
   df <- data.frame(lapply(df,toupper),stringsAsFactors = FALSE)
-  df$DI <- DI
+  df$DI <- gsub(" ","",DI)
   
   df <- df[!(names(df) %in% c("Paper", "Reco"))]
   

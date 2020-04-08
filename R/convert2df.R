@@ -122,7 +122,8 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     },
     ## db COCHRANE
     cochrane = {
-      M <- cochrane2df(file)
+      D <- importFiles(file)
+      M <- cochrane2df(D)
     },
     ## db DIMENSIONS
     dimensions = {

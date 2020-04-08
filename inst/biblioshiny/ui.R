@@ -14,8 +14,8 @@ if (!require(maps)){install.packages("maps"); require(maps, quietly=TRUE)}
 if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
 if (!require(plotly)){install.packages("plotly"); require(plotly, quietly=TRUE)}
 require(Matrix, quietly = TRUE)
-require(dimensionsR)
-require(pubmedR)
+require(dimensionsR, quietly = TRUE)
+require(pubmedR, quietly = TRUE)
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)

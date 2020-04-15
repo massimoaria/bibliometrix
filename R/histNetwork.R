@@ -70,6 +70,7 @@ wos <- function(M, min.citations, sep, network, verbose){
   }
   
   M = M[order(M$PY), ]
+  M$Paper <- 1:nrow(M)
   M_orig <- M
   M$nLABEL <- 1:nrow(M)
   #papers <- M$nLABEL[M$TC >= min.citations]
@@ -106,7 +107,8 @@ wos <- function(M, min.citations, sep, network, verbose){
   
   CR$LABEL <- paste(CR$SR, "DOI",CR$DI)
   
-  L <- left_join(M,CR,by="LABEL")
+  # By reference
+  L <- left_join(M,CR,by=c("LABEL"))
   L <- L[!is.na(L$paper),]
   L$CITING <- M$LABEL[L$paper]
   L$nCITING <- M$nLABEL[L$paper]

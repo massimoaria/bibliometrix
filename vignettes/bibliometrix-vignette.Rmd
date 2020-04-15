@@ -270,13 +270,15 @@ The argument *dbsource* indicates from which database the collection has been do
 
 It can be: 
 
-- "isi" (for Clarivate Analytics Web of Science database), 
+- "isi" or "wos" (for Clarivate Analytics Web of Science database), 
 
 - "scopus" (for SCOPUS database), 
 
+- "dimensions" (for DS Dimensions database)
+
 - "pubmed" (for PubMed/Medline database),  
 
-- "cochrane" (for Cochrane database of systematic reviews).
+- "cochrane" (for Cochrane Library database of systematic reviews).
 
 The argument *format* indicates the file format of the imported collection. It can be "plaintext" or "bibtex" for WOS collection and mandatorily "bibtext" for SCOPUS collection. The argument is ignored if the collection comes from Pubmed or Cochrane.
 

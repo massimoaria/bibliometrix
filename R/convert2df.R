@@ -178,6 +178,9 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   ### SR field creation
   suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
+  d <- duplicated(M$SR)
+  if (sum(d)>0) cat("\nRemoved ",sum(d),"duplicated documents\n")
+  M <- M[!d,]
   row.names(M) <- M$SR
   
   ### bibliometrix>DB class

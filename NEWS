@@ -9,7 +9,7 @@ New functionalities:
 * convert2df: Now it imports and converts json/xml collections downloaded using 'DS Dimensions' or 'NCBI PubMed' APIs
 * convert2df: Now it imports and converts export files downlaoded from 'NCBI PubMed' in pubmed format
 * convert2df: Now it imports and converts export files downlaoded from 'Scopus' in csv format
-* convert2df: The routine to convert data from WOS, PubMed and Cochrane plaintext files has been completely rewritten to be extremely more accurate and faster.
+* convert2df: The routine to convert data from WOS, Scopus, PubMed and Cochrane plaintext and bibtex files has been completely rewritten to be extremely more accurate and faster.
 
 Changes:
 * Added dependence to dimensionsR and pubmedR packages to gather data using APIs

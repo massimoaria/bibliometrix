@@ -1,6 +1,6 @@
-#' Import and Convert Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or \code{pubmedR} and \code{dimensionsR} json/xml objects into a data frame
+#' Import and Convert bibliographic export files and API objects.
 #'
-#' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR json/xml 
+#' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
 #' objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
 #' @param file a character array containing a sequence of object names coming from: 
@@ -46,7 +46,7 @@
 #' # Import and convert a Web of Science collection form an export file in plaintext format:
 #' 
 #' \dontrun{
-#' files <- 'https://www.bibliometrix.org/datasets/bibliometrics_articles.txt'
+#' files <- 'https://www.bibliometrix.org/datasets/wos_plaintext.txt'
 #' 
 #' M <- convert2df(file = files, dbsource = 'wos', format = "plaintext")
 #' }

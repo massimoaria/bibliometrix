@@ -2,7 +2,7 @@
 % Please edit documentation in R/convert2df.R
 \name{convert2df}
 \alias{convert2df}
-\title{Import and Convert Clarivate Analytics WoS, SCOPUS, Dimensions and COCHRANE Database Export files or \code{pubmedR} and \code{dimensionsR} json/xml objects into a data frame}
+\title{Import and Convert bibliographic export files and API objects.}
 \usage{
 convert2df(file, dbsource = "wos", format = "plaintext")
 }
@@ -49,7 +49,7 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
-It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR json/xml 
+It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
 objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 }
 \examples{
@@ -58,7 +58,7 @@ objects into a data frame, with cases corresponding to articles and variables to
 # Import and convert a Web of Science collection form an export file in plaintext format:
 
 \dontrun{
-files <- 'https://www.bibliometrix.org/datasets/bibliometrics_articles.txt'
+files <- 'https://www.bibliometrix.org/datasets/wos_plaintext.txt'
 
 M <- convert2df(file = files, dbsource = 'wos', format = "plaintext")
 }

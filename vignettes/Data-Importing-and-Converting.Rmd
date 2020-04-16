@@ -402,7 +402,7 @@ The *Dimensions API* provides access to Dimensions data directly, and makes it p
 
 The user can choose to write a valid query using that language or, in alternaative, using the function *dsQueryBuild*.
 
-For a more detailed focus on the use of the dimensionsR package, please see the package vignette at https://cran.r-project.org/web/packages/dimensionsR/vignettes/A_Brief_Example.html
+For a more detailed focus on the use of the dimensionsR package, please see the package vignette at https://cran.r-project.org/package=dimensionsR/vignettes/A_Brief_Example.html
 
 &nbsp; 
 
@@ -410,6 +410,6 @@ For a more detailed focus on the use of the dimensionsR package, please see the 
 
 The *PubMed API* provides access to PubMed data directly, submitting a query written following the pubmed query language. The PubMed data can be gathered using  the *pubmedR R-package* functions. 
 
-For a more detailed focus on the use of the pubmedR package, please see the package vignette at https://cran.r-project.org/web/packages/pubmedR/vignettes/A_Brief_Example.html
+For a more detailed focus on the use of the pubmedR package, please see the package vignette at https://cran.r-project.org/package=pubmedR/vignettes/A_Brief_Example.html
 
 &nbsp; 

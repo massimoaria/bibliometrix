@@ -120,9 +120,13 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
   if (isTRUE(verbose)) {
     cat("\n Legend\n\n")
+    
+    label <- data.frame(Label = names(V(bsk.network)), stringsAsFactors = FALSE)
     Data <-  histResults$histData
-    Data <-  Data[ind, ]
-    print(Data)
+    
+    Data <- left_join(label,Data, by = c("Label" = "Paper"))
+    
+    print(Data[,-2])
   }
   
   return(bsk.network)

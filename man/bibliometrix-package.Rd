@@ -29,21 +29,11 @@ library('bibliometrix')
 
 DATA LOADING AND CONVERTING
 
-The export file can be read by R using the function *readFiles*:
-(An example from bibliometrix vignettes)
+The export file can be imported and converted by R using the function *convert2df*:
 
-D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
+file <- ("https://www.bibliometrix.org/datasets/savedrecs.txt")
 
-D is a large character vector. 
-*readFiles* argument contains the name of files downloaded from SCOPUS, Clarivate Analytics WOS, or Cochrane CDSR website.
-
-The function *readFiles* combines all the text files onto a single large character vector. Furthermore, the format is converted into UTF-8.
-
-es. D <- readFiles("file1.txt","file2.txt", ...)
-
-The object D can be converted in a  data frame using the function *convert2df*:
-
-M <- convert2df(D, dbsource = "isi", format = "bibtex")
+M <- convert2df(file, dbsource = "wos", format = "bibtex")
 
 *convert2df* creates a bibliographic data frame with cases corresponding to manuscripts and variables to Field Tag in the original export file.
 Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
@@ -91,7 +81,7 @@ The function *biblioNetwork* calculates, starting from a bibliographic data fram
 
 i.e. the following code calculates a classical co-citation network:
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
 
 
 
@@ -124,12 +114,11 @@ net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration
 
 # Create a co-citation network
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
 
 # Plot the network
 
 net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
-
 
 
 ### Keyword co-occurrences
@@ -151,9 +140,9 @@ The analysis can be performed through dimensionality reduction techniques such a
 Here, we show an example using the function *conceptualStructure* that performs a CA or MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
 *conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts.  In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
 
-# Conceptual Structure using keywords (method="CA")
+# Conceptual Structure using keywords (method="MCA")
 
-CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
+CS <- conceptualStructure(M,field="ID", method="MCA", minDegree=4, clust=4 ,k.max=8, stemming=FALSE, labelsize=10, documents=10)
 
 
 
@@ -164,11 +153,11 @@ The function histNetwork generates a chronological direct citation network matri
 
 # Create a historical citation network
 
-histResults <- histNetwork(M, n = 20, sep = ".  ")
+histResults <- histNetwork(M, sep = ";")
 
 # Plot a historical co-citation network
 
-net <- histPlot(histResults, size = FALSE,label=TRUE, arrowsize = 0.5)
+net <- histPlot(histResults, size = 10)
 
 }
 

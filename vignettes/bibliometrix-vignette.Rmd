@@ -308,7 +308,7 @@ UT		     | Unique Article Identifier
 DB		     | Bibliographic Database
 
 
-For a complete list of field tags see http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf
+For a complete list of field tags see https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf
 
 ## Bibliometric Analysis
 

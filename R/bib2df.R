@@ -64,6 +64,8 @@ bib2df<-function(D, dbsource = "isi"){
   
   ### replace "---" with ";"
   tagsComma <- c("AU","DE","ID","C1" ,"CR")
+  nolab <- setdiff(tagsComma,names(df))
+  tagsComma <- tagsComma[(!(tagsComma %in% nolab))]
   df1 <- data.frame(lapply(df[tagsComma],function(x){
     gsub("---",";",x)
   }),stringsAsFactors = FALSE)

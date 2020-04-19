@@ -81,7 +81,8 @@ bib2df<-function(D, dbsource = "isi"){
   # Funding info
   ind <- which(regexpr("funding_text",names(df))>-1)
   if (!("FX" %in% Tag) & length(ind)>0){
-    df$FX <- apply(df[,ind],1,function(x) paste(x,collapse=" "))
+    df$FX <- apply((as.data.frame(df[,ind], stringsAsFactors = FALSE)),1,
+                   function(x) paste(x,collapse=" "))
     df <- df[,-ind]
   }
   

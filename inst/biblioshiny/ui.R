@@ -1393,7 +1393,9 @@ navbarMenu("Conceptual Structure",
                                            shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "750px",width = "1100px"))),
                                   tabPanel("Table", 
                                            shinycssloaders::withSpinner(DT::DTOutput(
-                                             outputId = "cocTable")))
+                                             outputId = "cocTable"))),
+                                  tabPanel("Degree Plot", 
+                                           shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height=700)))
                       )
                       
                       )
@@ -1787,7 +1789,9 @@ navbarMenu("Intellectual Structure",
                                              shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "750px",width = "1100px"))),         
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
-                                                outputId = "cocitTable")))
+                                                outputId = "cocitTable"))),
+                                    tabPanel("Degree Plot", 
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height=700)))
                                             
                         )
                         #shinycssloaders::withSpinner(plotOutput(outputId = "cocitPlot"))
@@ -1987,7 +1991,9 @@ navbarMenu("Social Structure",
                                              #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
-                                               outputId = "colTable")))
+                                               outputId = "colTable"))),
+                                    tabPanel("Degree Plot", 
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height=700)))
                         )
                         
                         #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))

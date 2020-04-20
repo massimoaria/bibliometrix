@@ -794,13 +794,13 @@ server <- function(input, output, session) {
     
     names(Y)=c("Year","Freq")
     
-    g=ggplot2::ggplot(Y, aes(x = Y$Year, y = Y$Freq, text=paste("Year: ",Y$Year,"\nN .of Documents: ",Y$Freq))) +
+    g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
       geom_line(aes(group="NA")) +
       geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
       labs(x = 'Year'
            , y = 'Articles'
            , title = "Annual Scientific Production") +
-      scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
+      scale_x_continuous(breaks= (.data$Year[seq(1,length(.data$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
             ,panel.background = element_rect(fill = '#EFEFEF')
             ,panel.grid.minor = element_line(color = '#FFFFFF')
@@ -2272,7 +2272,7 @@ server <- function(input, output, session) {
   output$cocTable <- DT::renderDT({
     
     cocData=values$cocnet$cluster_res
-    names(cocData)=c("Term", "Cluster", "Btw Centrality")
+    names(cocData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     DT::datatable(cocData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -2297,8 +2297,15 @@ server <- function(input, output, session) {
     
   })
   
+      ### Degree Plot Co-word analysis ####
+  output$cocDegree <- renderPlotly({
+    p <- degreePlot(values$cocnet)
+    plot.ly(p)
+  })
       ### Correspondence Analysis ----
 
+  
+  
   output$CSPlot1 <- renderPlot({
     
     input$applyCA
@@ -2814,7 +2821,7 @@ server <- function(input, output, session) {
   output$cocitTable <- DT::renderDT({
     
     cocitData=values$cocitnet$cluster_res
-    names(cocitData)=c("Node", "Cluster", "Btw Centrality")
+    names(cocitData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     DT::datatable(cocitData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -2847,6 +2854,12 @@ server <- function(input, output, session) {
     },
     contentType = "html"
   )
+  
+  ### Degree Plot Co-citation analysis ####
+  output$cocitDegree <- renderPlotly({
+    p <- degreePlot(values$cocitnet)
+    plot.ly(p)
+  })
       ### Historiograph ----
   output$histPlot <- renderPlot({
     
@@ -2939,7 +2952,7 @@ server <- function(input, output, session) {
   output$colTable <- DT::renderDT({
     
       colData=values$colnet$cluster_res
-      names(colData)=c("Node", "Cluster", "Btw Centrality")
+      names(colData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     
     DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
@@ -2972,6 +2985,13 @@ server <- function(input, output, session) {
     },
     contentType = "html"
   )
+  
+  
+  ### Degree Plot Collaboration analysis ####
+  output$colDegree <- renderPlotly({
+    p <- degreePlot(values$colnet)
+    plot.ly(p)
+  })
   
       ### WPPlot ----
   output$WMPlot<- renderPlot({
@@ -3337,6 +3357,26 @@ server <- function(input, output, session) {
   
   
       ### Network functions ----
+ 
+ degreePlot <- function(net){
+   deg <- data.frame(node = names(net$nodeDegree), x= (1:length(net$nodeDegree)), y = net$nodeDegree)
+   p <- ggplot(data = deg, aes(x=.data$x, y=.data$y, 
+                          text=paste("Node ",.data$x," - Degree ",.data$y, sep="")))+
+     geom_point()+
+     geom_line(aes(group="NA"),color = '#002F80', alpha = .5) +
+     theme(text = element_text(color = "#444444")
+           ,panel.background = element_rect(fill = '#EFEFEF')
+           ,panel.grid.minor = element_line(color = '#FFFFFF')
+           ,panel.grid.major = element_line(color = '#FFFFFF')
+           ,plot.title = element_text(size = 24)
+           ,axis.title = element_text(size = 14, color = '#555555')
+           ,axis.title.y = element_text(vjust = 1, angle = 0)
+           ,axis.title.x = element_text(hjust = 0)
+     ) + 
+     labs(x = "Node", y="Degree", title = "Node Degrees")
+   return(p)
+ }
+ 
   cocNetwork <- function(input,values){
     
     n = input$Nodes

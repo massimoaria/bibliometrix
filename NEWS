@@ -1,3 +1,14 @@
+bibliometrix v3.0.1 (Release date: ???)
+==============
+
+New functionalities:
+* biblioshiny: Added "Node Degree Plot" in Conceptual, Intellectual and Social networks 
+ 
+Changes:
+* convert2df: Bug fixes when importing uncomplete metadata
+* histNetwork: Bug fixes
+
+
 bibliometrix v3.0.0 (Release date: 2020-04-15)
 ==============
 

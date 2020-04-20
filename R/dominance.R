@@ -55,7 +55,7 @@ dominance<-function(results, k = 10){
   D=data.frame("Author"=FA,"Dominance Factor"=as.numeric(Dominance),"Articles"=Tot,"Single-Authored"=Single,"Multi-Authored"=Tot-Single,"First-Author"=as.numeric(Nmf))
   D=D[order(-D[,3]),]
   D=D[1:k,]
-  D$RankbyArticles=rank(D$Articles,ties.method="min")
+  D$RankbyArticles=rank(-D$Articles,ties.method="min")
   D=D[order(-D$Dominance.Factor),]
   D$RankDF=rank(-D$Dominance.Factor,ties.method="min")
   names(D)=c("Author","Dominance Factor","Tot Articles","Single-Authored","Multi-Authored","First-Authored","Rank by Articles","Rank by DF")

@@ -79,6 +79,7 @@
 #' @importFrom igraph centr_eigen
 #' @importFrom igraph mean_distance
 #' @importFrom igraph closeness
+#' @importFrom igraph page.rank
 #' @importFrom igraph eigen_centrality
 #' @importFrom igraph arpack_defaults
 #' @importFrom igraph authority_score

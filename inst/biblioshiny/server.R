@@ -30,7 +30,7 @@ server <- function(input, output, session) {
   values$dsQuery <- ""
   values$pmQuery <- " "
   values$pmSample <- 0
-  values$ApiOk=0
+  values$ApiOk <- 0
 
   
   
@@ -453,9 +453,10 @@ server <- function(input, output, session) {
   }) 
   
   output$sampleLog2 <- renderText({ 
-    if (values$ApiOk==1) {n <- nrow(values$M)}else{n <- 0}
+    
+    if (nrow(values$M)<2) {n <- 0}else{n <- nrow(values$M)}
     mes <- paste("Dimensions API returns ",n, " documents", collapse="",sep="")
-    values$ApiOk=0
+    values$ApiOk <- 0
     return(mes)
   }) 
   
@@ -538,7 +539,7 @@ server <- function(input, output, session) {
     })
   }) 
   output$pmSampleLog2 <- renderText({ 
-    if (values$ApiOk==1) {n <- nrow(values$M)}else{n <- 0}
+    if (nrow(values$M)<2) {n <- 0}else{n <- nrow(values$M)}
     
       mes <- paste("PubMed API returns ",n, " documents", collapse="",sep="")
       values$ApiOk <- 0

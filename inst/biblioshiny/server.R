@@ -801,7 +801,7 @@ server <- function(input, output, session) {
       labs(x = 'Year'
            , y = 'Articles'
            , title = "Annual Scientific Production") +
-      scale_x_continuous(breaks= (.data$Year[seq(1,length(.data$Year),by=2)])) +
+      scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
             ,panel.background = element_rect(fill = '#EFEFEF')
             ,panel.grid.minor = element_line(color = '#FFFFFF')

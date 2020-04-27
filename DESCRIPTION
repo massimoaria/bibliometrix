@@ -1,0 +1,52 @@
+Package: bibliometrix
+Type: Package
+Title: An R-Tool for Comprehensive Science Mapping Analysis
+Version: 3.0.1
+Date: 2020-04-26
+Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
+             person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
+Description: Tool for quantitative research in scientometrics and bibliometrics.
+    It provides various routines for importing bibliographic data from 'SCOPUS' (<http://scopus.com>),
+    'Clarivate Analytics Web of Science' (<http://www.webofknowledge.com/>), 'Digital Science Dimensions' 
+	(<https://www.dimensions.ai/>), 'Cochrane Library' (<http://www.cochranelibrary.com/>) 
+	and 'PubMed' (<https://www.ncbi.nlm.nih.gov/pubmed/>) databases, performing bibliometric analysis 
+    and building networks for co-citation, coupling, scientific collaboration and co-word analysis.
+License: GPL-3
+URL: https://www.bibliometrix.org, https://github.com/massimoaria/bibliometrix
+BugReports: https://github.com/massimoaria/bibliometrix/issues
+LazyData: FALSE
+Encoding: UTF-8
+Depends: R (>= 3.3.0)
+Imports: stats,
+		 dimensionsR, 
+		 dplyr,
+         DT,
+		 factoextra,
+		 FactoMineR,
+		 ggraph,
+		 ggplot2,
+		 ggrepel,
+		 igraph,
+		 Matrix, 
+		 networkD3,
+		 pubmedR,
+		 RColorBrewer,
+		 rio,
+	     rscopus,
+		 shiny,
+		 shinycssloaders,
+		 shinythemes,
+		 SnowballC,
+		 stringdist,
+		 stringr,
+		 tidyr		 
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0)
+RoxygenNote: 7.0.2
+NeedsCompilation: no
+Author: Massimo Aria [cre, aut],
+  Corrado Cuccurullo [aut]
+Maintainer: Massimo Aria <aria@unina.it>
+VignetteBuilder: knitr,

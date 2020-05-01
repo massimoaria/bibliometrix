@@ -3,7 +3,8 @@
 \name{scopusCollection}
 \alias{scopusCollection}
 \title{"Bibliometrics" manuscripts from SCOPUS.}
-\format{A data frame with 487 rows and 15 variables:
+\format{
+A data frame with 487 rows and 15 variables:
 \describe{
 \item{AU}{Authors}
 \item{TI}{Document Title}
@@ -20,7 +21,8 @@
 \item{PY}{Year}
 \item{UT}{Unique Article Identifier}
 \item{DB}{Database}
-}}
+}
+}
 \source{
 \url{http://www.scopus.com}
 }

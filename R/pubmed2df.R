@@ -20,21 +20,24 @@ pubmed2df<-function(D){
     arrange(.data$Tag, .data$Paper) %>%
     pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
     ungroup() %>%
-    rename(C1 = .data$AD,
-           OI = .data$AUID,
-           AF = .data$FAU,
-           SN = .data$IS,
-           IS = .data$IP,
-           SO2 =.data$SO,
-           SO = .data$JT,
-           J9 = .data$TA,
-           DE = .data$MH,
-           PP = .data$PG,
-           DT = .data$PT,
-           VL = .data$VI,
-           PY = .data$DP
-           ) %>%
     as.data.frame()
+  
+  # rename field tags
+  error <- 0
+  old_labs <- c("AD","AUID","FAU","IS","IP","SO","JT","TA","MH","PG","PT","VI","DP")
+  new_labs <- c("C1","OI","AF","SN","IS","SO2","SO","J9","DE","PP","DT","VL","PY")
+  lab <- names(df)
+  for (j in 1:length(old_labs)){
+    i <- which(lab %in% old_labs[j])
+    if (length(i)>0) {lab[i] <- new_labs[j]}else{error <- 1}
+  }
+  names(df) <- lab
+  if (error == 1){
+    cat("\nWarning:\nIn your file, some mandatory metadata are missing. Bibliometrix functions may not work properly!\n
+Please, take a look at the vignettes:
+- 'Data Importing and Converting' (https://cran.r-project.org/web/packages/bibliometrix/vignettes/Data-Importing-and-Converting.html)
+- 'A brief introduction to bibliometrix' (https://cran.r-project.org/web/packages/bibliometrix/vignettes/bibliometrix-vignette.html)\n\n")
+  }
   
   # extract DOIs
   df$DI <- trimws(unlist(lapply(strsplit(df$LID,"\\["), "[",1)))

@@ -3,7 +3,9 @@
 \name{stopwords}
 \alias{stopwords}
 \title{List of English stopwords.}
-\format{A character vector with 665 rows.\cr}
+\format{
+A character vector with 665 rows.\cr
+}
 \description{
 A character vector containing a complete list of English stopwords\cr
 Data are used by  \code{\link{biblioAnalysis}} function 

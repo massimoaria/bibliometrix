@@ -3,7 +3,8 @@
 \name{biblio_df}
 \alias{biblio_df}
 \title{Dataset of "Bibliometrics" manuscripts.}
-\format{#' A data frame with 99 rows (manuscripts) and 16 variables (WOS tag field):
+\format{
+#' A data frame with 99 rows (manuscripts) and 16 variables (WOS tag field):
 \describe{
 \item{AU}{Authors}
 \item{TI}{Document Title}
@@ -21,7 +22,8 @@
 \item{SC}{Subject Category}
 \item{UT}{Unique Article Identifier}
 \item{DB}{Database}
-}}
+}
+}
 \source{
 \url{http://www.webofknowledge.com}
 }

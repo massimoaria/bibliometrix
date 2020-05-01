@@ -27,6 +27,17 @@ isi2df<-function(D){
   
   ### replace "---" with ";"
   tagsComma <- c("AU","AF","DE","ID","CR")
+  
+  nolab <- setdiff(tagsComma,names(df))
+  if (length(nolab)>0){
+    cat("\nWarning:\nIn your file, some mandatory metadata are missing. Bibliometrix functions may not work properly!\n
+Please, take a look at the vignettes:
+- 'Data Importing and Converting' (https://cran.r-project.org/web/packages/bibliometrix/vignettes/Data-Importing-and-Converting.html)
+- 'A brief introduction to bibliometrix' (https://cran.r-project.org/web/packages/bibliometrix/vignettes/bibliometrix-vignette.html)\n\n")
+  }
+  
+  tagsComma <- tagsComma[(!(tagsComma %in% nolab))]
+  
   df1 <- data.frame(lapply(df[tagsComma],function(x){
     gsub("---",";",x)
   }),stringsAsFactors = FALSE)

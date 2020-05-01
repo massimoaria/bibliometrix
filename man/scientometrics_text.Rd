@@ -3,8 +3,10 @@
 \name{scientometrics_text}
 \alias{scientometrics_text}
 \title{"Co-citation analysis" and "Coupling analysis" manuscripts.}
-\format{A large character with 12731 rows.\cr 
-Data has been imported by a WoS Export file in plain text format using the function \code{\link{readLines}}.}
+\format{
+A large character with 12731 rows.\cr 
+Data has been imported by a WoS Export file in plain text format using the function \code{\link{readLines}}.
+}
 \source{
 \url{http://www.webofknowledge.com}
 }

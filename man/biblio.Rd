@@ -3,8 +3,10 @@
 \name{biblio}
 \alias{biblio}
 \title{Dataset of "Bibliometrics" scientific documents.}
-\format{A large character with 9014 rows.\cr 
-Data has been imported by an Clarivate Analytics WoS Export file in bibtex format using the function \code{\link{readLines}}.}
+\format{
+A large character with 9014 rows.\cr 
+Data has been imported by an Clarivate Analytics WoS Export file in bibtex format using the function \code{\link{readLines}}.
+}
 \source{
 \url{http://www.webofknowledge.com}
 }

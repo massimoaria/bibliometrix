@@ -3,7 +3,8 @@
 \name{management}
 \alias{management}
 \title{The use of bibliometric approaches in business and management disciplines.}
-\format{A data frame with 449 rows and 66 variables:
+\format{
+A data frame with 449 rows and 66 variables:
 \describe{
 \item{PT}{Publication Type (J=Journal; B=Book; S=Series; P=Patent)}
 \item{AU}{Author names}
@@ -71,7 +72,8 @@
 \item{AU_UN_NR}{Not Recognized Affiliations}
 \item{SR_FULL}{Short Full-Reference}
 \item{SR}{Short Reference}
-}}
+}
+}
 \source{
 \url{http://www.webofknowledge.com}
 }

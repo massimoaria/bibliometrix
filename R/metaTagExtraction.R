@@ -133,14 +133,15 @@ SR <- function(M){
   M$SR_FULL<- gsub("\\s+", " ", SR)
   
   ## assign an unique name to each document
+  SR<- gsub("\\s+", " ", SR)
   st<-i<-0
   while(st==0){
     ind <- which(duplicated(SR))
     if (length(ind)>0){
       i <- i+1
       SR[ind]=paste0(SR[ind],"-",letters[i],sep="")}else{st <- 1}}
-  
-  M$SR<- gsub("\\s+", " ", SR)
+  M$SR<- SR
+  #M$SR<- gsub("\\s+", " ", SR)
   return(M)
 }
 

@@ -49,7 +49,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   #theme_set(theme_bw())
   
 
-  g <- ggplot(df2, aes(x=df2$Author, y=df2$year, text = paste("Author: ", df2$Author,"\nYear: ",df2$year ,"\nN. of Articles: ",df2$freq ,"\nTotal Citations per Year: ", round(TCpY,2))))+
+  g <- ggplot(df2, aes(x=.data$Author, y=.data$year, text = paste("Author: ", df2$Author,"\nYear: ",df2$year ,"\nN. of Articles: ",df2$freq ,"\nTotal Citations per Year: ", round(TCpY,2))))+
     geom_point(aes(alpha=df2$TCpY,size = df2$freq), color="dodgerblue4")+ 
     scale_size(range=c(2,6))+
     scale_alpha(range=c(0.3,1))+

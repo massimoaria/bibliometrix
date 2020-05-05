@@ -31,7 +31,8 @@ tableTag <- function(M, Tag = "CR", sep = ";"){
   Tab<-unlist(strsplit(as.character(M[,i]),sep))
   
   ### inserted to remove punct and extra spaces ####
-  Tab<-trimws(trimES(gsub("[[:punct:]]"," ",Tab)))
+  #Tab<-trimws(trimES(gsub("[[:punct:]]"," ",Tab)))
+  Tab<-trimws(trimES(gsub("\\.|\\,"," ",Tab)))
   ####
   Tab<-Tab[Tab!=""]
   Tab<-sort(table(Tab),decreasing=TRUE)

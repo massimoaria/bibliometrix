@@ -139,7 +139,10 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     }
   )
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY <- NA}
-  if ("TC" %in% names(M)){M$TC=as.numeric(M$TC)} else {M$TC <- 0}
+  if ("TC" %in% names(M)){
+    M$TC=as.numeric(M$TC)
+    M$TC[is.na(M$TC)] <- 0
+  } else {M$TC <- 0}
   if (!("CR" %in% names(M))){M$CR="none"}
   if (dbsource!="cochrane"){M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
   

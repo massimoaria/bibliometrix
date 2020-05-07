@@ -91,7 +91,7 @@ biblioNetwork <-
         },
         references = {
           WCR <- Matrix::t(cocMatrix(M, Field = "CR", type = "sparse", n,sep))
-          NetMatrix <- crossprod(WCR, WCR,)
+          NetMatrix <- crossprod(WCR, WCR)
         },
         sources = {
           WSO <- cocMatrix(M, Field = "SO", type = "sparse", n, sep)

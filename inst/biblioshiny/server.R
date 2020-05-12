@@ -1131,7 +1131,7 @@ server <- function(input, output, session) {
     term=rep(term,each=dim(values$PYSO)[1])
     n=dim(values$PYSO)[1]*(dim(values$PYSO)[2]-1)
     freq=matrix(as.matrix(values$PYSO[,-1]),n,1)
-    values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq)
+    values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq, stringsAsFactors = TRUE)
     
     g=ggplot(values$SODF)+
       geom_smooth(aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source),se=se, method = "loess", formula="y ~ x")+
@@ -2121,7 +2121,7 @@ server <- function(input, output, session) {
     term=rep(term,each=dim(values$KW)[1])
     n=dim(values$KW)[1]*(dim(values$KW)[2]-1)
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
-    values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq)
+    values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq, stringsAsFactors = TRUE)
     
     g=ggplot(values$DF)+
       geom_smooth(aes(x=values$DF$Year,y=values$DF$Freq, group=values$DF$Term, color=values$DF$Term),se = se,method = "loess",formula ='y ~ x')+

@@ -34,6 +34,7 @@ isi2df<-function(D){
 Please, take a look at the vignettes:
 - 'Data Importing and Converting' (https://cran.r-project.org/web/packages/bibliometrix/vignettes/Data-Importing-and-Converting.html)
 - 'A brief introduction to bibliometrix' (https://cran.r-project.org/web/packages/bibliometrix/vignettes/bibliometrix-vignette.html)\n\n")
+    cat("\nMissing fields: ",nolab)
   }
   
   tagsComma <- tagsComma[(!(tagsComma %in% nolab))]

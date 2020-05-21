@@ -218,6 +218,8 @@ AU_CO<-function(M){
   
   M$AU_CO=NA
   C1=M$C1
+  ## must replace all NA before "removing reprint info", or NA_character_ became string "NA"
+  C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
   
   ## remove reprint information from C1
   C1=unlist(lapply(C1,function(l){
@@ -225,10 +227,11 @@ AU_CO<-function(M){
     #l=l[regexpr("REPRINT AUTHOR",l)==-1]
     l=paste0(l,collapse=";")
   }))
-  ###
+  ### above changes all NA to 'NA'
   
-  C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
   C1=gsub("\\[.*?\\] ", "", C1)
+  ## change 'NA' back to NA
+  C1[which(C1 == "NA")]=NA
   if (M$DB[1]=="ISI"){ C1=lastChar(C1,last=".")}
   if (M$DB[1]=="SCOPUS"){ C1=lastChar(C1,last=";")}
   
@@ -236,7 +239,8 @@ AU_CO<-function(M){
   RP=M$RP
   #RP[which(is.na(RP))]=M$RRP)
   RP=paste(RP,";",sep="")
-  RP=gsub("[[:punct:][:blank:]]+", " ", RP)
+  #RP = gsub("[[:punct:][:blank:]]+", " ", RP)
+  ## this will make gregexpr(l, RP[i], fixed=TRUE) fail as countries has the format '_COUNTRY_.' or '_COUNTRY_;'
   
   for (i in 1:size[1]){
     if (!is.na(C1[i])){
@@ -253,7 +257,9 @@ AU_CO<-function(M){
   M$AU_CO=gsub(".", "", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub("UNITED STATES","USA",M$AU_CO)
-  M$AU_CO=gsub("GEORGIA","USA",M$AU_CO)
+  M$AU_CO=gsub("TAIWAN","CHINA",M$AU_CO)
+  ## no need to gsub all Georgia to USA, as real Georgia will be like 'Georgia.' or 'Georgia;',
+  ## while Georgia, US will never be at the end of an address.
   M$AU_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU_CO)
   M$AU_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU_CO)
   M$AU_CO=gsub("WALES","UNITED KINGDOM",M$AU_CO)
@@ -279,8 +285,14 @@ AU1_CO<-function(M,sep){
   M$AU1_CO=NA
   C1=M$C1
   C1[which(!is.na(M$RP))]=M$RP[which(!is.na(M$RP))]
-  C1=unlist(lapply(strsplit(C1,sep),function(l) l[1]))
+  ## do this before strsplit(), otherwise entries with multiple (reprint) author would be split between first group of authors
   C1=gsub("\\[.*?\\] ", "", C1)
+  ## remove string before the first "(REPRINT AUTHOR)", otherwise C1 may get split between first group of authors, thus removing address, forcing it to default to RP.
+  C1=gsub("^.*?\\(REPRINT\\sAUTHOR\\)", "", C1)
+  C1=unlist(lapply(strsplit(C1,sep),function(l) l[1]))
+  ## remove all characters before the last comma, thus constantly leaving only country, or in the case of US, state + zip_code + country.
+  ## this way the need to distinguish Georgia and Georgia, US is eliminated.
+  C1=gsub("^(.+)?,", "", C1)
   C1=gsub("[[:punct:][:blank:]]+", " ", C1)
   C1=paste(trim(C1)," ",sep="")
   if (M$DB[1]!="PUBMED"){
@@ -304,7 +316,8 @@ AU1_CO<-function(M,sep){
   }
   M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
   M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
-  M$AU1_CO=gsub("GEORGIA","USA",M$AU1_CO)
+  M$AU1_CO=gsub("TAIWAN","CHINA",M$AU1_CO)
+  ## TAIWAN is not a country. It is so far still a part of CHINA, whatever you thinks.
   M$AU1_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU1_CO)
   M$AU1_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU1_CO)
   M$AU1_CO=gsub("WALES","UNITED KINGDOM",M$AU1_CO)

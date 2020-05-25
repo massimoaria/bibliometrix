@@ -2,7 +2,7 @@ Package: bibliometrix
 Type: Package
 Title: An R-Tool for Comprehensive Science Mapping Analysis
 Version: 3.0.1
-Date: 2020-04-30
+Date: 2020-05-25
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
 Description: Tool for quantitative research in scientometrics and bibliometrics.

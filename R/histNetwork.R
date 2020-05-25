@@ -88,6 +88,7 @@ wos <- function(M, min.citations, sep, network, verbose){
     trimws(unlist(lapply(
       strsplit(CR$ref, 'DOI', fixed = TRUE), '[', 2
     )))
+  CR$DI[is.na(CR$DI)] <- ""
   CR$AU <-
     trimws(gsub("[ ]{2,}", "", (gsub(
       "\\.", " ", unlist(lapply(strsplit(CR$ref, ',', fixed = TRUE), '[', 1))

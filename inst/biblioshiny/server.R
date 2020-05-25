@@ -917,15 +917,13 @@ server <- function(input, output, session) {
 
   })
   
-  output$ThreeFielsPlot <- networkD3::renderSankeyNetwork({
-    
-    input$apply3F
-    
-    isolate({
+  TFP <- eventReactive(input$apply3F,{
     fields=c(input$LeftField, input$CentralField, input$RightField)
     threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn), width=1200,height=600)
-    })
-    
+  })
+  
+  output$ThreeFielsPlot <- networkD3::renderSankeyNetwork({
+    TFP()  
   })
   
   ### SOURCES MENU ####
@@ -1074,18 +1072,17 @@ server <- function(input, output, session) {
       formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center')
   })
   
-  output$SourceHindexPlot <- renderPlotly({
-    
-    input$applyHsource
-    
+  Hsource <- eventReactive(input$applyHsource,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
-                   isolate(res <- Hindex_plot(values,type="source"))
+                   res <- Hindex_plot(values,type="source")
                  })
     
-    
-    isolate(plot.ly(res$g))
-   
+    plot.ly(res$g)
+  })
+  
+  output$SourceHindexPlot <- renderPlotly({
+    Hsource()
   })#, height = 500, width =900)
   
   output$SourceHindexTable <- DT::renderDT({
@@ -1113,6 +1110,7 @@ server <- function(input, output, session) {
               formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center')
     
   })
+  
   
   output$soGrowthPlot <- renderPlot({
     

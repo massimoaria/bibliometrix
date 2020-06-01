@@ -121,7 +121,7 @@ navbarMenu("Data",
                             "format",
                             label = "File format",
                             choices = c("Plain Text" = "plaintext",
-                                        "EndNote Desktop" = "plaintext",
+                                        "EndNote Desktop" = "endnote",
                                         "BibTeX" = "bibtex"),
                             selected = "plaintext"
                           )

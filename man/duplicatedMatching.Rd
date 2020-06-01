@@ -4,14 +4,18 @@
 \alias{duplicatedMatching}
 \title{Searching of duplicated records in a bibliographic database}
 \usage{
-duplicatedMatching(M, Field = "TI", tol = 0.95)
+duplicatedMatching(M, Field = "TI", exact = FALSE, tol = 0.95)
 }
 \arguments{
 \item{M}{is the bibliographic data frame.}
 
 \item{Field}{is a character object. It indicates one of the field tags used to identify duplicated records. Field can be equal to one of these tags: TI (title), AB (abstract), UT (manuscript ID).}
 
-\item{tol}{is a numeric value giving the minimum relative similarity to match two manuscripts. Default value is \code{tol = 0.95}.}
+\item{exact}{is logical. If exact = TRUE the function searches duplicates using exact matching. If exact=FALSE, 
+the function uses the restricted Damerau-Levenshtein distance to find duplicated documents.}
+
+\item{tol}{is a numeric value giving the minimum relative similarity to match two manuscripts. Default value is \code{tol = 0.95}. 
+To use the restricted Damerau-Levenshtein distance, exact argument has to be set as FALSE.}
 }
 \value{
 the value returned from \code{duplicatedMatching} is a data frame without duplicated records.
@@ -32,7 +36,7 @@ data(scientometrics)
 
 M=rbind(scientometrics[1:20,],scientometrics[10:30,])
 
-newM <- duplicatedMatching(M, Field = "TI", tol = 0.95)
+newM <- duplicatedMatching(M, Field = "TI", exact=FALSE, tol = 0.95)
 
 dim(newM)
 

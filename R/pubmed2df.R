@@ -43,8 +43,12 @@ Please, take a look at the vignettes:
   df$DI <- trimws(unlist(lapply(strsplit(df$LID,"\\["), "[",1)))
   df$PY <- as.numeric(substr(df$PY,1,4))
   
+  
   ### replace "---" with ";"
   tagsComma <- c("AU","AF","DE","AID","OT","PHST","DT")
+  nolab <- setdiff(tagsComma,names(df))
+  tagsComma <- tagsComma[(!(tagsComma %in% nolab))]
+  
   df1 <- data.frame(lapply(df[tagsComma],function(x){
     gsub("---",";",x)
   }),stringsAsFactors = FALSE)

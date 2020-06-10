@@ -42,7 +42,7 @@ b=length(which(cumSO<n*0.67))+1
 Z=c(rep("Zone 1",a),rep("Zone 2",b-a),rep("Zone 3",length(cumSO)-b))
 df=data.frame(SO=names(cumSO),Rank=1:length(cumSO),Freq=as.numeric(SO),cumFreq=cumSO,Zone=Z, stringsAsFactors = FALSE)
 
-g=ggplot2::ggplot(df, aes(x = log(df$Rank), y = df$Freq, text=paste("Source: ",df$SO,"\nN. of Documents: ",df$Freq))) +
+g=ggplot2::ggplot(df, aes(x = log(.data$Rank), y = .data$Freq, text=paste("Source: ",.data$SO,"\nN. of Documents: ",.data$Freq))) +
   geom_line(aes(group="NA")) +
   geom_area(aes(group="NA"),fill = "dodgerblue", alpha = 0.5) +
   annotate("rect", xmin=0, xmax=log(df$Rank[a]), ymin=0, ymax=max(df$Freq), alpha=0.4)+

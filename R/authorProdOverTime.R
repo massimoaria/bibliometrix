@@ -49,8 +49,8 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   #theme_set(theme_bw())
   
 
-  g <- ggplot(df2, aes(x=.data$Author, y=.data$year, text = paste("Author: ", df2$Author,"\nYear: ",df2$year ,"\nN. of Articles: ",df2$freq ,"\nTotal Citations per Year: ", round(TCpY,2))))+
-    geom_point(aes(alpha=df2$TCpY,size = df2$freq), color="dodgerblue4")+ 
+  g <- ggplot(df2, aes(x=.data$Author, y=.data$year, text = paste("Author: ", .data$Author,"\nYear: ",.data$year ,"\nN. of Articles: ",.data$freq ,"\nTotal Citations per Year: ", round(.data$TCpY,2))))+
+    geom_point(aes(alpha=.data$TCpY,size = .data$freq), color="dodgerblue4")+ 
     scale_size(range=c(2,6))+
     scale_alpha(range=c(0.3,1))+
     scale_y_continuous(breaks = seq(min(df2$year),max(df2$year), by=2))+
@@ -70,7 +70,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
     labs(title="Top-Authors' Production over the Time", 
          x="Author",
          y="Year")+
-    geom_line(aes(x = df2$Author, y = df2$year, group=df2$Author),size=1.0, color="firebrick", alpha=0.3 )+
+    geom_line(data=df2,aes(x = .data$Author, y = .data$year, group=.data$Author),size=1.0, color="firebrick", alpha=0.3 )+
     scale_x_discrete(limits = rev(levels(df2$Author)))+
     coord_flip()
   

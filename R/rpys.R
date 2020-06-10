@@ -106,11 +106,11 @@ if (length(timespan)==2){
 }
 df=data.frame(X=X,Y=Y,diffMedian=diffMedian,stringsAsFactors = FALSE)
 RPYS=data.frame(Year=names(Y),Citations=Y,diffMedian5=diffMedian)
-g=ggplot(df, aes(x=df$X,y=df$Y,text=paste("Year: ",df$X,"\nN. of References: ",df$Y)))+
+g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of References: ",.data$Y)))+
   geom_line(aes(group="NA")) +
   geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
   geom_hline(aes(yintercept=0, color = 'grey'))+
-  geom_line(aes(x=df$X,y=df$diffMedian, color="firebrick", group="NA"))+
+  geom_line(aes(x=.data$X,y=.data$diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'
        , y = 'Cited References'
        , title = "Reference Publication Year Spectroscopy",

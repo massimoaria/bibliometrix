@@ -15,7 +15,7 @@ conceptualStructure(
   k.max = 5,
   stemming = FALSE,
   labelsize = 10,
-  documents = 10,
+  documents = 2,
   graph = TRUE
 )
 }
@@ -52,7 +52,7 @@ field can be equal to one of these tags:
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=10}}
 
-\item{documents}{is an integer. It indicates the number of documents to plot in the factorial map. The default value is 10. It is used only for CA and MCA.}
+\item{documents}{is an integer. It indicates the number of documents per cluster to plot in the factorial map. The default value is 2. It is used only for CA and MCA.}
 
 \item{graph}{is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE}
 }

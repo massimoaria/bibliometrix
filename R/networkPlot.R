@@ -312,8 +312,8 @@ networkPlot <-
                                as.numeric(betweenness(
                                  bsk.network, directed = F, normalized = F
                                )),
-                               as.numeric(closeness(
-                                 bsk.network)),
+                               suppressWarnings(as.numeric(closeness(
+                                 bsk.network))),
                                as.numeric(page.rank(bsk.network)$vector))
       names(cluster_res) <- c("vertex", "cluster", "btw_centrality", "clos_centrality","pagerank_centrality")
       cluster_res <- cluster_res[order(cluster_res$cluster), ]

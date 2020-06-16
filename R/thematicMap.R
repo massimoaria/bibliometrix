@@ -15,7 +15,7 @@
 #' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE", "TI", "AB")}.
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param n is an integer. It indicates the number of terms to include in the analysis.
-#' @param minfreq is a integer. It indicates the minimum frequency of a cluster.
+#' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
@@ -42,6 +42,8 @@
 #' @export
 
 thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
+  
+  minfreq <- max(0,floor(minfreq*nrow(M)/1000))
   
   switch(field,
          ID={
@@ -144,7 +146,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   df$freq=A[,2]
   
-  W <- df_lab %>% group_by(.data$groups) %>% dplyr::filter(.data$sC>1) %>% 
+  W <- df_lab %>% group_by(.data$groups) %>% #dplyr::filter(.data$sC>1) %>% 
     arrange(-.data$sC, .by_group = TRUE) %>% 
     dplyr::top_n(10, .data$sC) %>%
     summarise(wordlist = paste(.data$words,.data$sC,collapse="\n")) %>% as.data.frame()
@@ -153,6 +155,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   ### number of labels for each cluster
   labels=gsub("\\d", "",df$words)
+  
+  ### cut ties over 10 words
+  df$words <- unlist(lapply(df$words, function(l){
+    l <- unlist(strsplit(l,"\\\n"))
+    l <- l[1:(min(length(l),10))]
+    l <- paste0(l,collapse="\n")
+  }))
+  
   L=unlist(lapply(labels, function(l){
     l=strsplit(l," \\\n")
     l=paste(l[[1]][1:min(n.labels,lengths(l))], collapse="\n")

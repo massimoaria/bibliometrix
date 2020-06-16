@@ -8,6 +8,7 @@ Changes:
 * convert2df: Bug fixes
 * biblioshiny: improved management of reactive events
 * plots: removed warnings by ggplot2 package
+* ThematicMap: min frequency now is a proportion
 
 
 bibliometrix v3.0.1 (Release date: 2020-05-25)

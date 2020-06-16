@@ -23,7 +23,7 @@ thematicMap(
 
 \item{n}{is an integer. It indicates the number of terms to include in the analysis.}
 
-\item{minfreq}{is a integer. It indicates the minimum frequency of a cluster.}
+\item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
 
 \item{stemming}{is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).}
 

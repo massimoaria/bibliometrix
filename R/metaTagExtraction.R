@@ -258,8 +258,6 @@ AU_CO<-function(M){
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub("UNITED STATES","USA",M$AU_CO)
   M$AU_CO=gsub("TAIWAN","CHINA",M$AU_CO)
-  ## no need to gsub all Georgia to USA, as real Georgia will be like 'Georgia.' or 'Georgia;',
-  ## while Georgia, US will never be at the end of an address.
   M$AU_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU_CO)
   M$AU_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU_CO)
   M$AU_CO=gsub("WALES","UNITED KINGDOM",M$AU_CO)
@@ -299,7 +297,9 @@ AU1_CO<-function(M,sep){
     RP=M$RP
     #RP[which(is.na(RP))]=M$RRP)
     RP=paste(RP,";",sep="")
-    RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {RP=C1}
+    RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {
+      RP <- C1 <-paste(" ",gsub("[[:punct:]]","",C1),sep="")
+      }
   
   for (i in 1:size[1]){
     if (!is.na(C1[i])){
@@ -317,7 +317,6 @@ AU1_CO<-function(M,sep){
   M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
   M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
   M$AU1_CO=gsub("TAIWAN","CHINA",M$AU1_CO)
-  ## TAIWAN is not a country. It is so far still a part of CHINA, whatever you thinks.
   M$AU1_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU1_CO)
   M$AU1_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU1_CO)
   M$AU1_CO=gsub("WALES","UNITED KINGDOM",M$AU1_CO)

@@ -1,6 +1,6 @@
 Package: bibliometrix
 Type: Package
-Title: An R-Tool for Comprehensive Science Mapping Analysis
+Title: Comprehensive Science Mapping Analysis
 Version: 3.0.2
 Date: 2020-06-16
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),

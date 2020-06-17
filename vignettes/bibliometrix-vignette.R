@@ -129,17 +129,18 @@ NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", sep
 ## ----similarity, fig.height=9, fig.width=9, warning=FALSE-------------------------------------------------------------
 NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", sep = ";")
 
-net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
+
+#net=networkPlot(NetMatrix,  normalize = "salton", weighted=NULL, n = 100, Title = "Authors' Coupling", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F)
 
 
 ## ---------------------------------------------------------------------------------------------------------------------
 # NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ".  ")
 
 ## ---------------------------------------------------------------------------------------------------------------------
-NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "authors", sep = ";")
+# NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "authors", sep = ";")
 
 ## ---------------------------------------------------------------------------------------------------------------------
-NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
+# NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
 
 ## ---------------------------------------------------------------------------------------------------------------------
 # An example of a classical keyword co-occurrences network
@@ -169,10 +170,10 @@ net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration
 ## ----Co-citation network, fig.height=7, fig.width=7, warning=FALSE----------------------------------------------------
 # Create a co-citation network
 
-NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
+# NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
 
 # Plot the network
-net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
+#net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
 
 
 ## ----Keyword c-occurrences, fig.height=7, fig.width=7, warning=FALSE--------------------------------------------------

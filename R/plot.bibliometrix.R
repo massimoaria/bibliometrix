@@ -61,7 +61,7 @@ plot.bibliometrix<-function(x, ...){
   names(xx2)=c("Country","Freq","Collaboration")
   xx=rbind(xx2,xx1)
   xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
-  g=suppressWarnings(ggplot(data=xx, aes(x=xx$Country, y=xx$Freq,fill=xx$Collaboration)) +
+  g=suppressWarnings(ggplot(data=xx, aes(x=.data$Country, y=.data$Freq,fill=.data$Collaboration)) +
     geom_bar(stat="identity")+
     scale_x_discrete(limits = rev(levels(xx$Country)))+
     scale_fill_discrete(name="Collaboration",
@@ -96,7 +96,7 @@ plot.bibliometrix<-function(x, ...){
   
   names(Y)=c("Year","Freq")
   
-  g=ggplot(Y, aes(x = Y$Year, y = Y$Freq)) +
+  g=ggplot(Y, aes(x = .data$Year, y = .data$Freq)) +
     geom_line() +
     geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'
@@ -144,7 +144,7 @@ plot.bibliometrix<-function(x, ...){
   row.names(Table2)=Table2$Year}
   
   
-  g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperYear)) +
+  g=ggplot(Table2, aes(x = .data$Year, y = .data$MeanTCperYear)) +
     geom_line() +
     geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'
@@ -167,7 +167,7 @@ plot.bibliometrix<-function(x, ...){
     cat("Hit <Return> to see next plot: ")
     line <- readline()}
   
-  g=ggplot(Table2, aes(x = Table2$Year, y = Table2$MeanTCperArt)) +
+  g=ggplot(Table2, aes(x = .data$Year, y = .data$MeanTCperArt)) +
     geom_line() +
     geom_area(fill = '#002F80', alpha = .5) +
     labs(x = 'Year'

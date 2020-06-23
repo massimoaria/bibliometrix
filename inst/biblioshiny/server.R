@@ -3299,7 +3299,7 @@ server <- function(input, output, session) {
              AU <- data.frame(Author=names(values$results$Authors), 
                               freq=as.numeric(values$results$Authors), 
                               stringsAsFactors = FALSE)
-             TAB <- left_join(AU,values$results$AuthorsFrac)
+             TAB <- dplyr::left_join(AU,values$results$AuthorsFrac)
              names(TAB)=c("Authors","Articles","Articles Fractionalized")
              #print(S$MostProdAuthors)
            },

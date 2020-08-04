@@ -210,7 +210,6 @@ scopus <- function(M, min.citations, sep, network, verbose){
   M$LCS[papers] <- LCS
   
   ### HistData
-  class(M)="data.frame"
   histData <- M %>%
     select(.data$SR_FULL, .data$DI, .data$PY, .data$LCS, .data$TC) %>%
     rename(

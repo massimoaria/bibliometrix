@@ -373,7 +373,7 @@ server <- function(input, output, session) {
         placeholder = NULL
       ),
       numericInput("dsStartYear", "Start Year", value = 1990),
-      numericInput("dsEndYear", "Start Year", value = as.numeric(substr(Sys.time(), 1, 4))),
+      numericInput("dsEndYear", "End Year", value = as.numeric(substr(Sys.time(), 1, 4))),
       
       
       actionButton("dsQuery", "Create the query "),
@@ -460,7 +460,7 @@ server <- function(input, output, session) {
   
   output$sliderLimit <- renderUI({
     
-    sliderInput("sliderLimit", "Total document to downalod", min = 1,
+    sliderInput("sliderLimit", "Total document to download", min = 1,
                 max = values$dsSample, value = values$dsSample, step = 1)
   })
   
@@ -481,7 +481,7 @@ server <- function(input, output, session) {
         placeholder = NULL
       ),
       numericInput("pmStartYear", "Start Year", value = 1990),
-      numericInput("pmEndYear", "Start Year", value = as.numeric(substr(Sys.time(
+      numericInput("pmEndYear", "End Year", value = as.numeric(substr(Sys.time(
       ), 1, 4))),
       actionButton("pmQuery", "Try the query "),
       h5(tags$b("Query Translation")),
@@ -548,7 +548,7 @@ server <- function(input, output, session) {
   }) 
   
   output$pmSliderLimit <- renderUI({
-    sliderInput("pmSliderLimit", "Total document to downalod", min = 1,
+    sliderInput("pmSliderLimit", "Total document to download", min = 1,
                 max = values$pmSample, value = values$pmSample, step = 1)
   })
   ### API MENU: Content Download ####

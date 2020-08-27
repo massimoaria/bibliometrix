@@ -189,7 +189,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   row.names(M) <- M$SR
   
   ### bibliometrix>DB class
-  class(M) <- c("data.frame","bibliometrixDB")
+  class(M) <- c("bibliometrixDB", "data.frame")
   
   return(M)
 

@@ -15,6 +15,7 @@
 #' @param n is integer. It defines the number of vertices to plot.
 #' @param size is an integer. It defines the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}
+#' @param title_as_label is a logical. If TRUE document titles are plotted instead of short labels.
 #' @param verbose is logical. If TRUE, results are printed on screen.
 #' @return It is a network object of the class \code{igraph}.
 #' 
@@ -32,7 +33,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
+histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = FALSE, verbose = TRUE){
   
   colorlist <-  c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   ## legacy with old argument size
@@ -54,9 +55,17 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, verbose=TRUE){
   
   R <- strsplit(names(V(bsk.network)),",")
   RR <- lapply(R,function(l){
-      l=l[1:2]
-      l=paste(l[1],l[2],sep=",")})
-  V(bsk.network)$id <- tolower(unlist(RR))
+    l=l[1:2]
+    l=paste(l[1],l[2],sep=",")})
+  
+  # add titles
+  V(bsk.network)$title <- histResults$histData$Title[ind]
+  
+  if (isTRUE(title_as_label)){
+    V(bsk.network)$id <- tolower(paste(substr(V(bsk.network)$title,1,50),"...",sep=""))
+  } else {
+    V(bsk.network)$id <- tolower(unlist(RR))
+  }
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- LCS

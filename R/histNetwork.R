@@ -124,8 +124,8 @@ wos <- function(M, min.citations, sep, network, verbose){
   M[LCS$nLABEL, "LCS"] <- LCS$n
   M_orig$LCS <- M$LCS
   
-  histData <- M[c("LABEL","DI","PY","LCS","TC")]
-  names(histData) <- c("Paper","DOI","Year","LCS","GCS")
+  histData <- M[c("LABEL","TI","DI","PY","LCS","TC")]
+  names(histData) <- c("Paper","Title", "DOI","Year","LCS","GCS")
   
   if (isTRUE(network)){
     # Citing data frame
@@ -211,9 +211,10 @@ scopus <- function(M, min.citations, sep, network, verbose){
   
   ### HistData
   histData <- M %>%
-    select(.data$SR_FULL, .data$DI, .data$PY, .data$LCS, .data$TC) %>%
+    select(.data$SR_FULL, .data$TI,.data$DI, .data$PY, .data$LCS, .data$TC) %>%
     rename(
       Paper = .data$SR_FULL,
+      Title = .data$TI,
       DOI = .data$DI,
       Year = .data$PY,
       GCS = .data$TC

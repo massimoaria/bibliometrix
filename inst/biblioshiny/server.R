@@ -786,7 +786,7 @@ server <- function(input, output, session) {
     Tab=table(values$results$Years)
     
     ## inserting missing years
-    YY=setdiff(seq(min(values$results$Years),max(values$results$Years)),names(Tab))
+    YY=setdiff(seq(min(values$results$Years, na.rm = T),max(values$results$Years,na.rm = T)),names(Tab))
     Y=data.frame(Year=as.numeric(c(names(Tab),YY)),Freq=c(as.numeric(Tab),rep(0,length(YY))))
     Y=Y[order(Y$Year),]
     
@@ -1747,9 +1747,9 @@ server <- function(input, output, session) {
     values$TABGlobDoc <- values$TAB
     
     if (input$CitDocsMeasure=="TC"){
-      xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[2], stringsAsFactors = FALSE,row.names=NULL)
+      xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[3], stringsAsFactors = FALSE,row.names=NULL)
       lab="Total Citations"} else {
-        xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[3], stringsAsFactors = FALSE,row.names=NULL)
+        xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[4], stringsAsFactors = FALSE,row.names=NULL)
         lab="Total Citations per Year"
       }
     
@@ -1779,7 +1779,8 @@ server <- function(input, output, session) {
   output$MostCitDocsTable <- DT::renderDT({
     g <- MGCDocuments()
     TAB <- values$TABGlobDoc
-    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+    TAB$DOI<- paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
@@ -1839,7 +1840,11 @@ server <- function(input, output, session) {
   output$MostLocCitDocsTable <- DT::renderDT({
     
     TAB <- values$TABLocDoc
-    TAB$DOI<- paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    TAB$DOI <- paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    TAB$Ratio <- TAB[,4]/TAB[,5]*100
+    TAB$Ratio[is.nan(TAB$Ratio)] <- 0
+    #TAB$Ratio <- round(TAB$Ratio,2)
+    names(TAB)[ncol(TAB)] <- "Local Citations (%)"
     DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -1860,7 +1865,8 @@ server <- function(input, output, session) {
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
+      formatRound(names(TAB)[6], digits=2)
     
   })
   
@@ -3305,7 +3311,7 @@ server <- function(input, output, session) {
            },
            "tab4"={
              TAB=values$S$MostCitedPapers
-             names(TAB)=c("Paper", "Total Citations","TC per Year")
+             names(TAB)=c("Paper", "DOI","Total Citations","TC per Year")
              #print(S$MostCitedPapers)
            },
            "tab5"={
@@ -3447,17 +3453,17 @@ server <- function(input, output, session) {
   
  historiograph <- function(input,values){
     
-    if (input$histsearch=="FAST"){
-      min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
-    }else{min.cit=1}
+   min.cit <- 1
+    # if (input$histsearch=="FAST"){
+    #   min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
+    # }else{min.cit=1}
     
-    if (values$Histfield=="NA" | values$histsearch!=input$histsearch){
+    if (values$Histfield=="NA"){
       values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
       values$Histfield="done"
-      values$histsearch=input$histsearch
     }
-    
-    values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, verbose=FALSE))
+    titlelabel <- input$titlelabel=="TRUE"
+    values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, title_as_label = titlelabel, verbose=FALSE))
   return(values)
   }
   

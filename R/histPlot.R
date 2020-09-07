@@ -16,8 +16,8 @@
 #' @param size is an integer. It defines the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}
 #' @param title_as_label is a logical. If TRUE document titles are plotted instead of short labels.
-#' @param verbose is logical. If TRUE, results are printed on screen.
-#' @return It is a network object of the class \code{igraph}.
+#' @param verbose is logical. If TRUE, results and plots are printed on screen.
+#' @return It is list containing: a network object of the class \code{igraph} and a plot object of the class \code{ggraph}.
 #' 
 #' @examples
 #' # EXAMPLE Citation network
@@ -118,16 +118,17 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     theme(legend.position='none', panel.background = element_rect(fill='gray97', color='grey97'),
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),
           axis.title.y = element_blank(), axis.title.x = element_blank(),
-          axis.line.x = element_line(size = 3, colour = "grey80"),
           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(),
-          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold"))+
+          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold", angle = 90, size=6))+
     labs(title = "Historical Direct Citation Network")
   
-  plot(g)
+  
 
   
   
   if (isTRUE(verbose)) {
+    plot(g)
+    
     cat("\n Legend\n\n")
     
     label <- data.frame(Label = names(V(bsk.network)), stringsAsFactors = FALSE)
@@ -138,7 +139,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     print(Data[,-2])
   }
   
-  return(bsk.network)
+  results <- list(net=bsk.network, g=g)
+  return(results)
 }
 
 

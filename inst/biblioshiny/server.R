@@ -2984,7 +2984,8 @@ server <- function(input, output, session) {
   output$histPlot <- renderPlot({
     
     Hist()
-    }, height = 500, width = 900)
+    plot(values$histPlot$g)
+    }, height = 610, width = 1100, res=150)
   
   output$histTable <- DT::renderDT({
     LCS=values$histResults$LCS

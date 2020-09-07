@@ -1889,13 +1889,13 @@ navbarMenu("Intellectual Structure",
                                                label = "Label size",
                                                min = 0.0,
                                                max = 20,
-                                               value = 6),
+                                               value = 3),
                                    
                                    sliderInput(inputId = "histsize",
                                                label = "Node size",
-                                               min = 0.1,
+                                               min = 0,
                                                max = 20,
-                                               value = 10)
+                                               value = 4)
                                   ),
                       mainPanel(
                         tabsetPanel(type = "tabs",

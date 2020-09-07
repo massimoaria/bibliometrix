@@ -8,7 +8,7 @@ if (!(require(shinycssloaders))){install.packages("shinycssloaders")}
 if (!(require(shinythemes))){install.packages("shinythemes")} 
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 if (!require(colourpicker)){install.packages("colourpicker")}
-if (!require(treemap)){install.packages("treemap")}
+#if (!require(treemap)){install.packages("treemap")}
 if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
 if (!require(maps)){install.packages("maps"); require(maps, quietly=TRUE)}
 if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
@@ -1176,31 +1176,32 @@ navbarMenu("Documents",
                                                            "Abstracts" = "AB"),
                                                selected = "ID"),
                                    hr(),
-                                   sliderInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
-                                   selectInput("treemeasure", "Word occurrence measure",
-                                               choices = c("Frequency" = "freq",
-                                                           "Square root" = "sqrt",
-                                                           "Log" = "log",
-                                                           "Log10" = "log10"),
-                                               selected = "freq"),
-                                   selectInput("treeCol", "Text colors",
-                                               choices = c("Accent" = "Accent",
-                                                           "Dark" = "Dark2",
-                                                           "Paired"= "Paired",
-                                                           "Pastel1"="Pastel1",
-                                                           "Pastel2"="Pastel2",
-                                                           "Set1"="Set1",
-                                                           "Set2"="Set2",
-                                                           "Set3"="Set3"),
-                                               selected = "Pastel2"),
-                                   sliderInput("treeFont", label = "Font size", min=6,max=20,step=1,value=10)
+                                   sliderInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50)
+                                   # ,selectInput("treemeasure", "Word occurrence measure",
+                                   #             choices = c("Frequency" = "freq",
+                                   #                         "Square root" = "sqrt",
+                                   #                         "Log" = "log",
+                                   #                         "Log10" = "log10"),
+                                   #             selected = "freq"),
+                                   # selectInput("treeCol", "Text colors",
+                                   #             choices = c("Accent" = "Accent",
+                                   #                         "Dark" = "Dark2",
+                                   #                         "Paired"= "Paired",
+                                   #                         "Pastel1"="Pastel1",
+                                   #                         "Pastel2"="Pastel2",
+                                   #                         "Set1"="Set1",
+                                   #                         "Set2"="Set2",
+                                   #                         "Set3"="Set3"),
+                                   #             selected = "Pastel2"),
+                                   # sliderInput("treeFont", label = "Font size", min=6,max=20,step=1,value=10)
                       ),
                       
                       # Show TreeMap
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput("treemap"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = 700))
+                                             #shinycssloaders::withSpinner(plotOutput("treemap"))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("treeTable"))

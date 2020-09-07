@@ -2091,24 +2091,35 @@ server <- function(input, output, session) {
     })
   
   TreeMap <- eventReactive(input$applyTreeMap,{
-    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure=input$treemeasure)
+    #resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure=input$treemeasure)
+    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity")
     
     W=resW$W
-    values$WordsT=resW$Words
+    values$TreeMap <- plot_ly(
+      type='treemap',
+      labels=W[,1],
+      parents="Tree",
+      values= W[,2],
+      textinfo="label+value+percent entry",
+      domain=list(column=0))
     
-    treemap::treemap(W, #Your data frame object
-                     index=c("Terms"),  #A list of your categorical variables
-                     vSize = "Frequency",  #This is your quantitative variable
-                     type="index", #Type sets the organization and color scheme of your treemap
-                     palette = input$treeCol,  #Select your color palette from the RColorBrewer presets or make your own.
-                     title="Word TreeMap", #Customize your title
-                     fontsize.title = 14, #Change the font size of the title
-                     fontsize.labels = input$treeFont
-    )
+    values$WordsT=resW$Words
+    return(resW$Words)
+    # treemap::treemap(W, #Your data frame object
+    #                  index=c("Terms"),  #A list of your categorical variables
+    #                  vSize = "Frequency",  #This is your quantitative variable
+    #                  type="index", #Type sets the organization and color scheme of your treemap
+    #                  palette = input$treeCol,  #Select your color palette from the RColorBrewer presets or make your own.
+    #                  title="Word TreeMap", #Customize your title
+    #                  fontsize.title = 14, #Change the font size of the title
+    #                  fontsize.labels = input$treeFont
+    # )
+    
   })
   
-  output$treemap <- renderPlot({
-   TreeMap()
+  output$treemap <- renderPlotly({
+    TreeMap()
+    values$TreeMap
   })
   
   output$wordTable <- DT::renderDT({
@@ -2138,7 +2149,7 @@ server <- function(input, output, session) {
   })
   
   output$treeTable <- DT::renderDT({
-    TreeMap()
+    WordsT <- TreeMap()
     
     DT::datatable(values$WordsT, rownames = FALSE,
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -2158,9 +2169,10 @@ server <- function(input, output, session) {
                                                      header = TRUE),
                                                 list(extend = 'print')),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$Words))-1)))), 
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$WordsT))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$Words),  backgroundColor = 'white',textAlign = 'center')
+      formatStyle(names(values$WordsT),  backgroundColor = 'white',textAlign = 'center')
+    
   },height = 600, width = 900)
   
   WDynamics <- eventReactive(input$applyWD,{
@@ -3367,7 +3379,7 @@ server <- function(input, output, session) {
     names(v)=tolower(names(v))
     #v=tableTag(values$M,"ID")
     n=min(c(n,length(v)))
-    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]))
+    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]), stringsAsFactors = FALSE)
     W=Words
     switch(measure,
            identity={},

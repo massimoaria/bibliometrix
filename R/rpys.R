@@ -126,11 +126,11 @@ g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of Refere
         ,axis.title = element_text(size = 14, color = '#555555')
         ,axis.title.y = element_text(vjust = 1, angle = 90)
         ,axis.title.x = element_text(hjust = 0.95, angle = 0)
-        ,axis.text.x = element_text(size=10)
+        ,axis.text.x = element_text(size=8,angle = 90)
   )
 
 if (isTRUE(graph)){plot(g)}
-    
+    CR$Reference <- reduceRefs(CR$Reference)
     result=list(spectroscopy=g, rpysTable=RPYS, CR=CR)
     return(result)
 }
@@ -153,4 +153,13 @@ yearExtract <- function(string,db){
     y=substr(y,2,5)
   }
   return(y)
+}
+
+reduceRefs<- function(A){
+  
+  ind=unlist(regexec("*V[0-9]", A))
+  A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+  ind=unlist(regexec("*DOI ", A))
+  A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+  return(A)
 }

@@ -1,10 +1,11 @@
 bibliometrix v3.0.3 (Release date: )
 
 Changes:
-* histPlot: Historiograsph now allows to plot document titles
 * biblioshiny: Improvements in Historiograph visualization
 * biblioshiny: Rewritten treemap using plotly
-* biblioshiny: Removed treemap package dependence 
+* biblioshiny: Removed treemap package dependence
+* histPlot: Historiograsph now allows to plot document titles
+* rpys: added html link to Google Scholar
 
 
 bibliometrix v3.0.2 (Release date: 2020-06-17 )

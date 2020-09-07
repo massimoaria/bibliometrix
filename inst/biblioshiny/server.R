@@ -1951,7 +1951,7 @@ server <- function(input, output, session) {
   output$rpysTable <- DT::renderDT({
     RPYS()
     rpysData=values$res$rpysTable
-    
+  
     DT::datatable(rpysData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -1979,8 +1979,11 @@ server <- function(input, output, session) {
   output$crTable <- DT::renderDT({
     RPYS()
     crData=values$res$CR
+    crData$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',crData$Reference,'\" target=\"_blank\">','link','</a>')
+    
     crData=crData[order(-as.numeric(crData$Year),-crData$Freq),]
-    names(crData)=c("Year", "Reference", "Local Citations")
+    names(crData)=c("Year", "Reference", "Local Citations", "Google link")
+    crData <- crData[,c(1,4,2,3)] 
     DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = list('pageLength',

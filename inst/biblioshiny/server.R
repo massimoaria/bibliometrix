@@ -865,9 +865,9 @@ server <- function(input, output, session) {
     values$AnnualTotCitperYear=Table2
     Table2$group="A"
     
-    g=ggplot(Table2, aes(x = Table2$Year, y =Table2$MeanTCperYear,text=paste("Year: ",Table2$Year,"\nAverage Citations per Year: ",round(Table2$MeanTCperYear,1)))) +
-      geom_line(aes(x = Table2$Year, y = Table2$MeanTCperYear, group=Table2$group)) +
-      geom_area(aes(x = Table2$Year, y = Table2$MeanTCperYear, group=Table2$group),fill = '#002F80', alpha = .5) +
+    g=ggplot(Table2, aes(x = .data$Year, y =.data$MeanTCperYear,text=paste("Year: ",.data$Year,"\nAverage Citations per Year: ",round(.data$MeanTCperYear,1)))) +
+      geom_line(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group)) +
+      geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = '#002F80', alpha = .5) +
       labs(x = 'Year'
            , y = 'Citations'
            , title = "Average Article Citations per Year")+

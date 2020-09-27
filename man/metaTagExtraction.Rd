@@ -15,7 +15,7 @@ Field can be equal to one of these tags:
 \tabular{lll}{
 \code{"CR_AU"}\tab   \tab First Author of each cited reference\cr
 \code{"CR_SO"}\tab   \tab Source of each cited reference\cr
-\code{"AU_CO"}\tab   \tab Country of affiliation for each co-author\cr
+\code{"AU_CO"}\tab   \tab Country of affiliation for co-authors \cr
 \code{"AU1_CO"}\tab   \tab Country of affiliation for the first author\cr
 \code{"AU_UN"}\tab   \tab University of affiliation for each co-author and the corresponding author (AU1_UN)\cr
 \code{"SR"}\tab     \tab Short tag of the document (as used in reference lists)}}
@@ -45,7 +45,7 @@ data(scientometrics)
 scientometrics <- metaTagExtraction(scientometrics, Field = "CR_SO", sep = ";")
 unlist(strsplit(scientometrics$CR_SO[1], ";"))
 
-#Example 3: Affiliation country for co-author
+#Example 3: Affiliation country for co-authors
 
 data(scientometrics)
 scientometrics <- metaTagExtraction(scientometrics, Field = "AU_CO", sep = ";")

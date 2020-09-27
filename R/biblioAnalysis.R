@@ -36,9 +36,9 @@
 #'
 #'
 #' @examples
-#' data(scientometrics)
+#' data(management)
 #'
-#' results <- biblioAnalysis(scientometrics)
+#' results <- biblioAnalysis(management)
 #'
 #' summary(results, k = 10, pause = FALSE)
 #'
@@ -107,6 +107,7 @@ if ("TC" %in% Tags){
   PY=as.numeric(M$PY)
   CurrentYear=as.numeric(format(Sys.Date(),"%Y"))
   TCperYear=TC/(CurrentYear-PY+1)
+  if (!("DI" %in% names(M))) M$DI <- ""
   MostCitedPapers=data.frame(M$SR,M$DI,TC,TCperYear)
   MostCitedPapers=MostCitedPapers[order(TC,decreasing=TRUE),]
   names(MostCitedPapers)=c("Paper         ","DOI","TC","TCperYear")

@@ -4,7 +4,14 @@
 \alias{histPlot}
 \title{Plotting historical co-citation network}
 \usage{
-histPlot(histResults, n = 20, size = 5, labelsize = 5, verbose = TRUE)
+histPlot(
+  histResults,
+  n = 20,
+  size = 5,
+  labelsize = 5,
+  title_as_label = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{histResults}{is an object of \code{class} "list" containing the following components:
@@ -23,10 +30,12 @@ is a network matrix obtained by the function \code{\link{histNetwork}}.}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}}
 
-\item{verbose}{is logical. If TRUE, results are printed on screen.}
+\item{title_as_label}{is a logical. If TRUE document titles are plotted instead of short labels.}
+
+\item{verbose}{is logical. If TRUE, results and plots are printed on screen.}
 }
 \value{
-It is a network object of the class \code{igraph}.
+It is list containing: a network object of the class \code{igraph} and a plot object of the class \code{ggraph}.
 }
 \description{
 \code{histPlot} plots a historical co-citation network.

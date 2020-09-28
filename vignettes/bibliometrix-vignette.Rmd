@@ -14,7 +14,7 @@ vignette: >
 </div>
 </center>
 
-#### http://www.bibliometrix.org
+#### https://www.bibliometrix.org
 
 #### Latest version
 ```{r echo=FALSE}
@@ -152,12 +152,12 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 ## Bibliographic databases
 **bibliometrix** works with data extracted from the four main bibliographic databases: SCOPUS, Clarivate Analytics Web of Science, Cochrane Database of Systematic Reviews (CDSR) and RISmed PubMed/MedLine.
 
-*SCOPUS* (http://www.scopus.com), founded in 2004, offers a great deal of flexibility for the bibliometric user.  It permits to query for different fields, such as titles, abstracts, keywords, references and so on. SCOPUS allows for relatively easy downloading data-queries, although there are some limits on very large results sets with over 2,000 items.
+*SCOPUS* (https://www.scopus.com), founded in 2004, offers a great deal of flexibility for the bibliometric user.  It permits to query for different fields, such as titles, abstracts, keywords, references and so on. SCOPUS allows for relatively easy downloading data-queries, although there are some limits on very large results sets with over 2,000 items.
 
-*Clarivate Analytics Web of Science (WoS)* (http://www.webofknowledge.com), owned by Clarivate Analytics, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
+*Clarivate Analytics Web of Science (WoS)* (https://www.webofknowledge.com), owned by Clarivate Analytics, was founded by Eugene Garfield, one of the pioneers of bibliometrics.  
 This platform includes many different collections.
 
-*Cochrane Database of Systematic Reviews* (http://www.cochranelibrary.com/cochrane-database-of-systematic-reviews/index.html) is the leading resource for systematic reviews in health care. The CDSR includes Cochrane Reviews (the systematic reviews) and protocols for Cochrane Reviews as well as editorials. The CDSR also has occasional supplements. The CDSR is updated regularly as Cochrane Reviews are published "when ready" and form monthly issues; see publication schedule.
+*Cochrane Database of Systematic Reviews* (https://www.cochranelibrary.com/cochrane-database-of-systematic-reviews/index.html) is the leading resource for systematic reviews in health care. The CDSR includes Cochrane Reviews (the systematic reviews) and protocols for Cochrane Reviews as well as editorials. The CDSR also has occasional supplements. The CDSR is updated regularly as Cochrane Reviews are published "when ready" and form monthly issues; see publication schedule.
 
 *PubMed* comprises more than 28 million citations for biomedical literature from MEDLINE, life science journals, and online books. Citations may include links to full-text content from PubMed Central and publisher websites.
 
@@ -169,7 +169,7 @@ In this example, we show how to download data, querying a term in the manuscript
 We choose the generic term "bibliometrics".
 
 ### Querying from Clarivate Analytics WoS
-At the link http://www.webofknowledge.com, select Web of Science Core Collection database. 
+At the link https://www.webofknowledge.com, select Web of Science Core Collection database. 
 
 Write the keyword "bibliometrics" in the search field and select title from the drop-down menu (see figure 1).  
 
@@ -210,7 +210,7 @@ The WoS platform permits to export only 500 records at a time.
 The Clarivate Analytics Web of Science export tool creates an export file with a default name "savedrecs" with an extension ".txt" or ".bib" for plain text or BibTeX  format respectively. Export files can be separately stored.
 
 ### Querying from SCOPUS
-The access to SCOPUS is via http://www.scopus.com.
+The access to SCOPUS is via https://www.scopus.com.
 
 To find all articles whose title includes the term "bibliometrics", simply write this keyword in the field and select "Article Title" (see figure 4)
 
@@ -235,7 +235,7 @@ The SCOPUS export tool creates an export file with the default name "scopus.bib"
 
 Download and install the most recent version of R (cran.r-project.org)
 
-Download and install the most recent version of Rstudio (http://www.rstudio.com)
+Download and install the most recent version of Rstudio (https://www.rstudio.com)
 
 Open Rstudio, in the console window, digit:
 
@@ -788,7 +788,7 @@ summary(netstat, k=10)
 All bibliographic networks can be graphically visualized or
 modeled.
 
-Here, we show how to visualize networks using function *networkPlot* and *VOSviewer software* by Nees Jan van Eck and Ludo Waltman (http://www.vosviewer.com).
+Here, we show how to visualize networks using function *networkPlot* and *VOSviewer software* by Nees Jan van Eck and Ludo Waltman (https://www.vosviewer.com).
 
 Using the function *networkPlot*, you can plot a network created by *biblioNetwork* using R routines or using *VOSviewer*.
 
@@ -878,10 +878,10 @@ Aria, M. & Cuccurullo, C. (2017).  *bibliometrix*: An R-tool for comprehensive s
 Cuccurullo, C., Aria, M., & Sarto, F. (2016). Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains, *Scientometrics*, DOI: 10.1007/s11192-016-1948-8 (https://doi.org/10.1007/s11192-016-1948-8).
 
 
-Cuccurullo, C., Aria, M., & Sarto, F.  (2015). Twenty years of research on performance management in business and public administration domains. Presentation at the *Correspondence Analysis and Related Methods conference (CARME 2015)* in September 2015 (http://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf).
+Cuccurullo, C., Aria, M., & Sarto, F.  (2015). Twenty years of research on performance management in business and public administration domains. Presentation at the *Correspondence Analysis and Related Methods conference (CARME 2015)* in September 2015 (https://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf).
 
 
-Sarto, F., Cuccurullo, C., & Aria, M. (2014). Exploring healthcare governance literature: systematic review and paths for future research. *Mecosan* (http://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en).
+Sarto, F., Cuccurullo, C., & Aria, M. (2014). Exploring healthcare governance literature: systematic review and paths for future research. *Mecosan* (https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en).
 
 
 Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research on performance management in business and public administration domains. In *Academy of Management Proceedings* (Vol. 2013, No. 1, p. 14270). Academy of Management (https://doi.org/10.5465/AMBPP.2013.14270abstract).

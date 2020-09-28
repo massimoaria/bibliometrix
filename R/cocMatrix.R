@@ -22,7 +22,7 @@
 #'   Cited References}
 #'
 #'   for a complete list of filed tags see:
-#'   \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr
+#'   \href{https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr
 #'   
 #'
 #' @param type indicates the output format of co-occurrences: \tabular{lll}{

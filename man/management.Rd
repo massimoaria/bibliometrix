@@ -75,10 +75,10 @@ A data frame with 449 rows and 66 variables:
 }
 }
 \source{
-\url{http://www.webofknowledge.com}
+\url{https://www.webofknowledge.com}
 }
 \description{
 A collection of Articles about the use of bibliometric approaches in business and management disciplines\cr
 Period: 1985 - 2018\cr
-Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
+Database: \href{https://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 }

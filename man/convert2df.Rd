@@ -46,7 +46,7 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 \code{UT}\tab   \tab Unique Article Identifier\cr
 \code{DB}\tab   \tab Database\cr}
 
-for a complete list of field tags see: \href{http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
+for a complete list of field tags see: \href{https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
 It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 

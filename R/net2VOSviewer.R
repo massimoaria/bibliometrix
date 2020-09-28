@@ -1,9 +1,9 @@
 #' Open a bibliometrix network in VosViewer
 #'
-#' \code{net2VOSviewer} plots a network created with \code{\link{networkPlot}} using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
+#' \code{net2VOSviewer} plots a network created with \code{\link{networkPlot}} using \href{https://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 #'
 #' The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
-#' The network map can be plotted using internal R routines or using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
+#' The network map can be plotted using internal R routines or using \href{https://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 #' 
 #' 
 #' @param net is an object created by networkPlot function.
@@ -43,7 +43,7 @@ net2VOSviewer <- function(net, vos.path = NULL){
       paste(
         "VOSviewer.jar does not exist in the path",
         vos.path,
-        "\n\nPlese download it from http://www.vosviewer.com/download",
+        "\n\nPlese download it from https://www.vosviewer.com/download",
         "\n(Java version for other systems)\n"
       )
     )

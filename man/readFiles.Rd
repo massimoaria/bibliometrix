@@ -23,7 +23,7 @@ The function readFiled is deprecated. You can import and convert your export fil
 # filename1.txt, filename2.txt and filename3.txt are ISI or SCOPUS Export file 
 # in plain text or bibtex format.
 
-# D <- readFiles('http://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
+# D <- readFiles('https://www.bibliometrix.org/datasets/bibliometrics_articles.txt')
 
 }
 \seealso{

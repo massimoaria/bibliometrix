@@ -216,13 +216,13 @@ UT		     | Unique Article Identifier
 DB		     | Bibliographic Database
 
 
-For a complete list of field tags, see http://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf
+For a complete list of field tags, see https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf
 
 &nbsp; 
 
 ### How to import data from Web of Science
 
-*Clarivate Analytics Web of Science (WoS)* (http://www.webofknowledge.com) is one of the world’s most trusted publisher-independent global citation databases. It was founded by Eugene Garfield, one of the pioneers of bibliometrics. This platform includes many different collections and allows users to export data in several different file formats.
+*Clarivate Analytics Web of Science (WoS)* (https://www.webofknowledge.com) is one of the world’s most trusted publisher-independent global citation databases. It was founded by Eugene Garfield, one of the pioneers of bibliometrics. This platform includes many different collections and allows users to export data in several different file formats.
 
 *bibliometrix* supports three WoS export file formats: BibTeX, plaintext and EndNote Desktop. 
 

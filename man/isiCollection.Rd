@@ -25,11 +25,11 @@ A data frame with 329 rows and 16 variables:
 }
 }
 \source{
-\url{http://www.webofknowledge.com}
+\url{https://www.webofknowledge.com}
 }
 \description{
 Manuscripts including the term "bibliometrics" in the title.\cr
 Period: 1985 - 2017\cr
-Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
+Database: \href{https://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 Format: bibtex\cr
 }

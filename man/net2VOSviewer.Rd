@@ -15,11 +15,11 @@ net2VOSviewer(net, vos.path = NULL)
 It write a .net file that can be open in VOSviewer
 }
 \description{
-\code{net2VOSviewer} plots a network created with \code{\link{networkPlot}} using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
+\code{net2VOSviewer} plots a network created with \code{\link{networkPlot}} using \href{https://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 }
 \details{
 The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
-The network map can be plotted using internal R routines or using \href{http://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
+The network map can be plotted using internal R routines or using \href{https://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 }
 \examples{
 # EXAMPLE 

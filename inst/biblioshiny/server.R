@@ -249,7 +249,7 @@ server <- function(input, output, session) {
    }), stringsAsFactors = FALSE)
    MData$DOI <-
      paste0(
-       '<a href=\"http://doi.org/',
+       '<a href=\"https://doi.org/',
        MData$DI,
        '\" target=\"_blank\">',
        MData$DI,
@@ -622,7 +622,7 @@ server <- function(input, output, session) {
     }), stringsAsFactors = FALSE)
     MData$DOI <-
       paste0(
-        '<a href=\"http://doi.org/',
+        '<a href=\"https://doi.org/',
         MData$DI,
         '\" target=\"_blank\">',
         MData$DI,
@@ -1428,7 +1428,7 @@ server <- function(input, output, session) {
   output$TopAuthorsProdTablePapers <- DT::renderDT({
     AUoverTime()
     TAB <- values$AUProdOverTime$dfPapersAU
-    TAB$DOI=paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    TAB$DOI=paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     DT::datatable(TAB, rownames = FALSE, escape = FALSE,extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -1779,7 +1779,7 @@ server <- function(input, output, session) {
   output$MostCitDocsTable <- DT::renderDT({
     g <- MGCDocuments()
     TAB <- values$TABGlobDoc
-    TAB$DOI<- paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    TAB$DOI<- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -1840,7 +1840,7 @@ server <- function(input, output, session) {
   output$MostLocCitDocsTable <- DT::renderDT({
     
     TAB <- values$TABLocDoc
-    TAB$DOI <- paste0('<a href=\"http://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
+    TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     TAB$Ratio <- TAB[,4]/TAB[,5]*100
     TAB$Ratio[is.nan(TAB$Ratio)] <- 0
     #TAB$Ratio <- round(TAB$Ratio,2)
@@ -3008,7 +3008,7 @@ server <- function(input, output, session) {
     ind=which(LCS>=s)
     Data=values$histResults$histData
     Data=Data[ind,]
-    Data$DOI<- paste0('<a href=\"http://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
+    Data$DOI<- paste0('<a href=\"https://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
     DT::datatable(Data, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',
                                  buttons = list('pageLength',

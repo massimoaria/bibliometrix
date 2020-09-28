@@ -8,11 +8,11 @@ A large character with 12731 rows.\cr
 Data has been imported by a WoS Export file in plain text format using the function \code{\link{readLines}}.
 }
 \source{
-\url{http://www.webofknowledge.com}
+\url{https://www.webofknowledge.com}
 }
 \description{
 Manuscripts about the topics "co-citation analysis" and 
 "coupling analysis" published on Scientometrics Journal.\cr
 Period: 1985 - 2015\cr
-Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
+Database: \href{https://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 }

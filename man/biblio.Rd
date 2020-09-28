@@ -8,10 +8,10 @@ A large character with 9014 rows.\cr
 Data has been imported by an Clarivate Analytics WoS Export file in bibtex format using the function \code{\link{readLines}}.
 }
 \source{
-\url{http://www.webofknowledge.com}
+\url{https://www.webofknowledge.com}
 }
 \description{
 The set of manuscripts which the title containing the word "bibliometrics" and published in a journal indexed by Clarivate Analytics WoS database.\cr
 Period: 2006 - 2015\cr
-Database: \href{http://www.webofknowledge.com}{ISI Web of Science}\cr
+Database: \href{https://www.webofknowledge.com}{ISI Web of Science}\cr
 }

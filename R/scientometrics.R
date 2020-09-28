@@ -3,7 +3,7 @@
 #' Manuscripts about the topics "co-citation analysis" and 
 #' "coupling analysis" published on Scientometrics Journal.\cr
 #' Period: 1985 - 2015\cr
-#' Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
+#' Database: \href{https://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 #'
 #' @format A data frame with 147 rows and 17 variables:
 #' \describe{
@@ -25,6 +25,6 @@
 #' \item{DB}{Database}
 #' \item{SR}{Short Reference}
 #' }
-#' @source \url{http://www.webofknowledge.com}
+#' @source \url{https://www.webofknowledge.com}
 #' @name scientometrics
 NULL

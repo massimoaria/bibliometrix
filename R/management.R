@@ -2,7 +2,7 @@
 #'
 #' A collection of Articles about the use of bibliometric approaches in business and management disciplines\cr
 #' Period: 1985 - 2018\cr
-#' Database: \href{http://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
+#' Database: \href{https://www.webofknowledge.com}{Clarivate Analytics Web of Science}\cr
 #'
 #' @format A data frame with 449 rows and 66 variables:
 #' \describe{
@@ -73,6 +73,6 @@
 #' \item{SR_FULL}{Short Full-Reference}
 #' \item{SR}{Short Reference}
 #' }
-#' @source \url{http://www.webofknowledge.com}
+#' @source \url{https://www.webofknowledge.com}
 #' @name management
 NULL

@@ -385,7 +385,7 @@ navbarMenu("Dataset",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
@@ -404,7 +404,7 @@ navbarMenu("Dataset",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("AnnualTotCitperYearTable"))
@@ -472,7 +472,7 @@ navbarMenu("Dataset",
                                    ),
                       mainPanel(
                         #tabPanel("Plot",
-                                 shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "ThreeFielsPlot",height = "600px"))
+                                 shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "ThreeFielsPlot",height = "80vh")) #height = "600px"))
                         #            )
                       )
                     )
@@ -501,7 +501,7 @@ navbarMenu("Sources",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot",height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                               shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
@@ -527,7 +527,7 @@ navbarMenu("Sources",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot",height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelCitSourcesTable"))
@@ -547,7 +547,7 @@ navbarMenu("Sources",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
@@ -583,7 +583,7 @@ navbarMenu("Sources",
                         
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
@@ -661,7 +661,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
@@ -688,7 +688,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
@@ -740,7 +740,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
@@ -776,7 +776,7 @@ navbarMenu("Authors",
                         
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))
@@ -812,7 +812,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
@@ -841,7 +841,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
@@ -860,7 +860,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = "80vh"))  #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
@@ -893,7 +893,7 @@ navbarMenu("Authors",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
@@ -932,7 +932,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
@@ -965,7 +965,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot",height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
@@ -1002,7 +1002,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = "80vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
@@ -1041,7 +1041,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
-                                             withSpinner(plotlyOutput(outputId = "rpysPlot", height = 700))),
+                                             withSpinner(plotlyOutput(outputId = "rpysPlot", height = "80vh"))), #height = 700))),
                                     tabPanel("RPY Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                outputId = "rpysTable"))),
@@ -1083,7 +1083,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = 700))
+                                             withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "80vh"))  #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
@@ -1147,7 +1147,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             wordcloud2::wordcloud2Output("wordcloud", height = "600px")
+                                             wordcloud2::wordcloud2Output("wordcloud", height = "80vh") #height = "600px")
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
@@ -1200,7 +1200,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = "80vh")) #height = 700))
                                              #shinycssloaders::withSpinner(plotOutput("treemap"))
                                     ),
                                     tabPanel("Table",
@@ -1444,12 +1444,12 @@ navbarMenu("Conceptual Structure",
                     mainPanel(
                       tabsetPanel(type = "tabs",
                                   tabPanel("Map", 
-                                           shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "750px",width = "1100px"))),
+                                           shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "80vh"))), #height = "750px",width = "1100px"))),
                                   tabPanel("Table", 
                                            shinycssloaders::withSpinner(DT::DTOutput(
                                              outputId = "cocTable"))),
                                   tabPanel("Degree Plot", 
-                                           shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height=700)))
+                                           shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "80vh"))) #height=700)))
                       )
                       
                       )
@@ -1492,10 +1492,10 @@ navbarMenu("Conceptual Structure",
                       mainPanel("Thematic Map",
                                 tabsetPanel(type = "tabs",
                                             tabPanel("Map",
-                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = 700))
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "80vh")) #height = 700))
                                             ),
                                             tabPanel("Network",
-                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "750px",width = "1100px"))),
+                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "80vh"))), #height = "750px",width = "1100px"))),
                                             tabPanel("Table",
                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
                                             )
@@ -1549,7 +1549,7 @@ navbarMenu("Conceptual Structure",
                                 tabsetPanel(type = "tabs",
                                             tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
                                               tabPanel("Map",
-                                                       shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot",height = "600px"))
+                                                       shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot", height = "80vh"))  #height = "600px"))
                                                       ),
                                               tabPanel("Table",
                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
@@ -1557,10 +1557,10 @@ navbarMenu("Conceptual Structure",
                                             ),
                                             tabPanel("Time Slice 1", tabsetPanel(type="tabs",
                                                                                           tabPanel("Thematic Map",
-                                                                                                    shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = 700))
+                                                                                                    shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = "80vh")) #height = 700))
                                                                                             ),
                                                                                           tabPanel("Network",
-                                                                                                    shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "750px",width = "1100px"))
+                                                                                                    shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "80vh")) # height = "750px",width = "1100px"))
                                                                                             ),
                                                                                           tabPanel("Table",
                                                                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
@@ -1568,10 +1568,10 @@ navbarMenu("Conceptual Structure",
                                             ),
                                             tabPanel("Time Slice 2", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
-                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = 700))
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = "80vh"))  #height = 700))
                                                                                             ),
                                                                                             tabPanel("Network",
-                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "750px",width = "1100px"))
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
                                                                                             tabPanel("Table",
                                                                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
@@ -1579,10 +1579,10 @@ navbarMenu("Conceptual Structure",
                                             ),
                                             tabPanel("Time Slice 3", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
-                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = 700))
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = "80vh")) #height = 700))
                                                                                             ),
                                                                                             tabPanel("Network",
-                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "750px",width = "1100px"))
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
                                                                                             tabPanel("Table",
                                                                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
@@ -1590,10 +1590,10 @@ navbarMenu("Conceptual Structure",
                                             ),
                                             tabPanel("Time Slice 4", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
-                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = 700))
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = "80vh")) #height = 700))
                                                                                             ),
                                                                                             tabPanel("Network",
-                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "750px",width = "1100px"))
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
                                                                                             tabPanel("Table",
                                                                                                       shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
@@ -1601,10 +1601,10 @@ navbarMenu("Conceptual Structure",
                                             ),
                                             tabPanel("Time Slice 5", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
-                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = 700))
+                                                                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = "80vh")) #height = 700))
                                                                                             ),
                                                                                             tabPanel("Network",
-                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "750px",width = "1100px"))
+                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
                                                                                             tabPanel("Table",
                                                                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
@@ -1840,7 +1840,7 @@ navbarMenu("Intellectual Structure",
                         tabsetPanel(type = "tabs",
                                     
                                     tabPanel("Graph", 
-                                             shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "750px",width = "1100px"))),         
+                                             shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "80vh"))), #height = "750px", width = "1100px"))),         
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                 outputId = "cocitTable"))),
@@ -2042,13 +2042,13 @@ navbarMenu("Social Structure",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
-                                             shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "750px",width = "1100px"))), 
+                                             shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "80vh"))), #,width = "1100px"))), 
                                              #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
                                     tabPanel("Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                outputId = "colTable"))),
                                     tabPanel("Degree Plot", 
-                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height=700)))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "80vh"))) #height=700)))
                         )
                         
                         #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))

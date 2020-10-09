@@ -62,7 +62,7 @@ Please, take a look at the vignettes:
   df$DI <- DI
   
   # add sep ; to affiliations
-  df$C1 <- trim(gsub("\\[.*?\\]", "", df$C1)) # to test
+  df$C1 <- trim(gsub("\\[.*?\\]", "", df$C1)) # to remove author info in square brackets
   df$C1 <- gsub("\\.",".;",df$C1)
 
   df <- df[names(df)!="Paper"]

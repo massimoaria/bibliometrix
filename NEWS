@@ -1,3 +1,11 @@
+bibliometrix v3.0.4 (Release date: )
+
+Changes:
+* Biblioshiny: added the "Export graph as PNG" button to network plots
+* Biblioshiny: in  network plots, added the button "Edit" for editing nodes (add, change, delete)
+
+
+
 bibliometrix v3.0.3 (Release date: 2020-09-25)
 
 Changes:

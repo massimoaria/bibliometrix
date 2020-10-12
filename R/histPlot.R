@@ -106,6 +106,9 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   wp <- membership(cluster_infomap(bsk,modularity = FALSE))
   layout_m$x <- layout_m$years
   
+  layout_m$y <- (diff(range(layout_m$x))/diff(range(layout_m$y)))*layout_m$y
+
+  
   g <- ggraph(layout_m) +
     geom_edge_arc(width = 1, strength = 0.05, 
           check_overlap = T, edge_alpha = 0.5, color="grey",
@@ -119,7 +122,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),
           axis.title.y = element_blank(), axis.title.x = element_blank(),
           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(),
-          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold", angle = 90, size=6))+
+          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold", angle = 90, size=6)) +
     labs(title = "Historical Direct Citation Network")
   
   

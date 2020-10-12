@@ -1175,7 +1175,7 @@ server <- function(input, output, session) {
     #suppressWarnings(plot(g))
     
     
-  },height = 600, width = 900)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
   
   output$soGrowthtable <- DT::renderDT({
     
@@ -2252,7 +2252,7 @@ server <- function(input, output, session) {
     g <- WDynamics()
     plot(g)
     
-  },height = 600, width = 900)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
   
   output$kwGrowthtable <- DT::renderDT({
     g <- WDynamics()
@@ -2305,7 +2305,7 @@ server <- function(input, output, session) {
     TrendTopics()
     plot(values$trendTopics$graph)
     
-  },height = 700)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150)  #height = 700)
   
   
   output$trendTopicsTable <- DT::renderDT({
@@ -2420,7 +2420,7 @@ server <- function(input, output, session) {
     CSfactorial()
     plot(values$CS$graph_terms)
     
-  }, height = 650, width = 800)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 800)
   
   output$CSPlot2 <- renderPlot({
     CSfactorial()
@@ -2436,7 +2436,7 @@ server <- function(input, output, session) {
       emptyPlot("This plot is available only for CA or MCA analyses")
     }
     
-  }, height = 650, width = 800)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 800)
   
   output$CSPlot3 <- renderPlot({
     CSfactorial()
@@ -2451,7 +2451,7 @@ server <- function(input, output, session) {
     }
     
     
-  }, height = 650, width = 800)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150)  #height = 650, width = 800)
   
   output$CSPlot4 <- renderPlot({
     
@@ -2462,7 +2462,7 @@ server <- function(input, output, session) {
       emptyPlot("Selected field is not included in your data collection")
     }
     
-  }, height = 650, width = 1000)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 1000)
   
   output$CSTableW <- DT::renderDT({
     CSfactorial()
@@ -2999,8 +2999,11 @@ server <- function(input, output, session) {
   output$histPlot <- renderPlot({
     
     Hist()
-    plot(values$histPlot$g)
-  }, height = 610, width = 1100, res=150)
+   #g <- values$histPlot$g + 
+   #    coord_equal()
+   #  plot(g)
+  plot(values$histPlot$g)
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 610, width = 1100, res=150)
   
   output$histTable <- DT::renderDT({
     LCS=values$histResults$LCS
@@ -3128,7 +3131,7 @@ server <- function(input, output, session) {
     WMnetwork()  
     plot(values$WMmap$g)
     
-  },height = 750)#, width = 750
+  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 750)#, width = 750
   
   output$WMTable <- DT::renderDT({
     WMnetwork()  

@@ -25,6 +25,17 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
                   
 ### WELCOME PAGE ----
                   tabPanel("Welcome",
+                           
+                           # code for ggplot plot resize
+                           tags$head(tags$script('$(document).on("shiny:connected", function(e) {
+                            Shiny.onInputChange("innerWidth", window.innerWidth);
+                            });
+                            $(window).resize(function(e) {
+                            Shiny.onInputChange("innerWidth", window.innerWidth);
+                            });
+                            ')),
+                           # end of code
+                           
                            fluidRow(
                              column(9,
                                     wellPanel(
@@ -1855,10 +1866,12 @@ navbarMenu("Intellectual Structure",
                     
                     ), ## End of tabPanel "Co-citations"
            ### Historiograph ----
+           
            tabPanel(title="Historiograph",
                     sidebarLayout(
                       
-                      sidebarPanel(width=3,
+                      sidebarPanel(
+                                   width=3,
                                    h3(em(strong("Historiograph "))),
                                    br(),
                                    actionButton("applyHist", "Apply!"),

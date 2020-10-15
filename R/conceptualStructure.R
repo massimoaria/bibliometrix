@@ -201,8 +201,15 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
     scale_fill_manual(values = cbPalette[1:clust]) +
     labs(title= paste("Conceptual Structure Map - method: ",method,collapse="",sep="")) +
     geom_point() +
-    theme(text = element_text(size=labelsize),axis.title=element_text(size=labelsize,face="bold"),
-          plot.title=element_text(size=labelsize+1,face="bold"))
+    geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
+    geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
+    theme(panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+          text = element_text(size=labelsize),
+          axis.title=element_text(size=labelsize,face="bold"),
+          plot.title=element_text(size=labelsize+1,face="bold"),
+          panel.background = element_rect(fill = "white", colour = "white"),
+          panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+          panel.grid.minor = element_blank())
    if (method!="MDS"){
      b=b+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
        ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))
@@ -294,14 +301,15 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
                        fill=adjustcolor(A$color,alpha.f=0.6), color = "white", segment.alpha=0.5, segment.color="gray")+
       scale_x_continuous(limits = rangex, breaks=seq(round(rangex[1]), round(rangex[2]), 1))+
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
-      geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
-      geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
+      geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
+      geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
             axis.title=element_text(size=labelsize,face="bold") ,
-            panel.background = element_rect(fill = "lavenderblush",
-                                            colour = "lavenderblush"),
+            panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+            panel.background = element_rect(fill = "white",
+                                            colour = "white"),
             #size = 1, linetype = "solid"),
-            panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
+            panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray90",alpha.f = 0.7)),
             panel.grid.minor = element_blank())
     
     if (method!="MDS"){
@@ -349,10 +357,9 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
       geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       theme(plot.title=element_text(size=labelsize+1,face="bold"), 
             axis.title=element_text(size=labelsize,face="bold") ,
-            panel.background = element_rect(fill = "lavenderblush",
-                                          colour = "lavenderblush"),
-                                            #size = 1, linetype = "solid"),
-           panel.grid.major = element_line(size = 1, linetype = 'solid', colour = "white"),
+            panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+            panel.background = element_rect(fill = "white", colour = "white"),
+           panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray90",alpha.f = 0.7)),
            panel.grid.minor = element_blank())
       
     

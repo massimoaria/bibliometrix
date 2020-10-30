@@ -1,6 +1,7 @@
 bibliometrix v3.0.4 (Release date: )
 
 Changes:
+* ThematicMap: added quadrant label annotations in plot
 * Biblioshiny: added the "Export graph as PNG" button to network plots
 * Biblioshiny: in  network plots, added the button "Edit" for editing nodes (add, change, delete)
 * Biblioshiny: improvements in plot resolution and resizing

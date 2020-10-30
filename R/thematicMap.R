@@ -177,17 +177,26 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
   rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
-  xlimits=c(meancentr-rangex,meancentr+rangex)
-  ylimits=c(meandens-rangey,meandens+rangey)
+  xlimits=c(meancentr-rangex-0.5,meancentr+rangex+0.5)
+  ylimits=c(meandens-rangey-0.5,meandens+rangey+0.5)
   
- #quadrant_names=rep(" ",4) ## empty tooltips for quadrant names
 
-  g=ggplot(df, aes(x=df$rcentrality, y=df$rdensity, text=(df$words))) +
-    geom_point(group="NA",aes(size=log(as.numeric(df$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
+  annotations <- data.frame(
+    #xpos = c(-Inf,-Inf,Inf,Inf),
+    #ypos =  c(-Inf, Inf,-Inf,Inf),
+    xpos = sort(c(xlimits,xlimits)),
+    ypos = c(ylimits, ylimits),
+    words = c("Emerging or\nDeclining Themes","Niche Themes","Basic or \nTransversal Themes ","Motor Themes "),
+    hjustvar = c(0,0,1,1) ,
+    vjustvar = c(0,1.0,0,1))
+  
+
+  g=ggplot(df, aes(x=.data$rcentrality, y=.data$rdensity, text=c(.data$words))) +
+    geom_point(group="NA",aes(size=log(as.numeric(.data$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
   if (size>0){
     if (isTRUE(repel)){
-      g=g+geom_label_repel(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)}else{
-      g=g+geom_text(aes(group="NA",label=ifelse(df$freq>1,unlist(tolower(df$name_full)),'')),size=3*(1+size),angle=0)
+      g=g+geom_label_repel(aes(group="NA",label=ifelse(.data$freq>1,unlist(tolower(.data$name_full)),'')),size=3*(1+size),angle=0)}else{
+      g=g+geom_text(aes(group="NA",label=ifelse(.data$freq>1,unlist(tolower(.data$name_full)),'')),size=3*(1+size),angle=0)
     }
   }
   
@@ -198,11 +207,9 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
       labs(x = "Centrality", y = "Density")+
       xlim(xlimits)+
       ylim(ylimits)+
-      #geom_text(x=xlimits[1]+0.5, y=ylimits[2], label="Niche Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-      #geom_text(x=xlimits[2]-1, y=ylimits[2], label="Motor Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-      #geom_text(x=xlimits[2]-1, y=ylimits[1], label="Basic or\nTransversal Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-      #geom_text(x=xlimits[1]+1, y=ylimits[1], label="Emerging or\nDeclining Themes", color=adjustcolor("gray20", alpha.f=0.2),hjust = 0)+
-    theme(axis.text.x=element_blank(),
+      annotate("text",x=annotations$xpos,y= annotations$ypos,hjust=annotations$hjustvar,
+                                         vjust=annotations$,label=annotations$words, color=adjustcolor("gray20", alpha.f=0.5),size=3*(1+size))+
+      theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())

@@ -390,8 +390,27 @@ navbarMenu("Dataset",
                                    h3(em(strong("Annual Scientific Production "))),
                                    "  ",
                                    br(),
-                                   verbatimTextOutput("CAGR")
-                                   #uiOutput("textCAGR")
+                                   verbatimTextOutput("CAGR"),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'ASPdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.ASPdpi != 'null'",
+                                                    downloadButton("ASPplot.save", "Export plot as png"))
+                                   
                                    ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -410,7 +429,25 @@ navbarMenu("Dataset",
                                    "  ",
                                    "  ",
                                    h3(em(strong("Average Citations per Year "))),
-                                   "  "
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'ACpYdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.ACpYdpi != 'null'",
+                                                    downloadButton("ACpYplot.save", "Export plot as png"))
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -507,7 +544,26 @@ navbarMenu("Sources",
                                    "  ",
                                    numericInput("MostRelSourcesK", 
                                                 label=("Number of Sources"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MRSdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MRSdpi != 'null'",
+                                                    downloadButton("MRSplot.save", "Export plot as png"))
                                    ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -533,7 +589,26 @@ navbarMenu("Sources",
                                    "  ",
                                    numericInput("MostRelCitSourcesK", 
                                                 label=("Number of Sources"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MLCSdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MLCSdpi != 'null'",
+                                                    downloadButton("MLCSplot.save", "Export plot as png"))
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -553,7 +628,25 @@ navbarMenu("Sources",
                       sidebarPanel(width=3,
                                    h3(em(strong("Source clustering"))),
                                    h4(em(strong("through Bradford's Law "))),
-                                   br()            
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'BLdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.BLdpi != 'null'",
+                                                    downloadButton("BLplot.save", "Export plot as png"))           
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -588,7 +681,26 @@ navbarMenu("Sources",
                                    "  ",
                                    numericInput("Hksource", 
                                                 label=("Number of sources"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'SIdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.SIdpi != 'null'",
+                                                    downloadButton("SIplot.save", "Export plot as png"))           
                       ),
                       mainPanel(
                         
@@ -623,9 +735,26 @@ navbarMenu("Sources",
                                                            "No" = "No"),
                                                selected = "No"),
                                    hr(),
-                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5)
-                                   
-                                   #uiOutput("sliderKwYears")
+                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'SDdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.SDdpi != 'null'",
+                                                    downloadButton("SDplot.save", "Export plot as png"))       
                       ),
                       
                       # 
@@ -667,7 +796,26 @@ navbarMenu("Authors",
                                                choices = c("N. of Documents "="t", 
                                                            "Percentage"="p",
                                                            "Fractionalized Frequency"="f"),
-                                               selected = "t")
+                                               selected = "t"),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MRAdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MRAdpi != 'null'",
+                                                    downloadButton("MRAplot.save", "Export plot as png"))    
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -694,7 +842,26 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("MostCitAuthorsK", 
                                                 label=("Number of Authors"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MLCAdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MLCAdpi != 'null'",
+                                                    downloadButton("MLCAplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -721,7 +888,26 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("TopAuthorsProdK", 
                                                 label=("Number of Authors"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'APOTdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.APOTdpi != 'null'",
+                                                    downloadButton("APOTplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -746,7 +932,25 @@ navbarMenu("Authors",
                       sidebarPanel(width=3,
                                    h3(em(strong("Author Productivity"))),
                                    h4(em(strong("through Lotka's Law"))),
-                                   br()         
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'LLdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.LLdpi != 'null'",
+                                                    downloadButton("LLplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -781,7 +985,26 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("Hkauthor", 
                                                 label=("Number of authors"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'AIdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.AIdpi != 'null'",
+                                                    downloadButton("AIplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
                         
@@ -818,7 +1041,26 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("MostRelAffiliationsK", 
                                                 label=("Number of Affiliations"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'AFFdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.AFFdpi != 'null'",
+                                                    downloadButton("AFFplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -847,7 +1089,26 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("MostRelCountriesK", 
                                                 label=("Number of Countries"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MRCOdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MRCOdpi != 'null'",
+                                                    downloadButton("MRCOplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -866,7 +1127,25 @@ navbarMenu("Authors",
                     sidebarLayout(
                       sidebarPanel(width=3,
                                    h3(em(strong("Country Scientific Production"))),
-                                   br()
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'CSPdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.CSPdpi != 'null'",
+                                                    downloadButton("CSPplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -899,7 +1178,26 @@ navbarMenu("Authors",
                                    "  ",
                                    numericInput("MostCitCountriesK", 
                                                 label=("Number of Countries"), 
-                                                value = 20)
+                                                value = 20),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MCCdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MCCdpi != 'null'",
+                                                    downloadButton("MCCplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -938,7 +1236,25 @@ navbarMenu("Documents",
                                                choices = c("Total Citations"="TC", 
                                                            "Total Citations per Year"="TCY"),
                                                selected = "TC"),
-                                   "  "
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MGCDdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MGCDdpi != 'null'",
+                                                    downloadButton("MGCDplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -971,7 +1287,25 @@ navbarMenu("Documents",
                                                            ".  " = ".  ",
                                                            "," = ","),
                                                selected = ";"),
-                                   "  "
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MLCDdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MLCDdpi != 'null'",
+                                                    downloadButton("MLCDplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -1008,7 +1342,26 @@ navbarMenu("Documents",
                                                choices = c(";" = ";", 
                                                            ".  " = ".  ",
                                                            "," = ","),
-                                               selected = ";")
+                                               selected = ";"),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MLCRdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MLCRdpi != 'null'",
+                                                    downloadButton("MLCRplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -1046,7 +1399,26 @@ navbarMenu("Documents",
                                                choices = c(";" = ";", 
                                                            ".  " = ".  ",
                                                            "," = ","),
-                                               selected = ";")
+                                               selected = ";"),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'RSdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.RSdpi != 'null'",
+                                                    downloadButton("RSplot.save", "Export plot as png"))  
                                    
                       ),
                       mainPanel(
@@ -1086,7 +1458,26 @@ navbarMenu("Documents",
                                                            "Abstracts" = "AB"),
                                                selected = "ID"),
                                    hr(),
-                                   sliderInput("MostRelWordsN", label = "Number of words", min = 2, max = 50, step = 1, value = 10)
+                                   sliderInput("MostRelWordsN", label = "Number of words", min = 2, max = 50, step = 1, value = 10),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'MRWdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.MRWdpi != 'null'",
+                                                    downloadButton("MRWplot.save", "Export plot as png"))  
                                    
                       ),
                       
@@ -1188,23 +1579,7 @@ navbarMenu("Documents",
                                                selected = "ID"),
                                    hr(),
                                    sliderInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50)
-                                   # ,selectInput("treemeasure", "Word occurrence measure",
-                                   #             choices = c("Frequency" = "freq",
-                                   #                         "Square root" = "sqrt",
-                                   #                         "Log" = "log",
-                                   #                         "Log10" = "log10"),
-                                   #             selected = "freq"),
-                                   # selectInput("treeCol", "Text colors",
-                                   #             choices = c("Accent" = "Accent",
-                                   #                         "Dark" = "Dark2",
-                                   #                         "Paired"= "Paired",
-                                   #                         "Pastel1"="Pastel1",
-                                   #                         "Pastel2"="Pastel2",
-                                   #                         "Set1"="Set1",
-                                   #                         "Set2"="Set2",
-                                   #                         "Set3"="Set3"),
-                                   #             selected = "Pastel2"),
-                                   # sliderInput("treeFont", label = "Font size", min=6,max=20,step=1,value=10)
+
                       ),
                       
                       # Show TreeMap
@@ -1249,9 +1624,27 @@ navbarMenu("Documents",
                                                            "No" = "No"),
                                                selected = "No"),
                                    hr(),
-                                   sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))
-                                   
-                                   #uiOutput("sliderKwYears")
+                                   sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10)),                                   br(),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'WDdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.WDdpi != 'null'",
+                                                    downloadButton("WDplot.save", "Export plot as png"))  
+    
                       ),
                       
                       # 
@@ -1297,7 +1690,26 @@ navbarMenu("Documents",
                                    #uiOutput("trendMinFreq"),
                                    sliderInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
                                    sliderInput("trendNItems", label = "N. of Words per Year", min = 1, max = 20, step = 1, value = 5),
-                                   sliderInput("trendSize", label = "Word label size", min = 0, max = 20, step = 1, value = 5)
+                                   sliderInput("trendSize", label = "Word label size", min = 0, max = 20, step = 1, value = 5),
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'TTdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.TTdpi != 'null'",
+                                                    downloadButton("TTplot.save", "Export plot as png"))  
                                    
                                    
                       ),
@@ -1498,7 +1910,27 @@ navbarMenu("Conceptual Structure",
                                    sliderInput("TMn", label="Number of Words",value=250,min=50,max=500,step=10),
                                    sliderInput("TMfreq", label="Min Cluster Frequency (per thousand docs)",value=5,min=1,max=100,step=1),
                                    sliderInput("TMn.labels", label="Number of Labels (for each cluster)",value=1,min=1,max=5,step=1),
-                                   sliderInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
+                                   sliderInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05),
+                                   
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'TMdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.TMdpi != 'null'",
+                                   downloadButton("TMplot.save", "Export plot as png"))
                       ),
                       mainPanel("Thematic Map",
                                 tabsetPanel(type = "tabs",
@@ -1689,7 +2121,33 @@ navbarMenu("Conceptual Structure",
                           value = 10),
                         numericInput("CSdoc", 
                                      label=("Num. of documents"), 
-                                     value = 5)
+                                     value = 5),
+
+                        br(),
+                        br(),
+                        selectInput(
+                          'FAdpi',
+                          h4(em(strong(
+                            "Export plots as png"
+                          ))),
+                          choices=c(
+                            "Please select a dpi value" = "null",
+                            "75 dpi" = "75",
+                            "150 dpi" = "150",
+                            "300 dpi" = "300",
+                            "600 dpi" = "600"
+                          ),
+                          selected = "null"
+                        ),
+                        conditionalPanel(condition = "input.FAdpi != 'null'",
+                                         downloadButton("FA1plot.save", "Term Factorial Map "),
+                                         h4(" "),
+                                         downloadButton("FA2plot.save", "Topic Dendrogram "),
+                                         h4(" "),
+                                         downloadButton("FA3plot.save", "Most Contributing Map "),
+                                         h4(" "),
+                                         downloadButton("FA4plot.save", "Most Cited Map ")
+                                         )  
                         
                       ),
                       
@@ -1877,8 +2335,7 @@ navbarMenu("Intellectual Structure",
                                    actionButton("applyHist", "Apply!"),
                                    #selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
                                    #conditionalPanel(condition = "input.save_colnet == 'pajek'",
-                                   
-                                   
+
                                    "  ",
                                    "  ",
                                    h4(em(strong("Historiograph Parameters: "))),
@@ -1909,7 +2366,26 @@ navbarMenu("Intellectual Structure",
                                                label = "Node size",
                                                min = 0,
                                                max = 20,
-                                               value = 4)
+                                               value = 4),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'HGdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.HGdpi != 'null'",
+                                                    downloadButton("HGplot.save", "Export plot as png"))  
+                                   
                                   ),
                       mainPanel(
                         tabsetPanel(type = "tabs",
@@ -2094,7 +2570,25 @@ navbarMenu("Social Structure",
                                                label = "Edge size",
                                                min = 0.1,
                                                max = 20,
-                                               value = 5)
+                                               value = 5),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'CCdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.CCdpi != 'null'",
+                                                    downloadButton("CCplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
                         tabsetPanel(type = "tabs",

@@ -808,8 +808,20 @@ server <- function(input, output, session) {
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
       )
+    values$ASPplot <- g
     plot.ly(g)
   })#, height = 500, width =900)
+  
+  output$ASPplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("AnnualScientificProduction-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$ASPplot, dpi = as.numeric(input$ASPdpi))
+    },
+    contentType = "png"
+  )
   
   output$AnnualProdTable <- DT::renderDT({
     TAB <- values$TAB
@@ -881,11 +893,20 @@ server <- function(input, output, session) {
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
       )
-    
+    values$ACpYplot <- g
     plot.ly(g)
-    
-    
   })
+  
+  output$ACpYplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$ACpYplot, dpi = as.numeric(input$ACpYdpi))
+    },
+    contentType = "png"
+  )
   
   output$AnnualTotCitperYearTable <- DT::renderDT({
     
@@ -950,7 +971,21 @@ server <- function(input, output, session) {
       guides(fill=FALSE)+
       coord_flip()
     
+    values$MRSplot <- g
+    return(g)
   })
+  
+  output$MRSplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostRelevantSources-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MRSplot, dpi = as.numeric(input$MRSdpi))
+    },
+    contentType = "png"
+  )
+  
   
   output$MostRelSourcesPlot <- renderPlotly({
     g <- MRSources()
@@ -1012,7 +1047,20 @@ server <- function(input, output, session) {
       theme_minimal()+
       guides(fill=FALSE)+
       coord_flip()
+    values$MLCSplot <- g
+    return(g)
   })
+  
+  output$MLCSplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostLocalCitedSources-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MLCSplot, dpi = as.numeric(input$MLCSdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostRelCitSourcesPlot <- renderPlotly({
     
@@ -1056,6 +1104,17 @@ server <- function(input, output, session) {
     
   })#,height = 600)
   
+  output$BLplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("BradfordLaws-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$bradford$graph, dpi = as.numeric(input$BLdpi))
+    },
+    contentType = "png"
+  )
+  
   output$bradfordTable <- DT::renderDT({
     
     DT::datatable(values$bradford$table, rownames = FALSE,
@@ -1086,9 +1145,20 @@ server <- function(input, output, session) {
                  value = 0, {
                    res <- Hindex_plot(values,type="source")
                  })
-    
+    values$SIplot <- res$g
     plot.ly(res$g)
   })
+  
+  output$SIplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("SourceImpact-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$SIplot, dpi = as.numeric(input$SIdpi))
+    },
+    contentType = "png"
+  )
   
   output$SourceHindexPlot <- renderPlotly({
     Hsource()
@@ -1165,8 +1235,21 @@ server <- function(input, output, session) {
     DF2=subset(DFsmooth, x == maximum)
     g=g+
       ggrepel::geom_text_repel(data = DF2, aes(label = DF2$group, colour = DF2$group, x =DF2$x, y = DF2$y), hjust = -.1)
+    values$SDplot <- g
+    return(g)
     #suppressWarnings(plot(g))
   })
+  
+  output$SDplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("SourceDynamics-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$SDplot, dpi = as.numeric(input$SDdpi))
+    },
+    contentType = "png"
+  )
   
   output$soGrowthPlot <- renderPlot({
     
@@ -1247,7 +1330,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MRAplot <- g
+    return(g)
   })
+  
+  output$MRAplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostRelevantAuthors-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MRAplot, dpi = as.numeric(input$MRAdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostRelAuthorsPlot <- renderPlotly({
     
@@ -1308,7 +1404,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MLCAplot <- g
+    return(g)
   })
+  
+  output$MLCAplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MLCAplot, dpi = as.numeric(input$MLCAdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostCitAuthorsPlot <- renderPlotly({
     
@@ -1348,8 +1457,20 @@ server <- function(input, output, session) {
                  value = 0, {
                    res <- Hindex_plot(values,type="author")
                  })
+    values$AIplot <- res$g
     return(res)
   })
+  
+  output$AIplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("AuthorImpact-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$AIplot, dpi = as.numeric(input$AIdpi))
+    },
+    contentType = "png"
+  )
   
   output$AuthorHindexPlot <- renderPlotly({
     
@@ -1388,6 +1509,17 @@ server <- function(input, output, session) {
   AUoverTime <- eventReactive(input$applyAUoverTime,{
     values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
   })
+  
+  output$APOTplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$AUProdOverTime$graph, dpi = as.numeric(input$APOTdpi))
+    },
+    contentType = "png"
+  )
   
   output$TopAuthorsProdPlot <- renderPlotly({
     AUoverTime()
@@ -1479,9 +1611,21 @@ server <- function(input, output, session) {
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0)
       )
+    values$LLplot <- g
     plot.ly(g)
     
   })#,height = 600)
+  
+  output$LLplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("LotkaLaw-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$LLplot, dpi = as.numeric(input$LLdpi))
+    },
+    contentType = "png"
+  )
   
   output$lotkaTable <- DT::renderDT({
     names(values$lotka$AuthorProd)=c("Documents written","N. of Authors","Proportion of Authors")
@@ -1541,7 +1685,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$AFFplot <- g
+    return(g)
   })
+  
+  output$AFFplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$AFFplot, dpi = as.numeric(input$AFFdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostRelAffiliationsPlot <- renderPlotly({
     
@@ -1605,7 +1762,20 @@ server <- function(input, output, session) {
                          theme(plot.caption = element_text(size = 9, hjust = 0.5,
                                                            color = "blue", face = "italic"))+
                          coord_flip())
+    values$MRCOplot <- g
+    return(g)
   }) 
+  
+  output$MRCOplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostRelevantCountries-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MRCOplot, dpi = as.numeric(input$MRCOdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostRelCountriesPlot <- renderPlotly({
     
@@ -1646,6 +1816,17 @@ server <- function(input, output, session) {
     values$mapworld<-mapworld(values$M)
     plot.ly(values$mapworld$g)
   })#, height = 500, width =900)
+  
+  output$CSPplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("CountryScientificProduction-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$mapworld$g, dpi = as.numeric(input$CSPdpi))
+    },
+    contentType = "png"
+  )
   
   output$countryProdTable <- DT::renderDT({
     
@@ -1703,7 +1884,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MCCplot <- g
+    return(g)
   })
+  
+  output$MCCplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostCitedCountries-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MCCplot, dpi = as.numeric(input$MCCdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostCitCountriesPlot <- renderPlotly({
     g <- MCCountries()
@@ -1768,7 +1962,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MGCDplot <- g
+    return(g)
   })
+  
+  output$MGCDplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MGCDplot, dpi = as.numeric(input$MGCDdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostCitDocsPlot <- renderPlotly({
     
@@ -1829,7 +2036,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MLCDplot <- g
+    return(g)
   })
+  
+  output$MLCDplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MLCDplot, dpi = as.numeric(input$MLCDdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostLocCitDocsPlot <- renderPlotly({
     
@@ -1894,7 +2114,20 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MLCRplot <- g
+    return(g)
   })
+  
+  output$MLCRplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MLCRplot, dpi = as.numeric(input$MLCRdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostCitRefsPlot <- renderPlotly({
     
@@ -1940,6 +2173,17 @@ server <- function(input, output, session) {
   RPYS <- eventReactive(input$applyRPYS,{
     values$res <- rpys(values$M, sep=input$rpysSep, graph=FALSE)
   })
+  
+  output$RSplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$res$spectroscopy, dpi = as.numeric(input$RSdpi))
+    },
+    contentType = "png"
+  )
   
   output$rpysPlot <- renderPlotly({
     
@@ -2037,9 +2281,21 @@ server <- function(input, output, session) {
       theme_minimal() +
       guides(fill=FALSE)+
       coord_flip()
+    values$MRWplot <- g
     return(g)
     
   })
+  
+  output$MRWplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostRelevantWords-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$MRWplot, dpi = as.numeric(input$MRWdpi))
+    },
+    contentType = "png"
+  )
   
   output$MostRelWordsPlot <- renderPlotly({
     g <- MFWords()
@@ -2108,15 +2364,6 @@ server <- function(input, output, session) {
     
     values$WordsT=resW$Words
     return(resW$Words)
-    # treemap::treemap(W, #Your data frame object
-    #                  index=c("Terms"),  #A list of your categorical variables
-    #                  vSize = "Frequency",  #This is your quantitative variable
-    #                  type="index", #Type sets the organization and color scheme of your treemap
-    #                  palette = input$treeCol,  #Select your color palette from the RColorBrewer presets or make your own.
-    #                  title="Word TreeMap", #Customize your title
-    #                  fontsize.title = 14, #Change the font size of the title
-    #                  fontsize.labels = input$treeFont
-    # )
     
   })
   
@@ -2244,8 +2491,20 @@ server <- function(input, output, session) {
     DF2=subset(DFsmooth, x == maximum)
     g=g+
       ggrepel::geom_text_repel(data = DF2, aes(label = .data$group, colour = .data$group, x =.data$x, y = .data$y), hjust = -.1)
+    values$WDplot <- g
     return(g)
   })
+  
+  output$WDplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("WordDynamics-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$WDplot, dpi = as.numeric(input$WDdpi))
+    },
+    contentType = "png"
+  )
   
   output$kwGrowthPlot <- renderPlot({
     
@@ -2300,6 +2559,18 @@ server <- function(input, output, session) {
     
     
   })
+  
+  output$TTplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("TrendTopics-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$trendTopics$graph, dpi = as.numeric(input$TTdpi))
+    },
+    contentType = "png"
+  )
+  
   output$trendTopicsPlot <- renderPlot({
     
     TrendTopics()
@@ -2415,6 +2686,49 @@ server <- function(input, output, session) {
   CSfactorial <- eventReactive(input$applyCA,{
     values <- CAmap(input,values)
   })
+  
+  output$FA1plot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("FactorialMap-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$CS$graph_terms, dpi = as.numeric(input$FAdpi))
+    },
+    contentType = "png"
+  )
+  output$FA2plot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("Dendrogram-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$CS$graph_dendogram, dpi = as.numeric(input$FAdpi))
+    },
+    contentType = "png"
+  )
+  
+  output$FA3plot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = as.numeric(input$FAdpi))
+    },
+    contentType = "png"
+  )
+  
+  output$FA4plot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = as.numeric(input$FAdpi))
+    },
+    contentType = "png"
+  )
   
   output$CSPlot1 <- renderPlot({
     CSfactorial()
@@ -2567,6 +2881,17 @@ server <- function(input, output, session) {
     values$networkTM$VIS
     
   })
+  
+  output$TMplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("ThematicMap-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+               ggsave(filename = file, plot = values$TM$map, dpi = as.numeric(input$TMdpi))
+             },
+    contentType = "png"
+  )
   
   output$TMTable <- DT::renderDT({
     TMAP()
@@ -2996,6 +3321,17 @@ server <- function(input, output, session) {
                  })
   })
   
+  output$HGplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("Historiograph-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$histPlot$g, dpi = as.numeric(input$HGdpi))
+    },
+    contentType = "png"
+  )
+  
   output$histPlot <- renderPlot({
     
     Hist()
@@ -3126,6 +3462,18 @@ server <- function(input, output, session) {
   WMnetwork<- eventReactive(input$applyWM,{
     values$WMmap=countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min)
   })
+  
+  output$CCplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("CountryCollaborationMap-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$WMmap$g, dpi = as.numeric(input$CCdpi))
+    },
+    contentType = "png"
+  )
+  
   output$WMPlot<- renderPlot({
     
     WMnetwork()  

@@ -2015,10 +2015,19 @@ server <- function(input, output, session) {
     withProgress(message = 'Calculation in progress',
                  value = 0, {
                    TAB <-localCitations(values$M, fast.search=FALSE, sep = input$LocCitSep)$Paper
+                   TAB <- TAB %>%
+                     group_by(.data$Year) %>%
+                     mutate(Ratio = .data$LCS/.data$GCS*100,
+                            NLCS = .data$LCS/mean(.data$LCS),
+                            NGCS = .data$GCS/mean(.data$GCS)) %>%
+                     ungroup() %>%
+                     as.data.frame()
+  
                  })
     
-    xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],stringsAsFactors = FALSE)
-    
+    xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], 
+                  "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],"LC/GC Ratio"=TAB[6], 
+                  "Normalized Local Citations"=TAB[,7],"Normalized Global Citations"=TAB[,8], stringsAsFactors = FALSE)
     values$TABLocDoc=xx
     
     if (input$MostLocCitDocsK>dim(xx)[1]){
@@ -2061,10 +2070,8 @@ server <- function(input, output, session) {
     
     TAB <- values$TABLocDoc
     TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    TAB$Ratio <- TAB[,4]/TAB[,5]*100
-    TAB$Ratio[is.nan(TAB$Ratio)] <- 0
-    #TAB$Ratio <- round(TAB$Ratio,2)
-    names(TAB)[ncol(TAB)] <- "Local Citations (%)"
+
+    names(TAB)[4:8] <- c("Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
     DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 20, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -2086,7 +2093,7 @@ server <- function(input, output, session) {
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
-      formatRound(names(TAB)[6], digits=2)
+      formatRound(names(TAB)[c(6:8)], digits=2)
     
   })
   
@@ -3683,7 +3690,7 @@ server <- function(input, output, session) {
            },
            "tab4"={
              TAB=values$S$MostCitedPapers
-             names(TAB)=c("Paper", "DOI","Total Citations","TC per Year")
+             names(TAB)=c("Paper", "DOI","Total Citations","TC per Year","Normalized TC")
              #print(S$MostCitedPapers)
            },
            "tab5"={

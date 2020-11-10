@@ -26,7 +26,7 @@ isi2df<-function(D){
   df$PY <- as.numeric(df$PY)
   
   ### replace "---" with ";"
-  tagsComma <- c("AU","AF","DE","ID","CR")
+  tagsComma <- c("AU","AF","CR")
   
   nolab <- setdiff(tagsComma,names(df))
   if (length(nolab)>0){

@@ -108,9 +108,15 @@ if ("TC" %in% Tags){
   CurrentYear=as.numeric(format(Sys.Date(),"%Y"))
   TCperYear=TC/(CurrentYear-PY+1)
   if (!("DI" %in% names(M))) M$DI <- ""
-  MostCitedPapers=data.frame(M$SR,M$DI,TC,TCperYear)
-  MostCitedPapers=MostCitedPapers[order(TC,decreasing=TRUE),]
-  names(MostCitedPapers)=c("Paper         ","DOI","TC","TCperYear")
+  MostCitedPapers <- data.frame(M$SR,M$DI,TC,TCperYear,PY) %>%
+    group_by(.data$PY) %>%
+    mutate(NTC = .data$TC/mean(.data$TC)) %>%
+    ungroup() %>% 
+    select(-.data$PY) %>%
+    arrange(desc(.data$TC)) %>%
+    as.data.frame()
+
+  names(MostCitedPapers)=c("Paper         ","DOI","TC","TCperYear","NTC")
 }
 
 # References

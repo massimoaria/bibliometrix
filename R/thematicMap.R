@@ -182,11 +182,9 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
 
   annotations <- data.frame(
-    #xpos = c(-Inf,-Inf,Inf,Inf),
-    #ypos =  c(-Inf, Inf,-Inf,Inf),
     xpos = sort(c(xlimits,xlimits)),
     ypos = c(ylimits, ylimits),
-    words = c("Emerging or\nDeclining Themes","Niche Themes","Basic or \nTransversal Themes ","Motor Themes "),
+    words = c("Emerging or\nDeclining Themes","Niche Themes","Basic Themes ","Motor Themes "),
     hjustvar = c(0,0,1,1) ,
     vjustvar = c(0,1.0,0,1))
   
@@ -204,7 +202,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
     geom_vline(xintercept = meancentr,linetype=2, color=adjustcolor("black",alpha.f=0.7)) + 
       theme(legend.position="none") +
     scale_radius(range=c(5*(1+size), 30*(1+size)))+
-      labs(x = "Centrality", y = "Density")+
+      labs(x = "Relevance degree\n(Centrality)", y = "Development degree\n(Density)")+
       xlim(xlimits)+
       ylim(ylimits)+
       annotate("text",x=annotations$xpos,y= annotations$ypos,hjust=annotations$hjustvar,

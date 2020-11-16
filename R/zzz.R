@@ -14,6 +14,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
+#' @importFrom dplyr tibble
 # @importFrom dplyr filter
 #' @importFrom dplyr arrange
 #' @importFrom dplyr desc

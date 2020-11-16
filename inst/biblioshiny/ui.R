@@ -1728,6 +1728,90 @@ navbarMenu("Documents",
                     ))
 ),
 
+### COUPLING ----
+navbarMenu("Coupling ",
+           
+           #### Coupling ----
+           "  ",
+           "  ",
+           tabPanel("Clustering by Coupling",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Coupling Map"))),
+                                   br(),
+                                   
+                                   actionButton("applyCM", "Apply!"),
+                                   "  ",
+                                   "  ",
+                                   h4(em(strong("CM Parameters: "))),
+                                   "  ",
+                                   selectInput("CManalysis", 
+                                               label = "Unit of Analysis",
+                                               choices = c("Documents" = "documents", 
+                                                           "Authors" = "authors",
+                                                           "Sources" = "sources"),
+                                               selected = "documents"),
+                                   selectInput("CMfield", 
+                                               label = "Coupling measured by",
+                                               choices = c("References" ="CR",
+                                                           "Keywords Plus" = "ID", 
+                                                           "Author's Keywords" = "DE",
+                                                           "Titles" = "TI",
+                                                           "Abstracts" = "AB"),
+                                               selected = "CR"),
+                                   conditionalPanel(
+                                     condition = "input.CMfield == 'TI' | input.CMfield == 'AB'",
+                                     selectInput("CMstemming", label="Word Stemming",
+                                                 choices = c("Yes" = TRUE,
+                                                             "No" = FALSE),
+                                                 selected = FALSE)),
+                                   sliderInput("CMn", label="Number of Units",value=250,min=50,max=5000,step=10),
+                                   sliderInput("CMfreq", label="Min Cluster Frequency (per thousand units)",value=5,min=1,max=100,step=1),
+                                   sliderInput("CMn.labels", label="Number of Labels (for each cluster)",value=1,min=1,max=5,step=1),
+                                   sliderInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05),
+                                   
+                                   br(),
+                                   br(),
+                                   br(),
+                                   selectInput(
+                                     'CMdpi',
+                                     h4(em(strong(
+                                       "Export plot"
+                                     ))),
+                                     choices=c(
+                                       "Please select a dpi value" = "null",
+                                       "75 dpi" = "75",
+                                       "150 dpi" = "150",
+                                       "300 dpi" = "300",
+                                       "600 dpi" = "600"
+                                     ),
+                                     selected = "null"
+                                   ),
+                                   conditionalPanel(condition = "input.CMdpi != 'null'",
+                                                    downloadButton("CMplot.save", "Export plot as png"))
+                      ),
+                      mainPanel("Clustering by Coupling",
+                                tabsetPanel(type = "tabs",
+                                            tabPanel("Map",
+                                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CMPlot", height = "80vh")) #height = 700))
+                                            ),
+                                            tabPanel("Network",
+                                                     shinycssloaders::withSpinner(visNetworkOutput("CMNetPlot", height = "80vh"))), #height = "750px",width = "1100px"))),
+                                            tabPanel("Data",
+                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTable"))
+                                            ),
+                                            tabPanel("Clusters",
+                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTableCluster"))
+                                            )
+                                )
+                                
+                      )
+                      
+                    )
+           ) ## End of tabPanel ("Thematic Map")
+),
+          
+
 
 ### CONCEPTUAL STRUCTURE ----
 navbarMenu("Conceptual Structure",

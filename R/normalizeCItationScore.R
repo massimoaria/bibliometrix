@@ -43,9 +43,10 @@ normalizeCitationScore <- function(M,field="documents"){
   M <- M %>% 
     group_by(.data$PY) %>%
     mutate(LCS = replace(.data$LCS, .data$LCS==0, 1),
-           NGCS = .data$TC/mean(.data$TC),
-           NLCS = .data$LCS/mean(.data$LCS)) %>%
+           NGCS = .data$TC/mean(.data$TC,na.rm=TRUE),
+           NLCS = .data$LCS/mean(.data$LCS,na.rm=TRUE)) %>%
     ungroup() %>% as.data.frame()
+  
   
   switch(field,
          documents={
@@ -77,10 +78,10 @@ normalizeCitationScore <- function(M,field="documents"){
            NCS <- df  %>%
              group_by(.data$Author) %>%
              summarize(NP = length(.data$year),
-                       MNGCS = mean(.data$NGCS),
-                       MNLCS = mean(.data$NLCS),
-                       TC = mean(.data$TC),
-                       LC = mean(.data$LCS) 
+                       MNGCS = mean(.data$NGCS,na.rm=TRUE),
+                       MNLCS = mean(.data$NLCS,na.rm=TRUE),
+                       TC = mean(.data$TC,na.rm=TRUE),
+                       LC = mean(.data$LCS,na.rm=TRUE) 
              ) %>% 
              rename(authors=.data$Author) %>% as.data.frame()
          },
@@ -89,12 +90,13 @@ normalizeCitationScore <- function(M,field="documents"){
            NCS <- M %>% 
              group_by(.data$SO) %>%
              summarize(NP = length(.data$PY),
-                       MNGCS = mean(.data$NGCS),
-                       MNLCS = mean(.data$NLCS),
-                       TC = mean(.data$TC),
-                       LC = mean(.data$LCS)
+                       MNGCS = mean(.data$NGCS,na.rm=TRUE),
+                       MNLCS = mean(.data$NLCS,na.rm=TRUE),
+                       TC = mean(.data$TC,na.rm=TRUE),
+                       LC = mean(.data$LCS,na.rm=TRUE)
              ) %>%
              rename(sources=.data$SO) %>% as.data.frame()
          })
+  NCS$MNLCS[is.na(NCS$MNLCS)] <- 0
   return(NCS)
 }

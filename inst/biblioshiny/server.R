@@ -2614,6 +2614,102 @@ server <- function(input, output, session) {
     
   })
   
+  #### Coupling ####
+  
+  CMMAP <- eventReactive(input$applyCM,{
+    
+    values$CM <- couplingMap(values$M, analysis=input$CManalysis, field=input$CMfield, 
+                             n=input$CMn, minfreq=input$CMfreq, 
+                             stemming=input$CMstemming, size=input$sizeCM, 
+                             n.labels=input$CMn.labels, repel=FALSE)
+    
+    validate(
+      need(values$CM$nclust > 0, "\n\nNo clusters in one or more periods. Please select a different set of parameters.")
+    )
+  })
+  output$CMPlot <- renderPlotly({
+    
+    CMMAP()
+    plot.ly(values$CM$map)
+    
+  })#, height = 650, width = 800)
+  
+  output$CMNetPlot <- renderVisNetwork({
+    CMMAP()
+    values$networkCM<-igraph2vis(g=values$CM$net$graph,curved=(input$coc.curved=="Yes"), 
+                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+                                 shape=input$coc.shape)
+    
+    values$networkCM$VIS
+    
+  })
+  
+  output$CMplot.save <- downloadHandler(
+    filename = function() {
+      
+      paste("CouplingMap-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$CM$map, dpi = as.numeric(input$CMdpi))
+    },
+    contentType = "png"
+  )
+  
+  output$CMTable <- DT::renderDT({
+    CMMAP()
+    cmData=values$CM$data[,c(2,1,3,5)]
+
+    DT::datatable(cmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cmData))-1))))) %>%
+      formatStyle(names(cmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
+  
+  output$CMTableCluster <- DT::renderDT({
+    CMMAP()
+    cmData=values$CM$clusters[,c(7,1:4,6)]
+    
+    DT::datatable(cmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 50, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cmData))-1))))) %>%
+      formatStyle(names(cmData),  backgroundColor = 'white') 
+    #return(Data)
+    
+  })
   ### Conceptual Structure  #####
   
   ### Co-occurrences network ----

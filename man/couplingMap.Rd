@@ -51,7 +51,12 @@ It performs a coupling network analysis and plots community detection results on
 \details{
 The analysis can be performed on three different units: documents, authors or sources and 
 the coupling strength can be measured using the classical approach (coupled by references) 
-or a novel approach based on unit contents (keywords or terms from titles and abstracts)
+or a novel approach based on unit contents (keywords or terms from titles and abstracts) 
+
+The x-axis measures the cluster centrality (by Callon's Centrality index) while the y-axis measures the cluster impact 
+by Mean Normalized Local Citation Score (MNLCS). 
+The Normalized Local Citation Score (NLCS) of a document is calculated 
+by dividing the actual count of local citing items by the expected citation rate for documents with the same year of publication.
 }
 \examples{
 
@@ -63,6 +68,8 @@ plot(res$map)
 
 }
 \seealso{
+\code{\link{nomalizeCitationScore}}.
+
 \code{\link{biblioNetwork}} function to compute a bibliographic network.
 
 \code{\link{cocMatrix}} to compute a bibliographic bipartite network.

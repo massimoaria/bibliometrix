@@ -42,7 +42,7 @@ a list containing:
 \code{clusters}\tab   \tab Centrality and Density values for each cluster. \cr
 \code{data}\tab   \tab A list of units following in each cluster\cr
 \code{nclust}\tab   \tab The number of clusters\cr
-\code{NCS}\tab     \tab The Normalized Citation Score dataframe 
+\code{NCS}\tab     \tab The Normalized Citation Score dataframe\cr
 \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
 }
 \description{

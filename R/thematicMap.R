@@ -43,7 +43,7 @@
 
 thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
   
-  minfreq <- max(2,floor(minfreq*nrow(M)/1000))
+  minfreq <- max(1,floor(minfreq*nrow(M)/1000))
   
   switch(field,
          ID={

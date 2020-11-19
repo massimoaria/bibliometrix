@@ -43,7 +43,7 @@
 
 thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
   
-  minfreq <- max(0,floor(minfreq*nrow(M)/1000))
+  minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
   switch(field,
          ID={
@@ -133,8 +133,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   }
   #df_lab$cluster_label=gsub(";NA;",";",df_lab$cluster_label)
   
-  centrality=centrality*10
+  centrality=centrality
   df=data.frame(centrality=centrality,density=density,rcentrality=rank(centrality),rdensity=rank(density),label=label_cluster,color=color)
+ 
+  meandens=mean(df$rdensity)
+  meancentr=mean(df$rcentrality)
+  rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
+  rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
+  
   df$name=unlist(labels)
   df=df[order(df$label),]
   df_lab <- df_lab[df_lab$sC>=minfreq,]
@@ -170,13 +176,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   df$name_full=L
   ###
   
-  
-  meandens=mean(df$rdensity)
-  meancentr=mean(df$rcentrality)
+  #meandens <- 0
+  #meancentr <- 0
+  #meandens=mean(df$rdensity)
+  #meancentr=mean(df$rcentrality)
   #df=df[df$freq>=minfreq,]
   
-  rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
-  rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
+  #rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
+  #rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
   xlimits=c(meancentr-rangex-0.5,meancentr+rangex+0.5)
   ylimits=c(meandens-rangey-0.5,meandens+rangey+0.5)
   

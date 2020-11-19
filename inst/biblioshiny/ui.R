@@ -2023,8 +2023,11 @@ navbarMenu("Conceptual Structure",
                                             ),
                                             tabPanel("Network",
                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "80vh"))), #height = "750px",width = "1100px"))),
-                                            tabPanel("Table",
+                                            tabPanel("Data",
                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
+                                            ),
+                                            tabPanel("Clusters",
+                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster"))
                                             )
                                 )
                                 
@@ -2089,9 +2092,13 @@ navbarMenu("Conceptual Structure",
                                                                                           tabPanel("Network",
                                                                                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "80vh")) # height = "750px",width = "1100px"))
                                                                                             ),
-                                                                                          tabPanel("Table",
+                                                                                          tabPanel("Data",
                                                                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
-                                                                                          ))      
+                                                                                          ),
+                                                                                          tabPanel("Clusters",
+                                                                                                    shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster1"))
+                                                                                          )
+                                                                                 )      
                                             ),
                                             tabPanel("Time Slice 2", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -2100,9 +2107,13 @@ navbarMenu("Conceptual Structure",
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
-                                                                                            tabPanel("Table",
+                                                                                            tabPanel("Data",
                                                                                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
-                                                                                            )) 
+                                                                                            ),
+                                                                                            tabPanel("Clusters",
+                                                                                                  shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster2"))
+                                                                                            )
+                                                                                 ) 
                                             ),
                                             tabPanel("Time Slice 3", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -2111,9 +2122,13 @@ navbarMenu("Conceptual Structure",
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
-                                                                                            tabPanel("Table",
+                                                                                            tabPanel("Data",
                                                                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
-                                                                                            )) 
+                                                                                            ),
+                                                                                 tabPanel("Clusters",
+                                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster3"))
+                                                                                          )
+                                                                                )
                                             ),
                                             tabPanel("Time Slice 4", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -2122,9 +2137,13 @@ navbarMenu("Conceptual Structure",
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
-                                                                                            tabPanel("Table",
+                                                                                            tabPanel("Data",
                                                                                                       shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
-                                                                                            )) 
+                                                                                            ),
+                                                                                            tabPanel("Clusters",
+                                                                                                       shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster4"))
+                                                                                            )
+                                            ) 
                                             ),
                                             tabPanel("Time Slice 5", tabsetPanel(type="tabs",
                                                                                             tabPanel("Thematic Map",
@@ -2133,9 +2152,13 @@ navbarMenu("Conceptual Structure",
                                                                                             tabPanel("Network",
                                                                                                      shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "80vh")) #height = "750px",width = "1100px"))
                                                                                             ),
-                                                                                            tabPanel("Table",
+                                                                                            tabPanel("Data",
                                                                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
-                                                                                            ))
+                                                                                            ),
+                                                                                            tabPanel("Clusters",
+                                                                                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster5"))
+                                                                                            )
+                                            )
                                             )
                                 )
                                 

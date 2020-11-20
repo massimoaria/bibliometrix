@@ -102,7 +102,7 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20), width=120
 
 ## function to melt data
 meltx <- function(LM) {
-  var1 <- rep((1:nrow(LM)), nrow(LM))
+  var1 <- rep((1:nrow(LM)), ncol(LM))
   var2 <- sort(var1)
   LMM <-
     data.frame(

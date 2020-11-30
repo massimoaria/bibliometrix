@@ -20,6 +20,8 @@ require(pubmedR, quietly = TRUE)
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 
+if (exists("M")) rm(M)
+
 ui <-  navbarPage("biblioshiny for bibliometrix",
                   theme=shinythemes::shinytheme("flatly"),
                   

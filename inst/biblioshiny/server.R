@@ -37,6 +37,29 @@ server <- function(input, output, session) {
   
   
   ### LOAD MENU ####
+  
+  format <- function(obj){
+    ext<- sub('.*\\.', '', obj[1])
+    switch(ext,
+           txt ={
+             format <- "plaintext"
+           },
+           csv ={
+             format <- "csv"
+           },
+           bib ={
+             format <- "bibtex"
+           },
+           ciw ={
+             format <- "endnote"
+           },
+           xlsx={
+             format <- "excel"
+           }
+           )
+    return(format)
+  }
+  
   DATAloading<- eventReactive(input$applyLoad,{
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
@@ -54,12 +77,12 @@ server <- function(input, output, session) {
           switch(ext,
                  ###  WoS ZIP Files
                  zip = {
-                   D = unzip(inFile$datapath)
+                   D <-  unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = input$format)
+                                                  format = format(D))
                                 })
                  },
                  ### WoS Txt/Bib Files
@@ -68,7 +91,7 @@ server <- function(input, output, session) {
                                 value = 0, {
                                   M <- convert2df(inFile$datapath,
                                                   dbsource = input$dbsource,
-                                                  format = input$format)
+                                                  format = format(inFile$datapath))
                                 })
                  })
         },
@@ -81,13 +104,11 @@ server <- function(input, output, session) {
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = input$format)
+                                                  format = format(D))
                                 })
                  },
                  ### Scopus CSV/Bib Files
                  csv = {
-                   
-                   #D = readFiles(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(inFile$datapath,
@@ -96,8 +117,6 @@ server <- function(input, output, session) {
                                 })
                  },
                  bib = {
-                   
-                   #D = readFiles(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(inFile$datapath,
@@ -116,12 +135,11 @@ server <- function(input, output, session) {
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = "plaintext")
+                                                  format = format(D))
                                 })
                  },
                  ### Cochrane txt files
                  {
-                   
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(inFile$datapath,
@@ -157,18 +175,17 @@ server <- function(input, output, session) {
           switch(ext,
                  ###  Dimensions ZIP Files
                  zip = {
-                   files = unzip(inFile$datapath)
+                   D = unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <-
-                                    convert2df(files,
+                                    convert2df(D,
                                                dbsource = input$dbsource,
-                                               format = input$format)
+                                               format = format(D))
                                 })
                  },
                  ### Dimensions Xlsx/csv Files
                  xlsx = {
-                   #D = readFiles(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <-
@@ -180,7 +197,6 @@ server <- function(input, output, session) {
                                 })
                  },
                  csv = {
-                   #D = readFiles(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <-

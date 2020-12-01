@@ -20,7 +20,7 @@ require(pubmedR, quietly = TRUE)
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
 
-if (exists("M")) rm(M)
+if (exists("M")) rm(M, envir = .GlobalEnv)  # remove an existing M object
 
 ui <-  navbarPage("biblioshiny for bibliometrix",
                   theme=shinythemes::shinytheme("flatly"),
@@ -41,8 +41,6 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
                            fluidRow(
                              column(9,
                                     wellPanel(
-                                          
-                                      #shinythemes::themeSelector(),
                                       
                                h1("biblioshiny: The shiny app for bibliometrix",align = "center"),
                                br(),
@@ -128,62 +126,6 @@ navbarMenu("Data",
                             selected = "isi"
                           )
                         ),
-                        # conditionalPanel(
-                        #   condition = "input.dbsource == 'isi' & input.load == 'import'",
-                        #   selectInput(
-                        #     "format",
-                        #     label = "File format",
-                        #     choices = c("Plain Text" = "plaintext",
-                        #                 "EndNote Desktop" = "endnote",
-                        #                 "BibTeX" = "bibtex"),
-                        #     selected = "plaintext"
-                        #   )
-                        # ),
-                        # conditionalPanel(
-                        #   condition = "input.dbsource == 'cochrane' & input.load == 'import'",
-                        #   selectInput(
-                        #     "format",
-                        #     label = "File format",
-                        #     choices = c("Plain Text" = "plaintext"),
-                        #     selected = "plaintext"
-                        #   )
-                        # ),
-                        # conditionalPanel(
-                        #   condition = "input.dbsource == 'scopus' & input.load == 'import'",
-                        #   selectInput(
-                        #     "format",
-                        #     label = "File format",
-                        #     choices = c("BibTeX" = "bibtex",
-                        #                 "CSV" = "csv"),
-                        #     selected = "bibtex"
-                        #   )
-                        # ),
-                        # conditionalPanel(
-                        #   condition = "input.dbsource == 'dimensions' & input.load == 'import'",
-                        #   selectInput(
-                        #     "format",
-                        #     label = "File format",
-                        #     choices = c(
-                        #       "Excel (Topic Analysis)" = "excel",
-                        #       "CSV (bibliometric mapping)" =
-                        #         "csv"
-                        #     ),
-                        #     selected = "excel"
-                        #   )
-                        # ),
-                        # conditionalPanel(
-                        #   condition = "input.dbsource == 'pubmed' & input.load == 'import'",
-                        #   selectInput(
-                        #     "format",
-                        #     label = "File format",
-                        #     choices = c(
-                        #       "PubMed txt format" = "pubmed"
-                        #     ),
-                        #     selected = "pubmed"
-                        #   )
-                        # ),
-                        
-                        
                         conditionalPanel(
                           condition = "input.load != 'null'",
                           fileInput(

@@ -9,6 +9,7 @@ couplingMap(
   analysis = "documents",
   field = "CR",
   n = 500,
+  impact.measure = "local",
   minfreq = 5,
   stemming = FALSE,
   size = 0.5,
@@ -24,6 +25,11 @@ couplingMap(
 \item{field}{is the textual attribute used to measure the coupling strength. It can be \code{field = c("CR", "ID","DE", "TI", "AB")}.}
 
 \item{n}{is an integer. It indicates the number of units to include in the analysis.}
+
+\item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
+It can be \code{impact.measure = c("local", "global")}.\\
+With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while 
+using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
 
 \item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
 

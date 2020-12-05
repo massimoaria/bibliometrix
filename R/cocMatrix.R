@@ -160,7 +160,6 @@ if (type=="sparse" & !isTRUE(binary)){
 }
 
   WF=WF[,!is.na(uniqueField)]
-  #WF=attrPY(M,WF)  # Median Year of each attribute 
   
 return(WF)
 }

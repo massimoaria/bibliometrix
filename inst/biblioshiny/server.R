@@ -4166,21 +4166,21 @@ server <- function(input, output, session) {
         
         switch(input$field,
                ID={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";")
                  values$Title= "Keywords Plus Network"
                },
                DE={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";")
                  values$Title= "Authors' Keywords network"
                },
                TI={
                  if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
                  values$Title= "Title Words network"
                },
                AB={
                  if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                  values$Title= "Abstract Words network"
                })
         
@@ -4193,7 +4193,7 @@ server <- function(input, output, session) {
       if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
       
       #par(bg="grey92", mar=c(0,0,0,0))
-      values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
+      values$cocnet=networkPlot(values$NetWords, normalize=normalize, Title = values$Title, type = input$layout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
                                 cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), verbose = FALSE)

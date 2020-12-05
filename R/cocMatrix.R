@@ -146,14 +146,15 @@ rownames(WF)<-rownames(M)
         if (sum(ind) > 0){
           WF[i, ind] <- 1
         }
+      }
       else{
         ## full counting
         tab=table(Fi[[i]])
         name=names(tab)
         WF[i,name[nchar(name)>0]]=tab[nchar(name)>0]
         }
-      }
-	}
+    }
+  }
 
 if (type=="sparse" & !isTRUE(binary)){
   WF=Matrix(WF)

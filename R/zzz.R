@@ -223,6 +223,7 @@
 #' @importFrom graphics lines
 #' @importFrom graphics plot
 #' @importFrom graphics par
+#' @importFrom utils capture.output
 #' @importFrom utils data
 #' @importFrom utils adist
 #' @importFrom SnowballC wordStem

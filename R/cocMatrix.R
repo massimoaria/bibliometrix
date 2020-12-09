@@ -150,8 +150,11 @@ rownames(WF)<-rownames(M)
       else{
         ## full counting
         tab=table(Fi[[i]])
-        name=names(tab)
-        WF[i,name[nchar(name)>0]]=tab[nchar(name)>0]
+        name <- names(tab)[names(tab) %in% uniqueField]
+        name <- name[nchar(name)>0]
+        if (length(name)>0){
+          WF[i,name] <- tab[name]
+        }
         }
     }
   }

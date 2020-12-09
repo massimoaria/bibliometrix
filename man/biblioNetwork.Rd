@@ -10,6 +10,7 @@ biblioNetwork(
   network = "authors",
   n = NULL,
   sep = ";",
+  short = FALSE,
   shortlabel = TRUE
 )
 }
@@ -29,6 +30,8 @@ Default is \code{network = "authors"}.}
 \item{n}{is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
+
+\item{short}{is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.}
 
 \item{shortlabel}{is logical. IF TRUE, reference labels are stored in a short format. Default is \code{shortlabel=TRUE}.}
 }

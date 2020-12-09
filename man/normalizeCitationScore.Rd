@@ -4,12 +4,17 @@
 \alias{normalizeCitationScore}
 \title{Calculate the normalized citation score metric}
 \usage{
-normalizeCitationScore(M, field = "documents")
+normalizeCitationScore(M, field = "documents", impact.measure = "local")
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
 
 \item{field}{is a character. It indicates the unit of analysis on which calculate the NCS. It can be equal to \code{field = c("documents", "authors", "sources")}. Default is \code{field = "documents"}.}
+
+\item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
+It can be \code{impact.measure = c("local", "global")}.\\
+With \code{impact.measure = "local"}, \link{normalizeCitationScore} calculates elements impact using the Normalized Local Citation Score while 
+using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
 }
 \value{
 a dataframe.
@@ -31,7 +36,7 @@ The NLCS is the NCS calculated using the local citations (total citations that a
 
 \dontrun{
 data(management)
-NCS <- normalizeCitationScore(M, field = "authors")
+NCS <- normalizeCitationScore(M, field = "authors", impact.measure = "local")
 }
 
 }

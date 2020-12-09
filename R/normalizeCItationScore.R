@@ -15,7 +15,10 @@
 #' 
 #' @param M is a bibliographic data frame obtained by \code{\link{convert2df}} function.
 #' @param field is a character. It indicates the unit of analysis on which calculate the NCS. It can be equal to \code{field = c("documents", "authors", "sources")}. Default is \code{field = "documents"}.
-#' 
+#' @param impact.measure is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
+#' It can be \code{impact.measure = c("local", "global")}.\\
+#' With \code{impact.measure = "local"}, \link{normalizeCitationScore} calculates elements impact using the Normalized Local Citation Score while 
+#' using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact. 
 #' @return a dataframe.
 #'
 #' 
@@ -24,11 +27,11 @@
 #' 
 #' \dontrun{
 #' data(management)
-#' NCS <- normalizeCitationScore(M, field = "authors")
+#' NCS <- normalizeCitationScore(M, field = "authors", impact.measure = "local")
 #' }
 #'
 #' @export
-normalizeCitationScore <- function(M,field="documents"){
+normalizeCitationScore <- function(M,field="documents", impact.measure = "local"){
 
   
   if (!(field %in% c("documents", "authors", "sources"))) {
@@ -38,7 +41,11 @@ normalizeCitationScore <- function(M,field="documents"){
   M$TC=as.numeric(M$TC)
   M$PY=as.numeric(M$PY)
   
-  log <- capture.output(M <- localCitations(M, fast.search = FALSE, sep = ";")$M)
+  if (impact.measure=="local"){
+    log <- capture.output(M <- localCitations(M, fast.search = FALSE, sep = ";")$M)
+  } else {
+    M$LCS <- 0
+  }
   
   M <- M %>% 
     group_by(.data$PY) %>%
@@ -97,6 +104,12 @@ normalizeCitationScore <- function(M,field="documents"){
              ) %>%
              rename(sources=.data$SO) %>% as.data.frame()
          })
-  NCS$MNLCS[is.na(NCS$MNLCS)] <- 0
+  
+  if (impact.measure == "global"){
+    NCS <- NCS[,-c(4,6)]
+  }else{
+    NCS$MNLCS[is.na(NCS$MNLCS)] <- 0
+  }
+  
   return(NCS)
 }

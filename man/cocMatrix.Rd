@@ -4,7 +4,15 @@
 \alias{cocMatrix}
 \title{Co-occurrence matrix}
 \usage{
-cocMatrix(M, Field = "AU", type = "sparse", n = NULL, sep = ";", binary = TRUE)
+cocMatrix(
+  M,
+  Field = "AU",
+  type = "sparse",
+  n = NULL,
+  sep = ";",
+  binary = TRUE,
+  short = FALSE
+)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function
@@ -34,6 +42,8 @@ argument generates a compact representation of the matrix.}}
 column of the data frame. The default is \code{sep = ";"}.}
 
 \item{binary}{is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency.}
+
+\item{short}{is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.}
 }
 \value{
 a co-occurrence matrix with cases corresponding to manuscripts and variables to the

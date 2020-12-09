@@ -2636,6 +2636,7 @@ server <- function(input, output, session) {
     
     values$CM <- couplingMap(values$M, analysis=input$CManalysis, field=input$CMfield, 
                              n=input$CMn, minfreq=input$CMfreq, 
+                             impact.measure=input$CMimpact,
                              stemming=input$CMstemming, size=input$sizeCM, 
                              n.labels=input$CMn.labels, repel=FALSE)
     

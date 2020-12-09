@@ -41,6 +41,7 @@
 #' Default is \code{network = "authors"}.
 #' @param n is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
+#' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
 #' @param shortlabel is logical. IF TRUE, reference labels are stored in a short format. Default is \code{shortlabel=TRUE}.
 #' @return It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{\link{Matrix}}.
 #' @examples
@@ -76,6 +77,7 @@ biblioNetwork <-
            network = "authors",
            n = NULL,
            sep = ";",
+           short = FALSE,
            shortlabel = TRUE) {
     crossprod <- Matrix::crossprod
     NetMatrix <-  NA
@@ -84,24 +86,24 @@ biblioNetwork <-
       switch(
         network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n,sep)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n,sep)
+          WA <- cocMatrix(M, Field = "AU", type = "sparse", n,sep,short=short)
+          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n,sep,short=short)
           CRA <- crossprod(WCR, WA)
           NetMatrix <- crossprod(CRA, CRA)
         },
         references = {
-          WCR <- Matrix::t(cocMatrix(M, Field = "CR", type = "sparse", n,sep))
+          WCR <- Matrix::t(cocMatrix(M, Field = "CR", type = "sparse", n,sep,short=short))
           NetMatrix <- crossprod(WCR, WCR)
         },
         sources = {
-          WSO <- cocMatrix(M, Field = "SO", type = "sparse", n, sep)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep)
+          WSO <- cocMatrix(M, Field = "SO", type = "sparse", n, sep,short=short)
+          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep,short=short)
           CRSO <- crossprod(WCR, WSO)
           NetMatrix <- crossprod(CRSO, CRSO)
         },
         countries = {
-          WCO <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep)
+          WCO <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep,short=short)
+          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep,short=short)
           CRCO <- crossprod(WCR, WCO)
           NetMatrix <- crossprod(CRCO, CRCO)
         }
@@ -112,22 +114,22 @@ biblioNetwork <-
       switch(
         network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep,short=short)
         },
         keywords = {
-          WA <- cocMatrix(M, Field = "ID", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "ID", type = "sparse", n, sep,short=short)
         },
         author_keywords = {
-          WA <- cocMatrix(M, Field = "DE", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "DE", type = "sparse", n, sep,short=short)
         },
         titles = {
-          WA <- cocMatrix(M, Field = "TI_TM", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "TI_TM", type = "sparse", n, sep,short=short)
         },
         abstracts = {
-          WA <- cocMatrix(M, Field = "AB_TM", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "AB_TM", type = "sparse", n, sep,short=short)
         },
         sources = {
-          WA <- cocMatrix(M, Field = "SO", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "SO", type = "sparse", n, sep,short=short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
@@ -140,13 +142,13 @@ biblioNetwork <-
       switch(
         network,
         authors = {
-          WA <- cocMatrix(M, Field = "CR_AU", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "CR_AU", type = "sparse", n, sep,short=short)
         },
         references = {
-          WA <- cocMatrix(M, Field = "CR", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "CR", type = "sparse", n, sep,short=short)
         },
         sources = {
-          WA <- cocMatrix(M, Field = "CR_SO", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "CR_SO", type = "sparse", n, sep,short=short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
@@ -157,15 +159,15 @@ biblioNetwork <-
       switch(
         network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep,short=short)
           
         },
         universities = {
-          WA <- cocMatrix(M, Field = "AU_UN", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "AU_UN", type = "sparse", n, sep,short=short)
           
         },
         countries = {
-          WA <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep)
+          WA <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep,short=short)
         }
       )
       NetMatrix <- crossprod(WA, WA)

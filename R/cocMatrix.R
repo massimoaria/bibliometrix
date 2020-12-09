@@ -34,6 +34,7 @@
 #' @param sep is the field separator character. This character separates strings in each 
 #' column of the data frame. The default is \code{sep = ";"}.
 #' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency. 
+#' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
 #' @return a co-occurrence matrix with cases corresponding to manuscripts and variables to the
 #'   objects extracted from the Tag \code{Field}.
 #'
@@ -61,7 +62,7 @@
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @export
 
-cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE){
+cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE, short = FALSE){
 #
 # The function creates co-occurences data between Works and Field
 #
@@ -123,12 +124,21 @@ if (Field=="CR"){
     l<-trimws(l)
     return(l)
   })
-  }
-uniqueField <- names(sort(table(allField), decreasing = TRUE))			     
+}
+tabField <- sort(table(allField), decreasing = TRUE)
+uniqueField <- names(tabField)			     
 # select n items
 if (!is.null(n)) {
     uniqueField <- uniqueField[1:n]
+} else if (isTRUE(short)){
+  uniqueField <- names(tabField[tabField>1])  # remove items with frequency<2
 }
+
+if (length(uniqueField)<1){
+  print("Matrix is empty!!")
+  return(NA)
+}
+
 if (type=="matrix" | !isTRUE(binary)){
   # Initialization of WA matrix
   WF<-matrix(0,size[1],length(uniqueField))} else if (type=="sparse"){

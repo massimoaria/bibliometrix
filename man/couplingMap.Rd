@@ -68,14 +68,13 @@ by dividing the actual count of local citing items by the expected citation rate
 
 \dontrun{
 data(management)
-res <- couplingMap(management, analysis = "authors", field = "CR", n = 250, minfreq = 3, size = 0.5, repel = TRUE)
+res <- couplingMap(management, analysis = "authors", field = "CR", n = 250, impact.measure="local", 
+                   minfreq = 3, size = 0.5, repel = TRUE)
 plot(res$map)
 }
 
 }
 \seealso{
-\code{\link{nomalizeCitationScore}}.
-
 \code{\link{biblioNetwork}} function to compute a bibliographic network.
 
 \code{\link{cocMatrix}} to compute a bibliographic bipartite network.

@@ -15,6 +15,10 @@
 #' @param analysis is the textual attribute used to select the unit of analysis. It can be \code{analysis = c("documents", "authors", "sources")}.
 #' @param field is the textual attribute used to measure the coupling strength. It can be \code{field = c("CR", "ID","DE", "TI", "AB")}.
 #' @param n is an integer. It indicates the number of units to include in the analysis.
+#' @param impact.measure is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
+#' It can be \code{impact.measure = c("local", "global")}.\\
+#' With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while 
+#' using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact. 
 #' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates the size of the cluster circles and is a number in the range (0.01,1).
@@ -29,13 +33,12 @@
 #' \code{NCS}\tab     \tab The Normalized Citation Score dataframe\cr
 #' \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
 #' 
-#' @seealso \code{\link{nomalizeCitationScore}}.
-#' 
 #' @examples
 #' 
 #' \dontrun{
 #' data(management)
-#' res <- couplingMap(management, analysis = "authors", field = "CR", n = 250, minfreq = 3, size = 0.5, repel = TRUE)
+#' res <- couplingMap(management, analysis = "authors", field = "CR", n = 250, impact.measure="local", 
+#'                    minfreq = 3, size = 0.5, repel = TRUE)
 #' plot(res$map)
 #' }
 #'
@@ -45,7 +48,7 @@
 #'
 #' @export
 
-couplingMap <- function(M, analysis = "documents", field="CR", n=500, minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
+couplingMap <- function(M, analysis = "documents", field="CR", n=500, impact.measure="local", minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
   
   
   if (!(analysis %in% c("documents", "authors", "sources"))) {
@@ -59,7 +62,13 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, minfreq=5,
   
   net=Net$graph
   
-  NCS <- normalizeCitationScore(M,field=analysis) 
+  NCS <- normalizeCitationScore(M,field=analysis, impact.measure = impact.measure) 
+  
+  if (impact.measure == "global"){
+    NCS$MNLCS <- NCS$MNGCS
+    NCS$LC <- NCS$TC
+  }
+  
   NCS[,1] <- toupper(NCS[,1])
   
   ### Citation for documents
@@ -95,9 +104,9 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, minfreq=5,
   df <- df_lab %>%
     mutate(centrality = mean(.data$pagerank_centrality),
            impact = mean(.data$MNLCS2,na.rm=TRUE),
-           impact = replace(impact, is.na(impact),NA)) %>%
+           impact = replace(.data$impact, is.na(.data$impact),NA)) %>%
     top_n(.data$MNLCS, n=10) %>%
-    summarize(freq = freq[1],
+    summarize(freq = .data$freq[1],
               centrality = .data$centrality[1]*100,
               impact = .data$impact[1],
               label_cluster = .data$group[1],
@@ -110,7 +119,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, minfreq=5,
                         l <- l[1:(min(length(l),10))]
                         l <- paste0(l,collapse="\n")  
                         })),
-           rimpact = rank(impact)) %>%
+           rimpact = rank(.data$impact)) %>%
     arrange(.data$group) %>% as.data.frame()
   
   
@@ -156,7 +165,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, minfreq=5,
   df_lab$ClusterName <- df$label[df_lab$Cluster]
   
   row.names(df)=NULL
-  df <- df %>% rename(items = words)
+  df <- df %>% rename(items = .data$words)
   
   results=list(map=g, clusters=df, data=df_lab,nclust=dim(df)[1], NCS = D, net=Net)
   return(results)
@@ -167,18 +176,18 @@ coupling <- function(M,field, analysis){
   if (field=="AB") field <- "AB_TM"
   switch(analysis,
          documents = {
-           WF <- t(cocMatrix(M, Field = field))
+           WF <- t(cocMatrix(M, Field = field, short=TRUE))
            NetMatrix <- crossprod(WF, WF)
          },
          authors = {
-           WF <- cocMatrix(M, Field = field)
-           WA <- cocMatrix(M,Field = "AU")
+           WF <- cocMatrix(M, Field = field, short=TRUE)
+           WA <- cocMatrix(M,Field = "AU", short=TRUE)
            FA <- t(crossprod(WA,WF))
            NetMatrix <- crossprod(FA,FA)
          },
          sources = {
-           WF <- cocMatrix(M, Field = field)
-           WS <- cocMatrix(M,Field = "SO")
+           WF <- cocMatrix(M, Field = field, short=TRUE)
+           WS <- cocMatrix(M,Field = "SO", short=TRUE)
            FS <- t(crossprod(WS,WF))
            NetMatrix <- crossprod(FS,FS)
          })
@@ -190,7 +199,7 @@ network <- function(M, analysis,field, stemming, n){
          documents = {
            switch(field,
                   CR = {
-                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", shortlabel = FALSE)
+                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", short = TRUE, shortlabel = FALSE)
                     type <- "D_CR"
                   },
                   {
@@ -205,7 +214,7 @@ network <- function(M, analysis,field, stemming, n){
          authors = {
            switch(field,
                   CR = {
-                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors")
+                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "authors", short = TRUE)
                     type <- "AU_CR"
                   },
                   {
@@ -220,7 +229,7 @@ network <- function(M, analysis,field, stemming, n){
          sources = {
            switch(field,
                   CR = {
-                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "sources")
+                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "sources", short = TRUE)
                     type <- "SO_CR"
                   },
                   {

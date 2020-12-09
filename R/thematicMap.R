@@ -47,23 +47,23 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   
   switch(field,
          ID={
-           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";")
            TERMS=tolower(M$ID)
          },
          DE={
-           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";")
            TERMS=tolower(M$DE)
          },
          TI={
            #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
            M=termExtraction(M,Field="TI",verbose=FALSE, stemming = stemming)
-           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", sep = ";")
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
            
          },
          AB={
            #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
            M=termExtraction(M,Field="AB",verbose=FALSE, stemming = stemming)
-           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "abstracts", sep = ";")
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
            
          })
   
@@ -71,7 +71,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
   #S=NetMatrix
   #t = tempfile();pdf(file=t) #### trick to hide igraph plot
   if (nrow(NetMatrix)>0){
-    Net <- networkPlot(NetMatrix, normalize="association",n=n, Title = "Keyword co-occurrences",type="auto",
+    Net <- networkPlot(NetMatrix, normalize="association", Title = "Keyword co-occurrences",type="auto",
                      labelsize = 2, halo = F,cluster="louvain",remove.isolates=TRUE,
                      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                      size=1,edges.min = 1, label.n=n, verbose = FALSE)

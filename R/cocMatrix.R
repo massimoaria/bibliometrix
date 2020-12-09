@@ -89,15 +89,15 @@ if (Field=="CR"){Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])}  ## delete not co
 
 
 # vector of unique units
-uniqueField<-unique(unlist(Fi))
-uniqueField<-uniqueField[!is.na(uniqueField)]
+allField <- unlist(Fi)
+allField <- allField[!is.na(allField)]
 
 if (Field=="CR"){
-  S<-gsub("\\).*",")",uniqueField)
+  S <- gsub("\\).*", ")", allField)
   S<-gsub(","," ",S)
   S<-gsub(";"," ",S)
   S<-reduceRefs(S)
-  uniqueField<-unique(trimES(S))
+  allField <- trimES(S)
   Fi<-lapply(Fi, function(l){
     l<-gsub("\\).*",")",l)
     l<-gsub(","," ",l)
@@ -109,11 +109,11 @@ if (Field=="CR"){
   })
 } else {
   # normalize reference names
-  S<-gsub("\\,",";",uniqueField)
+  S<-gsub("\\,", ";", allField)
   S<-sub("\\;",",",S)
   S<-sub("\\;",",",S)
   S<-gsub("\\;.*","",S)
-  uniqueField<-unique(trimws(S))
+  allField <- trimws(S)
   Fi<-lapply(Fi, function(l){
     l<-gsub("\\,",";",l)
     l<-sub("\\;",",",l)
@@ -124,7 +124,11 @@ if (Field=="CR"){
     return(l)
   })
   }
-
+uniqueField <- names(sort(table(allField), decreasing = TRUE))			     
+# select n items
+if (!is.null(n)) {
+    uniqueField <- uniqueField[1:n]
+}
 if (type=="matrix" | !isTRUE(binary)){
   # Initialization of WA matrix
   WF<-matrix(0,size[1],length(uniqueField))} else if (type=="sparse"){
@@ -138,30 +142,25 @@ rownames(WF)<-rownames(M)
       #if (Field=="CR"){Fi[[i]]=reduceRefs(Fi[[i]])}
       if (isTRUE(binary)){
         ## binary counting
-      WF[i,uniqueField %in% Fi[[i]]]<-1}else{
+	ind <- uniqueField %in% Fi[[i]]
+        if (sum(ind) > 0){
+          WF[i, ind] <- 1
+        }
+      }
+      else{
         ## full counting
         tab=table(Fi[[i]])
         name=names(tab)
         WF[i,name[nchar(name)>0]]=tab[nchar(name)>0]
         }
-      }
-	}
+    }
+  }
 
 if (type=="sparse" & !isTRUE(binary)){
   WF=Matrix(WF)
 }
 
   WF=WF[,!is.na(uniqueField)]
-  #WF=attrPY(M,WF)  # Median Year of each attribute
-  
-  # select n items
-  if (!is.null(n)){
-    n <- min(c(n, dim(WF)[2]))
-    deg <- colSums(WF)
-    nodes <- names(sort(deg, decreasing = TRUE)[1:n])
-    WF <- WF[,nodes]
-  }
-  
   
 return(WF)
 }

@@ -4166,34 +4166,33 @@ server <- function(input, output, session) {
         
         switch(input$field,
                ID={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";")
                  values$Title= "Keywords Plus Network"
                },
                DE={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";")
                  values$Title= "Authors' Keywords network"
                },
                TI={
                  if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
                  values$Title= "Title Words network"
                },
                AB={
                  if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                  values$Title= "Abstract Words network"
                })
         
       }
-      
-      if (n>dim(values$NetWords)[1]){n=dim(values$NetWords)[1]}
+     
       if (label.n>n){label.n=n}
       if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
       if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
       if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
       
       #par(bg="grey92", mar=c(0,0,0,0))
-      values$cocnet=networkPlot(values$NetWords, normalize=normalize,n = n, Title = values$Title, type = input$layout, 
+      values$cocnet=networkPlot(values$NetWords, normalize=normalize, Title = values$Title, type = input$layout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
                                 cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), verbose = FALSE)
@@ -4230,29 +4229,28 @@ server <- function(input, output, session) {
       values$citShortlabel=input$citShortlabel
       switch(input$citField,
              CR={
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", sep = input$citSep, shortlabel=shortlabel)
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", n = n, sep = input$citSep, shortlabel=shortlabel)
                values$Title= "Cited References network"
                
              },
              CR_AU={
                if(!("CR_AU" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_AU", sep = input$citSep)}
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "authors", sep = input$citSep)
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "authors", n = n, sep = input$citSep)
                values$Title= "Cited Authors network"
              },
              CR_SO={
                if(!("CR_SO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_SO", sep = input$citSep)}
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "sources", sep = input$citSep)
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "sources", n = n, sep = input$citSep)
                values$Title= "Cited Sources network"
              })
       
     }
     
-    if (n>dim(values$NetRefs)[1]){n=dim(values$NetRefs)[1]}
     if (label.n>n){label.n=n}
     if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
     if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
     
-    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, n = n, Title = values$Title, type = input$citlayout, 
+    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, Title = values$Title, type = input$citlayout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
@@ -4272,25 +4270,24 @@ server <- function(input, output, session) {
       values$cluster="walktrap"
       switch(input$colField,
              COL_AU={
-               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", sep = ";")
+               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")
                values$Title= "Author Collaboration network"
                
              },
              COL_UN={
                if(!("AU_UN" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_UN", sep=";")}
-               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "universities", sep = ";")
+               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "universities", n = n, sep = ";")
                values$Title= "Edu Collaboration network"
              },
              COL_CO={
                if(!("AU_CO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_CO", sep=";")}
-               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", sep = ";")
+               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", n = n, sep = ";")
                values$Title= "Country Collaboration network"
                #values$cluster="none"
              })
       
     }
-    
-    if (n>dim(values$ColNetRefs)[1]){n=dim(values$ColNetRefs)[1]}
+   
     if (label.n>n){label.n=n}
     if (input$colnormalize=="none"){normalize=NULL}else{normalize=input$colnormalize}
     if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
@@ -4299,7 +4296,7 @@ server <- function(input, output, session) {
     type=input$collayout
     if (input$collayout=="worldmap"){type="auto"}
     
-    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, n = n, Title = values$Title, type = type, 
+    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, Title = values$Title, type = type, 
                               size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,

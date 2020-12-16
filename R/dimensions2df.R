@@ -2,10 +2,31 @@ dimensions2df <- function(file, format = "csv") {
   
   switch(format,
          csv = {
-           DATA=rio::import(file, quote = '"',dec = ".",skip=1)
+           
+           for (i in 1:length(file)){
+             D <- rio::import(file[i], quote = '"',dec = ".",skip=1)
+             
+             if (i>1){
+               l <- intersect(l,names(D))
+               DATA <- rbind(DATA[l],D[l])
+             }else{
+               l <- names(D)
+               DATA <- D}
+           }
+           #DATA=rio::import(file, quote = '"',dec = ".",skip=1)
          },
          excel = {
-           DATA <- rio::import(file, skip = 1)
+           for (i in 1:length(file)){
+             D <- rio::import(file[i], skip=1)
+             
+             if (i>1){
+               l <- intersect(l,names(D))
+               DATA <- rbind(DATA[l],D[l])
+             }else{
+               l <- names(D)
+               DATA <- D}
+           }
+           #DATA <- rio::import(file, skip = 1)
          })
   #Encoding(DATA) <- "UTF-8"
   

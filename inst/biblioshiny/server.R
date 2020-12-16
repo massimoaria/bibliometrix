@@ -239,13 +239,15 @@ server <- function(input, output, session) {
              },
              ### RData format
              rdata={
-               load(inFile$datapath)
+               var <- load(inFile$datapath)
+               if (var != "M") eval(parse(text = paste0("M <- ", var)))
              },
              rda={
-               load(inFile$datapath)
+               var <- load(inFile$datapath)
+               if (var != "M") eval(parse(text = paste0("M <- ", var)))
              },
              rds={
-               load(inFile$datapath)
+               M <- readRDS(inFile$datapath)
              })
     } else if (is.null(inFile)) {return(NULL)}
     

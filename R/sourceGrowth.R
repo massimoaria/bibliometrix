@@ -9,7 +9,7 @@
 #' @return an object of class \code{data.frame}
 #' @examples
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' topSO=sourceGrowth(scientometrics, top=1, cdf=TRUE)
 #' topSO
 #'

@@ -22,7 +22,7 @@ It calculates yearly published documents of the top sources.
 }
 \examples{
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 topSO=sourceGrowth(scientometrics, top=1, cdf=TRUE)
 topSO
 

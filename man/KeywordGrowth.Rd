@@ -27,7 +27,7 @@ It calculates yearly occurrences of top keywords/terms.
 }
 \examples{
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 topKW=KeywordGrowth(scientometrics, Tag = "ID", sep = ";", top=5, cdf=TRUE)
 topKW
 

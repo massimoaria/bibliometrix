@@ -37,7 +37,7 @@ year spectroscopy (RPYS). Journal of the Association for Information Science and
 \examples{
 
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 res <- rpys(scientometrics, sep=";", graph = TRUE)
 
 }

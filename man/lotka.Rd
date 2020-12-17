@@ -29,7 +29,7 @@ Reference:
 Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the Washington academy of sciences, 16(12), 317-323.\cr
 }
 \examples{
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 results <- biblioAnalysis(scientometrics)
 L=lotka(results)
 L

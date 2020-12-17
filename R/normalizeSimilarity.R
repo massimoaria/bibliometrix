@@ -39,7 +39,7 @@
 #'
 #' @examples
 #' 
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-occurrences", 
 #'               network = "keywords", sep = ";")
 #' S=normalizeSimilarity(NetMatrix, type = "association")

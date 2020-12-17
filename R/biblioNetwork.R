@@ -47,7 +47,7 @@
 #' @examples
 #' # EXAMPLE 1: Authors collaboration network
 #'
-#' # data(scientometrics)
+#' # data(scientometrics, package = "bibliometrixData")
 #'
 #' # NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 #' # network = "authors", sep = ";")
@@ -57,7 +57,7 @@
 #'
 #' # EXAMPLE 2: Co-citation network
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #'
 #' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #' network = "references", sep = ";")

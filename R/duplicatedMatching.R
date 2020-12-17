@@ -19,7 +19,7 @@
 #'
 #' @examples
 #'  
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' 
 #' M=rbind(scientometrics[1:20,],scientometrics[10:30,])
 #' 

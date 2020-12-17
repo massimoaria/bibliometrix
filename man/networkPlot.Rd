@@ -111,7 +111,7 @@ The function \code{\link{networkPlot}} can plot a bibliographic network previous
 \examples{
 # EXAMPLE Keywordd co-occurrence network
 
-data(management)
+data(management, package = "bibliometrixData")
 
 NetMatrix <- biblioNetwork(management, analysis = "co-occurrences", 
 network = "keywords", sep = ";")

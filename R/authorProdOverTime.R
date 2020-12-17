@@ -11,7 +11,7 @@
 #' \code{graph}   \tab   \tab a ggplot object}
 #'
 #' @examples
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' res <- authorProdOverTime(scientometrics, k=10)
 #' print(res$dfAU)
 #' plot(res$graph)
@@ -63,10 +63,11 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 0, face="bold")
-          ,axis.title.x = element_text(hjust = .95, face="bold")
-          ,axis.text.x = element_text(face="bold")
+          ,axis.title.x = element_text(hjust = .95,face="bold")
+          ,axis.text.x = element_text(face="bold", angle = 90)
           ,axis.text.y = element_text(face="bold")
     )+
+    coord_fixed(ratio = 2/1) +
     labs(title="Top-Authors' Production over the Time", 
          x="Author",
          y="Year")+

@@ -26,7 +26,7 @@
 #' @examples
 #' 
 #' \dontrun{
-#' data(management)
+#' data(management, package = "bibliometrixData")
 #' NCS <- normalizeCitationScore(M, field = "authors", impact.measure = "local")
 #' }
 #'

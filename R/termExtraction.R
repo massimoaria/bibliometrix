@@ -24,7 +24,7 @@
 #' @examples
 #' # Example 1: Term extraction from titles
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' 
 #' # vector of compound words
 #' keep.terms <- c("co-citation analysis","bibliographic coupling")

@@ -24,7 +24,7 @@ The function \code{authorProdOverTime} returns a list containing two objects:
 It calculates and plots the author production (in terms of number of publications) over the time.
 }
 \examples{
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 res <- authorProdOverTime(scientometrics, k=10)
 print(res$dfAU)
 plot(res$graph)

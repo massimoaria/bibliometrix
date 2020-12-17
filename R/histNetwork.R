@@ -23,7 +23,7 @@
 #'
 #'
 #' @examples
-#' data(management)
+#' data(management, package = "bibliometrixData")
 #'
 #' histResults <- histNetwork(management, min.citations = 0, sep = ";")
 #'

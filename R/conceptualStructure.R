@@ -41,7 +41,7 @@
 #' @examples
 #' # EXAMPLE Conceptual Structure using Keywords Plus
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #'
 #' CS <- conceptualStructure(scientometrics, field="ID", method="CA", 
 #'              stemming=FALSE, minDegree=3, k.max = 5)

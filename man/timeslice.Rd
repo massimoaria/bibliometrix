@@ -22,7 +22,7 @@ Divide a bibliographic data frame into time slice
 }
 \examples{
  
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 list_df <- timeslice(scientometrics, breaks = c(1995, 2005))
 

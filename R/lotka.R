@@ -18,7 +18,7 @@
 #' \code{AuthorProd}    \tab   \tab Authors' Productivity frequency table}
 #'
 #' @examples
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' results <- biblioAnalysis(scientometrics)
 #' L=lotka(results)
 #' L

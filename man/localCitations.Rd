@@ -25,7 +25,7 @@ Local citations measure how many times an author (or a document) included in thi
 }
 \examples{
  
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 CR <- localCitations(scientometrics, sep = ";")
 

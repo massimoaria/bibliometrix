@@ -20,7 +20,7 @@ The function \code{plot} returns a list of plots of class \code{ggplot2}.
 \code{plot} method for class '\code{bibliometrix}'
 }
 \examples{
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 results <- biblioAnalysis(scientometrics)
 

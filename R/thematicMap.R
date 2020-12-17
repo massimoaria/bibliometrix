@@ -31,7 +31,7 @@
 #'
 #' @examples
 #' 
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' res <- thematicMap(scientometrics, field = "ID", n = 250, minfreq = 5, size = 0.5, repel = TRUE)
 #' plot(res$map)
 #'

@@ -21,7 +21,7 @@ The function \code{summary} computes and returns on display several statistics b
 \examples{
 
 # to run the example, please remove # from the beginning of the following lines
-#data(scientometrics)
+#data(scientometrics, package = "bibliometrixData")
 
 #NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 #                   network = "authors", sep = ";")

@@ -13,7 +13,7 @@
 #' 
 #' @examples
 #'  
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' 
 #' CR <- localCitations(scientometrics, sep = ";")
 #'

@@ -67,7 +67,7 @@ by dividing the actual count of local citing items by the expected citation rate
 \examples{
 
 \dontrun{
-data(management)
+data(management, package = "bibliometrixData")
 res <- couplingMap(management, analysis = "authors", field = "CR", n = 250, impact.measure="local", 
                    minfreq = 3, size = 0.5, repel = TRUE)
 plot(res$map)

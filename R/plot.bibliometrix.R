@@ -9,7 +9,7 @@
 #' 
 #'
 #' @examples
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #'
 #' results <- biblioAnalysis(scientometrics)
 #'

@@ -54,7 +54,7 @@ and visualizing the evolution of a research field: A practical application to th
 }
 \examples{
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 years=c(2000)
 
 nexus <- thematicEvolution(scientometrics,field="ID", years=years, n=100,minFreq=2)

@@ -48,7 +48,7 @@ Collaboration profiles of the top five producers of science. Scientometrics, 47(
 }
 \examples{
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 NetMatrix <- biblioNetwork(scientometrics, analysis = "co-occurrences", 
               network = "keywords", sep = ";")
 S=normalizeSimilarity(NetMatrix, type = "association")

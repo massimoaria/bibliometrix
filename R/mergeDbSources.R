@@ -12,9 +12,9 @@
 #'
 #' @examples
 #'  
-#' data(isiCollection)
+#' data(isiCollection, package = "bibliometrixData")
 #' 
-#' data(scopusCollection)
+#' data(scopusCollection, package = "bibliometrixData")
 #' 
 #' M <- mergeDbSources(isiCollection, scopusCollection, remove.duplicated=TRUE)
 #' 

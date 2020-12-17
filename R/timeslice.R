@@ -14,7 +14,7 @@
 #'
 #' @examples
 #'  
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' 
 #' list_df <- timeslice(scientometrics, breaks = c(1995, 2005))
 #'

@@ -28,7 +28,7 @@ It calculates frequency distribution of citations.
 \examples{
 ## EXAMPLE 1: Cited articles
 
-data(scientometrics)
+data(scientometrics,package = "bibliometrixData")
 
 CR <- citations(scientometrics, field = "article", sep = ";")
 

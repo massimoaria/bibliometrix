@@ -46,7 +46,7 @@ ID \tab      \tab the frequency distribution of keywords associated to the manus
 It performs a bibliometric analysis of a dataset imported from SCOPUS and Clarivate Analytics Web of Science databases.
 }
 \examples{
-data(management)
+data(management, package = "bibliometrixData")
 
 results <- biblioAnalysis(management)
 

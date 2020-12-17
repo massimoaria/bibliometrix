@@ -75,7 +75,7 @@ of a bipartite network of terms extracted from keyword, title or abstract fields
 \examples{
 # EXAMPLE Conceptual Structure using Keywords Plus
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 CS <- conceptualStructure(scientometrics, field="ID", method="CA", 
              stemming=FALSE, minDegree=3, k.max = 5)

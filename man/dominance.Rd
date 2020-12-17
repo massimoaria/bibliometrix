@@ -29,7 +29,7 @@ the data frame variables are:
 It calculates the authors' dominance ranking from an object of the class '\code{bibliometrix}' as proposed by Kumar & Kumar, 2008.
 }
 \examples{
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 results <- biblioAnalysis(scientometrics)
 DF=dominance(results)
 DF

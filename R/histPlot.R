@@ -22,7 +22,7 @@
 #' @examples
 #' # EXAMPLE Citation network
 #'
-#' data(management)
+#' data(management, package = "bibliometrixData")
 #'
 #' histResults <- histNetwork(management, sep = ";")
 #' 

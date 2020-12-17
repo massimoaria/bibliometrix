@@ -34,7 +34,7 @@ the list contains the following objects:
 \code{summary} method for class '\code{bibliometrix}'
 }
 \examples{
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 results <- biblioAnalysis(scientometrics)
 

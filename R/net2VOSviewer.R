@@ -15,7 +15,7 @@
 #' 
 #' # VOSviewer.jar have to be present in the working folder
 #'
-#' # data(scientometrics)
+#' # data(scientometrics, package = "bibliometrixData")
 #'
 #' # NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #' # network = "references", sep = ";")

@@ -23,7 +23,7 @@
 #' @examples
 #' # Example 1: First Authors for each cited reference
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' scientometrics <- metaTagExtraction(scientometrics, Field = "CR_AU", sep = ";")
 #' unlist(strsplit(scientometrics$CR_AU[1], ";"))
 #'

@@ -15,7 +15,7 @@
 #'
 #' @examples
 #' 
-#' #data(scientometrics)
+#' #data(scientometrics, package = "bibliometrixData")
 #' 
 #' #threeFieldsPlot(scientometrics, fields=c("DE","AU","CR"),n=c(20,20,20))
 #'

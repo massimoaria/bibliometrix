@@ -31,7 +31,7 @@ The function \code{\link{networkStat}} can calculate the main network statistics
 # EXAMPLE Co-citation network
 
 # to run the example, please remove # from the beginning of the following lines
-# data(scientometrics)
+# data(scientometrics, package = "bibliometrixData")
 
 # NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 #      network = "references", sep = ";")

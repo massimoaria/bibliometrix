@@ -1,7 +1,7 @@
 #' @import stats
 #' @import dimensionsR
 #' @import ggplot2
-# @import RISmed
+#' @import bibliometrixData
 #' @import ggrepel
 #' @import ggraph
 #' @import pubmedR

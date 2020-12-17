@@ -16,7 +16,7 @@
 #' \code{graph}   \tab   \tab a ggplot object}
 #'
 #' @examples
-#' data(management)
+#' data(management, package = "bibliometrixData")
 #' timespan=c(2005,2015)
 #' res <- fieldByYear(management, field = "ID", timespan = timespan, 
 #'                     min.freq = 5, n.items = 5, graph = TRUE)

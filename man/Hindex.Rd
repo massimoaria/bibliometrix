@@ -31,7 +31,7 @@ It calculates the authors' h-index and its variants.
 
 ### EXAMPLE 1: ###
  
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 authors <- c("SMALL H", "CHEN DZ")
 
@@ -41,7 +41,7 @@ Hindex(scientometrics, field = "source", elements = "SCIENTOMETRICS", sep = ";")
 
 ### EXAMPLE 2: Garfield h-index###
  
-data(garfield)
+data(garfield, package = "bibliometrixData")
 
 indices=Hindex(garfield, field = "author", elements = "GARFIELD E", , sep = ";")
 

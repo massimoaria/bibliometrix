@@ -36,7 +36,7 @@
 #'
 #'
 #' @examples
-#' data(management)
+#' data(management, package = "bibliometrixData")
 #'
 #' results <- biblioAnalysis(management)
 #'

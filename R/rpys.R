@@ -24,7 +24,7 @@
 #' @examples
 #' 
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' res <- rpys(scientometrics, sep=";", graph = TRUE)
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS

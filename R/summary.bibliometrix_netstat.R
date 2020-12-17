@@ -11,7 +11,7 @@
 #' @examples
 #' 
 #' # to run the example, please remove # from the beginning of the following lines
-#' #data(scientometrics)
+#' #data(scientometrics, package = "bibliometrixData")
 #' 
 #' #NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 #' #                   network = "authors", sep = ";")

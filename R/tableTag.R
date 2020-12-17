@@ -12,7 +12,7 @@
 #' @return an object of class \code{table}
 #' @examples
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' Tab <- tableTag(scientometrics, Tag = "CR", sep = ";")
 #' Tab[1:10]
 #'

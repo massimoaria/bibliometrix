@@ -73,7 +73,7 @@ Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive sci
 \examples{
 # EXAMPLE 1: Authors collaboration network
 
-# data(scientometrics)
+# data(scientometrics, package = "bibliometrixData")
 
 # NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
 # network = "authors", sep = ";")
@@ -83,7 +83,7 @@ Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive sci
 
 # EXAMPLE 2: Co-citation network
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 
 NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
 network = "references", sep = ";")

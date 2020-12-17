@@ -26,7 +26,7 @@ It tabulates elements from a Tag Field column of a bibliographic data frame.
 }
 \examples{
 
-data(scientometrics)
+data(scientometrics, package = "bibliometrixData")
 Tab <- tableTag(scientometrics, Tag = "CR", sep = ";")
 Tab[1:10]
 

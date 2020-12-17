@@ -12,7 +12,7 @@
 #' @return an object of class \code{data.frame}
 #' @examples
 #'
-#' data(scientometrics)
+#' data(scientometrics, package = "bibliometrixData")
 #' topKW=KeywordGrowth(scientometrics, Tag = "ID", sep = ";", top=5, cdf=TRUE)
 #' topKW
 #' 

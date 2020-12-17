@@ -60,6 +60,24 @@ server <- function(input, output, session) {
     return(format)
   }
   
+  smart_load <- function(file){
+    var <- load(file)
+    n <- length(var)
+    if (!"M" %in% var){
+      if (n == 1) {
+        eval(parse(text = paste0("M <- ", var)))
+      } else {
+        stop("I could not find M object in your data file: ", file)
+      }
+    }
+    rm(list = var[var != "M"])
+    if ("M" %in% ls() & is.data.frame(M)){
+      return(M)
+    } else {
+      stop("Please make sure your RData/Rda file contains a M object.")
+    }
+  }
+  
   DATAloading<- eventReactive(input$applyLoad,{
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
@@ -239,13 +257,13 @@ server <- function(input, output, session) {
              },
              ### RData format
              rdata={
-               load(inFile$datapath)
+               M <- smart_load(inFile$datapath)
              },
              rda={
-               load(inFile$datapath)
+               M <- smart_load(inFile$datapath)
              },
              rds={
-               load(inFile$datapath)
+               M <- readRDS(inFile$datapath)
              })
     } else if (is.null(inFile)) {return(NULL)}
     

@@ -12,6 +12,9 @@ Changes:
 * Biblioshiny: added the "Export graph as PNG" button to network plots
 * Biblioshiny: in  network plots, added the button "Edit" for editing nodes (add, change, delete)
 * Biblioshiny: improvements in plot resolution and resizing
+* Removed vignettes and examples Datasets to respect CRAN rules about package max size (<5Mb).
+  Examples datasets are now included in a new package bibliometrixData.
+  Vignettes will published on www.bibliometrix.org
 
 
 

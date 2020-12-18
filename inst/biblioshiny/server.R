@@ -67,14 +67,14 @@ server <- function(input, output, session) {
       if (n == 1) {
         eval(parse(text = paste0("M <- ", var)))
       } else {
-        stop("I could not find M object in your data file: ", file)
+        stop("I could not find bibliometrixDB object in your data file: ", file)
       }
     }
     rm(list = var[var != "M"])
     if ( ("M" %in% ls()) & inherits(M, "bibliometrixDB") ){
       return(M)
     } else {
-      stop("Please make sure your RData/Rda file contains a M object.")
+      stop("Please make sure your RData/Rda file contains a bibliometrixDB object (M).")
     }
   }
   

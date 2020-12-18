@@ -71,7 +71,7 @@ server <- function(input, output, session) {
       }
     }
     rm(list = var[var != "M"])
-    if ("M" %in% ls() & is.data.frame(M)){
+    if ( ("M" %in% ls()) & inherits(M, "bibliometrixDB") ){
       return(M)
     } else {
       stop("Please make sure your RData/Rda file contains a M object.")

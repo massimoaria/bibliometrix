@@ -4161,7 +4161,7 @@ server <- function(input, output, session) {
     label.n = input$Labels
     if ((input$field %in% names(values$M))){
       
-      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field)){
+      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field) | ((dim(values$NetWords)[1])!=input$Nodes) ){
         
         values$field=input$field
         
@@ -4222,7 +4222,7 @@ server <- function(input, output, session) {
     n = input$citNodes
     label.n = input$citLabels
     
-    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep) | !(input$citShortlabel==values$citShortlabel)){
+    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep) | !(input$citShortlabel==values$citShortlabel) | ((dim(values$NetRefs)[1])!=input$citNodes)){
       
       values$citField=input$citField
       values$citSep=input$citSep
@@ -4263,7 +4263,7 @@ server <- function(input, output, session) {
     n = input$colNodes
     label.n = input$colLabels
     
-    if ((dim(values$ColNetRefs)[1])==1 | !(input$colField==values$colField)){
+    if ((dim(values$ColNetRefs)[1])==1 | !(input$colField==values$colField) | ((dim(values$ColNetRefs)[1])!=input$colNodes)){
       
       values$colField=input$colField
       

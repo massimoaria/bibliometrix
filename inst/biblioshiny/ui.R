@@ -353,6 +353,12 @@ navbarMenu("Dataset",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.ASPdpi != 'null'",
+                                                    sliderInput(
+                                                      'ASPh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("ASPplot.save", "Export plot as png"))
                                    
                                    ),
@@ -391,6 +397,12 @@ navbarMenu("Dataset",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.ACpYdpi != 'null'",
+                                                    sliderInput(
+                                                      'ACpYh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("ACpYplot.save", "Export plot as png"))
                       ),
                       mainPanel(
@@ -507,6 +519,12 @@ navbarMenu("Sources",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MRSdpi != 'null'",
+                                                    sliderInput(
+                                                      'MRSh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MRSplot.save", "Export plot as png"))
                                    ),
                       mainPanel(
@@ -552,6 +570,12 @@ navbarMenu("Sources",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MLCSdpi != 'null'",
+                                                    sliderInput(
+                                                      'MLCSh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MLCSplot.save", "Export plot as png"))
                       ),
                       mainPanel(
@@ -590,6 +614,12 @@ navbarMenu("Sources",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.BLdpi != 'null'",
+                                                    sliderInput(
+                                                      'BLh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("BLplot.save", "Export plot as png"))           
                       ),
                       mainPanel(
@@ -644,6 +674,12 @@ navbarMenu("Sources",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.SIdpi != 'null'",
+                                                    sliderInput(
+                                                      'SIh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("SIplot.save", "Export plot as png"))           
                       ),
                       mainPanel(
@@ -698,6 +734,12 @@ navbarMenu("Sources",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.SDdpi != 'null'",
+                                                    sliderInput(
+                                                      'SDh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("SDplot.save", "Export plot as png"))       
                       ),
                       
@@ -759,6 +801,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MRAdpi != 'null'",
+                                                    sliderInput(
+                                                      'MRAh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MRAplot.save", "Export plot as png"))    
                       ),
                       mainPanel(
@@ -805,6 +853,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MLCAdpi != 'null'",
+                                                    sliderInput(
+                                                      'MLCAh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MLCAplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
@@ -851,6 +905,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.APOTdpi != 'null'",
+                                                    sliderInput(
+                                                      'APOTh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("APOTplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
@@ -894,6 +954,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.LLdpi != 'null'",
+                                                    sliderInput(
+                                                      'LLh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("LLplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
@@ -948,6 +1014,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.AIdpi != 'null'",
+                                                    sliderInput(
+                                                      'AIh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("AIplot.save", "Export plot as png"))   
                       ),
                       mainPanel(
@@ -1004,6 +1076,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.AFFdpi != 'null'",
+                                                    sliderInput(
+                                                      'AFFh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("AFFplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1052,6 +1130,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MRCOdpi != 'null'",
+                                                    sliderInput(
+                                                      'MRCOh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MRCOplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1089,6 +1173,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.CSPdpi != 'null'",
+                                                    sliderInput(
+                                                      'CSPh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("CSPplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1141,6 +1231,12 @@ navbarMenu("Authors",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MCCdpi != 'null'",
+                                                    sliderInput(
+                                                      'MCCh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MCCplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1198,6 +1294,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MGCDdpi != 'null'",
+                                                    sliderInput(
+                                                      'MGCDh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MGCDplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1249,6 +1351,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MLCDdpi != 'null'",
+                                                    sliderInput(
+                                                      'MLCDh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MLCDplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1305,6 +1413,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MLCRdpi != 'null'",
+                                                    sliderInput(
+                                                      'MLCRh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MLCRplot.save", "Export plot as png"))  
                       ),
                       mainPanel(
@@ -1362,6 +1476,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.RSdpi != 'null'",
+                                                    sliderInput(
+                                                      'RSh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("RSplot.save", "Export plot as png"))  
                                    
                       ),
@@ -1421,6 +1541,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.MRWdpi != 'null'",
+                                                    sliderInput(
+                                                      'MRWh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("MRWplot.save", "Export plot as png"))  
                                    
                       ),
@@ -1587,6 +1713,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.WDdpi != 'null'",
+                                                    sliderInput(
+                                                      'WDh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("WDplot.save", "Export plot as png"))  
     
                       ),
@@ -1653,6 +1785,12 @@ navbarMenu("Documents",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.TTdpi != 'null'",
+                                                    sliderInput(
+                                                      'TTh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("TTplot.save", "Export plot as png"))  
                                    
                                    
@@ -1737,6 +1875,12 @@ navbarMenu("Coupling ",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.CMdpi != 'null'",
+                                                    sliderInput(
+                                                      'CMh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("CMplot.save", "Export plot as png"))
                       ),
                       mainPanel("Clustering by Coupling",
@@ -1963,6 +2107,12 @@ navbarMenu("Conceptual Structure",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.TMdpi != 'null'",
+                                                    sliderInput(
+                                                      'TMh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                    downloadButton("TMplot.save", "Export plot as png"))
                       ),
                       mainPanel("Thematic Map",
@@ -2196,6 +2346,12 @@ navbarMenu("Conceptual Structure",
                           selected = "null"
                         ),
                         conditionalPanel(condition = "input.FAdpi != 'null'",
+                                         sliderInput(
+                                           'FAh',
+                                           h4(em(strong(
+                                             "Height (in inches)"
+                                           ))),
+                                           value = 7, min = 1, max = 20, step = 1),
                                          downloadButton("FA1plot.save", "Term Factorial Map "),
                                          h4(" "),
                                          downloadButton("FA2plot.save", "Topic Dendrogram "),
@@ -2440,6 +2596,12 @@ navbarMenu("Intellectual Structure",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.HGdpi != 'null'",
+                                                    sliderInput(
+                                                      'HGh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("HGplot.save", "Export plot as png"))  
                                    
                                   ),
@@ -2644,6 +2806,12 @@ navbarMenu("Social Structure",
                                      selected = "null"
                                    ),
                                    conditionalPanel(condition = "input.CCdpi != 'null'",
+                                                    sliderInput(
+                                                      'CCh',
+                                                      h4(em(strong(
+                                                        "Height (in inches)"
+                                                      ))),
+                                                      value = 7, min = 1, max = 20, step = 1),
                                                     downloadButton("CCplot.save", "Export plot as png"))  
                       ),
                       mainPanel(

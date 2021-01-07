@@ -10,6 +10,8 @@ server <- function(input, output, session) {
   
   ### initial values ####
   values = reactiveValues()
+  values$h <- 7
+  values$w <- 14 
   values$results=list("NA")
   values$log="working..."
   values$load="FALSE"
@@ -830,11 +832,12 @@ server <- function(input, output, session) {
   
   output$ASPplot.save <- downloadHandler(
     filename = function() {
-      
+    
       paste("AnnualScientificProduction-", Sys.Date(), ".png", sep="")
     },
+
     content <- function(file) {
-      ggsave(filename = file, plot = values$ASPplot, dpi = as.numeric(input$ASPdpi))
+      ggsave(filename = file, plot = values$ASPplot, dpi = as.numeric(input$ASPdpi), height = input$ASPh, width = input$ASPh*2)
     },
     contentType = "png"
   )
@@ -919,7 +922,7 @@ server <- function(input, output, session) {
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$ACpYplot, dpi = as.numeric(input$ACpYdpi))
+      ggsave(filename = file, plot = values$ACpYplot, dpi = as.numeric(input$ACpYdpi), height = input$ACpYh, width = input$ACpYh*2)
     },
     contentType = "png"
   )
@@ -997,7 +1000,7 @@ server <- function(input, output, session) {
       paste("MostRelevantSources-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRSplot, dpi = as.numeric(input$MRSdpi))
+      ggsave(filename = file, plot = values$MRSplot, dpi = as.numeric(input$MRSdpi), height = input$MRSh, width = input$MRSh*2)
     },
     contentType = "png"
   )
@@ -1073,7 +1076,7 @@ server <- function(input, output, session) {
       paste("MostLocalCitedSources-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCSplot, dpi = as.numeric(input$MLCSdpi))
+      ggsave(filename = file, plot = values$MLCSplot, dpi = as.numeric(input$MLCSdpi), height = input$MLCSh, width = input$MLCSh*2)
     },
     contentType = "png"
   )
@@ -1126,7 +1129,7 @@ server <- function(input, output, session) {
       paste("BradfordLaws-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$bradford$graph, dpi = as.numeric(input$BLdpi))
+      ggsave(filename = file, plot = values$bradford$graph, dpi = as.numeric(input$BLdpi), height = input$BLh, width = input$BLh*2)
     },
     contentType = "png"
   )
@@ -1171,7 +1174,7 @@ server <- function(input, output, session) {
       paste("SourceImpact-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$SIplot, dpi = as.numeric(input$SIdpi))
+      ggsave(filename = file, plot = values$SIplot, dpi = as.numeric(input$SIdpi), height = input$SIh, width = input$SIh*2)
     },
     contentType = "png"
   )
@@ -1262,7 +1265,7 @@ server <- function(input, output, session) {
       paste("SourceDynamics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$SDplot, dpi = as.numeric(input$SDdpi))
+      ggsave(filename = file, plot = values$SDplot, dpi = as.numeric(input$SDdpi), height = input$SDh, width = input$SDh*2)
     },
     contentType = "png"
   )
@@ -1356,7 +1359,7 @@ server <- function(input, output, session) {
       paste("MostRelevantAuthors-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRAplot, dpi = as.numeric(input$MRAdpi))
+      ggsave(filename = file, plot = values$MRAplot, dpi = as.numeric(input$MRAdpi), height = input$MRAh, width = input$MRAh*2)
     },
     contentType = "png"
   )
@@ -1430,7 +1433,7 @@ server <- function(input, output, session) {
       paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCAplot, dpi = as.numeric(input$MLCAdpi))
+      ggsave(filename = file, plot = values$MLCAplot, dpi = as.numeric(input$MLCAdpi), height = input$MLCAh, width = input$MLCAh*2)
     },
     contentType = "png"
   )
@@ -1483,7 +1486,7 @@ server <- function(input, output, session) {
       paste("AuthorImpact-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AIplot, dpi = as.numeric(input$AIdpi))
+      ggsave(filename = file, plot = values$AIplot, dpi = as.numeric(input$AIdpi), height = input$AIh, width = input$AIh*2)
     },
     contentType = "png"
   )
@@ -1532,7 +1535,7 @@ server <- function(input, output, session) {
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AUProdOverTime$graph, dpi = as.numeric(input$APOTdpi))
+      ggsave(filename = file, plot = values$AUProdOverTime$graph, dpi = as.numeric(input$APOTdpi), height = input$APOTh, width = input$APOTh*2.5)
     },
     contentType = "png"
   )
@@ -1638,7 +1641,7 @@ server <- function(input, output, session) {
       paste("LotkaLaw-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$LLplot, dpi = as.numeric(input$LLdpi))
+      ggsave(filename = file, plot = values$LLplot, dpi = as.numeric(input$LLdpi), height = input$LLh, width = input$LLh*2)
     },
     contentType = "png"
   )
@@ -1711,7 +1714,7 @@ server <- function(input, output, session) {
       paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AFFplot, dpi = as.numeric(input$AFFdpi))
+      ggsave(filename = file, plot = values$AFFplot, dpi = as.numeric(input$AFFdpi), height = input$AFFh, width = input$AFFh*2)
     },
     contentType = "png"
   )
@@ -1788,7 +1791,7 @@ server <- function(input, output, session) {
       paste("MostRelevantCountries-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRCOplot, dpi = as.numeric(input$MRCOdpi))
+      ggsave(filename = file, plot = values$MRCOplot, dpi = as.numeric(input$MRCOdpi), height = input$MRCOh, width = input$MRCOh*2)
     },
     contentType = "png"
   )
@@ -1839,7 +1842,7 @@ server <- function(input, output, session) {
       paste("CountryScientificProduction-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$mapworld$g, dpi = as.numeric(input$CSPdpi))
+      ggsave(filename = file, plot = values$mapworld$g, dpi = as.numeric(input$CSPdpi), height = input$CSPh, width = input$CSPh*2)
     },
     contentType = "png"
   )
@@ -1910,7 +1913,7 @@ server <- function(input, output, session) {
       paste("MostCitedCountries-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MCCplot, dpi = as.numeric(input$MCCdpi))
+      ggsave(filename = file, plot = values$MCCplot, dpi = as.numeric(input$MCCdpi), height = input$MCCh, width = input$MCCh*2)
     },
     contentType = "png"
   )
@@ -1988,7 +1991,7 @@ server <- function(input, output, session) {
       paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MGCDplot, dpi = as.numeric(input$MGCDdpi))
+      ggsave(filename = file, plot = values$MGCDplot, dpi = as.numeric(input$MGCDdpi), height = input$MGCDh, width = input$MGCDh*2)
     },
     contentType = "png"
   )
@@ -2071,7 +2074,7 @@ server <- function(input, output, session) {
       paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCDplot, dpi = as.numeric(input$MLCDdpi))
+      ggsave(filename = file, plot = values$MLCDplot, dpi = as.numeric(input$MLCDdpi), height = input$MLCDh, width = input$MLCDh*2)
     },
     contentType = "png"
   )
@@ -2147,7 +2150,7 @@ server <- function(input, output, session) {
       paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCRplot, dpi = as.numeric(input$MLCRdpi))
+      ggsave(filename = file, plot = values$MLCRplot, dpi = as.numeric(input$MLCRdpi), height = input$MLCRh, width = input$MLCRh*2)
     },
     contentType = "png"
   )
@@ -2203,7 +2206,7 @@ server <- function(input, output, session) {
       paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$res$spectroscopy, dpi = as.numeric(input$RSdpi))
+      ggsave(filename = file, plot = values$res$spectroscopy, dpi = as.numeric(input$RSdpi), height = input$RSh, width = input$RSh*2)
     },
     contentType = "png"
   )
@@ -2315,7 +2318,7 @@ server <- function(input, output, session) {
       paste("MostRelevantWords-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRWplot, dpi = as.numeric(input$MRWdpi))
+      ggsave(filename = file, plot = values$MRWplot, dpi = as.numeric(input$MRWdpi), height = input$MRWh, width = input$MRWh*2)
     },
     contentType = "png"
   )
@@ -2524,7 +2527,7 @@ server <- function(input, output, session) {
       paste("WordDynamics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$WDplot, dpi = as.numeric(input$WDdpi))
+      ggsave(filename = file, plot = values$WDplot, dpi = as.numeric(input$WDdpi), height = input$WDh, width = input$WDh*2)
     },
     contentType = "png"
   )
@@ -2589,7 +2592,7 @@ server <- function(input, output, session) {
       paste("TrendTopics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$trendTopics$graph, dpi = as.numeric(input$TTdpi))
+      ggsave(filename = file, plot = values$trendTopics$graph, dpi = as.numeric(input$TTdpi), height = input$TTh, width = input$TTh*2)
     },
     contentType = "png"
   )
@@ -2667,7 +2670,7 @@ server <- function(input, output, session) {
       paste("CouplingMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CM$map, dpi = as.numeric(input$CMdpi))
+      ggsave(filename = file, plot = values$CM$map, dpi = as.numeric(input$CMdpi), height = input$CMh, width = input$CMh*2)
     },
     contentType = "png"
   )
@@ -2813,7 +2816,7 @@ server <- function(input, output, session) {
       paste("FactorialMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_terms, dpi = as.numeric(input$FAdpi))
+      ggsave(filename = file, plot = values$CS$graph_terms, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*1.5)
     },
     contentType = "png"
   )
@@ -2823,7 +2826,7 @@ server <- function(input, output, session) {
       paste("Dendrogram-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_dendogram, dpi = as.numeric(input$FAdpi))
+      ggsave(filename = file, plot = values$CS$graph_dendogram, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*2)
     },
     contentType = "png"
   )
@@ -2834,7 +2837,7 @@ server <- function(input, output, session) {
       paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = as.numeric(input$FAdpi))
+      ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*1.5)
     },
     contentType = "png"
   )
@@ -2845,7 +2848,7 @@ server <- function(input, output, session) {
       paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = as.numeric(input$FAdpi))
+      ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*1.5)
     },
     contentType = "png"
   )
@@ -3008,7 +3011,7 @@ server <- function(input, output, session) {
       paste("ThematicMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-               ggsave(filename = file, plot = values$TM$map, dpi = as.numeric(input$TMdpi))
+               ggsave(filename = file, plot = values$TM$map, dpi = as.numeric(input$TMdpi),  height = input$TMh, width = input$TMh*1.5)
              },
     contentType = "png"
   )
@@ -3621,7 +3624,7 @@ server <- function(input, output, session) {
       paste("Historiograph-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$histPlot$g, dpi = as.numeric(input$HGdpi))
+      ggsave(filename = file, plot = values$histPlot$g, dpi = as.numeric(input$HGdpi),  height = input$HGh, width = input$HGh*2)
     },
     contentType = "png"
   )
@@ -3763,7 +3766,7 @@ server <- function(input, output, session) {
       paste("CountryCollaborationMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$WMmap$g, dpi = as.numeric(input$CCdpi))
+      ggsave(filename = file, plot = values$WMmap$g, dpi = as.numeric(input$CCdpi),  height = input$CCh, width = input$CCh*2)
     },
     contentType = "png"
   )
@@ -3806,6 +3809,7 @@ server <- function(input, output, session) {
   }) 
   
   ### COMMON FUNCTIONS ####
+  
   
   # displayResolution <- function() {
   #   session$clientData$output_plot1_width

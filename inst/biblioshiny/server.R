@@ -4030,8 +4030,9 @@ server <- function(input, output, session) {
              
            },
            "tab13"={
-             CR<-citations(values$M,field="author")
-             TAB=data.frame(Authors=names(CR$Cited), Citations=as.numeric(CR$Cited),stringsAsFactors = FALSE)
+             CR<-localCitations(values$M,fast.search = FALSE, verbose = FALSE)
+             TAB <- CR$Authors
+             #TAB=data.frame(Authors=names(CR$Authors$Author), Citations=as.numeric(CR$Cited),stringsAsFactors = FALSE)
            }
     )
     values$TAB=TAB

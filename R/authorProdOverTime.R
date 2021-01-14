@@ -25,6 +25,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
 
   M$TC=as.numeric(M$TC)
   M$PY=as.numeric(M$PY)
+  M <- M[!is.na(M$PY),] #remove rows with missing value in PY
   AU=names(tableTag(M,"AU"))
   k=min(k,length(AU))
   AU=AU[1:k]

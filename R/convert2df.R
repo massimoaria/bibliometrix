@@ -148,7 +148,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   if (!("CR" %in% names(M))){
     M$CR="none"
   } else {
-    M$CR <- trim.leading(trimES(gsub("\\[,||\\[||\\]","",M$CR)))  # remove foreign characters from CR (i.e. Chinese, Russian characters)
+    M$CR <- trim.leading(trimES(gsub("\\[,||\\[||\\]|| \\.\\. || \\. ","",M$CR)))  # remove foreign characters from CR (i.e. Chinese, Russian characters)
   }
   
   if (dbsource!="cochrane"){M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)}

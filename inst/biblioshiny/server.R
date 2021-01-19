@@ -2383,7 +2383,7 @@ server <- function(input, output, session) {
     
     wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
                            fontFamily = input$font, fontWeight = 'normal',
-                           color = input$wcCol, backgroundColor = input$wcBGCol,
+                           color = input$wcCol, backgroundColor = "white", #input$wcBGCol,
                            minRotation = 0, maxRotation = input$rotate/10, shuffle = TRUE,
                            rotateRatio = 0.7, shape = input$wcShape, ellipticity = input$ellipticity,
                            widgetsize = NULL, figPath = NULL, hoverFunction = NULL)

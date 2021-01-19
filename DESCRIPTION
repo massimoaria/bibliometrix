@@ -34,8 +34,6 @@ Imports: stats,
 		 rio,
 	   rscopus,
 		 shiny,
-		 shinycssloaders,
-		 shinythemes,
 		 SnowballC,
 		 stringdist,
 		 stringr,
@@ -43,10 +41,14 @@ Imports: stats,
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    plotly,
+    shinycssloaders,
+		shinythemes,
+		visNetwork,
+		wordcloud2
 RoxygenNote: 7.1.1
 NeedsCompilation: no
 Author: Massimo Aria [cre, aut],
   Corrado Cuccurullo [aut]
 Maintainer: Massimo Aria <aria@unina.it>
-VignetteBuilder: knitr, rmarkdown

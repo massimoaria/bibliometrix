@@ -7,7 +7,7 @@ if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=T
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
 if (!(require(shinythemes))){install.packages("shinythemes")} 
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
-if (!require(colourpicker)){install.packages("colourpicker")}
+#if (!require(colourpicker)){install.packages("colourpicker")}
 #if (!require(treemap)){install.packages("treemap")}
 if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
 if (!require(maps)){install.packages("maps"); require(maps, quietly=TRUE)}
@@ -1608,7 +1608,7 @@ navbarMenu("Documents",
                                                choices = c("Random Dark" = "random-dark",
                                                            "Random Light" = "random-light"),
                                                selected = "random-dark"),
-                                   colourpicker::colourInput("wcBGCol", label= "Backgroud color",value="white", showColour = "background", returnName=TRUE),
+                                   #colourpicker::colourInput("wcBGCol", label= "Backgroud color",value="white", showColour = "background", returnName=TRUE),
                                    sliderInput("scale", label = "Font size", min=0.2,max=5,step=0.1,value=1),
                                    sliderInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65),
                                    sliderInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1),

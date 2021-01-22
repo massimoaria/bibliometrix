@@ -106,7 +106,8 @@ navbarMenu("Data",
                           choices = c(
                             " " = "null",
                             "Import raw file(s)" = "import",
-                            "Load bibliometrix file(s)" = "load"
+                            "Load bibliometrix file(s)" = "load",
+                            "Use a sample collection" = "demo"
                           ),
                           selected = "null"
                         ),
@@ -127,7 +128,7 @@ navbarMenu("Data",
                           )
                         ),
                         conditionalPanel(
-                          condition = "input.load != 'null'",
+                          condition = "input.load != 'null' & input.load != 'demo'",
                           fileInput(
                             "file1",
                             "Choose a file",

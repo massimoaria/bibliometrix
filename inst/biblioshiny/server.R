@@ -86,7 +86,16 @@ server <- function(input, output, session) {
     # 'size', 'type', and 'datapath' columns. The 'datapath'
     # column will contain the local filenames where the data can
     # be found.
-    
+    if (input$load=="demo"){
+      data(management, package="bibliometrixData")
+
+      values = initial(values)
+      values$M <- management
+      values$Morig = management
+      values$Histfield = "NA"
+      values$results = list("NA")
+      return()
+    }
     inFile <- input$file1
     
     if (!is.null(inFile) & input$load=="import") {

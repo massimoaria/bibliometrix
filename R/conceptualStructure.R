@@ -241,7 +241,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
   if (isTRUE(graph)){plot(b)}
   
   b_dend <- fviz_dend(km.res, rect = TRUE, k=clust, 
-                                       labelsize=labelsize, main="Topic Dendrogram",
+                                       cex=labelsize/20, main="Topic Dendrogram",
                                        k_colors = cbPalette[clust:1])+ 
     #scale_color_manual(values = cbPalette[(clust+1):1])+
     #scale_fill_manual(values = cbPalette[(clust+1):1])+

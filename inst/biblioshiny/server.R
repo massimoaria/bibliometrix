@@ -2668,6 +2668,7 @@ server <- function(input, output, session) {
                              n=input$CMn, minfreq=input$CMfreq, 
                              impact.measure=input$CMimpact,
                              stemming=input$CMstemming, size=input$sizeCM, 
+                             label.term = input$CMlabeling,
                              n.labels=input$CMn.labels, repel=FALSE)
     
     validate(

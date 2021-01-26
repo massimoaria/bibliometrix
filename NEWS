@@ -4,7 +4,7 @@ New functionalities:
 
 Changes:
 * Biblioshiny: Added the possibility to use a sample collection 
-
+* couplingMap: Added the possibility to label clusters through content metadata (I.e. Keywords, title terms, etc.)
 
 
 bibliometrix v3.0.4 (Release date: 2021-01-18 )

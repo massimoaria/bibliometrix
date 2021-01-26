@@ -9,6 +9,7 @@ couplingMap(
   analysis = "documents",
   field = "CR",
   n = 500,
+  label.term = NULL,
   impact.measure = "local",
   minfreq = 5,
   stemming = FALSE,
@@ -25,6 +26,9 @@ couplingMap(
 \item{field}{is the textual attribute used to measure the coupling strength. It can be \code{field = c("CR", "ID","DE", "TI", "AB")}.}
 
 \item{n}{is an integer. It indicates the number of units to include in the analysis.}
+
+\item{label.term}{is a character. It indicates which content metadata have to use for cluster labeling. It can be \code{label.term = c("ID","DE","TI","AB")}.
+If \code{label.term = NULL} cluster items will be use for labeling.}
 
 \item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 It can be \code{impact.measure = c("local", "global")}.\\

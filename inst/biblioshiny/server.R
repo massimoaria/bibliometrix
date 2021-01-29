@@ -155,6 +155,28 @@ server <- function(input, output, session) {
                  })
           
         },
+        lens = {
+          switch(ext,
+                 ###  Lens.org ZIP Files
+                 zip = {
+                   D <-  unzip(inFile$datapath)
+                   withProgress(message = 'Conversion in progress',
+                                value = 0, {
+                                  M <- convert2df(D,
+                                                  dbsource = input$dbsource,
+                                                  format = format(D))
+                                })
+                 },
+                 ### Lens.org CSV Files
+                 {
+                   withProgress(message = 'Conversion in progress',
+                                value = 0, {
+                                  M <- convert2df(inFile$datapath,
+                                                  dbsource = input$dbsource,
+                                                  format = format(inFile$datapath))
+                                })
+                 })
+        },
         cochrane = {
           switch(ext,
                  ###  Cochrane ZIP Files

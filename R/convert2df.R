@@ -1,6 +1,6 @@
 #' Import and Convert bibliographic export files and API objects.
 #'
-#' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
+#' It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, Lens.org, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
 #' objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 #'
 #' @param file a character array containing a sequence of object names coming from: 
@@ -8,8 +8,9 @@
 #' a)\tab \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
 #' b)\tab \tab SCOPUS (exclusively in bibtex format '.bib');\cr
 #' c)\tab \tab Digital Science Dimensions (in csv '.csv' or excel '.xlsx' formats);\cr
-#' d)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
-#' e)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}
+#' d)\tab \tab Lens.org (in csv '.csv');\cr
+#' e)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
+#' f)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}
 #' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.
 #' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"api"}, \code{"bibtex"}, \code{"plaintext"}, \code{"endnote"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
@@ -57,7 +58,7 @@
 convert2df<-function(file,dbsource="wos",format="plaintext"){
 
   allowed_formats <- c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed') 
-  allowed_db <- c('cochrane','dimensions','generic','isi','pubmed','scopus','wos')
+  allowed_db <- c('cochrane','dimensions','generic','isi','pubmed','scopus','wos', 'lens')
   
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
   if (length(setdiff(dbsource,allowed_db))>0){
@@ -76,6 +77,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   if (dbsource=="wos") dbsource <- "isi"
   if (format=="endnote") format <- "plaintext"
+  if (format == "lens") format <- "csv"
   
   
   switch(
@@ -107,6 +109,10 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     generic = {
       D <- importFiles(file)
       M <- bib2df(D, dbsource = "generic")
+    },
+    ## db LENS
+    lens = {
+      M <- csvLens2df(file)
     },
     ## db PUBMED
     pubmed = {
@@ -155,7 +161,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   cat("Done!\n\n")
   
-  if (!(dbsource %in% c("dimensions", "pubmed"))) {
+  if (!(dbsource %in% c("dimensions", "pubmed", "lens"))) {
     ## AU_UN field creation
     if ("C1" %in% names(M)) {
       cat("\nGenerating affiliation field tag AU_UN from C1:  ")

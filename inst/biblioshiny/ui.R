@@ -121,6 +121,7 @@ navbarMenu("Data",
                               "Web of Science (WoS/WoK)" = "isi",
                               "Scopus" = "scopus",
                               "Dimensions" = "dimensions",
+                              "Lens.org" = "lens",
                               "PubMed" = "pubmed",
                               "Cochrane Library" = "cochrane"
                             ),

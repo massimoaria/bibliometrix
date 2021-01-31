@@ -49,64 +49,61 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   
   #elements=paste("\\\b",elements,"\\\b",sep="")
   M$TC=as.numeric(M$TC)
-  M$PY=as.numeric(M$PY)
+  M$PY <- as.numeric(M$PY)
+  M <- M %>% drop_na(.data$TC)
+  M <- M[M$TC>0,]
+  
   Today=as.numeric(substr(Sys.time(),1,4))
   past=Today-years
   if (min(M$PY, na.rm = TRUE)<past){M=M[M$PY>=past,]}
-  
-  TC2=NULL
   
   switch(field,
          author={
            AU=M$AU
            AU=trimES(gsub(","," ",AU))
-           i=which(regexpr("ANONYMOUS",elements)>-1)
-           if(length(i)>0){elements=elements[-i]}
-           Name="Author"
-           AU=paste(";",AU,";",sep="")
-           },
+           listAU <- strsplit(AU, split=sep)
+           l <- lengths(listAU)
+           index= rep(row.names(M), l)
+           df <- M[index,]
+           df$AUs <- unlist(listAU)
+         },
          source={
-           SO=M$SO
-           Name="Source"
+           df <- M
+           df$AUs <- M$SO
          })
-   
-  ## identify manuscripts of the author or of the sources
+  rm(M)
   
- 
-  H=data.frame(Element=elements,h_index=0,g_index=0,m_index=0,TC=0,NP=0, PY_start=NA,stringsAsFactors = FALSE)
-  TotalCitations=list()
-  for (j in 1:length(elements)){
-    author=elements[j]
-    
-    if (!is.null(shiny::getDefaultReactiveDomain())){shiny::incProgress(1/length(elements), detail=paste0("\nAuthor: ",author))}
-    
-    if (field=="source"){ind=which(SO==author)} else{
-      ind=which(regexpr(paste(";",author,";",sep=""),AU)!=-1)
-    }
-    
-    if (length(ind)>0){
-    range=as.numeric(format(Sys.Date(),'%Y'))-min(as.numeric(M$PY[ind]))+1
-    H[j,6]=length(ind)
-    H[j,5]=sum(M$TC[ind])
-    H[j,7]=min(as.numeric(M$PY[ind]), na.rm = TRUE)
-    TC=sort(as.numeric(M$TC[ind]))
-    TCC=sort(as.numeric(M$TC[ind]),decreasing = TRUE)
-      for (i in 1:length(TC)){
-        TC2[i]=mean(TCC[1:i], na.rm=TRUE)
-        if (TC2[i]>=i){H[j,3]=i}
-        if (length(TC[TC>=i])>=i){
-        H[j,2]=i
-        H[j,4]=i/range}
-      }
-    }
-    #TotalCitations[[j]]=data.frame(Year=as.numeric(M$PY[ind]),TC,Year2=sort(as.numeric(M$PY[ind])),TC2)
-    if (length(ind)>0){
-    df=data.frame(Authors=substr(M$AU[ind], 1, 30),Journal=substr(M$SO[ind], 1, 30),Year=as.numeric(M$PY[ind]),TotalCitation=M$TC[ind], stringsAsFactors = FALSE)
-    TotalCitations[[j]]=df[order(df$TotalCitation),]
-    }
+  h_calc <- function(x){
+    h <- tail(which(1:length(x) <= sort(x,decreasing = T)),1) #[1]-1
+    return(h)
   }
-  names(H)[1]=Name
-  results=list(H=H,CitationList=TotalCitations)
+  
+  g_calc <- function(x){
+    g <- tail(which(1:length(x) <= cummean(sort(x,decreasing = T))),1)
+    return(g)
+  }
+  
+  H <- df %>% 
+    group_by(.data$AUs) %>% 
+    summarize(#Element = .data$AUs[1],
+      h_index = h_calc(.data$TC),
+      #h_index = which(1:length(.data$TC) >= sort(.data$TC,decreasing = T))[1]-1,
+      g_index = g_calc(.data$TC),
+      PY_start = min(.data$PY),
+      TC = sum(.data$TC),
+      NP = length(.data$AUs)) %>%
+    mutate(
+      m_index = .data$h_index / (Today -.data$PY_start+1)
+    ) %>%
+    rename(Element = AUs) %>%
+    as.data.frame()
+  
+  H <- H[c("Element","h_index","g_index","m_index","TC","NP","PY_start")]           
+  
+  CitationList <- split(df[c("AU","SO","PY","TC","DI")] , f = df$AUs )
+  
+  results=list(H=H,CitationList=CitationList)
+  
   return(results)
 }
 

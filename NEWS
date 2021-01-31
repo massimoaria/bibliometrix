@@ -3,6 +3,7 @@ bibliometrix v3.0.5 (Release date: ?????? )
 New functionalities:
 
 Changes:
+* Hindex: Huge improvements in execution time.
 * Biblioshiny: Added the possibility to use a sample collection 
 * couplingMap: Added the possibility to label clusters through content metadata (I.e. Keywords, title terms, etc.)
 

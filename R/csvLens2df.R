@@ -3,7 +3,7 @@ csvLens2df <- function(file){
   ## import all files in a single data frame
   for (i in 1:length(file)){
     #D <- rio::import(file[i], quote='"')
-    D <- read.csv(file[i], quote='"', check.names = F, fileEncoding = "UTF-8-BOM")
+    D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F) #fileEncoding = "UTF-8-BOM")
     if (i>1){
       l <- intersect(l,names(D))
       DATA <- rbind(DATA[l],D[l])

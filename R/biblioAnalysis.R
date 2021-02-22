@@ -84,8 +84,10 @@ if (!("SR" %in% Tags)){M=metaTagExtraction(M,"SR")}
 if ("AU" %in% Tags){
   listAU=strsplit(as.character(M$AU),sep)
   listAU=lapply(listAU, function(l) trim(l))
-  nAU=unlist(lapply(listAU,length))  # num. of authors per paper
-  fracAU=unlist(lapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
+  #nAU=unlist(lapply(listAU,length))  # num. of authors per paper
+  nAU <- lengths(listAU)
+  #fracAU=unlist(lapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
+  fracAU <- rep(1/nAU,nAU)
   AU=unlist(listAU)
 
   Authors=sort(table(AU),decreasing=TRUE)

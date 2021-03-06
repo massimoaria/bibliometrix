@@ -78,5 +78,6 @@ mergeDbSources <- function(...,remove.duplicated=TRUE){
     cat("\n",sum(d),"duplicated documents have been removed\n")
     M=M[!d,]
   }
+  class(M) <- c("bibliometrixDB", "data.frame")
   return(M)
 }

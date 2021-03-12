@@ -50,7 +50,7 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
   #elements=paste("\\\b",elements,"\\\b",sep="")
   M$TC=as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
-  M <- M %>% drop_na(.data$TC)
+  M <- M %>% dplyr::filter(!is.na(.data$TC))
   M <- M[M$TC>0,]
   
   Today=as.numeric(substr(Sys.time(),1,4))

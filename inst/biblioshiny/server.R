@@ -1028,17 +1028,8 @@ server <- function(input, output, session) {
     xx$Articles=as.numeric(xx$Articles)
     xx$Sources=substr(xx$Sources,1,50)
     
-    
-    g=ggplot2::ggplot(data=xx, aes(x=.data$Sources, y=.data$Articles, fill=-.data$Articles,text=paste("Source: ",.data$Sources,"\nN. of Documents: ",.data$Articles))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx$Sources))+
-      labs(title="Most Relevant Sources", x = "Sources")+
-      labs(y = "N. of Documents")+
-      theme_minimal()+
-      guides(fill=FALSE)+
-      coord_flip()
-    
+    g <- freqPlot(xx,x=2,y=3, textLaby = "Sources", textLabx = "N. of Documents", title = "Most Relevant Sources")
+
     values$MRSplot <- g
     return(g)
   })
@@ -1105,16 +1096,8 @@ server <- function(input, output, session) {
     xx$Articles=as.numeric(xx$Articles)
     xx$Sources=substr(xx$Sources,1,50)
     
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Cited Sources", textLabx = "N. of Local Citations", title = "Most Local Cited Sources")
     
-    g=ggplot2::ggplot(data=xx, aes(x=.data$Sources, y=.data$Articles, fill=-.data$Articles,text=paste("Source: ",.data$Sources,"\nN. of Documents: ",.data$Articles))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx$Sources))+
-      labs(title="Most Cited Sources", x = "Sources")+
-      labs(y = "N. of Documents")+
-      theme_minimal()+
-      guides(fill=FALSE)+
-      coord_flip()
     values$MLCSplot <- g
     return(g)
   })
@@ -1389,15 +1372,11 @@ server <- function(input, output, session) {
     
     xx=xx[1:k,]
     xx[,2]=round(xx[,2],1)
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Author: ",xx[,1],"\n",lab,": ",xx[,2]))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
-      labs(title="Most Relevant Authors", x = "Authors")+
-      labs(y = lab)+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    
+    xx <- xx[order(-xx[,2]),]
+    
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Relevant Authors")
+
     values$MRAplot <- g
     return(g)
   })
@@ -1454,7 +1433,7 @@ server <- function(input, output, session) {
     
     #xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
     xx <- values$TABAuCit
-    lab <- "Citations"
+    lab <- "Local Citations"
     xx[,2]=as.numeric(xx[,2])
     
     if (input$MostCitAuthorsK>dim(xx)[1]){
@@ -1463,15 +1442,11 @@ server <- function(input, output, session) {
     
     xx=xx[1:k,]
     xx[,2]=round(xx[,2],1)
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Author: ",xx[,1],"\n",lab,": ",xx[,2]))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
-      labs(title="Most Local Cited Authors", x = "Authors")+
-      labs(y = lab)+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    
+    xx <- xx[order(-xx[,2]),]
+    
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Local Cited Authors")
+
     values$MLCAplot <- g
     return(g)
   })
@@ -1742,17 +1717,9 @@ server <- function(input, output, session) {
     } else {k=input$MostRelAffiliationsK}
     
     xx=xx[1:k,]
-    g=ggplot2::ggplot(data=xx, aes(x=.data$AFF, y=.data$Freq, 
-                                   fill=-.data$Freq, text=paste("Affiliation: ",
-                                                                .data$AFF,"\nN.of Documents: ",.data$Freq))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx$AFF))+
-      labs(title="Most Relevant Affiliations", x = "Affiliations")+
-      labs(y = "N. of Documents")+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Affiliations", textLabx = "Articles", title = "Most Relevant Affiliations")
+    
     values$AFFplot <- g
     return(g)
   })
@@ -1943,15 +1910,17 @@ server <- function(input, output, session) {
       laby="N. of Citations per Year"
     }
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2],text=paste("Country: ",xx[,1],"\n",laby,": ",xx[,2]))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
-      labs(title="Most Cited Countries", x = "Countries")+
-      labs(y = laby)+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Countries", textLabx = laby, title = "Most Cited Contries")
+    
+    # g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2],text=paste("Country: ",xx[,1],"\n",laby,": ",xx[,2]))) +
+    #   geom_bar(aes(group="NA"),stat="identity")+
+    #   scale_fill_continuous(type = "gradient")+
+    #   scale_x_discrete(limits = rev(xx[,1]))+
+    #   labs(title="Most Cited Countries", x = "Countries")+
+    #   labs(y = laby)+
+    #   theme_minimal() +
+    #   guides(fill=FALSE)+
+    #   coord_flip()
     values$MCCplot <- g
     return(g)
   })
@@ -2010,9 +1979,9 @@ server <- function(input, output, session) {
     
     if (input$CitDocsMeasure=="TC"){
       xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[3], stringsAsFactors = FALSE,row.names=NULL)
-      lab="Total Citations"} else {
+      lab="Global Citations"} else {
         xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[4], stringsAsFactors = FALSE,row.names=NULL)
-        lab="Total Citations per Year"
+        lab="Global Citations per Year"
       }
     
     if (input$MostCitDocsK>dim(xx)[1]){
@@ -2021,15 +1990,8 @@ server <- function(input, output, session) {
     
     xx=xx[1:k,]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Document: ", xx[,1],"\nGlobal Citations: ",xx[,2]))) +
-      geom_bar(stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
-      labs(title="Most Cited Documents", x = "Documents")+
-      labs(y = lab)+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Documents", textLabx = lab, title = "Most Global Cited Documents")
+
     values$MGCDplot <- g
     return(g)
   })
@@ -2104,15 +2066,8 @@ server <- function(input, output, session) {
     
     xx=xx[1:k,]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,4], fill=-xx[,4], text=paste("Document: ",xx[,1],"\nLocal Citations: ",xx[,4]))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
-      labs(title="Most Local Cited Documents", x = "Documents")+
-      labs(y = "Local Citations")+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    g <- freqPlot(xx,x=4,y=1, textLaby = "Documents", textLabx = "Local Citations", title = "Most Local Cited Documents")
+    
     values$MLCDplot <- g
     return(g)
   })
@@ -2180,15 +2135,8 @@ server <- function(input, output, session) {
     xx=xx[1:k,]
     #xx[,1]=substr(xx[,1],1,50)
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste("Reference: ",xx[,1],"\nLocal Citations: ",xx[,2]))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]), labels=substr(rev(xx[,1]),1,50))+
-      labs(title="Most Cited References", x = "References")+
-      labs(y = "Local Citations")+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    g <- freqPlot(xx,x=2,y=1, textLaby = "References", textLabx = "Local Citations", title = "Most Local Cited References")
+    
     values$MLCRplot <- g
     return(g)
   })
@@ -2347,15 +2295,8 @@ server <- function(input, output, session) {
            TI={lab="Title's Words"},
            AB={lab="Abstract's Words"})
     
-    g <- ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste(lab,": ",xx[,1],"\nOccurrences: ",xx[,2]))) +
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev(xx[,1]))+
-      labs(title="Most Relevant Words", x = lab)+
-      labs(y = "Occurrences")+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    g <- freqPlot(xx,x=2,y=1, textLaby = lab, textLabx = "Occurrences", title = "Most Relevant Words")
+    
     values$MRWplot <- g
     return(g)
     
@@ -3893,6 +3834,26 @@ server <- function(input, output, session) {
              ))
   }
   
+  freqPlot <- function(xx,x,y, textLaby,textLabx, title){
+    
+    Text <- paste(textLaby,": ",xx[,y],"\n",textLabx, ": ",xx[,x])
+    
+    g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
+      geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +
+      geom_point(aes(color=-xx[,x], size=xx[,x]), show.legend = FALSE) +
+      scale_radius(range=c(7, 15))+
+      geom_text(color = "white", size = 3) +
+      scale_y_discrete(limits = rev(xx[,y])) +
+      scale_fill_continuous(type = "gradient")+
+      labs(title=title, y = textLaby)+
+      labs(x = textLabx)+
+      expand_limits(y= c(1, length(xx[,y]) + 1))+
+      theme_minimal()+
+      theme(axis.text.y  = element_text(angle=0, hjust=0))
+    
+    return(g)
+  }
+  
   emptyPlot<-function(errortext){
     g=ggplot()+
       theme_void() + theme(legend.position="none")+
@@ -3964,12 +3925,12 @@ server <- function(input, output, session) {
     if (type=="author"){
       K=input$Hkauthor
       measure=input$HmeasureAuthors
-      title="Author Impact"
+      title="Author Local Impact"
       xn="Authors"
     } else {
       K=input$Hksource
       measure=input$HmeasureSources
-      title="Source Impact"
+      title="Source Local Impact"
       xn="Sources"
     }
     if (K>dim(xx)[1]){
@@ -3979,22 +3940,15 @@ server <- function(input, output, session) {
     switch(measure,
            h={m=2},
            g={m=3},
-           m={m=4},
+           m={m=4
+           xx[,m] <-round(xx[,m],2) },
            tc={m=5}
     )
-    xx=xx[order(-xx[,m]),]
-    xx=xx[1:k,c(1,m)]
+    xx <- xx[order(-xx[,m]),]
+    xx <- xx[1:k,c(1,m)]
     
-    g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2], text=paste(xn,": ",xx[,1],"\n", names(values$H)[m],": ",xx[,2]))) +
-      #geom_bar(stat="identity", fill="steelblue")+
-      geom_bar(aes(group="NA"),stat="identity")+
-      scale_fill_continuous(type = "gradient")+
-      scale_x_discrete(limits = rev((xx[,1])))+
-      labs(title=title, x = xn)+
-      labs(y = names(values$H)[m])+
-      theme_minimal() +
-      guides(fill=FALSE)+
-      coord_flip()
+    
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = paste("Impact Measure:",toupper(measure)), title = paste(title,"by",toupper(measure),"index"))
     
     res<-list(values=values,g=g)
     return(res)

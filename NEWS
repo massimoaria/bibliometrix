@@ -46,6 +46,7 @@ New functionalities:
 * duplicatedMatching: added the argument "exact"
  
 Changes:
+* New layout for frequency plots (Biblioshiny sections: Sources, Authors and Documents)
 * convert2df: Bug fixes
 * biblioshiny: improved management of reactive events
 * plots: removed warnings by ggplot2 package

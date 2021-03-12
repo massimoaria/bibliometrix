@@ -12,8 +12,9 @@ convert2df(file, dbsource = "wos", format = "plaintext")
 a)\tab \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
 b)\tab \tab SCOPUS (exclusively in bibtex format '.bib');\cr
 c)\tab \tab Digital Science Dimensions (in csv '.csv' or excel '.xlsx' formats);\cr
-d)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
-e)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}}
+d)\tab \tab Lens.org (in csv '.csv');\cr
+e)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
+f)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}}
 
 \item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.}
 
@@ -49,7 +50,7 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 for a complete list of field tags see: \href{https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
-It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
+It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, Lens.org, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
 objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 }
 \examples{

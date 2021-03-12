@@ -7,7 +7,7 @@ Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","au
 Description: Tool for quantitative research in scientometrics and bibliometrics.
     It provides various routines for importing bibliographic data from 'SCOPUS' (<https://scopus.com>),
     'Clarivate Analytics Web of Science' (<https://www.webofknowledge.com/>), 'Digital Science Dimensions' 
-	(<https://www.dimensions.ai/>), 'Cochrane Library' (<https://www.cochranelibrary.com/>) 
+	(<https://www.dimensions.ai/>), 'Cochrane Library' (<https://www.cochranelibrary.com/>), 'Lens' (<https://lens.org>), 
 	and 'PubMed' (<https://pubmed.ncbi.nlm.nih.gov/>) databases, performing bibliometric analysis 
     and building networks for co-citation, coupling, scientific collaboration and co-word analysis.
 License: GPL-3

@@ -231,8 +231,12 @@
 #' @importFrom SnowballC getStemLanguages
 #' @importFrom rio import
 .onAttach<-function(...){
-  packageStartupMessage("To cite bibliometrix in publications, please use:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.
-                        \n\nhttp:\\\\www.bibliometrix.org\n
+  packageStartupMessage("To cite bibliometrix in publications, please use:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, 
+                                 Journal of Informetrics, 11(4), pp 959-975, Elsevier.
+                        \n\nhttps://www.bibliometrix.org\n
+                        \nFor information and bug reports:
+                        - Send an email to info@bibliometrix.org   
+                        - Write a post on https://github.com/massimoaria/bibliometrix/issues
                         \nHelp us to keep Bibliometrix free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)\n
                         \nTo start with the shiny web-interface, please digit:
 biblioshiny()\n")

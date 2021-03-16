@@ -3,8 +3,9 @@ bibliometrix v3.0.5 (Release date: ?????? )
 New functionalities:
 
 Changes:
+* biblioshiny: Added maxUploadSize argument to biblioshiny(). Now it is possible to set any max upload file size for the biblioshiny app using the argument "maxUploadSize". The default value is maxUploadSize=200 (megabytes) 
 * Hindex: Huge improvements in execution time.
-* Biblioshiny: Added the possibility to use a sample collection 
+* biblioshiny: Added the possibility to use a sample collection 
 * couplingMap: Added the possibility to label clusters through content metadata (I.e. Keywords, title terms, etc.)
 
 

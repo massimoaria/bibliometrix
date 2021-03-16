@@ -7,7 +7,7 @@
 #' @param field is character. It can be equal to c("author", "source"). field indicates if H-index have to be calculated for a list of authors or for a list of sources. Default
 #' value is \code{field = "author"}.
 #' @param elements is a character vector. It contains the authors' names list or the source list for which you want to calculate the H-index. When the field is
-#' "author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
+#' "author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. If elements=NULL, the function calculates impact indices for all elements contained in the data frame.
 #' i.e for the authors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.
 #' @param sep is the field separator character. This character separates authors in each string of AU column of the bibliographic data frame. The default is \code{sep = ";"}.
 #' @param years is a integer. It indicates the number of years to consider for Hindex calculation. Default is 10.
@@ -30,13 +30,13 @@
 #'  
 #' data(garfield, package = "bibliometrixData")
 #'
-#' indices=Hindex(garfield, field = "author", elements = "GARFIELD E", , sep = ";")
+#' indices=Hindex(garfield, field = "author", elements = "GARFIELD E", years=Inf, sep = ";")
 #'
 #' # h-index, g-index and m-index of Eugene Garfield
 #' indices$H
 #' 
 #' # Papers and total citations
-#' indices$CitationList[[1]]
+#' head(indices$CitationList[[1]])
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame. 
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis.
@@ -45,10 +45,10 @@
 #' 
 #' @export
 
-Hindex <- function(M, field="author", elements, sep = ";",years=10){
+Hindex <- function(M, field="author", elements=NULL, sep = ";",years=10){
   
   #elements=paste("\\\b",elements,"\\\b",sep="")
-  M$TC=as.numeric(M$TC)
+  M$TC <- as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
   M <- M %>% dplyr::filter(!is.na(.data$TC))
   M <- M[M$TC>0,]
@@ -98,9 +98,20 @@ Hindex <- function(M, field="author", elements, sep = ";",years=10){
     rename(Element = AUs) %>%
     as.data.frame()
   
-  H <- H[c("Element","h_index","g_index","m_index","TC","NP","PY_start")]           
+  if (!is.null(elements)){
+    H <- H %>%
+      dplyr::filter(.data$Element %in% elements) %>%
+      dplyr::select("Element","h_index","g_index","m_index","TC","NP","PY_start")
+    
+    df <- df %>% dplyr::filter(.data$AUs %in% elements)
+  }
   
-  CitationList <- split(df[c("AU","SO","PY","TC","DI")] , f = df$AUs )
+  #H <- H[c("Element","h_index","g_index","m_index","TC","NP","PY_start")]     
+  
+  vars <- intersect(c("AU","SO","PY","TC","DI"), names(df))
+  
+  
+  CitationList <- split(df[vars] , f = df$AUs)
   
   results=list(H=H,CitationList=CitationList)
   

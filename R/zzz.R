@@ -2,21 +2,31 @@
 #' @import dimensionsR
 #' @import ggplot2
 #' @import bibliometrixData
+#' @import forcats
 #' @import ggrepel
 #' @import ggraph
 #' @import pubmedR
 #' @import shiny
+#' @import readr
+#' @import readxl
 # #' @import shinycssloaders
 # #' @import shinythemes
+#' @importFrom openxlsx write.xlsx
 #' @importFrom tidyr gather
 #' @importFrom tidyr spread
 #' @importFrom tidyr pivot_wider
 #' @importFrom tidyr pivot_longer
+#' @importFrom tidyr replace_na
+# @importFrom tidyselect where
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
+#' @importFrom dplyr across
 #' @importFrom dplyr tibble
+#' @importFrom dplyr as_tibble
+#' @importFrom dplyr between
 # @importFrom dplyr filter
 #' @importFrom dplyr arrange
+#' @importFrom dplyr cummean
 #' @importFrom dplyr desc
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
@@ -30,6 +40,9 @@
 #' @importFrom dplyr inner_join
 #' @importFrom dplyr left_join
 #' @importFrom dplyr top_n
+#' @importFrom dplyr relocate
+#' @importFrom dplyr slice_head
+#' @importFrom dplyr slice_tail
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
 #' @importFrom networkD3 sankeyNetwork
@@ -229,7 +242,7 @@
 #' @importFrom utils read.csv
 #' @importFrom SnowballC wordStem
 #' @importFrom SnowballC getStemLanguages
-#' @importFrom rio import
+# @importFrom rio import
 .onAttach<-function(...){
   packageStartupMessage("To cite bibliometrix in publications, please use:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, 
                                  Journal of Informetrics, 11(4), pp 959-975, Elsevier.

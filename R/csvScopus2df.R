@@ -1,10 +1,17 @@
+utils::globalVariables("where")
+
 csvScopus2df <- function(file){
   
   
   ## import all files in a single data frame
   for (i in 1:length(file)){
     #D <- rio::import(file[i], quote='"')
-    D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F)
+    #D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F)
+
+    D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress()) %>%
+      mutate(across(!where(is.numeric), as.character)) %>% 
+      mutate(across(where(is.character), tidyr::replace_na,"")) %>% as.data.frame(stringsAsFactors=FALSE)
+    
     if (i>1){
       l <- intersect(l,names(D))
       DATA <- rbind(DATA[l],D[l])
@@ -46,6 +53,7 @@ labelling <- function(DATA){
   label <- names(DATA)
   label <- gsub("Abbreviated Source Title","JI",label)
   label <- gsub("Authors with affiliations","C1",label)
+  #label <- gsub("Affiliations","RP",label)
   label <- gsub("Authors","AU",label)
   label <- gsub("Source title","SO",label)
   label <- gsub("Title","TI",label)

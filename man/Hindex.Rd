@@ -4,7 +4,7 @@
 \alias{Hindex}
 \title{h-index calculation}
 \usage{
-Hindex(M, field = "author", elements, sep = ";", years = 10)
+Hindex(M, field = "author", elements = NULL, sep = ";", years = 10)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
@@ -14,7 +14,7 @@ It is a data matrix with cases corresponding to manuscripts and variables to Fie
 value is \code{field = "author"}.}
 
 \item{elements}{is a character vector. It contains the authors' names list or the source list for which you want to calculate the H-index. When the field is
-"author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. 
+"author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. If elements=NULL, the function calculates impact indices for all elements contained in the data frame.
 i.e for the authors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.}
 
 \item{sep}{is the field separator character. This character separates authors in each string of AU column of the bibliographic data frame. The default is \code{sep = ";"}.}
@@ -43,13 +43,13 @@ Hindex(scientometrics, field = "source", elements = "SCIENTOMETRICS", sep = ";")
  
 data(garfield, package = "bibliometrixData")
 
-indices=Hindex(garfield, field = "author", elements = "GARFIELD E", , sep = ";")
+indices=Hindex(garfield, field = "author", elements = "GARFIELD E", years=Inf, sep = ";")
 
 # h-index, g-index and m-index of Eugene Garfield
 indices$H
 
 # Papers and total citations
-indices$CitationList[[1]]
+head(indices$CitationList[[1]])
 
 }
 \seealso{

@@ -1761,7 +1761,7 @@ navbarMenu("Documents",
                                    #uiOutput("trendMinFreq"),
                                    sliderInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
                                    sliderInput("trendNItems", label = "N. of Words per Year", min = 1, max = 20, step = 1, value = 5),
-                                   sliderInput("trendSize", label = "Word label size", min = 0, max = 20, step = 1, value = 5),
+                                   #sliderInput("trendSize", label = "Word label size", min = 0, max = 20, step = 1, value = 5),
                                    br(),
                                    br(),
                                    br(),
@@ -1795,7 +1795,8 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "trendTopicsPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh")) #height = 700))
+                                             #shinycssloaders::withSpinner(plotOutput(outputId = "trendTopicsPlot"))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))

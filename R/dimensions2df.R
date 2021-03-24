@@ -1,10 +1,17 @@
+utils::globalVariables("where")
+
 dimensions2df <- function(file, format = "csv") {
   
   switch(format,
          csv = {
            
            for (i in 1:length(file)){
-             D <- rio::import(file[i], quote = '"',dec = ".",skip=1)
+             #D <- rio::import(file[i], quote = '"',dec = ".",skip=1)
+             
+             D <- read_csv(file[i], na=character(), quote='"', skip=1, trim_ws = FALSE, progress = show_progress()) %>%
+               mutate(across(where(is.numeric), as.character)) %>% 
+               mutate(across(where(is.character), tidyr::replace_na,"")) %>% as.data.frame(stringsAsFactors=FALSE)
+             
              
              if (i>1){
                l <- intersect(l,names(D))
@@ -17,7 +24,8 @@ dimensions2df <- function(file, format = "csv") {
          },
          excel = {
            for (i in 1:length(file)){
-             D <- rio::import(file[i], skip=1)
+             #D1 <- rio::import(file[i], skip=1)
+             D <- readxl::read_excel(file[1],skip=1) %>% as.data.frame(stringsAsFactors=FALSE)
              
              if (i>1){
                l <- intersect(l,names(D))

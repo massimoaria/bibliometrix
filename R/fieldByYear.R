@@ -7,7 +7,8 @@
 #' @param timespan is a vector with the min and max year. If it is = NULL, the analysis is performed on the entire period. Default is \code{timespan = NULL}.
 #' @param min.freq is an integer. It indicates the min frequency of the items to include in the analysis
 #' @param n.items is an integer. I indicates the maximun number of items per year to include in the plot.
-#' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}.
+#' @param labelsize is deprecated argument. It will be removed in the next update.
+#' @param dynamic.plot is a logical. If TRUE plot aesthetics are optimized for plotly package.
 #' @param graph is logical. If TRUE the function plots Filed Tag distribution by Year graph. Default is \code{graph = TRUE}.
 #' @return The function \code{fieldByYear} returns a list containing threeobjects:
 #' \tabular{lll}{
@@ -31,80 +32,83 @@
 fieldByYear <- function(M,
                         field = "ID",
                         timespan = NULL,
-                        min.freq = 1,
+                        min.freq = 2,
                         n.items = 5,
-                        labelsize = 5,
+                        labelsize = NULL,
+                        dynamic.plot = FALSE,
                         graph = TRUE) {
   
   A <- cocMatrix(M, Field = field, binary = FALSE)
-  n <- colSums(A)
+  n <- colSums(as.array(A))
+  
   #A=tdIdf(A)
-  med <- apply(A, 2, function(x) {
-    round(median(rep(M$PY, x)))
+  
+  
+  trend_med <- apply(A, 2, function(x) {   
+    round(quantile(rep(M$PY, x), c(0.25,0.50,0.75)))
   })
   
-  med <-
-    data.frame(
-      item = names(med),
-      freq = as.numeric(n),
-      year = as.numeric(med),
-      stringsAsFactors = FALSE
-    )
+  trend_med <- as_tibble(t(trend_med)) %>% 
+    rename("year_q1"='25%', "year_med"='50%', "year_q3"='75%') %>%  
+    mutate(item=rownames(t(trend_med)), freq=n) %>% 
+    relocate(c(.data$item,.data$freq), .data$year_q1)
   
   # if timespan is null, timespan is set to the whole period
   if (is.null(timespan) | length(timespan)!=2){
-    timespan=as.numeric(range(med$year, na.rm = TRUE))
+    timespan <- as.numeric(range(trend_med$year_med, na.rm = TRUE))
   }
   
-  df <- med %>%
-    arrange(desc(.data$freq)) %>%
+  df <- trend_med %>%
+    mutate(item = tolower(.data$item)) %>%
+    group_by(.data$year_med) %>%
+    arrange(desc(.data$freq), .data$item) %>%
+    arrange(desc(.data$year_med)) %>%   
+    dplyr::slice_head(n=n.items) %>% 
     dplyr::filter(.data$freq >= min.freq) %>%
-    dplyr::filter(.data$year >= timespan[1] & .data$year <= timespan[2]) %>%
-    group_by(.data$year) %>%
-    top_n(n.items, .data$freq)
+    dplyr::filter(between(.data$year_med, timespan[1],timespan[2])) %>%
+    mutate(item = fct_reorder(.data$item, .data$freq))
   
-  g <- ggplot(df, aes(x = df$year, y = log(df$freq))) +
-    geom_point(color = adjustcolor("royalblue4", alpha.f = 0.5), size = 1) +
-    geom_text_repel(aes(label = tolower(df$item)), size=labelsize, color=adjustcolor("royalblue4", alpha.f = 0.7)) +
-    scale_x_continuous(breaks = seq(min(df$year, na.rm = TRUE), max(df$year, na.rm = TRUE), by = 2)) +
-    ylab("log(frequency)") +
-    xlab("year") +
-    labs(title= "Trend Topics") +
-    theme(
-      legend.position = 'right'
-      ,
-      text = element_text(color = "#444444")
-      ,
-      panel.background = element_rect(fill = 'gray97')
-      ,
-      panel.grid.minor = element_line(color = '#FFFFFF')
-      ,
-      panel.grid.major = element_line(color = '#FFFFFF')
-      ,
-      plot.title = element_text(size = 24)
-      ,
-      axis.title = element_text(size = 14, color = '#555555')
-      ,
-      axis.title.y = element_text(
-        vjust = 1,
-        angle = 90,
-        face = "bold"
-      )
-      ,
-      axis.title.x = element_text(hjust = .95, face = "bold")
-      ,
-      axis.text.x = element_text(face = "bold")
-      ,
-      axis.text.y = element_text(face = "bold")
+  g <- ggplot(df, aes(x=.data$item, y=.data$year_med, 
+                      text = paste("Term: ", .data$item,"\nYear: ",
+                                   .data$year_med ,"\nTerm frequency: ",.data$freq )))+
+    geom_point(aes(size = .data$freq), alpha=0.6, color="dodgerblue4")+ 
+    scale_size(range=c(2,6))+
+    #scale_alpha(range=c(0.3,1))+
+    scale_y_continuous(breaks = seq(min(df$year_q1),max(df$year_q3), by=2))+
+    guides(size = guide_legend(order = 1, "Term frequency"), alpha = guide_legend(order = 2, "Term frequency"))+
+    theme(legend.position = 'right'
+          #,aspect.ratio = 1
+          ,text = element_text(color = "#444444")
+          ,panel.background = element_rect(fill = 'gray98')
+          ,panel.grid.minor = element_line(color = '#FFFFFF')
+          ,panel.grid.major = element_line(color = '#FFFFFF')
+          ,plot.title = element_text(size = 24)
+          ,axis.title = element_text(size = 14, color = '#555555')
+          ,axis.title.y = element_text(vjust = 1, angle = 90, face="bold")
+          ,axis.title.x = element_text(hjust = .95,face="bold")
+          ,axis.text.x = element_text(face="bold", angle = 90)#, size=labelsize)
+          ,axis.text.y = element_text(face="bold")
     )
+  if (!isTRUE(dynamic.plot)){
+    g <- g+geom_vline(xintercept=nrow(df)-(which(c(diff(df$year_med))==-1)-0.5), color="grey70",alpha=0.6, linetype=6)+
+      geom_point(aes(y=.data$year_q1), alpha=0.6, size = 3, color="royalblue4", shape="|")+
+      geom_point(aes(y=.data$year_q3), alpha=0.6, size = 3, color="royalblue4", shape="|")
+  }
+  
+ g <- g+
+    labs(title="Trend Topics", 
+         x="Term",
+         y="Year")+
+    geom_segment(data=df, aes(x = .data$item, y = .data$year_q1, xend = .data$item, yend = .data$year_q3), size=1.0, color="royalblue4", alpha=0.3) +
+    coord_flip() 
   
   if (isTRUE(graph)) {
-    plot(g)
+    print(g) 
   }
   
-  results <- list(df = med,
-                 df_graph = df,
-                 graph = g)
+  
+  
+  results <- list(df = trend_med, df_graph = df, graph = g)
   
   return(results)
   

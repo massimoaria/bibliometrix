@@ -1,10 +1,15 @@
+utils::globalVariables("where")
+
 csvLens2df <- function(file){
   options(readr.num_columns = 0)
   
   ## import all files in a single data frame
   for (i in 1:length(file)){
-    D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F) #fileEncoding = "UTF-8-BOM")
-    #D <- read_csv(file[i], quote='"')
+    #D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F) #fileEncoding = "UTF-8-BOM")
+    D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress()) %>%
+      mutate(across(where(is.numeric), as.character)) %>% 
+      mutate(across(where(is.character), tidyr::replace_na,"")) %>% as.data.frame(stringsAsFactors=FALSE)
+
     if (i>1){
       l <- intersect(l,names(D))
       DATA <- rbind(DATA[l],D[l])

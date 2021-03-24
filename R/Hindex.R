@@ -95,7 +95,7 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=10){
     mutate(
       m_index = .data$h_index / (Today -.data$PY_start+1)
     ) %>%
-    rename(Element = AUs) %>%
+    rename(Element = .data$AUs) %>%
     as.data.frame()
   
   if (!is.null(elements)){

@@ -4,7 +4,12 @@
 \alias{biblioshiny}
 \title{Shiny UI for bibliometrix package}
 \usage{
-biblioshiny(host = "127.0.0.1", port = NULL, launch.browser = TRUE)
+biblioshiny(
+  host = "127.0.0.1",
+  port = NULL,
+  launch.browser = TRUE,
+  maxUploadSize = 200
+)
 }
 \arguments{
 \item{host}{The IPv4 address that the application should listen on. 
@@ -17,6 +22,8 @@ Otherwise, use a random port.}
 \item{launch.browser}{If true, the system's default web browser will be launched automatically 
 after the app is started. Defaults to true in interactive sessions only. This value of 
 this parameter can also be a function to call with the application's URL.}
+
+\item{maxUploadSize}{is a integer. The max upload file size argument. Default value is 200 (megabyte)}
 }
 \description{
 \code{biblioshiny} performs science mapping analysis using the main functions of the bibliometrix package.

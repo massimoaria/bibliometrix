@@ -6,6 +6,7 @@ server <- function(input, output, session) {
   ##
   
   ## file upload max size
+  maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)
   #options(shiny.maxRequestSize=200*1024^2)
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
@@ -270,7 +271,9 @@ server <- function(input, output, session) {
       switch(ext,
              ### excel format
              xlsx={
-               M <- rio::import(inFile$datapath)
+               #M <- rio::import(inFile$datapath)
+               M <- readxl::read_excel(inFile$datapath) %>% as.data.frame(stringsAsFactors=FALSE)
+               class(M) <- c("bibliometrixDB", "data.frame")
                ### M row names
                ### identify duplicated SRs 
                SR=M$SR
@@ -355,7 +358,8 @@ server <- function(input, output, session) {
     },
     content <- function(file) {
       switch(input$save_file,
-             xlsx={suppressWarnings(rio::export(values$M, file=file))},
+             #xlsx={suppressWarnings(rio::export(values$M, file=file))},
+             xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
              RData={
                M=values$M
                save(M, file=file)
@@ -372,7 +376,8 @@ server <- function(input, output, session) {
     },
     content <- function(file) {
       switch(input$save_file_api,
-             xlsx={suppressWarnings(rio::export(values$M, file=file))},
+             #xlsx={suppressWarnings(rio::export(values$M, file=file))},
+             xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
              RData={
                M=values$M
                save(M, file=file)
@@ -2573,8 +2578,8 @@ server <- function(input, output, session) {
       field=paste(input$trendTerms,"_TM",sep="")
     } else {field=input$trendTerms}
     values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
-                                      n.items = input$trendNItems, labelsize = input$trendSize, graph = FALSE)
-    
+                                      n.items = input$trendNItems, dynamic.plot=TRUE, graph = FALSE)
+    return(values$trendTopics$graph)
     
   })
   
@@ -2589,12 +2594,17 @@ server <- function(input, output, session) {
     contentType = "png"
   )
   
-  output$trendTopicsPlot <- renderPlot({
-    
-    TrendTopics()
-    plot(values$trendTopics$graph)
-    
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150)  #height = 700)
+  output$trendTopicsPlot <- renderPlotly({
+    g <- TrendTopics()
+    plot.ly(g)
+  })#, height = 500, width =900)
+  
+  # output$trendTopicsPlot <- renderPlot({
+  #   
+  #   TrendTopics()
+  #   plot(values$trendTopics$graph)
+  #   
+  # }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150)  #height = 700)
   
   
   output$trendTopicsTable <- DT::renderDT({

@@ -37,109 +37,103 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field="ID", years,n=250, minFreq=2, size=0.5, stemming=FALSE, n.labels=1, repel=TRUE){
-  
-  #net=list()
-  #arguments <- list(...)
-  #K=length(arguments)
-  
-  list_df=timeslice(M, breaks = years)
-  
-  K=length(list_df)
-  S=net=res=list()
-  
-  Y=NULL
-  pdf(file = NULL)  ## to prevent the network plotting
-  for (k in 1:K){
-    
-    Mk=list_df[[k]]
-    Y[k]=paste(min(Mk$PY),"-",max(Mk$PY),sep="",collapse="")
-    resk <- thematicMap(Mk, field=field, n=n, minfreq=minFreq, stemming=stemming, size=size, n.labels=n.labels, repel=repel)
-    #S[[k]]=Sk
-    #net[[k]]=netk
-    res[[k]]=resk
-    net[[k]]=resk$net
+thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, stemming = FALSE, n.labels = 1, repel = TRUE) 
+{
+  list_df <-  timeslice(M, breaks = years)
+  K <-  length(list_df)
+  S <-  net <-  res <-  list()
+  Y <-  NULL
+  pdf(file = NULL)
+  for (k in 1:K) {
+    Mk <-  list_df[[k]]
+    Y[k] <-  paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")
+    resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, 
+                        stemming = stemming, size = size, n.labels = n.labels, 
+                        repel = repel)
+    res[[k]] <-  resk
+    net[[k]] <-  resk$net
   }
-  dev.off() 
-  
-  par(mfrow=c(1, (K-1)))
-  
-  if (K<2){
+  dev.off()
+  par(mfrow = c(1, (K - 1)))
+  if (K < 2) {
     print("Error")
     return()
   }
-  #net=list()
-  incMatrix=list()
-  for (k in 2:K){
-    res1=res[[(k-1)]]
-    res2=res[[(k)]]
-    
-    ### check for empty cluster list
-    if (res1$nclust==0 | res2$nclust==0){
-      cat(paste("\nNo topics in the period ",k-1," with this set of input parameters\n\n"))
-      return(list(check=FALSE))
+  incMatrix <-  list()
+  for (k in 2:K) {
+    res1 <-  res[[(k - 1)]]
+    res2 <-  res[[(k)]]
+    if (res1$nclust == 0 | res2$nclust == 0) {
+      cat(paste("\nNo topics in the period ", k - 1, " with this set of input parameters\n\n"))
+      return(list(check = FALSE))
     }
-    
-    ####
-     res1$words$Cluster=paste(res1$clusters$name[res1$words$Cluster],"--",Y[k-1],sep="")
-     res1$clusters$label=paste(res1$clusters$name,"--",Y[k-1],sep="")
-     res2$words$Cluster=paste(res2$clusters$name[res2$words$Cluster],"--",Y[k],sep="")
-     res2$clusters$label=paste(res2$clusters$name,"--",Y[k],sep="")
-    ##
-
-    cluster1 <- res1$words %>% group_by(.data$Cluster_Label) %>% mutate(len=length(.data$Words), tot=sum(.data$Occurrences))
-    cluster2 <- res2$words %>% group_by(.data$Cluster_Label) %>% mutate(len=length(.data$Words), tot=sum(.data$Occurrences))
+    res1$words$Cluster <-  paste(res1$clusters$name[res1$words$Cluster], 
+                               "--", Y[k - 1], sep = "")
+    res1$clusters$label <-  paste(res1$clusters$name, "--", 
+                                Y[k - 1], sep = "")
+    res2$words$Cluster <-  paste(res2$clusters$name[res2$words$Cluster], 
+                               "--", Y[k], sep = "")
+    res2$clusters$label <-  paste(res2$clusters$name, "--", 
+                                Y[k], sep = "")
+    cluster1 <- res1$words %>% group_by(.data$Cluster_Label) %>% 
+      mutate(len = length(.data$Words), tot = sum(.data$Occurrences))
+    cluster2 <- res2$words %>% group_by(.data$Cluster_Label) %>% 
+      mutate(len = length(.data$Words), tot = sum(.data$Occurrences))
     A <- inner_join(cluster1, cluster2, by = "Words") %>% 
       group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
-      rowwise() %>%
-      mutate(min=min(.data$Occurrences.x,.data$Occurrences.y), Occ=sum(.data$Occurrences.x), tot=min(.data$tot.x,.data$tot.y)) %>%
-      ungroup()
-    
-    B <- A %>% 
-      group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
-      summarise(CL1=.data$Cluster.x[1],CL2=.data$Cluster.y[1], 
-                Words=paste0(.data$Words,collapse=";",sep=""),
-                sum=sum(.data$min), 
-                Inc_Weighted=sum(.data$min)/min(.data$tot), 
-                Inc_index=length(.data$Words)/min(.data$len.x,.data$len.y), 
-                Occ=.data$Occ[1], Tot=.data$tot[1], 
-                Stability=length(.data$Words)/(.data$len.x[1]+.data$len.y[1]-length(.data$Words))) %>%
+      rowwise() %>% mutate(min = min(.data$Occurrences.x, 
+                                     .data$Occurrences.y), Occ = sum(.data$Occurrences.x), 
+                           tot = min(.data$tot.x, .data$tot.y)) %>% ungroup()
+    B <- A %>% group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
+      summarise(CL1 = .data$Cluster.x[1], CL2 = .data$Cluster.y[1], 
+                Words = paste0(.data$Words, collapse = ";", sep = ""), 
+                sum = sum(.data$min), Inc_Weighted = sum(.data$min)/min(.data$tot), 
+                Inc_index = length(.data$Words)/min(.data$len.x, 
+                                                    .data$len.y), Occ = .data$Occ[1], Tot = .data$tot[1], 
+                Stability = length(.data$Words)/(.data$len.x[1] + 
+                                                   .data$len.y[1] - length(.data$Words))) %>% 
       data.frame()
-    
-    incMatrix[[k-1]]=B 
+    incMatrix[[k - 1]] <-  B
   }
-  
-  INC=incMatrix[[1]]
-  if (length(incMatrix)>1){
-    for (i in 2:length(incMatrix)){
-      INC=rbind(INC,incMatrix[[i]])
+  INC = incMatrix[[1]]
+  if (length(incMatrix) > 1) {
+    for (i in 2:length(incMatrix)) {
+      INC <-  rbind(INC, incMatrix[[i]])
     }
   }
+  edges <-  INC[, c("CL1", "CL2", "Inc_index", "Inc_Weighted", 
+                  "Stability")]
+  # edges = edges[edges[, 3] > 0, ]
+  nodes <-  data.frame(name = unique(c(edges$CL1, edges$CL2)), 
+                     stringsAsFactors = FALSE)
+  nodes$group <-  nodes$name
   
-  ### sankey plot data
-  edges = INC[,c("CL1","CL2","Inc_index","Inc_Weighted","Stability")]
-  edges=edges[edges[,3]>0,]
-  nodes = data.frame("name"=unique(c(edges$CL1,edges$CL2)),stringsAsFactors = FALSE)
-  nodes$group=nodes$name
-  
-  cont=0
-  edges[,6]=edges[,1]
-  for (i in nodes$name){
-    
-    ind=which(edges[,1]==i)
-    edges[ind,1]=cont
-    ind1=which(edges[,2]==i)
-    edges[ind1,2]=cont
-    cont=cont+1
+  cont <-  0
+  edges[, 6] <-  edges[, 1]
+  for (i in nodes$name) {
+    ind <-  which(edges[, 1] == i)
+    edges[ind, 1] <-  cont
+    ind1 <-  which(edges[, 2] == i)
+    edges[ind1, 2] <-  cont
+    cont <-  cont + 1
   }
+  names(edges) <-  c("from", "to", "Inclusion", "Inc_Weighted", 
+                   "Stability", "group")
+  edges$from <-  as.numeric(edges$from)
+  edges$to <-  as.numeric(edges$to)
   
-  names(edges)=c("from","to","Inclusion","Inc_Weighted","Stability","group")
-  edges$from=as.numeric(edges$from)
-  edges$to=as.numeric(edges$to)
+  ###for colors
+  nodes <-nodes %>% mutate(label=.data$name) %>% 
+    separate(sep = "--", col = "name", into = c("name", "group")) %>% 
+    mutate(slice=factor(.data$group,labels =1:K))
+  Nodes<-data.frame()
+  for (i in 1:K) {
+    Nodes<-rbind(Nodes,left_join(subset(nodes,nodes$slice==i), res[[i]]$clusters[c("color","name")], by="name"))
+  }
+  ################ 
   
-  results=list(Nodes=nodes,Edges=edges,Data=INC[,-c(1,2)],check=TRUE, TM=res, Net=net)
   
+  results <-  list(Nodes = Nodes, Edges = edges, Data = INC[, 
+                                                          -c(1, 2)], check = TRUE, TM = res, Net = net)
   return(results)
-  
-  
 }

@@ -32,6 +32,7 @@
 #' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.  
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("none", optimal", "louvain","infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
+#' @param community.repulsion is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.
 #' @param curved is a logical or a number. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}. Curved values are any numbers from 0 to 1.
 #' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix. 
 #' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
@@ -79,6 +80,7 @@ networkPlot <-
            label.n = NULL,
            halo = FALSE,
            cluster = "louvain",
+           community.repulsion = 0.1,
            vos.path = NULL,
            size = 3,
            size.cex = FALSE,
@@ -227,20 +229,29 @@ networkPlot <-
         }
       }
       
-      # Choose Network layout
-      if (!isTRUE(bsk.S)) {
-        l <- switchLayout(bsk.S, type)
-      } else{
-        l <- switchLayout(bsk.network, type)
-      }
+      
+
+      
+      # Community Detection
       
       cl <- clusteringNetwork(bsk.network, cluster)
       
       bsk.network <- cl$bsk.network
       if (!isTRUE(bsk.S)) {
-        V(bsk.S)$color = V(bsk.network)$color
+        V(bsk.S)$color <-  V(bsk.network)$color
+        V(bsk.S)$community <- V(bsk.network)$community
       }
       net_groups <- cl$net_groups
+      
+      # Choose Network layout
+      if (!isTRUE(bsk.S)) {
+        layout_results <- switchLayout(bsk.S, type, community.repulsion)
+        bsk.S <- layout_results$bsk.S
+      } else{
+        layout_results <- switchLayout(bsk.network, type, community.repulsion)
+        bsk.network <- layout_results$bsk.network
+      }
+      l <- layout_results$l
       
       ## Labelling the network
       LABEL = ""
@@ -249,7 +260,7 @@ networkPlot <-
         if (!is.null(label.n)) {
           q <- 1 - (label.n / length(V(bsk.network)$deg))
           if (q <= 0) {
-            LABEL <- rep("", length(LABEL))
+            #LABEL <- rep("", length(LABEL))
             V(bsk.network)$labelsize <- 10
           } else {
             if (q > 1) {
@@ -327,6 +338,7 @@ networkPlot <-
       graph_pajek = bsk.save,
       cluster_obj = net_groups,
       cluster_res = cluster_res,
+      community_obj = cl$net_groups,
       layout = l,
       S = S,
       nodeDegree = sort(deg, decreasing = T) 
@@ -428,7 +440,22 @@ clusteringNetwork <- function(bsk.network, cluster) {
 
 ### switchLayout
 
-switchLayout <- function(bsk.network, type) {
+switchLayout <- function(bsk.network, type, community.repulsion) {
+
+  if (community.repulsion>0){
+    community.repulsion = round(community.repulsion*100)
+    row <- get.edgelist(bsk.network)
+    membership <- V(bsk.network)$community
+    names(membership) <- V(bsk.network)$name
+    
+    if (is.null(E(bsk.network)$weight[1])){
+      E(bsk.network)$weight <-  apply(row,1,weight.community,membership,community.repulsion,1)
+    } else {
+      E(bsk.network)$weight <- E(bsk.network)$weight + apply(row,1,weight.community,membership,community.repulsion,1)
+      
+    }
+  }
+  
   switch(
     type,
     auto = {
@@ -454,6 +481,19 @@ switchLayout <- function(bsk.network, type) {
     }
   )
   l <- layout.norm(l)
- 
-  return(l)
+  
+  layout_results <- list(l=l, bsk.network=bsk.network)
+  return(layout_results)
+}
+
+
+# Community repulsion
+
+weight.community=function(row,membership,weigth.within,weight.between){
+  if(as.numeric(membership[which(names(membership)==row[1])])==as.numeric(membership[which(names(membership)==row[2])])){
+    weight=weigth.within
+  }else{
+    weight=weight.between
+  }
+  return(weight)
 }

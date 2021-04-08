@@ -1,12 +1,17 @@
-bibliometrix v3.0.5 (Release date: ?????? )
+bibliometrix v3.1 (Release date: ?????? )
 
 New functionalities:
+* splitCommunities: new function to create a network plot with separated communities.
+* histPlot: new, improved, plot layout
+
 
 Changes:
+* networkPlot: Improved layout algorithms to obtain better separated clusters. The level of separation is guided by a new argument "community.repulsion"
 * biblioshiny: Added maxUploadSize argument to biblioshiny(). Now it is possible to set any max upload file size for the biblioshiny app using the argument "maxUploadSize". The default value is maxUploadSize=200 (megabytes) 
-* Hindex: Huge improvements in execution time.
 * biblioshiny: Added the possibility to use a sample collection 
+* biblioshiny: New layout for all frequency plots (sources, authors, docuemnts, etc.)
 * couplingMap: Added the possibility to label clusters through content metadata (I.e. Keywords, title terms, etc.)
+* Hindex: Huge improvements in execution time.
 
 
 bibliometrix v3.0.4 (Release date: 2021-01-18 )

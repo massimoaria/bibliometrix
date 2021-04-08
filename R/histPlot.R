@@ -80,9 +80,6 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
   
   
-  
-  #V(bsk.network)$color <- 'red'
-  
   # define network layout
   
   E(bsk.network)$color <- "slategray1"
@@ -90,7 +87,10 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   bsk.network <- delete.isolates(bsk.network)
   dg <- decompose.graph(bsk.network)
 
-  layout_m <- create_layout(bsk.network, layout = 'nicely')
+  layout_m <- as.data.frame(layout.fruchterman.reingold(bsk.network))
+  names(layout_m) <- c("x","y")
+  layout_m$name <- V(bsk.network)$name
+  layout_m$years <- V(bsk.network)$years
   layout_m$cluster <- 0
   rr <- 0
   for (k in 1:length(dg)){
@@ -102,32 +102,55 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     layout_m$y[layout_m$cluster==k] <- layout_m$y[layout_m$cluster==k]+(rr-Min)
     rr <- max(layout_m$y[layout_m$cluster==k])
   }
-  bsk <- bsk.network
-  wp <- membership(cluster_infomap(bsk,modularity = FALSE))
+  #bsk <- bsk.network
+  wp <- membership(cluster_infomap(bsk.network,modularity = FALSE))
+  layout_m$color <- colorlist[wp]
   layout_m$x <- layout_m$years
-  
   layout_m$y <- (diff(range(layout_m$x))/diff(range(layout_m$y)))*layout_m$y
 
+  ################
+  df_net <- ggnetwork(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
+  df_net$color <- "slategray1"
+  df_net <- left_join(df_net,layout_m[c("name","color")], by = "name")
+  names(df_net)[10:11] <- c("color", "color_v")
   
-  g <- ggraph(layout_m) +
-    geom_edge_arc(width = 1, strength = 0.05, 
-          check_overlap = T, edge_alpha = 0.5, color="grey",
-          arrow = grid::arrow(angle = 10, unit(0.15, "inches")))+
-    geom_node_text(aes(label=V(bsk)$id), size=labelsize,repel = TRUE, color=colorlist[wp],alpha=0.8)+
-    geom_node_point(size = V(bsk)$size,color = "royalblue4", alpha=0.15)+
-    scale_color_brewer() +
-    scale_x_continuous(labels=as.character(seq(min(Years),max(Years))),breaks=seq(min(Years),max(Years)))+
+  ylength <- diff(range(df_net$years))+1
+  Ylabel <- (as.character(seq(min(df_net$years),max(df_net$years),length.out=ylength)))
+  Breaks <- (seq(0,1,length.out=ylength))
+  
+  df_net <- df_net %>% 
+    left_join(histResults$histData, by = c("name" = "Paper")) #%>%
+  
+  Title <- strsplit(df_net$title, "(?<=.{40})", perl = TRUE)
+  df_net$Title <- unlist(lapply(Title, function(x){
+    paste(x,"\n",collapse="", sep="")
+  }))
+  df_net <- df_net %>%
+    mutate(text = paste(tolower(.data$Title), "doi: ",
+                        .data$DOI, "\nLCS: ",
+                        .data$LCS, "    GCS: ",
+                        .data$GCS, sep=""))
+  
+  
+  g <- ggplot(df_net, aes(x = .data$x, y = .data$y, xend = .data$xend, yend = .data$yend, text=.data$text)) +
+    geom_edges(color = "grey", size=0.4, alpha=0.4) +
+    geom_nodes(aes(color = .data$color_v), size = size, alpha=0.5) +
+    geom_text(aes(label=.data$id, color=.data$color_v),  size=labelsize,
+              nudge_x = 0,
+              nudge_y = 0.02,
+              check_overlap = FALSE,alpha=0.7)+
+    scale_x_continuous(labels=Ylabel,breaks=Breaks)+
+    guides(size=FALSE, color=FALSE) +
     theme_minimal()+
-    theme(legend.position='none', panel.background = element_rect(fill='gray97', color='grey97'),
+    theme(legend.position='none', panel.background = element_rect(fill='white', color='white'),
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),
           axis.title.y = element_blank(), axis.title.x = element_blank(),
           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(),
-          panel.grid.minor.x = element_blank(), axis.text.x=element_text(face="bold", angle = 90, size=6)) +
+          panel.grid.major.x = element_line(adjustcolor(col="grey", alpha.f = 0.2), linetype = 2, size = 0.5),
+          panel.grid.minor.x = element_blank(), 
+          axis.text.x=element_text(face="bold", angle = 90, size=labelsize+3)) +
     labs(title = "Historical Direct Citation Network")
-  
-  
 
-  
   
   if (isTRUE(verbose)) {
     plot(g)
@@ -142,7 +165,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     print(Data[,-2])
   }
   
-  results <- list(net=bsk.network, g=g)
+  results <- list(net=bsk.network, g=g, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks))
   return(results)
 }
 

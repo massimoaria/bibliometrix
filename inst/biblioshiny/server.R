@@ -1249,32 +1249,39 @@ server <- function(input, output, session) {
   })
   
   SOGrowth <- eventReactive(input$applySOGrowth,{
-    if (input$SOse=="Yes"){se=TRUE}else{se=FALSE}
+    #if (input$SOse=="Yes"){se=TRUE}else{se=FALSE}
     
     if (input$cumSO=="Cum"){
       cdf=TRUE
-      laby="Cumulate occurrences (loess smoothing)"
+      laby="Cumulate occurrences"
     }else{
       cdf=FALSE
-      laby="Annual occurrences (loess smoothing)"} 
+      laby="Annual occurrences"} 
     
-    values$PYSO=sourceGrowth(values$M,input$topSO, cdf=cdf)
+    values$PYSO=sourceGrowth(values$M,input$topSO[2], cdf=cdf)
+    if (input$topSO[1]>1){
+      values$PYSO <- values$PYSO[-c(2:(input$topSO[1]))]
+    }
     
     term=names(values$PYSO)[-1]
+    
     term=rep(term,each=dim(values$PYSO)[1])
     n=dim(values$PYSO)[1]*(dim(values$PYSO)[2]-1)
     freq=matrix(as.matrix(values$PYSO[,-1]),n,1)
     values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq, stringsAsFactors = TRUE)
     
-    g=ggplot(values$SODF)+
-      geom_smooth(aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source),se=se, method = "loess", formula="y ~ x")+
+    Text <- paste(values$SODF$Source," (",values$SODF$Year,") ",values$SODF$Freq, sep="")
+    
+    g=ggplot(values$SODF, aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source, text=Text))+
+      #geom_line(aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source))+
+      geom_line()+
       labs(x = 'Year'
            , y = laby
            , title = "Source Growth") +
-      #ylim(0, NA) +
       scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
-      theme(text = element_text(color = "#444444"), legend.position="none"
+      theme(text = element_text(color = "#444444"), legend.position="bottom"
+            ,legend.text = element_text(colour="#444444", size=10)
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
             ,panel.background = element_rect(fill = '#EFEFEF')
             ,panel.grid.minor = element_line(color = '#FFFFFF')
@@ -1285,14 +1292,6 @@ server <- function(input, output, session) {
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
             ,axis.text.x = element_text(size=10)
       )
-    
-    DFsmooth=(ggplot_build(g)$data[[1]])
-    DFsmooth$group=factor(DFsmooth$group, labels=levels(values$SODF$Source))
-    
-    maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
-    DF2=subset(DFsmooth, x == maximum)
-    g=g+
-      ggrepel::geom_text_repel(data = DF2, aes(label = DF2$group, colour = DF2$group, x =DF2$x, y = DF2$y), hjust = -.1)
     values$SDplot <- g
     return(g)
     #suppressWarnings(plot(g))
@@ -1309,15 +1308,38 @@ server <- function(input, output, session) {
     contentType = "png"
   )
   
-  output$soGrowthPlot <- renderPlot({
+  output$soGrowthPlot <- renderPlotly({
     
     g <- SOGrowth()
-    plot(g)
+    
+    leg <- list(
+      orientation = 'h', 
+      y = -0.15,
+      font = list(
+        family = "sans-serif",
+        size = 10,
+        color = "#000"),
+      bgcolor = "#FFFFFF",
+      bordercolor = "#FFFFFF",
+      borderwidth = 2) 
+    
+    plot.ly(g) %>%
+      layout(legend = leg) %>%
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines'
+             )) %>%
+      layout(hovermode = 'compare')
     #suppressWarnings(plot(g))
     
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
-  
+  #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
+  })
+    
   output$soGrowthtable <- DT::renderDT({
     
     g <- SOGrowth()
@@ -2451,11 +2473,11 @@ server <- function(input, output, session) {
   WDynamics <- eventReactive(input$applyWD,{
     if (input$cumTerms=="Cum"){
       cdf=TRUE
-      laby="Cumulate occurrences (loess smoothing)"
+      laby="Cumulate occurrences"
     }else{
       cdf=FALSE
-      laby="Annual occurrences (loess smoothing)"}
-    if (input$se=="Yes"){se=TRUE}else{se=FALSE}
+      laby="Annual occurrences"}
+    #if (input$se=="Yes"){se=TRUE}else{se=FALSE}
     
     switch(input$growthTerms,
            ID={
@@ -2486,16 +2508,18 @@ server <- function(input, output, session) {
     n=dim(values$KW)[1]*(dim(values$KW)[2]-1)
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
     values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq, stringsAsFactors = TRUE)
+  
+    Text <- paste(values$DF$Term," (",values$DF$Year,") ",values$DF$Freq, sep="")
     
-    g <- ggplot(values$DF)+
-      geom_smooth(aes(x=.data$Year,y=.data$Freq, group=.data$Term, color=.data$Term),se = se,method = "loess",formula ='y ~ x')+
+    g <- ggplot(values$DF, aes(x=.data$Year,y=.data$Freq, group=.data$Term, color=.data$Term, text = Text))+
+      geom_line()+
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
       #ylim(0, NA) +
       scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0, alpha=0.1))+
-      theme(text = element_text(color = "#444444"), legend.position="none"
+      theme(text = element_text(color = "#444444"), legend.position="bottom"
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
             ,panel.background = element_rect(fill = '#EFEFEF')
             ,panel.grid.minor = element_line(color = '#FFFFFF')
@@ -2507,13 +2531,13 @@ server <- function(input, output, session) {
             ,axis.text.x = element_text(size=10)
       )
     
-    DFsmooth=(ggplot_build(g)$data[[1]])
-    DFsmooth$group=factor(DFsmooth$group, labels=levels(values$DF$Term))
-    
-    maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
-    DF2=subset(DFsmooth, x == maximum)
-    g=g+
-      ggrepel::geom_text_repel(data = DF2, aes(label = .data$group, colour = .data$group, x =.data$x, y = .data$y), hjust = -.1)
+    # DFsmooth=(ggplot_build(g)$data[[1]])
+    # DFsmooth$group=factor(DFsmooth$group, labels=levels(values$DF$Term))
+    # 
+    # maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
+    # DF2=subset(DFsmooth, x == maximum)
+    # g=g+
+    #   ggrepel::geom_text_repel(data = DF2, aes(label = .data$group, colour = .data$group, x =.data$x, y = .data$y), hjust = -.1)
     values$WDplot <- g
     return(g)
   })
@@ -2529,12 +2553,35 @@ server <- function(input, output, session) {
     contentType = "png"
   )
   
-  output$kwGrowthPlot <- renderPlot({
+  output$kwGrowthPlot <- renderPlotly({
     
     g <- WDynamics()
-    plot(g)
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
+    leg <- list(
+      orientation = 'h', 
+      y = -0.15,
+      font = list(
+        family = "sans-serif",
+        size = 10,
+        color = "#000"),
+      bgcolor = "#FFFFFF",
+      bordercolor = "#FFFFFF",
+      borderwidth = 2) 
+    
+    plot.ly(g) %>%
+      layout(legend = leg) %>%
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines'
+             )) %>%
+      layout(hovermode = 'compare')
+    
+  #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
+  })
   
   output$kwGrowthtable <- DT::renderDT({
     g <- WDynamics()
@@ -2661,7 +2708,7 @@ server <- function(input, output, session) {
     CMMAP()
     values$networkCM<-igraph2vis(g=values$CM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape)
+                                 shape=input$coc.shape, values)
     
     values$networkCM$VIS
     
@@ -2743,7 +2790,7 @@ server <- function(input, output, session) {
     
     values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                               shape=input$coc.shape)
+                               shape=input$coc.shape, net=values$cocnet)
     
     
   })
@@ -2754,6 +2801,15 @@ server <- function(input, output, session) {
     values$network$VIS
     
   })
+  
+  # output$cocPlotComm <- renderVisNetwork({  
+  #   
+  #   g <- splitCommunities(values$cocnet$graph, n=NULL)
+  #   igraph2vis(g=g,curved=(input$coc.curved=="Yes"), 
+  #                              labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
+  #                              shape=input$coc.shape, net=values$cocnet)$VIS
+  #   
+  # })
   
   output$network.coc <- downloadHandler(
     filename = "Co_occurrence_network.net",
@@ -3002,7 +3058,7 @@ server <- function(input, output, session) {
     TMAP()
     values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape)
+                                 shape=input$coc.shape, net=values$TM$net)
     
     values$networkTM$VIS
     
@@ -3111,7 +3167,7 @@ server <- function(input, output, session) {
     }
   })
   
-  output$TEPlot <- networkD3::renderSankeyNetwork({
+  output$TEPlot <- plotly::renderPlotly({
     
     TEMAP()
     
@@ -3199,7 +3255,7 @@ server <- function(input, output, session) {
     k=1
     values$network1<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape)
+                                shape=input$coc.shape, net=values$nexus$Net[[k]])
     
     values$network1$VIS
     
@@ -3210,7 +3266,7 @@ server <- function(input, output, session) {
     k=2
     values$network2<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape)
+                                shape=input$coc.shape, net=values$nexus$Net[[k]])
     
     values$network2$VIS
     
@@ -3221,7 +3277,7 @@ server <- function(input, output, session) {
     k=3
     values$network3<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape)
+                                shape=input$coc.shape, net=values$nexus$Net[[k]])
     
     values$network3$VIS
     
@@ -3232,7 +3288,7 @@ server <- function(input, output, session) {
     k=4
     values$network4<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape)
+                                shape=input$coc.shape, net=values$nexus$Net[[k]])
     
     values$network4$VIS
     
@@ -3243,7 +3299,7 @@ server <- function(input, output, session) {
     k=5
     values$network5<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape)
+                                shape=input$coc.shape, net=values$nexus$Net[[k]])
     
     values$network5$VIS
     
@@ -3549,7 +3605,7 @@ server <- function(input, output, session) {
     
     values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                labelsize=input$citlabelsize, opacity=input$cocitAlpha,type=input$citlayout,
-                               shape=input$cocit.shape)
+                               shape=input$cocit.shape, net=values$cocitnet)
   })
   
   output$cocitPlot <- renderVisNetwork({  
@@ -3612,6 +3668,7 @@ server <- function(input, output, session) {
     p <- degreePlot(values$cocitnet)
     plot.ly(p)
   })
+  
   ### Historiograph ----
   Hist <- eventReactive(input$applyHist,{
     
@@ -3619,6 +3676,29 @@ server <- function(input, output, session) {
                  value = 0, {
                    values <- historiograph(input,values)
                  })
+    
+    fx <- list(
+      family = "Old Standard TT, serif",
+      size = 11,
+      color = "black"
+    )
+    
+    a <- list(
+      ticks = "outside",
+      autotick = FALSE,
+      ticktext = values$histPlot$axis$label, 
+      tickvals = values$histPlot$axis$values,
+      tickmode = "array",
+      showticklabels = TRUE,
+      tickangle = 270,
+      tickfont = fx,
+      ticklen = 2,
+      tickwidth = 2,
+      tickcolor = toRGB("black")
+    )
+    
+    g <- plot.ly(values$histPlot$g) %>% layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, hoverlabel = list(font=list(size=input$histlabelsize+7)))
+    return(g)
   })
   
   output$HGplot.save <- downloadHandler(
@@ -3632,15 +3712,11 @@ server <- function(input, output, session) {
     contentType = "png"
   )
   
-  output$histPlot <- renderPlot({
+  output$histPlot <- renderPlotly({
     
     Hist()
-   #g <- values$histPlot$g + 
-   #    coord_equal()
-   #  plot(g)
-  plot(values$histPlot$g)
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 610, width = 1100, res=150)
-  
+
+  })
   output$histTable <- DT::renderDT({
     LCS=values$histResults$LCS
     s=sort(LCS,decreasing = TRUE)[input$histNodes]
@@ -3694,7 +3770,7 @@ server <- function(input, output, session) {
     
     values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
-                               shape=input$col.shape)
+                               shape=input$col.shape, net=values$colnet)
   })
   output$colPlot <- renderVisNetwork({  
     
@@ -4217,7 +4293,8 @@ server <- function(input, output, session) {
       values$cocnet=networkPlot(values$NetWords, normalize=normalize, Title = values$Title, type = input$layout, 
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
                                 label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
-                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), verbose = FALSE)
+                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), 
+                                community.repulsion = input$coc.repulsion/2, verbose = FALSE)
       if (input$cocyears=="Yes"){
         Y=fieldByYear(values$M, field = input$field, graph=FALSE)
         g=values$cocnet$graph
@@ -4276,7 +4353,8 @@ server <- function(input, output, session) {
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
-                                alpha=input$cocitAlpha, cluster=input$cocitCluster, verbose = FALSE)
+                                alpha=input$cocitAlpha, cluster=input$cocitCluster, 
+                                community.repulsion = input$cocit.repulsion/2, verbose = FALSE)
     return(values)
   }
   
@@ -4322,7 +4400,8 @@ server <- function(input, output, session) {
                               size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
                               labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
                               label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
-                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster, verbose = FALSE)
+                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster, 
+                              community.repulsion = input$col.repulsion/2, verbose = FALSE)
     
     return(values)
     
@@ -4415,7 +4494,7 @@ server <- function(input, output, session) {
       visPhysics(enabled = FALSE) %>% visSave(con)
   }
   
-  igraph2vis<-function(g,curved,labelsize,opacity,type,shape){
+  igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net){
     
     LABEL=igraph::V(g)$name
     
@@ -4449,10 +4528,14 @@ server <- function(input, output, session) {
     l<-netLayout(type)
     
     ### TO ADD SHAPE AND FONT COLOR OPTIONS
+    coords <- net$layout
     
-    VIS<-visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
+    VIS<-
+      #visIgraph(g, type="full", smooth=TRUE, physics=FALSE) %>%
+      visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
       visNodes(shape=shape, font=list(color="black")) %>%
-      visIgraphLayout(layout = l) %>%
+      #visIgraphLayout(layout = l) %>%
+      visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
       visEdges(smooth = curved) %>%
       visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
       visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%

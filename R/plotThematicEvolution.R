@@ -24,26 +24,49 @@
 #'
 #' @export
 
-plotThematicEvolution<-function(Nodes,Edges,measure="inclusion", min.flow=0){
+plotThematicEvolution <- function (Nodes, Edges, measure = "inclusion", min.flow = 0){
   
-  switch(measure,
-         inclusion={
-           Edges=Edges[-c(4,5)]
-         },
-         stability={
-           Edges=Edges[-c(3,4)]
-         },
-         weighted={
-           Edges=Edges[,-c(3,5)]
-         })
+
   
-  names(Edges)[3]="weight"
-  Edges=Edges[Edges$weight>=min.flow,]
-  Edges$weight=Edges$weight*100
-  networkD3::sankeyNetwork(Links = Edges, Nodes = Nodes, Source = "from", Target = "to", 
-                           NodeID = "name", Value = "weight", width = 900, fontSize = 12,
-                           nodeWidth = 30,  NodeGroup = "group",LinkGroup = "group")
-                           #colourScale = networkD3::JS('function(){d3.select("body").style("background-color", "#DAE3F9"); return 50;}'))
+  Kx <- length(table(Nodes$group))
+  Ky <- nrow(Nodes)
+  Nodes <-Nodes %>% 
+    mutate(coordX=factor(.data$group, labels = seq(from= 0, to= 1, by= 1/(Kx-0.8)))) %>%  # before: seq(from= 0, to= 1, by= 1/(Kx-1))
+    mutate(coordY= rep(0.1, Ky))
+  
+
+  ################
+  switch(measure, inclusion = {
+    Edges = Edges[-c(4, 5)]
+  }, stability = {
+    Edges = Edges[-c(3, 4)]
+  }, weighted = {
+    Edges = Edges[, -c(3, 5)]
+  })
+  names(Edges)[3] = "weight"
+  Edges = Edges[Edges$weight >= min.flow, ]
+  Edges$weight = Edges$weight * 100
+  
+  
+  plotly::plot_ly(
+    type = "sankey",
+    arrangement = "snap",
+    node = list(
+      label = Nodes$name,
+      x = Nodes$coordX,
+      y = Nodes$coordY,
+      color = Nodes$color,
+      pad = 10), # 10 Pixel
+    link = list(
+      source = Edges$from,
+      target = Edges$to,
+      value = Edges$weight)
+  ) %>% 
+    plotly::add_annotations(x = Nodes$coordX,
+                    y = -0.03,
+                    text = factor(Nodes$group) ,
+                    showarrow=F,xanchor = "center",
+                    font = list(color = 'Dark',
+                                family = "Arial",
+                                size = 18))
 }
-
-

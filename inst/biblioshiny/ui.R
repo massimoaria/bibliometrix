@@ -711,13 +711,13 @@ navbarMenu("Sources",
                                    selectInput("cumSO", "Occurrences",
                                                choices = c("Cumulate" = "Cum",
                                                            "Per year" = "noCum"),
-                                               selected = "noCum"),
-                                   selectInput("SOse", "Confidence Interval",
-                                               choices = c("Yes" = "Yes",
-                                                           "No" = "No"),
-                                               selected = "No"),
+                                               selected = "Cum"),
+                                   # selectInput("SOse", "Confidence Interval",
+                                   #             choices = c("Yes" = "Yes",
+                                   #                         "No" = "No"),
+                                   #             selected = "No"),
                                    hr(),
-                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = 5),
+                                   sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = c(1,5)),
                                    br(),
                                    br(),
                                    br(),
@@ -749,7 +749,8 @@ navbarMenu("Sources",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
+                                             #shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "soGrowthPlot", height = "90vh"))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
@@ -1682,11 +1683,11 @@ navbarMenu("Documents",
                                    selectInput("cumTerms", "Occurrences",
                                                choices = c("Cumulate" = "Cum",
                                                            "Per year" = "noCum"),
-                                               selected = "noCum"),
-                                   selectInput("se", "Confidence Interval",
-                                               choices = c("Yes" = "Yes",
-                                                           "No" = "No"),
-                                               selected = "No"),
+                                               selected = "Cum"),
+                                   # selectInput("se", "Confidence Interval",
+                                   #             choices = c("Yes" = "Yes",
+                                   #                         "No" = "No"),
+                                   #             selected = "No"),
                                    hr(),
                                    sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10)),                                   
                                    br(),
@@ -1722,7 +1723,8 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             shinycssloaders::withSpinner(plotOutput(outputId = "kwGrowthPlot"))
+                                             #shinycssloaders::withSpinner(plotOutput(outputId = "kwGrowthPlot"))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "kwGrowthPlot", height = "90vh")) #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
@@ -1858,7 +1860,7 @@ navbarMenu("Coupling ",
                                                selected = "ID"),
                                    sliderInput("CMn", label="Number of Units",value=250,min=50,max=5000,step=10),
                                    sliderInput("CMfreq", label="Min Cluster Frequency (per thousand units)",value=5,min=1,max=100,step=1),
-                                   sliderInput("CMn.labels", label="Number of Labels (for each cluster)",value=1,min=3,max=10,step=1),
+                                   sliderInput("CMn.labels", label="Number of Labels (for each cluster)",value=3,min=1,max=10,step=1),
                                    sliderInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05),
                                    
                                    br(),
@@ -1975,6 +1977,11 @@ navbarMenu("Conceptual Structure",
                                                 "Spinglass" = "spinglass",
                                                 "Walktrap" = "walktrap"),
                                     selected = "louvain"),
+                        sliderInput(inputId = "coc.repulsion",
+                                    label = "Cluster Repulsion Force",
+                                    min = 0,
+                                    max = 1,
+                                    value = 0.1),
                         
                         sliderInput(inputId = "Nodes",
                                     label = "Number of Nodes",
@@ -2047,8 +2054,10 @@ navbarMenu("Conceptual Structure",
                     
                     mainPanel(
                       tabsetPanel(type = "tabs",
-                                  tabPanel("Map", 
+                                  tabPanel("Network Map", 
                                            shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "80vh"))), #height = "750px",width = "1100px"))),
+                                  # tabPanel("Communities", 
+                                  #          shinycssloaders::withSpinner(visNetworkOutput("cocPlotComm", height = "80vh"))), #height = "750px",width = "1100px"))),
                                   tabPanel("Table", 
                                            shinycssloaders::withSpinner(DT::DTOutput(
                                              outputId = "cocTable"))),
@@ -2090,7 +2099,7 @@ navbarMenu("Conceptual Structure",
                                                  selected = FALSE)),
                                    sliderInput("TMn", label="Number of Words",value=250,min=50,max=5000,step=10),
                                    sliderInput("TMfreq", label="Min Cluster Frequency (per thousand docs)",value=5,min=1,max=100,step=1),
-                                   sliderInput("TMn.labels", label="Number of Labels (for each cluster)",value=1,min=1,max=5,step=1),
+                                   sliderInput("TMn.labels", label="Number of Labels (for each cluster)",value=3,min=0,max=10,step=1),
                                    sliderInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05),
                                    
                                    br(),
@@ -2182,7 +2191,8 @@ navbarMenu("Conceptual Structure",
                                 tabsetPanel(type = "tabs",
                                             tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
                                               tabPanel("Map",
-                                                       shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot", height = "80vh"))  #height = "600px"))
+                                                       #shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot", height = "80vh"))  #height = "600px"))
+                                                       shinycssloaders::withSpinner(plotlyOutput(outputId = "TEPlot", height = "80vh"))
                                                       ),
                                               tabPanel("Table",
                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
@@ -2449,6 +2459,11 @@ navbarMenu("Intellectual Structure",
                                                 "Spinglass" = "spinglass",
                                                 "Walktrap" = "walktrap"),
                                     selected = "louvain"),
+                        sliderInput(inputId = "cocit.repulsion",
+                                    label = "Cluster Repulsion Force",
+                                    min = 0,
+                                    max = 1,
+                                    value = 0.1),
                         
                         sliderInput(inputId = "citNodes",
                                     label = "Number of Nodes",
@@ -2612,11 +2627,10 @@ navbarMenu("Intellectual Structure",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
-                                             shinycssloaders::withSpinner(plotOutput(
-                                      outputId = "histPlot"))),
+                                             #shinycssloaders::withSpinner(plotOutput(outputId = "histPlot"))),
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "80vh"))),
                                     tabPanel("Table", 
-                                             shinycssloaders::withSpinner(DT::DTOutput(
-                                      outputId = "histTable")))
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
                         )
                       )
                         
@@ -2683,6 +2697,12 @@ navbarMenu("Social Structure",
                                                            "Spinglass" = "spinglass",
                                                            "Walktrap" = "walktrap"),
                                                selected = "louvain"),
+                                   
+                                   sliderInput(inputId = "col.repulsion",
+                                               label = "Cluster Repulsion Force",
+                                               min = 0,
+                                               max = 1,
+                                               value = 0.1),
                                    
                                    sliderInput(inputId = "colNodes",
                                                label = "Number of Nodes",

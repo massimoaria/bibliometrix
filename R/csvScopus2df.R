@@ -1,7 +1,7 @@
 utils::globalVariables("where")
 
 csvScopus2df <- function(file){
-  
+  options(readr.num_columns = 0)
   
   ## import all files in a single data frame
   for (i in 1:length(file)){

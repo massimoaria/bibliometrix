@@ -4,11 +4,19 @@
 #' @import bibliometrixData
 #' @import forcats
 #' @import ggrepel
-#' @import ggraph
+#' @import ggnetwork
 #' @import pubmedR
 #' @import shiny
 #' @import readr
 #' @import readxl
+#' @importFrom plotly add_annotations
+#' @importFrom plotly add_lines
+#' @importFrom plotly config
+#' @importFrom plotly ggplotly
+#' @importFrom plotly layout
+#' @importFrom plotly plot_ly
+#' @importFrom plotly subplot
+#' @importFrom plotly toRGB
 # #' @import shinycssloaders
 # #' @import shinythemes
 #' @importFrom openxlsx write.xlsx
@@ -17,6 +25,7 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom tidyr pivot_longer
 #' @importFrom tidyr replace_na
+#' @importFrom tidyr separate
 # @importFrom tidyselect where
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%

@@ -478,7 +478,8 @@ navbarMenu("Dataset",
                                    ),
                       mainPanel(
                         #tabPanel("Plot",
-                                 shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "ThreeFielsPlot",height = "80vh")) #height = "600px"))
+                              shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
+                                 #shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "ThreeFielsPlot",height = "80vh")) #height = "600px"))
                         #            )
                       )
                     )

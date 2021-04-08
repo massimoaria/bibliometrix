@@ -1012,10 +1012,10 @@ server <- function(input, output, session) {
   
   TFP <- eventReactive(input$apply3F,{
     fields=c(input$LeftField, input$CentralField, input$RightField)
-    threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn), width=1200,height=600)
+    threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn))
   })
   
-  output$ThreeFielsPlot <- networkD3::renderSankeyNetwork({
+  output$ThreeFieldsPlot <- renderPlotly({
     TFP()  
   })
   
@@ -3697,7 +3697,7 @@ server <- function(input, output, session) {
       tickcolor = toRGB("black")
     )
     
-    g <- plot.ly(values$histPlot$g) %>% layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, hoverlabel = list(font=list(size=input$histlabelsize+7)))
+    g <- plot.ly(values$histPlot$g) %>% layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, hoverlabel = list(font=list(size=input$histlabelsize+9)))
     return(g)
   })
   

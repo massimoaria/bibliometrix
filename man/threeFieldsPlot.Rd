@@ -4,13 +4,7 @@
 \alias{threeFieldsPlot}
 \title{Three Fields Plot}
 \usage{
-threeFieldsPlot(
-  M,
-  fields = c("AU", "DE", "SO"),
-  n = c(20, 20, 20),
-  width = 1200,
-  height = 600
-)
+threeFieldsPlot(M, fields = c("AU", "DE", "SO"), n = c(20, 20, 20))
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
@@ -21,10 +15,6 @@ Default is \code{fields = c("AU","DE", "SO")}.}
 
 \item{n}{is a integer vector. It indicates how many items to plot, for each of the three fields. 
 Default is \code{n = c(20, 20, 20)}}
-
-\item{width}{is an integer. It indicates the plot width (in pixel). Default is \code{width=1200}.}
-
-\item{height}{is an integer. It indicates the plot height (in pixel). Default is \code{height=600}.}
 }
 \value{
 a sankeyPlot

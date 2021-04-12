@@ -1,4 +1,6 @@
-utils::globalVariables("where")
+# utils::globalVariables("where")
+# utils::globalVariables("any_of")
+# utils::globalVariables("if_all")
 
 csvScopus2df <- function(file){
   options(readr.num_columns = 0)

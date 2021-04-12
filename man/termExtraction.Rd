@@ -7,6 +7,7 @@
 termExtraction(
   M,
   Field = "TI",
+  ngrams = 1,
   stemming = FALSE,
   language = "english",
   remove.numbers = TRUE,
@@ -27,6 +28,9 @@ It is a data matrix with cases corresponding to articles and variables to Field 
 \code{"ID"}\tab   \tab Manuscript keywords plus\cr
 \code{"DE"}\tab   \tab Manuscript author's keywords}
 The default is \code{Field = "TI"}.}
+
+\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{stemming}{is logical. If TRUE the Porter Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.}
 
@@ -57,7 +61,7 @@ data(scientometrics, package = "bibliometrixData")
 keep.terms <- c("co-citation analysis","bibliographic coupling")
 
 # term extraction
-scientometrics <- termExtraction(scientometrics, Field = "TI",
+scientometrics <- termExtraction(scientometrics, Field = "TI", ngrams = 1,
 remove.numbers=TRUE, remove.terms=NULL, keep.terms=keep.terms, verbose=TRUE)
 
 # terms extracted from the first 10 titles
@@ -68,12 +72,10 @@ scientometrics$TI_TM[1:10]
 
 data(scientometrics)
 
-# vector of terms to remove
-remove.terms=c("analysis","bibliographic")
-
 # term extraction
-scientometrics <- termExtraction(scientometrics, Field = "AB", stemming=TRUE,language="english",
- remove.numbers=TRUE, remove.terms=remove.terms, keep.terms=NULL, verbose=TRUE)
+scientometrics <- termExtraction(scientometrics, Field = "AB", ngrams = 2, 
+ stemming=TRUE,language="english",
+ remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, verbose=TRUE)
 
 # terms extracted from the first abstract
 scientometrics$AB_TM[1]
@@ -86,7 +88,7 @@ data(scientometrics)
 synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
 
 # term extraction
-scientometrics <- termExtraction(scientometrics, Field = "ID",
+scientometrics <- termExtraction(scientometrics, Field = "ID", ngrams = 1,
 synonyms=synonyms, verbose=TRUE)
 
 

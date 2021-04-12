@@ -11,6 +11,8 @@
 #' \code{"DE"}\tab   \tab Manuscript author's keywords}
 #' The default is \code{Field = "TI"}.
 #'
+#' @param ngrams is an integer between 1 and 3. It indicates the type of n-gram to extract from texts. 
+#' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param stemming is logical. If TRUE the Porter Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param language is a character. It is the language of textual contents ("english", "german","italian","french","spanish"). The default is \code{language="english"}.
 #' @param remove.numbers is logical. If TRUE all numbers are deleted from the documents before term extraction. The default is \code{remove.numbers = TRUE}.
@@ -30,7 +32,7 @@
 #' keep.terms <- c("co-citation analysis","bibliographic coupling")
 #' 
 #' # term extraction
-#' scientometrics <- termExtraction(scientometrics, Field = "TI",
+#' scientometrics <- termExtraction(scientometrics, Field = "TI", ngrams = 1,
 #' remove.numbers=TRUE, remove.terms=NULL, keep.terms=keep.terms, verbose=TRUE)
 #' 
 #' # terms extracted from the first 10 titles
@@ -41,12 +43,10 @@
 #'
 #' data(scientometrics)
 #' 
-#' # vector of terms to remove
-#' remove.terms=c("analysis","bibliographic")
-#' 
 #' # term extraction
-#' scientometrics <- termExtraction(scientometrics, Field = "AB", stemming=TRUE,language="english",
-#'  remove.numbers=TRUE, remove.terms=remove.terms, keep.terms=NULL, verbose=TRUE)
+#' scientometrics <- termExtraction(scientometrics, Field = "AB", ngrams = 2, 
+#'  stemming=TRUE,language="english",
+#'  remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, verbose=TRUE)
 #' 
 #' # terms extracted from the first abstract
 #' scientometrics$AB_TM[1]
@@ -59,7 +59,7 @@
 #' synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
 #' 
 #' # term extraction
-#' scientometrics <- termExtraction(scientometrics, Field = "ID",
+#' scientometrics <- termExtraction(scientometrics, Field = "ID", ngrams = 1,
 #' synonyms=synonyms, verbose=TRUE)
 #'
 #'
@@ -68,102 +68,117 @@
 #' 
 #' @export
 
-termExtraction <- function(M, Field="TI", stemming=FALSE,language="english",remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, synonyms=NULL, verbose=TRUE){
+
+
+termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="english",remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, synonyms=NULL, verbose=TRUE){
   
   # load stopwords
   data("stopwords",envir=environment())
+  data("stop_words", envir=environment(), package = "tidytext")
+  stop_words <- stop_words %>% as.data.frame()
+  
   switch(language,
-    english={stopwords=stopwords$en},
+    english={stopwords=(stop_words$word)},
     italian={stopwords=stopwords$it},
     german={stopwords=stopwords$de},
     french={stopwords=stopwords$fr},
     spanish={stopwords=stopwords$es}
     )
-  #stopwords=stopwords
+  stopwords <- tolower(stopwords)
 
   # remove all special characters (except "-")
-  TERMS=toupper(M[,Field])
-  TERMS=gsub("ELSEVIER B.V. ALL RIGHTS RESERVED","",TERMS)
-  TERMS=gsub("RIGHTS RESERVED","",TERMS)
-  TERMS=gsub("ELSEVIER","",TERMS)
-  TERMS=gsub("[^[:alnum:][:blank:]\\-]", "", TERMS)
+  TERMS <- M %>% 
+    select(.data$SR,!!Field)
   
-  if (remove.numbers==TRUE){TERMS=gsub("[[:digit:]]","",TERMS)}
+  names(TERMS) <- c("SR","text")
   
-  TERMS=gsub("\\."," ",TERMS)
-  TERMS=gsub(" - "," ",TERMS)
+  TERMS <- TERMS %>%
+    mutate(text = tolower(gsub("[^[:alnum:][:blank:]\\-]", "", .data$text)))
+  
+  if (remove.numbers==TRUE){
+    TERMS <- TERMS %>%
+      mutate(text = gsub("[[:digit:]]","",.data$text))
+    }
   
   # keep terms in the vector keep.terms
   if (length(keep.terms)>0 & class(keep.terms)=="character"){
-    keep.terms=toupper(keep.terms)
-    kt=gsub(" ","-",keep.terms)
+    keep.terms <- tolower(keep.terms)
+    kt <- gsub(" ","-",keep.terms)
     for (i in 1:length(keep.terms)){
-      TERMS=gsub(keep.terms[i],kt[i],TERMS)
+      TERMS <- TERMS %>%
+        mutate(text = gsub(keep.terms[i],kt[i],.data$text))
     }
   }
-  
-  # create a list of terms for each document
-  listTERMS=strsplit(TERMS,split=" ")
 
-  # merge synonyms 
+  
+  # keep terms in the vector keep.terms
   if (length(synonyms)>0 & class(synonyms)=="character"){
-    synonyms=toupper(synonyms)
-    listTERMS=lapply(listTERMS,function(l){
-      s=(strsplit(synonyms,split=";"))
-      
-      for (i in 1:length(synonyms)){
-        
-        ind=which(l %in% trim(s[[i]]))
-        if (length(ind)>0){l[ind]=trim(s[[i]][1])}
-      }
-      return(l)
-    })
+    s <- strsplit(tolower(synonyms),";")
+    snew <- paste(" ",unlist(lapply(s,function(l) l[1]))," ",sep="")
+    sold <- (lapply(s,function(l) paste(" ",l[-1]," ",sep="")))
+    TERMS <- TERMS %>% mutate(text = paste(" ",.data$text," ", sep=""))
+    for (i in 1:length(s)){
+      TERMS <- TERMS %>%
+        mutate(
+          text = str_replace_all(.data$text, paste(sold[[i]], collapse="|",sep=""),snew[i]))
+    }
   }
+  if (is.null(remove.terms)) remove.terms <- ""
   
-  # remove stopwords from each list of terms
-  listTERMS=lapply(listTERMS,function(l){
-    l=l[!(l %in% stopwords)]
-    l=l[nchar(l)>1]
-  })
+  TERMS <- extractNgrams(text=TERMS, Var="text", nword=ngrams, 
+                             stopwords=stopwords, custom_stopwords=tolower(remove.terms),
+                             stemming=stemming, language=language)
   
-  # remove user-defined terms from each list of terms
-  if (length(remove.terms)>0 & class(remove.terms)=="character"){
-    remove.terms=toupper(remove.terms)
-    listTERMS=lapply(listTERMS,function(l){
-      l=l[!(l %in% remove.terms)]
-      l=l[nchar(l)>1]
-    })
-  }
-  
-  # word stemming algorithm
-  if (stemming==TRUE){
-    listTERMS=lapply(listTERMS,function(l){
-      l=tolower(l)
-      l=toupper(SnowballC::wordStem(l,language=language))
-    })
-  }
-  
-  
-  # create a vector of extracted terms
-  TM=unlist(lapply(listTERMS,function(l){
-    l=paste0(l,collapse=";")
-  }))
+  TERMS <- TERMS %>%
+    group_by(.data$SR) %>%
+    summarize(text = paste(.data$ngram, collapse=";"))
   
   # assign the vector to the bibliographic data frame
-  switch(Field,
-         TI={M$TI_TM=TM},
-         AB={M$AB_TM=TM},
-         ID={M$ID_TM=TM},
-         DE={M$DE_TM=TM})
-
+  col_name <- paste(Field,"_TM",sep="")
+  M <- M[!names(M) %in% col_name]
+  
+  M <- TERMS %>%
+    right_join(M, by = "SR") 
+  names(M)[which(names(M) %in% "text")] <- col_name
+  
   
   # display results
   if (verbose==TRUE){
-    s=sort(table(unlist(strsplit(TM,split=";"))),decreasing = TRUE)
+    s <- tableTag(M,col_name)
     
     if (length(s>25)){print(s[1:25])}else{print(s)}
     }
   
+  class(M) <- c("bibliometrixDB", "data.frame")
+  
   return(M)
   
+}
+
+extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemming, language){
+  # text is data frame containing the corpus data text = M %>% select(.data$SR,.data$AB)
+  # Var is a string indicating the column name. I.e. Var = "AB"
+  # nword is a integer vector indicating the ngrams to extract. I.e. nword = c(2,3)
+  
+  custom_stopwords <- c(stopwords, custom_stopwords, "elsevier", "springer", "john wiley")
+  custom_stopngrams <- c("rights reserved")
+  ngram <- NULL
+  
+  ngrams <- text %>%
+    drop_na(any_of(Var)) %>%
+    unnest_tokens(ngram, !!Var, token = "ngrams", n = nword) %>%
+    separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ") %>%
+    dplyr::filter(if_all(starts_with("word"), ~ !.x %in% custom_stopwords)) 
+  
+  if (isTRUE(stemming)){
+    ngrams <- ngrams %>% 
+      mutate(across(paste("word",1:nword,sep=""), ~SnowballC::wordStem(.x,language=language)))
+    }
+    #filter(if_all(starts_with("word"), ~ !str_detect(.x, "\\d"))) %>%
+    ngrams <- ngrams %>% 
+      unite(ngram, paste("word",1:nword,sep=""), sep = " ") %>%
+      dplyr::filter(!.data$ngram %in% custom_stopngrams) %>%
+      mutate(ngram = toupper(.data$ngram))
+
+  return(ngrams)
 }

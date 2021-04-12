@@ -9,6 +9,7 @@
 #' @param Tag is a character object. It indicates one of the field tags of the
 #'   standard ISI WoS Field Tag codify.
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
+#' @param ngrams is an integer between 1 and 3. It indicates the type of n-gram to extract from titles or abstracts. 
 #' @return an object of class \code{table}
 #' @examples
 #'
@@ -17,11 +18,11 @@
 #' Tab[1:10]
 #'
 #' @export
-tableTag <- function(M, Tag = "CR", sep = ";"){
+tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1){
   
   if (Tag %in% c("AB","TI")){
-    M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE)
-    i=dim(M)[2]
+    M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE, ngrams = ngrams)
+    i=which(names(M)==paste(Tag,"_TM",sep=""))
   }else{i<-which(names(M)==Tag)}
   
   if (Tag=="C1"){

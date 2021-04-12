@@ -2306,7 +2306,13 @@ server <- function(input, output, session) {
   
   ### Words ----
   MFWords <- eventReactive(input$applyMFWords,{
-    WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity")$v
+    if (input$MostRelWords %in% c("TI","AB")){
+      ngrams <- as.numeric(input$MRWngrams)
+    }else{
+      ngrams <- 1
+    }
+
+    WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams)$v
     
     TAB=data.frame(names(WR),as.numeric(WR),stringsAsFactors = FALSE)
     names(TAB)=c("Words", "Occurrences")
@@ -2377,7 +2383,14 @@ server <- function(input, output, session) {
   })
   
   WordCloud <- eventReactive(input$applyWordCloud,{
-    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure)
+    
+    if (input$summaryTerms %in% c("TI","AB")){
+      ngrams <- as.numeric(input$summaryTermsngrams)
+    }else{
+      ngrams <- 1
+    }
+    
+    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams)
     
     W=resW$W
     values$Words=resW$Words
@@ -2395,8 +2408,13 @@ server <- function(input, output, session) {
   })
   
   TreeMap <- eventReactive(input$applyTreeMap,{
-    #resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure=input$treemeasure)
-    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity")
+    if (input$treeTerms %in% c("TI","AB")){
+      ngrams <- as.numeric(input$treeTermsngrams)
+    }else{
+      ngrams <- 1
+    }
+    
+    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity", ngrams=ngrams)
     
     W=resW$W
     values$TreeMap <- plot_ly(
@@ -2479,6 +2497,8 @@ server <- function(input, output, session) {
       laby="Annual occurrences"}
     #if (input$se=="Yes"){se=TRUE}else{se=FALSE}
     
+    
+    
     switch(input$growthTerms,
            ID={
              KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw[2], cdf = cdf)
@@ -2488,15 +2508,15 @@ server <- function(input, output, session) {
              KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf)
            },
            TI={
-             if (!("TI_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "TI", verbose=FALSE)
-             }
+             #if (!("TI_TM" %in% names(values$M))){
+               values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams))
+             #}
              KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            },
            AB={
-             if (!("AB_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE)
-             }
+             #if (!("AB_TM" %in% names(values$M))){
+               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams))
+             #}
              KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            }
     )
@@ -2621,7 +2641,7 @@ server <- function(input, output, session) {
   TrendTopics <- eventReactive(input$applyTrendTopics,{
     
     if (input$trendTerms %in% c("TI","AB")){
-      values$M=termExtraction(values$M, Field = input$trendTerms, stemming = input$trendStemming, verbose = FALSE)
+      values$M=termExtraction(values$M, Field = input$trendTerms, stemming = input$trendStemming, verbose = FALSE, ngrams=as.numeric(input$trendTermsngrams))
       field=paste(input$trendTerms,"_TM",sep="")
     } else {field=input$trendTerms}
     values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
@@ -4114,16 +4134,16 @@ server <- function(input, output, session) {
     return(res)
   }
   
-  wordlist <- function(M, Field, n, measure){
+  wordlist <- function(M, Field, n, measure, ngrams){
     switch(Field,
            ID={v=tableTag(values$M,"ID")},
            DE={v=tableTag(values$M,"DE")},
            TI={
              if (!("TI_TM" %in% names(M))){
-               v=tableTag(M,"TI")
+               v=tableTag(M,"TI", ngrams=ngrams)
              }},
            AB={if (!("AB_TM" %in% names(M))){
-             v=tableTag(M,"AB")
+             v=tableTag(M,"AB", ngrams=ngrams)
            }}
     )
     names(v)=tolower(names(v))

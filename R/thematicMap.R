@@ -16,6 +16,8 @@
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param n is an integer. It indicates the number of terms to include in the analysis.
 #' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).
+#' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+#' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
@@ -41,7 +43,7 @@
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
   
   minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
@@ -56,13 +58,13 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, stemming=FALSE, size=0.
          },
          TI={
            #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
-           M=termExtraction(M,Field="TI",verbose=FALSE, stemming = stemming)
+           M=termExtraction(M,Field="TI", ngrams=ngrams, verbose=FALSE, stemming = stemming)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
            
          },
          AB={
            #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
-           M=termExtraction(M,Field="AB",verbose=FALSE, stemming = stemming)
+           M=termExtraction(M,Field="AB", ngrams=ngrams, verbose=FALSE, stemming = stemming)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
            
          })

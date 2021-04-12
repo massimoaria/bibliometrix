@@ -1,6 +1,7 @@
 bibliometrix v3.1 (Release date: ?????? )
 
 New functionalities:
+* The analysis of n-grams extracted from titles and abstracts 
 * splitCommunities: new function to create a network plot with separated communities.
 * histPlot: new, improved, plot layout
 * fieldByYear: New Trend Topic Plot

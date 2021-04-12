@@ -17,6 +17,7 @@ LazyData: FALSE
 Encoding: UTF-8
 Depends: R (>= 3.3.0)
 Imports: stats,
+     grDevices,
 		 bibliometrixData,
 		 dimensionsR, 
 		 dplyr,
@@ -41,7 +42,8 @@ Imports: stats,
 		 stringdist,
 		 stringr,
 		 tidyr,
-		 tidyselect
+		 tidyselect,
+		 tidytext
 Suggests: 
     knitr,
     rmarkdown,

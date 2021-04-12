@@ -1,3 +1,7 @@
+utils::globalVariables("where")
+#utils::globalVariables("any_of")
+#utils::globalVariables("if_all")
+
 #' @import stats
 #' @import dimensionsR
 #' @import ggplot2
@@ -9,6 +13,7 @@
 #' @import shiny
 #' @import readr
 #' @import readxl
+#' @import tidytext
 #' @importFrom plotly add_annotations
 #' @importFrom plotly add_lines
 #' @importFrom plotly config
@@ -26,6 +31,9 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom tidyr replace_na
 #' @importFrom tidyr separate
+#' @importFrom tidyr drop_na
+#' @importFrom tidyr unite
+#' @importFrom tidyr starts_with
 # @importFrom tidyselect where
 #' @importFrom grDevices adjustcolor
 #' @importFrom dplyr %>%
@@ -35,6 +43,8 @@
 #' @importFrom dplyr between
 # @importFrom dplyr filter
 #' @importFrom dplyr arrange
+#' @importFrom dplyr if_all
+#' @importFrom dplyr any_of
 #' @importFrom dplyr cummean
 #' @importFrom dplyr desc
 #' @importFrom dplyr group_by
@@ -48,6 +58,7 @@
 #' @importFrom dplyr anti_join
 #' @importFrom dplyr inner_join
 #' @importFrom dplyr left_join
+#' @importFrom dplyr right_join
 #' @importFrom dplyr top_n
 #' @importFrom dplyr relocate
 #' @importFrom dplyr slice_head
@@ -239,12 +250,13 @@
 #' @importFrom Matrix writeMM
 #' @importFrom stringr str_locate_all
 #' @importFrom stringr str_extract_all
-# @importFrom stringr str_replace
+#' @importFrom stringr str_replace_all
 #' @importFrom graphics barplot
 #' @importFrom graphics legend
 #' @importFrom graphics lines
 #' @importFrom graphics plot
 #' @importFrom graphics par
+#' @importFrom grDevices colorRampPalette
 #' @importFrom utils capture.output
 #' @importFrom utils data
 #' @importFrom utils adist

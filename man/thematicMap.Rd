@@ -9,6 +9,7 @@ thematicMap(
   field = "ID",
   n = 250,
   minfreq = 5,
+  ngrams = 1,
   stemming = FALSE,
   size = 0.5,
   n.labels = 1,
@@ -24,6 +25,9 @@ thematicMap(
 \item{n}{is an integer. It indicates the number of terms to include in the analysis.}
 
 \item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
+
+\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{stemming}{is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).}
 

@@ -14,6 +14,8 @@
 #' @param years is a numeric vector of two or more unique cut points.
 #' @param n is numerical. It indicates the number of words to use in the network analysis
 #' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.
+#' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+#' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
@@ -37,7 +39,7 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, stemming = FALSE, n.labels = 1, repel = TRUE) 
+thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, ngrams=1, stemming = FALSE, n.labels = 1, repel = TRUE) 
 {
   list_df <-  timeslice(M, breaks = years)
   K <-  length(list_df)
@@ -47,7 +49,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
   for (k in 1:K) {
     Mk <-  list_df[[k]]
     Y[k] <-  paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")
-    resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, 
+    resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, ngrams=ngrams,
                         stemming = stemming, size = size, n.labels = n.labels, 
                         repel = repel)
     res[[k]] <-  resk

@@ -29,7 +29,7 @@ It is a data matrix with cases corresponding to articles and variables to Field 
 \code{"DE"}\tab   \tab Manuscript author's keywords}
 The default is \code{Field = "TI"}.}
 
-\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from texts. 
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{stemming}{is logical. If TRUE the Porter Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.}

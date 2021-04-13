@@ -1,8 +1,9 @@
 bibliometrix v3.1 (Release date: ?????? )
 
 New functionalities:
-* The analysis of n-grams extracted from titles and abstracts 
-* splitCommunities: new function to create a network plot with separated communities.
+* All content analysis functions (conceptualStructure, biblioAnalysis, etc) include the analysis of bigrams and trigrams extracted from titles and abstracts 
+* Three Field Plot: improved plot layout using plotly libraries
+* splitCommunities: new function to create a network plot with separated communities
 * histPlot: new, improved, plot layout
 * fieldByYear: New Trend Topic Plot
 

@@ -4,7 +4,7 @@
 \alias{tableTag}
 \title{Tabulate elements from a Tag Field column}
 \usage{
-tableTag(M, Tag = "CR", sep = ";")
+tableTag(M, Tag = "CR", sep = ";", ngrams = 1)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
@@ -14,6 +14,8 @@ It is a data matrix with cases corresponding to articles and variables to Field 
 standard ISI WoS Field Tag codify.}
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
+
+\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from titles or abstracts.}
 }
 \value{
 an object of class \code{table}

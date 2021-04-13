@@ -17,6 +17,8 @@
 #'   \code{DE_TM}\tab   \tab Author's Keywords stemmed through the Porter's stemming algorithm\cr
 #'   \code{TI}\tab   \tab Terms extracted from titles\cr
 #'   \code{AB}\tab   \tab Terms extracted from abstracts}
+#' @param ngrams is an integer between 1 and 3. It indicates the type of n-gram to extract from texts. 
+#' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
 #'  \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}
 #' @param minDegree is an integer. It indicates the minimum occurrences of terms to analize and plot. The default value is 2.
@@ -53,7 +55,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, clust="auto", k.max=5, stemming=FALSE, labelsize=10,documents=2, graph=TRUE){
+conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, clust="auto", k.max=5, stemming=FALSE, labelsize=10,documents=2, graph=TRUE){
   
   #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   cbPalette <- c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
@@ -120,7 +122,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
           
          },
          TI={
-           M=termExtraction(M,Field="TI",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE)
+           M=termExtraction(M,Field="TI",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE, ngrams=ngrams)
            
            CW <- cocMatrix(M, Field = "TI_TM", type="matrix", sep=";",binary=binary)
            # Define minimum degree (number of occurrences of each Keyword)
@@ -131,7 +133,7 @@ conceptualStructure<-function(M,field="ID", method="MCA", quali.supp=NULL, quant
           
          },
          AB={
-           M=termExtraction(M,Field="AB",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE)
+           M=termExtraction(M,Field="AB",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE, ngrams=ngrams)
            
            CW <- cocMatrix(M, Field = "AB_TM", type="matrix", sep=";",binary=binary)
            # Define minimum degree (number of occurrences of each Keyword)

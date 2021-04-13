@@ -15,10 +15,10 @@ server <- function(input, output, session) {
   values = reactiveValues()
   values$h <- 7
   values$w <- 14 
-  values$results=list("NA")
-  values$log="working..."
+  values$results <- list("NA")
+  values$log <- "working..."
   values$load="FALSE"
-  values$field="NA"
+  values$field = values$cocngrams = "NA"
   values$citField=values$colField=values$citSep="NA"
   values$NetWords=values$NetRefs=values$ColNetRefs=matrix(NA,1,1)
   values$Title="Network"
@@ -2883,6 +2883,8 @@ server <- function(input, output, session) {
     p <- degreePlot(values$cocnet)
     plot.ly(p)
   })
+  
+  
   ### Correspondence Analysis ----
   
   CSfactorial <- eventReactive(input$applyCA,{
@@ -3058,8 +3060,14 @@ server <- function(input, output, session) {
   ### Thematic Map ----
   TMAP <- eventReactive(input$applyTM,{
     
+    if (input$TMfield %in% c("TI","AB")){
+      ngrams <- as.numeric(input$TMngrams)
+    }else{
+      ngrams <- 1
+    }
+    
     values$TM <- thematicMap(values$M, field=input$TMfield, 
-                             n=input$TMn, minfreq=input$TMfreq, 
+                             n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
                              stemming=input$TMstemming, size=input$sizeTM, 
                              n.labels=input$TMn.labels, repel=FALSE)
     
@@ -3169,7 +3177,11 @@ server <- function(input, output, session) {
   })
   
   TEMAP <- eventReactive(input$applyTE,{
-    
+    if (input$TEfield %in% c("TI","AB")){
+      ngrams <- as.numeric(input$TEngrams)
+    }else{
+      ngrams <- 1
+    }
     
     values$yearSlices <- as.numeric()
     for (i in 1:as.integer(input$numSlices)){
@@ -3177,7 +3189,7 @@ server <- function(input, output, session) {
     }
     
     if (length(values$yearSlices)>0){
-      values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, n.labels=input$TEn.labels, repel=FALSE)
+      values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams)
       
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -3988,20 +4000,20 @@ server <- function(input, output, session) {
   
   
   initial <- function(values){
-    values$results=list("NA")
-    values$log="working..."
-    values$load="FALSE"
-    values$field="NA"
-    values$citField=values$colField=values$citSep="NA"
-    values$NetWords=values$NetRefs=values$ColNetRefs=matrix(NA,1,1)
-    values$Title="Network"
-    values$Histfield="NA"
-    values$histlog="working..."
-    values$kk=0
-    values$histsearch="NA"
-    values$citShortlabel="NA"
-    values$S=list("NA")
-    values$GR="NA"
+    values$results <- list("NA")
+    values$log <- "working..."
+    values$load <- "FALSE"
+    values$field = values$cocngrams = "NA"
+    values$citField = values$colField = values$citSep= "NA"
+    values$NetWords = values$NetRefs = values$ColNetRefs=matrix(NA,1,1)
+    values$Title <- "Network"
+    values$Histfield <- "NA"
+    values$histlog <- "working..."
+    values$kk <- 0
+    values$histsearch <- "NA"
+    values$citShortlabel <- "NA"
+    values$S <- list("NA")
+    values$GR <- "NA"
     
     return(values)
   }
@@ -4216,13 +4228,20 @@ server <- function(input, output, session) {
   CAmap <- function(input, values){
     if ((input$CSfield %in% names(values$M))){
       
-      tab=tableTag(values$M,input$CSfield)
+      if (input$CSfield %in% c("TI","AB")){
+        ngrams <- as.numeric(input$CSngrams)
+      }else{
+        ngrams <- 1
+      }
+      
+      tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
       if (length(tab>=2)){
         
         minDegree=as.numeric(tab[input$CSn])
         
-        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE)
-        #plot(values$CS$graph_terms)
+        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
+                                         k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams)
+        
         
       }else{emptyPlot("Selected field is not included in your data collection")
         values$CS=list("NA")}
@@ -4278,9 +4297,10 @@ server <- function(input, output, session) {
     label.n = input$Labels
     if ((input$field %in% names(values$M))){
       
-      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field) | ((dim(values$NetWords)[1])!=input$Nodes) ){
+      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field) | !(input$cocngrams==values$cocngrams) | ((dim(values$NetWords)[1])!=input$Nodes) ){
         
         values$field=input$field
+        values$ngrams <- input$cocngrams
         
         switch(input$field,
                ID={
@@ -4292,12 +4312,16 @@ server <- function(input, output, session) {
                  values$Title= "Authors' Keywords network"
                },
                TI={
-                 if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE)}
+                 #if(!("TI_TM" %in% names(values$M))){
+                   values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams))
+                   #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
                  values$Title= "Title Words network"
                },
                AB={
-                 if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE)}
+                 #if(!("AB_TM" %in% names(values$M))){
+                   values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams))
+                 #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                  values$Title= "Abstract Words network"
                })

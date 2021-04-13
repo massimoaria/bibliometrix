@@ -7,6 +7,7 @@
 conceptualStructure(
   M,
   field = "ID",
+  ngrams = 1,
   method = "MCA",
   quali.supp = NULL,
   quanti.supp = NULL,
@@ -34,6 +35,9 @@ field can be equal to one of these tags:
 \code{DE_TM}\tab   \tab Author's Keywords stemmed through the Porter's stemming algorithm\cr
 \code{TI}\tab   \tab Terms extracted from titles\cr
 \code{AB}\tab   \tab Terms extracted from abstracts}}
+
+\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from texts. 
+An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{method}{is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
 \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}}

@@ -160,8 +160,9 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
   # Var is a string indicating the column name. I.e. Var = "AB"
   # nword is a integer vector indicating the ngrams to extract. I.e. nword = c(2,3)
   
-  custom_stopwords <- c(stopwords, custom_stopwords, "elsevier", "springer", "wiley")
-  custom_stopngrams <- c("rights reserved", "john wiley", "john wiley sons", "science bv")
+  custom_stopwords <- c(stopwords, custom_stopwords, "elsevier", "springer", "wiley", "mdpi", "emerald")
+  custom_stopngrams <- c("rights reserved", "john wiley", "john wiley sons", "science bv", "mdpi basel", 
+                         "mdpi licensee", "emerald publishing", "taylor francis")
   ngram <- NULL
   
   ngrams <- text %>%

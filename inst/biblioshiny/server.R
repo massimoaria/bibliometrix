@@ -1849,8 +1849,8 @@ server <- function(input, output, session) {
     xx=rbind(xx2,xx1)
     xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
     
-    xx2 <- xx %>% group_by(.data$Country) %>%
-      summarize(Freq = sum(.data$Freq))
+    xx2 <- xx %>% dplyr::group_by(.data$Country) %>%
+      dplyr::summarize(Freq = sum(.data$Freq))
     
     #x <- c(length(levels(xx2$Country))*(1-0.125)-0.02, length(levels(xx2$Country))-0.02)
     x <- c(0.5,0.5+length(levels(xx2$Country))*0.125)+1

@@ -178,14 +178,6 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   df$name_full=L
   ###
   
-  #meandens <- 0
-  #meancentr <- 0
-  #meandens=mean(df$rdensity)
-  #meancentr=mean(df$rcentrality)
-  #df=df[df$freq>=minfreq,]
-  
-  #rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
-  #rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
   xlimits=c(meancentr-rangex-0.5,meancentr+rangex+0.5)
   ylimits=c(meandens-rangey-0.5,meandens+rangey+0.5)
   
@@ -197,6 +189,11 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
     hjustvar = c(0,0,1,1) ,
     vjustvar = c(0,1.0,0,1))
   
+  data("logo",envir=environment())
+  logo <- grid::rasterGrob(logo,interpolate = TRUE)
+  
+  x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.5
+  y <- c(min(df$rdensity),min(df$rdensity)+diff(range(df$rdensity))*0.125)
 
   g=ggplot(df, aes(x=.data$rcentrality, y=.data$rdensity, text=c(.data$words))) +
     geom_point(group="NA",aes(size=log(as.numeric(.data$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
@@ -219,7 +216,8 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
       theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+        axis.ticks.y=element_blank()
+        ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
   names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label")
   words=df_lab[order(df_lab$Cluster),]

@@ -42,13 +42,18 @@ b=length(which(cumSO<n*0.67))+1
 Z=c(rep("Zone 1",a),rep("Zone 2",b-a),rep("Zone 3",length(cumSO)-b))
 df=data.frame(SO=names(cumSO),Rank=1:length(cumSO),Freq=as.numeric(SO),cumFreq=cumSO,Zone=Z, stringsAsFactors = FALSE)
 
+x <- c(max(log(df$Rank))-0.02-diff(range(log(df$Rank)))*0.125, max(log(df$Rank))-0.02)
+y <- c(min(df$Freq),min(df$Freq)+diff(range(df$Freq))*0.125)+1
+data("logo",envir=environment())
+logo <- grid::rasterGrob(logo,interpolate = TRUE)
+
 g=ggplot2::ggplot(df, aes(x = log(.data$Rank), y = .data$Freq, text=paste("Source: ",.data$SO,"\nN. of Documents: ",.data$Freq))) +
   geom_line(aes(group="NA")) +
   geom_area(aes(group="NA"),fill = "dodgerblue", alpha = 0.5) +
   annotate("rect", xmin=0, xmax=log(df$Rank[a]), ymin=0, ymax=max(df$Freq), alpha=0.4)+
   labs(x = 'Source log(Rank)', y = 'Articles', title = "Bradford's Law") +
   annotate("text",x=log(df$Rank[a])/2, y=max(df$Freq)/2, label = "Core\nSources",fontface =2,alpha=0.5,size=10)+
-  scale_x_continuous(breaks=log(df$Rank)[1:a],labels=as.character(substr(df$SO,1,50))[1:a]) +
+  scale_x_continuous(breaks=log(df$Rank)[1:a],labels=as.character(substr(df$SO,1,25))[1:a]) +
   theme(text = element_text(color = "#444444")
         ,legend.position="none"
         ,panel.background = element_rect(fill = '#EFEFEF')
@@ -59,7 +64,7 @@ g=ggplot2::ggplot(df, aes(x = log(.data$Rank), y = .data$Freq, text=paste("Sourc
         ,axis.title.y = element_text(vjust = 1, angle = 90)
         ,axis.title.x = element_text(hjust = 0)
         ,axis.text.x = element_text(angle=90,hjust=1,size=8,face="bold")
-  )
+  ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
 results=list(table=df,graph=g)
 return(results)

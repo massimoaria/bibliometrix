@@ -5,6 +5,10 @@ server <- function(input, output, session) {
   session$onSessionEnded(stopApp)
   ##
   
+  ## suppress warnings
+  options(warn = -1)
+  ##
+  
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)
@@ -12,7 +16,10 @@ server <- function(input, output, session) {
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
   
   ### initial values ####
+  data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
+  values$logo <- logo
+  values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
   values$h <- 7
   values$w <- 14 
   values$results <- list("NA")
@@ -865,6 +872,9 @@ server <- function(input, output, session) {
     Y=Y[order(Y$Year),]
     
     names(Y)=c("Year","Freq")
+    x <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.125, max(Y$Year)-0.02)+1
+    y <- c(min(Y$Freq),min(Y$Freq)+diff(range(Y$Freq))*0.125)
+    
     
     g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
       geom_line(aes(group="NA")) +
@@ -881,9 +891,11 @@ server <- function(input, output, session) {
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-      )
+      ) +
+      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ASPplot <- g
-    plot.ly(g)
+    
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
   })#, height = 500, width =900)
   
   output$ASPplot.save <- downloadHandler(
@@ -952,7 +964,10 @@ server <- function(input, output, session) {
     values$AnnualTotCitperYear=Table2
     Table2$group="A"
     
-    g=ggplot(Table2, aes(x = .data$Year, y =.data$MeanTCperYear,text=paste("Year: ",.data$Year,"\nAverage Citations per Year: ",round(.data$MeanTCperYear,1)))) +
+    x <- c(max(Table2$Year)-0.02-diff(range(Table2$Year))*0.125, max(Table2$Year)-0.02)+1
+    y <- c(min(Table2$MeanTCperYear),min(Table2$MeanTCperYear)+diff(range(Table2$MeanTCperYear))*0.125)
+    
+    g <- ggplot(Table2, aes(x = .data$Year, y =.data$MeanTCperYear,text=paste("Year: ",.data$Year,"\nAverage Citations per Year: ",round(.data$MeanTCperYear,1)))) +
       geom_line(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group)) +
       geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = '#002F80', alpha = .5) +
       labs(x = 'Year'
@@ -967,9 +982,10 @@ server <- function(input, output, session) {
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-      )
+      ) + 
+      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ACpYplot <- g
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
   })
   
   output$ACpYplot.save <- downloadHandler(
@@ -1055,7 +1071,7 @@ server <- function(input, output, session) {
   
   output$MostRelSourcesPlot <- renderPlotly({
     g <- MRSources()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.1, size=0.10)
   })#, height = 500, width =900)
   
   
@@ -1124,7 +1140,7 @@ server <- function(input, output, session) {
     
     g <- MLCSources()
     
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
   })#, height = 500, width =900)
   
   output$MostRelCitSourcesTable <- DT::renderDT({
@@ -1158,7 +1174,7 @@ server <- function(input, output, session) {
   output$bradfordPlot <- renderPlotly({
     
     values$bradford=bradford(values$M)
-    plot.ly(values$bradford$graph)
+    plot.ly(values$bradford$graph,flip=FALSE, side="r", aspectratio=1.6, size=0.15)
     
   })#,height = 600)
   
@@ -1204,7 +1220,7 @@ server <- function(input, output, session) {
                    res <- Hindex_plot(values,type="source")
                  })
     values$SIplot <- res$g
-    plot.ly(res$g)
+    plot.ly(res$g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
   })
   
   output$SIplot.save <- downloadHandler(
@@ -1272,16 +1288,28 @@ server <- function(input, output, session) {
     
     Text <- paste(values$SODF$Source," (",values$SODF$Year,") ",values$SODF$Freq, sep="")
     
+    width_scale <- 1.7 * 26 / length(unique(values$SODF$Source))
+    
+    x <- c(max(values$SODF$Year)-0.02-diff(range(values$SODF$Year))*0.15, max(values$SODF$Year)-0.02)+1
+    y <- c(min(values$SODF$Freq),min(values$SODF$Freq)+diff(range(values$SODF$Freq))*0.15)
+    
     g=ggplot(values$SODF, aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source, text=Text))+
-      #geom_line(aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source))+
       geom_line()+
       labs(x = 'Year'
            , y = laby
            , title = "Source Growth") +
       scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
-      geom_hline(aes(yintercept=0, alpha=0.1))+
-      theme(text = element_text(color = "#444444"), legend.position="bottom"
-            ,legend.text = element_text(colour="#444444", size=10)
+      geom_hline(aes(yintercept=0), alpha=0.1)+
+      labs(color = "Source")+
+      #guides(fill = guide_legend(nrow = 5))+
+      theme(text = element_text(color = "#444444"),
+            legend.text=ggplot2::element_text(size=width_scale),
+            legend.box.margin = margin(6, 6, 6, 6),
+            legend.title=ggplot2::element_text(size=1.5*width_scale,face="bold"),
+            legend.position="bottom",
+            legend.direction = "vertical",
+            legend.key.size = grid::unit(width_scale/50, "inch"),
+            legend.key.width = grid::unit(width_scale/50, "inch")
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
             ,panel.background = element_rect(fill = '#EFEFEF')
             ,panel.grid.minor = element_line(color = '#FFFFFF')
@@ -1290,12 +1318,13 @@ server <- function(input, output, session) {
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
-            ,axis.text.x = element_text(size=10)
-      )
+            ,axis.text.x = element_text(size=10, angle = 90)
+      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+    
     values$SDplot <- g
     return(g)
     #suppressWarnings(plot(g))
-  })
+  }) 
   
   output$SDplot.save <- downloadHandler(
     filename = function() {
@@ -1323,7 +1352,7 @@ server <- function(input, output, session) {
       bordercolor = "#FFFFFF",
       borderwidth = 2) 
     
-    plot.ly(g) %>%
+    plot.ly(g, flip=FALSE, side="r", aspectratio=1.8, size=0.10) %>%
       layout(legend = leg) %>%
       config(displaylogo = FALSE,
              modeBarButtonsToRemove = c(
@@ -1424,7 +1453,7 @@ server <- function(input, output, session) {
   output$MostRelAuthorsPlot <- renderPlotly({
     
     g <- MRAuthors()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
   })#, height = 500, width =900)
   
   output$MostRelAuthorsTable <- DT::renderDT({
@@ -1494,7 +1523,7 @@ server <- function(input, output, session) {
   output$MostCitAuthorsPlot <- renderPlotly({
     
     g <- MLCAuthors()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
   })#, height = 500, width =900)
   
   output$MostCitAuthorsTable <- DT::renderDT({
@@ -1547,7 +1576,7 @@ server <- function(input, output, session) {
   output$AuthorHindexPlot <- renderPlotly({
     
     res <- HAuthors()
-    plot.ly(res$g)
+    plot.ly(res$g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
     
   })#, height = 500, width =900)
   
@@ -1596,7 +1625,8 @@ server <- function(input, output, session) {
   output$TopAuthorsProdPlot <- renderPlotly({
     AUoverTime()
     
-    plot.ly(values$AUProdOverTime$graph)
+    plot.ly(values$AUProdOverTime$graph, flip=TRUE, side="l", aspectratio=1)
+    
     
   })#, height = 550, width =1100)
   
@@ -1665,6 +1695,9 @@ server <- function(input, output, session) {
     AuProd$Theoretical=10^(log10(values$lotka$C)-2*log10(AuProd[,1]))
     AuProd$Theoretical=AuProd$Theoretical/sum(AuProd$Theoretical)
     
+    x <- c(max(AuProd$N.Articles)-0.02-diff(range(AuProd$N.Articles))*0.125, max(AuProd$N.Articles)-0.02)+1
+    y <- c(min(AuProd$Freq*100),min(AuProd$Freq*100)+diff(range(AuProd$Freq*100))*0.125)
+    
     g=ggplot2::ggplot(AuProd, aes(x = .data$N.Articles, y = .data$Freq*100, text=paste("N.Articles: ",.data$N.Articles,"\n% of production: ",round(.data$Freq*100,1)))) +
       geom_line(aes(group="NA")) +
       geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
@@ -1682,9 +1715,9 @@ server <- function(input, output, session) {
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0)
-      )
+      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$LLplot <- g
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
     
   })#,height = 600)
   
@@ -1768,7 +1801,7 @@ server <- function(input, output, session) {
     
     g <- MRAffiliations()
     
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.15)
   })#, height = 500, width =900)
   
   output$MostRelAffiliationsTable <- DT::renderDT({
@@ -1815,6 +1848,14 @@ server <- function(input, output, session) {
     names(xx2)=c("Country","Freq","Collaboration")
     xx=rbind(xx2,xx1)
     xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
+    
+    xx2 <- xx %>% group_by(.data$Country) %>%
+      summarize(Freq = sum(.data$Freq))
+    
+    #x <- c(length(levels(xx2$Country))*(1-0.125)-0.02, length(levels(xx2$Country))-0.02)
+    x <- c(0.5,0.5+length(levels(xx2$Country))*0.125)+1
+    y <- c(max(xx2$Freq)-0.02-diff(range(xx2$Freq))*0.125,max(xx2$Freq)-0.02)
+    
     g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=.data$Country, y=.data$Freq,fill=.data$Collaboration, text=paste("Country: ",.data$Country,"\nN.of Documents: ",.data$Freq))) +
                          geom_bar(aes(group="NA"),stat="identity")+
                          scale_x_discrete(limits = rev(levels(xx$Country)))+
@@ -1825,7 +1866,9 @@ server <- function(input, output, session) {
                          theme_minimal() +
                          theme(plot.caption = element_text(size = 9, hjust = 0.5,
                                                            color = "blue", face = "italic"))+
-                         coord_flip())
+                         coord_flip()) + 
+      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+    
     values$MRCOplot <- g
     return(g)
   }) 
@@ -1845,7 +1888,8 @@ server <- function(input, output, session) {
     
     g <- CAUCountries()
     
-    plot.ly(g)
+    plot.ly(g,flip=T, side="r", aspectratio=1.4, size=0.10, data.type=1)
+    
   })#, height = 500, width =900)
   
   output$MostRelCountriesTable <- DT::renderDT({
@@ -1878,7 +1922,7 @@ server <- function(input, output, session) {
   
   output$countryProdPlot <- renderPlotly({
     values$mapworld<-mapworld(values$M)
-    plot.ly(values$mapworld$g)
+    plot.ly(values$mapworld$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
   })#, height = 500, width =900)
   
   output$CSPplot.save <- downloadHandler(
@@ -1940,16 +1984,7 @@ server <- function(input, output, session) {
     }
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Countries", textLabx = laby, title = "Most Cited Contries")
-    
-    # g=ggplot2::ggplot(data=xx, aes(x=xx[,1], y=xx[,2], fill=-xx[,2],text=paste("Country: ",xx[,1],"\n",laby,": ",xx[,2]))) +
-    #   geom_bar(aes(group="NA"),stat="identity")+
-    #   scale_fill_continuous(type = "gradient")+
-    #   scale_x_discrete(limits = rev(xx[,1]))+
-    #   labs(title="Most Cited Countries", x = "Countries")+
-    #   labs(y = laby)+
-    #   theme_minimal() +
-    #   guides(fill=FALSE)+
-    #   coord_flip()
+
     values$MCCplot <- g
     return(g)
   })
@@ -1967,7 +2002,7 @@ server <- function(input, output, session) {
   
   output$MostCitCountriesPlot <- renderPlotly({
     g <- MCCountries()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
   })#, height = 500, width =900)
   
   output$MostCitCountriesTable <- DT::renderDT({
@@ -2039,7 +2074,7 @@ server <- function(input, output, session) {
   output$MostCitDocsPlot <- renderPlotly({
     
     g <- MGCDocuments()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.10)
   })#, height = 500, width =900)
   
   output$MostCitDocsTable <- DT::renderDT({
@@ -2115,7 +2150,7 @@ server <- function(input, output, session) {
   output$MostLocCitDocsPlot <- renderPlotly({
     
     g <- MLCDocuments()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.10)
   })#, height = 500, width =900)
   
   output$MostLocCitDocsTable <- DT::renderDT({
@@ -2184,7 +2219,7 @@ server <- function(input, output, session) {
   output$MostCitRefsPlot <- renderPlotly({
     
     g <- MLCReferences()
-    plot.ly(g)
+    plot.ly(g,flip=FALSE, side="r", aspectratio=0.6, size=0.20)
   })#, height = 500, width =900)
   
   output$MostCitRefsTable <- DT::renderDT({
@@ -2240,7 +2275,7 @@ server <- function(input, output, session) {
   output$rpysPlot <- renderPlotly({
     
     RPYS()
-    plot.ly(values$res$spectroscopy)
+    plot.ly(values$res$spectroscopy, side="l", aspectratio = 1.3, size=0.10)
     
   })#,height = 600, width = 900)
   
@@ -2350,7 +2385,7 @@ server <- function(input, output, session) {
   
   output$MostRelWordsPlot <- renderPlotly({
     g <- MFWords()
-    plot.ly(g)
+    plot.ly(g, side="r", aspectratio = 1.3, size=0.10)
   })#, height = 500, width =900)
   
   output$MostRelWordsTable <- DT::renderDT({
@@ -2529,7 +2564,12 @@ server <- function(input, output, session) {
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
     values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq, stringsAsFactors = TRUE)
   
+    width_scale <- 2.5 * 26 / length(unique(values$DF$Term))
+    
     Text <- paste(values$DF$Term," (",values$DF$Year,") ",values$DF$Freq, sep="")
+    
+    x <- c(max(values$DF$Year)-0.02-diff(range(values$SO$Year))*0.20, max(values$DF$Year)-0.02)-1
+    y <- c(min(values$DF$Freq),min(values$DF$Freq)+diff(range(values$DF$Freq))*0.20)
     
     g <- ggplot(values$DF, aes(x=.data$Year,y=.data$Freq, group=.data$Term, color=.data$Term, text = Text))+
       geom_line()+
@@ -2538,8 +2578,17 @@ server <- function(input, output, session) {
            , title = "Word Growth") +
       #ylim(0, NA) +
       scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
-      geom_hline(aes(yintercept=0, alpha=0.1))+
-      theme(text = element_text(color = "#444444"), legend.position="bottom"
+      geom_hline(aes(yintercept=0), alpha=0.1)+
+      labs(color = "Term")+
+      #guides(fill = guide_legend(nrow = 5))+
+      theme(text = element_text(color = "#444444"),
+            legend.text=ggplot2::element_text(size=width_scale),
+            legend.box.margin = margin(6, 6, 6, 6),
+            legend.title=ggplot2::element_text(size=1.5*width_scale,face="bold"),
+            legend.position="bottom",
+            legend.direction = "vertical",
+            legend.key.size = grid::unit(width_scale/50, "inch"),
+            legend.key.width = grid::unit(width_scale/50, "inch")
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
             ,panel.background = element_rect(fill = '#EFEFEF')
             ,panel.grid.minor = element_line(color = '#FFFFFF')
@@ -2548,16 +2597,9 @@ server <- function(input, output, session) {
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
-            ,axis.text.x = element_text(size=10)
-      )
+            ,axis.text.x = element_text(size=10, angle = 90)
+      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
-    # DFsmooth=(ggplot_build(g)$data[[1]])
-    # DFsmooth$group=factor(DFsmooth$group, labels=levels(values$DF$Term))
-    # 
-    # maximum=sort(unique(DFsmooth$x),decreasing=TRUE)[2]
-    # DF2=subset(DFsmooth, x == maximum)
-    # g=g+
-    #   ggrepel::geom_text_repel(data = DF2, aes(label = .data$group, colour = .data$group, x =.data$x, y = .data$y), hjust = -.1)
     values$WDplot <- g
     return(g)
   })
@@ -2588,7 +2630,7 @@ server <- function(input, output, session) {
       bordercolor = "#FFFFFF",
       borderwidth = 2) 
     
-    plot.ly(g) %>%
+    plot.ly(g, flip=FALSE, side="r", aspectratio=1.6, size=0.10) %>%
       layout(legend = leg) %>%
       config(displaylogo = FALSE,
              modeBarButtonsToRemove = c(
@@ -2663,7 +2705,7 @@ server <- function(input, output, session) {
   
   output$trendTopicsPlot <- renderPlotly({
     g <- TrendTopics()
-    plot.ly(g)
+    plot.ly(g, flip=TRUE, side="r", size=0.1, aspectratio=1.3)
   })#, height = 500, width =900)
   
   # output$trendTopicsPlot <- renderPlot({
@@ -3078,7 +3120,7 @@ server <- function(input, output, session) {
   output$TMPlot <- renderPlotly({
     
     TMAP()
-    plot.ly(values$TM$map)
+    plot.ly(values$TM$map, size=0.10, aspectratio = 1.3)
     
   })#, height = 650, width = 800)
   
@@ -3241,7 +3283,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=1){
-      plot.ly(values$nexus$TM[[1]]$map)
+      plot.ly(values$nexus$TM[[1]]$map, size=0.10, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
@@ -3250,7 +3292,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=2){
-      plot.ly(values$nexus$TM[[2]]$map)
+      plot.ly(values$nexus$TM[[2]]$map, size=0.10, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
@@ -3259,7 +3301,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=3){
-      plot.ly(values$nexus$TM[[3]]$map)
+      plot.ly(values$nexus$TM[[3]]$map, size=0.10, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
@@ -3268,7 +3310,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=4){
-      plot.ly(values$nexus$TM[[4]]$map)
+      plot.ly(values$nexus$TM[[4]]$map, size=0.10, aspectratio = 1.3)
     } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
@@ -3277,7 +3319,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=5){
-      plot.ly(values$nexus$TM[[5]]$map)
+      plot.ly(values$nexus$TM[[5]]$map, size=0.10, aspectratio = 1.3)
     } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
@@ -3939,8 +3981,61 @@ server <- function(input, output, session) {
     ext
   }
   
-  
-  plot.ly <- function(g){
+  plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=2, height=0){
+    
+    a <- ggplot_build(g)$data
+    
+    ymin <- unlist(lapply(a, function(l){
+      if ("y" %in% names(l)){
+        min(l["y"])  
+      }
+    })) %>% min(na.rm=TRUE)
+    
+    ymax <- unlist(lapply(a, function(l){
+      if ("y" %in% names(l)){
+        max(l["y"])  
+      }
+    })) %>% max(na.rm=TRUE)
+    
+    xmin <- unlist(lapply(a, function(l){
+      if ("x" %in% names(l)){
+        min(l["x"])  
+      }
+    })) %>% min(na.rm=TRUE)
+    
+    xmax <- unlist(lapply(a, function(l){
+      if ("x" %in% names(l)){
+        max(l["x"])  
+      }
+    })) %>% max(na.rm=TRUE)
+
+    if (isTRUE(flip)){
+      xrange <- c(ymin,ymax)
+      yrange <- c(xmin,xmax)
+    }else{
+      yrange <- c(ymin,ymax)
+      xrange <- c(xmin,xmax)
+    }
+        
+    # if (isTRUE(flip)){
+    #   yrange <- range(ggplot_build(g)$data[[data.type]]$x)
+    #   xrange <- range(ggplot_build(g)$data[[data.type]]$y)
+    # }else{
+    #   xrange <- range(ggplot_build(g)$data[[data.type]]$x)
+    #   yrange <- range(ggplot_build(g)$data[[data.type]]$y)
+    # }
+    
+    sizex = diff(xrange)*size
+    sizey = diff(yrange)*size*aspectratio
+    
+    y <- min(yrange)+0.2
+    
+    if (side=="l"){
+      x <- min(xrange)+0.2
+    }else{
+      x <- max(xrange)-0.2-sizex
+    }
+    
     ggplotly(g, tooltip = "text") %>% 
       config(displaylogo = FALSE,
              modeBarButtonsToRemove = c(
@@ -3951,10 +4046,24 @@ server <- function(input, output, session) {
                'toggleSpikelines',
                'hoverClosestCartesian',
                'hoverCompareCartesian'
-             ))
+             )) %>%
+      layout(
+        images = list(
+          source = raster2uri(as.raster(values$logo)),
+          x = x, y = y+height,
+          sizex = sizex, sizey = sizey,
+          xref = "x", yref = "y",
+          xanchor = "left", yanchor = "bottom",
+          sizing = "stretch"
+        )
+      )
   }
   
   freqPlot <- function(xx,x,y, textLaby,textLabx, title){
+    
+
+    xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
+    yl <- c(1,1+length(unique(xx[,y]))*0.125)
     
     Text <- paste(textLaby,": ",xx[,y],"\n",textLabx, ": ",xx[,x])
     
@@ -3969,7 +4078,8 @@ server <- function(input, output, session) {
       labs(x = textLabx)+
       expand_limits(y= c(1, length(xx[,y]) + 1))+
       theme_minimal()+
-      theme(axis.text.y  = element_text(angle=0, hjust=0))
+      theme(axis.text.y  = element_text(angle=0, hjust=0)) + 
+      annotation_custom(values$logoGrid, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2]) 
     
     return(g)
   }
@@ -4199,7 +4309,7 @@ server <- function(input, output, session) {
     names(breaks)=breaks
     breaks=log(breaks)
     
-    g=ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
+    g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
       geom_polygon(aes(fill = log(Freq), group=group)) +
       scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
       guides(fill = guide_legend(reverse = T)) +
@@ -4219,8 +4329,9 @@ server <- function(input, output, session) {
             ,legend.position = c(.18,.36)
             ,legend.background = element_blank()
             ,legend.key = element_blank()
-      ) 
-    results=list(g=g,tab=tab)
+      ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
+    
+   results=list(g=g,tab=tab)
     return(results)
   }
   

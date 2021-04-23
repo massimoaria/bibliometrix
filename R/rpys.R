@@ -106,6 +106,13 @@ if (length(timespan)==2){
 }
 df=data.frame(X=X,Y=Y,diffMedian=diffMedian,stringsAsFactors = FALSE)
 RPYS=data.frame(Year=names(Y),Citations=Y,diffMedian5=diffMedian)
+
+data("logo",envir=environment())
+logo <- grid::rasterGrob(logo,interpolate = TRUE)
+
+x <- c(min(df$X),min(df$X)+diff(range(df$X))*0.125)+1
+y <- c(min(c(df$Y,df$diffMedian)),min(c(df$Y,df$diffMedian))+diff(range(c(df$Y,df$diffMedian)))*0.125)*1.05
+
 g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of References: ",.data$Y)))+
   geom_line(aes(group="NA")) +
   geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
@@ -127,7 +134,7 @@ g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of Refere
         ,axis.title.y = element_text(vjust = 1, angle = 90)
         ,axis.title.x = element_text(hjust = 0.95, angle = 0)
         ,axis.text.x = element_text(size=8,angle = 90)
-  )
+  ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
 if (isTRUE(graph)){plot(g)}
     CR$Reference <- reduceRefs(CR$Reference)

@@ -68,6 +68,14 @@ fieldByYear <- function(M,
     dplyr::filter(between(.data$year_med, timespan[1],timespan[2])) %>%
     mutate(item = fct_reorder(.data$item, .data$freq))
   
+  data("logo",envir=environment())
+  logo <- grid::rasterGrob(logo,interpolate = TRUE)
+  
+  yrange <- range(unlist(df[,which(regexpr("year",names(df))>-1)]))
+  
+  x <- c(0+0.5,0.05+length(levels(df$item))*0.125)+1
+  y <- c(yrange[2]-0.02-diff(yrange)*0.125,yrange[2]-0.02)
+  
   g <- ggplot(df, aes(x=.data$item, y=.data$year_med, 
                       text = paste("Term: ", .data$item,"\nYear: ",
                                    .data$year_med ,"\nTerm frequency: ",.data$freq )))+
@@ -88,8 +96,9 @@ fieldByYear <- function(M,
           ,axis.title.x = element_text(hjust = .95,face="bold")
           ,axis.text.x = element_text(face="bold", angle = 90)#, size=labelsize)
           ,axis.text.y = element_text(face="bold")
-    )
-  if (!isTRUE(dynamic.plot)){
+    ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+ 
+   if (!isTRUE(dynamic.plot)){
     g <- g+geom_vline(xintercept=nrow(df)-(which(c(diff(df$year_med))==-1)-0.5), color="grey70",alpha=0.6, linetype=6)+
       geom_point(aes(y=.data$year_q1), alpha=0.6, size = 3, color="royalblue4", shape="|")+
       geom_point(aes(y=.data$year_q3), alpha=0.6, size = 3, color="royalblue4", shape="|")

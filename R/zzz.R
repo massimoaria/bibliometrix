@@ -257,6 +257,7 @@ utils::globalVariables("where")
 #' @importFrom graphics plot
 #' @importFrom graphics par
 #' @importFrom grDevices colorRampPalette
+#' @importFrom grDevices as.raster
 #' @importFrom utils capture.output
 #' @importFrom utils data
 #' @importFrom utils adist

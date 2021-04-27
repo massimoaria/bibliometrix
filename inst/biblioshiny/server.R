@@ -2852,7 +2852,7 @@ server <- function(input, output, session) {
     
     values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                               shape=input$coc.shape, net=values$cocnet)
+                               shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"))
     
     
   })
@@ -3678,8 +3678,8 @@ server <- function(input, output, session) {
     #dev.off();file.remove(t) ### end of trick
     
     values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
-                               labelsize=input$citlabelsize, opacity=input$cocitAlpha,type=input$citlayout,
-                               shape=input$cocit.shape, net=values$cocitnet)
+                               labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
+                               shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"))
   })
   
   output$cocitPlot <- renderVisNetwork({  
@@ -3844,7 +3844,7 @@ server <- function(input, output, session) {
     
     values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
-                               shape=input$col.shape, net=values$colnet)
+                               shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
   })
   output$colPlot <- renderVisNetwork({  
     
@@ -4508,7 +4508,7 @@ server <- function(input, output, session) {
                                 size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
                                 labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
                                 label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
-                                alpha=input$cocitAlpha, cluster=input$cocitCluster, 
+                                alpha=0.7, cluster=input$cocitCluster, 
                                 community.repulsion = input$cocit.repulsion/2, verbose = FALSE)
     return(values)
   }
@@ -4611,7 +4611,7 @@ server <- function(input, output, session) {
             ,legend.position = c(.18,.36)
             ,legend.background = element_blank()
             ,legend.key = element_blank()
-      )
+      ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
     if (isTRUE(label)){
       CO=dplyr::inner_join(CO,countries, by=c('Tab'='Tab'))
       g=g+
@@ -4649,7 +4649,7 @@ server <- function(input, output, session) {
       visPhysics(enabled = FALSE) %>% visSave(con)
   }
   
-  igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net){
+  igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
     
     LABEL=igraph::V(g)$name
     
@@ -4675,7 +4675,7 @@ server <- function(input, output, session) {
     Min=min(vn$nodes$font.size)
     Max=max(vn$nodes$font.size)
     if (Max>Min){
-      size=(vn$nodes$font.size-Min)/(Max-Min)*10*labelsize+10
+      size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
     } else {size=10*labelsize}
     size[size<scalemin]=scalemin
     size[size>scalemax]=scalemax
@@ -4685,11 +4685,24 @@ server <- function(input, output, session) {
     ### TO ADD SHAPE AND FONT COLOR OPTIONS
     coords <- net$layout
     
+    vn$nodes$size <- vn$nodes$font.size*0.8
+    
+    if (shape %in% c("text")){
+      vn$nodes$font.color <- vn$nodes$color
+    }else{
+      vn$nodes$font.color <- "black"
+    }
+    
+    if (shape %in% c("dot","square")){
+      vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
+    }else{
+      vn$nodes$font.vadjust <-0
+      }
+    
     VIS<-
-      #visIgraph(g, type="full", smooth=TRUE, physics=FALSE) %>%
       visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-      visNodes(shape=shape, font=list(color="black")) %>%
-      #visIgraphLayout(layout = l) %>%
+      #visNodes(shape=shape, font=list(color="black")) %>%
+      visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
       visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
       visEdges(smooth = curved) %>%
       visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%

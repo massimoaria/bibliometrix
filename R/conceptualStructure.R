@@ -197,6 +197,9 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
   km.res$centers=centers[,c(2,3,1)]
   
+  data("logo",envir=environment())
+  logo <- grid::rasterGrob(logo,interpolate = TRUE)
+  
   b=fviz_cluster(km.res, stand=FALSE, data = df,labelsize=labelsize, repel = TRUE)+
     theme_minimal()+
     scale_color_manual(values = cbPalette[1:clust])+
@@ -240,6 +243,12 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   }
   b=b + theme(legend.position="none")
   
+  ## logo coordinates
+  coord_b <- plotCoord(b)
+
+  b <- b + annotation_custom(logo, xmin = coord_b[1], xmax = coord_b[2], ymin = coord_b[3], ymax = coord_b[4]) 
+  ##
+  
   if (isTRUE(graph)){plot(b)}
   
   b_dend <- fviz_dend(km.res, rect = TRUE, k=clust, 
@@ -254,6 +263,12 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
           #size = 1, linetype = "solid"),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
+  
+  ## logo coordinates
+  coord <- plotCoord(b_dend, side="u")
+  
+  b_dend <- b_dend + annotation_custom(logo, xmin = coord[1], xmax = coord[2], ymin = coord[3], ymax = coord[4]) 
+  ##
   
   if (isTRUE(graph)){plot(b_dend)}
   
@@ -296,7 +311,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     rangex=c(min(df_all[,1]),max(df_all[,1]))
     rangey=c(min(df_all[,2]),max(df_all[,2]))
 
-    b_doc=ggplot(aes(x=.data$dim1,y=.data$dim2,label=.data$nomi),data=A)+
+    b_doc <- ggplot(aes(x=.data$dim1,y=.data$dim2,label=.data$nomi),data=A)+
       geom_point(size = 2, color = A$color)+
       labs(title= "Factorial map of the documents with the highest contributes") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 
@@ -319,6 +334,12 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
         ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))
     }else{b_doc=b_doc+xlab("Dim 1")+ylab("Dim 2")}
       
+    ## logo coordinates
+    xl <- c(rangex[2]-0.02-diff(rangex)*0.125, rangex[2]-0.02)
+    yl <- c(rangey[1],rangey[1]+diff(rangey)*0.125)+0.02
+    b_doc <- b_doc + annotation_custom(logo, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2]) 
+    ##
+    
     if (isTRUE(graph)){(plot(b_doc))}
     
     ## Factorial map of the most cited documents
@@ -364,7 +385,12 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
            panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray90",alpha.f = 0.7)),
            panel.grid.minor = element_blank())
       
-    
+    ## logo coordinates
+    xl <- c(rangex[2]-0.02-diff(rangex)*0.125, rangex[2]-0.02)
+    yl <- c(rangey[1],rangey[1]+diff(rangey)*0.125)+0.02
+    b_doc_TC <- b_doc_TC + annotation_custom(logo, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2]) 
+    ##
+
     if (isTRUE(graph)){plot(b_doc_TC)}
 
     semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
@@ -482,4 +508,44 @@ eigCorrection <- function(res) {
   cumPerc = cumsum(perc)
   res$eigCorr <- data.frame(eig=e, eigBenz=eigBenz, perc=perc, cumPerc=cumPerc)
   return(res)
+}
+
+
+plotCoord <- function(g, side="b"){
+  a <- ggplot_build(g)$data
+  
+  ymin <- unlist(lapply(a, function(l){
+    if ("y" %in% names(l)){
+      min(l["y"])  
+    }
+  })) %>% min(na.rm=TRUE)
+  
+  ymax <- unlist(lapply(a, function(l){
+    if ("y" %in% names(l)){
+      max(l["y"])  
+    }
+  })) %>% max(na.rm=TRUE)
+  
+  xmin <- unlist(lapply(a, function(l){
+    if ("x" %in% names(l)){
+      min(l["x"])  
+    }
+  })) %>% min(na.rm=TRUE)
+  
+  xmax <- unlist(lapply(a, function(l){
+    if ("x" %in% names(l)){
+      max(l["x"])  
+    }
+  })) %>% max(na.rm=TRUE)
+  
+  coord <- c(xmin,xmax,ymin,ymax)
+  
+  xl <- c(xmax-0.02-diff(c(xmin,xmax))*0.125, xmax-0.02)
+  if (side=="b"){
+    yl <- c(ymin,ymin+diff(c(ymin,ymax))*0.125)+0.02
+  }else{
+    yl <- c(ymax-0.02-diff(c(ymin,ymax))*0.125, ymax-0.02)
+  }
+  coord <- c(xl,yl)
+  
 }

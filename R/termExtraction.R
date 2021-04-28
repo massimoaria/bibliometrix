@@ -162,7 +162,7 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
   
   custom_stopwords <- c(stopwords, custom_stopwords, "elsevier", "springer", "wiley", "mdpi", "emerald")
   custom_stopngrams <- c("rights reserved", "john wiley", "john wiley sons", "science bv", "mdpi basel", 
-                         "mdpi licensee", "emerald publishing", "taylor francis")
+                         "mdpi licensee", "emerald publishing", "taylor francis", "paper proposes", "we proposes", "paper aims")
   ngram <- NULL
   
   ngrams <- text %>%

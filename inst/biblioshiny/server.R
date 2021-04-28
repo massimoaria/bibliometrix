@@ -1,6 +1,7 @@
-# Define server logic required to draw a histogram ----
+# Biblioshiny Server ----
 server <- function(input, output, session) {
-  
+ 
+# Server settings ---- 
   ## stop the R session
   session$onSessionEnded(stopApp)
   ##
@@ -15,7 +16,7 @@ server <- function(input, output, session) {
   #options(shiny.maxRequestSize=200*1024^2)
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
   
-  ### initial values ####
+  ### initial values 
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
   values$logo <- logo
@@ -48,8 +49,9 @@ server <- function(input, output, session) {
   
   
   
-  ### LOAD MENU ####
-  
+# LOAD MENU ----
+
+## format identification function ----
   format <- function(obj){
     ext<- sub('.*\\.', '', obj[1])
     switch(ext,
@@ -72,6 +74,7 @@ server <- function(input, output, session) {
     return(format)
   }
   
+## smart_load function ----
   smart_load <- function(file){
     var <- load(file)
     n <- length(var)
@@ -89,7 +92,8 @@ server <- function(input, output, session) {
       stop("Please make sure your RData/Rda file contains a bibliometrixDB object (M).")
     }
   }
-  
+
+## loading function ----
   DATAloading<- eventReactive(input$applyLoad,{
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
@@ -358,6 +362,7 @@ server <- function(input, output, session) {
       ) 
   })
   
+## export functions ----
   output$collection.save <- downloadHandler(
     filename = function() {
       
@@ -402,10 +407,10 @@ server <- function(input, output, session) {
               value=log)
   })
   
-  ### API MENU ####
-  ### API MENU: Dimensions ####
+## API MENU ----
+### API MENU: Dimensions ----
   
-  ### Dimensions modal ####
+  ### Dimensions modal 
   dsModal <- function(failed = FALSE) {
     modalDialog(
       title = "Dimensions API",
@@ -474,7 +479,7 @@ server <- function(input, output, session) {
     )
   }
   
-  # Show modal when button is clicked.
+  ### Show Dimensions modal when button is clicked.
   observeEvent(input$dsShow, {
     showModal(dsModal())
   })
@@ -545,8 +550,8 @@ server <- function(input, output, session) {
                 max = values$dsSample, value = values$dsSample, step = 1)
   })
   
-  ### API MENU: PubMed ####
-  ### PubMed modal ####
+### API MENU: PubMed ----
+  ### PubMed modal 
   pmModal <- function(failed = FALSE) {
     modalDialog(
       title = "PubMed API",
@@ -632,7 +637,7 @@ server <- function(input, output, session) {
     sliderInput("pmSliderLimit", "Total document to download", min = 1,
                 max = values$pmSample, value = values$pmSample, step = 1)
   })
-  ### API MENU: Content Download ####
+### API MENU: Content Download ----
   APIDOWNLOAD <- eventReactive(input$apiApply,{
     values = initial(values)
     values$M <- data.frame(Message="Waiting for data")
@@ -688,15 +693,12 @@ server <- function(input, output, session) {
   
   output$apiContents <- DT::renderDT({
     APIDOWNLOAD()
-    #     if (nrow(values$M) == 1 & ncol(values$M) == 1) {
-    #   M <- data.frame(Message="Waiting for data")
-    # }else{
     contentTable(values)
     #}
     
   })
   
-  ### function returns a formatted data.table
+### function returns a formatted data.frame ----
   contentTable <- function(values){
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
@@ -734,8 +736,9 @@ server <- function(input, output, session) {
   }
   
   
-  ### FILTERS MENU ####
-  ### Filters uiOutput
+
+# FILTERS MENU ----
+## Filters uiOutput ----
   output$textDim <- renderUI({
     dimMatrix=paste("Documents ",dim(values$M)[1]," of ",dim(values$Morig)[1])
     textInput("textDim", "Number of Documents", 
@@ -771,7 +774,8 @@ server <- function(input, output, session) {
     sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC, na.rm=T),
                 max = max(values$Morig$TC, na.rm=T), value = c(min(values$Morig$TC, na.rm=T),max(values$Morig$TC,na.rm=T)))
   })
-  ### End Filters uiOutput
+
+## Update filterd data ----
   
   DTfiltered <- eventReactive(input$applyFilter,{
     M=values$Morig
@@ -820,8 +824,9 @@ server <- function(input, output, session) {
   
   
   
-  ### DATASET MENU ####
-  
+
+# DATASET MENU ----
+## Main Info ----  
   output$MainInfo <- DT::renderDT({
     res <- descriptive(values,type="tab1")
     TAB<-res$TAB
@@ -853,7 +858,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
       formatStyle(names(TAB)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
-  
+
+## Annual Production ----
   output$CAGR <- renderText({
     Y=table(values$M$PY)
     ny=dim(Y)[1]
@@ -935,7 +941,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+
+## Annual Citation per Year ----
   output$AnnualTotCitperYearPlot <- renderPlotly({
     
     if (values$results[[1]]=="NA"){
@@ -1025,18 +1032,20 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+ 
+## Three Fileds Plot ---- 
   TFP <- eventReactive(input$apply3F,{
     fields=c(input$LeftField, input$CentralField, input$RightField)
     threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn))
   })
-  
+
   output$ThreeFieldsPlot <- renderPlotly({
     TFP()  
   })
   
-  ### SOURCES MENU ####
-  
+
+# SOURCES MENU ----
+## Most Relevant Sources ----
   MRSources <- eventReactive(input$applyMRSources,{
     res <- descriptive(values,type="tab7")
     values <-res$values
@@ -1103,7 +1112,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+
+## Most Local Cited Sources ---- 
   MLCSources <- eventReactive(input$applyMLCSources,{
     values$M=metaTagExtraction(values$M,"CR_SO")
     TAB=tableTag(values$M,"CR_SO")
@@ -1170,7 +1180,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+## Bradford's Law ---- 
   output$bradfordPlot <- renderPlotly({
     
     values$bradford=bradford(values$M)
@@ -1213,7 +1223,7 @@ server <- function(input, output, session) {
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center')
   })
-  
+## Sources' Impact ----  
   Hsource <- eventReactive(input$applyHsource,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -1263,7 +1273,7 @@ server <- function(input, output, session) {
       formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center')
     
   })
-  
+## Source Growth ----  
   SOGrowth <- eventReactive(input$applySOGrowth,{
     #if (input$SOse=="Yes"){se=TRUE}else{se=FALSE}
     
@@ -1399,8 +1409,9 @@ server <- function(input, output, session) {
     
   })
   
-  ### AUTHORS MENU ####
-  ### Authors ----
+
+# AUTHORS MENU ----
+## Most Relevant Authors ----
   MRAuthors <- eventReactive(input$applyMRAuthors,{
     res <- descriptive(values,type="tab3")
     values <-res$values
@@ -1483,7 +1494,7 @@ server <- function(input, output, session) {
       formatRound(names(TAB)[3], digits=2)
     
   })
-  
+## Most Cited Authors ----  
   MLCAuthors <- eventReactive(input$applyMLCAuthors,{
     res <- descriptive(values,type="tab13")
     values <-res$values
@@ -1552,7 +1563,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') 
     
   })
-  
+## Authors' Impact ----  
   HAuthors <- eventReactive(input$applyHAuthors,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -1606,7 +1617,7 @@ server <- function(input, output, session) {
       formatRound(names(values$H)[4], 3)
     
   })
-  
+## Authors Production Over Time ----  
   AUoverTime <- eventReactive(input$applyAUoverTime,{
     values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
   })
@@ -1687,7 +1698,7 @@ server <- function(input, output, session) {
       formatRound(names(TAB)[dim(TAB)[2]], 3)
     
   })
-  
+## Lotka Law ----  
   output$lotkaPlot <- renderPlotly({
     
     values$lotka=lotka(biblioAnalysis(values$M))
@@ -1758,8 +1769,9 @@ server <- function(input, output, session) {
       formatRound(names(values$lotka$AuthorProd)[3], 3)
   })
   
-  ### Affiliations ----
-  
+
+# Affiliations ----
+## Most Relevant Affliations ---- 
   MRAffiliations <- eventReactive(input$applyMRAffiliations,{
     if (input$disAff=="Y"){
       res <- descriptive(values,type="tab11")
@@ -1832,8 +1844,9 @@ server <- function(input, output, session) {
     
   })
   
-  ### Countries ----
-  
+
+# Countries ----
+## Country by Corresponding Authors ----  
   CAUCountries <- eventReactive(input$applyCAUCountries,{
     res <- descriptive(values,type="tab5")
     values <-res$values
@@ -1919,7 +1932,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+
+## Country Production ----  
   output$countryProdPlot <- renderPlotly({
     values$mapworld<-mapworld(values$M)
     plot.ly(values$mapworld$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
@@ -1962,7 +1976,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+## Most Cited Country ----    
   MCCountries <- eventReactive(input$applyMCCountries,{
     res <- descriptive(values,type="tab6")
     values <-res$values
@@ -2032,9 +2046,9 @@ server <- function(input, output, session) {
     
   })
   
-  ### DOCUMENTS MENU ####
-  
-  ### Documents ----
+
+# DOCUMENTS MENU ----
+## Most Global Cited Documents ----
   
   MGCDocuments <- eventReactive(input$applyMGCDocuments,{
     res <- descriptive(values,type="tab4")
@@ -2104,7 +2118,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+## Most Local Cited Documents ----  
   MLCDocuments <- eventReactive(input$applyMLCDocuments,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -2184,7 +2198,7 @@ server <- function(input, output, session) {
     
   })
   
-  ### Cited References ----
+## Most Local Cited References ----
   MLCReferences <- eventReactive(input$applyMLCReferences,{
     CR=citations(values$M,sep=input$CitRefsSep)$Cited
     TAB=data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
@@ -2256,7 +2270,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+## Reference Spectroscopy ---- 
   RPYS <- eventReactive(input$applyRPYS,{
     values$res <- rpys(values$M, sep=input$rpysSep, graph=FALSE)
   })
@@ -2339,7 +2353,9 @@ server <- function(input, output, session) {
     
   })
   
-  ### Words ----
+
+# Words ----
+## Most Frequent Words ----
   MFWords <- eventReactive(input$applyMFWords,{
     if (input$MostRelWords %in% c("TI","AB")){
       ngrams <- as.numeric(input$MRWngrams)
@@ -2416,7 +2432,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-  
+## WordCloud ----  
   WordCloud <- eventReactive(input$applyWordCloud,{
     
     if (input$summaryTerms %in% c("TI","AB")){
@@ -2441,7 +2457,7 @@ server <- function(input, output, session) {
     
     WordCloud()
   })
-  
+## TreeMap ----  
   TreeMap <- eventReactive(input$applyTreeMap,{
     if (input$treeTerms %in% c("TI","AB")){
       ngrams <- as.numeric(input$treeTermsngrams)
@@ -2522,7 +2538,7 @@ server <- function(input, output, session) {
       formatStyle(names(values$WordsT),  backgroundColor = 'white',textAlign = 'center')
     
   },height = 600, width = 900)
-  
+## Word Dynamics ----   
   WDynamics <- eventReactive(input$applyWD,{
     if (input$cumTerms=="Cum"){
       cdf=TRUE
@@ -2673,7 +2689,7 @@ server <- function(input, output, session) {
     
   })
   
-  #### Trend Topics ####
+## Trend Topics ----
   output$trendSliderPY <- renderUI({
     
     sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
@@ -2744,12 +2760,13 @@ server <- function(input, output, session) {
     
   })
   
-  #### Coupling ####
+# Coupling ----
   
   CMMAP <- eventReactive(input$applyCM,{
     
     values$CM <- couplingMap(values$M, analysis=input$CManalysis, field=input$CMfield, 
-                             n=input$CMn, minfreq=input$CMfreq, 
+                             n=input$CMn, minfreq=input$CMfreq,
+                             ngrams=as.numeric(input$CMngrams),
                              impact.measure=input$CMimpact,
                              stemming=input$CMstemming, size=input$sizeCM, 
                              label.term = input$CMlabeling,
@@ -2762,7 +2779,7 @@ server <- function(input, output, session) {
   output$CMPlot <- renderPlotly({
     
     CMMAP()
-    plot.ly(values$CM$map)
+    plot.ly(values$CM$map, size=0.15, aspectratio = 1.3)
     
   })#, height = 650, width = 800)
   
@@ -2770,7 +2787,7 @@ server <- function(input, output, session) {
     CMMAP()
     values$networkCM<-igraph2vis(g=values$CM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape, values)
+                                 shape=input$coc.shape, net=values$CM$net,shadow=FALSE)
     
     values$networkCM$VIS
     

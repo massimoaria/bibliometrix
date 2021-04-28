@@ -17,6 +17,8 @@
 #' @param n is an integer. It indicates the number of units to include in the analysis.
 #' @param label.term is a character. It indicates which content metadata have to use for cluster labeling. It can be \code{label.term = c("ID","DE","TI","AB")}.
 #' If \code{label.term = NULL} cluster items will be use for labeling.
+#' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+#' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param impact.measure is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 #' It can be \code{impact.measure = c("local", "global")}.\\
 #' With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while 
@@ -50,7 +52,7 @@
 #'
 #' @export
 
-couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term=NULL, impact.measure="local", minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
+couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term=NULL, ngrams=1, impact.measure="local", minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
   
   
   if (!(analysis %in% c("documents", "authors", "sources"))) {
@@ -145,9 +147,14 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
     label.term="null"
   } 
   if (label.term %in% c("DE", "ID", "TI","AB")){
-    w <- labeling(M, df_lab, term=label.term, n=n, n.labels=n.labels, analysis = analysis)
+    w <- labeling(M, df_lab, term=label.term, n=n, n.labels=n.labels, analysis = analysis, ngrams=ngrams)
     df$label <- w
   }
+  
+  data("logo",envir=environment())
+  logo <- grid::rasterGrob(logo,interpolate = TRUE)
+  x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.5
+  y <- c(min(df$rimpact),min(df$rimpact)+diff(range(df$rimpact))*0.125)
   
   g=ggplot(df, aes(x=.data$rcentrality, y=.data$rimpact, text=(.data$words))) +
     geom_point(group="NA",aes(size=log(as.numeric(.data$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
@@ -170,7 +177,8 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
           axis.text.y=element_blank(),
-          axis.ticks.y=element_blank())
+          axis.ticks.y=element_blank()) + 
+    annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
   
 
   
@@ -269,10 +277,10 @@ network <- function(M, analysis,field, stemming, n){
 }
 
 ## cluster labeling
-labeling <- function(M, df_lab, term, n, n.labels, analysis){
+labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
   
   if (term %in% c("TI", "AB")){
-    M <- termExtraction(M, Field = term, verbose=FALSE)
+    M <- termExtraction(M, Field = term,ngrams = ngrams, verbose=FALSE)
     term <- paste(term,"_TM",sep="")
   }
   switch(analysis,

@@ -3137,7 +3137,7 @@ server <- function(input, output, session) {
   output$TMPlot <- renderPlotly({
     
     TMAP()
-    plot.ly(values$TM$map, size=0.10, aspectratio = 1.3)
+    plot.ly(values$TM$map, size=0.07, aspectratio = 1.3)
     
   })#, height = 650, width = 800)
   
@@ -3300,7 +3300,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=1){
-      plot.ly(values$nexus$TM[[1]]$map, size=0.10, aspectratio = 1.3)
+      plot.ly(values$nexus$TM[[1]]$map, size=0.07, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
@@ -3309,7 +3309,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=2){
-      plot.ly(values$nexus$TM[[2]]$map, size=0.10, aspectratio = 1.3)
+      plot.ly(values$nexus$TM[[2]]$map, size=0.07, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
@@ -3318,7 +3318,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=3){
-      plot.ly(values$nexus$TM[[3]]$map, size=0.10, aspectratio = 1.3)
+      plot.ly(values$nexus$TM[[3]]$map, size=0.07, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
     
   })#, height = 650, width = 800)
@@ -3327,7 +3327,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=4){
-      plot.ly(values$nexus$TM[[4]]$map, size=0.10, aspectratio = 1.3)
+      plot.ly(values$nexus$TM[[4]]$map, size=0.07, aspectratio = 1.3)
     } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
@@ -3336,7 +3336,7 @@ server <- function(input, output, session) {
     TEMAP()
     #input$applyTM
     if (length(values$nexus$TM)>=5){
-      plot.ly(values$nexus$TM[[5]]$map, size=0.10, aspectratio = 1.3)
+      plot.ly(values$nexus$TM[[5]]$map, size=0.07, aspectratio = 1.3)
     } else (emptyPlot("You have selected fewer periods!"))
     
   })#, height = 650, width = 800)
@@ -3788,7 +3788,9 @@ server <- function(input, output, session) {
       tickcolor = toRGB("black")
     )
     
-    g <- plot.ly(values$histPlot$g) %>% layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, hoverlabel = list(font=list(size=input$histlabelsize+9)))
+    g <- plot.ly(values$histPlot$g, side="r", size=0.05, aspectratio = 1.5, height=-0.1) %>% 
+      layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, 
+             hoverlabel = list(font=list(size=input$histlabelsize+9)))
     return(g)
   })
   

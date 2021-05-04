@@ -77,7 +77,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   V(bsk.network)$years <- Years
   
   # Remove loops
-  bsk.network <- simplify(bsk.network, remove.multiple = T, remove.loops = T) 
+  bsk.network <- igraph::simplify(bsk.network, remove.multiple = T, remove.loops = T) 
   
   
   # define network layout
@@ -109,7 +109,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   layout_m$y <- (diff(range(layout_m$x))/diff(range(layout_m$y)))*layout_m$y
 
   ################
-  df_net <- ggnetwork(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
+  df_net <- ggnetwork::ggnetwork(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
   df_net$color <- "slategray1"
   df_net <- left_join(df_net,layout_m[c("name","color")], by = "name")
   names(df_net)[10:11] <- c("color", "color_v")
@@ -131,7 +131,6 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
                         .data$LCS, "    GCS: ",
                         .data$GCS, sep=""))
   
-  
   g <- ggplot(df_net, aes(x = .data$x, y = .data$y, xend = .data$xend, yend = .data$yend, text=.data$text)) +
     geom_edges(color = "grey", size=0.4, alpha=0.4) +
     geom_nodes(aes(color = .data$color_v), size = size, alpha=0.5) +
@@ -149,7 +148,43 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
           panel.grid.major.x = element_line(adjustcolor(col="grey", alpha.f = 0.2), linetype = 2, size = 0.5),
           panel.grid.minor.x = element_blank(), 
           axis.text.x=element_text(face="bold", angle = 90, size=labelsize+3)) +
-    labs(title = "Historical Direct Citation Network")
+    labs(title = "Historical Direct Citation Network") 
+  
+  ### logo coordinates
+  data("logo",envir=environment())
+  logo <- grid::rasterGrob(logo,interpolate = TRUE)
+  
+  a <- ggplot_build(g)$data
+  
+  ymin <- unlist(lapply(a, function(l){
+    if ("y" %in% names(l)){
+      min(l["y"])  
+    }
+  })) %>% min(na.rm=TRUE)
+  
+  ymax <- unlist(lapply(a, function(l){
+    if ("y" %in% names(l)){
+      max(l["y"])  
+    }
+  })) %>% max(na.rm=TRUE)
+  
+  xmin <- unlist(lapply(a, function(l){
+    if ("x" %in% names(l)){
+      min(l["x"])  
+    }
+  })) %>% min(na.rm=TRUE)
+  
+  xmax <- unlist(lapply(a, function(l){
+    if ("x" %in% names(l)){
+      max(l["x"])  
+    }
+  })) %>% max(na.rm=TRUE)
+  
+  x <- c(xmax-0.02-diff(c(xmin,xmax))*0.125, xmax-0.02)
+  y <- c(ymin,ymin+diff(c(ymin,ymax))*0.125)+0.02
+  
+  g <- g +
+    annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
   
   if (isTRUE(verbose)) {

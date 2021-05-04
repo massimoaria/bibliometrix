@@ -10,6 +10,7 @@ couplingMap(
   field = "CR",
   n = 500,
   label.term = NULL,
+  ngrams = 1,
   impact.measure = "local",
   minfreq = 5,
   stemming = FALSE,
@@ -29,6 +30,9 @@ couplingMap(
 
 \item{label.term}{is a character. It indicates which content metadata have to use for cluster labeling. It can be \code{label.term = c("ID","DE","TI","AB")}.
 If \code{label.term = NULL} cluster items will be use for labeling.}
+
+\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 It can be \code{impact.measure = c("local", "global")}.\\

@@ -150,7 +150,7 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     }
   
   class(M) <- c("bibliometrixDB", "data.frame")
-  
+  row.names(M) <- M$SR
   return(M)
   
 }

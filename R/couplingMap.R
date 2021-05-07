@@ -190,7 +190,8 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
 }
 
 coupling <- function(M,field, analysis){
-  if (field=="TI") field <- "TI_TM"
+
+  if (field=="TI"){field <- "TI_TM"}
   if (field=="AB") field <- "AB_TM"
   switch(analysis,
          documents = {

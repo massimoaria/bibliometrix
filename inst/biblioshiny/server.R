@@ -94,6 +94,7 @@ server <- function(input, output, session) {
   }
 
 ## loading function ----
+  
   DATAloading<- eventReactive(input$applyLoad,{
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',

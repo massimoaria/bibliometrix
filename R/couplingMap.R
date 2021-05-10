@@ -108,7 +108,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   df <- df_lab %>%
     mutate(centrality = mean(.data$pagerank_centrality),
            impact = mean(.data$MNLCS2,na.rm=TRUE),
-           impact = replace(.data$impact, is.na(.data$impact),NA)) %>%
+           impact = replace(.data$impact, is.na(.data$impact),0)) %>%
     top_n(.data$MNLCS, n=10) %>%
     summarize(freq = .data$freq[1],
               centrality = .data$centrality[1]*100,
@@ -131,6 +131,9 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   meandens <- mean(df$rimpact)
   meancentr <- mean(df$rcentrality)
   df <- df[df$freq>=minfreq,]
+  
+  df_lab<- df_lab %>% 
+    dplyr::filter(.data$group %in% df$group)
   
   rangex <- max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
   rangey <- max(c(meandens-min(df$rimpact),max(df$rimpact)-meandens))
@@ -156,7 +159,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.5
   y <- c(min(df$rimpact),min(df$rimpact)+diff(range(df$rimpact))*0.125)
   
-  g=ggplot(df, aes(x=.data$rcentrality, y=.data$rimpact, text=(.data$words))) +
+  g <- ggplot(df, aes(x=.data$rcentrality, y=.data$rimpact, text=(.data$words))) +
     geom_point(group="NA",aes(size=log(as.numeric(.data$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
   if (size>0){
     if (isTRUE(repel)){

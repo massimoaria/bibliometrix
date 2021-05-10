@@ -1850,7 +1850,7 @@ navbarMenu("Documents",
 ),
 
 ### COUPLING ----
-navbarMenu("Coupling ",
+navbarMenu("Clustering ",
            
            #### Coupling ----
            "  ",

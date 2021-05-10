@@ -29,7 +29,7 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1){
     M$C1=gsub("\\[.+?]","",M$C1) 
   }
   
-  Tab<-unlist(strsplit(as.character(M[,i]),sep))
+  Tab<-unlist(strsplit(as.character(M %>% dplyr::pull(i)),sep))
   
   ### inserted to remove punct and extra spaces ####
   #Tab<-trimws(trimES(gsub("[[:punct:]]"," ",Tab)))

@@ -6,7 +6,7 @@
 #'   standard ISI WoS Field Tag codify.
 #' @param timespan is a vector with the min and max year. If it is = NULL, the analysis is performed on the entire period. Default is \code{timespan = NULL}.
 #' @param min.freq is an integer. It indicates the min frequency of the items to include in the analysis
-#' @param n.items is an integer. I indicates the maximun number of items per year to include in the plot.
+#' @param n.items is an integer. I indicates the maximum number of items per year to include in the plot.
 #' @param labelsize is deprecated argument. It will be removed in the next update.
 #' @param dynamic.plot is a logical. If TRUE plot aesthetics are optimized for plotly package.
 #' @param graph is logical. If TRUE the function plots Filed Tag distribution by Year graph. Default is \code{graph = TRUE}.
@@ -45,7 +45,7 @@ fieldByYear <- function(M,
   
   
   trend_med <- apply(A, 2, function(x) {   
-    round(quantile(rep(M$PY, x), c(0.25,0.50,0.75)))
+    round(quantile(rep(M$PY, x), c(0.25,0.50,0.75), na.rm=TRUE))
   })
   
   trend_med <- as_tibble(t(trend_med)) %>% 

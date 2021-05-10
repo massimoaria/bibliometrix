@@ -25,7 +25,7 @@ standard ISI WoS Field Tag codify.}
 
 \item{min.freq}{is an integer. It indicates the min frequency of the items to include in the analysis}
 
-\item{n.items}{is an integer. I indicates the maximun number of items per year to include in the plot.}
+\item{n.items}{is an integer. I indicates the maximum number of items per year to include in the plot.}
 
 \item{labelsize}{is deprecated argument. It will be removed in the next update.}
 

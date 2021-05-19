@@ -1,4 +1,4 @@
-bibliometrix v3.1 (Release date: ?????? )
+bibliometrix v3.11 (Release date: 2021-05-10)
 
 New functionalities:
 * Content analysis functions (conceptualStructure, biblioNetwork, biblioAnalysis, etc) include the analysis of bigrams and trigrams extracted from titles and abstracts 

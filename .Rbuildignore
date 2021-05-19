@@ -8,7 +8,10 @@
 ^.*\.jar
 ^.*\.net
 ^.*\.csv
+^.*\.xlsx
+^.*\.xls
 ^.*\.xml
+^.*\.png
 LICENCE.*$
 Rubbish
 ^_gh-pages$

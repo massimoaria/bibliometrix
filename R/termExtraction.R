@@ -130,6 +130,7 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
                              stemming=stemming, language=language)
   
   TERMS <- TERMS %>%
+    dplyr::filter(!(.data$ngram %in% paste(rep("NA",ngrams),sep="",collapse=" "))) %>% 
     group_by(.data$SR) %>%
     summarize(text = paste(.data$ngram, collapse=";"))
   

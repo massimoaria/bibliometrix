@@ -1498,7 +1498,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Graph", 
-                                             withSpinner(plotlyOutput(outputId = "rpysPlot", height = "80vh"))), #height = 700))),
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "80vh"))), #height = 700))),
                                     tabPanel("RPY Table", 
                                              shinycssloaders::withSpinner(DT::DTOutput(
                                                outputId = "rpysTable"))),
@@ -1571,7 +1571,7 @@ navbarMenu("Documents",
                       mainPanel(
                         tabsetPanel(type = "tabs",
                                     tabPanel("Plot",
-                                             withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "80vh"))  #height = 700))
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "80vh"))  #height = 700))
                                     ),
                                     tabPanel("Table",
                                              shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))

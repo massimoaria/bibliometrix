@@ -50,7 +50,7 @@ data(management, package = "bibliometrixData")
 
 results <- biblioAnalysis(management)
 
-summary(results, k = 10, pause = FALSE)
+# summary(results, k = 10, pause = FALSE)
 
 }
 \seealso{

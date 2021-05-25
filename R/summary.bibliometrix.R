@@ -27,7 +27,7 @@
 #' 
 #' results <- biblioAnalysis(scientometrics)
 #'
-#' summary(results)
+#' # summary(results)
 #'
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis
 #' @seealso \code{\link{plot}} to draw some useful plots of the results.

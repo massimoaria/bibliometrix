@@ -40,7 +40,7 @@
 #'
 #' results <- biblioAnalysis(management)
 #'
-#' summary(results, k = 10, pause = FALSE)
+#' # summary(results, k = 10, pause = FALSE)
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an WoS or SCOPUS Export file in a bibliographic data frame.
 #' @seealso \code{\link{summary}} to obtain a summary of the results.

@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
-Version: 3.1.1
+Version: 3.1.2
 Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
              person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
 Description: Tool for quantitative research in scientometrics and bibliometrics.
@@ -11,7 +11,7 @@ Description: Tool for quantitative research in scientometrics and bibliometrics.
 	and 'PubMed' (<https://pubmed.ncbi.nlm.nih.gov/>) databases, performing bibliometric analysis 
     and building networks for co-citation, coupling, scientific collaboration and co-word analysis.
 License: GPL-3
-URL: https://www.bibliometrix.org, https://github.com/massimoaria/bibliometrix
+URL: https://www.bibliometrix.org, https://github.com/massimoaria/bibliometrix, https://www.k-synth.com
 BugReports: https://github.com/massimoaria/bibliometrix/issues
 LazyData: FALSE
 Encoding: UTF-8

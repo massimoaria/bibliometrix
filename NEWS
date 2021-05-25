@@ -1,4 +1,10 @@
-bibliometrix v3.11 (Release date: 2021-05-10)
+bibliometrix v3.1.2 (Release date: 2021-05-25)
+
+Changes:
+* Solved issue in CRAN Debian release
+
+
+bibliometrix v3.1.1 (Release date: 2021-05-10)
 
 New functionalities:
 * Content analysis functions (conceptualStructure, biblioNetwork, biblioAnalysis, etc) include the analysis of bigrams and trigrams extracted from titles and abstracts 
@@ -6,7 +12,6 @@ New functionalities:
 * splitCommunities: new function to create a network plot with separated communities
 * histPlot: new, improved, plot layout
 * fieldByYear: New Trend Topic Plot
-
 
 Changes:
 * Added bibliometrix logo in all plots

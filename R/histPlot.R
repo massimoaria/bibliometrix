@@ -121,7 +121,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   df_net <- df_net %>% 
     left_join(histResults$histData, by = c("name" = "Paper")) #%>%
   
-  Title <- strsplit(df_net$title, "(?<=.{40})", perl = TRUE)
+#  Title <- strsplit(df_net$title, "(?<=.{40})", perl = TRUE)
+  Title <- gsub("(.{40})", "\\1\n",df_net$title) 
   df_net$Title <- unlist(lapply(Title, function(x){
     paste(x,"\n",collapse="", sep="")
   }))

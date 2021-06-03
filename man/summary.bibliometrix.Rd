@@ -38,7 +38,7 @@ data(scientometrics, package = "bibliometrixData")
 
 results <- biblioAnalysis(scientometrics)
 
-# summary(results)
+summary(results)
 
 }
 \seealso{

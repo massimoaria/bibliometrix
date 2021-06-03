@@ -27,7 +27,7 @@
 #' 
 #' results <- biblioAnalysis(scientometrics)
 #'
-#' # summary(results)
+#' summary(results)
 #'
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis
 #' @seealso \code{\link{plot}} to draw some useful plots of the results.
@@ -79,7 +79,7 @@ summary.bibliometrix<-function(object, ...){
   MainInfo[length(MainInfo)+1]=paste("Authors of single-authored documents ",object$AuSingleAuthoredArt,"\n")
   MainInfo[length(MainInfo)+1]=paste("Authors of multi-authored documents  ",object$AuMultiAuthoredArt,"\n")
   MainInfo[length(MainInfo)+1]=toupper("\nAuthors Collaboration\n")
-  MainInfo[length(MainInfo)+1]=paste("Single-authored documents            ",format(sum(object$nAUperPaper==1),digits=0),"\n")
+  MainInfo[length(MainInfo)+1]=paste("Single-authored documents            ",as.character(round(sum(object$nAUperPaper==1),0)),"\n")#format(sum(object$nAUperPaper==1),digits=0),"\n")
   MainInfo[length(MainInfo)+1]=paste("Documents per Author                 ",format(object$Articles/object$nAuthors,digits=3),"\n")
   MainInfo[length(MainInfo)+1]=paste("Authors per Document                 ",format(object$nAuthors/object$Articles,digits=3),"\n")
   MainInfo[length(MainInfo)+1]=paste("Co-Authors per Documents             ",format(mean(object$nAUperPaper),digits=3),"\n")

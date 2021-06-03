@@ -72,6 +72,9 @@
 
 termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="english",remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, synonyms=NULL, verbose=TRUE){
   
+  # ngrams imposed = 1 for keywords
+  if (Field %in% c("ID","DE")){ngrams <- 1}
+  
   # load stopwords
   data("stopwords",envir=environment())
   data("stop_words", envir=environment(), package = "tidytext")
@@ -86,15 +89,27 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     )
   stopwords <- tolower(stopwords)
 
-  # remove all special characters (except "-")
+  # remove all special characters (except "-" becoming "_")
   TERMS <- M %>% 
     select(.data$SR,!!Field)
   
   names(TERMS) <- c("SR","text")
   
-  TERMS <- TERMS %>%
-    mutate(text = tolower(gsub("[^[:alnum:][:blank:]\\-]", "", .data$text)))
+  # save original multi-words keywords
+  if (Field %in% c("ID","DE")){
+    listTerms <- strsplit(TERMS$text,";")
+    TERMS$text <- unlist(lapply(listTerms, function(l){
+      l <- tolower(paste(gsub(" ","_",trimES(trimws(l))), sep="", collapse=";"))  
+    }))
+  } else {
   
+  TERMS <- TERMS %>%
+    mutate(text = tolower(gsub("[^[:alnum:][:blank:]\\-]", "", .data$text)),
+           text = gsub("-", "_",.data$text))
+  }
+
+  
+  # remove numbers
   if (remove.numbers==TRUE){
     TERMS <- TERMS %>%
       mutate(text = gsub("[[:digit:]]","",.data$text))
@@ -103,7 +118,11 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   # keep terms in the vector keep.terms
   if (length(keep.terms)>0 & class(keep.terms)=="character"){
     keep.terms <- tolower(keep.terms)
-    kt <- gsub(" ","-",keep.terms)
+    if (Field %in% c("DE","ID")){
+      kt <- gsub(" |-","_",keep.terms)
+    } else {
+      kt <- gsub("-","_",keep.terms)
+    }
     for (i in 1:length(keep.terms)){
       TERMS <- TERMS %>%
         mutate(text = gsub(keep.terms[i],kt[i],.data$text))
@@ -133,6 +152,11 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     dplyr::filter(!(.data$ngram %in% paste(rep("NA",ngrams),sep="",collapse=" "))) %>% 
     group_by(.data$SR) %>%
     summarize(text = paste(.data$ngram, collapse=";"))
+  
+  if (Field %in% c("ID","DE")){
+    TERMS <- TERMS %>% 
+      mutate(text = gsub("_", " ", .data$text))
+  }
   
   # assign the vector to the bibliographic data frame
   col_name <- paste(Field,"_TM",sep="")

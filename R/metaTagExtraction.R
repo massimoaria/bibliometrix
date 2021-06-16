@@ -201,7 +201,7 @@ CR_SO<-function(M,sep){
     } 
   }
   
-  M$CR_SO=CCR
+  M$CR_SO=unlist(CCR)
   return(M)
 }
 

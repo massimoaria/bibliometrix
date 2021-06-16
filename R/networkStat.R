@@ -6,7 +6,7 @@
 #' @param object is a network matrix obtained by the function \code{\link{biblioNetwork}} or an graph object of the class \code{igraph}. 
 #' @param stat is a character. It indicates which statistics are to be calculated. \code{stat = "network"} calculates the statistics related to the network; 
 #' \code{stat = "all"} calculates the statistics related to the network and the individual nodes that compose it. Default value is \code{stat = "network"}.
-#' @param type is a character. It indicates which centrality index is calculated. type values can be c("degree", "closeness", "betweenness","eigenvector","pagerank","hub","authority"). Default is "degree".
+#' @param type is a character. It indicates which centrality index is calculated. type values can be c("degree", "closeness", "betweenness","eigenvector","pagerank","hub","authority", "all"). Default is "degree".
 #' @return It is a list containing the following elements:
 #' \tabular{lll}{
 #' \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
@@ -100,6 +100,7 @@ networkStat<-function(object, stat="network",type="degree"){
   if (stat=="all"){
   
    DC=CC=BC=EC=PR=HS=AS=NA
+   
     switch(type,
            degree={
              # Degree centrality. 
@@ -141,6 +142,17 @@ networkStat<-function(object, stat="network",type="degree"){
            },
            authority={
              # Authorities
+             AS <- authority_score(net, weights=NA)$vector
+           },
+           all={
+             DC <- degree(net, v = V(net), mode = c("all"), loops = TRUE, normalized = TRUE)
+             CC <- suppressWarnings(closeness(net, vids = V(net), mode = c("all"), normalized = TRUE))
+             BC <- betweenness(net, v = V(net), directed = FALSE, weights = NULL, nobigint = TRUE, normalized = TRUE)
+             EC <- eigen_centrality(net, directed = FALSE, scale = TRUE, weights = NULL, options = arpack_defaults)$vector
+             PR <- page_rank(net, algo = c("prpack"), vids = V(net),
+                             directed = FALSE, damping = 0.85, personalized = NULL, weights = NULL,
+                             options = NULL)$vector
+             HS <- hub_score(net, weights=NA)$vector
              AS <- authority_score(net, weights=NA)$vector
            }
     )  

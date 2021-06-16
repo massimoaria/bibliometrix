@@ -1,3 +1,9 @@
+bibliometrix v3.1.4 (Release date: ????-??-??)
+
+Changes:
+* Added the possibily to calculate all vertex centrality measures setting the argument type="all"
+* Solved the issue with extracting cited sources from scopus collections (function metaTagExtraction)
+
 bibliometrix v3.1.3 (Release date: 2021-05-25)
 
 Changes:

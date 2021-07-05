@@ -306,15 +306,43 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
            df <- left_join(df_lab,M, by=c("sources" = "SO" ))
          })
   
-  clusters <- unique(df$Cluster)
-  w <- character(length(clusters))
+  #clusters <- unique(df$Cluster)
+  #w <- character(length(clusters))
   
+  tab_global <- tableTag(df, term)
+  tab_global <- data.frame(label=names(tab_global),tot=as.numeric(tab_global), n=nrow(M),stringsAsFactors = FALSE)
   
-  for (i in 1:length(clusters)){
-    ind <- which(df$Cluster == clusters[i])
-    tab <- round((tableTag(df[ind,], term)[1:n.labels])/length(ind)*100,1)
-    w[i]=tolower(paste(names(tab)," ",as.numeric(tab),"%",sep="", collapse="\n"))
-  }
-  return(w)
+  df <- df %>% 
+    group_by(.data$Cluster) %>% 
+    do(w = best_lab(.data,tab_global, n.labels, term)) %>% 
+    unnest(.data$w) %>% 
+    as.data.frame()
   
+  # for (i in 1:length(clusters)){
+  #   ind <- which(df$Cluster == clusters[i])
+  #   tab <- round((tableTag(df[ind,], term)[1:n.labels])/length(ind),1)
+  #   tab <- data.frame(label=names(tab), value=as.numeric(tab),stringsAsFactors = FALSE)
+  #   tab <- tab %>% 
+  #     left_join(tab_global, by = "label") %>% 
+  #     mutate(freq = .data$value/.data$tot*100) 
+  #   
+  #   w[i]=tolower(paste(tab$label," ",round(tab$freq,1),"%",sep="", collapse="\n"))
+  # }
+  return(df$w)
+  
+}
+
+best_lab <- function(d, tab_global, n.labels, term){
+  tab <- tableTag(d, term)
+  tab <- data.frame(label=names(tab), value=as.numeric(tab), stringsAsFactors = FALSE)
+  tab <- tab %>% 
+    left_join(tab_global, by = "label") %>% 
+    mutate(conf = round(.data$value/.data$tot*100,1),
+           supp = round(.data$tot/n*100,1),
+           relevance = round(.data$conf*.data$supp/100,1)) %>% 
+    arrange(desc(.data$relevance)) %>% 
+    slice(1:n.labels) 
+  
+  #tolower(paste(tab$label," Supp ",tab$supp,"% - Conf ", tab$conf,"%", sep="", collapse="\n"))
+  tolower(paste(tab$label," - Conf ", tab$conf,"%", sep="", collapse="\n"))
 }

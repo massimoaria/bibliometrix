@@ -1,8 +1,10 @@
-bibliometrix v3.1.4 (Release date: ????-??-??)
+bibliometrix v3.1.4 (Release date: 2021-07-05)
 
 Changes:
 * Added the possibily to calculate all vertex centrality measures setting the argument type="all"
-* Solved the issue with extracting cited sources from scopus collections (function metaTagExtraction)
+* Solved the issue with extracting cited sources from Scopus collections (function metaTagExtraction)
+* Solved the issue related to exclusion of the ggnetwork package from CRAN by removing the dependence from the package 
+
 
 bibliometrix v3.1.3 (Release date: 2021-05-25)
 

@@ -109,7 +109,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   layout_m$y <- (diff(range(layout_m$x))/diff(range(layout_m$y)))*layout_m$y
 
   ################
-  df_net <- ggnetwork::ggnetwork(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
+  df_net <- dataFromIgraph(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
   df_net$color <- "slategray1"
   df_net <- left_join(df_net,layout_m[c("name","color")], by = "name")
   names(df_net)[10:11] <- c("color", "color_v")
@@ -133,14 +133,14 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
                         .data$GCS, sep=""))
   
   g <- ggplot(df_net, aes(x = .data$x, y = .data$y, xend = .data$xend, yend = .data$yend, text=.data$text)) +
-    geom_edges(color = "grey", size=0.4, alpha=0.4) +
-    geom_nodes(aes(color = .data$color_v), size = size, alpha=0.5) +
+    geom_network_edges(color = "grey", size=0.4, alpha=0.4) +
+    geom_network_nodes(aes(color = .data$color_v), size = size, alpha=0.5) +
     geom_text(aes(label=.data$id, color=.data$color_v),  size=labelsize,
               nudge_x = 0,
               nudge_y = 0.02,
               check_overlap = FALSE,alpha=0.7)+
     scale_x_continuous(labels=Ylabel,breaks=Breaks)+
-    guides(size=FALSE, color=FALSE) +
+    guides(size="none", color="none") +
     theme_minimal()+
     theme(legend.position='none', panel.background = element_rect(fill='white', color='white'),
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),
@@ -148,7 +148,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(),
           panel.grid.major.x = element_line(adjustcolor(col="grey", alpha.f = 0.2), linetype = 2, size = 0.5),
           panel.grid.minor.x = element_blank(), 
-          axis.text.x=element_text(face="bold", angle = 90, size=labelsize+3)) +
+          axis.text.x=element_text(face="bold", angle = 90, size=labelsize+4)) +
     labs(title = "Historical Direct Citation Network") 
   
   ### logo coordinates
@@ -226,3 +226,5 @@ delete.isolates <- function(graph, mode = 'all') {
   isolates <- which(degree(graph, mode = mode) == 0) - 1
   delete.vertices(graph, names(isolates))
 }
+
+

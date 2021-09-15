@@ -10,8 +10,9 @@ csvScopus2df <- function(file){
     #D <- rio::import(file[i], quote='"')
     #D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F)
 
-    D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress()) %>%
-      mutate(across(!where(is.numeric), as.character)) %>% 
+    D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress(),
+                  col_types = cols(.default = col_character())) %>%  # Introduced to remove cols parsing errors
+      #mutate(across(!where(is.numeric), as.character)) %>%   # not yet necessary with the inclusion of previuos line
       mutate(across(where(is.character), tidyr::replace_na,"")) %>% as.data.frame(stringsAsFactors=FALSE)
     
     if (i>1){
@@ -37,7 +38,11 @@ csvScopus2df <- function(file){
   }))
 
   # Iso Source Titles
-  DATA$J9 <- gsub("\\.","",DATA$JI)
+  if ("JI" %in% names(DATA)){
+    DATA$J9 <- gsub("\\.","",DATA$JI)
+    }else{
+      DATA$J9 <- DATA$JI <- DATA$SO
+    }
  
   DI <- DATA$DI
   URL <- DATA$URL
@@ -55,10 +60,13 @@ labelling <- function(DATA){
   label <- names(DATA)
   label <- gsub("Abbreviated Source Title","JI",label)
   label <- gsub("Authors with affiliations","C1",label)
+  label <- gsub("Author Addresses","C1",label)
   #label <- gsub("Affiliations","RP",label)
   label <- gsub("Authors","AU",label)
+  label <- gsub("Author Names","AU",label)
   label <- gsub("Source title","SO",label)
   label <- gsub("Title","TI",label)
+  label <- gsub("Publication Year","PY",label)
   label <- gsub("Year","PY",label)
   label <- gsub("Volume","VL",label)
   label <- gsub("Issue","IS",label)

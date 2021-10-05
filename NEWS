@@ -2,7 +2,7 @@ bibliometrix v3.1.4 (Release date: )
 
 Changes:
 * Improvements of scopus CSV file importing fucntion
-* Solved encoding issues about non UTF-8 character sets.
+* Solved encoding issues about non UTF-8 character sets for bibtex files.
 
 
 bibliometrix v3.1.4 (Release date: 2021-07-05)

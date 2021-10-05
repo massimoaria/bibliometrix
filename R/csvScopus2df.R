@@ -33,10 +33,11 @@ csvScopus2df <- function(file){
   DATA$AU=gsub(",", ";", DATA$AU)
   
   # Affiliation
-  DATA$C1 <- unlist(lapply(strsplit(DATA$C1,";"), function(l){
-    l <- paste(gsub(".*\\., ","",l), collapse=";",sep="")
-  }))
-
+  if (!("C1" %in% names(DATA))){DATA$C1 <- NA}else{
+    DATA$C1 <- unlist(lapply(strsplit(DATA$C1,";"), function(l){
+      l <- paste(gsub(".*\\., ","",l), collapse=";",sep="")
+    }))
+  }
   # Iso Source Titles
   if ("JI" %in% names(DATA)){
     DATA$J9 <- gsub("\\.","",DATA$JI)

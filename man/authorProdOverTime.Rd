@@ -2,7 +2,7 @@
 % Please edit documentation in R/authorProdOverTime.R
 \name{authorProdOverTime}
 \alias{authorProdOverTime}
-\title{Top-Authors' Productivity over the Time}
+\title{Top-Authors' Productivity over Time}
 \usage{
 authorProdOverTime(M, k = 10, graph = TRUE)
 }

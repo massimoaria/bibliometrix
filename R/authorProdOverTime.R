@@ -1,4 +1,4 @@
-#' Top-Authors' Productivity over the Time
+#' Top-Authors' Productivity over Time
 #'
 #' It calculates and plots the author production (in terms of number of publications) over the time. 
 #' @param M is a bibliographic data frame obtained by \code{\link{convert2df}} function.
@@ -75,7 +75,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
           ,axis.text.y = element_text(face="bold")
     )+
     #coord_fixed(ratio = 2/1) +
-    labs(title="Top-Authors' Production over the Time", 
+    labs(title="Top-Authors' Production over Time", 
          x="Author",
          y="Year")+
     geom_line(data=df2,aes(x = .data$Author, y = .data$year, group=.data$Author),size=1.0, color="firebrick", alpha=0.3 )+

@@ -1,6 +1,17 @@
 bib2df<-function(D, dbsource = "isi"){
   
-  D <- D[nchar(D)>1]  # remove empty rows
+  #D <- D[nchar(D)>1]  
+  
+  # remove empty rows and strange characters
+  res <- try(D <- D[nchar(D)>1], silent = T)
+  if(inherits(res, "try-error")){
+    D <- removeStrangeChar(D)
+    #next
+  }else{
+    D <- res
+    rm(res)
+  }
+  
   D <- gsub("\\{\\[\\}","[",D)
   D <- gsub("\\{\\]\\}","]",D)
   Papers <- which(substr(D,1,1)=="@")  # # first row of each document
@@ -187,3 +198,4 @@ postprocessing <-function(DATA,dbsource){
   DATA$url <- URL
   return(DATA)
 }
+

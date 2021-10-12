@@ -1,6 +1,17 @@
 isi2df<-function(D){
   
-  D <- D[nchar(D)>0]  # remove empty rows
+  #D <- D[nchar(D)>0]  # remove empty rows
+  
+  # remove empty rows and strange characters
+  res <- try(D <- D[nchar(D)>1], silent = T)
+  if(inherits(res, "try-error")){
+    D <- removeStrangeChar(D)
+    #next
+  }else{
+    D <- res
+    rm(res)
+  }
+  
   D <- D[!(substr(D,1,3) %in% c("FN ", "VR "))]
   
   for (i in 1:length(D)){

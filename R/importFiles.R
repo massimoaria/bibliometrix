@@ -12,6 +12,7 @@ importFiles <- function(...){
       arguments[i],
       skip = 0,
       n_max = -1L,
+      locale = default_locale(),
       progress = show_progress()
     )
     

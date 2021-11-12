@@ -56,7 +56,7 @@ csvLens2df <- function(file){
   DATA$ID <- DATA$DE
   DI <- DATA$DI
   URL <- DATA$URL
-  DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
+  DATA <- data.frame(lapply(DATA,toUpper),stringsAsFactors = FALSE)
   DATA$DI <- DI
   DATA$URL <- URL
   DATA$DB <- "LENS"

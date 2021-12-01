@@ -1998,7 +1998,7 @@ server <- function(input, output, session) {
       laby="N. of Citations per Year"
     }
     
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Countries", textLabx = laby, title = "Most Cited Contries")
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Countries", textLabx = laby, title = "Most Cited Countries")
 
     values$MCCplot <- g
     return(g)

@@ -94,7 +94,10 @@ allField <- unlist(Fi)
 allField <- allField[!is.na(allField)]
 
 if (Field=="CR"){
-  S <- gsub("\\).*", ")", allField)
+  ind <- which(substr(allField,1,1)!="(")
+  S <- allField
+  S[ind] <- gsub("\\).*", ")", allField[ind])
+  S[-ind] <- substr(S[-ind],1,100)
   S<-gsub(","," ",S)
   S<-gsub(";"," ",S)
   S<-reduceRefs(S)

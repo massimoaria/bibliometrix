@@ -80,6 +80,8 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   data("stop_words", envir=environment(), package = "tidytext")
   stop_words <- stop_words %>% as.data.frame()
   
+  if (ngrams == 2){remove.terms <- c(remove.terms,stopwords$bigrams)}
+  
   switch(language,
     english={stopwords=(stop_words$word)},
     italian={stopwords=stopwords$it},
@@ -185,8 +187,8 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
   # Var is a string indicating the column name. I.e. Var = "AB"
   # nword is a integer vector indicating the ngrams to extract. I.e. nword = c(2,3)
   
-  custom_stopwords <- c(stopwords, custom_stopwords, "elsevier", "springer", "wiley", "mdpi", "emerald")
-  custom_stopngrams <- c("rights reserved", "john wiley", "john wiley sons", "science bv", "mdpi basel", 
+  stopwords <- c(stopwords,"elsevier", "springer", "wiley", "mdpi", "emerald")
+  custom_stopngrams <- c(custom_stopwords,"rights reserved", "john wiley", "john wiley sons", "science bv", "mdpi basel", 
                          "mdpi licensee", "emerald publishing", "taylor francis", "paper proposes", 
                          "we proposes", "paper aims", "articles published", "study aims")
   ngram <- NULL
@@ -195,7 +197,7 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
     drop_na(any_of(Var)) %>%
     unnest_tokens(ngram, !!Var, token = "ngrams", n = nword) %>%
     separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ") %>%
-    dplyr::filter(if_all(starts_with("word"), ~ !.x %in% custom_stopwords)) 
+    dplyr::filter(if_all(starts_with("word"), ~ !.x %in% stopwords)) 
   
   if (isTRUE(stemming)){
     ngrams <- ngrams %>% 

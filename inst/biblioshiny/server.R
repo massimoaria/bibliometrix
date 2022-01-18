@@ -33,6 +33,7 @@ server <- function(input, output, session) {
   values$Histfield="NA"
   values$histlog="working..."
   values$kk=0
+  #values$MRWremove.terms=NULL
   values$M=data.frame(PY=0)
   values$histsearch="NA"
   values$citShortlabel="NA"
@@ -740,10 +741,17 @@ server <- function(input, output, session) {
 
 # FILTERS MENU ----
 ## Filters uiOutput ----
-  output$textDim <- renderUI({
-    dimMatrix=paste("Documents ",dim(values$M)[1]," of ",dim(values$Morig)[1])
-    textInput("textDim", "Number of Documents", 
-              value=dimMatrix)
+  # output$textDim <- renderUI({
+  #   dimMatrix=paste("Documents ",dim(values$M)[1]," of ",dim(values$Morig)[1],"\nSources ",length(unique(values$M$SO)))
+  #   textInput("textDim", "Number of Documents", 
+  #             value=dimMatrix)
+  # })
+  # 
+  output$textDim <-  renderUI({
+    str1=paste("Documents  ",dim(values$M)[1]," of ",dim(values$Morig)[1])
+    str2=paste("Sources    ",length(unique(values$M$SO))," of ", length(unique(values$Morig$SO)))
+    str3=paste("Authors    ",length(unique(unlist(strsplit(values$M$AU,";"))))," of ", length(unique(unlist(strsplit(values$Morig$AU,";")))))
+    HTML(paste("<pre>", str1, str2, str3,"</pre>", sep = '<br/>'))
   })
   
   output$selectType <- renderUI({
@@ -752,6 +760,17 @@ server <- function(input, output, session) {
     selectInput("selectType", "Document Type", 
                 choices = artType,
                 selected = artType,
+                multiple =TRUE )
+  })
+  output$selectLA <- renderUI({
+    
+    if ("LA" %in% names(values$Morig)){
+    LA <- sort(unique(values$Morig$LA))} else {
+      LA <- "N.A."
+    }
+    selectInput("selectLA", "Language", 
+                choices = LA,
+                selected = LA,
                 multiple =TRUE )
   })
   
@@ -770,20 +789,28 @@ server <- function(input, output, session) {
     
   })
   
-  output$sliderTC <- renderUI({
-    
-    sliderInput("sliderTC", "Total Citation", min = min(values$Morig$TC, na.rm=T),
-                max = max(values$Morig$TC, na.rm=T), value = c(min(values$Morig$TC, na.rm=T),max(values$Morig$TC,na.rm=T)))
+  output$sliderTCpY <- renderUI({
+    Y <- as.numeric(substr(Sys.time(),1,4))
+    values$Morig <- values$Morig %>% 
+      mutate(Age = Y - .data$PY+1,
+             TCpY = round(.data$TC/Age,2)) %>% 
+      group_by(.data$PY) %>% 
+      mutate(NTC = .data$TC/mean(.data$TC, na.rm=T)) %>% 
+      as.data.frame()
+    sliderInput("sliderTCpY", "Average Citation per Year", min = floor(min(values$Morig$TCpY, na.rm=T)),
+                max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
+                value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
   })
 
-## Update filterd data ----
+## Update filtered data ----
   
   DTfiltered <- eventReactive(input$applyFilter,{
-    M=values$Morig
-    B=bradford(M)$table
-    M=subset(M, M$PY>=input$sliderPY[1] & M$PY<=input$sliderPY[2])
-    M=subset(M, M$TC>=input$sliderTC[1] & M$TC<=input$sliderTC[2])
-    M=subset(M, M$DT %in% input$selectType)
+    M <- values$Morig
+    B <- bradford(M)$table
+    M <- subset(M, M$PY>=input$sliderPY[1] & M$PY<=input$sliderPY[2])
+    M <- subset(M, M$TCpY>=input$sliderTCpY[1] & M$TCpY<=input$sliderTCpY[2])
+    M <- subset(M, M$DT %in% input$selectType)
+    M <- subset(M, M$LA %in% input$selectLA)
     switch(input$bradfordSources,
            "core"={
              SO=B$SO[B$Zone %in% "Zone 1"]
@@ -2371,8 +2398,15 @@ server <- function(input, output, session) {
     }else{
       ngrams <- 1
     }
-
-    WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams)$v
+    
+    ### load file with terms to remove
+    if (input$MostRelWordsStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$MostRelWordsStop, sep=input$MostRelWordsSep))
+    }else{remove.terms <- NULL}
+    values$MRWremove.terms <- remove.terms
+    ### end of block
+    print(remove.terms)
+    WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms)$v
     
     TAB=data.frame(names(WR),as.numeric(WR),stringsAsFactors = FALSE)
     names(TAB)=c("Words", "Occurrences")
@@ -2395,6 +2429,15 @@ server <- function(input, output, session) {
     values$MRWplot <- g
     return(g)
     
+  })
+  
+  output$MostRelWordsStopPreview <-  renderUI({
+    
+    if (!is.null(values$MRWremove.terms) | exists("values$MRWremove.terms")){
+      strPreview(values$MRWremove.terms, input$MostRelWordsSep)  
+    }else{
+      strPreview(" ", input$MostRelWordsSep)
+    }
   })
   
   output$MRWplot.save <- downloadHandler(
@@ -2450,7 +2493,14 @@ server <- function(input, output, session) {
       ngrams <- 1
     }
     
-    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams)
+    ### load file with terms to remove
+    if (input$WCStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$WCStop, sep=input$WCSep))
+    }else{remove.terms <- NULL}
+    values$WCremove.terms <- remove.terms
+    ### end of block
+    
+    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams, remove.terms = remove.terms)
     
     W=resW$W
     values$Words=resW$Words
@@ -2466,6 +2516,15 @@ server <- function(input, output, session) {
     
     WordCloud()
   })
+  
+  output$WCStopPreview <-  renderUI({
+    if (!is.null(values$WCremove.terms) | exists("values$WCremove.terms")){
+      strPreview(values$WCremove.terms, input$WCSep)
+    }else{
+      strPreview(" ", input$WCSep)
+    }
+  })
+  
 ## TreeMap ----  
   TreeMap <- eventReactive(input$applyTreeMap,{
     if (input$treeTerms %in% c("TI","AB")){
@@ -2473,8 +2532,13 @@ server <- function(input, output, session) {
     }else{
       ngrams <- 1
     }
-    
-    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity", ngrams=ngrams)
+    ### load file with terms to remove
+    if (input$TreeMapStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$TreeMapStop, sep=input$TreeMapSep))
+    }else{remove.terms <- NULL}
+    values$TreeMapremove.terms <- remove.terms
+    ### end of block
+    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity", ngrams=ngrams, remove.terms=remove.terms)
     
     W=resW$W
     values$TreeMap <- plot_ly(
@@ -2493,6 +2557,15 @@ server <- function(input, output, session) {
   output$treemap <- renderPlotly({
     TreeMap()
     values$TreeMap
+  })
+  
+  output$TreeMapStopPreview <-  renderUI({
+    
+    if (!is.null(values$TreeMapremove.terms) | exists("values$TreeMapremove.terms")){
+      strPreview(values$TreeMapremove.terms, input$TreeMapSep)  
+    }else{
+      strPreview(" ", input$TreeMapSep)
+    }
   })
   
   output$wordTable <- DT::renderDT({
@@ -2557,25 +2630,30 @@ server <- function(input, output, session) {
       laby="Annual occurrences"}
     #if (input$se=="Yes"){se=TRUE}else{se=FALSE}
     
-    
+    ### load file with terms to remove
+    if (input$WDStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$WDStop, sep=input$WDSep))
+    }else{remove.terms <- NULL}
+    values$WDremove.terms <- remove.terms
+    ### end of block
     
     switch(input$growthTerms,
            ID={
-             KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw[2], cdf = cdf)
+             KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms)
              
            },
            DE={
-             KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf)
+             KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms)
            },
            TI={
              #if (!("TI_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams))
+               values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms)
              #}
              KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            },
            AB={
              #if (!("AB_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams))
+               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms)
              #}
              KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            }
@@ -2627,6 +2705,15 @@ server <- function(input, output, session) {
     
     values$WDplot <- g
     return(g)
+  })
+  
+  output$WDStopPreview <-  renderUI({
+    
+    if (!is.null(values$WDremove.terms) | exists("values$WDremove.terms")){
+      strPreview(values$WDremove.terms)  
+    }else{
+      strPreview(" ")
+    }
   })
   
   output$WDplot.save <- downloadHandler(
@@ -2707,14 +2794,30 @@ server <- function(input, output, session) {
   
   TrendTopics <- eventReactive(input$applyTrendTopics,{
     
+    ### load file with terms to remove
+    if (input$TTStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$TTStop, sep=input$TTSep))
+    }else{remove.terms <- NULL}
+    values$TTremove.terms <- remove.terms
+    
+    ### end of block
     if (input$trendTerms %in% c("TI","AB")){
       values$M=termExtraction(values$M, Field = input$trendTerms, stemming = input$trendStemming, verbose = FALSE, ngrams=as.numeric(input$trendTermsngrams))
       field=paste(input$trendTerms,"_TM",sep="")
     } else {field=input$trendTerms}
     values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
-                                      n.items = input$trendNItems, dynamic.plot=TRUE, graph = FALSE)
+                                      n.items = input$trendNItems, remove.terms = remove.terms, dynamic.plot=TRUE, graph = FALSE)
     return(values$trendTopics$graph)
     
+  })
+  
+  output$TTStopPreview <-  renderUI({
+    
+    if (!is.null(values$TTremove.terms) | exists("values$TTremove.terms")){
+      strPreview(values$TTremove.terms)  
+    }else{
+      strPreview(" ")
+    }
   })
   
   output$TTplot.save <- downloadHandler(
@@ -4009,6 +4112,15 @@ server <- function(input, output, session) {
     ext
   }
   
+  # string preview (stopwords)
+  strPreview <- function(string, sep=","){
+    str1 <- unlist(strsplit(string, sep))
+    str1 <- str1[1:min(c(length(str1),5))]
+    str1 <- paste(str1, collapse=sep)
+    HTML(paste("<pre>", "File Preview: ", str1,"</pre>", sep = '<br/>'))
+  }
+  
+  # from ggplot to plotly
   plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=2, height=0){
     
     a <- ggplot_build(g)$data
@@ -4284,16 +4396,17 @@ server <- function(input, output, session) {
     return(res)
   }
   
-  wordlist <- function(M, Field, n, measure, ngrams){
+  wordlist <- function(M, Field, n, measure, ngrams, remove.terms=NULL){
     switch(Field,
-           ID={v=tableTag(values$M,"ID")},
-           DE={v=tableTag(values$M,"DE")},
+           ID={v=tableTag(values$M,"ID", remove.terms  = remove.terms)},
+           DE={v=tableTag(values$M,"DE", remove.terms = remove.terms)},
            TI={
              if (!("TI_TM" %in% names(M))){
-               v=tableTag(M,"TI", ngrams=ngrams)
+               v=tableTag(M,"TI", ngrams=ngrams, remove.terms=remove.terms)
+               
              }},
            AB={if (!("AB_TM" %in% names(M))){
-             v=tableTag(M,"AB", ngrams=ngrams)
+             v=tableTag(M,"AB", ngrams=ngrams, remove.terms = remove.terms)
            }}
     )
     names(v)=tolower(names(v))
@@ -4310,6 +4423,14 @@ server <- function(input, output, session) {
     
     results=list(v=v,W=W, Words=Words)
     return(results)
+  }
+  
+  readStopwordsFile <- function(file, sep=","){
+    if (!is.null(file)){
+    req(file$datapath)
+    remove.terms <- unlist(strsplit(readr::read_lines(file$datapath), sep))
+    }else{remove.terms <- NULL}
+    return(remove.terms)
   }
   
   mapworld <- function(M){

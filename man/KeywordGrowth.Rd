@@ -4,7 +4,14 @@
 \alias{KeywordGrowth}
 \title{Yearly occurrences of top keywords/terms}
 \usage{
-KeywordGrowth(M, Tag = "ID", sep = ";", top = 10, cdf = TRUE)
+KeywordGrowth(
+  M,
+  Tag = "ID",
+  sep = ";",
+  top = 10,
+  cdf = TRUE,
+  remove.terms = NULL
+)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
@@ -18,6 +25,8 @@ standard ISI WoS Field Tag codify (ID or DE) or a field tag created by \code{\li
 \item{top}{is a numeric. It indicates the number of top keywords to analyze. The default value is 10.}
 
 \item{cdf}{is a logical. If TRUE, the function calculates the cumulative occurrences distribution.}
+
+\item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
 }
 \value{
 an object of class \code{data.frame}

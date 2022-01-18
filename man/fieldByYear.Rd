@@ -11,6 +11,7 @@ fieldByYear(
   min.freq = 2,
   n.items = 5,
   labelsize = NULL,
+  remove.terms = NULL,
   dynamic.plot = FALSE,
   graph = TRUE
 )
@@ -28,6 +29,8 @@ standard ISI WoS Field Tag codify.}
 \item{n.items}{is an integer. I indicates the maximum number of items per year to include in the plot.}
 
 \item{labelsize}{is deprecated argument. It will be removed in the next update.}
+
+\item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
 
 \item{dynamic.plot}{is a logical. If TRUE plot aesthetics are optimized for plotly package.}
 

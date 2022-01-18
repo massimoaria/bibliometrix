@@ -9,6 +9,7 @@
 #' @param sep is the field separator character. This character separates strings in each keyword column of the data frame. The default is \code{sep = ";"}.
 #' @param top is a numeric. It indicates the number of top keywords to analyze. The default value is 10.
 #' @param cdf is a logical. If TRUE, the function calculates the cumulative occurrences distribution. 
+#' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @return an object of class \code{data.frame}
 #' @examples
 #'
@@ -26,7 +27,7 @@
 #' }
 #'
 #' @export
-KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE){
+KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE, remove.terms=NULL){
   i<-which(names(M)==Tag)
   PY=as.numeric(M$PY)
   Tab<-(strsplit(as.character(M[,i]),sep))
@@ -35,6 +36,10 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE){
   A$Tab=trim.leading(A$Tab)
   A=A[A$Tab!="",]
   A=A[!is.na(A$Y),]
+  ## remove terms
+  terms <- data.frame(Tab=toupper(remove.terms))
+  A <- anti_join(A,terms)
+  ##
   Ymin=min(A$Y)
   Ymax=max(A$Y)
   Year=Ymin:Ymax

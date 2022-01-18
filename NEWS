@@ -1,4 +1,8 @@
-bibliometrix v3.1.4 (Release date: )
+bibliometrix v3.2 (Release date: )
+
+Features:
+* Added the possibility to load a list of terms to remove in all content analyses
+* Added the new package lgo in all plots
 
 Changes:
 * Improvements of scopus CSV file importing fucntion

@@ -2925,15 +2925,15 @@ server <- function(input, output, session) {
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
-                                                     filename = 'Thematic_Map',
+                                                     filename = 'CouplingMap',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'excel',
-                                                     filename = 'Thematic_Map',
+                                                     filename = 'CouplingMap',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'pdf',
-                                                     filename = 'Thematic_Map',
+                                                     filename = 'CouplingMap',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'print')),
@@ -2953,15 +2953,15 @@ server <- function(input, output, session) {
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
-                                                     filename = 'Thematic_Map',
+                                                     filename = 'CouplingMap_Clusters',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'excel',
-                                                     filename = 'Thematic_Map',
+                                                     filename = 'CouplingMap_Clusters',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'pdf',
-                                                     filename = 'Thematic_Map',
+                                                     filename = 'CouplingMap_Clusters',
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'print')),
@@ -2985,12 +2985,22 @@ server <- function(input, output, session) {
     
     
   })
+  
   output$cocPlot <- renderVisNetwork({  
     
     COCnetwork()
     
     values$network$VIS
     
+  })
+  
+  output$COCStopPreview <-  renderUI({
+    
+    if (!is.null(values$COCremove.terms) | exists("values$COCremove.terms")){
+      strPreview(values$COCremove.terms)  
+    }else{
+      strPreview(" ")
+    }
   })
   
   # output$cocPlotComm <- renderVisNetwork({  
@@ -3060,6 +3070,15 @@ server <- function(input, output, session) {
   
   CSfactorial <- eventReactive(input$applyCA,{
     values <- CAmap(input,values)
+  })
+  
+  output$CSStopPreview <-  renderUI({
+    
+    if (!is.null(values$CSremove.terms) | exists("values$CSremove.terms")){
+      strPreview(values$CSremove.terms)  
+    }else{
+      strPreview(" ")
+    }
   })
   
   output$FA1plot.save <- downloadHandler(
@@ -3237,10 +3256,17 @@ server <- function(input, output, session) {
       ngrams <- 1
     }
     
+    ### load file with terms to remove
+    if (input$TMStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$TMStop, sep=input$TMSep))
+    }else{remove.terms <- NULL}
+    values$TMremove.terms <- remove.terms
+    ### end of block
+    
     values$TM <- thematicMap(values$M, field=input$TMfield, 
                              n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
                              stemming=input$TMstemming, size=input$sizeTM, 
-                             n.labels=input$TMn.labels, repel=FALSE)
+                             n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms)
     
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -3261,6 +3287,15 @@ server <- function(input, output, session) {
     
     values$networkTM$VIS
     
+  })
+  
+  output$TMStopPreview <-  renderUI({
+    
+    if (!is.null(values$TMremove.terms) | exists("values$TMremove.terms")){
+      strPreview(values$TMremove.terms)  
+    }else{
+      strPreview(" ")
+    }
   })
   
   output$TMplot.save <- downloadHandler(
@@ -3354,13 +3389,21 @@ server <- function(input, output, session) {
       ngrams <- 1
     }
     
+    ### load file with terms to remove
+    if (input$TEStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$TEStop, sep=input$TESep))
+    }else{remove.terms <- NULL}
+    values$TEremove.terms <- remove.terms
+    ### end of block
+    
     values$yearSlices <- as.numeric()
     for (i in 1:as.integer(input$numSlices)){
       if (length(input[[paste0("Slice", i)]])>0){values$yearSlices=c(values$yearSlices,input[[paste0("Slice", i)]])}
     }
     
     if (length(values$yearSlices)>0){
-      values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams)
+      values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, 
+                                        n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams, remove.terms = remove.terms)
       
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -3374,6 +3417,15 @@ server <- function(input, output, session) {
     
     TEMAP()
     
+  })
+  
+  output$TEStopPreview <-  renderUI({
+    
+    if (!is.null(values$TEremove.terms) | exists("values$TEremove.terms")){
+      strPreview(values$TEremove.terms)  
+    }else{
+      strPreview(" ")
+    }
   })
   
   output$TETable <- DT::renderDT({
@@ -4494,13 +4546,21 @@ server <- function(input, output, session) {
         ngrams <- 1
       }
       
+      ### load file with terms to remove
+      if (input$CSStopFile=="Y"){
+        remove.terms <- trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep))
+      }else{remove.terms <- NULL}
+      values$CSremove.terms <- remove.terms
+      ### end of block
+      
       tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
       if (length(tab>=2)){
         
         minDegree=as.numeric(tab[input$CSn])
         
         values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
-                                         k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams)
+                                         k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
+                                         remove.terms=remove.terms)
         
         
       }else{emptyPlot("Selected field is not included in your data collection")
@@ -4555,6 +4615,14 @@ server <- function(input, output, session) {
     
     n = input$Nodes
     label.n = input$Labels
+    
+    ### load file with terms to remove
+    if (input$COCStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep))
+    }else{remove.terms <- NULL}
+    values$COCremove.terms <- remove.terms
+    ### end of block
+    
     if ((input$field %in% names(values$M))){
       
       if ((dim(values$NetWords)[1])==1 | !(input$field==values$field) | !(input$cocngrams==values$cocngrams) | ((dim(values$NetWords)[1])!=input$Nodes) ){
@@ -4564,23 +4632,23 @@ server <- function(input, output, session) {
         
         switch(input$field,
                ID={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms)
                  values$Title= "Keywords Plus Network"
                },
                DE={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";")
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms)
                  values$Title= "Authors' Keywords network"
                },
                TI={
                  #if(!("TI_TM" %in% names(values$M))){
-                   values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams))
+                   values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms)
                    #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
                  values$Title= "Title Words network"
                },
                AB={
                  #if(!("AB_TM" %in% names(values$M))){
-                   values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams))
+                   values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms)
                  #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                  values$Title= "Abstract Words network"

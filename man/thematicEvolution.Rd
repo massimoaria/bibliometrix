@@ -14,7 +14,8 @@ thematicEvolution(
   ngrams = 1,
   stemming = FALSE,
   n.labels = 1,
-  repel = TRUE
+  repel = TRUE,
+  remove.terms = NULL
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{n.labels}{is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.}
 
 \item{repel}{is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.}
+
+\item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
 }
 \value{
 a list containing:

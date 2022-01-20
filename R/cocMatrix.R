@@ -35,6 +35,7 @@
 #' column of the data frame. The default is \code{sep = ";"}.
 #' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency. 
 #' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
+#' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @return a co-occurrence matrix with cases corresponding to manuscripts and variables to the
 #'   objects extracted from the Tag \code{Field}.
 #'
@@ -62,7 +63,7 @@
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @export
 
-cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE, short = FALSE){
+cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE, short = FALSE, remove.terms = NULL){
 #
 # The function creates co-occurences data between Works and Field
 #
@@ -92,6 +93,12 @@ if (Field=="CR"){Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])}  ## delete not co
 # vector of unique units
 allField <- unlist(Fi)
 allField <- allField[!is.na(allField)]
+
+# remove terms
+if (Field %in% c("ID", "DE", "TI", "TI_TM", "AB", "AB_TM")){
+  allField <- anti_join(data.frame(item=trimws(allField)),data.frame(item=trimws(toupper(remove.terms))), by="item")$item
+  }
+#
 
 if (Field=="CR"){
   ind <- which(substr(allField,1,1)!="(")

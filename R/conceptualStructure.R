@@ -30,6 +30,7 @@
 #' @param quanti.supp is a vector indicating the indexes of the quantitative supplementary variables. It is used only for CA and MCA.
 #' @param documents is an integer. It indicates the number of documents per cluster to plot in the factorial map. The default value is 2. It is used only for CA and MCA.
 #' @param graph is logical. If TRUE the function plots the maps otherwise they are saved in the output object. Default value is TRUE
+#' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @return It is an object of the class \code{list} containing the following components:
 #'
 #' \tabular{lll}{
@@ -55,7 +56,8 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, clust="auto", k.max=5, stemming=FALSE, labelsize=10,documents=2, graph=TRUE){
+conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=NULL, quanti.supp=NULL, minDegree=2, 
+                              clust="auto", k.max=5, stemming=FALSE, labelsize=10,documents=2, graph=TRUE, remove.terms=NULL){
   
   #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   cbPalette <- c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
@@ -80,7 +82,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
            #
            # each row represents a manuscript
            # each column represents a keyword (1 if present, 0 if absent in a document)
-           CW <- cocMatrix(M, Field = "ID", type="matrix", sep=";",binary=binary)
+           CW <- cocMatrix(M, Field = "ID", type="matrix", sep=";",binary=binary, remove.terms = remove.terms)
            # Define minimum degree (number of occurrences of each Keyword)
            CW=CW[,colSums(CW)>=minDegree]
            # Delete empty rows
@@ -90,7 +92,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
          },
          DE={
-           CW <- cocMatrix(M, Field = "DE", type="matrix", sep=";",binary=binary)
+           CW <- cocMatrix(M, Field = "DE", type="matrix", sep=";",binary=binary, remove.terms = remove.terms)
            # Define minimum degree (number of occurrences of each Keyword)
            CW=CW[,colSums(CW)>=minDegree]
            # Delete empty rows
@@ -99,7 +101,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
          },
          ID_TM={
-           M=termExtraction(M,Field="ID",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE)
+           M=termExtraction(M,Field="ID",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms = remove.terms, keep.terms=NULL, verbose=FALSE)
            
            CW <- cocMatrix(M, Field = "ID_TM", type="matrix", sep=";",binary=binary)
            # Define minimum degree (number of occurrences of each Keyword)
@@ -111,7 +113,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
            
          },
          DE_TM={
-           M=termExtraction(M,Field="DE",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE)
+           M=termExtraction(M,Field="DE",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms = remove.terms, keep.terms=NULL, verbose=FALSE)
            
            CW <- cocMatrix(M, Field = "DE_TM", type="matrix", sep=";",binary=binary)
            # Define minimum degree (number of occurrences of each Keyword)
@@ -122,7 +124,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
           
          },
          TI={
-           M=termExtraction(M,Field="TI",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE, ngrams=ngrams)
+           M=termExtraction(M,Field="TI",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms = remove.terms, keep.terms=NULL, verbose=FALSE, ngrams=ngrams)
            
            CW <- cocMatrix(M, Field = "TI_TM", type="matrix", sep=";",binary=binary)
            # Define minimum degree (number of occurrences of each Keyword)
@@ -133,7 +135,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
           
          },
          AB={
-           M=termExtraction(M,Field="AB",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms=NULL, keep.terms=NULL, verbose=FALSE, ngrams=ngrams)
+           M=termExtraction(M,Field="AB",remove.numbers=TRUE, stemming=stemming, language="english", remove.terms = remove.terms, keep.terms=NULL, verbose=FALSE, ngrams=ngrams)
            
            CW <- cocMatrix(M, Field = "AB_TM", type="matrix", sep=";",binary=binary)
            # Define minimum degree (number of occurrences of each Keyword)

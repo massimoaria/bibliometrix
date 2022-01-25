@@ -10,7 +10,8 @@ KeywordGrowth(
   sep = ";",
   top = 10,
   cdf = TRUE,
-  remove.terms = NULL
+  remove.terms = NULL,
+  synonyms = NULL
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ standard ISI WoS Field Tag codify (ID or DE) or a field tag created by \code{\li
 \item{cdf}{is a logical. If TRUE, the function calculates the cumulative occurrences distribution.}
 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
+
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 }
 \value{
 an object of class \code{data.frame}

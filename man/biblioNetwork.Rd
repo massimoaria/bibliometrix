@@ -12,7 +12,8 @@ biblioNetwork(
   sep = ";",
   short = FALSE,
   shortlabel = TRUE,
-  remove.terms = NULL
+  remove.terms = NULL,
+  synonyms = NULL
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ Default is \code{network = "authors"}.}
 \item{shortlabel}{is logical. IF TRUE, reference labels are stored in a short format. Default is \code{shortlabel=TRUE}.}
 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
+
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 }
 \value{
 It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{\link{Matrix}}.

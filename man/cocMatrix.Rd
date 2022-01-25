@@ -12,7 +12,8 @@ cocMatrix(
   sep = ";",
   binary = TRUE,
   short = FALSE,
-  remove.terms = NULL
+  remove.terms = NULL,
+  synonyms = NULL
 )
 }
 \arguments{
@@ -47,6 +48,8 @@ column of the data frame. The default is \code{sep = ";"}.}
 \item{short}{is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.}
 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
+
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 }
 \value{
 a co-occurrence matrix with cases corresponding to manuscripts and variables to the

@@ -36,6 +36,7 @@
 #' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency. 
 #' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
+#' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @return a co-occurrence matrix with cases corresponding to manuscripts and variables to the
 #'   objects extracted from the Tag \code{Field}.
 #'
@@ -63,9 +64,10 @@
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
 #' @export
 
-cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE, short = FALSE, remove.terms = NULL){
+cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE, 
+                    short = FALSE, remove.terms = NULL, synonyms = NULL){
 #
-# The function creates co-occurences data between Works and Field
+# The function creates co-occurrences data between Works and Field
 #
 # type indicates the output format of co-occurrences:
 #   "matrix" argument generates a W x Field sparse matrix
@@ -80,6 +82,17 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
 size<-dim(M)
 
 if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
+
+# Merge synonyms in the vector synonyms
+if (length(synonyms)>0 & class(synonyms)=="character"){
+  s <- strsplit(toupper(synonyms),";")
+  snew <- trimws(unlist(lapply(s,function(l) l[1])))
+  sold <- (lapply(s,function(l) trimws(l[-1])))
+  for (i in 1:length(s)){
+    M[,Field] <-  str_replace_all(M[,Field], paste(sold[[i]], collapse="|",sep=""),snew[i])
+  }
+}
+##
 
 if (Field %in% names(M)){
   Fi<-strsplit(M[,Field],sep)} else{return(print(paste("Field",Field,"is not a column name of input data frame")))}
@@ -183,8 +196,9 @@ if (type=="sparse" & !isTRUE(binary)){
   WF=Matrix(WF)
 }
 
+
   WF=WF[,!is.na(uniqueField)]
-  
+
 return(WF)
 }
 

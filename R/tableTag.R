@@ -11,6 +11,7 @@
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
 #' @param ngrams is an integer between 1 and 3. It indicates the type of n-gram to extract from titles or abstracts. 
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
+#' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @return an object of class \code{table}
 #' @examples
 #'
@@ -19,10 +20,10 @@
 #' Tab[1:10]
 #'
 #' @export
-tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL){
+tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL, synonyms=NULL){
   
   if (Tag %in% c("AB","TI")){
-    M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE, ngrams = ngrams, remove.terms=remove.terms)
+    M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE, ngrams = ngrams, remove.terms=remove.terms, synonyms=synonyms)
     i=which(names(M)==paste(Tag,"_TM",sep=""))
   }else{i<-which(names(M)==Tag)}
   
@@ -37,13 +38,23 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL){
   Tab<-trimws(trimES(gsub("\\.|\\,"," ",Tab)))
   ####
   Tab<-Tab[Tab!=""]
+  
+  # Merge synonyms in the vector synonyms
+  if (length(synonyms)>0 & class(synonyms)=="character"){
+    s <- strsplit(toupper(synonyms),";")
+    snew <- trimws(unlist(lapply(s,function(l) l[1])))
+    sold <- (lapply(s,function(l) trimws(l[-1])))
+    for (i in 1:length(s)){
+      Tab <-  str_replace_all(Tab, paste(sold[[i]], collapse="|",sep=""),snew[i])
+    }
+  }
+  
   Tab<-sort(table(Tab),decreasing=TRUE)
   # remove terms from ID and DE
   if ((Tag %in% c("DE","ID")) & (!is.null(remove.terms))){
     term <- setdiff(names(Tab),toupper(remove.terms))
     Tab <- Tab[term]
   }
-  
   
   return(Tab)
 }

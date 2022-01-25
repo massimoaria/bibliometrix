@@ -10,6 +10,7 @@
 #' @param top is a numeric. It indicates the number of top keywords to analyze. The default value is 10.
 #' @param cdf is a logical. If TRUE, the function calculates the cumulative occurrences distribution. 
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
+#' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @return an object of class \code{data.frame}
 #' @examples
 #'
@@ -27,7 +28,7 @@
 #' }
 #'
 #' @export
-KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE, remove.terms=NULL){
+KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE, remove.terms=NULL, synonyms=NULL){
   i<-which(names(M)==Tag)
   PY=as.numeric(M$PY)
   Tab<-(strsplit(as.character(M[,i]),sep))
@@ -36,10 +37,26 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE, remove.ter
   A$Tab=trim.leading(A$Tab)
   A=A[A$Tab!="",]
   A=A[!is.na(A$Y),]
-  ## remove terms
+  
+  ### remove terms
   terms <- data.frame(Tab=toupper(remove.terms))
   A <- anti_join(A,terms)
-  ##
+  # end of block
+  
+  ### Merge synonyms in the vector synonyms
+  if (length(synonyms)>0 & class(synonyms)=="character"){
+    s <- strsplit(toupper(synonyms),";")
+    snew <- trimws(unlist(lapply(s,function(l) l[1])))
+    sold <- (lapply(s,function(l) trimws(l[-1])))
+    for (i in 1:length(s)){
+      A <- A %>% 
+        mutate(
+          Tab = str_replace_all(Tab, paste(sold[[i]], collapse="|",sep=""),snew[i])
+        )
+    }
+  }
+  # end of block
+  
   Ymin=min(A$Y)
   Ymax=max(A$Y)
   Year=Ymin:Ymax

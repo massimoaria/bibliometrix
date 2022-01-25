@@ -12,6 +12,7 @@ fieldByYear(
   n.items = 5,
   labelsize = NULL,
   remove.terms = NULL,
+  synonyms = NULL,
   dynamic.plot = FALSE,
   graph = TRUE
 )
@@ -31,6 +32,8 @@ standard ISI WoS Field Tag codify.}
 \item{labelsize}{is deprecated argument. It will be removed in the next update.}
 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
+
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 
 \item{dynamic.plot}{is a logical. If TRUE plot aesthetics are optimized for plotly package.}
 

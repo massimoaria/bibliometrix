@@ -4,7 +4,14 @@
 \alias{tableTag}
 \title{Tabulate elements from a Tag Field column}
 \usage{
-tableTag(M, Tag = "CR", sep = ";", ngrams = 1, remove.terms = NULL)
+tableTag(
+  M,
+  Tag = "CR",
+  sep = ";",
+  ngrams = 1,
+  remove.terms = NULL,
+  synonyms = NULL
+)
 }
 \arguments{
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
@@ -18,6 +25,8 @@ standard ISI WoS Field Tag codify.}
 \item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from titles or abstracts.}
 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
+
+\item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 }
 \value{
 an object of class \code{table}

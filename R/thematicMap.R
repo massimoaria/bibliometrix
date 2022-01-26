@@ -23,6 +23,7 @@
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
+#' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
@@ -44,28 +45,28 @@
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL, synonyms=NULL){
   
   minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
   switch(field,
          ID={
-           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms)
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
            TERMS=tolower(M$ID)
          },
          DE={
-           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms)
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
            TERMS=tolower(M$DE)
          },
          TI={
            #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
-           M=termExtraction(M,Field="TI", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms)
+           M=termExtraction(M,Field="TI", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms, synonyms = synonyms)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
            
          },
          AB={
            #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
-           M=termExtraction(M,Field="AB", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms)
+           M=termExtraction(M,Field="AB", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms, synonyms = synonyms)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
            
          })

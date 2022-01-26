@@ -3067,6 +3067,15 @@ server <- function(input, output, session) {
     }
   })
   
+  output$COCSynPreview <-  renderUI({
+    
+    if (!is.null(values$COCsyn.terms) | exists("values$COCsyn.terms")){
+      strSynPreview(values$COCsyn.terms)  
+    }else{
+      strSynPreview(" ")
+    }
+  })
+  
   # output$cocPlotComm <- renderVisNetwork({  
   #   
   #   g <- splitCommunities(values$cocnet$graph, n=NULL)
@@ -3142,6 +3151,15 @@ server <- function(input, output, session) {
       strPreview(values$CSremove.terms)  
     }else{
       strPreview(" ")
+    }
+  })
+  
+  output$FASynPreview <-  renderUI({
+    
+    if (!is.null(values$FAsyn.terms) | exists("values$FAsyn.terms")){
+      strSynPreview(values$FAsyn.terms)  
+    }else{
+      strSynPreview(" ")
     }
   })
   
@@ -3326,11 +3344,17 @@ server <- function(input, output, session) {
     }else{remove.terms <- NULL}
     values$TMremove.terms <- remove.terms
     ### end of block
+    ### load file with synonyms
+    if (input$TMapSynFile=="Y"){
+      synonyms <- trimws(readSynWordsFile(file=input$TMapSyn, sep=input$TMapSynSep))
+    }else{synonyms <- NULL}
+    values$TMapsyn.terms <- synonyms
+    ### end of block
     
     values$TM <- thematicMap(values$M, field=input$TMfield, 
                              n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
                              stemming=input$TMstemming, size=input$sizeTM, 
-                             n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms)
+                             n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms)
     
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -3359,6 +3383,15 @@ server <- function(input, output, session) {
       strPreview(values$TMremove.terms)  
     }else{
       strPreview(" ")
+    }
+  })
+  
+  output$TMapSynPreview <-  renderUI({
+
+    if (!is.null(values$TMapsyn.terms) | exists("values$TMapsyn.terms")){
+      strSynPreview(values$TMapsyn.terms)
+    }else{
+      strSynPreview(" ")
     }
   })
   
@@ -3459,6 +3492,12 @@ server <- function(input, output, session) {
     }else{remove.terms <- NULL}
     values$TEremove.terms <- remove.terms
     ### end of block
+    ### load file with synonyms
+    if (input$TESynFile=="Y"){
+      synonyms <- trimws(readSynWordsFile(file=input$TESyn, sep=input$TESynSep))
+    }else{synonyms <- NULL}
+    values$TEsyn.terms <- synonyms
+    ### end of block
     
     values$yearSlices <- as.numeric()
     for (i in 1:as.integer(input$numSlices)){
@@ -3467,7 +3506,7 @@ server <- function(input, output, session) {
     
     if (length(values$yearSlices)>0){
       values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, 
-                                        n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams, remove.terms = remove.terms)
+                                        n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
       
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -3489,6 +3528,15 @@ server <- function(input, output, session) {
       strPreview(values$TEremove.terms)  
     }else{
       strPreview(" ")
+    }
+  })
+  
+  output$TESynPreview <-  renderUI({
+    
+    if (!is.null(values$TEsyn.terms) | exists("values$TEsyn.terms")){
+      strSynPreview(values$TEsyn.terms)  
+    }else{
+      strSynPreview(" ")
     }
   })
   
@@ -4634,6 +4682,12 @@ server <- function(input, output, session) {
       }else{remove.terms <- NULL}
       values$CSremove.terms <- remove.terms
       ### end of block
+      ### load file with synonyms
+      if (input$FASynFile=="Y"){
+        synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
+      }else{synonyms <- NULL}
+      values$FAsyn.terms <- synonyms
+      ### end of block
       
       tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
       if (length(tab>=2)){
@@ -4642,7 +4696,7 @@ server <- function(input, output, session) {
         
         values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
                                          k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
-                                         remove.terms=remove.terms)
+                                         remove.terms=remove.terms, synonyms = synonyms)
         
         
       }else{emptyPlot("Selected field is not included in your data collection")
@@ -4704,6 +4758,12 @@ server <- function(input, output, session) {
     }else{remove.terms <- NULL}
     values$COCremove.terms <- remove.terms
     ### end of block
+    ### load file with synonyms
+    if (input$COCSynFile=="Y"){
+      synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
+    }else{synonyms <- NULL}
+    values$COCsyn.terms <- synonyms
+    ### end of block
     
     if ((input$field %in% names(values$M))){
       
@@ -4714,23 +4774,23 @@ server <- function(input, output, session) {
         
         switch(input$field,
                ID={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms)
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
                  values$Title= "Keywords Plus Network"
                },
                DE={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms)
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
                  values$Title= "Authors' Keywords network"
                },
                TI={
                  #if(!("TI_TM" %in% names(values$M))){
-                   values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms)
+                   values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
                    #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
                  values$Title= "Title Words network"
                },
                AB={
                  #if(!("AB_TM" %in% names(values$M))){
-                   values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms)
+                   values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
                  #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                  values$Title= "Abstract Words network"

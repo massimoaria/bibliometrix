@@ -1592,7 +1592,7 @@ navbarMenu("Documents",
                                    conditionalPanel(condition = "input.MRWSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("MRWSyn", "",
                                                               multiple = FALSE,
@@ -1704,7 +1704,7 @@ navbarMenu("Documents",
                                    conditionalPanel(condition = "input.WCSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("WCSyn", "",
                                                               multiple = FALSE,
@@ -1842,7 +1842,7 @@ navbarMenu("Documents",
                                    conditionalPanel(condition = "input.TreeMapSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("TreeMapSyn", "",
                                                               multiple = FALSE,
@@ -1936,7 +1936,7 @@ navbarMenu("Documents",
                                    conditionalPanel(condition = "input.WDSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("WDSyn", "",
                                                               multiple = FALSE,
@@ -2051,7 +2051,7 @@ navbarMenu("Documents",
                                    conditionalPanel(condition = "input.TTSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("TTSyn", "",
                                                               multiple = FALSE,
@@ -2306,7 +2306,7 @@ navbarMenu("Conceptual Structure",
                                    conditionalPanel(condition = "input.COCSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("COCSyn", "",
                                                               multiple = FALSE,
@@ -2572,7 +2572,7 @@ navbarMenu("Conceptual Structure",
                                    conditionalPanel(condition = "input.TMapSynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("TMapSyn", "",
                                                               multiple = FALSE,
@@ -2711,7 +2711,7 @@ navbarMenu("Conceptual Structure",
                                    conditionalPanel(condition = "input.TESynFile == 'Y'",
                                                     helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                              h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                                     ),
                                                     fileInput("TESyn", "",
                                                               multiple = FALSE,
@@ -2928,7 +2928,7 @@ navbarMenu("Conceptual Structure",
                         conditionalPanel(condition = "input.FASynFile == 'Y'",
                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\n)."))
+                              Rows have to be separated by return separator (\\n)."))
                                          ),
                                          fileInput("FASyn", "",
                                                    multiple = FALSE,

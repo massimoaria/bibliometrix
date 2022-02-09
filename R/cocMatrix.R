@@ -198,8 +198,8 @@ if (type=="sparse" & !isTRUE(binary)){
 
 
   WF <- WF[,!is.na(uniqueField)]
-  ind <- which(colnames(WF)!="NA")
-  if (length(ind)>0 & ncol(WF)>0) WF <- WF[,ind]
+  ind <- which(colnames(WF)=="NA")
+  if (length(ind)>0) {WF <- WF[,-ind]}
 
 return(WF)
 }

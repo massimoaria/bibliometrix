@@ -193,11 +193,12 @@ rownames(WF)<-rownames(M)
   }
 
 if (type=="sparse" & !isTRUE(binary)){
-  WF=Matrix(WF)
+  WF <- Matrix(WF)
 }
 
 
-  WF=WF[,!is.na(uniqueField)]
+  WF <- WF[,!is.na(uniqueField)]
+  WF <- WF[,colnames(WF)!="NA"]
 
 return(WF)
 }

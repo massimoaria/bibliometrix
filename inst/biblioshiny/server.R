@@ -766,6 +766,7 @@ server <- function(input, output, session) {
     
     if ("LA" %in% names(values$Morig)){
     LA <- sort(unique(values$Morig$LA))} else {
+      values$Morig$LA <- "N.A."
       LA <- "N.A."
     }
     selectInput("selectLA", "Language", 

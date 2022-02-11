@@ -2428,7 +2428,7 @@ server <- function(input, output, session) {
     xx=xx[1:k,]
     switch(input$MostRelWords,
            ID={lab="Keywords Plus"},
-           DE={lab="Auhtor's Keywords"},
+           DE={lab="Author's Keywords"},
            TI={lab="Title's Words"},
            AB={lab="Abstract's Words"})
     

@@ -5,7 +5,8 @@ if (!(require(rio))){install.packages("rio")}
 if (!(require(DT))){install.packages("DT")} 
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
-if (!(require(shinythemes))){install.packages("shinythemes")} 
+#if (!(require(shinythemes))){install.packages("shinythemes")}
+if (!(require(bslib))){install.packages("bslib")}
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
 #if (!require(colourpicker)){install.packages("colourpicker")}
 #if (!require(treemap)){install.packages("treemap")}
@@ -23,7 +24,8 @@ options(spinner.size=1, spinner.type=5)
 if (exists("M")) rm(M, envir = .GlobalEnv)  # remove an existing M object
 
 ui <-  navbarPage("",
-                  theme=shinythemes::shinytheme("flatly"),
+                  #theme=shinythemes::shinytheme("flatly"),
+                  theme = bs_theme(bootswatch = "flatly"),
                   
 ### WELCOME PAGE ----
                   tabPanel("Biblioshiny for bibliometrix",

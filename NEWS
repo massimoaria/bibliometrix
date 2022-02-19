@@ -1,3 +1,9 @@
+bibliometrix v3.2.1 (Release date: 2022-02-21)
+
+Changes:
+* shinythemes is no longer supported. It has been replaced by new bslib package
+
+
 bibliometrix v3.2 (Release date: 2022-02-10)
 
 Features:
@@ -5,7 +11,7 @@ Features:
 * Added the new package logo in all plots
 
 Changes:
-* Improvements of scopus CSV file importing fucntion
+* Improvements of scopus CSV file importing function
 * Solved encoding issues about non UTF-8 character sets for bibtex files.
 
 

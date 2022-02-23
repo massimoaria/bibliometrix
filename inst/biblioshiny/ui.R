@@ -5,27 +5,63 @@ if (!(require(rio))){install.packages("rio")}
 if (!(require(DT))){install.packages("DT")} 
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
-#if (!(require(shinythemes))){install.packages("shinythemes")}
 if (!(require(bslib))){install.packages("bslib")}
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
-#if (!require(colourpicker)){install.packages("colourpicker")}
-#if (!require(treemap)){install.packages("treemap")}
 if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
 if (!require(maps)){install.packages("maps"); require(maps, quietly=TRUE)}
 if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
 if (!require(plotly)){install.packages("plotly"); require(plotly, quietly=TRUE)}
+if (!require(thematic)){install.packages("thematic"); require(thematic, quietly=TRUE)}
 require(Matrix, quietly = TRUE)
 require(dimensionsR, quietly = TRUE)
 require(pubmedR, quietly = TRUE)
+#base_font = bslib::font_google("San Serif")
+thematic_shiny()
 
 # Main NavBar ----
 options(spinner.size=1, spinner.type=5)
+# theme argument
+theme.type = tryCatch({
+  getShinyOption("theme.type", theme.type.default)
+}, error = function(e){
+  "yeti"
+}, finally = function(f){
+  getShinyOption("theme.type", theme.type.default)
+})
+
+# font type argument
+font.type = tryCatch({
+  getShinyOption("font.type", font.type.default)
+}, error = function(e){
+  "Jost"
+}, finally = function(f){
+  getShinyOption("font.type", font.type.default)
+})
+#font size argument
+font.size = tryCatch({
+  getShinyOption("font.size", font.size.default)
+}, error = function(e){
+  1.05
+}, finally = function(f){
+  getShinyOption("font.size", font.size.default)
+})
+
+customTheme <- function(theme.type = "yeti", font.type, font.size){
+  theme = bs_theme(version = 5, 
+                   bootswatch = theme.type,
+                   base_font = font_google(font.type),
+                   "font-size-base" = paste(font.size,"rem",sep=""), "enable-rounded" = TRUE)
+  return(theme)
+}
 
 if (exists("M")) rm(M, envir = .GlobalEnv)  # remove an existing M object
 
 ui <-  navbarPage("",
-                  #theme=shinythemes::shinytheme("flatly"),
-                  theme = bs_theme(bootswatch = "flatly"),
+                  theme = customTheme(theme.type = theme.type, font.type = font.type, font.size = font.size),
+                  # theme = bs_theme(version = 5, 
+                  #                  bootswatch = "flatly",
+                  #                  base_font = font_google(font.type),
+                  #                  "font-size-base" = paste(font.size,"rem",sep=""), "enable-rounded" = FALSE),
                   
 ### WELCOME PAGE ----
                   tabPanel("Biblioshiny for bibliometrix",
@@ -44,6 +80,7 @@ ui <-  navbarPage("",
                               }"
                              ),
                            # end of code
+                           
                            fluidRow(
                              column(9,
                                     wellPanel(
@@ -96,10 +133,10 @@ ui <-  navbarPage("",
 ),
 
 ### Loading page ----
-### DATASET MENU ----
+### DATA MENU ----
 navbarMenu("Data",
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            ### Import or Load files ####
            tabPanel("Import or Load files",
                     sidebarLayout(
@@ -206,7 +243,8 @@ navbarMenu("Data",
                                   }
                                   "
                           )
-                        )),
+                        )
+                        ),
                         tags$style(
                           HTML(
                             ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
@@ -341,10 +379,10 @@ navbarMenu("Data",
            ),
 
 
-### DATASET MENU ----
+### OVERVIEW MENU ----
 navbarMenu("Overview",
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            tabPanel("Main Information",
                     sidebarLayout(
                       sidebarPanel(width=3,
@@ -514,8 +552,8 @@ navbarMenu("Overview",
 
 ### SOURCES MENU ----
 navbarMenu("Sources",
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            #### MOST RELEVANT SOURCES ----
            tabPanel("Most Relevant Sources",
                     sidebarLayout(
@@ -789,8 +827,8 @@ navbarMenu("Sources",
 ),
 ### AUTHORS MENU ----
 navbarMenu("Authors",
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            ### MOST RELEVANT AUTHORS ----
            "Authors",
            tabPanel("Most Relevant Authors",
@@ -1283,8 +1321,8 @@ navbarMenu("Authors",
 ),
 ### DOCS MENU ----           
 navbarMenu("Documents",
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            "Documents",
            ### CITED DOCS ----
            tabPanel("Most Global Cited Documents",
@@ -2128,8 +2166,8 @@ navbarMenu("Documents",
 navbarMenu("Clustering ",
            
            #### Coupling ----
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            tabPanel("Clustering by Coupling",
                     sidebarLayout(
                       sidebarPanel(width=3,
@@ -2250,8 +2288,8 @@ navbarMenu("Clustering ",
 navbarMenu("Conceptual Structure",
            
            #### Co-occurrence Network ----
-           "  ",
-           "  ",
+           # "  ",
+           # "  ",
            "Network Approach",
            tabPanel("Co-occurrence Network",
                     
@@ -3616,9 +3654,63 @@ navbarMenu("Social Structure",
 #                     includeHTML("bibliometrix-vignette.html"))
 #            ),
 
-### Quit button ----
-navbarMenu("Quit",
-           tabPanel(actionLink("stop_radiant", "Stop", icon = icon("power-off"), 
+### Options button ----
+navbarMenu("Options",
+           tabPanel("Preferences",
+                    actionButton("applyOptions", "Apply!"),
+                    hr(),
+                    #uiOutput("theme"),
+                    selectInput("theme", "Theme",
+                                choices = c(
+                                  "Cerulean" = "cerulean",
+                                  "Cosmo" = "cosmo",
+                                  "Flatly" = "flatly",
+                                  "Journal" = "journal",
+                                  "Litera" = "litera",
+                                  "Lumen" = "lumen",
+                                  "Lux" = "lux",
+                                  "Materia" = "materia",
+                                  "Minty" = "minty",
+                                  "Morph" = "morph",
+                                  "Pulse" = "pulse",
+                                  #"Quartz" = "quartz",
+                                  "Sandstone" = "sandstone",
+                                  "Simplex" = "simplex",
+                                  "Sketchy" = "sketchy",
+                                  #"Slate" = "slate",
+                                  "Solar" = "solar",
+                                  "Spacelab" = "spacelab",
+                                  #"Superhero" = "superhero",
+                                  "United" = "united",
+                                  "Vapor" = "vapor",
+                                  "Yeti (Default)" ="yeti",
+                                  "Zephyr" = "zephyr"),
+                                #selected = "flatly"
+                                selected = theme.type
+                    ),
+                    hr(),
+                    selectInput("font_type", "Font type",
+                                choices = c(
+                                  "Jost (Default)" = "Jost",
+                                  "Cairo" = "Cairo",
+                                  "Gideon Roman" = "Gideon Roman",
+                                  "Lato" = "Lato",
+                                  "Redressed" = "Redressed",
+                                  "Roboto" = "Roboto",
+                                  "Secular One" = "Secular One",
+                                  "Ubuntu" = "Ubuntu"),
+                                selected = "Jost"
+                                ),
+                    hr(),
+                    numericInput("font_size", "Font Size",
+                                 value = 1,
+                                 min = 0.2,
+                                 max = 2,
+                                 step = 0.1)
+                    
+                    ),
+           tabPanel(
+             actionLink("stop_radiant", "Stop", icon = icon("power-off"), 
                                onclick = "setTimeout(function(){window.close();}, 100); ")
            )
 

@@ -47,8 +47,35 @@ server <- function(input, output, session) {
   values$ApiOk <- 0
   
   
+# Theme Selector ----
+  customTheme <- function(theme.type = "flatly", font.type, font.size){
+    theme = bs_theme(version = 5, 
+                     bootswatch = theme.type,
+                     base_font = font_google(font.type),
+                     "font-size-base" = paste(font.size,"rem",sep=""), "enable-rounded" = FALSE)
+    return(theme)
+  }
   
+  # output$theme <- renderUI({
+  #   
+  #   theme_sel <- session$getCurrentTheme()
+  #   themes  <- bslib::bootswatch_themes(version = 5, full_path = FALSE)
+  #   selectInput("theme", "Theme ", 
+  #               choices = themes,
+  #               selected = theme_sel,
+  #               multiple =FALSE)
+  # })
   
+  ## Theme and Font
+  # observe(session$setCurrentTheme(
+  #     theme = customTheme(theme.type = input$theme, font.type = input$font_type, font.size = input$font_size)
+  #   )
+  # )
+  
+  observeEvent(input$applyOptions, {session$setCurrentTheme(
+    theme = customTheme(theme.type = input$theme, font.type = input$font_type, font.size = input$font_size)
+  )}
+  )
   
 # LOAD MENU ----
 
@@ -4492,7 +4519,7 @@ server <- function(input, output, session) {
     xx <- xx[1:k,c(1,m)]
     
     
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = paste("Impact Measure:",toupper(measure)), title = paste(title,"by",toupper(measure),"index"))
+    g <- freqPlot(xx,x=2,y=1, textLaby = xn, textLabx = paste("Impact Measure:",toupper(measure)), title = paste(title,"by",toupper(measure),"index"))
     
     res<-list(values=values,g=g)
     return(res)

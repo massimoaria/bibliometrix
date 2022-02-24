@@ -389,7 +389,13 @@ navbarMenu("Overview",
                                    h3(em(strong("Main Information about the collection "))),
                                    br()),
                       mainPanel(
-                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 500))
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 500))
+                                    ),
+                                    tabPanel("Radar Plot",
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "RadarPlot", height = "80vh")) #height = 700))
+                                    ))
                     )
            )),
            tabPanel("Annual Scientific Production",

@@ -881,7 +881,7 @@ server <- function(input, output, session) {
   
   
 
-# DATASET MENU ----
+# OVERVIEW MENU ----
 ## Main Info ----  
   output$MainInfo <- DT::renderDT({
     res <- descriptive(values,type="tab1")
@@ -915,6 +915,46 @@ server <- function(input, output, session) {
       formatStyle(names(TAB)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
 
+  output$RadarPlot <- renderPlotly({
+    #print(values$radar)
+    D <- as.numeric(values$radar[1,])*100
+    label <-  paste(c('Authors per Document','Document Age (in Year)','International Collaboration', 'Document Citations', 'Top Source Coverage'), 
+                    " ",round(as.numeric(values$radar[2,]),1), " (",round(D,1),"%)", sep="")
+    
+    
+    fig <- plot_ly(
+      type = 'scatterpolar',
+      mode = 'markers',
+      r = D,
+      theta = c('Authors per Document','Document Age','International Collaboration', 'Document Citations', 'Top Source Coverage'),
+      fill = 'toself',
+      hoverinfo = 'text',
+      text =label
+    ) %>% 
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             ))
+    fig <- fig %>%
+      layout(
+        polar = list(
+          radialaxis = list(
+            visible = T,
+            range = c(0,100)
+          )
+        ),
+        showlegend = F
+      )
+    
+    fig
+  })
+  
 ## Annual Production ----
   output$CAGR <- renderText({
     Y=table(values$M$PY)
@@ -4531,6 +4571,23 @@ server <- function(input, output, session) {
     if (values$S[[1]][1]=="NA"){
       values$S=summary(values$results,k=Inf,verbose=FALSE)}
     
+   ### radar info
+   perc=0.90
+   radar <- data.frame(nAU=c(NA,NA), Age=c(NA,NA), IntColl=c(NA,NA), Cit=c(NA,NA), So=c(NA,NA))
+   radar$nAU[1] <- min(1,mean(values$results$nAUperPaper, na.rm=TRUE)/quantile(values$results$nAUperPaper,perc, na.rm=TRUE))
+   radar$nAU[2] <- mean(values$results$nAUperPaper, na.rm=TRUE) 
+   Age <- as.numeric(substr(Sys.time(),1,4))-values$results$Years+1
+   radar$Age[2] <- mean(Age, na.rm=TRUE)
+   radar$Age[1] <- min(1,radar$Age[2]/quantile(Age,perc, na.rm=TRUE))
+   radar$IntColl[2] <- sum(values$results$CountryCollaboration$MCP)
+   radar$IntColl[1] <- radar$IntColl[2]/values$results$Articles
+   radar$Cit[2] <- mean(values$M$TC, na.rm=TRUE)
+   radar$Cit[1] <- min(1,radar$Cit[2]/quantile(values$M$TC, perc, na.rm=TRUE))
+   radar$So[1] <- values$results$Sources[1]/values$results$Articles
+   radar$So[2] <- values$results$Sources[1]
+   values$radar <- radar
+   #  ### 
+   
     switch(type,
            "tab1"={
              #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))

@@ -64,21 +64,25 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
     theme(legend.position = 'right'
           #,aspect.ratio = 1
           ,text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = 'gray97')
-          ,panel.grid.minor = element_line(color = '#FFFFFF')
-          ,panel.grid.major = element_line(color = '#FFFFFF')
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          #,panel.grid.minor = element_line(color = 'grey95')
+          #,panel.grid.major = element_line(color = 'grey95')
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
-          ,axis.title.y = element_text(vjust = 1, angle = 90, face="bold")
-          ,axis.title.x = element_text(hjust = .95,face="bold")
+          ,axis.title.y = element_text(vjust = 1, angle = 90)#, face="bold")
+          ,axis.title.x = element_text(hjust = .95)#,face="bold")
           ,axis.text.x = element_text(face="bold", angle = 90)
           ,axis.text.y = element_text(face="bold")
+          #,axis.line.x = element_line(color="black", size=1)
+          ,axis.line.x = element_line(color="grey50", size=0.5)
+          ,panel.grid.major.x = element_blank() 
+          ,panel.grid.major.y = element_line( size=.2, color="grey90" ) 
     )+
     #coord_fixed(ratio = 2/1) +
     labs(title="Top-Authors' Production over Time", 
          x="Author",
          y="Year")+
-    geom_line(data=df2,aes(x = .data$Author, y = .data$year, group=.data$Author),size=1.0, color="firebrick", alpha=0.3 )+
+    geom_line(data=df2,aes(x = .data$Author, y = .data$year, group=.data$Author),size=1.0, color="firebrick4", alpha=0.3 )+
     scale_x_discrete(limits = rev(levels(df2$Author)))+
     coord_flip() +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 

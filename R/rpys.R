@@ -107,16 +107,20 @@ if (length(timespan)==2){
 df=data.frame(X=X,Y=Y,diffMedian=diffMedian,stringsAsFactors = FALSE)
 RPYS=data.frame(Year=names(Y),Citations=Y,diffMedian5=diffMedian)
 
+df$diffMedian[df$diffMedian<0] <- 0
+
 data("logo",envir=environment())
 logo <- grid::rasterGrob(logo,interpolate = TRUE)
 
 x <- c(min(df$X),min(df$X)+diff(range(df$X))*0.125)+1
 y <- c(min(c(df$Y,df$diffMedian)),min(c(df$Y,df$diffMedian))+diff(range(c(df$Y,df$diffMedian)))*0.125)*1.05
 
+
+
 g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of References: ",.data$Y)))+
   geom_line(aes(group="NA")) +
-  geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
-  geom_hline(aes(yintercept=0, color = 'grey'))+
+  geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
+  #geom_hline(aes(yintercept=0, color = 'grey'))+
   geom_line(aes(x=.data$X,y=.data$diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'
        , y = 'Cited References'
@@ -126,14 +130,16 @@ g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of Refere
   theme(text = element_text(color = "#444444"), legend.position="none"
         ,plot.caption = element_text(size = 9, hjust = 0.5,
                                      color = "black", face = "bold")
-        ,panel.background = element_rect(fill = '#EFEFEF')
-        ,panel.grid.minor = element_line(color = '#FFFFFF')
-        ,panel.grid.major = element_line(color = '#FFFFFF')
+        ,panel.background = element_rect(fill = '#FFFFFF')
+        #,panel.grid.minor = element_line(color = '#FFFFFF')
+        ,panel.grid.major = element_line(color = '#EFEFEF')
         ,plot.title = element_text(size = 24)
         ,axis.title = element_text(size = 14, color = '#555555')
         ,axis.title.y = element_text(vjust = 1, angle = 90)
         ,axis.title.x = element_text(hjust = 0.95, angle = 0)
         ,axis.text.x = element_text(size=8,angle = 90)
+        ,axis.line.x = element_line(color="black", size=0.5)
+        ,axis.line.y = element_line(color="black", size=0.5)
   ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
 if (isTRUE(graph)){plot(g)}

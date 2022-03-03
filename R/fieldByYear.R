@@ -91,15 +91,16 @@ fieldByYear <- function(M,
     theme(legend.position = 'right'
           #,aspect.ratio = 1
           ,text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = 'gray98')
-          ,panel.grid.minor = element_line(color = '#FFFFFF')
-          ,panel.grid.major = element_line(color = '#FFFFFF')
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.major.x = element_blank()
+          ,panel.grid.major.y = element_line(color = 'grey95')
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 90, face="bold")
-          ,axis.title.x = element_text(hjust = .95,face="bold")
+          ,axis.title.x = element_text(hjust = .95)
           ,axis.text.x = element_text(face="bold", angle = 90)#, size=labelsize)
-          ,axis.text.y = element_text(face="bold")
+          ,axis.text.y = element_text(face="bold",)
+          ,axis.line.x = element_line(color="black", size=0.5)
     ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
  
    if (!isTRUE(dynamic.plot)){

@@ -8,7 +8,10 @@ biblioshiny(
   host = "127.0.0.1",
   port = NULL,
   launch.browser = TRUE,
-  maxUploadSize = 200
+  maxUploadSize = 200,
+  theme.type = "yeti",
+  font.type = "Jost",
+  font.size = 1.05
 )
 }
 \arguments{
@@ -24,6 +27,12 @@ after the app is started. Defaults to true in interactive sessions only. This va
 this parameter can also be a function to call with the application's URL.}
 
 \item{maxUploadSize}{is a integer. The max upload file size argument. Default value is 200 (megabyte)}
+
+\item{theme.type}{is a character. The argument indicates one of the bootstrap 5 themes included in bslib package.}
+
+\item{font.type}{is a character. The argument indicates one of the Google fonts you can use in Biblioshiny.}
+
+\item{font.size}{is a numeric. The argument indicates the font size. Default value is 1.}
 }
 \description{
 \code{biblioshiny} performs science mapping analysis using the main functions of the bibliometrix package.

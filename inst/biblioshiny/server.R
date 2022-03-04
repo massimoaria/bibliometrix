@@ -1,8 +1,6 @@
-# Biblioshiny Server ----
-server <- function(input, output, session) {
- 
-# Server settings ---- 
-  ## stop the R session
+#### SERVER ####
+
+server <- function(input, output,session){
   session$onSessionEnded(stopApp)
   ##
   
@@ -16,7 +14,7 @@ server <- function(input, output, session) {
   #options(shiny.maxRequestSize=200*1024^2)
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
   
-  ### initial values 
+  ## initial values
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
   values$logo <- logo
@@ -46,40 +44,7 @@ server <- function(input, output, session) {
   values$pmSample <- 0
   values$ApiOk <- 0
   
-  
-# Theme Selector ----
-  customTheme <- function(theme.type = "flatly", font.type, font.size){
-    theme = bs_theme(version = 5, 
-                     bootswatch = theme.type,
-                     base_font = font_google(font.type),
-                     "font-size-base" = paste(font.size,"rem",sep=""), "enable-rounded" = FALSE)
-    return(theme)
-  }
-  
-  # output$theme <- renderUI({
-  #   
-  #   theme_sel <- session$getCurrentTheme()
-  #   themes  <- bslib::bootswatch_themes(version = 5, full_path = FALSE)
-  #   selectInput("theme", "Theme ", 
-  #               choices = themes,
-  #               selected = theme_sel,
-  #               multiple =FALSE)
-  # })
-  
-  ## Theme and Font
-  # observe(session$setCurrentTheme(
-  #     theme = customTheme(theme.type = input$theme, font.type = input$font_type, font.size = input$font_size)
-  #   )
-  # )
-  
-  observeEvent(input$applyOptions, {session$setCurrentTheme(
-    theme = customTheme(theme.type = input$theme, font.type = input$font_type, font.size = input$font_size)
-  )}
-  )
-  
-# LOAD MENU ----
-
-## format identification function ----
+  ## LOAD MENU --
   format <- function(obj){
     ext<- sub('.*\\.', '', obj[1])
     switch(ext,
@@ -98,11 +63,11 @@ server <- function(input, output, session) {
            xlsx={
              format <- "excel"
            }
-           )
+    )
     return(format)
   }
   
-## smart_load function ----
+  ## smart_load function ----
   smart_load <- function(file){
     var <- load(file)
     n <- length(var)
@@ -120,8 +85,6 @@ server <- function(input, output, session) {
       stop("Please make sure your RData/Rda file contains a bibliometrixDB object (M).")
     }
   }
-
-## loading function ----
   
   DATAloading<- eventReactive(input$applyLoad,{
     # input$file1 will be NULL initially. After the user selects
@@ -131,7 +94,6 @@ server <- function(input, output, session) {
     # be found.
     if (input$load=="demo"){
       data(management, package="bibliometrixData")
-
       values = initial(values)
       values$M <- management
       values$Morig = management
@@ -354,7 +316,6 @@ server <- function(input, output, session) {
     
   })
   output$contents <- DT::renderDT({
-    
     DATAloading()   
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
@@ -371,7 +332,7 @@ server <- function(input, output, session) {
     MData = MData[nome]
     DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
                   options = list(
-                    pageLength = 50,
+                    pageLength = 10,
                     dom = 'Bfrtip',
                     buttons = list(list(extend = 'pageLength'),
                                    list(extend = 'print')),
@@ -391,7 +352,7 @@ server <- function(input, output, session) {
       ) 
   })
   
-## export functions ----
+  ## export functions ----
   output$collection.save <- downloadHandler(
     filename = function() {
       
@@ -436,10 +397,6 @@ server <- function(input, output, session) {
               value=log)
   })
   
-## API MENU ----
-### API MENU: Dimensions ----
-  
-  ### Dimensions modal 
   dsModal <- function(failed = FALSE) {
     modalDialog(
       title = "Dimensions API",
@@ -579,7 +536,7 @@ server <- function(input, output, session) {
                 max = values$dsSample, value = values$dsSample, step = 1)
   })
   
-### API MENU: PubMed ----
+  ### API MENU: PubMed ----
   ### PubMed modal 
   pmModal <- function(failed = FALSE) {
     modalDialog(
@@ -666,7 +623,7 @@ server <- function(input, output, session) {
     sliderInput("pmSliderLimit", "Total document to download", min = 1,
                 max = values$pmSample, value = values$pmSample, step = 1)
   })
-### API MENU: Content Download ----
+  ### API MENU: Content Download ----
   APIDOWNLOAD <- eventReactive(input$apiApply,{
     values = initial(values)
     values$M <- data.frame(Message="Waiting for data")
@@ -727,7 +684,7 @@ server <- function(input, output, session) {
     
   })
   
-### function returns a formatted data.frame ----
+  ### function returns a formatted data.frame ----
   contentTable <- function(values){
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
@@ -744,7 +701,7 @@ server <- function(input, output, session) {
     MData = MData[nome]
     DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
                   options = list(
-                    pageLength = 50,
+                    pageLength = 10,
                     dom = 'Bfrtip',
                     buttons = list(list(extend = 'pageLength'),
                                    list(extend = 'print')),
@@ -764,21 +721,11 @@ server <- function(input, output, session) {
       )
   }
   
-  
-
-# FILTERS MENU ----
-## Filters uiOutput ----
-  # output$textDim <- renderUI({
-  #   dimMatrix=paste("Documents ",dim(values$M)[1]," of ",dim(values$Morig)[1],"\nSources ",length(unique(values$M$SO)))
-  #   textInput("textDim", "Number of Documents", 
-  #             value=dimMatrix)
-  # })
-  # 
   output$textDim <-  renderUI({
-    str1=paste("Documents  ",dim(values$M)[1]," of ",dim(values$Morig)[1])
-    str2=paste("Sources    ",length(unique(values$M$SO))," of ", length(unique(values$Morig$SO)))
-    str3=paste("Authors    ",length(unique(unlist(strsplit(values$M$AU,";"))))," of ", length(unique(unlist(strsplit(values$Morig$AU,";")))))
-    HTML(paste("<pre>", str1, str2, str3,"</pre>", sep = '<br/>'))
+    str1=paste("Documents    ",dim(values$M)[1]," of ",dim(values$Morig)[1])
+    str2=paste("Sources      ",length(unique(values$M$SO))," of ", length(unique(values$Morig$SO)))
+    str3=paste("Authors      ",length(unique(unlist(strsplit(values$M$AU,";"))))," of ", length(unique(unlist(strsplit(values$Morig$AU,";")))))
+    HTML(paste("<pre class='tab'>",str1, str2, str3, sep = '<br/>'))
   })
   
   output$selectType <- renderUI({
@@ -792,10 +739,10 @@ server <- function(input, output, session) {
   output$selectLA <- renderUI({
     
     if ("LA" %in% names(values$Morig)){
-    LA <- sort(unique(values$Morig$LA))} else {
-      values$Morig$LA <- "N.A."
-      LA <- "N.A."
-    }
+      LA <- sort(unique(values$Morig$LA))} else {
+        values$Morig$LA <- "N.A."
+        LA <- "N.A."
+      }
     selectInput("selectLA", "Language", 
                 choices = LA,
                 selected = LA,
@@ -829,8 +776,8 @@ server <- function(input, output, session) {
                 max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
                 value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
   })
-
-## Update filtered data ----
+  
+  ## Update filtered data ----
   
   DTfiltered <- eventReactive(input$applyFilter,{
     M <- values$Morig
@@ -853,7 +800,7 @@ server <- function(input, output, session) {
     Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)    
     if (dim(Mdisp)[1]>0){
       DT::datatable(Mdisp, rownames = FALSE, extensions = c("Buttons"),
-                    options = list(pageLength = 50, dom = 'Bfrtip',
+                    options = list(pageLength = 10, dom = 'Bfrtip',
                                    buttons = list('pageLength',
                                                   list(extend = 'copy'),
                                                   list(extend = 'csv',
@@ -878,15 +825,10 @@ server <- function(input, output, session) {
     
   })
   
-  
-  
-
-# OVERVIEW MENU ----
-## Main Info ----  
+  ## Main Info ----
   output$MainInfo <- DT::renderDT({
-    res <- descriptive(values,type="tab1")
-    TAB<-res$TAB
-    values <-res$values
+    
+    TAB <- values$TAB
     
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',ordering=F,
@@ -914,53 +856,206 @@ server <- function(input, output, session) {
       formatStyle(names(TAB)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
       formatStyle(names(TAB)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
-
-  output$RadarPlot <- renderPlotly({
-    #print(values$radar)
-    D <- as.numeric(values$radar[1,])*100
-    label <-  paste(c('Authors per Document','Document Age (in Year)','International Collaboration', 'Document Citations', 'Top Source Coverage'), 
-                    " ",round(as.numeric(values$radar[2,]),1), " (",round(D,1),"%)", sep="")
-    
-    
-    fig <- plot_ly(
-      type = 'scatterpolar',
-      mode = 'markers',
-      r = D,
-      theta = c('Authors per Document','Document Age','International Collaboration', 'Document Citations', 'Top Source Coverage'),
-      fill = 'toself',
-      hoverinfo = 'text',
-      text =label
-    ) %>% 
-      config(displaylogo = FALSE,
-             modeBarButtonsToRemove = c(
-               'sendDataToCloud',
-               'pan2d', 
-               'select2d', 
-               'lasso2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             ))
-    fig <- fig %>%
-      layout(
-        polar = list(
-          radialaxis = list(
-            visible = T,
-            range = c(0,100)
-          )
-        ),
-        showlegend = F
-      )
-    
-    fig
+  
+  # output$RadarPlot <- renderPlotly({
+  #   res <- descriptive(values,type="tab1")
+  #   TAB <- res$TAB
+  #   values <- res$values
+  #   
+  #   #print(values$radar)
+  #   D <- as.numeric(values$radar[1,])*100
+  #   label <-  paste(c('Authors per Document','Document Age (in Year)','International Collaboration', 'Document Citations', 'Top Source Coverage'), 
+  #                   " ",round(as.numeric(values$radar[2,]),1), " (",round(D,1),"%)", sep="")
+  #   
+  #   fig <- plot_ly(
+  #     type = 'scatterpolar',
+  #     mode = 'markers',
+  #     autosize=TRUE,
+  #     height = 400,
+  #     r = D,
+  #     theta = c('Authors per Document','Document Age','International Collaboration', 'Document Citations', 'Top Source Coverage'),
+  #     fill = 'toself',
+  #     hoverinfo = 'text',
+  #     text =label
+  #   ) %>% 
+  #     config(displaylogo = FALSE,
+  #            modeBarButtonsToRemove = c(
+  #              'sendDataToCloud',
+  #              'pan2d', 
+  #              'select2d', 
+  #              'lasso2d',
+  #              'toggleSpikelines',
+  #              'hoverClosestCartesian',
+  #              'hoverCompareCartesian'
+  #            ))
+  #   m <- list(
+  #     l = 150,
+  #     r = 150,
+  #     b = 30,
+  #     t = 30,
+  #     pad = 4
+  #   )
+  #   
+  #   fig <- fig %>%
+  #     layout(margin=m,
+  #       polar = list(
+  #         radialaxis = list(
+  #           visible = T,
+  #           range = c(0,100)
+  #         )
+  #       ),
+  #       showlegend = F
+  #     )
+  # 
+  #   fig
+  # })
+  # 
+#paste(,sep=br())
+ # gsub(":","br()", res$TAB$Results[2])
+  
+#box1 ---------------
+  output$Timespan <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    #a=unlist(strsplit(res$TAB$Results[2],":"))
+    valueBox(value = p(TAB[TAB$Description=="Timespan", 1], style = 'font-size:16px;color:white;'),
+       subtitle = p(strong((TAB[TAB$Description=="Timespan", 2])), style = 'font-size:36px;color:white;', align="center"), 
+             icon = fa_i(name="hourglass"), color = "blue",
+           width = NULL
+       )
+  })
+#box2 ---------------
+  output$au <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Authors", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Authors", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="user"), color = "light-blue",
+             width = NULL)
   })
   
-## Annual Production ----
+  
+#box3 ------------
+  output$kw <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Author's Keywords (DE)", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Author's Keywords (DE)", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="spell-check"), color = "aqua",
+             width = NULL)
+  }) 
+#box4 ---------------
+  output$so <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p("Sources", style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Sources (Journals, Books, etc)", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name ="book"), color = "blue",
+             width = NULL)
+  })
+
+#box5 --------------------
+  output$auS1 <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Authors of single-authored docs", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Authors of single-authored docs", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="pen-fancy"), color = "light-blue",
+             width = NULL)
+  }) 
+  
+#box6 -------------
+  
+  output$cr <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="References", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="References", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="file"), color = "aqua",
+             width = NULL)
+  })
+  
+#box7 ----------------
+  
+  output$doc <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Documents", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Documents", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="layer-group"), color = "blue",
+             width = NULL)
+  })
+#box8 ---------------
+  
+  output$col <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(strong("International Co-Authorship"), style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="International co-authorships %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
+             icon = icon("globe",lib = "glyphicon"), color = "light-blue",
+             width = NULL)
+  })
+
+  
+#box9 ---------------
+  output$agePerDoc <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Document Average Age", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Document Average Age", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="calendar"), color = "aqua",
+             width = NULL)
+  })
+  #box10 ------------------
+  output$cagr <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(strong("Annual Growth Rate"), style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Annual Growth Rate %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
+             icon = icon("arrow-up", lib="glyphicon"), color = "blue",
+             width = NULL)
+  })
+  
+  #box11 ------
+  output$coAuPerDoc <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Co-Authors per Doc", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Co-Authors per Doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = fa_i(name="users"), color = "light-blue",
+             width = NULL)
+  })
+
+  #box12 -------
+  output$tc <- renderValueBox({
+    res <- descriptive(values,type="tab1")
+    TAB <- res$TAB
+    values <- res$values
+    valueBox(value = p(TAB[TAB$Description=="Average citations per doc", 1], style = 'font-size:16px;color:white;'),
+             subtitle = p(strong(TAB[TAB$Description=="Average citations per doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
+             icon = icon("volume-up", lib = "glyphicon"), color = "aqua",
+             width = NULL)
+  })
+  
+
+  ## Annual Production ----
   output$CAGR <- renderText({
     Y=table(values$M$PY)
     ny=dim(Y)[1]
     values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
-    paste("Annual Growth Rate: ",values$GR,"%",collapse="",sep="")
+    paste0(values$GR," %")
+    #paste0(values$GR,"%",collapse="",sep="")
   })
   
   output$AnnualProdPlot <- renderPlotly({
@@ -980,32 +1075,35 @@ server <- function(input, output, session) {
     
     g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
       geom_line(aes(group="NA")) +
-      geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
+      geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
            , y = 'Articles'
            , title = "Annual Scientific Production") +
       scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
       ) +
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ASPplot <- g
     
+    #'#EFEFEF'
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
   })#, height = 500, width =900)
   
   output$ASPplot.save <- downloadHandler(
     filename = function() {
-    
+      
       paste("AnnualScientificProduction-", Sys.Date(), ".png", sep="")
     },
-
+    
     content <- function(file) {
       ggsave(filename = file, plot = values$ASPplot, dpi = as.numeric(input$ASPdpi), height = input$ASPh, width = input$ASPh*2, bg="white")
     },
@@ -1015,7 +1113,7 @@ server <- function(input, output, session) {
   output$AnnualProdTable <- DT::renderDT({
     TAB <- values$TAB
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1037,8 +1135,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-
-## Annual Citation per Year ----
+  
+  ## Annual Citation per Year ----
   output$AnnualTotCitperYearPlot <- renderPlotly({
     
     if (values$results[[1]]=="NA"){
@@ -1072,19 +1170,21 @@ server <- function(input, output, session) {
     
     g <- ggplot(Table2, aes(x = .data$Year, y =.data$MeanTCperYear,text=paste("Year: ",.data$Year,"\nAverage Citations per Year: ",round(.data$MeanTCperYear,1)))) +
       geom_line(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group)) +
-      geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = '#002F80', alpha = .5) +
+      geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
            , y = 'Citations'
            , title = "Average Article Citations per Year")+
       scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
       ) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ACpYplot <- g
@@ -1106,7 +1206,7 @@ server <- function(input, output, session) {
     
     TAB <- values$AnnualTotCitperYear
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1128,20 +1228,19 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
- 
-## Three Fileds Plot ---- 
+  
+  ## Three Fields Plot ---- 
   TFP <- eventReactive(input$apply3F,{
     fields=c(input$LeftField, input$CentralField, input$RightField)
     threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn))
   })
-
+  
   output$ThreeFieldsPlot <- renderPlotly({
     TFP()  
   })
   
-
-# SOURCES MENU ----
-## Most Relevant Sources ----
+  # SOURCES MENU ----
+  ## Most Relevant Sources ----
   MRSources <- eventReactive(input$applyMRSources,{
     res <- descriptive(values,type="tab7")
     values <-res$values
@@ -1157,7 +1256,7 @@ server <- function(input, output, session) {
     xx$Sources=substr(xx$Sources,1,50)
     
     g <- freqPlot(xx,x=2,y=3, textLaby = "Sources", textLabx = "N. of Documents", title = "Most Relevant Sources")
-
+    
     values$MRSplot <- g
     return(g)
   })
@@ -1186,7 +1285,7 @@ server <- function(input, output, session) {
     
     TAB <- values$TABSo
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1208,8 +1307,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-
-## Most Local Cited Sources ---- 
+  
+  ## Most Local Cited Sources ---- 
   MLCSources <- eventReactive(input$applyMLCSources,{
     values$M=metaTagExtraction(values$M,"CR_SO")
     TAB=tableTag(values$M,"CR_SO")
@@ -1254,7 +1353,7 @@ server <- function(input, output, session) {
     g <- MLCSources()
     TAB <- values$TABSoCit
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1276,7 +1375,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-## Bradford's Law ---- 
+  ## Bradford's Law ---- 
   output$bradfordPlot <- renderPlotly({
     
     values$bradford=bradford(values$M)
@@ -1298,7 +1397,7 @@ server <- function(input, output, session) {
   output$bradfordTable <- DT::renderDT({
     
     DT::datatable(values$bradford$table, rownames = FALSE,
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1319,7 +1418,7 @@ server <- function(input, output, session) {
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center')
   })
-## Sources' Impact ----  
+  ## Sources' Impact ----  
   Hsource <- eventReactive(input$applyHsource,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -1347,7 +1446,7 @@ server <- function(input, output, session) {
   output$SourceHindexTable <- DT::renderDT({
     
     DT::datatable(values$H, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1369,7 +1468,7 @@ server <- function(input, output, session) {
       formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center')
     
   })
-## Source Growth ----  
+  ## Source Growth ----  
   SOGrowth <- eventReactive(input$applySOGrowth,{
     #if (input$SOse=="Yes"){se=TRUE}else{se=FALSE}
     
@@ -1417,14 +1516,16 @@ server <- function(input, output, session) {
             legend.key.size = grid::unit(width_scale/50, "inch"),
             legend.key.width = grid::unit(width_scale/50, "inch")
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
             ,axis.text.x = element_text(size=10, angle = 90)
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
       ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
     values$SDplot <- g
@@ -1472,9 +1573,9 @@ server <- function(input, output, session) {
     #suppressWarnings(plot(g))
     
     
-  #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
+    #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
   })
-    
+  
   output$soGrowthtable <- DT::renderDT({
     
     g <- SOGrowth()
@@ -1482,7 +1583,7 @@ server <- function(input, output, session) {
     soData=values$PYSO
     
     DT::datatable(soData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1502,12 +1603,10 @@ server <- function(input, output, session) {
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(soData))-1))))) %>%
       formatStyle(names(soData),  backgroundColor = 'white') 
     #return(Data)
-    
   })
   
-
-# AUTHORS MENU ----
-## Most Relevant Authors ----
+  # AUTHORS MENU ----
+  ## Most Relevant Authors ----
   MRAuthors <- eventReactive(input$applyMRAuthors,{
     res <- descriptive(values,type="tab3")
     values <-res$values
@@ -1541,7 +1640,7 @@ server <- function(input, output, session) {
     xx <- xx[order(-xx[,2]),]
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Relevant Authors")
-
+    
     values$MRAplot <- g
     return(g)
   })
@@ -1567,7 +1666,7 @@ server <- function(input, output, session) {
     
     TAB <- values$TABAu
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1590,7 +1689,7 @@ server <- function(input, output, session) {
       formatRound(names(TAB)[3], digits=2)
     
   })
-## Most Cited Authors ----  
+  ## Most Cited Authors ----  
   MLCAuthors <- eventReactive(input$applyMLCAuthors,{
     res <- descriptive(values,type="tab13")
     values <-res$values
@@ -1611,7 +1710,7 @@ server <- function(input, output, session) {
     xx <- xx[order(-xx[,2]),]
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Local Cited Authors")
-
+    
     values$MLCAplot <- g
     return(g)
   })
@@ -1637,7 +1736,7 @@ server <- function(input, output, session) {
     
     TAB <- values$TABAuCit
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1659,7 +1758,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') 
     
   })
-## Authors' Impact ----  
+  ## Authors' Impact ----  
   HAuthors <- eventReactive(input$applyHAuthors,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -1690,7 +1789,7 @@ server <- function(input, output, session) {
   output$AuthorHindexTable <- DT::renderDT({
     
     DT::datatable(values$H, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1713,7 +1812,7 @@ server <- function(input, output, session) {
       formatRound(names(values$H)[4], 3)
     
   })
-## Authors Production Over Time ----  
+  ## Authors Production Over Time ----  
   AUoverTime <- eventReactive(input$applyAUoverTime,{
     values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
   })
@@ -1742,7 +1841,7 @@ server <- function(input, output, session) {
     
     TAB <- values$AUProdOverTime$dfAU
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1771,7 +1870,7 @@ server <- function(input, output, session) {
     TAB <- values$AUProdOverTime$dfPapersAU
     TAB$DOI=paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     DT::datatable(TAB, rownames = FALSE, escape = FALSE,extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1794,7 +1893,7 @@ server <- function(input, output, session) {
       formatRound(names(TAB)[dim(TAB)[2]], 3)
     
   })
-## Lotka Law ----  
+  ## Lotka Law ----  
   output$lotkaPlot <- renderPlotly({
     
     values$lotka=lotka(biblioAnalysis(values$M))
@@ -1807,7 +1906,7 @@ server <- function(input, output, session) {
     
     g=ggplot2::ggplot(AuProd, aes(x = .data$N.Articles, y = .data$Freq*100, text=paste("N.Articles: ",.data$N.Articles,"\n% of production: ",round(.data$Freq*100,1)))) +
       geom_line(aes(group="NA")) +
-      geom_area(aes(group="NA"),fill = '#002F80', alpha = .5) +
+      geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
       geom_line(data=AuProd, aes(y=.data$Theoretical*100, group="NA"),linetype = "dashed",color="black",alpha=0.8)+
       xlim(0,max(AuProd$N.Articles)+1)+
       labs(x = 'Documents written'
@@ -1815,14 +1914,17 @@ server <- function(input, output, session) {
            , title = "The Frequency Distribution of Scientific Productivity") +
       #scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 90)
+            ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
+      ) +
+      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$LLplot <- g
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
     
@@ -1842,7 +1944,7 @@ server <- function(input, output, session) {
   output$lotkaTable <- DT::renderDT({
     names(values$lotka$AuthorProd)=c("Documents written","N. of Authors","Proportion of Authors")
     DT::datatable(values$lotka$AuthorProd, rownames = FALSE,
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1865,9 +1967,9 @@ server <- function(input, output, session) {
       formatRound(names(values$lotka$AuthorProd)[3], 3)
   })
   
-
-# Affiliations ----
-## Most Relevant Affliations ---- 
+  
+  # Affiliations ----
+  ## Most Relevant Affliations ---- 
   MRAffiliations <- eventReactive(input$applyMRAffiliations,{
     if (input$disAff=="Y"){
       res <- descriptive(values,type="tab11")
@@ -1917,7 +2019,7 @@ server <- function(input, output, session) {
     
     TAB <- values$TABAff
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -1940,9 +2042,9 @@ server <- function(input, output, session) {
     
   })
   
-
-# Countries ----
-## Country by Corresponding Authors ----  
+  
+  # Countries ----
+  ## Country by Corresponding Authors ----  
   CAUCountries <- eventReactive(input$applyCAUCountries,{
     res <- descriptive(values,type="tab5")
     values <-res$values
@@ -1972,9 +2074,30 @@ server <- function(input, output, session) {
                                              breaks=c("SCP","MCP"))+
                          labs(title = "Corresponding Author's Country", x = "Countries", y = "N. of Documents", 
                               caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
-                         theme_minimal() +
+                         #theme_minimal() 
                          theme(plot.caption = element_text(size = 9, hjust = 0.5,
-                                                           color = "blue", face = "italic"))+
+                                                           color = "blue", face = "italic")
+                               ,panel.background = element_rect(fill = '#FFFFFF')
+                               #,panel.grid.minor = element_line(color = '#EFEFEF')
+                               ,panel.grid.major.y  = element_line(color = '#EFEFEF')
+                               ,plot.title = element_text(size = 24)
+                               ,axis.title = element_text(size = 14, color = '#555555')
+                               ,axis.title.y = element_text(vjust = 1, angle = 0)
+                               ,axis.title.x = element_text(hjust = 0)
+                               ,axis.line.x = element_line(color="black",size=0.5)
+                               #,axis.line.y = element_line(color="black",size=0.5)
+                                )+
+                         # theme(text = element_text(color = "#444444")
+                         #       ,panel.background = element_rect(fill = '#FFFFFF')
+                         #       ,panel.grid.minor = element_line(color = '#EFEFEF')
+                         #       ,panel.grid.major = element_line(color = '#EFEFEF')
+                         #       ,plot.title = element_text(size = 24)
+                         #       ,axis.title = element_text(size = 14, color = '#555555')
+                         #       ,axis.title.y = element_text(vjust = 1, angle = 0)
+                         #       ,axis.title.x = element_text(hjust = 0)
+                         #       ,axis.line.x = element_line(color="black",size=0.5)
+                         #       ,axis.line.y = element_line(color="black",size=0.5)
+                         # )
                          coord_flip()) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
@@ -2006,7 +2129,7 @@ server <- function(input, output, session) {
     
     TAB <- values$TABCo
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2028,8 +2151,8 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-
-## Country Production ----  
+  
+  ## Country Production ----  
   output$countryProdPlot <- renderPlotly({
     values$mapworld<-mapworld(values$M)
     plot.ly(values$mapworld$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
@@ -2050,7 +2173,7 @@ server <- function(input, output, session) {
     
     TAB <- values$mapworld$tab
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2072,7 +2195,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-## Most Cited Country ----    
+  ## Most Cited Country ----    
   MCCountries <- eventReactive(input$applyMCCountries,{
     res <- descriptive(values,type="tab6")
     values <-res$values
@@ -2094,7 +2217,7 @@ server <- function(input, output, session) {
     }
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Countries", textLabx = laby, title = "Most Cited Countries")
-
+    
     values$MCCplot <- g
     return(g)
   })
@@ -2119,7 +2242,7 @@ server <- function(input, output, session) {
     g <- MCCountries()
     TAB <- values$TABCitCo
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2142,9 +2265,9 @@ server <- function(input, output, session) {
     
   })
   
-
-# DOCUMENTS MENU ----
-## Most Global Cited Documents ----
+  
+  # DOCUMENTS MENU ----
+  ## Most Global Cited Documents ----
   
   MGCDocuments <- eventReactive(input$applyMGCDocuments,{
     res <- descriptive(values,type="tab4")
@@ -2165,7 +2288,7 @@ server <- function(input, output, session) {
     xx=xx[1:k,]
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Documents", textLabx = lab, title = "Most Global Cited Documents")
-
+    
     values$MGCDplot <- g
     return(g)
   })
@@ -2192,7 +2315,7 @@ server <- function(input, output, session) {
     TAB <- values$TABGlobDoc
     TAB$DOI<- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2214,7 +2337,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-## Most Local Cited Documents ----  
+  ## Most Local Cited Documents ----  
   MLCDocuments <- eventReactive(input$applyMLCDocuments,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -2226,7 +2349,7 @@ server <- function(input, output, session) {
                             NGCS = .data$GCS/mean(.data$GCS)) %>%
                      ungroup() %>%
                      as.data.frame()
-  
+                   
                  })
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], 
@@ -2267,10 +2390,10 @@ server <- function(input, output, session) {
     
     TAB <- values$TABLocDoc
     TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-
+    
     names(TAB)[4:8] <- c("Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
     DT::datatable(TAB, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2294,7 +2417,7 @@ server <- function(input, output, session) {
     
   })
   
-## Most Local Cited References ----
+  ## Most Local Cited References ----
   MLCReferences <- eventReactive(input$applyMLCReferences,{
     CR=citations(values$M,sep=input$CitRefsSep)$Cited
     TAB=data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
@@ -2344,7 +2467,7 @@ server <- function(input, output, session) {
     TAB=TAB[,c(3,1,2)]
     names(TAB)[1]="Google Scholar"
     DT::datatable(TAB, rownames = FALSE, escape=FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2366,7 +2489,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-## Reference Spectroscopy ---- 
+  ## Reference Spectroscopy ---- 
   RPYS <- eventReactive(input$applyRPYS,{
     
     timespan <- c(-Inf,Inf)
@@ -2402,7 +2525,7 @@ server <- function(input, output, session) {
     rpysData=values$res$rpysTable
     
     DT::datatable(rpysData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2434,7 +2557,7 @@ server <- function(input, output, session) {
     names(crData)=c("Year", "Reference", "Local Citations", "Google link")
     crData <- crData[,c(1,4,2,3)] 
     DT::datatable(crData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2457,9 +2580,9 @@ server <- function(input, output, session) {
     
   })
   
-
-# Words ----
-## Most Frequent Words ----
+  
+  # Words ----
+  ## Most Frequent Words ----
   MFWords <- eventReactive(input$applyMFWords,{
     if (input$MostRelWords %in% c("TI","AB")){
       ngrams <- as.numeric(input$MRWngrams)
@@ -2546,7 +2669,7 @@ server <- function(input, output, session) {
     TAB <- values$TABWord
     
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 20, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2568,7 +2691,7 @@ server <- function(input, output, session) {
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
     
   })
-## WordCloud ----  
+  ## WordCloud ----  
   WordCloud <- eventReactive(input$applyWordCloud,{
     
     if (input$summaryTerms %in% c("TI","AB")){
@@ -2609,7 +2732,7 @@ server <- function(input, output, session) {
     WordCloud()
   })
   
-## TreeMap ----  
+  ## TreeMap ----  
   TreeMap <- eventReactive(input$applyTreeMap,{
     if (input$treeTerms %in% c("TI","AB")){
       ngrams <- as.numeric(input$treeTermsngrams)
@@ -2721,7 +2844,7 @@ server <- function(input, output, session) {
       formatStyle(names(values$WordsT),  backgroundColor = 'white',textAlign = 'center')
     
   },height = 600, width = 900)
-## Word Dynamics ----   
+  ## Word Dynamics ----   
   WDynamics <- eventReactive(input$applyWD,{
     if (input$cumTerms=="Cum"){
       cdf=TRUE
@@ -2754,13 +2877,13 @@ server <- function(input, output, session) {
            },
            TI={
              #if (!("TI_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
+             values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
              #}
              KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            },
            AB={
              #if (!("AB_TM" %in% names(values$M))){
-               values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
+             values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
              #}
              KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            }
@@ -2773,7 +2896,7 @@ server <- function(input, output, session) {
     n=dim(values$KW)[1]*(dim(values$KW)[2]-1)
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
     values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq, stringsAsFactors = TRUE)
-  
+    
     width_scale <- 2.5 * 26 / length(unique(values$DF$Term))
     
     Text <- paste(values$DF$Term," (",values$DF$Year,") ",values$DF$Freq, sep="")
@@ -2800,15 +2923,18 @@ server <- function(input, output, session) {
             legend.key.size = grid::unit(width_scale/50, "inch"),
             legend.key.width = grid::unit(width_scale/50, "inch")
             ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
             ,axis.text.x = element_text(size=10, angle = 90)
-      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
+      ) + 
+      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
     values$WDplot <- g
     return(g)
@@ -2870,7 +2996,7 @@ server <- function(input, output, session) {
              )) %>%
       layout(hovermode = 'compare')
     
-  #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
+    #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
   })
   
   output$kwGrowthtable <- DT::renderDT({
@@ -2878,7 +3004,7 @@ server <- function(input, output, session) {
     kwData=values$KW
     
     DT::datatable(kwData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -2898,10 +3024,9 @@ server <- function(input, output, session) {
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(kwData))-1))))) %>%
       formatStyle(names(kwData),  backgroundColor = 'white') 
     #return(Data)
-    
   })
   
-## Trend Topics ----
+  ## Trend Topics ----
   output$trendSliderPY <- renderUI({
     
     sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
@@ -2981,7 +3106,7 @@ server <- function(input, output, session) {
     tpData=values$trendTopics$df_graph
     
     DT::datatable(tpData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3004,7 +3129,7 @@ server <- function(input, output, session) {
     
   })
   
-# Coupling ----
+  # Coupling ----
   
   CMMAP <- eventReactive(input$applyCM,{
     
@@ -3051,9 +3176,9 @@ server <- function(input, output, session) {
   output$CMTable <- DT::renderDT({
     CMMAP()
     cmData=values$CM$data[,c(2,1,3,5)]
-
+    
     DT::datatable(cmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3081,7 +3206,7 @@ server <- function(input, output, session) {
     cmData=values$CM$clusters[,c(7,1:4,6)]
     
     DT::datatable(cmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3176,7 +3301,7 @@ server <- function(input, output, session) {
     cocData=values$cocnet$cluster_res
     names(cocData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     DT::datatable(cocData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3278,7 +3403,10 @@ server <- function(input, output, session) {
     CSfactorial()
     plot(values$CS$graph_terms)
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 800)
+  },  width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
+  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
+  res = 150)
+  #width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 800)
   
   output$CSPlot2 <- renderPlot({
     CSfactorial()
@@ -3294,7 +3422,9 @@ server <- function(input, output, session) {
       emptyPlot("This plot is available only for CA or MCA analyses")
     }
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 800)
+  }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
+  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
+  res = 150)
   
   output$CSPlot3 <- renderPlot({
     CSfactorial()
@@ -3309,7 +3439,9 @@ server <- function(input, output, session) {
     }
     
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150)  #height = 650, width = 800)
+  }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
+  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
+  res = 150)
   
   output$CSPlot4 <- renderPlot({
     
@@ -3320,7 +3452,9 @@ server <- function(input, output, session) {
       emptyPlot("Selected field is not included in your data collection")
     }
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 1000)
+  }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
+  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
+  res = 150)
   
   output$CSTableW <- DT::renderDT({
     CSfactorial()
@@ -3344,7 +3478,7 @@ server <- function(input, output, session) {
     WData$Dim.2=round(WData$Dim.2,2)
     
     DT::datatable(WData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3375,7 +3509,7 @@ server <- function(input, output, session) {
     CSData$dim2=round(CSData$dim2,2)
     CSData$contrib=round(CSData$contrib,2)
     DT::datatable(CSData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3455,7 +3589,7 @@ server <- function(input, output, session) {
   })
   
   output$TMapSynPreview <-  renderUI({
-
+    
     if (!is.null(values$TMapsyn.terms) | exists("values$TMapsyn.terms")){
       strSynPreview(values$TMapsyn.terms)
     }else{
@@ -3469,8 +3603,8 @@ server <- function(input, output, session) {
       paste("ThematicMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-               ggsave(filename = file, plot = values$TM$map, dpi = as.numeric(input$TMdpi),  height = input$TMh, width = input$TMh*1.5, bg="white")
-             },
+      ggsave(filename = file, plot = values$TM$map, dpi = as.numeric(input$TMdpi),  height = input$TMh, width = input$TMh*1.5, bg="white")
+    },
     contentType = "png"
   )
   
@@ -3481,7 +3615,7 @@ server <- function(input, output, session) {
     
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3510,7 +3644,7 @@ server <- function(input, output, session) {
     names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3614,7 +3748,7 @@ server <- function(input, output, session) {
     TEData=TEData[TEData$Inc_index>0,-c(4,8)]
     names(TEData)=c("From", "To", "Words", "Weighted Inclusion Index", "Inclusion Index", "Occurrences", "Stability Index")
     DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3746,7 +3880,7 @@ server <- function(input, output, session) {
     tmData=values$nexus$TM[[1]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3775,7 +3909,7 @@ server <- function(input, output, session) {
     tmData=values$nexus$TM[[2]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3804,7 +3938,7 @@ server <- function(input, output, session) {
     tmData=values$nexus$TM[[3]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3833,7 +3967,7 @@ server <- function(input, output, session) {
     tmData=values$nexus$TM[[4]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3862,7 +3996,7 @@ server <- function(input, output, session) {
     tmData=values$nexus$TM[[5]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3891,7 +4025,7 @@ server <- function(input, output, session) {
     names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3920,7 +4054,7 @@ server <- function(input, output, session) {
     names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3949,7 +4083,7 @@ server <- function(input, output, session) {
     names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -3978,7 +4112,7 @@ server <- function(input, output, session) {
     names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -4007,7 +4141,7 @@ server <- function(input, output, session) {
     names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -4027,7 +4161,6 @@ server <- function(input, output, session) {
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
     #return(Data)
-    
   })
   
   ### INTELLECTUAL STRUCTURE ####
@@ -4065,7 +4198,7 @@ server <- function(input, output, session) {
     cocitData=values$cocitnet$cluster_res
     names(cocitData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     DT::datatable(cocitData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -4152,7 +4285,7 @@ server <- function(input, output, session) {
   output$histPlot <- renderPlotly({
     
     Hist()
-
+    
   })
   output$histTable <- DT::renderDT({
     LCS=values$histResults$LCS
@@ -4162,7 +4295,7 @@ server <- function(input, output, session) {
     Data=Data[ind,]
     Data$DOI<- paste0('<a href=\"https://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
     DT::datatable(Data, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -4232,7 +4365,7 @@ server <- function(input, output, session) {
     names(colData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     
     DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -4282,7 +4415,8 @@ server <- function(input, output, session) {
       paste("CountryCollaborationMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$WMmap$g, dpi = as.numeric(input$CCdpi),  height = input$CCh, width = input$CCh*2, bg="white")
+      g <- values$WMmap$g + labs(title = "Country Collaboration Map")
+      ggsave(filename = file, plot = g, dpi = as.numeric(input$CCdpi),  height = input$CCh, width = input$CCh*2, bg="white")
     },
     contentType = "png"
   )
@@ -4292,7 +4426,10 @@ server <- function(input, output, session) {
     WMnetwork()  
     plot(values$WMmap$g)
     
-  }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 750)#, width = 750
+  }, #width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), 
+  width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
+  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
+  res = 150)
   
   output$WMTable <- DT::renderDT({
     WMnetwork()  
@@ -4301,7 +4438,7 @@ server <- function(input, output, session) {
     names(colData)=c("From","To","Frequency")
     
     DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
-                  options = list(pageLength = 50, dom = 'Bfrtip',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
                                                 list(extend = 'csv',
@@ -4364,6 +4501,8 @@ server <- function(input, output, session) {
   # from ggplot to plotly
   plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=2, height=0){
     
+    g <- g + labs(title=NULL)
+    print("Fatto")
     a <- ggplot_build(g)$data
     
     ymin <- unlist(lapply(a, function(l){
@@ -4389,7 +4528,7 @@ server <- function(input, output, session) {
         max(l["x"])  
       }
     })) %>% max(na.rm=TRUE)
-
+    
     if (isTRUE(flip)){
       xrange <- c(ymin,ymax)
       yrange <- c(xmin,xmax)
@@ -4397,7 +4536,7 @@ server <- function(input, output, session) {
       yrange <- c(ymin,ymax)
       xrange <- c(xmin,xmax)
     }
-        
+    
     # if (isTRUE(flip)){
     #   yrange <- range(ggplot_build(g)$data[[data.type]]$x)
     #   xrange <- range(ggplot_build(g)$data[[data.type]]$y)
@@ -4442,7 +4581,7 @@ server <- function(input, output, session) {
   
   freqPlot <- function(xx,x,y, textLaby,textLabx, title){
     
-
+    
     xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
     yl <- c(1,1+length(unique(xx[,y]))*0.125)
     
@@ -4451,7 +4590,7 @@ server <- function(input, output, session) {
     g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
       geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +
       geom_point(aes(color=-xx[,x], size=xx[,x]), show.legend = FALSE) +
-      scale_radius(range=c(7, 15))+
+      scale_radius(range=c(5, 12))+
       geom_text(color = "white", size = 3) +
       scale_y_discrete(limits = rev(xx[,y])) +
       scale_fill_continuous(type = "gradient")+
@@ -4571,23 +4710,6 @@ server <- function(input, output, session) {
     if (values$S[[1]][1]=="NA"){
       values$S=summary(values$results,k=Inf,verbose=FALSE)}
     
-   ### radar info
-   perc=0.90
-   radar <- data.frame(nAU=c(NA,NA), Age=c(NA,NA), IntColl=c(NA,NA), Cit=c(NA,NA), So=c(NA,NA))
-   radar$nAU[1] <- min(1,mean(values$results$nAUperPaper, na.rm=TRUE)/quantile(values$results$nAUperPaper,perc, na.rm=TRUE))
-   radar$nAU[2] <- mean(values$results$nAUperPaper, na.rm=TRUE) 
-   Age <- as.numeric(substr(Sys.time(),1,4))-values$results$Years+1
-   radar$Age[2] <- mean(Age, na.rm=TRUE)
-   radar$Age[1] <- min(1,radar$Age[2]/quantile(Age,perc, na.rm=TRUE))
-   radar$IntColl[2] <- sum(values$results$CountryCollaboration$MCP)
-   radar$IntColl[1] <- radar$IntColl[2]/values$results$Articles
-   radar$Cit[2] <- mean(values$M$TC, na.rm=TRUE)
-   radar$Cit[1] <- min(1,radar$Cit[2]/quantile(values$M$TC, perc, na.rm=TRUE))
-   radar$So[1] <- values$results$Sources[1]/values$results$Articles
-   radar$So[2] <- values$results$Sources[1]
-   values$radar <- radar
-   #  ### 
-   
     switch(type,
            "tab1"={
              #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
@@ -4685,8 +4807,8 @@ server <- function(input, output, session) {
   
   readStopwordsFile <- function(file, sep=","){
     if (!is.null(file)){
-    req(file$datapath)
-    remove.terms <- unlist(strsplit(readr::read_lines(file$datapath), sep))
+      req(file$datapath)
+      remove.terms <- unlist(strsplit(readr::read_lines(file$datapath), sep))
     }else{remove.terms <- NULL}
     return(remove.terms)
   }
@@ -4747,7 +4869,7 @@ server <- function(input, output, session) {
             ,legend.key = element_blank()
       ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
     
-   results=list(g=g,tab=tab)
+    results=list(g=g,tab=tab)
     return(results)
   }
   
@@ -4868,21 +4990,21 @@ server <- function(input, output, session) {
                },
                TI={
                  #if(!("TI_TM" %in% names(values$M))){
-                   values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
-                   #}
+                 values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
+                 #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
                  values$Title= "Title Words network"
                },
                AB={
                  #if(!("AB_TM" %in% names(values$M))){
-                   values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
+                 values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
                  #}
                  values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                  values$Title= "Abstract Words network"
                })
         
       }
-     
+      
       if (label.n>n){label.n=n}
       if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
       if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
@@ -4986,7 +5108,7 @@ server <- function(input, output, session) {
              })
       
     }
-   
+    
     if (label.n>n){label.n=n}
     if (input$colnormalize=="none"){normalize=NULL}else{normalize=input$colnormalize}
     if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
@@ -5042,7 +5164,840 @@ server <- function(input, output, session) {
                                    color = "firebrick4", size = .data$count, group=.data$continent.x),
                  curvature = 0.33,
                  alpha = 0.5) +
-      labs(title = "Country Collaboration Map", x = "Latitude", y = "Longitude")+
+      scale_size_continuous(guide = FALSE, range = c(0.25, edgesize))+
+      labs(title = NULL, x = "Latitude", y = "Longitude") +
+      theme(text = element_text(color = '#333333')
+            ,plot.title = element_text(size = 28)
+            ,plot.subtitle = element_text(size = 14)
+            ,axis.ticks = element_blank()
+            ,axis.text = element_blank()
+            ,panel.grid = element_blank()
+            ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
+            ,plot.background = element_rect(fill = '#FFFFFF')
+            ,legend.position = c(.18,.36)
+            ,legend.background = element_blank()
+            ,legend.key = element_blank()
+      ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
+    if (isTRUE(label)){
+      CO=dplyr::inner_join(CO,countries, by=c('Tab'='Tab'))
+      g=g+
+        ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
+                                 hjust = 0, nudge_x = 1, nudge_y = 4,
+                                 size = 3, color = "orange", fontface = "bold")
+    }
+    
+    results=list(g=g,tab=tab)
+    return(results)
+  }
+  ### visNetwork tools ----
+  netLayout <- function(type){
+    switch(type,
+           auto={l <- "layout_nicely"},
+           circle={l <- "layout_in_circle"},
+           mds={l <- "layout_with_mds"},
+           star={l <- "layout_as_star"},
+           
+           sphere={l <- "layout_on_sphere"},
+           fruchterman={l <- "layout_with_fr"},
+           kamada={l <- "layout_with_kk"}
+    )
+    return(l)
+  }
+  
+  savenetwork <- function(con){
+    vn=values$network$vn
+    visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE, height = "2000px",width = "2000px" ) %>%
+      visNodes(shape="box", font=list(color="black"),scaling=list(label=list(enables=TRUE))) %>%
+      visIgraphLayout(layout = values$network$l) %>%
+      visEdges(smooth = values$network$curved) %>%
+      visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
+      visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE)  %>% visExport() %>%
+      visPhysics(enabled = FALSE) %>% visSave(con)
+  }
+  
+  igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
+    
+    LABEL=igraph::V(g)$name
+    
+    LABEL[igraph::V(g)$labelsize==0]=""
+    
+    vn <- toVisNetworkData(g)
+    
+    vn$nodes$label=LABEL
+    vn$edges$num=1
+    vn$edges$dashes=FALSE
+    vn$edges$dashes[vn$edges$lty==2]=TRUE
+    
+    ## opacity
+    vn$nodes$color=adjustcolor(vn$nodes$color,alpha=min(c(opacity+0.2,1)))
+    vn$edges$color=adjustcolor(vn$edges$color,alpha=opacity)
+    
+    ## removing multiple edges
+    vn$edges=unique(vn$edges)
+    
+    ## labelsize
+    scalemin=20
+    scalemax=150
+    Min=min(vn$nodes$font.size)
+    Max=max(vn$nodes$font.size)
+    if (Max>Min){
+      size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
+    } else {size=10*labelsize}
+    size[size<scalemin]=scalemin
+    size[size>scalemax]=scalemax
+    vn$nodes$font.size=size
+    l<-netLayout(type)
+    
+    ### TO ADD SHAPE AND FONT COLOR OPTIONS
+    coords <- net$layout
+    
+    vn$nodes$size <- vn$nodes$font.size*0.8
+    
+    if (shape %in% c("text")){
+      vn$nodes$font.color <- vn$nodes$color
+    }else{
+      vn$nodes$font.color <- "black"
+    }
+    
+    if (shape %in% c("dot","square")){
+      vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
+    }else{
+      vn$nodes$font.vadjust <-0
+    }
+    
+    VIS<-
+      visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
+      #visNodes(shape=shape, font=list(color="black")) %>%
+      visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+      visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
+      visEdges(smooth = curved) %>%
+      visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
+      visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
+      visOptions(manipulation = TRUE) %>%
+      visExport(type = "png", name = "network",
+                label = paste0("Export graph as png"), background = "#fff",
+                float = "right", style = NULL, loadDependencies = TRUE)
+    values$COCVIS=VIS
+    return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
+  }
+  
+  #### Common functions ---- 
+  
+  getFileNameExtension <- function (fn) {
+    # remove a path
+    splitted    <- strsplit(x=fn, split='/')[[1]]   
+    # or use .Platform$file.sep in stead of '/'
+    fn          <- splitted [length(splitted)]
+    ext         <- ''
+    splitted    <- strsplit(x=fn, split='\\.')[[1]]
+    l           <-length (splitted)
+    if (l > 1 && sum(splitted[1:(l-1)] != ''))  ext <-splitted [l] 
+    # the extention must be the suffix of a non-empty name    
+    ext
+  }
+  
+  # string preview (stopwords)
+  strPreview <- function(string, sep=","){
+    str1 <- unlist(strsplit(string, sep))
+    str1 <- str1[1:min(c(length(str1),5))]
+    str1 <- paste(str1, collapse=sep)
+    HTML(paste("<pre>", "File Preview: ", str1,"</pre>", sep = '<br/>'))
+  }
+  
+  # string preview (synonyms)
+  strSynPreview <- function(string){
+    string <- string[1]
+    str1 <- unlist(strsplit(string, ";"))
+    str1 <- str1[1:min(c(length(str1),5))]
+    str1 <- paste(paste(str1[1], " <- ",collapse=""),paste(str1[-1], collapse=";"), collapse="")
+    HTML(paste("<pre>", "File Preview: ", str1,"</pre>", sep = '<br/>'))
+  }
+  
+  # from ggplot to plotly
+  plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=2, height=0){
+    
+    # g <- g + labs(title = NULL)
+    # a <- ggplot_build(g)$data
+    # 
+    # ymin <- unlist(lapply(a, function(l){
+    #   if ("y" %in% names(l)){
+    #     min(l["y"])  
+    #   }
+    # })) %>% min(na.rm=TRUE)
+    # 
+    # ymax <- unlist(lapply(a, function(l){
+    #   if ("y" %in% names(l)){
+    #     max(l["y"])  
+    #   }
+    # })) %>% max(na.rm=TRUE)
+    # 
+    # xmin <- unlist(lapply(a, function(l){
+    #   if ("x" %in% names(l)){
+    #     min(l["x"])  
+    #   }
+    # })) %>% min(na.rm=TRUE)
+    # 
+    # xmax <- unlist(lapply(a, function(l){
+    #   if ("x" %in% names(l)){
+    #     max(l["x"])  
+    #   }
+    # })) %>% max(na.rm=TRUE)
+    # 
+    # if (isTRUE(flip)){
+    #   xrange <- c(ymin,ymax)
+    #   yrange <- c(xmin,xmax)
+    # }else{
+    #   yrange <- c(ymin,ymax)
+    #   xrange <- c(xmin,xmax)
+    # }
+    # 
+    # 
+    # sizex = diff(xrange)*size
+    # sizey = diff(yrange)*size*aspectratio
+    # 
+    # y <- min(yrange)+0.2
+    # 
+    # if (side=="l"){
+    #   x <- min(xrange)+0.2
+    # }else{
+    #   x <- max(xrange)-0.2-sizex
+    # }
+    
+    ggplotly(g, tooltip = "text") %>% 
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             )) #%>%
+      # layout(
+      #   images = list(
+      #     source = raster2uri(as.raster(values$logo)),
+      #     x = x, y = y+height,
+      #     sizex = sizex, sizey = sizey,
+      #     xref = "x", yref = "y",
+      #     xanchor = "left", yanchor = "bottom",
+      #     sizing = "stretch"
+      #   )
+      # )
+  }
+  
+  freqPlot <- function(xx,x,y, textLaby,textLabx, title){
+    
+
+    xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
+    yl <- c(1,1+length(unique(xx[,y]))*0.125)
+    
+    Text <- paste(textLaby,": ",xx[,y],"\n",textLabx, ": ",xx[,x])
+    
+    g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
+      geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +
+      geom_point(aes(color=-xx[,x], size=xx[,x]), show.legend = FALSE) +
+      scale_radius(range=c(7, 15))+
+      geom_text(color = "white", size = 3) +
+      scale_y_discrete(limits = rev(xx[,y])) +
+      scale_fill_continuous(type = "gradient")+
+      labs(title=title, y = textLaby)+
+      labs(x = textLabx)+
+      expand_limits(y= c(1, length(xx[,y]) + 1))+
+      theme_minimal()+
+      theme(axis.text.y  = element_text(angle=0, hjust=0)) +
+      annotation_custom(values$logoGrid, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2])
+    
+    return(g)
+  }
+  
+  emptyPlot<-function(errortext){
+    g=ggplot()+
+      theme_void() + theme(legend.position="none")+
+      annotate("text", x = 4, y = 25, label = errortext, size=10)
+    plot(g)
+  }
+  
+  count.duplicates <- function(DF){
+    x <- do.call('paste', c(DF, sep = '\r'))
+    ox <- order(x)
+    rl <- rle(x[ox])
+    cbind(DF[ox[cumsum(rl$lengths)],,drop=FALSE],count = rl$lengths)
+    
+  }
+  
+  reduceRefs<- function(A){
+    
+    ind=unlist(regexec("*V[0-9]", A))
+    A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+    ind=unlist(regexec("*DOI ", A))
+    A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
+    return(A)
+  }
+  
+  
+  initial <- function(values){
+    values$results <- list("NA")
+    values$log <- "working..."
+    values$load <- "FALSE"
+    values$field = values$cocngrams = "NA"
+    values$citField = values$colField = values$citSep= "NA"
+    values$NetWords = values$NetRefs = values$ColNetRefs=matrix(NA,1,1)
+    values$Title <- "Network"
+    values$Histfield <- "NA"
+    values$histlog <- "working..."
+    values$kk <- 0
+    values$histsearch <- "NA"
+    values$citShortlabel <- "NA"
+    values$S <- list("NA")
+    values$GR <- "NA"
+    
+    return(values)
+  }
+  
+  
+  ### ANALYSIS FUNCTIONS ####
+  ### Descriptive functions ----
+  Hindex_plot <- function(values, type){
+    
+    hindex<-function(values,type){
+      
+      switch(type,
+             author={
+               AU <- trim(gsub(",","",names(tableTag(values$M,"AU"))))
+               values$H <- Hindex(values$M, field = "author", elements = AU, sep = ";", years=Inf)$H
+             },
+             source={
+               SO <- names(sort(table(values$M$SO),decreasing = TRUE))
+               values$H <- Hindex(values$M, field = "source", elements = SO, sep = ";", years=Inf)$H
+             }
+      )
+      
+      return(values)
+    }
+    
+    values<-hindex(values, type = type)
+    
+    xx=values$H
+    if (type=="author"){
+      K=input$Hkauthor
+      measure=input$HmeasureAuthors
+      title="Author Local Impact"
+      xn="Authors"
+    } else {
+      K=input$Hksource
+      measure=input$HmeasureSources
+      title="Source Local Impact"
+      xn="Sources"
+    }
+    if (K>dim(xx)[1]){
+      k=dim(xx)[1]
+    } else {k=K}
+    
+    switch(measure,
+           h={m=2},
+           g={m=3},
+           m={m=4
+           xx[,m] <-round(xx[,m],2) },
+           tc={m=5}
+    )
+    xx <- xx[order(-xx[,m]),]
+    xx <- xx[1:k,c(1,m)]
+    
+    
+    g <- freqPlot(xx,x=2,y=1, textLaby = xn, textLabx = paste("Impact Measure:",toupper(measure)), title = paste(title,"by",toupper(measure),"index"))
+    
+    res<-list(values=values,g=g)
+    return(res)
+  }
+  
+  descriptive <- function(values,type){
+    if (values$results[[1]]=="NA"){
+      values$results=biblioAnalysis(values$M)}
+    if (values$S[[1]][1]=="NA"){
+      values$S=summary(values$results,k=Inf,verbose=FALSE)}
+    
+    # ### radar info
+    # perc=0.90
+    # radar <- data.frame(nAU=c(NA,NA), Age=c(NA,NA), IntColl=c(NA,NA), Cit=c(NA,NA), So=c(NA,NA))
+    # radar$nAU[1] <- min(1,mean(values$results$nAUperPaper, na.rm=TRUE)/quantile(values$results$nAUperPaper,perc, na.rm=TRUE))
+    # radar$nAU[2] <- mean(values$results$nAUperPaper, na.rm=TRUE) 
+    # Age <- as.numeric(substr(Sys.time(),1,4))-values$results$Years+1
+    # radar$Age[2] <- mean(Age, na.rm=TRUE)
+    # radar$Age[1] <- min(1,radar$Age[2]/quantile(Age,perc, na.rm=TRUE))
+    # radar$IntColl[2] <- sum(values$results$CountryCollaboration$MCP) #V
+    # radar$IntColl[1] <- radar$IntColl[2]/values$results$Articles #V
+    # radar$Cit[2] <- mean(values$M$TC, na.rm=TRUE)
+    # radar$Cit[1] <- min(1,radar$Cit[2]/quantile(values$M$TC, perc, na.rm=TRUE))
+    # radar$So[1] <- values$results$Sources[1]/values$results$Articles
+    # radar$So[2] <- values$results$Sources[1]
+    # values$radar <- radar
+    # #  ### 
+    
+    # values$descriptive_2<- sum(values$results$CountryCollaboration$MCP)/values$results$Articles 
+    # Y=table(values$M$PY)
+    # ny=dim(Y)[1]
+    # values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
+    
+    switch(type,
+           "tab1"={
+             #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
+             TAB=data.frame(values$S$MainInformationDF)
+             #cat(S$MainInformation)
+             #values$descriptive_2<- sum(values$results$CountryCollaboration$MCP)/values$results$Articles 
+            # Y=table(values$M$PY)
+             #ny=dim(Y)[1]
+             #values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
+           },
+           "tab2"={
+             
+             TAB=values$S$AnnualProduction
+             names(TAB)=c("Year","Articles")
+             #print(S$AnnualProduction)
+             #cat("\n\n")
+             #cat("Annual Growth Rate ",round(S$AnnualGrowthRate, digits=2),"%")
+           },
+           "tab3"={
+             #TAB=values$S$MostProdAuthors
+             AU <- data.frame(Author=names(values$results$Authors), 
+                              freq=as.numeric(values$results$Authors), 
+                              stringsAsFactors = FALSE)
+             TAB <- dplyr::left_join(AU,values$results$AuthorsFrac)
+             names(TAB)=c("Authors","Articles","Articles Fractionalized")
+             #print(S$MostProdAuthors)
+           },
+           "tab4"={
+             TAB=values$S$MostCitedPapers
+             names(TAB)=c("Paper", "DOI","Total Citations","TC per Year","Normalized TC")
+             #print(S$MostCitedPapers)
+           },
+           "tab5"={
+             TAB=values$S$MostProdCountries
+             #print(S$MostProdCountries)
+           },
+           "tab6"={
+             TAB=values$S$TCperCountries
+             #print(S$TCperCountries)
+           },
+           "tab7"={
+             TAB=values$S$MostRelSources
+             #print(S$MostRelSources)
+           },
+           
+           "tab10"={
+             TAB<-mapworld(values$M)$tab
+           },
+           "tab11"={
+             TAB=as.data.frame(values$results$Affiliations,stringsAsFactors = FALSE)
+             names(TAB)=c("Affiliations", "Articles")
+           },
+           "tab12"={
+             TAB=tableTag(values$M,"C1")
+             TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB),stringsAsFactors = FALSE)
+             TAB=TAB[nchar(TAB[,1])>4,]
+             #names(TAB)=c("Affiliations", "Articles")
+             
+           },
+           "tab13"={
+             CR<-localCitations(values$M,fast.search = FALSE, verbose = FALSE)
+             TAB <- CR$Authors
+             #TAB=data.frame(Authors=names(CR$Authors$Author), Citations=as.numeric(CR$Cited),stringsAsFactors = FALSE)
+           }
+    )
+    values$TAB=TAB
+    res=list(values=values,TAB=TAB)
+    return(res)
+  }
+  
+  wordlist <- function(M, Field, n, measure, ngrams, remove.terms=NULL, synonyms=NULL){
+    switch(Field,
+           ID={v=tableTag(values$M,"ID", remove.terms  = remove.terms, synonyms = synonyms)},
+           DE={v=tableTag(values$M,"DE", remove.terms = remove.terms, synonyms = synonyms)},
+           TI={
+             if (!("TI_TM" %in% names(M))){
+               v=tableTag(M,"TI", ngrams=ngrams, remove.terms=remove.terms, synonyms = synonyms)
+               
+             }},
+           AB={if (!("AB_TM" %in% names(M))){
+             v=tableTag(M,"AB", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
+           }}
+    )
+    names(v)=tolower(names(v))
+    #v=tableTag(values$M,"ID")
+    n=min(c(n,length(v)))
+    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]), stringsAsFactors = FALSE)
+    W=Words
+    switch(measure,
+           identity={},
+           sqrt={W$Frequency=sqrt(W$Frequency)},
+           log={W$Frequency=log(W$Frequency+1)},
+           log10={W$Frequency=log10(W$Frequency+1)}
+    )
+    
+    results=list(v=v,W=W, Words=Words)
+    return(results)
+  }
+  
+  readStopwordsFile <- function(file, sep=","){
+    if (!is.null(file)){
+      req(file$datapath)
+      remove.terms <- unlist(strsplit(readr::read_lines(file$datapath), sep))
+    }else{remove.terms <- NULL}
+    return(remove.terms)
+  }
+  
+  readSynWordsFile <- function(file, sep=","){
+    if (!is.null(file)){
+      req(file$datapath)
+      syn.terms <- readr::read_lines(file$datapath)
+      if (sep!=";") syn.terms <- gsub(sep,";",syn.terms)
+    }else{syn.terms <- NULL}
+    return(syn.terms)
+  }
+  
+  mapworld <- function(M){
+    if (!("AU_CO" %in% names(M))){M=metaTagExtraction(M,"AU_CO")}
+    CO=as.data.frame(tableTag(M,"AU_CO"),stringsAsFactors = FALSE)
+    CO$Tab=gsub("UNITED KINGDOM","UK",CO$Tab)
+    CO$Tab=gsub("KOREA","SOUTH KOREA",CO$Tab)
+    
+    map.world <- map_data("world")
+    map.world$region=toupper(map.world$region)
+    
+    dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
+    
+    country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
+    
+    tab=data.frame(country.prod %>%
+                     dplyr::group_by(region) %>%
+                     dplyr::summarise(Freq=mean(Freq)))
+    
+    tab=tab[!is.na(tab$Freq),]
+    
+    tab=tab[order(-tab$Freq),]
+    
+    breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
+    names(breaks)=breaks
+    breaks=log(breaks)
+    
+    g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
+      geom_polygon(aes(fill = log(Freq), group=group)) +
+      scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+      guides(fill = guide_legend(reverse = T)) +
+      #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +
+      labs(fill = 'N.Documents'
+           ,title = 'Country Scientific Production'
+           ,x = NULL
+           ,y = NULL) +
+      theme(text = element_text(color = '#333333')
+            ,plot.title = element_text(size = 28)
+            ,plot.subtitle = element_text(size = 14)
+            ,axis.ticks = element_blank()
+            ,axis.text = element_blank()
+            ,panel.grid = element_blank()
+            ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
+            ,plot.background = element_rect(fill = '#FFFFFF')
+            ,legend.position = c(.18,.36)
+            ,legend.background = element_blank()
+            ,legend.key = element_blank()
+      ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
+    
+    results=list(g=g,tab=tab)
+    return(results)
+  }
+  
+  ### Structure fuctions ----
+  CAmap <- function(input, values){
+    if ((input$CSfield %in% names(values$M))){
+      
+      if (input$CSfield %in% c("TI","AB")){
+        ngrams <- as.numeric(input$CSngrams)
+      }else{
+        ngrams <- 1
+      }
+      
+      ### load file with terms to remove
+      if (input$CSStopFile=="Y"){
+        remove.terms <- trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep))
+      }else{remove.terms <- NULL}
+      values$CSremove.terms <- remove.terms
+      ### end of block
+      ### load file with synonyms
+      if (input$FASynFile=="Y"){
+        synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
+      }else{synonyms <- NULL}
+      values$FAsyn.terms <- synonyms
+      ### end of block
+      
+      tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
+      if (length(tab>=2)){
+        
+        minDegree=as.numeric(tab[input$CSn])
+        
+        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
+                                         k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
+                                         remove.terms=remove.terms, synonyms = synonyms)
+        
+        
+      }else{emptyPlot("Selected field is not included in your data collection")
+        values$CS=list("NA")}
+      
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+      values$CS=list("NA")
+      
+    }
+  }
+  
+  historiograph <- function(input,values){
+    
+    min.cit <- 1
+    # if (input$histsearch=="FAST"){
+    #   min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
+    # }else{min.cit=1}
+    
+    if (values$Histfield=="NA"){
+      values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
+      values$Histfield="done"
+    }
+    titlelabel <- input$titlelabel=="TRUE"
+    values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, title_as_label = titlelabel, verbose=FALSE))
+    return(values)
+  }
+  
+  
+  ### Network functions ----
+  
+  degreePlot <- function(net){
+    deg <- data.frame(node = names(net$nodeDegree), x= (1:length(net$nodeDegree)), y = net$nodeDegree)
+    p <- ggplot(data = deg, aes(x=.data$x, y=.data$y, 
+                                text=paste("Node ",.data$x," - Degree ",.data$y, sep="")))+
+      geom_point()+
+      geom_line(aes(group="NA"),color = '#002F80', alpha = .5) +
+      theme(text = element_text(color = "#444444")
+            ,panel.background = element_rect(fill = '#EFEFEF')
+            ,panel.grid.minor = element_line(color = '#FFFFFF')
+            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,plot.title = element_text(size = 24)
+            ,axis.title = element_text(size = 14, color = '#555555')
+            ,axis.title.y = element_text(vjust = 1, angle = 0)
+            ,axis.title.x = element_text(hjust = 0)
+      ) + 
+      labs(x = "Node", y="Degree", title = "Node Degrees")
+    return(p)
+  }
+  
+  cocNetwork <- function(input,values){
+    
+    n = input$Nodes
+    label.n = input$Labels
+    
+    ### load file with terms to remove
+    if (input$COCStopFile=="Y"){
+      remove.terms <- trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep))
+    }else{remove.terms <- NULL}
+    values$COCremove.terms <- remove.terms
+    ### end of block
+    ### load file with synonyms
+    if (input$COCSynFile=="Y"){
+      synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
+    }else{synonyms <- NULL}
+    values$COCsyn.terms <- synonyms
+    ### end of block
+    
+    if ((input$field %in% names(values$M))){
+      
+      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field) | !(input$cocngrams==values$cocngrams) | ((dim(values$NetWords)[1])!=input$Nodes) ){
+        
+        values$field=input$field
+        values$ngrams <- input$cocngrams
+        
+        switch(input$field,
+               ID={
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
+                 values$Title= "Keywords Plus Network"
+               },
+               DE={
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
+                 values$Title= "Authors' Keywords network"
+               },
+               TI={
+                 #if(!("TI_TM" %in% names(values$M))){
+                 values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
+                 #}
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
+                 values$Title= "Title Words network"
+               },
+               AB={
+                 #if(!("AB_TM" %in% names(values$M))){
+                 values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
+                 #}
+                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
+                 values$Title= "Abstract Words network"
+               })
+        
+      }
+      
+      if (label.n>n){label.n=n}
+      if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
+      if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
+      if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
+      
+      #par(bg="grey92", mar=c(0,0,0,0))
+      values$cocnet=networkPlot(values$NetWords, normalize=normalize, Title = values$Title, type = input$layout, 
+                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
+                                label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
+                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), 
+                                community.repulsion = input$coc.repulsion/2, verbose = FALSE)
+      if (input$cocyears=="Yes"){
+        Y=fieldByYear(values$M, field = input$field, graph=FALSE)
+        g=values$cocnet$graph
+        label=igraph::V(g)$name
+        ind=which(tolower(Y$df$item) %in% label)
+        df=Y$df[ind,]
+        
+        #bluefunc <- colorRampPalette(c("lightblue", "darkblue"))
+        #col=bluefunc((diff(range(df$year))+1)*10)
+        col=heat.colors((diff(range(df$year))+1)*10)
+        igraph::V(g)$color=col[(max(df$year)-df$year+1)*10]
+        igraph::V(g)$year=df$year
+        values$cocnet$graph=g
+      }
+      
+    }else{
+      emptyPlot("Selected field is not included in your data collection")
+    }
+    return(values)
+  }
+  
+  intellectualStructure <- function(input,values){
+    n = input$citNodes
+    label.n = input$citLabels
+    
+    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep) | !(input$citShortlabel==values$citShortlabel) | ((dim(values$NetRefs)[1])!=input$citNodes)){
+      
+      values$citField=input$citField
+      values$citSep=input$citSep
+      if (input$citShortlabel=="Yes"){shortlabel=TRUE}else{shortlabel=FALSE}
+      values$citShortlabel=input$citShortlabel
+      switch(input$citField,
+             CR={
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", n = n, sep = input$citSep, shortlabel=shortlabel)
+               values$Title= "Cited References network"
+               
+             },
+             CR_AU={
+               if(!("CR_AU" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_AU", sep = input$citSep)}
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "authors", n = n, sep = input$citSep)
+               values$Title= "Cited Authors network"
+             },
+             CR_SO={
+               if(!("CR_SO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_SO", sep = input$citSep)}
+               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "sources", n = n, sep = input$citSep)
+               values$Title= "Cited Sources network"
+             })
+      
+    }
+    
+    if (label.n>n){label.n=n}
+    if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
+    if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
+    
+    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, Title = values$Title, type = input$citlayout, 
+                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
+                                labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
+                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
+                                alpha=0.7, cluster=input$cocitCluster, 
+                                community.repulsion = input$cocit.repulsion/2, verbose = FALSE)
+    return(values)
+  }
+  
+  socialStructure<-function(input,values){
+    n = input$colNodes
+    label.n = input$colLabels
+    
+    if ((dim(values$ColNetRefs)[1])==1 | !(input$colField==values$colField) | ((dim(values$ColNetRefs)[1])!=input$colNodes)){
+      
+      values$colField=input$colField
+      
+      
+      values$cluster="walktrap"
+      switch(input$colField,
+             COL_AU={
+               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")
+               values$Title= "Author Collaboration network"
+               
+             },
+             COL_UN={
+               if(!("AU_UN" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_UN", sep=";")}
+               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "universities", n = n, sep = ";")
+               values$Title= "Edu Collaboration network"
+             },
+             COL_CO={
+               if(!("AU_CO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_CO", sep=";")}
+               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", n = n, sep = ";")
+               values$Title= "Country Collaboration network"
+               #values$cluster="none"
+             })
+      
+    }
+    
+    if (label.n>n){label.n=n}
+    if (input$colnormalize=="none"){normalize=NULL}else{normalize=input$colnormalize}
+    if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
+    if (input$soc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
+    
+    type=input$collayout
+    if (input$collayout=="worldmap"){type="auto"}
+    
+    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, Title = values$Title, type = type, 
+                              size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
+                              labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
+                              label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
+                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster, 
+                              community.repulsion = input$col.repulsion/2, verbose = FALSE)
+    
+    return(values)
+    
+  }
+  
+  countrycollaboration <- function(M,label,edgesize,min.edges){
+    M=metaTagExtraction(M,"AU_CO")
+    net=biblioNetwork(M,analysis="collaboration",network="countries")
+    CO=data.frame(Tab=rownames(net),Freq=diag(net),stringsAsFactors = FALSE)
+    bsk.network=igraph::graph_from_adjacency_matrix(net,mode="undirected")
+    COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE),stringsAsFactors = FALSE)
+    
+    map.world <- map_data("world")
+    map.world$region=toupper(map.world$region)
+    map.world$region=gsub("UK","UNITED KINGDOM",map.world$region)
+    map.world$region=gsub("SOUTH KOREA","KOREA",map.world$region)
+    
+    country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
+    
+    breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
+    names(breaks)=breaks
+    breaks=log(breaks)
+    data("countries",envir=environment())
+    names(countries)[1]="Tab"
+    
+    COedges=dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
+    COedges=dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
+    COedges=COedges[COedges$V1!=COedges$V2,]
+    COedges=count.duplicates(COedges)
+    tab=COedges
+    COedges=COedges[COedges$count>=min.edges,]
+    
+    g=ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group )) +
+      geom_polygon(aes(fill = log(Freq))) +
+      scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+      #guides(fill = guide_legend(reverse = T)) +
+      guides(colour=FALSE, fill=FALSE)+
+      geom_curve(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
+                                   color = "firebrick4", size = .data$count, group=.data$continent.x),
+                 curvature = 0.33,
+                 alpha = 0.5) +
+      labs(x = "Latitude", y = "Longitude")+
       scale_size_continuous(guide = FALSE, range = c(0.25, edgesize))+
       theme(text = element_text(color = '#333333')
             ,plot.title = element_text(size = 28)
@@ -5141,7 +6096,7 @@ server <- function(input, output, session) {
       vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
     }else{
       vn$nodes$font.vadjust <-0
-      }
+    }
     
     VIS<-
       visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
@@ -5158,5 +6113,40 @@ server <- function(input, output, session) {
     values$COCVIS=VIS
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
   }
+
+
+  ## User part ----
+  #   output$user <- renderUser({
+  #   dashboardUser(
+  #     name = "Credits",
+  #     subtitle = p("Massimo Aria & Corrado Cuccurullo", align ="center", style='font-size:50px;color:white;'),
+  #     image = "logo2.png",
+  #     footer = p("Bibliometrix, K-Synth and Github Websites",
+  #                class ="text-center"),
+  #     fluidRow(
+  #       dashboardUserItem(
+  #         width = 4,
+  #         socialButton(
+  #           href = 'https://www.bibliometrix.org/',
+  #           icon = icon("globe", lib = "font-awesome")
+  #         )
+  #       ),
+  #       dashboardUserItem(
+  #         width = 4,
+  #         socialButton(
+  #           href = "https://www.k-synth.unina.it",
+  #           icon = icon("globe",lib = "font-awesome")
+  #         )
+  #       ),
+  #       dashboardUserItem(
+  #         width = 4,
+  #         socialButton(
+  #           href = "https://github.com/massimoaria/bibliometrix",
+  #           icon = icon("globe",lib = "font-awesome")
+  #         )
+  #       )
+  #     ))
+  # })
   
-} ## End of Server
+
+}

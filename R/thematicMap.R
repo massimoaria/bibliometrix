@@ -180,8 +180,8 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   df$name_full=L
   ###
   
-  xlimits=c(meancentr-rangex-0.5,meancentr+rangex+0.5)
-  ylimits=c(meandens-rangey-0.5,meandens+rangey+0.5)
+  xlimits=c(meancentr-(rangex*1.2),meancentr+rangex*1.2)
+  ylimits=c(meandens-(rangey*1.2),meandens+rangey*1.2)
   
 
   annotations <- data.frame(
@@ -194,7 +194,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   data("logo",envir=environment())
   logo <- grid::rasterGrob(logo,interpolate = TRUE)
   
-  x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.5
+  x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.6
   y <- c(min(df$rdensity),min(df$rdensity)+diff(range(df$rdensity))*0.125)
 
   g=ggplot(df, aes(x=.data$rcentrality, y=.data$rdensity, text=c(.data$words))) +
@@ -216,11 +216,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
       annotate("text",x=annotations$xpos,y= annotations$ypos,hjust=annotations$hjustvar,
                                          vjust=annotations$vjustvar,label=annotations$words, color=adjustcolor("gray20", alpha.f=0.5),size=3*(1+size))+
       theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()
-        ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
-
+            panel.background = element_rect(fill = '#FFFFFF'),
+            axis.line.x = element_line(color="black",size=0.5),
+            axis.line.y = element_line(color="black",size=0.5),
+            axis.ticks.x=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank()
+      ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+    
   names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label")
   words=df_lab[order(df_lab$Cluster),]
   words=words[!is.na(words$Color),]

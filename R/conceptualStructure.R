@@ -212,12 +212,16 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     geom_point() +
     geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
     geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
-    theme(panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+    theme(
+      #panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
           text = element_text(size=labelsize),
           axis.title=element_text(size=labelsize,face="bold"),
           plot.title=element_text(size=labelsize+1,face="bold"),
           panel.background = element_rect(fill = "white", colour = "white"),
-          panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+          #panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+          axis.line.x = element_line(color="black",size=0.5),
+          axis.line.y = element_line(color="black",size=0.5),
+          panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
    if (method!="MDS"){
      b=b+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
@@ -257,7 +261,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
   b_dend <- fviz_dend(km.res, rect = TRUE, k=clust, 
                                        cex=labelsize/20, main="Topic Dendrogram",
-                                       k_colors = cbPalette[clust:1])+ 
+                                       k_colors = cbPalette[1:clust])+ 
     #scale_color_manual(values = cbPalette[(clust+1):1])+
     #scale_fill_manual(values = cbPalette[(clust+1):1])+
     theme(plot.title=element_text(size=labelsize+1,face="bold"), 
@@ -296,7 +300,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     A <- A %>%
       mutate(names=row.names(A)) %>%
       group_by(.data$color) %>%
-      top_n(.data$contrib,n=documents) %>%
+      top_n(n=documents,wt=.data$contrib) %>%
       select(!"contrib")%>%
       as.data.frame() 
     
@@ -324,14 +328,19 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
       scale_y_continuous(limits = rangey, breaks=seq(round(rangey[1]), round(rangey[2]), 1))+
       geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
       geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
-      theme(plot.title=element_text(size=labelsize+1,face="bold"), 
-            axis.title=element_text(size=labelsize,face="bold") ,
-            panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
-            panel.background = element_rect(fill = "white",
-                                            colour = "white"),
-            #size = 1, linetype = "solid"),
-            panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray90",alpha.f = 0.7)),
-            panel.grid.minor = element_blank())
+      theme(
+        #panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+        text = element_text(size=labelsize),
+        axis.title=element_text(size=labelsize,face="bold"),
+        plot.title=element_text(size=labelsize+1,face="bold"),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        #panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+        axis.line.x = element_line(color="black",size=0.5),
+        axis.line.y = element_line(color="black",size=0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+      
+  
     
     if (method!="MDS"){
       b_doc=b_doc+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
@@ -356,7 +365,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     B <- B %>%
       mutate(names=row.names(B)) %>%
       group_by(.data$color) %>%
-      top_n(.data$TC,n=documents) %>%
+      top_n(n=documents, wt=.data$TC) %>%
       select(!"TC")%>%
       as.data.frame() 
     
@@ -382,12 +391,17 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
       ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))+
       geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
       geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey60",alpha.f = 0.7))+
-      theme(plot.title=element_text(size=labelsize+1,face="bold"), 
-            axis.title=element_text(size=labelsize,face="bold") ,
-            panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
-            panel.background = element_rect(fill = "white", colour = "white"),
-           panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray90",alpha.f = 0.7)),
-           panel.grid.minor = element_blank())
+      theme(
+        #panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+        text = element_text(size=labelsize),
+        axis.title=element_text(size=labelsize,face="bold"),
+        plot.title=element_text(size=labelsize+1,face="bold"),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        #panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
+        axis.line.x = element_line(color="black",size=0.5),
+        axis.line.y = element_line(color="black",size=0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
       
     ## logo coordinates
     xl <- c(rangex[2]-0.02-diff(rangex)*0.125, rangex[2]-0.02)

@@ -25,7 +25,7 @@ require(pubmedR, quietly = TRUE)
 #### INTERFACCIA UTENTE #### 
 ## Title ----
 mytitle <- tags$link(tags$a(href = 'https://www.bibliometrix.org/',target="_blank",
-                            tags$img(src="logo2.png", height = '35',width='35')),
+                            tags$img(src="logo2.jpg", height = '35',width='35')),
                      strong("bibliometrix")
                      )
                      #style = "font-weight: jost"
@@ -366,7 +366,7 @@ customTheme <- shinyDashboardThemeDIY(
                    style="text-align:center; font-size:20px;")),
             ),
             column(12,
-            div(img(src = "logo.png", height = "35%",width = "35%"), style="text-align: center;")
+            div(img(src = "logo.jpg", height = "35%",width = "35%"), style="text-align: center;")
             ),
             #div(img(src = "hexagon.png",height = 600, width = 600), style="text-align: center;"),
             column(12,

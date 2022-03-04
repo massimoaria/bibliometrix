@@ -176,11 +176,14 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
     xlim(xlimits)+
     ylim(ylimits)+
     ggtitle(paste("Clusters by ", toupper(substr(analysis,1,1)),substr(analysis,2,nchar(analysis))," Coupling" ,sep="")) +
-    theme(plot.title = element_text(size=14, face="bold.italic"),
-          axis.text.x=element_blank(),
+    theme(axis.text.x=element_blank(),
+          panel.background = element_rect(fill = '#FFFFFF'),
+          axis.line.x = element_line(color="black",size=0.5),
+          axis.line.y = element_line(color="black",size=0.5),
           axis.ticks.x=element_blank(),
           axis.text.y=element_blank(),
-          axis.ticks.y=element_blank()) + 
+          axis.ticks.y=element_blank()
+    ) +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
   
 

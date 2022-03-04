@@ -49,20 +49,20 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                 headerText = strong("Help Menu"),
                                                 messageItem(
                                                   from = "Package Tutorial",
-                                                  message = "For the tutorial, please click here",
+                                                  message = "",
                                                   href = intro,
                                                   icon = icon("play-circle", lib = "glyphicon")
                                                 ),
                                                 messageItem(
                                                   from = "Convert and Import Data",
-                                                  message = "For the tutorial, please click here",
+                                                  message = "",
                                                   icon = icon("info-sign", lib = "glyphicon"),
                                                   href = importData
                                                 ),
                                                 messageItem(
                                                   icon = icon("play", lib = "glyphicon"),
                                                   from = "biblioshiny Tutorial",
-                                                  message = "For the tutorial, please click here",
+                                                  message = "",
                                                   href = slides
                                                 )
                                               ),
@@ -72,7 +72,7 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                            headerText = strong("Donate"),
                                                            messageItem(
                                                              from = "Donation",
-                                                             message = "For a donation, please click here",
+                                                             message = "",
                                                              href = donation,
                                                              icon = icon("share-alt", lib = "glyphicon")
                                                            )
@@ -84,19 +84,19 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                 headerText = strong("Credits"),
                                                 messageItem(
                                                   from = "Bibliometrix",
-                                                  message = "Click here",
+                                                  message = "",
                                                   href = bibliometrixWeb,
                                                   icon = fa_i(name = "globe")
                                                 ),
                                                 messageItem(
                                                   from = "K-Synth",
-                                                  message = "Click here",
+                                                  message = "",
                                                   href = k_synth,
                                                   icon = fa_i(name = "watchman-monitoring")
                                                   ),
                                                 messageItem(
                                                   from = "Github",
-                                                  message = "Click here",
+                                                  message = "",
                                                   href = github_aria,
                                                   icon = fa_i(name = "github")
                                                  )
@@ -707,7 +707,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Annual Scientific Production"), align = "center")
+                  h2(strong("Annual Scientific Production"), align = "center")
               ),
               fluidRow(
             sidebarLayout(
@@ -757,7 +757,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Average Citation Per Year"), align = "center")
+                  h2(strong("Average Citation Per Year"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -803,7 +803,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Three-Field Plot"), align = "center")
+                  h2(strong("Three-Field Plot"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -881,7 +881,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Most Relevant Sources"), align = "center")
+                  h2(strong("Most Relevant Sources"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -937,7 +937,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Most Local Cited Sources (from Reference Lists)"), align = "center")
+                  h2(strong("Most Local Cited Sources (from Reference Lists)"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -993,7 +993,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Source clustering through Bradford's Law"), align = "center")
+                  h2(strong("Source clustering through Bradford's Law"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1040,7 +1040,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Source Local Impact"), align = "center")
+                  h2(strong("Source Local Impact"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1105,7 +1105,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Source Dynamics"), align = "center")
+                  h2(strong("Source Dynamics"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1173,7 +1173,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Most Relevant Authors"), align = "center")
+                  h2(strong("Most Relevant Authors"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1237,7 +1237,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Most Local Cited Authors"), align = "center")
+                  h2(strong("Most Local Cited Authors"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1293,7 +1293,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Authors' Production over Time"), align = "center")
+                  h2(strong("Authors' Production over Time"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1353,7 +1353,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Author Productivity through Lotka's Law"), align = "center")
+                  h2(strong("Author Productivity through Lotka's Law"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1400,7 +1400,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Author Local Impact"), align = "center")
+                  h2(strong("Author Local Impact"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1465,7 +1465,7 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Most Relevant Affiliations"), align = "center")
+                  h2(strong("Most Relevant Affiliations"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
@@ -1529,12 +1529,12 @@ tabItem("mainInfo",
             fluidPage(
               fluidRow(
                 titlePanel(
-                  h1(strong("Corresponding Author's Country"), align = "center")
+                  h2(strong("Corresponding Author's Country"), align = "center")
                 ),
                 fluidRow(
             sidebarLayout(
               sidebarPanel(width=2,
-                           h3(strong("Corresponding Author's Country")),
+                           #h3(strong("Corresponding Author's Country")),
                            br(),
                            actionButton("applyCAUCountries", strong("Apply!"),style ="border-radius: 10px; border-width: 3px;",
                                         width = "100%"),
@@ -3099,7 +3099,7 @@ tabItem("mainInfo",
                                                            width = "100%")
               )),
               mainPanel(width=9,
-                "Thematic Map",
+                #"Thematic Map",
                         tabsetPanel(type = "tabs",
                                     tabPanel("Map",
                                              shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "75vh")) #height = 700))
@@ -3228,15 +3228,14 @@ tabItem("mainInfo",
                            ),
                            br(),
                            box(title = p(strong("Time Slices"),style='font-size:16px;color:black;'), 
-                               collapsible = TRUE, width = 15,
-                               solidHeader = FALSE, collapsed = TRUE,
+                               collapsible = FALSE, width = 15,
+                               solidHeader = FALSE, collapsed = FALSE,
                            numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
                            "Please, write the cutting points (in year) for your collection",
                            uiOutput("sliders")
               )),
               mainPanel(width=9,
-                "Thematic Evolution",
-                        
+                #"Thematic Evolution",
                         tabsetPanel(type = "tabs",
                                     tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
                                                                                tabPanel("Map",
@@ -3487,8 +3486,7 @@ tabItem("mainInfo",
                            )
                            ),
               mainPanel(width=9,
-                "Factorial Analysis",
-                        
+                #"Factorial Analysis",
                         tabsetPanel(type = "tabs",
                                     tabPanel("Word Map", 
                                              shinycssloaders::withSpinner(plotOutput(
@@ -3689,7 +3687,6 @@ tabItem("mainInfo",
               )),
               mainPanel(width=9,
                 tabsetPanel(type = "tabs",
-                            
                             tabPanel("Newtwork", 
                                      shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))), #height = "750px", width = "1100px"))),         
                             tabPanel("Table", 

@@ -5316,7 +5316,7 @@ server <- function(input, output,session){
   # from ggplot to plotly
   plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=2, height=0){
     
-    # g <- g + labs(title = NULL)
+    g <- g + labs(title = NULL)
     # a <- ggplot_build(g)$data
     # 
     # ymin <- unlist(lapply(a, function(l){

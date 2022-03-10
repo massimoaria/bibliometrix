@@ -75,16 +75,17 @@ server <- function(input, output,session){
         }
       }
       
-      
       notificationItem(
         #text = row[["nots"]],
         text = eval(parse(text=textRows)),
-        icon = icon("bell", lib = "font-awesome"),
+        icon = fa_i(name ="envelope"),
         status = row[["status"]],
         href = href
       )
     })
-    dropdownMenu(type = "notifications", .list = values$nots)
+    dropdownMenu(type = "notifications", 
+                 .list = values$nots, 
+                 icon = fa_i(name ="bell"))
   })
   ## LOAD MENU ----
   format <- function(obj){
@@ -5489,7 +5490,8 @@ server <- function(input, output,session){
                'lasso2d',
                'toggleSpikelines',
                'hoverClosestCartesian',
-               'hoverCompareCartesian'
+               'hoverCompareCartesian',
+               'toImage'
              )) #%>%
       # layout(
       #   images = list(
@@ -5506,7 +5508,7 @@ server <- function(input, output,session){
   freqPlot <- function(xx,x,y, textLaby,textLabx, title){
     
 
-    xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
+    xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+0.5
     yl <- c(1,1+length(unique(xx[,y]))*0.125)
     
     Text <- paste(textLaby,": ",xx[,y],"\n",textLabx, ": ",xx[,x])

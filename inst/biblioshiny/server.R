@@ -83,8 +83,17 @@ server <- function(input, output,session){
         href = href
       )
     })
+    
+    if ("danger" %in% notifTot[["status"]]){
+      badge = "danger"
+    } else {
+      badge = NULL
+    }
+    
     dropdownMenu(type = "notifications", 
                  .list = values$nots, 
+                 headerText ="",
+                 badgeStatus = badge, 
                  icon = fa_i(name ="bell"))
   })
   ## LOAD MENU ----

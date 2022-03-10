@@ -42,6 +42,7 @@ github_aria <- "javascript:void(window.open('https://github.com/massimoaria/bibl
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                               titleWidth = 300,
+                                              dropdownMenuOutput("notificationMenu"),
                                               dropdownMenu(
                                                 type = "messages",
                                                 icon = icon("question"),

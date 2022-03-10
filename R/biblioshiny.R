@@ -14,9 +14,6 @@
 #' Defaults to the shiny.host option, if set, or "127.0.0.1" if not.
 #' 
 #' @param maxUploadSize is a integer. The max upload file size argument. Default value is 200 (megabyte)
-#' @param theme.type is a character. The argument indicates one of the bootstrap 5 themes included in bslib package.
-#' @param font.type is a character. The argument indicates one of the Google fonts you can use in Biblioshiny.
-#' @param font.size is a numeric. The argument indicates the font size. Default value is 1.
 #' 
 #' @examples
 #' 
@@ -26,14 +23,10 @@
 #' @export
 
 biblioshiny <- function(host = "127.0.0.1", port = NULL, 
-                        launch.browser = TRUE, maxUploadSize=200,
-                        theme.type = "yeti",
-                        font.type = "Jost", font.size = 1.05){
+                        launch.browser = TRUE, maxUploadSize=200
+                        ){
   
-  shinyOptions(maxUploadSize = maxUploadSize,
-               theme.type = theme.type,
-               font.type = font.type,
-               font.size = font.size)
+  shinyOptions(maxUploadSize = maxUploadSize)
   
   runApp(system.file("biblioshiny",package="bibliometrix"),launch.browser = launch.browser, port = port, host = getOption("shiny.host", host))
 }

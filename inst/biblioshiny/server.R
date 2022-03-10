@@ -11,7 +11,6 @@ server <- function(input, output,session){
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)
-  #options(shiny.maxRequestSize=200*1024^2)
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
   
   ## initial values
@@ -44,7 +43,50 @@ server <- function(input, output,session){
   values$pmSample <- 0
   values$ApiOk <- 0
   
-  ## LOAD MENU --
+  ## NOTIFICATION ITEM ----
+  
+  output$notificationMenu <- renderMenu({
+    
+    notifTot <- notifications()
+    
+    values$nots <- apply(notifTot, 1, function(row) {
+      
+      ## extract href from messages
+      if (is.na(row[["href"]])){href <- NULL
+      }else{
+        href <- paste("javascript:void(window.open('",row[["href"]],"', '_blank'))", sep="")
+      }
+      
+      ## add bold to new messages and split the long ones in two rows
+      if (row[["status"]]=="danger"){  ### new messages
+        textRows <- paste("tags$strong('",row[["nots"]],"')", sep="")
+        textRows <- strsplit(substr(textRows,1,85), "(?<=.{48})", perl = TRUE)[[1]]
+        if (length(textRows)>1){
+          textRows <- paste("tags$div(",textRows[1],"',tags$br(),'",textRows[2],")", sep="")
+        }else{
+          textRows <- paste("tags$div(",textRows,")", sep="")
+        }
+      }else{ ## old messages
+        textRows <- strsplit(substr(row[["nots"]],1,70), "(?<=.{35})", perl = TRUE)[[1]]
+        if (length(textRows)>1){
+          textRows <- paste("tags$div('",textRows[1],"',tags$br(),'",textRows[2],"')", sep="")
+        }else{
+          textRows <- paste("tags$div('",textRows,"')", sep="")
+        }
+      }
+      
+      
+      notificationItem(
+        #text = row[["nots"]],
+        text = eval(parse(text=textRows)),
+        icon = icon("bell", lib = "font-awesome"),
+        status = row[["status"]],
+        href = href
+      )
+    })
+    dropdownMenu(type = "notifications", .list = values$nots)
+  })
+  ## LOAD MENU ----
   format <- function(obj){
     ext<- sub('.*\\.', '', obj[1])
     switch(ext,
@@ -5282,6 +5324,81 @@ server <- function(input, output,session){
   }
   
   #### Common functions ---- 
+  
+  notifications <- function(){
+    
+    ## check connection and download notifications
+    online <- is_online()
+    if (isTRUE(is_online())){
+      notifOnline <- readLines("https://www.bibliometrix.org/notification.txt")
+      notifOnline <- notifOnline[nchar(notifOnline)>2]
+      n <- strsplit(notifOnline,",")
+      notsOnline <- unlist(lapply(n,function(l) l[1]))
+      linksOnline <- unlist(lapply(n,function(l) l[2]))
+      linksOnline[nchar(linksOnline)<6] <- NA
+    }
+    
+    ## check if a file exists on the local machine and load it
+    switch(Sys.info()[['sysname']],
+           Windows= {home <- Sys.getenv('R_USER')},
+           Linux  = {home <- Sys.getenv('HOME')},
+           Darwin = {home <- Sys.getenv('HOME')})
+    
+    file <- paste(home,"/biblioshiny_notification.txt", sep="")
+    fileTrue <- file.exists(file)
+    if (isTRUE(fileTrue)){
+      notifLocal <- readLines(file)
+      n <- strsplit(notifLocal,",")
+      notsLocal <- unlist(lapply(n,function(l) l[1]))
+      linksLocal <- unlist(lapply(n,function(l) l[2]))
+      linksLocal[nchar(linksLocal)<6] <- NA
+    }
+    
+    
+    A <- c("noA","A")
+    B <- c("noB","B")
+    status <- paste(A[online+1],B[fileTrue+1],sep="")
+    
+    switch(status,
+           # missing both files (online and local)
+           noAnoB={
+             notifTot <- data.frame(nots="No notifications", status="info")
+           },
+           # missing online file. The local one exists.
+           noAB={
+             notifTot <- data.frame(nots=notsLocal, href=linksLocal, status=rep("info",length(notifLocal)))
+           },
+           # missing the local file. The online one exists.
+           AnoB={
+             notifTot <- data.frame(nots=notsOnline, href=linksOnline, status=rep("danger",length(notifOnline)))
+             write.table(notifOnline, file=file, col.names = FALSE, row.names = FALSE, quote = FALSE)
+           },
+           # both files exist.
+           AB={
+             if (notifLocal[1]!=notifOnline[1]){
+               notifTot <- data.frame(nots=c(notsOnline,notsLocal), href=c(linksOnline,linksLocal), status=c(rep("danger",length(notifOnline)),rep("info",length(notifLocal))))
+               notifLocal <- c(notifOnline,notifLocal)
+               notifLocal <- notifLocal[1:min(5,length(notifLocal))]
+               write.table(notifLocal, file=file, col.names = FALSE, row.names = FALSE, quote = FALSE)
+               #save(notifFile, file=file)
+             }else{
+               notifTot <- data.frame(nots=notsLocal, href=linksLocal, status=rep("info",length(notifLocal)))
+             }
+           })
+    
+    notifTot <- notifTot[1:(min(5,nrow(notifTot))),]
+    return(notifTot)
+  }
+  
+  
+  is_online <- function(site="https://www.bibliometrix.org/") {
+    tryCatch({
+      readLines(site,n=1)
+      TRUE
+    },
+    warning = function(w) invokeRestart("muffleWarning"),
+    error = function(e) FALSE)
+  }
   
   getFileNameExtension <- function (fn) {
     # remove a path

@@ -75,10 +75,12 @@ server <- function(input, output,session){
         }
       }
       
+      
+      
       notificationItem(
         #text = row[["nots"]],
         text = eval(parse(text=textRows)),
-        icon = fa_i(name ="envelope"),
+        icon = if (row[["status"]]=="danger") {fa_i(name ="envelope")}else{fa_i(name ="envelope-open")},
         status = row[["status"]],
         href = href
       )
@@ -86,15 +88,19 @@ server <- function(input, output,session){
     
     if ("danger" %in% notifTot[["status"]]){
       badge = "danger"
+      icon_name ="envelope"
     } else {
       badge = NULL
+      icon_name ="envelope-open"
     }
     
     dropdownMenu(type = "notifications", 
                  .list = values$nots, 
                  headerText ="",
-                 badgeStatus = badge, 
-                 icon = fa_i(name ="bell"))
+                 badgeStatus = NULL, 
+                 icon = fa_i(name = icon_name)
+                 #icon = icon_color
+                 )
   })
   ## LOAD MENU ----
   format <- function(obj){
@@ -5906,14 +5912,16 @@ server <- function(input, output,session){
       geom_point()+
       geom_line(aes(group="NA"),color = '#002F80', alpha = .5) +
       theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-      ) + 
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
+      ) +
       labs(x = "Node", y="Degree", title = "Node Degrees")
     return(p)
   }

@@ -333,7 +333,13 @@ customTheme <- shinyDashboardThemeDIY(
      customTheme,
      ### aggiunto da Massimo il 25/02/2022
      ### codice per risize automatico grafici ggplot statici
-     tags$head(tags$script(
+     tags$head(
+       tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"), # colore icone nel header
+       tags$style(".fa-envelope-open {font-size: 20px}"), 
+       tags$style(".fa-cube {font-size: 20px}"),
+       tags$style(".fa-question {font-size: 20px}"),
+       tags$style(".fa-comment-dollar {font-size: 20px}"),
+       tags$script(
        'var dimension = [0, 0];
               $(document).on("shiny:connected", function(e) {
                   dimension[0] = window.innerWidth;
@@ -4053,6 +4059,7 @@ tabItem("mainInfo",
    
 ui <- shinydashboardPlus::dashboardPage(header, sidebar, body,
                                         options = list(sidebarExpandOnHover = TRUE),
-                                        scrollToTop =TRUE)
+                                        scrollToTop =TRUE,
+                                        controlbar = NULL)
                                         
    

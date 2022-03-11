@@ -5377,7 +5377,7 @@ server <- function(input, output,session){
     switch(status,
            # missing both files (online and local)
            noAnoB={
-             notifTot <- data.frame(nots="No notifications", status="info")
+             notifTot <- data.frame(nots="No notifications", href=NA, status="info") %>% mutate(status = "info")
            },
            # missing online file. The local one exists.
            noAB={
@@ -5401,7 +5401,7 @@ server <- function(input, output,session){
                arrange(.data$status) %>% 
                filter(.data$action == TRUE) %>% 
                dplyr::slice_head(n=5)
-             notifTot  %>% write.csv(file=file, quote = FALSE, row.names = FALSE)   
+             notifTot %>% select(-.data$status) %>% write.csv(file=file, quote = FALSE, row.names = FALSE)   
              
            })
     

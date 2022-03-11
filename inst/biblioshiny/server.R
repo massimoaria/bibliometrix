@@ -5339,13 +5339,14 @@ server <- function(input, output,session){
     
     ## check connection and download notifications
     online <- is_online()
+    location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
     if (isTRUE(is_online())){
-      notifOnline <- readLines("https://www.bibliometrix.org/notification.txt")
-      notifOnline <- notifOnline[nchar(notifOnline)>2]
-      n <- strsplit(notifOnline,",")
-      notsOnline <- unlist(lapply(n,function(l) l[1]))
-      linksOnline <- unlist(lapply(n,function(l) l[2]))
-      linksOnline[nchar(linksOnline)<6] <- NA
+      suppressWarnings(notifOnline <- read.csv(location, header=TRUE, sep=","))
+      #notifOnline <- notifOnline[nchar(notifOnline)>2]
+      #n <- strsplit(notifOnline,",")
+      #notsOnline <- unlist(lapply(n,function(l) l[1]))
+      #linksOnline <- unlist(lapply(n,function(l) l[2]))
+      notifOnline$href[nchar(notifOnline$href)<6] <- NA
     }
     
     ## check if a file exists on the local machine and load it
@@ -5354,14 +5355,12 @@ server <- function(input, output,session){
            Linux  = {home <- Sys.getenv('HOME')},
            Darwin = {home <- Sys.getenv('HOME')})
     
-    file <- paste(home,"/biblioshiny_notification.txt", sep="")
+    file <- paste(home,"/biblioshiny_notifications.csv", sep="")
     fileTrue <- file.exists(file)
     if (isTRUE(fileTrue)){
-      notifLocal <- readLines(file)
-      n <- strsplit(notifLocal,",")
-      notsLocal <- unlist(lapply(n,function(l) l[1]))
-      linksLocal <- unlist(lapply(n,function(l) l[2]))
-      linksLocal[nchar(linksLocal)<6] <- NA
+      suppressWarnings(notifLocal <- read.csv(file, header=TRUE, sep=","))
+      #notifLocal <- readLines(file)
+      #linksLocal[nchar(linksLocal)<6] <- NA
     }
     
     
@@ -5376,27 +5375,31 @@ server <- function(input, output,session){
            },
            # missing online file. The local one exists.
            noAB={
-             notifTot <- data.frame(nots=notsLocal, href=linksLocal, status=rep("info",length(notifLocal)))
+             notifTot <- notifLocal %>% filter(.data$action == TRUE) %>% mutate(status = "info")
            },
            # missing the local file. The online one exists.
            AnoB={
-             notifTot <- data.frame(nots=notsOnline, href=linksOnline, status=rep("danger",length(notifOnline)))
-             write.table(notifOnline, file=file, col.names = FALSE, row.names = FALSE, quote = FALSE)
+             notifOnline <- notifOnline %>% 
+               slice_head(n=5)
+             notifTot <- notifOnline %>% filter(.data$action == TRUE) %>% mutate(status = "danger") 
+             notifOnline %>% filter(.data$action == TRUE) %>% write.csv(file=file, quote = FALSE, row.names = FALSE)
            },
            # both files exist.
            AB={
-             if (notifLocal[1]!=notifOnline[1]){
-               notifTot <- data.frame(nots=c(notsOnline,notsLocal), href=c(linksOnline,linksLocal), status=c(rep("danger",length(notifOnline)),rep("info",length(notifLocal))))
-               notifLocal <- c(notifOnline,notifLocal)
-               notifLocal <- notifLocal[1:min(5,length(notifLocal))]
-               write.table(notifLocal, file=file, col.names = FALSE, row.names = FALSE, quote = FALSE)
-               #save(notifFile, file=file)
-             }else{
-               notifTot <- data.frame(nots=notsLocal, href=linksLocal, status=rep("info",length(notifLocal)))
-             }
+             notifTot <- left_join(notifOnline %>% mutate(status = "danger"),
+                                   notifLocal%>% mutate(status = "info"), by="nots") %>% 
+               mutate(status = replace_na(.data$status.y,"danger")) %>% 
+               rename(href = .data$href.x,
+                      action = .data$action.x) %>% 
+               select(nots, href, action, status) %>% 
+               arrange(.data$status) %>% 
+               filter(.data$action == TRUE) %>% 
+               slice_head(n=5)
+             notifTot  %>% write.csv(file=file, quote = FALSE, row.names = FALSE)   
+             
            })
     
-    notifTot <- notifTot[1:(min(5,nrow(notifTot))),]
+    #notifTot <- notifTot[1:(min(5,nrow(notifTot))),]
     return(notifTot)
   }
   

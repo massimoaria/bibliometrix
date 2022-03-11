@@ -4,11 +4,7 @@ if (!(require(rio))){install.packages("rio")}
 if (!(require(DT))){install.packages("DT")};require(DT, quietly =TRUE)
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
-#if (!(require(shinythemes))){install.packages("shinythemes")}
-#if (!(require(bslib))){install.packages("bslib")}
 if (!(require(wordcloud2))){install.packages("wordcloud2")} 
-#if (!require(colourpicker)){install.packages("colourpicker")}
-#if (!require(treemap)){install.packages("treemap")}
 if (!require(ggmap)){install.packages("ggmap"); require(ggmap, quietly=TRUE)}
 if (!require(maps)){install.packages("maps"); require(maps, quietly=TRUE)}
 if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
@@ -21,6 +17,7 @@ require(Matrix, quietly = TRUE)
 require(dimensionsR, quietly = TRUE)
 require(pubmedR, quietly = TRUE)
 require(dplyr, quietly = TRUE)
+require(tidyr, quietly = TRUE)
 
 #### INTERFACCIA UTENTE #### 
 ## Title ----

@@ -20,7 +20,7 @@ if (!require(shinydashboard)){install.packages("shinydashboard"); require(shinyd
 require(Matrix, quietly = TRUE)
 require(dimensionsR, quietly = TRUE)
 require(pubmedR, quietly = TRUE)
-
+require(dplyr, quietly = TRUE)
 
 #### INTERFACCIA UTENTE #### 
 ## Title ----

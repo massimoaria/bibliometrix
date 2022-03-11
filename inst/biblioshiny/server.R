@@ -5380,7 +5380,7 @@ server <- function(input, output,session){
            # missing the local file. The online one exists.
            AnoB={
              notifOnline <- notifOnline %>% 
-               slice_head(n=5)
+               dplyr::slice_head(n=5)
              notifTot <- notifOnline %>% filter(.data$action == TRUE) %>% mutate(status = "danger") 
              notifOnline %>% filter(.data$action == TRUE) %>% write.csv(file=file, quote = FALSE, row.names = FALSE)
            },
@@ -5394,7 +5394,7 @@ server <- function(input, output,session){
                select(nots, href, action, status) %>% 
                arrange(.data$status) %>% 
                filter(.data$action == TRUE) %>% 
-               slice_head(n=5)
+               dplyr::slice_head(n=5)
              notifTot  %>% write.csv(file=file, quote = FALSE, row.names = FALSE)   
              
            })

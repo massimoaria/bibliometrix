@@ -2671,7 +2671,7 @@ server <- function(input, output,session){
     TAB <- values$TABCitRef
     
     TAB$link <- trimES(gsub("[[:punct:]]" , " ",reduceRefs(TAB[,1])))
-    
+    #TAB$link <- trimws(gsub(".*DOI ","",TAB$`Cited References`))
     
     TAB$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',TAB$link,'\" target=\"_blank\">','link','</a>')
     

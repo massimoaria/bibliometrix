@@ -1847,7 +1847,7 @@ body <- dashboardBody(
                 ),
                 fluidRow(
                   sidebarLayout(
-                    sidebarPanel(width=2,
+                    sidebarPanel(width=3,
                                  actionButton("applyRPYS", strong("Apply!"),style ="border-radius: 10px; border-width: 3px;",
                                               width = "100%"),
                                  br(),
@@ -1899,7 +1899,7 @@ body <- dashboardBody(
                                                                  width = "100%")  
                                                   
                                  )),
-                    mainPanel(width=10,
+                    mainPanel(width=9,
                               tabsetPanel(type = "tabs",
                                           tabPanel("Plot", 
                                                    shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))), #height = 700))),
@@ -2042,7 +2042,7 @@ body <- dashboardBody(
                 fluidRow(
                   sidebarLayout(
                     # Sidebar with a slider and selection inputs
-                    sidebarPanel(width=2,
+                    sidebarPanel(width=3,
                                  actionButton("applyWordCloud", strong("Apply!"),
                                               style ="border-radius: 10px; border-width: 3px;",
                                               width = "100%"),
@@ -2163,7 +2163,7 @@ body <- dashboardBody(
                     ),
                     
                     # Show Word Cloud
-                    mainPanel(width=10,
+                    mainPanel(width=9,
                               tabsetPanel(type = "tabs",
                                           tabPanel("Plot",
                                                    wordcloud2::wordcloud2Output("wordcloud", height = "75vh") #height = "600px")
@@ -2408,7 +2408,7 @@ body <- dashboardBody(
                 fluidRow(
                   sidebarLayout(
                     # Sidebar with a slider and selection inputs
-                    sidebarPanel(width=2,
+                    sidebarPanel(width=4,
                                  actionButton("applyTrendTopics", strong("Apply!"),
                                               style ="border-radius: 10px; border-width: 3px;",
                                               width = "100%"),
@@ -2521,7 +2521,7 @@ body <- dashboardBody(
                                  )),
                     
                     # 
-                    mainPanel(width=10,
+                    mainPanel(width=8,
                               tabsetPanel(type = "tabs",
                                           tabPanel("Plot",
                                                    shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh",width ="98.9%")) #height = 700))
@@ -2546,7 +2546,7 @@ body <- dashboardBody(
                 fluidRow(
                   tabPanel("Clustering by Coupling",
                            sidebarLayout(
-                             sidebarPanel(width=2,
+                             sidebarPanel(width=3,
                                           actionButton("applyCM", strong("Apply!"),
                                                        style ="border-radius: 10px; border-width: 3px;",
                                                        width = "100%"),
@@ -2638,7 +2638,7 @@ body <- dashboardBody(
                                                                           style ="border-radius: 10px; border-width: 3px;",
                                                                           width = "100%")
                                           )),
-                             mainPanel(width=10,
+                             mainPanel(width=9,
                                        #"Clustering by Coupling",
                                        tabsetPanel(type = "tabs",
                                                    tabPanel("Map",

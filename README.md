@@ -12,7 +12,7 @@ bibliometrix
 
 
 <p align="center">
-<img src="https://www.bibliometrix.org/logo.png" width="300"  />
+<img src="https://www.bibliometrix.org/logo_new.png" width="400"  />
 </p>
 
 ## Overview

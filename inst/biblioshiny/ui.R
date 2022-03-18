@@ -101,9 +101,9 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                   icon = fa_i(name = "github")
                                                 )
                                               )
-                                               ,
-                                               tags$li(class = "dropdown",
-                                                       tags$style(".main-header .logo {height: 53px}"))
+                                              ,
+                                              tags$li(class = "dropdown",
+                                                      tags$style(".main-header .logo {height: 53px}"))
 )
 
 ## Side Bar ----
@@ -341,58 +341,58 @@ body <- dashboardBody(
     tabItem("loadData",
             fluidPage(
               fluidRow(
-                    ## color of datatable
-                    tags$head(tags$style(
-                      HTML(
-                        "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                ## color of datatable
+                tags$head(tags$style(
+                  HTML(
+                    "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
                                   }
                                   "
-                      )
-                    )),
-                    tags$style(
-                      HTML(
-                        ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  )
+                )),
+                tags$style(
+                  HTML(
+                    ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
                   color: #000000 !important;
                   }"
-                      )
-                    ),
-                    shinycssloaders::withSpinner(DT::DTOutput("contents")
-                    )
                   )
+                ),
+                shinycssloaders::withSpinner(DT::DTOutput("contents")
                 )
+              )
+            )
             #  )
-           # )
+            # )
     ),
     ## Gather Data ---- 
     tabItem("gathData",
             fluidPage(
               fluidRow(
-                            ## color of datatable
-                            tags$head(tags$style(
-                              HTML(
-                                "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                ## color of datatable
+                tags$head(tags$style(
+                  HTML(
+                    "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
                                   }
                                   "
-                              )
-                            )),
-                            tags$style(
-                              HTML(
-                                ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  )
+                )),
+                tags$style(
+                  HTML(
+                    ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
                   color: #000000 !important;
                   }"
-                              )
-                            ),
-                            shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
                   )
+                ),
+                shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
+              )
             )
     ),
     
     ## FILTERS ----
     tabItem("filters",
             fluidRow(
-            DT::DTOutput("dataFiltered"))
+              DT::DTOutput("dataFiltered"))
     ),
     #### OVERVIEW ####
     ## Main information ----
@@ -432,221 +432,221 @@ body <- dashboardBody(
               )
             )
     ),
-
+    
     ## Annual Scientific Production ----
     tabItem("annualScPr",
             fluidPage(
               fluidRow(
-                  h2(strong("Annual Scientific Production"), align = "center")
-                ),
-                fluidRow(
-                              tabsetPanel(id ="tabsASP",
-                                          type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = "75vh")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
-                                          ))
-                    )
-    )),
+                h2(strong("Annual Scientific Production"), align = "center")
+              ),
+              fluidRow(
+                tabsetPanel(id ="tabsASP",
+                            type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = "75vh")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
+                            ))
+              )
+            )),
     ## Average Citation per Year ----
     tabItem("averageCitPerYear",
             fluidPage(
               fluidRow(
-                  h2(strong("Average Citation Per Year"), align = "center")
-                ),
-                fluidRow(
-                              tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = "75vh")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("AnnualTotCitperYearTable"))
-                                          ))
-                    )
-    )),
+                h2(strong("Average Citation Per Year"), align = "center")
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = "75vh")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("AnnualTotCitperYearTable"))
+                            ))
+              )
+            )),
     ## Three fields plot ----
     tabItem("threeFieldPlot",
             fluidPage(
               fluidRow(
-                column(11,
+                column(10,
                        h2(strong("Three-Field Plot"), align = "center")),
-                column(1,actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                          width = "100%",
+                column(2,actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",
                                       icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                              shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
-                    )
-    )),
+              ),
+              fluidRow(
+                shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
+              )
+            )),
     #### SOURCES ####
     ## Relevant Sources ----
     tabItem("relevantSources",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Relevant Sources"), align = "center")),
-                column(1,actionButton("applyMRSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
-                                          ))
-                    )
-    )),
+                column(10,
+                       h2(strong("Most Relevant Sources"), align = "center")),
+                column(2,actionButton("applyMRSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
+                            ))
+              )
+            )),
     ## Local Cited Sources ----
     tabItem("localCitedSources",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Local Cited Sources (from Reference Lists)"), align = "center")),
-                column(1,
-                       actionButton("applyMLCSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot", height = "75vh", width = "98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostRelCitSourcesTable"))
-                                          ))
-                    )
-    )),
+                column(10,
+                       h2(strong("Most Local Cited Sources (from Reference Lists)"), align = "center")),
+                column(2,
+                       actionButton("applyMLCSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot", height = "75vh", width = "98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostRelCitSourcesTable"))
+                            ))
+              )
+            )),
     ## Bradford Law ----
     tabItem("bradford",
             fluidPage(
               fluidRow(
                 titlePanel(
                   h2(strong("Source clustering through Bradford's Law"), align = "center")
-                 )
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = "75vh")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
-                                          ))
-                    )
-        )),
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = "75vh")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
+                            ))
+              )
+            )),
     ## Source Impact ----
     tabItem("sourceImpact",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Source Local Impact"), align = "center")),
-                column(1,
-                       actionButton("applyHsource", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",
+                column(10,
+                       h2(strong("Source Local Impact"), align = "center")),
+                column(2,
+                       actionButton("applyHsource", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
                                     icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
-                                          ))
-                    )
-              )),
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
+                            ))
+              )
+            )),
     ## Source Dynamics ----
     tabItem("sourceDynamics",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Source Dynamics"), align = "center")),
-                column(1,actionButton("applySOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",
+                column(10,
+                       h2(strong("Source Dynamics"), align = "center")),
+                column(2,actionButton("applySOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",
                                       icon = fa_i(name ="play"))
-                       )
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   #shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "soGrowthPlot", height = "90vh"))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
-                                          ))
-                ))
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     #shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "soGrowthPlot", height = "90vh"))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
+                            ))
+              ))
     ),
     #### AUTHORS ####
     ## Most Relevant Authors ----
     tabItem("mostRelAuthors",
             fluidPage(
               fluidRow(
-                  column(11,
-                  h2(strong("Most Relevant Authors"), align = "center")),
-                  column(1,
-                         actionButton("applyMRAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
-                                          ))
-                    )
-  )),
+                column(10,
+                       h2(strong("Most Relevant Authors"), align = "center")),
+                column(2,
+                       actionButton("applyMRAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
+                            ))
+              )
+            )),
     ## Most Local Cited Authors ----
     tabItem("mostLocalCitedAuthors",
             fluidPage(
               fluidRow(
-                  column(11,
-                  h2(strong("Most Local Cited Authors"), align = "center")),
-                  column(1,actionButton("applyMLCAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                        width = "100%",icon = fa_i(name ="play")))
-                  
-                  ),
-                fluidRow(
-                            tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
-                                          ))
-                    )
-      )
+                column(10,
+                       h2(strong("Most Local Cited Authors"), align = "center")),
+                column(2,actionButton("applyMLCAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+                
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
+                            ))
+              )
+            )
     ),
     ## Authors Production Over Time ----
     tabItem("authorsProdOverTime",
             fluidPage(
               fluidRow(
-                  column(11,
-                  h2(strong("Authors' Production over Time"), align = "center")),
-                  column(1,
-                         actionButton("applyAUoverTime", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                  ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "TopAuthorsProdPlot", height = "75vh",width ="98.9%"))
-                                          ),
-                                          tabPanel("Table - Authors' Production per Year",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
-                                          ),
-                                          tabPanel("Table - Author's Documents",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
-                                          ))
-                    )
-      )
+                column(10,
+                       h2(strong("Authors' Production over Time"), align = "center")),
+                column(2,
+                       actionButton("applyAUoverTime", strong("Run"),
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TopAuthorsProdPlot", height = "75vh",width ="98.9%"))
+                            ),
+                            tabPanel("Table - Authors' Production per Year",
+                                     shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
+                            ),
+                            tabPanel("Table - Author's Documents",
+                                     shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
+                            ))
+              )
+            )
     ),
     ## Lotka Law ----
     tabItem("lotka",
@@ -654,120 +654,120 @@ body <- dashboardBody(
               fluidRow(
                 titlePanel(
                   h2(strong("Author Productivity through Lotka's Law"), align = "center")
-                  )
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = "75vh")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
-                                          ))
-                    )
-      )
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = "75vh")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
+                            ))
+              )
+            )
     ),
     ## Author Impact ----
     tabItem("authorImpact",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Author Local Impact"), align = "center")),
-                column(1,
-                       actionButton("applyHAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play"))
-                       )
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))
-                                          ))
-                    )
+                column(10,
+                       h2(strong("Author Local Impact"), align = "center")),
+                column(2,
+                       actionButton("applyHAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play"))
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))
+                            ))
               )
+            )
     ),
     ## Most Relevant Affiliations ----
     tabItem("mostRelAffiliations",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Relevant Affiliations"), align = "center")),
-                column(1,
-                  actionButton("applyMRAffiliations", strong("Run"),
-                               style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                               width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
-                                          ))
-                    )
-      )
+                column(10,
+                       h2(strong("Most Relevant Affiliations"), align = "center")),
+                column(2,
+                       actionButton("applyMRAffiliations", strong("Run"),
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
+                            ))
+              )
+            )
     ),
     ## Corresponding Author Country ----
     tabItem("correspAuthorCountry",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Corresponding Author's Country"), align = "center")),
-                column(1,
-                       actionButton("applyCAUCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
-                                          ))
-                    )
-                  )
+                column(10,
+                       h2(strong("Corresponding Author's Country"), align = "center")),
+                column(2,
+                       actionButton("applyCAUCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
+                            ))
+              )
+            )
     ),
     ## Country Scientific Production ----
     tabItem("countryScientProd",
             fluidPage(
               fluidRow(
-                  h2(strong("Country Scientific Production"), align = "center")
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = "75vh"))  #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
-                                          ))
-                   )
-      )
+                h2(strong("Country Scientific Production"), align = "center")
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = "75vh"))  #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
+                            ))
+              )
+            )
     ),
     ## Most Cited Countries ----
     tabItem("mostCitedCountries",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Cited Countries"), align = "center")),
-                column(1,actionButton("applyMCCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
-                                          ))
-                    )
-                  )
+                column(10,
+                       h2(strong("Most Cited Countries"), align = "center")),
+                column(2,actionButton("applyMCCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
+                            ))
+              )
+            )
     ),
     
     #### DOCUMENTS ####
@@ -775,515 +775,515 @@ body <- dashboardBody(
     tabItem("mostGlobalCitDoc",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Global Cited Documents"), align = "center")),
-                column(1,
+                column(10,
+                       h2(strong("Most Global Cited Documents"), align = "center")),
+                column(2,
                        actionButton("applyMGCDocuments", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
-                                          ))
-                    )
-                  )
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
+                            ))
+              )
+            )
     ),
     ## Most Local Cited Documents ----
     tabItem("mostLocalCitDoc",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Local Cited Documents"), align = "center")),
-                column(1, actionButton("applyMLCDocuments", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",
-                                      icon = fa_i(name="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
-                                          ))
-                    )
-                  )
+                column(10,
+                       h2(strong("Most Local Cited Documents"), align = "center")),
+                column(2, actionButton("applyMLCDocuments", strong("Run"),
+                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                       width = "80%",
+                                       icon = fa_i(name="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
+                            ))
+              )
+            )
     ),
     ## Most Local Cited References ----
     tabItem("mostLocalCitRef",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Local Cited References"), align = "center")),
-                column(1,
+                column(10,
+                       h2(strong("Most Local Cited References"), align = "center")),
+                column(2,
                        actionButton("applyMLCReferences", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = "75vh",width ="98.9%")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
-                                          ))
-                    )
-                  )
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
+                            ))
+              )
+            )
     ),
     ## Reference Spectroscopy ----
     tabItem("ReferenceSpect",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Reference Spectroscopy"), align = "center")
-                  ),
-                column(1,
-                       actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
+                column(10,
+                       h2(strong("Reference Spectroscopy"), align = "center")
                 ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot", 
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))), #height = 700))),
-                                          tabPanel("Table - RPY", 
-                                                   shinycssloaders::withSpinner(DT::DTOutput(
-                                                     outputId = "rpysTable"))),
-                                          tabPanel("Table - Cited References", 
-                                                   shinycssloaders::withSpinner(DT::DTOutput(
-                                                     outputId = "crTable")))
-                              )
-                    )
-                  )
+                column(2,
+                       actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))), #height = 700))),
+                            tabPanel("Table - RPY", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(
+                                       outputId = "rpysTable"))),
+                            tabPanel("Table - Cited References", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(
+                                       outputId = "crTable")))
+                )
+              )
+            )
     ),
     ## Most Frequent Words ----
     tabItem("mostFreqWords",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Most Frequent Words"), align = "center")
+                column(10,
+                       h2(strong("Most Frequent Words"), align = "center")
                 ),
-                column(1,
-                  actionButton("applyMFWords", strong("Run"),
-                               style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                               width = "100%",icon = fa_i(name ="play"))
-                 )
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "75vh",width ="98.9%"))  #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
-                                          ))
-                              
-                    )
-                  )
+                column(2,
+                       actionButton("applyMFWords", strong("Run"),
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play"))
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "75vh",width ="98.9%"))  #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
+                            ))
+                
+              )
+            )
     ),
     ## World Cloud ----
     tabItem("wcloud",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("WordCloud"), align = "center")),
-                  column(1,actionButton("applyWordCloud", strong("Run"),
-                                        style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                        width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   wordcloud2::wordcloud2Output("wordcloud", height = "75vh") #height = "600px")
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
-                                          ))
-                              
-                    )
-                  )
+                column(10,
+                       h2(strong("WordCloud"), align = "center")),
+                column(2,actionButton("applyWordCloud", strong("Run"),
+                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     wordcloud2::wordcloud2Output("wordcloud", height = "75vh") #height = "600px")
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
+                            ))
+                
+              )
+            )
     ),
     ## Tree Map ----
     tabItem("treemap",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("TreeMap"), align = "center")),
-                column(1,
-                  actionButton("applyTreeMap", strong("Run"),
-                               style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                               width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                              tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = "75vh")) #height = 700))
-                                                   #shinycssloaders::withSpinner(plotOutput("treemap"))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput("treeTable"))
-                                          ))
+                column(10,
+                       h2(strong("TreeMap"), align = "center")),
+                column(2,
+                       actionButton("applyTreeMap", strong("Run"),
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = "75vh")) #height = 700))
+                                     #shinycssloaders::withSpinner(plotOutput("treemap"))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput("treeTable"))
+                            ))
               ))
     ),
     ## Word Dynamics ----
     tabItem("wordDynamics",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Word Dynamics"), align = "center")),
-                column(1,
-                  actionButton("applyWD", strong("Run"),
-                               style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                               width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   #shinycssloaders::withSpinner(plotOutput(outputId = "kwGrowthPlot"))
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "kwGrowthPlot", height = "90vh")) #height = 700))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
-                                          ))
-                              
-                    )
-                  )
+                column(10,
+                       h2(strong("Word Dynamics"), align = "center")),
+                column(2,
+                       actionButton("applyWD", strong("Run"),
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     #shinycssloaders::withSpinner(plotOutput(outputId = "kwGrowthPlot"))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "kwGrowthPlot", height = "90vh")) #height = 700))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
+                            ))
+                
+              )
+            )
     ),
     ## Trend Topic ----
     tabItem("trendTopic",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Trend Topics"), align = "center")),
-                column(1,
-                  actionButton("applyTrendTopics", strong("Run"),
-                               style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                               width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh",width ="98.9%")) #height = 700))
-                                                   #shinycssloaders::withSpinner(plotOutput(outputId = "trendTopicsPlot"))
-                                          ),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
-                                          ))
-                              
-                    )
-                  )
+                column(10,
+                       h2(strong("Trend Topics"), align = "center")),
+                column(2,
+                       actionButton("applyTrendTopics", strong("Run"),
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh",width ="98.9%")) #height = 700))
+                                     #shinycssloaders::withSpinner(plotOutput(outputId = "trendTopicsPlot"))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
+                            ))
+                
+              )
+            )
     ),
     #### COUPLING ####
     ## Clustering by Coupling ----
     tabItem("coupling",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Clustering by Coupling"), align = "center")),
-                column(1,
+                column(10,
+                       h2(strong("Clustering by Coupling"), align = "center")),
+                column(2,
                        actionButton("applyCM", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                                   tabPanel("Map",
-                                                            shinycssloaders::withSpinner(plotlyOutput(outputId = "CMPlot", height = "75vh")) #height = 700))
-                                                   ),
-                                                   tabPanel("Network",
-                                                            shinycssloaders::withSpinner(visNetworkOutput("CMNetPlot", height = "75vh"))), #height = "750px",width = "1100px"))),
-                                                   tabPanel("Table",
-                                                            shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTable"))
-                                                   ),
-                                                   tabPanel("Clusters",
-                                                            shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTableCluster"))
-                                                   )
-                                       )
-                             )
-                           )
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Map",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CMPlot", height = "75vh")) #height = 700))
+                            ),
+                            tabPanel("Network",
+                                     shinycssloaders::withSpinner(visNetworkOutput("CMNetPlot", height = "75vh"))), #height = "750px",width = "180%"))),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTable"))
+                            ),
+                            tabPanel("Clusters",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTableCluster"))
+                            )
+                )
+              )
+            )
     ),
     #### CONCEPTUAL STRUCTURE ####
     ## Co-occurence Network ----
     tabItem("coOccurenceNetwork",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Co-occurrence Network"), align = "center")),
-                column(1,
+                column(10,
+                       h2(strong("Co-occurrence Network"), align = "center")),
+                column(2,
                        actionButton("applyCoc", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                    width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                                   tabPanel("Network", 
-                                                            shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))), #height = "750px",width = "1100px"))),
-                                                   # tabPanel("Communities", 
-                                                   #          shinycssloaders::withSpinner(visNetworkOutput("cocPlotComm", height = "75vh"))), #height = "750px",width = "1100px"))),
-                                                   tabPanel("Table", 
-                                                            shinycssloaders::withSpinner(DT::DTOutput(
-                                                              outputId = "cocTable"))),
-                                                   tabPanel("Degree Plot", 
-                                                            shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh"))) #height=700)))
-                                       )
-                             )
-                           )
+                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Network", 
+                                     shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))), #height = "750px",width = "180%"))),
+                            # tabPanel("Communities", 
+                            #          shinycssloaders::withSpinner(visNetworkOutput("cocPlotComm", height = "75vh"))), #height = "750px",width = "180%"))),
+                            tabPanel("Table", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(
+                                       outputId = "cocTable"))),
+                            tabPanel("Degree Plot", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh"))) #height=700)))
+                )
+              )
+            )
     ),
     ## Thematic Map ----
     tabItem("thematicMap",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Thematic Map"), align = "center")),
-                column(1,actionButton("applyTM", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Map",
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "75vh")) #height = 700))
-                                          ),
-                                          tabPanel("Network",
-                                                   shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "75vh"))), #height = "750px",width = "1100px"))),
-                                          tabPanel("Table",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
-                                          ),
-                                          tabPanel("Clusters",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster"))
-                                          )
-                              )
-                    )
-                  )
+                column(10,
+                       h2(strong("Thematic Map"), align = "center")),
+                column(2,actionButton("applyTM", strong("Run"),
+                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Map",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "75vh")) #height = 700))
+                            ),
+                            tabPanel("Network",
+                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "75vh"))), #height = "750px",width = "180%"))),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
+                            ),
+                            tabPanel("Clusters",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster"))
+                            )
+                )
+              )
+            )
     ),
     ## Thematic Evolution ----
     tabItem("thematicEvolution",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Thematic Evolution"), align = "center")),
-                column(1,actionButton("applyTE", strong("Run"),
-                             style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                             width = "100%",icon = fa_i(name ="play"))
-                  )
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
-                                                                                     tabPanel("Map",
-                                                                                              #shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot", height = "75vh"))  #height = "600px"))
-                                                                                              shinycssloaders::withSpinner(plotlyOutput(outputId = "TEPlot", height = "75vh"))
-                                                                                     ),
-                                                                                     tabPanel("Table",
-                                                                                              shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
-                                                                                     ))
-                                          ),
-                                          tabPanel("Time Slice 1", tabsetPanel(type="tabs",
-                                                                               tabPanel("Map",
-                                                                                        shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = "75vh")) #height = 700))
-                                                                               ),
-                                                                               tabPanel("Network",
-                                                                                        shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "75vh")) # height = "750px",width = "1100px"))
-                                                                               ),
-                                                                               tabPanel("Table",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
-                                                                               ),
-                                                                               tabPanel("Clusters",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster1"))
-                                                                               )
-                                          )      
-                                          ),
-                                          tabPanel("Time Slice 2", tabsetPanel(type="tabs",
-                                                                               tabPanel("Map",
-                                                                                        shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = "75vh"))  #height = 700))
-                                                                               ),
-                                                                               tabPanel("Network",
-                                                                                        shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "75vh")) #height = "750px",width = "1100px"))
-                                                                               ),
-                                                                               tabPanel("Table",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
-                                                                               ),
-                                                                               tabPanel("Clusters",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster2"))
-                                                                               )
-                                          ) 
-                                          ),
-                                          tabPanel("Time Slice 3", tabsetPanel(type="tabs",
-                                                                               tabPanel("Map",
-                                                                                        shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = "75vh")) #height = 700))
-                                                                               ),
-                                                                               tabPanel("Network",
-                                                                                        shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "75vh")) #height = "750px",width = "1100px"))
-                                                                               ),
-                                                                               tabPanel("Table",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
-                                                                               ),
-                                                                               tabPanel("Clusters",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster3"))
-                                                                               )
-                                          )
-                                          ),
-                                          tabPanel("Time Slice 4", tabsetPanel(type="tabs",
-                                                                               tabPanel("Map",
-                                                                                        shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = "75vh")) #height = 700))
-                                                                               ),
-                                                                               tabPanel("Network",
-                                                                                        shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "75vh")) #height = "750px",width = "1100px"))
-                                                                               ),
-                                                                               tabPanel("Table",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
-                                                                               ),
-                                                                               tabPanel("Clusters",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster4"))
-                                                                               )
-                                          ) 
-                                          ),
-                                          tabPanel("Time Slice 5", tabsetPanel(type="tabs",
-                                                                               tabPanel("Map",
-                                                                                        shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = "75vh")) #height = 700))
-                                                                               ),
-                                                                               tabPanel("Network",
-                                                                                        shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "75vh")) #height = "750px",width = "1100px"))
-                                                                               ),
-                                                                               tabPanel("Table",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
-                                                                               ),
-                                                                               tabPanel("Clusters",
-                                                                                        shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster5"))
-                                                                               )
-                                          )
-                                          )
-                              )
-                    )
-                  )
-                #)))
+                column(10,
+                       h2(strong("Thematic Evolution"), align = "center")),
+                column(2,actionButton("applyTE", strong("Run"),
+                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play"))
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
+                                                                       tabPanel("Map",
+                                                                                #shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot", height = "75vh"))  #height = "600px"))
+                                                                                shinycssloaders::withSpinner(plotlyOutput(outputId = "TEPlot", height = "75vh"))
+                                                                       ),
+                                                                       tabPanel("Table",
+                                                                                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                                                       ))
+                            ),
+                            tabPanel("Time Slice 1", tabsetPanel(type="tabs",
+                                                                 tabPanel("Map",
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = "75vh")) #height = 700))
+                                                                 ),
+                                                                 tabPanel("Network",
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "75vh")) # height = "750px",width = "180%"))
+                                                                 ),
+                                                                 tabPanel("Table",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
+                                                                 ),
+                                                                 tabPanel("Clusters",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster1"))
+                                                                 )
+                            )      
+                            ),
+                            tabPanel("Time Slice 2", tabsetPanel(type="tabs",
+                                                                 tabPanel("Map",
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = "75vh"))  #height = 700))
+                                                                 ),
+                                                                 tabPanel("Network",
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "75vh")) #height = "750px",width = "180%"))
+                                                                 ),
+                                                                 tabPanel("Table",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
+                                                                 ),
+                                                                 tabPanel("Clusters",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster2"))
+                                                                 )
+                            ) 
+                            ),
+                            tabPanel("Time Slice 3", tabsetPanel(type="tabs",
+                                                                 tabPanel("Map",
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = "75vh")) #height = 700))
+                                                                 ),
+                                                                 tabPanel("Network",
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "75vh")) #height = "750px",width = "180%"))
+                                                                 ),
+                                                                 tabPanel("Table",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
+                                                                 ),
+                                                                 tabPanel("Clusters",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster3"))
+                                                                 )
+                            )
+                            ),
+                            tabPanel("Time Slice 4", tabsetPanel(type="tabs",
+                                                                 tabPanel("Map",
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = "75vh")) #height = 700))
+                                                                 ),
+                                                                 tabPanel("Network",
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "75vh")) #height = "750px",width = "180%"))
+                                                                 ),
+                                                                 tabPanel("Table",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
+                                                                 ),
+                                                                 tabPanel("Clusters",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster4"))
+                                                                 )
+                            ) 
+                            ),
+                            tabPanel("Time Slice 5", tabsetPanel(type="tabs",
+                                                                 tabPanel("Map",
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = "75vh")) #height = 700))
+                                                                 ),
+                                                                 tabPanel("Network",
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "75vh")) #height = "750px",width = "180%"))
+                                                                 ),
+                                                                 tabPanel("Table",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
+                                                                 ),
+                                                                 tabPanel("Clusters",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster5"))
+                                                                 )
+                            )
+                            )
+                )
+              )
+            )
+            #)))
     ),
     ## Factorial Analysis ----
     tabItem("factorialAnalysis",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Factorial Analysis"), align = "center")),
-                column(1,actionButton("applyCA", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Word Map", 
-                                                   shinycssloaders::withSpinner(plotOutput(
-                                                     outputId = "CSPlot1"))),
-                                          tabPanel("Topic Dendrogram", 
-                                                   shinycssloaders::withSpinner(plotOutput(
-                                                     outputId = "CSPlot4"))),
-                                          tabPanel("Table - Most Contributing Papers", 
-                                                   shinycssloaders::withSpinner(plotOutput(
-                                                     outputId = "CSPlot2"))),
-                                          tabPanel("Table - Most Cited Papers", 
-                                                   shinycssloaders::withSpinner(plotOutput(
-                                                     outputId = "CSPlot3"))),
-                                          tabPanel("Table - Words by Cluster",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))),
-                                          tabPanel("Table - Articles by Cluster",
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD")))
-                                          
-                              )
-                    )
-                  )
+                column(10,
+                       h2(strong("Factorial Analysis"), align = "center")),
+                column(2,actionButton("applyCA", strong("Run"),
+                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Word Map", 
+                                     shinycssloaders::withSpinner(plotOutput(
+                                       outputId = "CSPlot1"))),
+                            tabPanel("Topic Dendrogram", 
+                                     shinycssloaders::withSpinner(plotOutput(
+                                       outputId = "CSPlot4"))),
+                            tabPanel("Table - Most Contributing Papers", 
+                                     shinycssloaders::withSpinner(plotOutput(
+                                       outputId = "CSPlot2"))),
+                            tabPanel("Table - Most Cited Papers", 
+                                     shinycssloaders::withSpinner(plotOutput(
+                                       outputId = "CSPlot3"))),
+                            tabPanel("Table - Words by Cluster",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))),
+                            tabPanel("Table - Articles by Cluster",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD")))
+                            
+                )
+              )
+            )
     ),
     #### INTELLECTUAL STRUCTURE ####
     ## Co-Citation Network ----
     tabItem("coCitationNetwork",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Co-citation Network"), align = "center")),
-                column(1,actionButton("applyCocit", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Newtwork", 
-                                                   shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))), #height = "750px", width = "1100px"))),         
-                                          tabPanel("Table", 
-                                                   shinycssloaders::withSpinner(DT::DTOutput(
-                                                     outputId = "cocitTable"))),
-                                          tabPanel("Degree Plot", 
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height=700)))
-                              )
-                    )
-                  )
+                column(10,
+                       h2(strong("Co-citation Network"), align = "center")),
+                column(2,actionButton("applyCocit", strong("Run"),
+                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Newtwork", 
+                                     shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))), #height = "750px", width = "180%"))),         
+                            tabPanel("Table", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(
+                                       outputId = "cocitTable"))),
+                            tabPanel("Degree Plot", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height=700)))
+                )
+              )
+            )
     ),
     ## Historiograph ----
     tabItem("historiograph",
             fluidPage(
               fluidRow(
-                column(11,
-                  h2(strong("Historiograph"), align = "center")),
-                column(1,actionButton("applyHist", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot", 
-                                                   #shinycssloaders::withSpinner(plotOutput(outputId = "histPlot"))),
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
-                                          tabPanel("Table", 
-                                                   shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
-                              )
-                    )
-                  )
+                column(10,
+                       h2(strong("Historiograph"), align = "center")),
+                column(2,actionButton("applyHist", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot", 
+                                     #shinycssloaders::withSpinner(plotOutput(outputId = "histPlot"))),
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
+                            tabPanel("Table", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
+                )
+              )
+            )
     ),
     #### SOCIAL STRUCTURE ####
     ## Collaboration Network ----
     tabItem("collabNetwork",
             fluidPage(
               fluidRow(
-                column(11,h2(strong("Collaboration Network"), align = "center")),
-                column(1,actionButton("applyCol", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                      width = "100%",icon = fa_i(name ="play")))
-                ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Network", 
-                                                   shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))), #,width = "1100px"))), 
-                                          #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
-                                          tabPanel("Table", 
-                                                   shinycssloaders::withSpinner(DT::DTOutput(
-                                                     outputId = "colTable"))),
-                                          tabPanel("Degree Plot", 
-                                                   shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh"))) #height=700)))
-                              )
-                    )
-                  )
+                column(10,h2(strong("Collaboration Network"), align = "center")),
+                column(2,actionButton("applyCol", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Network", 
+                                     shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))), #,width = "180%"))), 
+                            #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
+                            tabPanel("Table", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(
+                                       outputId = "colTable"))),
+                            tabPanel("Degree Plot", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh"))) #height=700)))
+                )
+              )
+            )
     ),
     ## Collaboration World Map ----
     tabItem("collabWorldMap",
             fluidPage(
               fluidRow(
-                  column(11,h2(strong("Collaboration WorldMap"), align = "center")),
-                  column(1,actionButton("applyWM", strong("Run"),
-                                        style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                        width = "100%",icon = fa_i(name ="play")))
-                  ),
-                fluidRow(
-                  tabsetPanel(type = "tabs",
-                                          tabPanel("Plot", 
-                                                   shinycssloaders::withSpinner(plotOutput(outputId = "WMPlot"))),
-                                          tabPanel("Table", 
-                                                   shinycssloaders::withSpinner(DT::DTOutput(
-                                                     outputId = "WMTable")))
-                              )
-        )
-    ))
-))
+                column(10,h2(strong("Collaboration WorldMap"), align = "center")),
+                column(2,actionButton("applyWM", strong("Run"),
+                                      style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",icon = fa_i(name ="play")))
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot", 
+                                     shinycssloaders::withSpinner(plotOutput(outputId = "WMPlot"))),
+                            tabPanel("Table", 
+                                     shinycssloaders::withSpinner(DT::DTOutput(
+                                       outputId = "WMTable")))
+                )
+              )
+            ))
+  ))
 
 #### CONTROL BAR ----
 controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
@@ -1293,8 +1293,8 @@ controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
                                                       overlay = FALSE,
                                                       collapsed = TRUE,
                                                       shinyjs::useShinyjs()
-                                                      )
-                                                      
+)
+
 
 #### UI ####
 
@@ -1306,4 +1306,4 @@ ui <- shinydashboardPlus::dashboardPage(shinyjs::useShinyjs(),
                                         footer = NULL,
                                         options = list(sidebarExpandOnHover = TRUE),
                                         scrollToTop =TRUE
-                                        )
+)

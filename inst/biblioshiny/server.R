@@ -1040,7 +1040,7 @@ server <- function(input, output,session){
   ## Main Info ----
   output$MainInfo <- DT::renderDT({
     
-    TAB <- values$TAB
+    TAB <- values$TABvb
     
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',ordering=F,
@@ -1069,67 +1069,13 @@ server <- function(input, output,session){
       formatStyle(names(TAB)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
   
-  # output$RadarPlot <- renderPlotly({
-  #   res <- descriptive(values,type="tab1")
-  #   TAB <- res$TAB
-  #   values <- res$values
-  #   
-  #   #print(values$radar)
-  #   D <- as.numeric(values$radar[1,])*100
-  #   label <-  paste(c('Authors per Document','Document Age (in Year)','International Collaboration', 'Document Citations', 'Top Source Coverage'), 
-  #                   " ",round(as.numeric(values$radar[2,]),1), " (",round(D,1),"%)", sep="")
-  #   
-  #   fig <- plot_ly(
-  #     type = 'scatterpolar',
-  #     mode = 'markers',
-  #     autosize=TRUE,
-  #     height = 400,
-  #     r = D,
-  #     theta = c('Authors per Document','Document Age','International Collaboration', 'Document Citations', 'Top Source Coverage'),
-  #     fill = 'toself',
-  #     hoverinfo = 'text',
-  #     text =label
-  #   ) %>% 
-  #     config(displaylogo = FALSE,
-  #            modeBarButtonsToRemove = c(
-  #              'sendDataToCloud',
-  #              'pan2d', 
-  #              'select2d', 
-  #              'lasso2d',
-  #              'toggleSpikelines',
-  #              'hoverClosestCartesian',
-  #              'hoverCompareCartesian'
-  #            ))
-  #   m <- list(
-  #     l = 150,
-  #     r = 150,
-  #     b = 30,
-  #     t = 30,
-  #     pad = 4
-  #   )
-  #   
-  #   fig <- fig %>%
-  #     layout(margin=m,
-  #       polar = list(
-  #         radialaxis = list(
-  #           visible = T,
-  #           range = c(0,100)
-  #         )
-  #       ),
-  #       showlegend = F
-  #     )
-  # 
-  #   fig
-  # })
-  # 
-  #paste(,sep=br())
-  # gsub(":","br()", res$TAB$Results[2])
   
   #box1 ---------------
   output$Timespan <- renderValueBox({
     res <- descriptive(values,type="tab1")
     TAB <- res$TAB
     values <- res$values
+    values$TABvb <- TAB
     #a=unlist(strsplit(res$TAB$Results[2],":"))
     valueBox(value = p(TAB[TAB$Description=="Timespan", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong((TAB[TAB$Description=="Timespan", 2])), style = 'font-size:36px;color:white;', align="center"), 
@@ -1139,9 +1085,10 @@ server <- function(input, output,session){
   })
   #box2 ---------------
   output$au <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Authors", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Authors", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="user"), color = "light-blue",
@@ -1151,9 +1098,10 @@ server <- function(input, output,session){
   
   #box3 ------------
   output$kw <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Author's Keywords (DE)", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Author's Keywords (DE)", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="spell-check"), color = "aqua",
@@ -1161,9 +1109,10 @@ server <- function(input, output,session){
   }) 
   #box4 ---------------
   output$so <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p("Sources", style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Sources (Journals, Books, etc)", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name ="book"), color = "blue",
@@ -1172,9 +1121,10 @@ server <- function(input, output,session){
   
   #box5 --------------------
   output$auS1 <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Authors of single-authored docs", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Authors of single-authored docs", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="pen-fancy"), color = "light-blue",
@@ -1184,9 +1134,10 @@ server <- function(input, output,session){
   #box6 -------------
   
   output$cr <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="References", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="References", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="file"), color = "aqua",
@@ -1194,11 +1145,12 @@ server <- function(input, output,session){
   })
   
   #box7 ----------------
-  
+
   output$doc <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Documents", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Documents", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="layer-group"), color = "blue",
@@ -1207,9 +1159,10 @@ server <- function(input, output,session){
   #box8 ---------------
   
   output$col <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(strong("International Co-Authorship"), style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="International co-authorships %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
              icon = icon("globe",lib = "glyphicon"), color = "light-blue",
@@ -1219,9 +1172,10 @@ server <- function(input, output,session){
   
   #box9 ---------------
   output$agePerDoc <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Document Average Age", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Document Average Age", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="calendar"), color = "aqua",
@@ -1229,9 +1183,10 @@ server <- function(input, output,session){
   })
   #box10 ------------------
   output$cagr <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(strong("Annual Growth Rate"), style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Annual Growth Rate %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
              icon = icon("arrow-up", lib="glyphicon"), color = "blue",
@@ -1240,9 +1195,10 @@ server <- function(input, output,session){
   
   #box11 ------
   output$coAuPerDoc <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Co-Authors per Doc", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Co-Authors per Doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="users"), color = "light-blue",
@@ -1251,9 +1207,10 @@ server <- function(input, output,session){
   
   #box12 -------
   output$tc <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    # res <- descriptive(values,type="tab1")
+    # TAB <- res$TAB
+    # values <- res$values
+    TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Average citations per doc", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Average citations per doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = icon("volume-up", lib = "glyphicon"), color = "aqua",

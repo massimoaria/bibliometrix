@@ -1076,7 +1076,6 @@ server <- function(input, output,session){
     TAB <- res$TAB
     values <- res$values
     values$TABvb <- TAB
-    #a=unlist(strsplit(res$TAB$Results[2],":"))
     valueBox(value = p(TAB[TAB$Description=="Timespan", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong((TAB[TAB$Description=="Timespan", 2])), style = 'font-size:36px;color:white;', align="center"), 
              icon = fa_i(name="hourglass"), color = "blue",
@@ -1085,9 +1084,6 @@ server <- function(input, output,session){
   })
   #box2 ---------------
   output$au <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Authors", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Authors", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1098,9 +1094,6 @@ server <- function(input, output,session){
   
   #box3 ------------
   output$kw <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Author's Keywords (DE)", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Author's Keywords (DE)", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1109,9 +1102,6 @@ server <- function(input, output,session){
   }) 
   #box4 ---------------
   output$so <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p("Sources", style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Sources (Journals, Books, etc)", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1121,9 +1111,6 @@ server <- function(input, output,session){
   
   #box5 --------------------
   output$auS1 <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Authors of single-authored docs", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Authors of single-authored docs", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1134,9 +1121,6 @@ server <- function(input, output,session){
   #box6 -------------
   
   output$cr <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="References", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="References", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1147,9 +1131,6 @@ server <- function(input, output,session){
   #box7 ----------------
 
   output$doc <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Documents", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Documents", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1159,9 +1140,6 @@ server <- function(input, output,session){
   #box8 ---------------
   
   output$col <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(strong("International Co-Authorship"), style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="International co-authorships %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
@@ -1172,9 +1150,6 @@ server <- function(input, output,session){
   
   #box9 ---------------
   output$agePerDoc <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Document Average Age", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Document Average Age", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1183,9 +1158,6 @@ server <- function(input, output,session){
   })
   #box10 ------------------
   output$cagr <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(strong("Annual Growth Rate"), style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Annual Growth Rate %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
@@ -1195,9 +1167,6 @@ server <- function(input, output,session){
   
   #box11 ------
   output$coAuPerDoc <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Co-Authors per Doc", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Co-Authors per Doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1207,9 +1176,6 @@ server <- function(input, output,session){
   
   #box12 -------
   output$tc <- renderValueBox({
-    # res <- descriptive(values,type="tab1")
-    # TAB <- res$TAB
-    # values <- res$values
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Average citations per doc", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Average citations per doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
@@ -1224,7 +1190,6 @@ server <- function(input, output,session){
     ny=dim(Y)[1]
     values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
     paste0(values$GR," %")
-    #paste0(values$GR,"%",collapse="",sep="")
   })
   
   output$AnnualProdPlot <- renderPlotly({

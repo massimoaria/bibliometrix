@@ -6438,7 +6438,8 @@ server <- function(input, output,session){
                                                  em("A collection of scientific articles about the use of bibliometric approaches",
                                                     "in business and management disciplines."),
                                                  br(),
-                                                 em("Period: 1985 - 2018, Source WoS.")
+                                                 em("Period: 1985 - 2020
+                                                    , Source WoS.")
                                         )
                                       ),
                                       #br(),

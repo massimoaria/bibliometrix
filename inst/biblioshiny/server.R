@@ -307,6 +307,7 @@ server <- function(input, output,session){
     if (input$load=="demo"){
       data(management, package="bibliometrixData")
       values = initial(values)
+      row.names(management) <- management$SR
       values$M <- management
       values$Morig = management
       values$Histfield = "NA"

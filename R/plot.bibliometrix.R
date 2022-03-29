@@ -24,6 +24,9 @@
 
 plot.bibliometrix<-function(x, ...){
 
+  data("logo",package="bibliometrix",envir=environment())
+  logo <- grid::rasterGrob(logo,interpolate = TRUE)
+  
   if (class(x)!="bibliometrix"){cat('\n argument "x" have to be an object of class "bibliometrix"\n');return(NA)}
   graphs=list()
   
@@ -34,15 +37,30 @@ plot.bibliometrix<-function(x, ...){
   if (pause == TRUE){
     cat("Hit <Return> to see next plot: ")
     line <- readline()}
-
-  # Authors
-  #barplot(x$Authors[1:k],horiz=TRUE,las=2,cex.names=0.5,main="Most Productive Authors",xlab="Articles")
+  
   xx=as.data.frame(x$Authors[1:k])
+  xcoord <- c(k-0.2-(k)*0.15, k-0.02)+1
+  ycoord <- c(max(xx$Freq),max(xx$Freq)-diff(range(xx$Freq))*0.15)
+  # Authors
+
+  
   g=ggplot(data=xx, aes(x=.data$AU, y=.data$Freq)) +
-    geom_bar(stat="identity", fill="steelblue")+
+    geom_bar(stat="identity", fill="grey90")+
     labs(title="Most productive Authors", x = "Authors")+
     labs(y = "N. of Documents")+
-    theme_minimal() +
+    theme(text = element_text(color = "#444444")
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.minor = element_line(color = '#EFEFEF')
+          ,panel.grid.major = element_line(color = '#EFEFEF')
+          ,plot.title = element_text(size = 18)
+          ,axis.title = element_text(size = 14, color = '#555555')
+          ,axis.title.y = element_text(vjust = 1, angle = 90)
+          ,axis.title.x = element_text(hjust = 0)
+          ,axis.text.x = element_text(size=10)
+          ,axis.line.x = element_line(color="black",size=0.5)
+          ,axis.line.y = element_line(color="black",size=0.5)
+    ) +
+    annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) +
     coord_flip()
   plot(g)
   
@@ -61,6 +79,13 @@ plot.bibliometrix<-function(x, ...){
   names(xx2)=c("Country","Freq","Collaboration")
   xx=rbind(xx2,xx1)
   xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
+  
+  Freq <- x$CountryCollaboration$SCP[1:k]+x$CountryCollaboration$MCP[1:k]
+  st <- floor(k/10)
+  #xcoord <- c(st-0.2-(st)*0.85, 0.02)+1
+  xcoord <- c(1,max(st,3))
+  ycoord <- c(max(Freq),max(Freq)-diff(range(Freq))*0.15)
+
   g=suppressWarnings(ggplot(data=xx, aes(x=.data$Country, y=.data$Freq,fill=.data$Collaboration)) +
     geom_bar(stat="identity")+
     scale_x_discrete(limits = rev(levels(xx$Country)))+
@@ -68,10 +93,22 @@ plot.bibliometrix<-function(x, ...){
                         breaks=c("SCP","MCP"))+
     labs(title = "Most Productive Countries", x = "Countries", y = "N. of Documents", 
          caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
-    theme_minimal() +
-    theme(plot.caption = element_text(size = 9, hjust = 0.5,
-          color = "blue", face = "italic"))+
-    coord_flip())
+      theme(text = element_text(color = "#444444")
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
+            ,plot.title = element_text(size = 18)
+            ,axis.title = element_text(size = 14, color = '#555555')
+            ,axis.title.y = element_text(vjust = 1, angle = 90)
+            ,axis.title.x = element_text(hjust = 0)
+            ,axis.text.x = element_text(size=10)
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
+      ) +
+      annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) + 
+      coord_flip()) 
+    
+  
   plot(g)
   graphs$MostProdCountries=g
   } else {graphs$MostProdCountries=NA}
@@ -81,11 +118,6 @@ plot.bibliometrix<-function(x, ...){
     line <- readline()}
 
     # Articles per Year
-#  Y=table(x$Years)
-#  Ym=table(x$Years[x$nAUperPaper>1])
-#  plot(as.numeric(row.names(Y)),Y,type="l",main="Articles per Year",xlab="Year",ylab="N.Articles",col="blue")
-#  lines(as.numeric(row.names(Ym)),Ym,col="red")
-#  legend(x="topleft",c("Total Articles","Multi Auth. Articles"),col=c("blue","red"),lty = c(1, 1),cex=0.6,bty="n")
   
   Tab=table(x$Years)
   
@@ -96,22 +128,29 @@ plot.bibliometrix<-function(x, ...){
   
   names(Y)=c("Year","Freq")
   
+  xcoord <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.15, max(Y$Year)-0.02)+1
+  ycoord <- c(min(Y$Freq),min(Y$Freq)+diff(range(Y$Freq))*0.15)
+  
   g=ggplot(Y, aes(x = .data$Year, y = .data$Freq)) +
     geom_line() +
-    geom_area(fill = '#002F80', alpha = .5) +
+    geom_area(fill = 'grey90', alpha = .5) +
     labs(x = 'Year'
          , y = 'Articles'
          , title = "Annual Scientific Production") +
     scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
     theme(text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = '#EFEFEF')
-          ,panel.grid.minor = element_line(color = '#FFFFFF')
-          ,panel.grid.major = element_line(color = '#FFFFFF')
-          ,plot.title = element_text(size = 24)
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.minor = element_line(color = '#EFEFEF')
+          ,panel.grid.major = element_line(color = '#EFEFEF')
+          ,plot.title = element_text(size = 18)
           ,axis.title = element_text(size = 14, color = '#555555')
-          ,axis.title.y = element_text(vjust = 1, angle = 0)
+          ,axis.title.y = element_text(vjust = 1, angle = 90)
           ,axis.title.x = element_text(hjust = 0)
-    )   
+          ,axis.text.x = element_text(size=10, angle = 90)
+          ,axis.line.x = element_line(color="black",size=0.5)
+          ,axis.line.y = element_line(color="black",size=0.5)
+    ) + annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) 
+  
   plot(g)
   graphs$AnnualScientProd=g
   
@@ -143,23 +182,29 @@ plot.bibliometrix<-function(x, ...){
   Table2=Table2[order(Table2$Year),]
   row.names(Table2)=Table2$Year}
   
+  xcoord <- c(max(Table2$Year)-0.02-diff(range(Table2$Year))*0.15, max(Table2$Year)-0.02)+1
+  ycoord <- c(min(Table2$MeanTCperYear),min(Table2$MeanTCperYear)+diff(range(Table2$MeanTCperYear))*0.15)
   
   g=ggplot(Table2, aes(x = .data$Year, y = .data$MeanTCperYear)) +
     geom_line() +
-    geom_area(fill = '#002F80', alpha = .5) +
+    geom_area(fill = 'grey90', alpha = .5) +
     labs(x = 'Year'
          , y = 'Citations'
          , title = "Average Article Citations per Year")+
     scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
     theme(text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = '#EFEFEF')
-          ,panel.grid.minor = element_line(color = '#FFFFFF')
-          ,panel.grid.major = element_line(color = '#FFFFFF')
-          ,plot.title = element_text(size = 24)
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.minor = element_line(color = '#EFEFEF')
+          ,panel.grid.major = element_line(color = '#EFEFEF')
+          ,plot.title = element_text(size = 18)
           ,axis.title = element_text(size = 14, color = '#555555')
-          ,axis.title.y = element_text(vjust = 1, angle = 0)
+          ,axis.title.y = element_text(vjust = 1, angle = 90)
           ,axis.title.x = element_text(hjust = 0)
-    )   
+          ,axis.text.x = element_text(size=10, angle = 90)
+          ,axis.line.x = element_line(color="black",size=0.5)
+          ,axis.line.y = element_line(color="black",size=0.5)
+    ) + annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) 
+  
   plot(g)
   graphs$AverArtCitperYear=g
   
@@ -167,22 +212,28 @@ plot.bibliometrix<-function(x, ...){
     cat("Hit <Return> to see next plot: ")
     line <- readline()}
   
+  xcoord <- c(max(Table2$Year)-0.02-diff(range(Table2$Year))*0.15, max(Table2$Year)-0.02)+1
+  ycoord <- c(min(Table2$MeanTCperArt),min(Table2$MeanTCperArt)+diff(range(Table2$MeanTCperArt))*0.15)
+  
   g=ggplot(Table2, aes(x = .data$Year, y = .data$MeanTCperArt)) +
     geom_line() +
-    geom_area(fill = '#002F80', alpha = .5) +
+    geom_area(fill = 'grey90', alpha = .5) +
     labs(x = 'Year'
          , y = 'Citations'
          , title = "Average Total Citations per Year")+
     scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
     theme(text = element_text(color = "#444444")
-          ,panel.background = element_rect(fill = '#EFEFEF')
-          ,panel.grid.minor = element_line(color = '#FFFFFF')
-          ,panel.grid.major = element_line(color = '#FFFFFF')
-          ,plot.title = element_text(size = 24)
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.minor = element_line(color = '#EFEFEF')
+          ,panel.grid.major = element_line(color = '#EFEFEF')
+          ,plot.title = element_text(size = 18)
           ,axis.title = element_text(size = 14, color = '#555555')
-          ,axis.title.y = element_text(vjust = 1, angle = 0)
-          ,axis.title.x = element_text(hjust = 0, angle = 0)
-    )   
+          ,axis.title.y = element_text(vjust = 1, angle = 90)
+          ,axis.title.x = element_text(hjust = 0)
+          ,axis.text.x = element_text(size=10, angle = 90)
+          ,axis.line.x = element_line(color="black",size=0.5)
+          ,axis.line.y = element_line(color="black",size=0.5)
+    )  + annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) 
   plot(g)
   graphs$AverTotCitperYear=g
   } else {

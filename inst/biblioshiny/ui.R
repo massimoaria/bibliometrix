@@ -20,6 +20,8 @@ require(pubmedR, quietly = TRUE)
 require(dplyr, quietly = TRUE)
 require(tidyr, quietly = TRUE)
 
+source("utils.R")
+
 #### INTERFACCIA UTENTE #### 
 ## Title ----
 mytitle <- tags$link(tags$a(href = 'https://www.bibliometrix.org/',target="_blank",

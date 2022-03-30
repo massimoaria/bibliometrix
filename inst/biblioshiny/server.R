@@ -1040,10 +1040,11 @@ server <- function(input, output,session){
   
   ## Main Info ----
   output$MainInfo <- DT::renderDT({
-    
-    TAB <- values$TABvb
-    
-    DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
+    res <- descriptive(values,type="tab1")
+    values <- res$values
+    values$TABdesc <- res$TAB
+
+    DT::datatable(values$TABdesc, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',ordering=F,
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
@@ -1066,16 +1067,16 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = "_all"),
                                                    list(width = '350px', targets = 0))),
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
-      formatStyle(names(TAB)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
+      formatStyle(names(values$TABdesc)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
+      formatStyle(names(values$TABdescb)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
   
   
   #box1 ---------------
   output$Timespan <- renderValueBox({
-    res <- descriptive(values,type="tab1")
-    TAB <- res$TAB
-    values <- res$values
+    
+    #TAB <- res$TAB
+    TAB <- ValueBoxes(values$M)
     values$TABvb <- TAB
     valueBox(value = p(TAB[TAB$Description=="Timespan", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong((TAB[TAB$Description=="Timespan", 2])), style = 'font-size:36px;color:white;', align="center"), 
@@ -1187,21 +1188,16 @@ server <- function(input, output,session){
   
   ## Annual Production ----
   output$CAGR <- renderText({
-    Y=table(values$M$PY)
-    ny=dim(Y)[1]
-    values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
+    # Y=table(values$M$PY)
+    # ny=dim(Y)[1]
+    # values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
     paste0(values$GR," %")
   })
   
   output$AnnualProdPlot <- renderPlotly({
     res <- descriptive(values,type="tab2")
     values <-res$values
-    Tab=table(values$results$Years)
-    
-    ## inserting missing years
-    YY=setdiff(seq(min(values$results$Years, na.rm = T),max(values$results$Years,na.rm = T)),names(Tab))
-    Y=data.frame(Year=as.numeric(c(names(Tab),YY)),Freq=c(as.numeric(Tab),rep(0,length(YY))))
-    Y=Y[order(Y$Year),]
+    Y <- values$TAB
     
     names(Y)=c("Year","Freq")
     x <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.125, max(Y$Year)-0.02)+1
@@ -1223,6 +1219,7 @@ server <- function(input, output,session){
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
+            ,axis.text.x = element_text(vjust = 1, angle = 90)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
       ) +
@@ -1360,7 +1357,8 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))),
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
+      formatRound(names(TAB)[c(3:4)], digits=2)
     
   })
   
@@ -1385,12 +1383,14 @@ server <- function(input, output,session){
     if (input$MostRelSourcesK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelSourcesK}
+    xx <- xx %>% 
+      slice_head(n=k)
     #xx=xx[1:k,]
-    xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
-    xx$Articles=as.numeric(xx$Articles)
+    #xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
+    #xx$Articles=as.numeric(xx$Articles)
     xx$Sources=substr(xx$Sources,1,50)
     
-    g <- freqPlot(xx,x=2,y=3, textLaby = "Sources", textLabx = "N. of Documents", title = "Most Relevant Sources")
+    g <- freqPlot(xx,x=2,y=1, textLaby = "Sources", textLabx = "N. of Documents", title = "Most Relevant Sources")
     
     values$MRSplot <- g
     return(g)
@@ -1551,7 +1551,7 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$bradford$table))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center')
+      formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center') 
   })
   ## Sources' Impact ----  
   Hsource <- eventReactive(input$applyHsource,{
@@ -1600,7 +1600,8 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$H))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center')
+      formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center') %>% 
+      formatRound(names(values$H)[4], digits=3)
     
   })
   ## Source Growth ----  
@@ -2108,13 +2109,11 @@ server <- function(input, output,session){
   MRAffiliations <- eventReactive(input$applyMRAffiliations,{
     if (input$disAff=="Y"){
       res <- descriptive(values,type="tab11")
-      xx=as.data.frame(values$results$Affiliations, stringsAsFactors = FALSE)
     }else{
       res <- descriptive(values,type="tab12")
-      xx=values$TAB
-      names(xx)=c("AFF","Freq")
     }
-    
+    xx=values$TAB
+    names(xx)=c("AFF","Freq")
     values <-res$values
     values$TABAff <- values$TAB
     
@@ -2186,7 +2185,8 @@ server <- function(input, output,session){
     values$TABCo <- values$TAB
     
     k=input$MostRelCountriesK
-    xx=values$results$CountryCollaboration[1:k,]
+    xx <- values$TABCo %>% slice_head(n=k) %>% 
+      select(.data$Country,.data$SCP,.data$MCP)
     xx=xx[order(-(xx$SCP+xx$MCP)),]
     xx1=cbind(xx[,1:2],rep("SCP",k))
     names(xx1)=c("Country","Freq","Collaboration")
@@ -2222,17 +2222,6 @@ server <- function(input, output,session){
                                ,axis.line.x = element_line(color="black",size=0.5)
                                #,axis.line.y = element_line(color="black",size=0.5)
                          )+
-                         # theme(text = element_text(color = "#444444")
-                         #       ,panel.background = element_rect(fill = '#FFFFFF')
-                         #       ,panel.grid.minor = element_line(color = '#EFEFEF')
-                         #       ,panel.grid.major = element_line(color = '#EFEFEF')
-                         #       ,plot.title = element_text(size = 24)
-                         #       ,axis.title = element_text(size = 14, color = '#555555')
-                         #       ,axis.title.y = element_text(vjust = 1, angle = 0)
-                         #       ,axis.title.x = element_text(hjust = 0)
-                         #       ,axis.line.x = element_line(color="black",size=0.5)
-                         #       ,axis.line.y = element_line(color="black",size=0.5)
-                         # )
                        coord_flip()) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
@@ -2263,6 +2252,7 @@ server <- function(input, output,session){
     g <- CAUCountries()
     
     TAB <- values$TABCo
+   # TAB=format(TAB,justify="left",digits=3)
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -2283,7 +2273,9 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
+      formatRound(names(TAB)[5], digits=3) %>% 
+      formatRound(names(TAB)[6], digits=3)
     
   })
   
@@ -2396,7 +2388,8 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
+      formatRound(names(TAB)[3], 2)
     
   })
   
@@ -2410,9 +2403,9 @@ server <- function(input, output,session){
     values$TABGlobDoc <- values$TAB
     
     if (input$CitDocsMeasure=="TC"){
-      xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[3], stringsAsFactors = FALSE,row.names=NULL)
+      xx <- values$TABGlobDoc %>% select(1,3)
       lab="Global Citations"} else {
-        xx=data.frame(values$results$MostCitedPapers[1],values$results$MostCitedPapers[4], stringsAsFactors = FALSE,row.names=NULL)
+        xx <- values$TABGlobDoc %>% select(1,4)
         lab="Global Citations per Year"
       }
     
@@ -2469,7 +2462,9 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+      formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
+      formatRound(names(TAB)[4], 2) %>%
+      formatRound(names(TAB)[5], 2)
     
   })
   ## Most Local Cited Documents ----  
@@ -4840,58 +4835,102 @@ server <- function(input, output,session){
   }
   
   descriptive <- function(values,type){
-    if (values$results[[1]]=="NA"){
-      values$results=biblioAnalysis(values$M)}
-    if (values$S[[1]][1]=="NA"){
-      values$S=summary(values$results,k=Inf,verbose=FALSE)}
+
     
     switch(type,
            "tab1"={
+             if (values$results[[1]]=="NA"){
+               values$results=biblioAnalysis(values$M)
+             }
+             if (values$S[[1]][1]=="NA"){
+               values$S=summary(values$results,k=Inf,verbose=FALSE)
+             }
              #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
              TAB=data.frame(values$S$MainInformationDF)
              #cat(S$MainInformation)
            },
            "tab2"={
+             TAB <- values$M %>% group_by(.data$PY) %>% 
+               count() %>% 
+               rename(Year = .data$PY,
+                      Articles = .data$n) %>% 
+               right_join(data.frame(Year=seq(min(values$M$PY,na.rm=TRUE),max(values$M$PY, na.rm=TRUE))), by="Year") %>% 
+               mutate(Articles = replace_na(.data$Articles,0)) %>% 
+               arrange(.data$Year) %>% as.data.frame()
              
-             TAB=values$S$AnnualProduction
-             names(TAB)=c("Year","Articles")
-             #print(S$AnnualProduction)
-             #cat("\n\n")
-             #cat("Annual Growth Rate ",round(S$AnnualGrowthRate, digits=2),"%")
+             ny=diff(range(TAB$Year))
+             values$GR=round(((TAB[nrow(TAB),2]/TAB[1,2])^(1/(ny))-1)*100, digits = 2)
            },
            "tab3"={
-             #TAB=values$S$MostProdAuthors
-             AU <- data.frame(Author=names(values$results$Authors), 
-                              freq=as.numeric(values$results$Authors), 
-                              stringsAsFactors = FALSE)
-             TAB <- dplyr::left_join(AU,values$results$AuthorsFrac)
+             listAU <- (strsplit(values$M$AU, ";"))
+             nAU <- lengths(listAU)
+             fracAU <- rep(1/nAU,nAU)
+             TAB <- tibble(Author=unlist(listAU), fracAU=fracAU) %>% 
+               group_by(.data$Author) %>% 
+               summarize(
+                 Articles = n(),
+                 AuthorFrac = sum(.data$fracAU)
+               ) %>% 
+               arrange(desc(.data$Articles)) %>% as.data.frame()
              names(TAB)=c("Authors","Articles","Articles Fractionalized")
              #print(S$MostProdAuthors)
            },
            "tab4"={
-             TAB=values$S$MostCitedPapers
+             y <- as.numeric(substr(Sys.Date(),1,4))
+             TAB <- values$M %>% 
+               mutate(TCperYear = .data$TC/(y+1-.data$PY)) %>% 
+               select(.data$SR,.data$DI, .data$TC, .data$TCperYear, .data$PY) %>% 
+               group_by(.data$PY) %>%
+               mutate(NTC = .data$TC/mean(.data$TC)) %>%
+               ungroup() %>% 
+               select(-.data$PY) %>%
+               arrange(desc(.data$TC)) %>%
+               as.data.frame()
              names(TAB)=c("Paper", "DOI","Total Citations","TC per Year","Normalized TC")
-             #print(S$MostCitedPapers)
            },
            "tab5"={
-             TAB=values$S$MostProdCountries
-             #print(S$MostProdCountries)
+             
+             TAB <- countryCollab(values$M)
+             TAB <- TAB %>% 
+               mutate(Freq = .data$Articles/sum(.data$Articles)) %>% 
+               mutate(MCP_Ratio = .data$MCP/.data$Articles)
            },
            "tab6"={
-             TAB=values$S$TCperCountries
-             #print(S$TCperCountries)
+             if (!"AU1_CO" %in% names(values$M)){
+               values$M <- metaTagExtraction(values$M, "AU1_CO")
+             }
+             TAB <- values$M %>% 
+               select(.data$AU1_CO, .data$TC) %>% 
+               drop_na(.data$AU1_CO) %>% 
+               rename(Country = .data$AU1_CO,
+                      TotalCitation = .data$TC) %>% 
+               group_by(.data$Country) %>% 
+               summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
+               arrange(-.data$TC) %>% as.data.frame(.data,stringasfactor=FALSE)
            },
            "tab7"={
-             TAB=values$S$MostRelSources
-             #print(S$MostRelSources)
+             TAB <- values$M %>% 
+               select(.data$SO) %>% 
+               group_by(.data$SO) %>% 
+               count() %>% 
+               arrange(desc(.data$n)) %>% 
+               rename(Sources = .data$SO,
+                      Articles = .data$n) %>% 
+               as.data.frame()
            },
            
            "tab10"={
              TAB<-mapworld(values$M)$tab
            },
            "tab11"={
-             TAB=as.data.frame(values$results$Affiliations,stringsAsFactors = FALSE)
-             names(TAB)=c("Affiliations", "Articles")
+             if(!("AU_UN" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_UN")}
+             TAB <- data.frame(Affiliation=unlist(strsplit(values$M$AU_UN, ";"))) %>% 
+               group_by(.data$Affiliation) %>% 
+               count() %>% 
+               drop_na(.data$Affiliation) %>% 
+               arrange(desc(.data$n)) %>% 
+               rename(Articles = .data$n) %>% 
+               as.data.frame()
            },
            "tab12"={
              TAB=tableTag(values$M,"C1")
@@ -5077,14 +5116,16 @@ server <- function(input, output,session){
       geom_point()+
       geom_line(aes(group="NA"),color = '#002F80', alpha = .5) +
       theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#EFEFEF')
-            ,panel.grid.minor = element_line(color = '#FFFFFF')
-            ,panel.grid.major = element_line(color = '#FFFFFF')
+            ,panel.background = element_rect(fill = '#FFFFFF')
+            ,panel.grid.minor = element_line(color = '#EFEFEF')
+            ,panel.grid.major = element_line(color = '#EFEFEF')
             ,plot.title = element_text(size = 24)
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-      ) + 
+            ,axis.line.x = element_line(color="black",size=0.5)
+            ,axis.line.y = element_line(color="black",size=0.5)
+      ) +
       labs(x = "Node", y="Degree", title = "Node Degrees")
     return(p)
   }
@@ -5669,718 +5710,8 @@ server <- function(input, output,session){
     return(values)
   }
   
-  
-  ### ANALYSIS FUNCTIONS ####
-  ### Descriptive functions ----
-  Hindex_plot <- function(values, type){
-    
-    hindex<-function(values,type){
-      
-      switch(type,
-             author={
-               AU <- trim(gsub(",","",names(tableTag(values$M,"AU"))))
-               values$H <- Hindex(values$M, field = "author", elements = AU, sep = ";", years=Inf)$H
-             },
-             source={
-               SO <- names(sort(table(values$M$SO),decreasing = TRUE))
-               values$H <- Hindex(values$M, field = "source", elements = SO, sep = ";", years=Inf)$H
-             }
-      )
-      
-      return(values)
-    }
-    
-    values<-hindex(values, type = type)
-    
-    xx=values$H
-    if (type=="author"){
-      K=input$Hkauthor
-      measure=input$HmeasureAuthors
-      title="Author Local Impact"
-      xn="Authors"
-    } else {
-      K=input$Hksource
-      measure=input$HmeasureSources
-      title="Source Local Impact"
-      xn="Sources"
-    }
-    if (K>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=K}
-    
-    switch(measure,
-           h={m=2},
-           g={m=3},
-           m={m=4
-           xx[,m] <-round(xx[,m],2) },
-           tc={m=5}
-    )
-    xx <- xx[order(-xx[,m]),]
-    xx <- xx[1:k,c(1,m)]
-    
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = xn, textLabx = paste("Impact Measure:",toupper(measure)), title = paste(title,"by",toupper(measure),"index"))
-    
-    res<-list(values=values,g=g)
-    return(res)
-  }
-  
-  descriptive <- function(values,type){
-    if (values$results[[1]]=="NA"){
-      values$results=biblioAnalysis(values$M)}
-    if (values$S[[1]][1]=="NA"){
-      values$S=summary(values$results,k=Inf,verbose=FALSE)}
-    
-    # ### radar info
-    # perc=0.90
-    # radar <- data.frame(nAU=c(NA,NA), Age=c(NA,NA), IntColl=c(NA,NA), Cit=c(NA,NA), So=c(NA,NA))
-    # radar$nAU[1] <- min(1,mean(values$results$nAUperPaper, na.rm=TRUE)/quantile(values$results$nAUperPaper,perc, na.rm=TRUE))
-    # radar$nAU[2] <- mean(values$results$nAUperPaper, na.rm=TRUE) 
-    # Age <- as.numeric(substr(Sys.time(),1,4))-values$results$Years+1
-    # radar$Age[2] <- mean(Age, na.rm=TRUE)
-    # radar$Age[1] <- min(1,radar$Age[2]/quantile(Age,perc, na.rm=TRUE))
-    # radar$IntColl[2] <- sum(values$results$CountryCollaboration$MCP) #V
-    # radar$IntColl[1] <- radar$IntColl[2]/values$results$Articles #V
-    # radar$Cit[2] <- mean(values$M$TC, na.rm=TRUE)
-    # radar$Cit[1] <- min(1,radar$Cit[2]/quantile(values$M$TC, perc, na.rm=TRUE))
-    # radar$So[1] <- values$results$Sources[1]/values$results$Articles
-    # radar$So[2] <- values$results$Sources[1]
-    # values$radar <- radar
-    # #  ### 
-    
-    # values$descriptive_2<- sum(values$results$CountryCollaboration$MCP)/values$results$Articles 
-    # Y=table(values$M$PY)
-    # ny=dim(Y)[1]
-    # values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
-    
-    switch(type,
-           "tab1"={
-             #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
-             TAB=data.frame(values$S$MainInformationDF)
-             #cat(S$MainInformation)
-             #values$descriptive_2<- sum(values$results$CountryCollaboration$MCP)/values$results$Articles 
-             # Y=table(values$M$PY)
-             #ny=dim(Y)[1]
-             #values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
-           },
-           "tab2"={
-             
-             TAB=values$S$AnnualProduction
-             names(TAB)=c("Year","Articles")
-             #print(S$AnnualProduction)
-             #cat("\n\n")
-             #cat("Annual Growth Rate ",round(S$AnnualGrowthRate, digits=2),"%")
-           },
-           "tab3"={
-             #TAB=values$S$MostProdAuthors
-             AU <- data.frame(Author=names(values$results$Authors), 
-                              freq=as.numeric(values$results$Authors), 
-                              stringsAsFactors = FALSE)
-             TAB <- dplyr::left_join(AU,values$results$AuthorsFrac)
-             names(TAB)=c("Authors","Articles","Articles Fractionalized")
-             #print(S$MostProdAuthors)
-           },
-           "tab4"={
-             TAB=values$S$MostCitedPapers
-             names(TAB)=c("Paper", "DOI","Total Citations","TC per Year","Normalized TC")
-             #print(S$MostCitedPapers)
-           },
-           "tab5"={
-             TAB=values$S$MostProdCountries
-             #print(S$MostProdCountries)
-           },
-           "tab6"={
-             TAB=values$S$TCperCountries
-             #print(S$TCperCountries)
-           },
-           "tab7"={
-             TAB=values$S$MostRelSources
-             #print(S$MostRelSources)
-           },
-           
-           "tab10"={
-             TAB<-mapworld(values$M)$tab
-           },
-           "tab11"={
-             TAB=as.data.frame(values$results$Affiliations,stringsAsFactors = FALSE)
-             names(TAB)=c("Affiliations", "Articles")
-           },
-           "tab12"={
-             TAB=tableTag(values$M,"C1")
-             TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB),stringsAsFactors = FALSE)
-             TAB=TAB[nchar(TAB[,1])>4,]
-             #names(TAB)=c("Affiliations", "Articles")
-             
-           },
-           "tab13"={
-             CR<-localCitations(values$M,fast.search = FALSE, verbose = FALSE)
-             TAB <- CR$Authors
-             #TAB=data.frame(Authors=names(CR$Authors$Author), Citations=as.numeric(CR$Cited),stringsAsFactors = FALSE)
-           }
-    )
-    values$TAB=TAB
-    res=list(values=values,TAB=TAB)
-    return(res)
-  }
-  
-  wordlist <- function(M, Field, n, measure, ngrams, remove.terms=NULL, synonyms=NULL){
-    switch(Field,
-           ID={v=tableTag(values$M,"ID", remove.terms  = remove.terms, synonyms = synonyms)},
-           DE={v=tableTag(values$M,"DE", remove.terms = remove.terms, synonyms = synonyms)},
-           TI={
-             if (!("TI_TM" %in% names(M))){
-               v=tableTag(M,"TI", ngrams=ngrams, remove.terms=remove.terms, synonyms = synonyms)
-               
-             }},
-           AB={if (!("AB_TM" %in% names(M))){
-             v=tableTag(M,"AB", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
-           }}
-    )
-    names(v)=tolower(names(v))
-    #v=tableTag(values$M,"ID")
-    n=min(c(n,length(v)))
-    Words=data.frame(Terms=names(v)[1:n], Frequency=(as.numeric(v)[1:n]), stringsAsFactors = FALSE)
-    W=Words
-    switch(measure,
-           identity={},
-           sqrt={W$Frequency=sqrt(W$Frequency)},
-           log={W$Frequency=log(W$Frequency+1)},
-           log10={W$Frequency=log10(W$Frequency+1)}
-    )
-    
-    results=list(v=v,W=W, Words=Words)
-    return(results)
-  }
-  
-  readStopwordsFile <- function(file, sep=","){
-    if (!is.null(file)){
-      req(file$datapath)
-      remove.terms <- unlist(strsplit(readr::read_lines(file$datapath), sep))
-    }else{remove.terms <- NULL}
-    return(remove.terms)
-  }
-  
-  readSynWordsFile <- function(file, sep=","){
-    if (!is.null(file)){
-      req(file$datapath)
-      syn.terms <- readr::read_lines(file$datapath)
-      if (sep!=";") syn.terms <- gsub(sep,";",syn.terms)
-    }else{syn.terms <- NULL}
-    return(syn.terms)
-  }
-  
-  mapworld <- function(M){
-    if (!("AU_CO" %in% names(M))){M=metaTagExtraction(M,"AU_CO")}
-    CO=as.data.frame(tableTag(M,"AU_CO"),stringsAsFactors = FALSE)
-    CO$Tab=gsub("UNITED KINGDOM","UK",CO$Tab)
-    CO$Tab=gsub("KOREA","SOUTH KOREA",CO$Tab)
-    
-    map.world <- map_data("world")
-    map.world$region=toupper(map.world$region)
-    
-    dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
-    
-    country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
-    
-    tab=data.frame(country.prod %>%
-                     dplyr::group_by(region) %>%
-                     dplyr::summarise(Freq=mean(Freq)))
-    
-    tab=tab[!is.na(tab$Freq),]
-    
-    tab=tab[order(-tab$Freq),]
-    
-    breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
-    names(breaks)=breaks
-    breaks=log(breaks)
-    
-    g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
-      geom_polygon(aes(fill = log(Freq), group=group)) +
-      scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
-      guides(fill = guide_legend(reverse = T)) +
-      #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +
-      labs(fill = 'N.Documents'
-           ,title = 'Country Scientific Production'
-           ,x = NULL
-           ,y = NULL) +
-      theme(text = element_text(color = '#333333')
-            ,plot.title = element_text(size = 28)
-            ,plot.subtitle = element_text(size = 14)
-            ,axis.ticks = element_blank()
-            ,axis.text = element_blank()
-            ,panel.grid = element_blank()
-            ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
-            ,plot.background = element_rect(fill = '#FFFFFF')
-            ,legend.position = c(.18,.36)
-            ,legend.background = element_blank()
-            ,legend.key = element_blank()
-      ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
-    
-    results=list(g=g,tab=tab)
-    return(results)
-  }
-  
-  ### Structure fuctions ----
-  CAmap <- function(input, values){
-    if ((input$CSfield %in% names(values$M))){
-      
-      if (input$CSfield %in% c("TI","AB")){
-        ngrams <- as.numeric(input$CSngrams)
-      }else{
-        ngrams <- 1
-      }
-      
-      ### load file with terms to remove
-      if (input$CSStopFile=="Y"){
-        remove.terms <- trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep))
-      }else{remove.terms <- NULL}
-      values$CSremove.terms <- remove.terms
-      ### end of block
-      ### load file with synonyms
-      if (input$FASynFile=="Y"){
-        synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
-      }else{synonyms <- NULL}
-      values$FAsyn.terms <- synonyms
-      ### end of block
-      
-      tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
-      if (length(tab>=2)){
-        
-        minDegree=as.numeric(tab[input$CSn])
-        
-        values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
-                                         k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
-                                         remove.terms=remove.terms, synonyms = synonyms)
-        
-        
-      }else{emptyPlot("Selected field is not included in your data collection")
-        values$CS=list("NA")}
-      
-    }else{
-      emptyPlot("Selected field is not included in your data collection")
-      values$CS=list("NA")
-      
-    }
-  }
-  
-  historiograph <- function(input,values){
-    
-    min.cit <- 1
-    # if (input$histsearch=="FAST"){
-    #   min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
-    # }else{min.cit=1}
-    
-    if (values$Histfield=="NA"){
-      values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
-      values$Histfield="done"
-    }
-    titlelabel <- input$titlelabel=="TRUE"
-    values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, title_as_label = titlelabel, verbose=FALSE))
-    return(values)
-  }
-  
-  
-  ### Network functions ----
-  
-  degreePlot <- function(net){
-    deg <- data.frame(node = names(net$nodeDegree), x= (1:length(net$nodeDegree)), y = net$nodeDegree)
-    p <- ggplot(data = deg, aes(x=.data$x, y=.data$y, 
-                                text=paste("Node ",.data$x," - Degree ",.data$y, sep="")))+
-      geom_point()+
-      geom_line(aes(group="NA"),color = '#002F80', alpha = .5) +
-      theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#FFFFFF')
-            ,panel.grid.minor = element_line(color = '#EFEFEF')
-            ,panel.grid.major = element_line(color = '#EFEFEF')
-            ,plot.title = element_text(size = 24)
-            ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 0)
-            ,axis.title.x = element_text(hjust = 0)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
-      ) +
-      labs(x = "Node", y="Degree", title = "Node Degrees")
-    return(p)
-  }
-  
-  cocNetwork <- function(input,values){
-    
-    n = input$Nodes
-    label.n = input$Labels
-    
-    ### load file with terms to remove
-    if (input$COCStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep))
-    }else{remove.terms <- NULL}
-    values$COCremove.terms <- remove.terms
-    ### end of block
-    ### load file with synonyms
-    if (input$COCSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
-    }else{synonyms <- NULL}
-    values$COCsyn.terms <- synonyms
-    ### end of block
-    
-    if ((input$field %in% names(values$M))){
-      
-      if ((dim(values$NetWords)[1])==1 | !(input$field==values$field) | !(input$cocngrams==values$cocngrams) | ((dim(values$NetWords)[1])!=input$Nodes) ){
-        
-        values$field=input$field
-        values$ngrams <- input$cocngrams
-        
-        switch(input$field,
-               ID={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
-                 values$Title= "Keywords Plus Network"
-               },
-               DE={
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
-                 values$Title= "Authors' Keywords network"
-               },
-               TI={
-                 #if(!("TI_TM" %in% names(values$M))){
-                 values$M=termExtraction(values$M,Field="TI",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
-                 #}
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
-                 values$Title= "Title Words network"
-               },
-               AB={
-                 #if(!("AB_TM" %in% names(values$M))){
-                 values$M=termExtraction(values$M,Field="AB",verbose=FALSE, ngrams=as.numeric(input$cocngrams), remove.terms=remove.terms, synonyms = synonyms)
-                 #}
-                 values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
-                 values$Title= "Abstract Words network"
-               })
-        
-      }
-      
-      if (label.n>n){label.n=n}
-      if (input$normalize=="none"){normalize=NULL}else{normalize=input$normalize}
-      if (input$label.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-      if (input$coc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
-      
-      #par(bg="grey92", mar=c(0,0,0,0))
-      values$cocnet=networkPlot(values$NetWords, normalize=normalize, Title = values$Title, type = input$layout, 
-                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$edgesize*3, labelsize=input$labelsize,label.cex=label.cex,
-                                label.n=label.n,edges.min=input$edges.min,label.color = F, curved=curved,alpha=input$cocAlpha,
-                                cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), 
-                                community.repulsion = input$coc.repulsion/2, verbose = FALSE)
-      if (input$cocyears=="Yes"){
-        Y=fieldByYear(values$M, field = input$field, graph=FALSE)
-        g=values$cocnet$graph
-        label=igraph::V(g)$name
-        ind=which(tolower(Y$df$item) %in% label)
-        df=Y$df[ind,]
-        
-        #bluefunc <- colorRampPalette(c("lightblue", "darkblue"))
-        #col=bluefunc((diff(range(df$year))+1)*10)
-        col=heat.colors((diff(range(df$year))+1)*10)
-        igraph::V(g)$color=col[(max(df$year)-df$year+1)*10]
-        igraph::V(g)$year=df$year
-        values$cocnet$graph=g
-      }
-      
-    }else{
-      emptyPlot("Selected field is not included in your data collection")
-    }
-    return(values)
-  }
-  
-  intellectualStructure <- function(input,values){
-    n = input$citNodes
-    label.n = input$citLabels
-    
-    if ((dim(values$NetRefs)[1])==1 | !(input$citField==values$citField) | !(input$citSep==values$citSep) | !(input$citShortlabel==values$citShortlabel) | ((dim(values$NetRefs)[1])!=input$citNodes)){
-      
-      values$citField=input$citField
-      values$citSep=input$citSep
-      if (input$citShortlabel=="Yes"){shortlabel=TRUE}else{shortlabel=FALSE}
-      values$citShortlabel=input$citShortlabel
-      switch(input$citField,
-             CR={
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "references", n = n, sep = input$citSep, shortlabel=shortlabel)
-               values$Title= "Cited References network"
-               
-             },
-             CR_AU={
-               if(!("CR_AU" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_AU", sep = input$citSep)}
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "authors", n = n, sep = input$citSep)
-               values$Title= "Cited Authors network"
-             },
-             CR_SO={
-               if(!("CR_SO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="CR_SO", sep = input$citSep)}
-               values$NetRefs <- biblioNetwork(values$M, analysis = "co-citation", network = "sources", n = n, sep = input$citSep)
-               values$Title= "Cited Sources network"
-             })
-      
-    }
-    
-    if (label.n>n){label.n=n}
-    if (input$citlabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-    if (input$cocit.curved=="Yes"){curved=TRUE}else{curved=FALSE}
-    
-    values$cocitnet=networkPlot(values$NetRefs, normalize=NULL, Title = values$Title, type = input$citlayout, 
-                                size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$citedgesize*3, 
-                                labelsize=input$citlabelsize,label.cex=label.cex, curved=curved,
-                                label.n=label.n,edges.min=input$citedges.min,label.color = F,remove.isolates = (input$cit.isolates=="yes"),
-                                alpha=0.7, cluster=input$cocitCluster, 
-                                community.repulsion = input$cocit.repulsion/2, verbose = FALSE)
-    return(values)
-  }
-  
-  socialStructure<-function(input,values){
-    n = input$colNodes
-    label.n = input$colLabels
-    
-    if ((dim(values$ColNetRefs)[1])==1 | !(input$colField==values$colField) | ((dim(values$ColNetRefs)[1])!=input$colNodes)){
-      
-      values$colField=input$colField
-      
-      
-      values$cluster="walktrap"
-      switch(input$colField,
-             COL_AU={
-               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")
-               values$Title= "Author Collaboration network"
-               
-             },
-             COL_UN={
-               if(!("AU_UN" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_UN", sep=";")}
-               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "universities", n = n, sep = ";")
-               values$Title= "Edu Collaboration network"
-             },
-             COL_CO={
-               if(!("AU_CO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_CO", sep=";")}
-               values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", n = n, sep = ";")
-               values$Title= "Country Collaboration network"
-               #values$cluster="none"
-             })
-      
-    }
-    
-    if (label.n>n){label.n=n}
-    if (input$colnormalize=="none"){normalize=NULL}else{normalize=input$colnormalize}
-    if (input$collabel.cex=="Yes"){label.cex=TRUE}else{label.cex=FALSE}
-    if (input$soc.curved=="Yes"){curved=TRUE}else{curved=FALSE}
-    
-    type=input$collayout
-    if (input$collayout=="worldmap"){type="auto"}
-    
-    values$colnet=networkPlot(values$ColNetRefs, normalize=normalize, Title = values$Title, type = type, 
-                              size.cex=TRUE, size=5 , remove.multiple=F, edgesize = input$coledgesize*3, 
-                              labelsize=input$collabelsize,label.cex=label.cex, curved=curved,
-                              label.n=label.n,edges.min=input$coledges.min,label.color = F,alpha=input$colAlpha,
-                              remove.isolates = (input$col.isolates=="yes"), cluster=input$colCluster, 
-                              community.repulsion = input$col.repulsion/2, verbose = FALSE)
-    
-    return(values)
-    
-  }
-  
-  countrycollaboration <- function(M,label,edgesize,min.edges){
-    M=metaTagExtraction(M,"AU_CO")
-    net=biblioNetwork(M,analysis="collaboration",network="countries")
-    CO=data.frame(Tab=rownames(net),Freq=diag(net),stringsAsFactors = FALSE)
-    bsk.network=igraph::graph_from_adjacency_matrix(net,mode="undirected")
-    COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE),stringsAsFactors = FALSE)
-    
-    map.world <- map_data("world")
-    map.world$region=toupper(map.world$region)
-    map.world$region=gsub("UK","UNITED KINGDOM",map.world$region)
-    map.world$region=gsub("SOUTH KOREA","KOREA",map.world$region)
-    
-    country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
-    
-    breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
-    names(breaks)=breaks
-    breaks=log(breaks)
-    data("countries",envir=environment())
-    names(countries)[1]="Tab"
-    
-    COedges=dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
-    COedges=dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
-    COedges=COedges[COedges$V1!=COedges$V2,]
-    COedges=count.duplicates(COedges)
-    tab=COedges
-    COedges=COedges[COedges$count>=min.edges,]
-    
-    g=ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group )) +
-      geom_polygon(aes(fill = log(Freq))) +
-      scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
-      #guides(fill = guide_legend(reverse = T)) +
-      guides(colour=FALSE, fill=FALSE)+
-      geom_curve(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
-                                   color = "firebrick4", size = .data$count, group=.data$continent.x),
-                 curvature = 0.33,
-                 alpha = 0.5) +
-      labs(x = "Latitude", y = "Longitude")+
-      scale_size_continuous(guide = FALSE, range = c(0.25, edgesize))+
-      theme(text = element_text(color = '#333333')
-            ,plot.title = element_text(size = 28)
-            ,plot.subtitle = element_text(size = 14)
-            ,axis.ticks = element_blank()
-            ,axis.text = element_blank()
-            ,panel.grid = element_blank()
-            ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
-            ,plot.background = element_rect(fill = '#FFFFFF')
-            ,legend.position = c(.18,.36)
-            ,legend.background = element_blank()
-            ,legend.key = element_blank()
-      ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
-    if (isTRUE(label)){
-      CO=dplyr::inner_join(CO,countries, by=c('Tab'='Tab'))
-      g=g+
-        ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
-                                 hjust = 0, nudge_x = 1, nudge_y = 4,
-                                 size = 3, color = "orange", fontface = "bold")
-    }
-    
-    results=list(g=g,tab=tab)
-    return(results)
-  }
-  ### visNetwork tools ----
-  netLayout <- function(type){
-    switch(type,
-           auto={l <- "layout_nicely"},
-           circle={l <- "layout_in_circle"},
-           mds={l <- "layout_with_mds"},
-           star={l <- "layout_as_star"},
-           
-           sphere={l <- "layout_on_sphere"},
-           fruchterman={l <- "layout_with_fr"},
-           kamada={l <- "layout_with_kk"}
-    )
-    return(l)
-  }
-  
-  savenetwork <- function(con){
-    vn=values$network$vn
-    visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE, height = "2000px",width = "2000px" ) %>%
-      visNodes(shape="box", font=list(color="black"),scaling=list(label=list(enables=TRUE))) %>%
-      visIgraphLayout(layout = values$network$l) %>%
-      visEdges(smooth = values$network$curved) %>%
-      visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-      visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE)  %>% visExport() %>%
-      visPhysics(enabled = FALSE) %>% visSave(con)
-  }
-  
-  igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
-    
-    LABEL=igraph::V(g)$name
-    
-    LABEL[igraph::V(g)$labelsize==0]=""
-    
-    vn <- toVisNetworkData(g)
-    
-    vn$nodes$label=LABEL
-    vn$edges$num=1
-    vn$edges$dashes=FALSE
-    vn$edges$dashes[vn$edges$lty==2]=TRUE
-    
-    ## opacity
-    vn$nodes$color=adjustcolor(vn$nodes$color,alpha=min(c(opacity+0.2,1)))
-    vn$edges$color=adjustcolor(vn$edges$color,alpha=opacity)
-    
-    ## removing multiple edges
-    vn$edges=unique(vn$edges)
-    
-    ## labelsize
-    scalemin=20
-    scalemax=150
-    Min=min(vn$nodes$font.size)
-    Max=max(vn$nodes$font.size)
-    if (Max>Min){
-      size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
-    } else {size=10*labelsize}
-    size[size<scalemin]=scalemin
-    size[size>scalemax]=scalemax
-    vn$nodes$font.size=size
-    l<-netLayout(type)
-    
-    ### TO ADD SHAPE AND FONT COLOR OPTIONS
-    coords <- net$layout
-    
-    vn$nodes$size <- vn$nodes$font.size*0.8
-    
-    if (shape %in% c("text")){
-      vn$nodes$font.color <- vn$nodes$color
-    }else{
-      vn$nodes$font.color <- "black"
-    }
-    
-    if (shape %in% c("dot","square")){
-      vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
-    }else{
-      vn$nodes$font.vadjust <-0
-    }
-    
-    VIS<-
-      visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-      #visNodes(shape=shape, font=list(color="black")) %>%
-      visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
-      visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
-      visEdges(smooth = curved) %>%
-      visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-      visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
-      visOptions(manipulation = TRUE) %>%
-      visExport(type = "png", name = "network",
-                label = paste0("Export graph as png"), background = "#fff",
-                float = "right", style = NULL, loadDependencies = TRUE)
-    values$COCVIS=VIS
-    return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
-  }
-  
-  
-  ## User part ----
-  #   output$user <- renderUser({
-  #   dashboardUser(
-  #     name = "Credits",
-  #     subtitle = p("Massimo Aria & Corrado Cuccurullo", align ="center", style='font-size:50px;color:white;'),
-  #     image = "logo2.png",
-  #     footer = p("Bibliometrix, K-Synth and Github Websites",
-  #                class ="text-center"),
-  #     fluidRow(
-  #       dashboardUserItem(
-  #         width = 4,
-  #         socialButton(
-  #           href = 'https://www.bibliometrix.org/',
-  #           icon = icon("globe", lib = "font-awesome")
-  #         )
-  #       ),
-  #       dashboardUserItem(
-  #         width = 4,
-  #         socialButton(
-  #           href = "https://www.k-synth.unina.it",
-  #           icon = icon("globe",lib = "font-awesome")
-  #         )
-  #       ),
-  #       dashboardUserItem(
-  #         width = 4,
-  #         socialButton(
-  #           href = "https://github.com/massimoaria/bibliometrix",
-  #           icon = icon("globe",lib = "font-awesome")
-  #         )
-  #       )
-  #     ))
-  # })
-  
-  ## CONTROL BAR  ----
-  
-  # output$iconControlbar <- renderUI({
-  #   fa_i(name = "bars")
-  #   })
-  
-  # observe({
-  #   if(!isTRUE(values$checkControlBar)){
-  #     output$iconControlbar <- renderUI({
-  #       fa_i(name = "chevron-down")
-  #     })
-  #   } else{
-  #     output$iconControlbar <- renderUI({
-  #       fa_i(name = "chevron-left")
-  #     })
-  #   }
-  # })
+
+
   
   observe({
     if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo")) & !isTRUE(values$checkControlBar)){

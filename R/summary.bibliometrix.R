@@ -61,7 +61,7 @@ summary.bibliometrix<-function(object, ...){
   CAGR<-as.numeric(round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2))
   #
   
-  IntColl<- sum(object$CountryCollaboration$MCP)/object$Articles*100
+  #IntColl<- sum(object$CountryCollaboration$MCP)/object$Articles*100
   
   #Main Information about data
   MainInfo=toupper("\n\nMain Information about data\n\n")
@@ -92,7 +92,7 @@ summary.bibliometrix<-function(object, ...){
   MainInfo[length(MainInfo)+1]=paste("Documents per Author                 ",format(object$Articles/object$nAuthors,digits=3),"\n")
   #MainInfo[length(MainInfo)+1]=paste("Authors per Document                 ",format(object$nAuthors/object$Articles,digits=3),"\n")
   MainInfo[length(MainInfo)+1]=paste("Co-Authors per Doc                   ",format(mean(object$nAUperPaper),digits=3),"\n")
-  MainInfo[length(MainInfo)+1]=paste("International co-authorships %       ",format(IntColl,digits=4),"\n")
+  MainInfo[length(MainInfo)+1]=paste("International co-authorships %       ",format(object$IntColl,digits=4),"\n")
   #MainInfo[length(MainInfo)+1]=paste("Collaboration Index                  ",CollIndex,"\n")
   MainInfo[length(MainInfo)+1]=paste("\n")
   

@@ -35,9 +35,10 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL, syno
   
   ### inserted to remove punct and extra spaces ####
   #Tab<-trimws(trimES(gsub("[[:punct:]]"," ",Tab)))
-  Tab<-trimws(trimES(gsub("\\.|\\,"," ",Tab)))
+  Tab <- trimws(gsub("\\s+|\\.|\\,"," ",Tab))
   ####
-  Tab<-Tab[Tab!=""]
+  #Tab<-Tab[Tab!=""]
+  Tab <- Tab[nchar(Tab)>0]
   
   # Merge synonyms in the vector synonyms
   if (length(synonyms)>0 & class(synonyms)=="character"){

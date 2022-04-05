@@ -34,6 +34,6 @@ biblioshiny <- function(host = "127.0.0.1", port = NULL,
   rm(CAmap, cocNetwork, count.duplicates, countrycollaboration, degreePlot, descriptive, emptyPlot, freqPlot,
      getFileNameExtension, Hindex_plot, historiograph, igraph2vis, initial, intellectualStructure, is_online,
      mapworld, netLayout, notifications, plot.ly, readStopwordsFile, readSynWordsFile, reduceRefs, savenetwork,
-     socialStructure, strPreview, strSynPreview, wordlist, ValueBoxes, countryCollab, management, pos = ".GlobalEnv")
+     socialStructure, strPreview, strSynPreview, wordlist, ValueBoxes, countryCollab, pos = ".GlobalEnv")
   
 }

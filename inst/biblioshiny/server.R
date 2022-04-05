@@ -1040,11 +1040,7 @@ server <- function(input, output,session){
   
   ## Main Info ----
   output$MainInfo <- DT::renderDT({
-    res <- descriptive(values,type="tab1")
-    values <- res$values
-    values$TABdesc <- res$TAB
-    
-    DT::datatable(values$TABdesc, rownames = FALSE, extensions = c("Buttons"),
+    DT::datatable(values$TABvb , rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',ordering=F,
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
@@ -1067,8 +1063,8 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = "_all"),
                                                    list(width = '350px', targets = 0))),
                   class = 'cell-border compact stripe') %>%
-      formatStyle(names(values$TABdesc)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
-      formatStyle(names(values$TABdescb)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
+      formatStyle(names(values$TABvb)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
+      formatStyle(names(values$TABvb)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
   
   
@@ -4838,17 +4834,6 @@ server <- function(input, output,session){
     
     
     switch(type,
-           "tab1"={
-             if (values$results[[1]]=="NA"){
-               values$results=biblioAnalysis(values$M)
-             }
-             if (values$S[[1]][1]=="NA"){
-               values$S=summary(values$results,k=Inf,verbose=FALSE)
-             }
-             #TAB=data.frame(Information=gsub("[[:digit:]]", "", S$MainInformation), Data=gsub("[^0-9]", "", S$MainInformation))
-             TAB=data.frame(values$S$MainInformationDF)
-             #cat(S$MainInformation)
-           },
            "tab2"={
              TAB <- values$M %>% group_by(.data$PY) %>% 
                count() %>% 

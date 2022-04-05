@@ -59,6 +59,28 @@ ValueBoxes <- function(M){
   ## VB 12 - Average citations per doc
   df[12,] <- c("Average citations per doc", format(mean(M$TC, na.rm=T), digit = 4))
   
+  DT <- M %>% mutate(DT = tolower(.data$DT)) %>% 
+    count(.data$DT) %>% 
+    rename(Description = .data$DT,
+           Results = .data$n)
+  
+  # Indexed Keywords (ID)
+  ID <- unique(trimws(gsub("\\s+|\\.|\\,"," ",unlist(strsplit(M$ID, ";")))))
+  ID <- ID[!is.na(ID)]
+  df[nrow(df)+1,] <- c("Keywords Plus (ID)",length(ID))
+  
+  # Single authored docs
+  
+  df[nrow(df)+1,] <- c("Single-authored docs",sum(nAU==1))
+  
+  df2 <- data.frame(Description = c("MAIN INFORMATION ABOUT DATA","Timespan","Sources (Journals, Books, etc)","Documents",
+                                    "Annual Growth Rate %","Document Average Age","Average citations per doc","References",
+                                    "DOCUMENT CONTENTS","Keywords Plus (ID)","Author's Keywords (DE)","AUTHORS","Authors","Authors of single-authored docs",
+                                    "AUTHORS COLLABORATION","Single-authored docs","Co-Authors per Doc","International co-authorships %", "DOCUMENT TYPES"))
+  
+  df <- left_join(df2,df,by = "Description") %>% rbind(DT) %>% 
+    mutate(Results = replace_na(.data$Results, ""))
+  
   return(df)
 }
 
@@ -80,5 +102,5 @@ countryCollab<-function(M){
     rename(Country = .data$AU1_CO) %>% 
     arrange(desc(.data$Articles))
   
-  return(df)
+    return(df)
 }

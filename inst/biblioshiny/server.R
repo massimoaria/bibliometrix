@@ -2,11 +2,9 @@
 
 server <- function(input, output,session){
   session$onSessionEnded(stopApp)
-  ##
-  
+
   ## suppress warnings
   options(warn = -1)
-  ##
   
   ## file upload max size
   maxUploadSize <- 200 # default value
@@ -30,7 +28,6 @@ server <- function(input, output,session){
   values$Histfield="NA"
   values$histlog="working..."
   values$kk=0
-  #values$MRWremove.terms=NULL
   values$M=data.frame(PY=0)
   values$histsearch="NA"
   values$citShortlabel="NA"
@@ -44,12 +41,10 @@ server <- function(input, output,session){
   values$ApiOk <- 0
   values$checkControlBar <-FALSE
   
-  ## NOTIFICATION ITEM ----
+## NOTIFICATION ITEM ----
   
   output$notificationMenu <- renderMenu({
-    
     notifTot <- notifications()
-    
     values$nots <- apply(notifTot, 1, function(row) {
       
       ## extract href from messages
@@ -76,10 +71,7 @@ server <- function(input, output,session){
         }
       }
       
-      
-      
       notificationItem(
-        #text = row[["nots"]],
         text = eval(parse(text=textRows)),
         icon = if (row[["status"]]=="danger") {fa_i(name ="envelope")}else{fa_i(name ="envelope-open")},
         status = row[["status"]],
@@ -100,13 +92,11 @@ server <- function(input, output,session){
                  headerText ="",
                  badgeStatus = NULL, 
                  icon = fa_i(name = icon_name)
-                 #icon = icon_color
     )
   })
   
-  ###Menu sidebar ----
-  
-  # Apply Data----
+  ## SIDEBAR MENU ----
+  ### Apply Data----
   observe({
     toggleElement(
       id ="rest_of_sidebar",
@@ -148,7 +138,7 @@ server <- function(input, output,session){
                menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
                "Cited References",
                menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Reference Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
                "Words",
                menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
@@ -174,7 +164,7 @@ server <- function(input, output,session){
     )
   })
   
-  # Apply API ----
+  ### Apply API ----
   observe({
     toggleElement(
       id ="rest_of_sidebar",
@@ -242,21 +232,7 @@ server <- function(input, output,session){
     )
   })
   
-  # observe({
-  #   toggleElement(
-  #     id = "rest_of_sidebar",
-  #     condition = input[["applyLoad"]]
-  #   )
-  #   })
-  # 
-  #     # menuItem("Quit", tabName = "quit",icon=icon("off",lib = "glyphicon")),
-  #     # menuItem("K-Synth", icon = icon("globe",lib = "glyphicon"), badgeLabel = "Link", badgeColor = "blue",
-  #     #         href = "https://www.k-synth.unina.it")
-  
-  
-  
-  
-  ## LOAD MENU ----
+  ## Load Menu ----
   format <- function(obj){
     ext<- sub('.*\\.', '', obj[1])
     switch(ext,
@@ -371,7 +347,6 @@ server <- function(input, output,session){
                                                   format = "bibtex")
                                 })
                  })
-          
         },
         lens = {
           switch(ext,
@@ -416,7 +391,6 @@ server <- function(input, output,session){
                                                   format = "plaintext")
                                 })
                  })
-          
         },
         pubmed = {
           switch(ext,
@@ -479,14 +453,11 @@ server <- function(input, output,session){
           
         }
       )
-      
     } else if (!is.null(inFile) & input$load=="load") {
       ext <- tolower(getFileNameExtension(inFile$datapath))
-      #print(ext)
       switch(ext,
              ### excel format
              xlsx={
-               #M <- rio::import(inFile$datapath)
                M <- readxl::read_excel(inFile$datapath) %>% as.data.frame(stringsAsFactors=FALSE)
                class(M) <- c("bibliometrixDB", "data.frame")
                ### M row names
@@ -505,7 +476,6 @@ server <- function(input, output,session){
                    }
                  }
                }
-               
                row.names(M) <- SR
              },
              ### RData format
@@ -525,7 +495,6 @@ server <- function(input, output,session){
     values$Morig = M
     values$Histfield = "NA"
     values$results = list("NA")
-    
     
   })
   output$contents <- DT::renderDT({
@@ -568,18 +537,15 @@ server <- function(input, output,session){
   ## export functions ----
   output$collection.save <- downloadHandler(
     filename = function() {
-      
       paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
     },
     content <- function(file) {
       switch(input$save_file,
-             #xlsx={suppressWarnings(rio::export(values$M, file=file))},
              xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
              RData={
                M=values$M
                save(M, file=file)
              })
-      
     },
     contentType = input$save_file
   )
@@ -591,13 +557,11 @@ server <- function(input, output,session){
     },
     content <- function(file) {
       switch(input$save_file_api,
-             #xlsx={suppressWarnings(rio::export(values$M, file=file))},
              xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
              RData={
                M=values$M
                save(M, file=file)
              })
-      
     },
     contentType = input$save_file_api
   )
@@ -614,7 +578,6 @@ server <- function(input, output,session){
     modalDialog(
       title = "Dimensions API",
       size = "l",
-      
       h4(em(
         strong("1) Get a token using your Dimensions credentials")
       )),
@@ -629,8 +592,8 @@ server <- function(input, output,session){
                     "Password",
                     "",
                     width = NULL,
-                    placeholder = NULL),
-      
+                    placeholder = NULL
+                    ),
       actionButton("dsToken", "Get a token "),
       h5(tags$b("Token")),
       verbatimTextOutput("tokenLog", placeholder = FALSE),
@@ -659,18 +622,12 @@ server <- function(input, output,session){
       ),
       numericInput("dsStartYear", "Start Year", value = 1990),
       numericInput("dsEndYear", "End Year", value = as.numeric(substr(Sys.time(), 1, 4))),
-      
-      
       actionButton("dsQuery", "Create the query "),
-      
       h5(tags$b("Your query")),
       verbatimTextOutput("queryLog", placeholder = FALSE),
       h5(tags$b("Documents returned using your query")),
       verbatimTextOutput("sampleLog", placeholder = FALSE),
-      
-      
       uiOutput("sliderLimit"),
-      
       footer = tagList(
         modalButton("Cancel"),
         actionButton("dsok", "OK")
@@ -692,14 +649,12 @@ server <- function(input, output,session){
     input$dsToken 
     isolate({
       capture.output(Token <- dsAuth(username = input$dsAccount, password = input$dsPassword))
-      #Token <- dsAuth(username = input$dsAccount, password = input$dsPassword)
       if (Token==1){
         values$dsToken <- "Wrong account or password"
       }else{
         values$dsToken <- Token
       }
       values$dsToken
-      
     })
   })
   
@@ -718,10 +673,8 @@ server <- function(input, output,session){
   })
   
   output$queryLog <- renderText({ 
-    
     DSQUERYload()
     values$dsQuery
-    
   })
   
   output$queryLog2 <- renderText({ 
@@ -736,7 +689,6 @@ server <- function(input, output,session){
   }) 
   
   output$sampleLog2 <- renderText({ 
-    
     if (nrow(values$M)<2) {n <- 0}else{n <- nrow(values$M)}
     mes <- paste("Dimensions API returns ",n, " documents", collapse="",sep="")
     values$ApiOk <- 0
@@ -744,7 +696,6 @@ server <- function(input, output,session){
   }) 
   
   output$sliderLimit <- renderUI({
-    
     sliderInput("sliderLimit", "Total document to download", min = 1,
                 max = values$dsSample, value = values$dsSample, step = 1)
   })
@@ -771,16 +722,13 @@ server <- function(input, output,session){
       actionButton("pmQuery", "Try the query "),
       h5(tags$b("Query Translation")),
       verbatimTextOutput("pmQueryLog", placeholder = FALSE),
-      #h5(tags$b("Generated query")),
       h5(tags$b("Documents returned using your query")),
       verbatimTextOutput("pmSampleLog", placeholder = FALSE),
       tags$hr(),
       h4(em(
         strong("2) Choose how many documents to download")
       )),
-      
       uiOutput("pmSliderLimit"),
-      
       footer = tagList(
         modalButton("Cancel"),
         actionButton("pmok", "OK")
@@ -798,7 +746,6 @@ server <- function(input, output,session){
   })
   
   pmQUERYLOAD <- eventReactive(input$pmQuery,{
-    
     query = paste(input$pmQueryText,"[Title/Abstract] AND english[LA] AND Journal Article[PT] AND "
                   ,input$pmStartYear,":",input$pmEndYear,"[DP]", sep="")
     res <- pmQueryTotalCount(query = query, api_key = NULL)
@@ -836,22 +783,20 @@ server <- function(input, output,session){
     sliderInput("pmSliderLimit", "Total document to download", min = 1,
                 max = values$pmSample, value = values$pmSample, step = 1)
   })
+  
   ### API MENU: Content Download ----
   APIDOWNLOAD <- eventReactive(input$apiApply,{
     values = initial(values)
     values$M <- data.frame(Message="Waiting for data")
-    
     switch(input$dbapi,
            ds={
              if (input$dsWords!="") {
-               #capture.output(
                D <-
                  dsApiRequest(
                    token = values$dsToken,
                    query = values$dsQuery,
                    limit = input$sliderLimit
                  )
-               #)
                M <- convert2df(D, "dimensions", "api")
                values$ApiOk <- 1
                values$M <- M
@@ -859,42 +804,30 @@ server <- function(input, output,session){
                
                values$Histfield = "NA"
                values$results = list("NA")
-               
                contentTable(values)
              }
            },
            pubmed={
-             #if (exists("input$pmQueryText")){
              if (input$pmQueryText !=" ") {
-               #capture.output(
                D <-
                  pmApiRequest(
                    query = values$pmQuery,
                    limit = input$pmSliderLimit,
                    api_key = NULL
                  )
-               #)
                M <- convert2df(D, "pubmed", "api")
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
-               
                values$Histfield = "NA"
                values$results = list("NA")
-               
-               #contentTable(values)
              }
-             
            })
   })
-  
-  
   
   output$apiContents <- DT::renderDT({
     APIDOWNLOAD()
     contentTable(values)
-    #}
-    
   })
   
   ### function returns a formatted data.frame ----
@@ -942,15 +875,14 @@ server <- function(input, output,session){
   })
   
   output$selectType <- renderUI({
-    
     artType=sort(unique(values$Morig$DT))
     selectInput("selectType", "Document Type", 
                 choices = artType,
                 selected = artType,
                 multiple =TRUE )
   })
+  
   output$selectLA <- renderUI({
-    
     if ("LA" %in% names(values$Morig)){
       LA <- sort(unique(values$Morig$LA))} else {
         values$Morig$LA <- "N.A."
@@ -963,7 +895,6 @@ server <- function(input, output,session){
   })
   
   output$sliderPY <- renderUI({
-    
     sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY,na.rm=T),sep="",
                 max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T),max(values$Morig$PY,na.rm=T)))
   })
@@ -974,7 +905,6 @@ server <- function(input, output,session){
                 choices = SO,
                 selected = SO,
                 multiple = TRUE)
-    
   })
   
   output$sliderTCpY <- renderUI({
@@ -1033,12 +963,11 @@ server <- function(input, output,session){
   })
   
   output$dataFiltered <- DT::renderDT({
-    
     DTfiltered()
-    
   })
   
-  ## Main Info ----
+  # OVERVIEW ----
+  ### Main Info ----
   output$MainInfo <- DT::renderDT({
     DT::datatable(values$TABvb , rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 50, dom = 'Bfrtip',ordering=F,
@@ -1057,30 +986,24 @@ server <- function(input, output,session){
                                                      title = " ",
                                                      header = TRUE),
                                                 list(extend = 'print')), 
-                                 #lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-                                 #columnDefs = list(list(className = 'dt-center', targets = "_all"),
-                                 #              list(width = '50px', targets = 0)), 
                                  columnDefs = list(list(className = 'dt-center', targets = "_all"),
                                                    list(width = '350px', targets = 0))),
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$TABvb)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
       formatStyle(names(values$TABvb)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
-  
-  
-  #box1 ---------------
+
+  #### box1 ---------------
   output$Timespan <- renderValueBox({
-    
-    #TAB <- res$TAB
     TAB <- ValueBoxes(values$M)
     values$TABvb <- TAB
     valueBox(value = p(TAB[TAB$Description=="Timespan", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong((TAB[TAB$Description=="Timespan", 2])), style = 'font-size:36px;color:white;', align="center"), 
              icon = fa_i(name="hourglass"), color = "blue",
-             width = NULL
-    )
+             width = NULL)
   })
-  #box2 ---------------
+  
+  #### box2 ---------------
   output$au <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Authors", 1], style = 'font-size:16px;color:white;'),
@@ -1088,17 +1011,17 @@ server <- function(input, output,session){
              icon = fa_i(name="user"), color = "light-blue",
              width = NULL)
   })
-  
-  
-  #box3 ------------
+
+  #### box3 ------------
   output$kw <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Author's Keywords (DE)", 1], style = 'font-size:16px;color:white;'),
              subtitle = p(strong(TAB[TAB$Description=="Author's Keywords (DE)", 2]), style = 'font-size:36px;color:white;',align="center"), 
              icon = fa_i(name="spell-check"), color = "aqua",
              width = NULL)
-  }) 
-  #box4 ---------------
+  })
+  
+  #### box4 ---------------
   output$so <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p("Sources", style = 'font-size:16px;color:white;'),
@@ -1107,7 +1030,7 @@ server <- function(input, output,session){
              width = NULL)
   })
   
-  #box5 --------------------
+  #### box5 --------------------
   output$auS1 <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Authors of single-authored docs", 1], style = 'font-size:16px;color:white;'),
@@ -1116,8 +1039,7 @@ server <- function(input, output,session){
              width = NULL)
   }) 
   
-  #box6 -------------
-  
+  #### box6 -------------
   output$cr <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="References", 1], style = 'font-size:16px;color:white;'),
@@ -1126,8 +1048,7 @@ server <- function(input, output,session){
              width = NULL)
   })
   
-  #box7 ----------------
-  
+  #### box7 ----------------
   output$doc <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Documents", 1], style = 'font-size:16px;color:white;'),
@@ -1135,8 +1056,8 @@ server <- function(input, output,session){
              icon = fa_i(name="layer-group"), color = "blue",
              width = NULL)
   })
-  #box8 ---------------
   
+  #### box8 ---------------
   output$col <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(strong("International Co-Authorship"), style = 'font-size:16px;color:white;'),
@@ -1144,9 +1065,8 @@ server <- function(input, output,session){
              icon = icon("globe",lib = "glyphicon"), color = "light-blue",
              width = NULL)
   })
-  
-  
-  #box9 ---------------
+
+  #### box9 ---------------
   output$agePerDoc <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Document Average Age", 1], style = 'font-size:16px;color:white;'),
@@ -1154,7 +1074,8 @@ server <- function(input, output,session){
              icon = fa_i(name="calendar"), color = "aqua",
              width = NULL)
   })
-  #box10 ------------------
+  
+  #### box10 ------------------
   output$cagr <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(strong("Annual Growth Rate"), style = 'font-size:16px;color:white;'),
@@ -1163,7 +1084,7 @@ server <- function(input, output,session){
              width = NULL)
   })
   
-  #box11 ------
+  #### box11 ------
   output$coAuPerDoc <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Co-Authors per Doc", 1], style = 'font-size:16px;color:white;'),
@@ -1172,7 +1093,7 @@ server <- function(input, output,session){
              width = NULL)
   })
   
-  #box12 -------
+  #### box12 -------
   output$tc <- renderValueBox({
     TAB <- values$TABvb
     valueBox(value = p(TAB[TAB$Description=="Average citations per doc", 1], style = 'font-size:16px;color:white;'),
@@ -1181,12 +1102,8 @@ server <- function(input, output,session){
              width = NULL)
   })
   
-  
-  ## Annual Production ----
+  # Annual Production ----
   output$CAGR <- renderText({
-    # Y=table(values$M$PY)
-    # ny=dim(Y)[1]
-    # values$GR<-round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2)
     paste0(values$GR," %")
   })
   
@@ -1198,8 +1115,7 @@ server <- function(input, output,session){
     names(Y)=c("Year","Freq")
     x <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.125, max(Y$Year)-0.02)+1
     y <- c(min(Y$Freq),min(Y$Freq)+diff(range(Y$Freq))*0.125)
-    
-    
+
     g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
       geom_line(aes(group="NA")) +
       geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
@@ -1218,13 +1134,12 @@ server <- function(input, output,session){
             ,axis.text.x = element_text(vjust = 1, angle = 90)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
-      ) +
+           ) +
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ASPplot <- g
     
-    #'#EFEFEF'
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$ASPplot.save <- downloadHandler(
     filename = function() {
@@ -1261,12 +1176,10 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
   
   ## Annual Citation per Year ----
   output$AnnualTotCitperYearPlot <- renderPlotly({
-    
     if (values$results[[1]]=="NA"){
       values$results=biblioAnalysis(values$M)}
     x=values$results
@@ -1313,7 +1226,7 @@ server <- function(input, output,session){
             ,axis.title.x = element_text(hjust = 0)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
-      ) + 
+           ) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ACpYplot <- g
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
@@ -1321,7 +1234,6 @@ server <- function(input, output,session){
   
   output$ACpYplot.save <- downloadHandler(
     filename = function() {
-      
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1331,7 +1243,6 @@ server <- function(input, output,session){
   )
   
   output$AnnualTotCitperYearTable <- DT::renderDT({
-    
     TAB <- values$AnnualTotCitperYear
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -1355,7 +1266,6 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
       formatRound(names(TAB)[c(3:4)], digits=2)
-    
   })
   
   ## Three Fields Plot ---- 
@@ -1369,21 +1279,17 @@ server <- function(input, output,session){
   })
   
   # SOURCES MENU ----
-  ## Most Relevant Sources ----
+  ### Most Relevant Sources ----
   MRSources <- eventReactive(input$applyMRSources,{
     res <- descriptive(values,type="tab7")
     values <-res$values
     values$TABSo<-values$TAB
-    #xx=as.data.frame(values$results$Sources)
     xx<- values$TAB
     if (input$MostRelSourcesK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelSourcesK}
     xx <- xx %>% 
       slice_head(n=k)
-    #xx=xx[1:k,]
-    #xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
-    #xx$Articles=as.numeric(xx$Articles)
     xx$Sources=substr(xx$Sources,1,50)
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Sources", textLabx = "N. of Documents", title = "Most Relevant Sources", values)
@@ -1394,7 +1300,6 @@ server <- function(input, output,session){
   
   output$MRSplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostRelevantSources-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1403,12 +1308,10 @@ server <- function(input, output,session){
     contentType = "png"
   )
   
-  
   output$MostRelSourcesPlot <- renderPlotly({
     g <- MRSources()
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.1, size=0.10)
-  })#, height = 500, width =900)
-  
+  })
   
   output$MostRelSourcesTable <- DT::renderDT({
     
@@ -1436,21 +1339,18 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
   
-  ## Most Local Cited Sources ---- 
+  ### Most Local Cited Sources ---- 
   MLCSources <- eventReactive(input$applyMLCSources,{
     values$M=metaTagExtraction(values$M,"CR_SO")
     TAB=tableTag(values$M,"CR_SO")
     TAB=data.frame(Sources=names(TAB),Articles=as.numeric(TAB),stringsAsFactors = FALSE)
     values$TABSoCit<-TAB
-    #xx=as.data.frame(values$results$Sources)
     xx<- TAB
     if (input$MostRelCitSourcesK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelCitSourcesK}
-    #xx=xx[1:k,]
     xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
     xx$Articles=as.numeric(xx$Articles)
     xx$Sources=substr(xx$Sources,1,50)
@@ -1463,7 +1363,6 @@ server <- function(input, output,session){
   
   output$MLCSplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostLocalCitedSources-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1477,7 +1376,7 @@ server <- function(input, output,session){
     g <- MLCSources()
     
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostRelCitSourcesTable <- DT::renderDT({
     
@@ -1504,19 +1403,16 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
-  ## Bradford's Law ---- 
+  
+  ### Bradford's Law ---- 
   output$bradfordPlot <- renderPlotly({
-    
     values$bradford=bradford(values$M)
     plot.ly(values$bradford$graph,flip=FALSE, side="r", aspectratio=1.6, size=0.15)
-    
-  })#,height = 600)
+  })
   
   output$BLplot.save <- downloadHandler(
     filename = function() {
-      
       paste("BradfordLaws-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1549,7 +1445,8 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center') 
   })
-  ## Sources' Impact ----  
+  
+  ### Sources' Impact ----  
   Hsource <- eventReactive(input$applyHsource,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -1561,7 +1458,6 @@ server <- function(input, output,session){
   
   output$SIplot.save <- downloadHandler(
     filename = function() {
-      
       paste("SourceImpact-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1572,7 +1468,7 @@ server <- function(input, output,session){
   
   output$SourceHindexPlot <- renderPlotly({
     Hsource()
-  })#, height = 500, width =900)
+  })
   
   output$SourceHindexTable <- DT::renderDT({
     
@@ -1598,12 +1494,11 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center') %>% 
       formatRound(names(values$H)[4], digits=3)
-    
   })
-  ## Source Growth ----  
+  
+  ### Source Growth ----  
   SOGrowth <- eventReactive(input$applySOGrowth,{
-    #if (input$SOse=="Yes"){se=TRUE}else{se=FALSE}
-    
+
     if (input$cumSO=="Cum"){
       cdf=TRUE
       laby="Cumulate occurrences"
@@ -1638,7 +1533,6 @@ server <- function(input, output,session){
       scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
       geom_hline(aes(yintercept=0), alpha=0.1)+
       labs(color = "Source")+
-      #guides(fill = guide_legend(nrow = 5))+
       theme(text = element_text(color = "#444444"),
             legend.text=ggplot2::element_text(size=width_scale),
             legend.box.margin = margin(6, 6, 6, 6),
@@ -1658,16 +1552,14 @@ server <- function(input, output,session){
             ,axis.text.x = element_text(size=10, angle = 90)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
-      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+            ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
     values$SDplot <- g
     return(g)
-    #suppressWarnings(plot(g))
   }) 
   
   output$SDplot.save <- downloadHandler(
     filename = function() {
-      
       paste("SourceDynamics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1702,16 +1594,11 @@ server <- function(input, output,session){
                'toggleSpikelines'
              )) %>%
       layout(hovermode = 'compare')
-    #suppressWarnings(plot(g))
-    
-    
-    #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
   })
   
   output$soGrowthtable <- DT::renderDT({
     
     g <- SOGrowth()
-    
     soData=values$PYSO
     
     DT::datatable(soData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
@@ -1734,17 +1621,16 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(soData))-1))))) %>%
       formatStyle(names(soData),  backgroundColor = 'white') 
-    #return(Data)
   })
   
   # AUTHORS MENU ----
-  ## Most Relevant Authors ----
+  ## Authors ----
+  ### Most Relevant Authors ----
   MRAuthors <- eventReactive(input$applyMRAuthors,{
     res <- descriptive(values,type="tab3")
     values <-res$values
     values$TABAu<-values$TAB
     
-    #xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
     xx=values$TABAu
     switch(input$AuFreqMeasure,
            t={
@@ -1768,7 +1654,6 @@ server <- function(input, output,session){
     
     xx=xx[1:k,]
     xx[,2]=round(xx[,2],1)
-    
     xx <- xx[order(-xx[,2]),]
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Relevant Authors", values)
@@ -1779,7 +1664,6 @@ server <- function(input, output,session){
   
   output$MRAplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostRelevantAuthors-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1792,7 +1676,7 @@ server <- function(input, output,session){
     
     g <- MRAuthors()
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostRelAuthorsTable <- DT::renderDT({
     
@@ -1819,15 +1703,14 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
       formatRound(names(TAB)[3], digits=2)
-    
   })
-  ## Most Cited Authors ----  
+  
+  ### Most Cited Authors ----  
   MLCAuthors <- eventReactive(input$applyMLCAuthors,{
     res <- descriptive(values,type="tab13")
     values <-res$values
     values$TABAuCit<-values$TAB
     
-    #xx=as.data.frame(values$results$Authors, stringsAsFactors = FALSE)
     xx <- values$TABAuCit
     lab <- "Local Citations"
     xx[,2]=as.numeric(xx[,2])
@@ -1838,7 +1721,6 @@ server <- function(input, output,session){
     
     xx=xx[1:k,]
     xx[,2]=round(xx[,2],1)
-    
     xx <- xx[order(-xx[,2]),]
     
     g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Local Cited Authors", values)
@@ -1849,7 +1731,6 @@ server <- function(input, output,session){
   
   output$MLCAplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1862,7 +1743,7 @@ server <- function(input, output,session){
     
     g <- MLCAuthors()
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostCitAuthorsTable <- DT::renderDT({
     
@@ -1888,9 +1769,9 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') 
-    
   })
-  ## Authors' Impact ----  
+  
+  ### Authors' Impact ----  
   HAuthors <- eventReactive(input$applyHAuthors,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -1902,7 +1783,6 @@ server <- function(input, output,session){
   
   output$AIplot.save <- downloadHandler(
     filename = function() {
-      
       paste("AuthorImpact-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1912,11 +1792,9 @@ server <- function(input, output,session){
   )
   
   output$AuthorHindexPlot <- renderPlotly({
-    
     res <- HAuthors()
     plot.ly(res$g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
-    
-  })#, height = 500, width =900)
+  })
   
   output$AuthorHindexTable <- DT::renderDT({
     
@@ -1942,16 +1820,15 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center') %>%
       formatRound(names(values$H)[4], 3)
-    
   })
-  ## Authors Production Over Time ----  
+  
+  ### Authors Production Over Time ----  
   AUoverTime <- eventReactive(input$applyAUoverTime,{
     values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
   })
   
   output$APOTplot.save <- downloadHandler(
     filename = function() {
-      
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -1962,11 +1839,8 @@ server <- function(input, output,session){
   
   output$TopAuthorsProdPlot <- renderPlotly({
     AUoverTime()
-    
     plot.ly(values$AUProdOverTime$graph, flip=TRUE, side="l", aspectratio=1)
-    
-    
-  })#, height = 550, width =1100)
+  })
   
   output$TopAuthorsProdTable <- DT::renderDT({
     AUoverTime()
@@ -1994,7 +1868,6 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
       formatRound(names(TAB)[dim(TAB)[2]], 3)
-    
   })
   
   output$TopAuthorsProdTablePapers <- DT::renderDT({
@@ -2023,9 +1896,9 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
       formatRound(names(TAB)[dim(TAB)[2]], 3)
-    
   })
-  ## Lotka Law ----  
+  
+  ### Lotka Law ----  
   output$lotkaPlot <- renderPlotly({
     
     values$lotka=lotka(biblioAnalysis(values$M))
@@ -2044,7 +1917,6 @@ server <- function(input, output,session){
       labs(x = 'Documents written'
            , y = '% of Authors'
            , title = "The Frequency Distribution of Scientific Productivity") +
-      #scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
             ,panel.background = element_rect(fill = '#FFFFFF')
             ,panel.grid.minor = element_line(color = '#EFEFEF')
@@ -2059,12 +1931,10 @@ server <- function(input, output,session){
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$LLplot <- g
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
-    
-  })#,height = 600)
+  })
   
   output$LLplot.save <- downloadHandler(
     filename = function() {
-      
       paste("LotkaLaw-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2099,9 +1969,8 @@ server <- function(input, output,session){
       formatRound(names(values$lotka$AuthorProd)[3], 3)
   })
   
-  
   # Affiliations ----
-  ## Most Relevant Affliations ---- 
+  ### Most Relevant Affliations ---- 
   MRAffiliations <- eventReactive(input$applyMRAffiliations,{
     if (input$disAff=="Y"){
       res <- descriptive(values,type="tab11")
@@ -2112,7 +1981,6 @@ server <- function(input, output,session){
     names(xx)=c("AFF","Freq")
     values <-res$values
     values$TABAff <- values$TAB
-    
     
     if (input$MostRelAffiliationsK>dim(xx)[1]){
       k=dim(xx)[1]
@@ -2128,7 +1996,6 @@ server <- function(input, output,session){
   
   output$AFFplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2142,7 +2009,7 @@ server <- function(input, output,session){
     g <- MRAffiliations()
     
     plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.15)
-  })#, height = 500, width =900)
+  })
   
   output$MostRelAffiliationsTable <- DT::renderDT({
     g <- MRAffiliations()
@@ -2169,12 +2036,10 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
   
-  
   # Countries ----
-  ## Country by Corresponding Authors ----  
+  ### Country by Corresponding Authors ----  
   CAUCountries <- eventReactive(input$applyCAUCountries,{
     res <- descriptive(values,type="tab5")
     values <-res$values
@@ -2194,7 +2059,6 @@ server <- function(input, output,session){
     xx2 <- xx %>% dplyr::group_by(.data$Country) %>%
       dplyr::summarize(Freq = sum(.data$Freq))
     
-    #x <- c(length(levels(xx2$Country))*(1-0.125)-0.02, length(levels(xx2$Country))-0.02)
     x <- c(0.5,0.5+length(levels(xx2$Country))*0.125)+1
     y <- c(max(xx2$Freq)-0.02-diff(range(xx2$Freq))*0.125,max(xx2$Freq)-0.02)
     
@@ -2205,19 +2069,16 @@ server <- function(input, output,session){
                                              breaks=c("SCP","MCP"))+
                          labs(title = "Corresponding Author's Country", x = "Countries", y = "N. of Documents", 
                               caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
-                         #theme_minimal() 
                          theme(plot.caption = element_text(size = 9, hjust = 0.5,
                                                            color = "blue", face = "italic")
                                ,panel.background = element_rect(fill = '#FFFFFF')
-                               #,panel.grid.minor = element_line(color = '#EFEFEF')
                                ,panel.grid.major.y  = element_line(color = '#EFEFEF')
                                ,plot.title = element_text(size = 24)
                                ,axis.title = element_text(size = 14, color = '#555555')
                                ,axis.title.y = element_text(vjust = 1, angle = 0)
                                ,axis.title.x = element_text(hjust = 0)
                                ,axis.line.x = element_line(color="black",size=0.5)
-                               #,axis.line.y = element_line(color="black",size=0.5)
-                         )+
+                               ) +
                          coord_flip()) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
@@ -2227,7 +2088,6 @@ server <- function(input, output,session){
   
   output$MRCOplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostRelevantCountries-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2237,18 +2097,14 @@ server <- function(input, output,session){
   )
   
   output$MostRelCountriesPlot <- renderPlotly({
-    
     g <- CAUCountries()
-    
     plot.ly(g,flip=T, side="r", aspectratio=1.4, size=0.10, data.type=1)
-    
-  })#, height = 500, width =900)
+  })
   
   output$MostRelCountriesTable <- DT::renderDT({
     g <- CAUCountries()
     
     TAB <- values$TABCo
-    # TAB=format(TAB,justify="left",digits=3)
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -2272,18 +2128,16 @@ server <- function(input, output,session){
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
       formatRound(names(TAB)[5], digits=3) %>% 
       formatRound(names(TAB)[6], digits=3)
-    
   })
   
-  ## Country Production ----  
+  ### Country Production ----  
   output$countryProdPlot <- renderPlotly({
     values$mapworld<-mapworld(values$M, values)
     plot.ly(values$mapworld$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
-  })#, height = 500, width =900)
+  })
   
   output$CSPplot.save <- downloadHandler(
     filename = function() {
-      
       paste("CountryScientificProduction-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2316,9 +2170,9 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
-  ## Most Cited Country ----    
+  
+  ### Most Cited Country ----    
   MCCountries <- eventReactive(input$applyMCCountries,{
     res <- descriptive(values,type="tab6")
     values <-res$values
@@ -2347,7 +2201,6 @@ server <- function(input, output,session){
   
   output$MCCplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostCitedCountries-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2359,7 +2212,7 @@ server <- function(input, output,session){
   output$MostCitCountriesPlot <- renderPlotly({
     g <- MCCountries()
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostCitCountriesTable <- DT::renderDT({
     g <- MCCountries()
@@ -2386,12 +2239,11 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
       formatRound(names(TAB)[3], 2)
-    
   })
   
-  
   # DOCUMENTS MENU ----
-  ## Most Global Cited Documents ----
+  ## Documents ----
+  ### Most Global Cited Documents ----
   
   MGCDocuments <- eventReactive(input$applyMGCDocuments,{
     res <- descriptive(values,type="tab4")
@@ -2419,7 +2271,6 @@ server <- function(input, output,session){
   
   output$MGCDplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2429,10 +2280,9 @@ server <- function(input, output,session){
   )
   
   output$MostCitDocsPlot <- renderPlotly({
-    
     g <- MGCDocuments()
     plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostCitDocsTable <- DT::renderDT({
     g <- MGCDocuments()
@@ -2461,9 +2311,9 @@ server <- function(input, output,session){
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
       formatRound(names(TAB)[4], 2) %>%
       formatRound(names(TAB)[5], 2)
-    
   })
-  ## Most Local Cited Documents ----  
+  
+  ### Most Local Cited Documents ----  
   MLCDocuments <- eventReactive(input$applyMLCDocuments,{
     withProgress(message = 'Calculation in progress',
                  value = 0, {
@@ -2475,7 +2325,6 @@ server <- function(input, output,session){
                             NGCS = .data$GCS/mean(.data$GCS)) %>%
                      ungroup() %>%
                      as.data.frame()
-                   
                  })
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], 
@@ -2497,7 +2346,6 @@ server <- function(input, output,session){
   
   output$MLCDplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2507,10 +2355,9 @@ server <- function(input, output,session){
   )
   
   output$MostLocCitDocsPlot <- renderPlotly({
-    
     g <- MLCDocuments()
     plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostLocCitDocsTable <- DT::renderDT({
     
@@ -2540,10 +2387,10 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
       formatRound(names(TAB)[c(6:8)], digits=2)
-    
   })
   
-  ## Most Local Cited References ----
+  ## Cited References ----
+  ### Most Local Cited References ----
   MLCReferences <- eventReactive(input$applyMLCReferences,{
     CR=citations(values$M,sep=input$CitRefsSep)$Cited
     TAB=data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
@@ -2556,8 +2403,7 @@ server <- function(input, output,session){
     } else {k=input$MostCitRefsK}
     
     xx=xx[1:k,]
-    #xx[,1]=substr(xx[,1],1,50)
-    
+
     g <- freqPlot(xx,x=2,y=1, textLaby = "References", textLabx = "Local Citations", title = "Most Local Cited References", values)
     
     values$MLCRplot <- g
@@ -2566,7 +2412,6 @@ server <- function(input, output,session){
   
   output$MLCRplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2576,18 +2421,15 @@ server <- function(input, output,session){
   )
   
   output$MostCitRefsPlot <- renderPlotly({
-    
     g <- MLCReferences()
     plot.ly(g,flip=FALSE, side="r", aspectratio=0.6, size=0.20)
-  })#, height = 500, width =900)
+  })
   
   output$MostCitRefsTable <- DT::renderDT({
     g <- MLCReferences()
     TAB <- values$TABCitRef
     
     TAB$link <- trimES(gsub("[[:punct:]]" , " ",reduceRefs(TAB[,1])))
-    
-    
     TAB$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',TAB$link,'\" target=\"_blank\">','link','</a>')
     
     TAB=TAB[,c(3,1,2)]
@@ -2613,11 +2455,10 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
-  ## Reference Spectroscopy ---- 
+  
+  ### Reference Spectroscopy ---- 
   RPYS <- eventReactive(input$applyRPYS,{
-    
     timespan <- c(-Inf,Inf)
     if (!is.na(input$rpysMinYear)){
       timespan[1] <- input$rpysMinYear
@@ -2630,7 +2471,6 @@ server <- function(input, output,session){
   
   output$RSplot.save <- downloadHandler(
     filename = function() {
-      
       paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2640,11 +2480,9 @@ server <- function(input, output,session){
   )
   
   output$rpysPlot <- renderPlotly({
-    
     RPYS()
     plot.ly(values$res$spectroscopy, side="l", aspectratio = 1.3, size=0.10)
-    
-  })#,height = 600, width = 900)
+  })
   
   output$rpysTable <- DT::renderDT({
     RPYS()
@@ -2670,8 +2508,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(rpysData))-1))))) %>%
       formatStyle(names(rpysData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$crTable <- DT::renderDT({
@@ -2701,14 +2537,11 @@ server <- function(input, output,session){
                                                 list(extend = 'print')),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(crData))-1))))) %>%
-      formatStyle(names(crData),  backgroundColor = 'white') 
-    #return(Data)
-    
+      formatStyle(names(crData),  backgroundColor = 'white')
   })
   
-  
-  # Words ----
-  ## Most Frequent Words ----
+  ## Words ----
+  ### Most Frequent Words ----
   MFWords <- eventReactive(input$applyMFWords,{
     if (input$MostRelWords %in% c("TI","AB")){
       ngrams <- as.numeric(input$MRWngrams)
@@ -2752,11 +2585,9 @@ server <- function(input, output,session){
     
     values$MRWplot <- g
     return(g)
-    
   })
   
   output$MostRelWordsStopPreview <-  renderUI({
-    
     if (!is.null(values$MRWremove.terms) | exists("values$MRWremove.terms")){
       strPreview(values$MRWremove.terms, input$MostRelWordsSep)  
     }else{
@@ -2765,7 +2596,6 @@ server <- function(input, output,session){
   })
   
   output$MRWSynPreview <-  renderUI({
-    
     if (!is.null(values$MRWsyn.terms) | exists("values$MRWsyn.terms")){
       strSynPreview(values$MRWsyn.terms)  
     }else{
@@ -2775,7 +2605,6 @@ server <- function(input, output,session){
   
   output$MRWplot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostRelevantWords-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -2787,7 +2616,7 @@ server <- function(input, output,session){
   output$MostRelWordsPlot <- renderPlotly({
     g <- MFWords()
     plot.ly(g, side="r", aspectratio = 1.3, size=0.10)
-  })#, height = 500, width =900)
+  })
   
   output$MostRelWordsTable <- DT::renderDT({
     g <- MFWords()
@@ -2815,11 +2644,10 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
-    
   })
-  ## WordCloud ----  
+  
+  ### WordCloud ----  
   WordCloud <- eventReactive(input$applyWordCloud,{
-    
     if (input$summaryTerms %in% c("TI","AB")){
       ngrams <- as.numeric(input$summaryTermsngrams)
     }else{
@@ -2854,11 +2682,10 @@ server <- function(input, output,session){
                            widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
   })
   output$wordcloud <- wordcloud2::renderWordcloud2({
-    
     WordCloud()
   })
   
-  ## TreeMap ----  
+  ### TreeMap ----  
   TreeMap <- eventReactive(input$applyTreeMap,{
     if (input$treeTerms %in% c("TI","AB")){
       ngrams <- as.numeric(input$treeTermsngrams)
@@ -2891,7 +2718,6 @@ server <- function(input, output,session){
     
     values$WordsT=resW$Words
     return(resW$Words)
-    
   })
   
   output$treemap <- renderPlotly({
@@ -2900,7 +2726,6 @@ server <- function(input, output,session){
   })
   
   output$TreeMapStopPreview <-  renderUI({
-    
     if (!is.null(values$TreeMapremove.terms) | exists("values$TreeMapremove.terms")){
       strPreview(values$TreeMapremove.terms, input$TreeMapSep)  
     }else{
@@ -2909,14 +2734,12 @@ server <- function(input, output,session){
   })
   
   output$TreeMapSynPreview <-  renderUI({
-    
     if (!is.null(values$TreeMapsyn.terms) | exists("values$TreeMapsyn.terms")){
       strSynPreview(values$TreeMapsyn.terms)  
     }else{
       strSynPreview(" ")
     }
   })
-  
   
   output$wordTable <- DT::renderDT({
     WordCloud()
@@ -2968,9 +2791,9 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$WordsT))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$WordsT),  backgroundColor = 'white',textAlign = 'center')
-    
   },height = 600, width = 900)
-  ## Word Dynamics ----   
+  
+  ### Word Dynamics ----   
   WDynamics <- eventReactive(input$applyWD,{
     if (input$cumTerms=="Cum"){
       cdf=TRUE
@@ -2978,14 +2801,14 @@ server <- function(input, output,session){
     }else{
       cdf=FALSE
       laby="Annual occurrences"}
-    #if (input$se=="Yes"){se=TRUE}else{se=FALSE}
-    
+
     ### load file with terms to remove
     if (input$WDStopFile=="Y"){
       remove.terms <- trimws(readStopwordsFile(file=input$WDStop, sep=input$WDSep))
     }else{remove.terms <- NULL}
     values$WDremove.terms <- remove.terms
     ### end of block
+    
     ### load file with synonyms
     if (input$WDSynFile=="Y"){
       synonyms <- trimws(readSynWordsFile(file=input$WDSyn, sep=input$WDSynSep))
@@ -2996,21 +2819,16 @@ server <- function(input, output,session){
     switch(input$growthTerms,
            ID={
              KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
-             
            },
            DE={
              KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
            },
            TI={
-             #if (!("TI_TM" %in% names(values$M))){
              values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
-             #}
              KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            },
            AB={
-             #if (!("AB_TM" %in% names(values$M))){
              values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
-             #}
              KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw[2], cdf = cdf)
            }
     )
@@ -3035,11 +2853,9 @@ server <- function(input, output,session){
       labs(x = 'Year'
            , y = laby
            , title = "Word Growth") +
-      #ylim(0, NA) +
       scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0), alpha=0.1)+
       labs(color = "Term")+
-      #guides(fill = guide_legend(nrow = 5))+
       theme(text = element_text(color = "#444444"),
             legend.text=ggplot2::element_text(size=width_scale),
             legend.box.margin = margin(6, 6, 6, 6),
@@ -3067,7 +2883,6 @@ server <- function(input, output,session){
   })
   
   output$WDStopPreview <-  renderUI({
-    
     if (!is.null(values$WDremove.terms) | exists("values$WDremove.terms")){
       strPreview(values$WDremove.terms)  
     }else{
@@ -3076,7 +2891,6 @@ server <- function(input, output,session){
   })
   
   output$WDSynPreview <-  renderUI({
-    
     if (!is.null(values$WDsyn.terms) | exists("values$WDsyn.terms")){
       strSynPreview(values$WDsyn.terms)  
     }else{
@@ -3086,7 +2900,6 @@ server <- function(input, output,session){
   
   output$WDplot.save <- downloadHandler(
     filename = function() {
-      
       paste("WordDynamics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3121,8 +2934,6 @@ server <- function(input, output,session){
                'toggleSpikelines'
              )) %>%
       layout(hovermode = 'compare')
-    
-    #}, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 600, width = 900)
   })
   
   output$kwGrowthtable <- DT::renderDT({
@@ -3149,10 +2960,9 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(kwData))-1))))) %>%
       formatStyle(names(kwData),  backgroundColor = 'white') 
-    #return(Data)
   })
   
-  ## Trend Topics ----
+  ### Trend Topics ----
   output$trendSliderPY <- renderUI({
     
     sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
@@ -3167,6 +2977,7 @@ server <- function(input, output,session){
     }else{remove.terms <- NULL}
     values$TTremove.terms <- remove.terms
     ### end of block
+    
     ### load file with synonyms
     if (input$TTSynFile=="Y"){
       synonyms <- trimws(readSynWordsFile(file=input$TTSyn, sep=input$TTSynSep))
@@ -3182,11 +2993,9 @@ server <- function(input, output,session){
                                       n.items = input$trendNItems, remove.terms = remove.terms, synonyms = synonyms, 
                                       dynamic.plot=TRUE, graph = FALSE)
     return(values$trendTopics$graph)
-    
   })
   
   output$TTStopPreview <-  renderUI({
-    
     if (!is.null(values$TTremove.terms) | exists("values$TTremove.terms")){
       strPreview(values$TTremove.terms)  
     }else{
@@ -3195,7 +3004,6 @@ server <- function(input, output,session){
   })
   
   output$TTSynPreview <-  renderUI({
-    
     if (!is.null(values$TTsyn.terms) | exists("values$TTsyn.terms")){
       strSynPreview(values$TTsyn.terms)  
     }else{
@@ -3205,7 +3013,6 @@ server <- function(input, output,session){
   
   output$TTplot.save <- downloadHandler(
     filename = function() {
-      
       paste("TrendTopics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3217,15 +3024,7 @@ server <- function(input, output,session){
   output$trendTopicsPlot <- renderPlotly({
     g <- TrendTopics()
     plot.ly(g, flip=TRUE, side="r", size=0.1, aspectratio=1.3)
-  })#, height = 500, width =900)
-  
-  # output$trendTopicsPlot <- renderPlot({
-  #   
-  #   TrendTopics()
-  #   plot(values$trendTopics$graph)
-  #   
-  # }, width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150)  #height = 700)
-  
+  })
   
   output$trendTopicsTable <- DT::renderDT({
     TrendTopics()
@@ -3250,13 +3049,11 @@ server <- function(input, output,session){
                                                 list(extend = 'print')),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tpData))-1))))) %>%
-      formatStyle(names(tpData),  backgroundColor = 'white') 
-    #return(Data)
-    
+      formatStyle(names(tpData),  backgroundColor = 'white')
   })
   
-  # Coupling ----
-  
+  # CLUSTERING ----
+  ### Clustering by Coupling ----
   CMMAP <- eventReactive(input$applyCM,{
     
     values$CM <- couplingMap(values$M, analysis=input$CManalysis, field=input$CMfield, 
@@ -3271,26 +3068,22 @@ server <- function(input, output,session){
       need(values$CM$nclust > 0, "\n\nNo clusters in one or more periods. Please select a different set of parameters.")
     )
   })
+  
   output$CMPlot <- renderPlotly({
-    
     CMMAP()
     plot.ly(values$CM$map, size=0.15, aspectratio = 1.3)
-    
-  })#, height = 650, width = 800)
+  })
   
   output$CMNetPlot <- renderVisNetwork({
     CMMAP()
     values$networkCM<-igraph2vis(g=values$CM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                  shape=input$coc.shape, net=values$CM$net,shadow=FALSE)
-    
     values$networkCM$VIS
-    
   })
   
   output$CMplot.save <- downloadHandler(
     filename = function() {
-      
       paste("CouplingMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3322,9 +3115,7 @@ server <- function(input, output,session){
                                                 list(extend = 'print')),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cmData))-1))))) %>%
-      formatStyle(names(cmData),  backgroundColor = 'white') 
-    #return(Data)
-    
+      formatStyle(names(cmData),  backgroundColor = 'white')
   })
   
   output$CMTableCluster <- DT::renderDT({
@@ -3351,34 +3142,25 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cmData))-1))))) %>%
       formatStyle(names(cmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
-  ### Conceptual Structure  #####
   
-  ### Co-occurrences network ----
+  # CONCEPTUAL STRUCTURE ----
+  ### Network approach ----
+  #### Co-occurrences network ----
   COCnetwork <- eventReactive(input$applyCoc,{
     
     values <- cocNetwork(input,values)
-    
-    
     values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"))
-    
-    
   })
   
   output$cocPlot <- renderVisNetwork({  
-    
     COCnetwork()
-    
     values$network$VIS
-    
   })
   
   output$COCStopPreview <-  renderUI({
-    
     if (!is.null(values$COCremove.terms) | exists("values$COCremove.terms")){
       strPreview(values$COCremove.terms)  
     }else{
@@ -3387,7 +3169,6 @@ server <- function(input, output,session){
   })
   
   output$COCSynPreview <-  renderUI({
-    
     if (!is.null(values$COCsyn.terms) | exists("values$COCsyn.terms")){
       strSynPreview(values$COCsyn.terms)  
     }else{
@@ -3395,25 +3176,15 @@ server <- function(input, output,session){
     }
   })
   
-  # output$cocPlotComm <- renderVisNetwork({  
-  #   
-  #   g <- splitCommunities(values$cocnet$graph, n=NULL)
-  #   igraph2vis(g=g,curved=(input$coc.curved=="Yes"), 
-  #                              labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-  #                              shape=input$coc.shape, net=values$cocnet)$VIS
-  #   
-  # })
-  
   output$network.coc <- downloadHandler(
     filename = "Co_occurrence_network.net",
     content <- function(file) {
       igraph::write.graph(values$cocnet$graph_pajek,file=file, format="pajek")
-      
     },
     contentType = "net"
   )
   
-  ### save coc network image as html ####
+  ##### save coc network image as html ####
   output$networkCoc.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
@@ -3446,17 +3217,14 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cocData))-1))))) %>%
       formatStyle(names(cocData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
-  ### Degree Plot Co-word analysis ####
+  ### Degree Plot Co-word analysis ----
   output$cocDegree <- renderPlotly({
     COCnetwork()
     p <- degreePlot(values$cocnet)
     plot.ly(p)
   })
-  
   
   ### Correspondence Analysis ----
   
@@ -3465,7 +3233,6 @@ server <- function(input, output,session){
   })
   
   output$CSStopPreview <-  renderUI({
-    
     if (!is.null(values$CSremove.terms) | exists("values$CSremove.terms")){
       strPreview(values$CSremove.terms)  
     }else{
@@ -3474,7 +3241,6 @@ server <- function(input, output,session){
   })
   
   output$FASynPreview <-  renderUI({
-    
     if (!is.null(values$FAsyn.terms) | exists("values$FAsyn.terms")){
       strSynPreview(values$FAsyn.terms)  
     }else{
@@ -3484,7 +3250,6 @@ server <- function(input, output,session){
   
   output$FA1plot.save <- downloadHandler(
     filename = function() {
-      
       paste("FactorialMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3492,9 +3257,9 @@ server <- function(input, output,session){
     },
     contentType = "png"
   )
+  
   output$FA2plot.save <- downloadHandler(
     filename = function() {
-      
       paste("Dendrogram-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3505,7 +3270,6 @@ server <- function(input, output,session){
   
   output$FA3plot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3516,7 +3280,6 @@ server <- function(input, output,session){
   
   output$FA4plot.save <- downloadHandler(
     filename = function() {
-      
       paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3528,18 +3291,14 @@ server <- function(input, output,session){
   output$CSPlot1 <- renderPlot({
     CSfactorial()
     plot(values$CS$graph_terms)
-    
   },  width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
   height = exprToFunction(as.numeric(input$dimension[2])*0.85),
   res = 150)
-  #width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), res = 150) #height = 650, width = 800)
-  
+
   output$CSPlot2 <- renderPlot({
     CSfactorial()
     if (input$method!="MDS"){
-      
       if (values$CS[[1]][1]!="NA"){
-        
         plot(values$CS$graph_documents_Contrib)
       }else{
         emptyPlot("Selected field is not included in your data collection")
@@ -3547,7 +3306,6 @@ server <- function(input, output,session){
     }else{
       emptyPlot("This plot is available only for CA or MCA analyses")
     }
-    
   }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
   height = exprToFunction(as.numeric(input$dimension[2])*0.85),
   res = 150)
@@ -3563,21 +3321,17 @@ server <- function(input, output,session){
     }else{
       emptyPlot("This plot is available only for CA or MCA analyses")
     }
-    
-    
   }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
   height = exprToFunction(as.numeric(input$dimension[2])*0.85),
   res = 150)
   
   output$CSPlot4 <- renderPlot({
-    
     CSfactorial()
     if (values$CS[[1]][1]!="NA"){
       plot(values$CS$graph_dendogram)
     }else{
       emptyPlot("Selected field is not included in your data collection")
     }
-    
   }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
   height = exprToFunction(as.numeric(input$dimension[2])*0.85),
   res = 150)
@@ -3623,8 +3377,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(WData))-1))))) %>%
       formatStyle(names(WData),  backgroundColor = 'white')
-    #return(Data)
-    
   })
   
   output$CSTableD <- DT::renderDT({
@@ -3654,12 +3406,10 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(CSData))-1))))) %>%
       formatStyle(names(CSData),  backgroundColor = 'white') 
-    
   })
   
   ### Thematic Map ----
   TMAP <- eventReactive(input$applyTM,{
-    
     if (input$TMfield %in% c("TI","AB")){
       ngrams <- as.numeric(input$TMngrams)
     }else{
@@ -3672,6 +3422,7 @@ server <- function(input, output,session){
     }else{remove.terms <- NULL}
     values$TMremove.terms <- remove.terms
     ### end of block
+    
     ### load file with synonyms
     if (input$TMapSynFile=="Y"){
       synonyms <- trimws(readSynWordsFile(file=input$TMapSyn, sep=input$TMapSynSep))
@@ -3689,24 +3440,19 @@ server <- function(input, output,session){
     )
   })
   output$TMPlot <- renderPlotly({
-    
     TMAP()
     plot.ly(values$TM$map, size=0.07, aspectratio = 1.3)
-    
-  })#, height = 650, width = 800)
+  })
   
   output$NetPlot <- renderVisNetwork({
     TMAP()
     values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                  shape=input$coc.shape, net=values$TM$net)
-    
     values$networkTM$VIS
-    
   })
   
   output$TMStopPreview <-  renderUI({
-    
     if (!is.null(values$TMremove.terms) | exists("values$TMremove.terms")){
       strPreview(values$TMremove.terms)  
     }else{
@@ -3715,7 +3461,6 @@ server <- function(input, output,session){
   })
   
   output$TMapSynPreview <-  renderUI({
-    
     if (!is.null(values$TMapsyn.terms) | exists("values$TMapsyn.terms")){
       strSynPreview(values$TMapsyn.terms)
     }else{
@@ -3725,7 +3470,6 @@ server <- function(input, output,session){
   
   output$TMplot.save <- downloadHandler(
     filename = function() {
-      
       paste("ThematicMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -3737,9 +3481,7 @@ server <- function(input, output,session){
   output$TMTable <- DT::renderDT({
     TMAP()
     tmData=values$TM$words[,-4]
-    
-    
-    
+
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -3760,8 +3502,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTableCluster <- DT::renderDT({
@@ -3789,8 +3529,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   ### Thematic Evolution ----
@@ -3799,11 +3537,7 @@ server <- function(input, output,session){
     v=quantile(values$M$PY, seq(0,1,by=(1/(numSlices+1))), na.rm=TRUE)
     v=round(v[-c(1,length(v))],0)
     lapply(1:numSlices, function(i) {
-      # sliderInput(inputId = paste0("Slice", i), label = paste("Cutting Year", i),
-      #             min=1990,max=2018,value=1990)
-      
       numericInput(inputId = paste0("Slice", i), label = paste("Cutting Year", i),value=v[i],min=min(values$M$PY, na.rm = TRUE)+1,max=max(values$M$PY, na.rm = TRUE)-1, step=1)
-      #numericInput(inputId = paste0("Slice", i), label = paste("Cutting Year", i),value=median(values$M$PY),min=min(values$M$PY)+1,max=max(values$M$PY)-1, step=1)
     })
   })
   
@@ -3820,6 +3554,7 @@ server <- function(input, output,session){
     }else{remove.terms <- NULL}
     values$TEremove.terms <- remove.terms
     ### end of block
+    
     ### load file with synonyms
     if (input$TESynFile=="Y"){
       synonyms <- trimws(readSynWordsFile(file=input$TESyn, sep=input$TESynSep))
@@ -3835,23 +3570,18 @@ server <- function(input, output,session){
     if (length(values$yearSlices)>0){
       values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, 
                                         n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
-      
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
       )
-      
       plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE)
     }
   })
   
   output$TEPlot <- plotly::renderPlotly({
-    
     TEMAP()
-    
   })
   
   output$TEStopPreview <-  renderUI({
-    
     if (!is.null(values$TEremove.terms) | exists("values$TEremove.terms")){
       strPreview(values$TEremove.terms)  
     }else{
@@ -3860,7 +3590,6 @@ server <- function(input, output,session){
   })
   
   output$TESynPreview <-  renderUI({
-    
     if (!is.null(values$TEsyn.terms) | exists("values$TEsyn.terms")){
       strSynPreview(values$TEsyn.terms)  
     }else{
@@ -3896,54 +3625,42 @@ server <- function(input, output,session){
       formatRound(names(TEData)[4], 2) %>%
       formatRound(names(TEData)[5], 2) %>%
       formatRound(names(TEData)[7], 2) 
-    #return(Data)
-    
   })
   
   output$TMPlot1 <-  renderPlotly({
     TEMAP()
-    #input$applyTM
     if (length(values$nexus$TM)>=1){
       plot.ly(values$nexus$TM[[1]]$map, size=0.07, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
-    
-  })#, height = 650, width = 800)
+  })
   
   output$TMPlot2 <-  renderPlotly({
     TEMAP()
-    #input$applyTM
     if (length(values$nexus$TM)>=2){
       plot.ly(values$nexus$TM[[2]]$map, size=0.07, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
-    
-  })#, height = 650, width = 800)
+  })
   
   output$TMPlot3 <-  renderPlotly({
     TEMAP()
-    #input$applyTM
     if (length(values$nexus$TM)>=3){
       plot.ly(values$nexus$TM[[3]]$map, size=0.07, aspectratio = 1.3)
     } else {emptyPlot("You have selected fewer periods!")}
-    
-  })#, height = 650, width = 800)
+  })
   
   output$TMPlot4 <-  renderPlotly({
     TEMAP()
-    #input$applyTM
     if (length(values$nexus$TM)>=4){
       plot.ly(values$nexus$TM[[4]]$map, size=0.07, aspectratio = 1.3)
     } else (emptyPlot("You have selected fewer periods!"))
-    
-  })#, height = 650, width = 800)
+  })
   
   output$TMPlot5 <-  renderPlotly({
     TEMAP()
-    #input$applyTM
     if (length(values$nexus$TM)>=5){
       plot.ly(values$nexus$TM[[5]]$map, size=0.07, aspectratio = 1.3)
     } else (emptyPlot("You have selected fewer periods!"))
-    
-  })#, height = 650, width = 800)
+  })
   
   output$NetPlot1 <- renderVisNetwork({
     TEMAP()
@@ -3951,9 +3668,7 @@ server <- function(input, output,session){
     values$network1<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                 shape=input$coc.shape, net=values$nexus$Net[[k]])
-    
     values$network1$VIS
-    
   })
   
   output$NetPlot2 <- renderVisNetwork({
@@ -3962,9 +3677,7 @@ server <- function(input, output,session){
     values$network2<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                 shape=input$coc.shape, net=values$nexus$Net[[k]])
-    
     values$network2$VIS
-    
   })
   
   output$NetPlot3 <- renderVisNetwork({
@@ -3973,9 +3686,7 @@ server <- function(input, output,session){
     values$network3<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                 shape=input$coc.shape, net=values$nexus$Net[[k]])
-    
     values$network3$VIS
-    
   })
   
   output$NetPlot4 <- renderVisNetwork({
@@ -3984,9 +3695,7 @@ server <- function(input, output,session){
     values$network4<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                 shape=input$coc.shape, net=values$nexus$Net[[k]])
-    
     values$network4$VIS
-    
   })
   
   output$NetPlot5 <- renderVisNetwork({
@@ -3995,14 +3704,11 @@ server <- function(input, output,session){
     values$network5<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                 shape=input$coc.shape, net=values$nexus$Net[[k]])
-    
     values$network5$VIS
-    
   })
   
   output$TMTable1 <- DT::renderDT({
     TEMAP()
-    
     tmData=values$nexus$TM[[1]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
@@ -4025,13 +3731,10 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTable2 <- DT::renderDT({
     TEMAP()
-    
     tmData=values$nexus$TM[[2]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
@@ -4054,13 +3757,10 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTable3 <- DT::renderDT({
     TEMAP()
-    
     tmData=values$nexus$TM[[3]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
@@ -4083,13 +3783,10 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTable4 <- DT::renderDT({
     TEMAP()
-    
     tmData=values$nexus$TM[[4]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
@@ -4112,13 +3809,10 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTable5 <- DT::renderDT({
     TEMAP()
-    
     tmData=values$nexus$TM[[5]]$words[,-4]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
@@ -4141,8 +3835,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTableCluster1 <- DT::renderDT({
@@ -4170,8 +3862,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTableCluster2 <- DT::renderDT({
@@ -4199,8 +3889,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTableCluster3 <- DT::renderDT({
@@ -4228,8 +3916,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTableCluster4 <- DT::renderDT({
@@ -4257,8 +3943,6 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
   output$TMTableCluster5 <- DT::renderDT({
@@ -4286,35 +3970,26 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmData))-1))))) %>%
       formatStyle(names(tmData),  backgroundColor = 'white') 
-    #return(Data)
   })
   
-  ### INTELLECTUAL STRUCTURE ####
-  
+  # INTELLECTUAL STRUCTURE ####
   ### Co-citation network ----
   COCITnetwork <- eventReactive(input$applyCocit,{
-    
     values <- intellectualStructure(input,values)
-    #dev.off();file.remove(t) ### end of trick
-    
     values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
                                shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"))
   })
   
   output$cocitPlot <- renderVisNetwork({  
-    
     COCITnetwork()
-    
     isolate(values$network$VIS)
-    
   })
   
   output$network.cocit <- downloadHandler(
     filename = "Co_citation_network.net",
     content <- function(file) {
       igraph::write.graph(values$cocitnet$graph_pajek,file=file, format="pajek")
-      #rio::export(values$M, file=file)
     },
     contentType = "net"
   )
@@ -4343,11 +4018,9 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cocitData))-1))))) %>%
       formatStyle(names(cocitData),  backgroundColor = 'white') 
-    #return(Data)
-    
   })
   
-  ### save coc network image as html ####
+  #### save coc network image as html ----
   output$networkCocit.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
@@ -4365,7 +4038,6 @@ server <- function(input, output,session){
   
   ### Historiograph ----
   Hist <- eventReactive(input$applyHist,{
-    
     withProgress(message = 'Calculation in progress',
                  value = 0, {
                    values <- historiograph(input,values)
@@ -4399,7 +4071,6 @@ server <- function(input, output,session){
   
   output$HGplot.save <- downloadHandler(
     filename = function() {
-      
       paste("Historiograph-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -4409,10 +4080,9 @@ server <- function(input, output,session){
   )
   
   output$histPlot <- renderPlotly({
-    
     Hist()
-    
   })
+  
   output$histTable <- DT::renderDT({
     LCS=values$histResults$LCS
     s=sort(LCS,decreasing = TRUE)[input$histNodes]
@@ -4454,33 +4124,25 @@ server <- function(input, output,session){
         backgroundRepeat = 'no-repeat',
         backgroundPosition = 'center'
       )
-    #return(Data)
-    
   })
   
-  ### SOCIAL STRUCTURE ####
+  # SOCIAL STRUCTURE ####
   ### Collaboration network ----
   COLnetwork <- eventReactive(input$applyCol,{
-    
     values <- socialStructure(input,values)
-    
     values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
                                shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
   })
   output$colPlot <- renderVisNetwork({  
-    
     COLnetwork()
-    
     values$network$VIS
-    
   })
   
   output$network.col <- downloadHandler(
     filename = "Collaboration_network.net",
     content <- function(file) {
       igraph::write.graph(values$colnet$graph_pajek,file=file, format="pajek")
-      #rio::export(values$M, file=file)
     },
     contentType = "net"
   )
@@ -4510,10 +4172,9 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
       formatStyle(names(colData),  backgroundColor = 'white') 
-    #return(Data)
-    
-  })    
-  ### save coc network image as html ####
+  })   
+  
+  #### save coc network image as html ####
   output$networkCol.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
@@ -4521,7 +4182,6 @@ server <- function(input, output,session){
     },
     contentType = "html"
   )
-  
   
   ### Degree Plot Collaboration analysis ####
   output$colDegree <- renderPlotly({
@@ -4537,7 +4197,6 @@ server <- function(input, output,session){
   
   output$CCplot.save <- downloadHandler(
     filename = function() {
-      
       paste("CountryCollaborationMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
@@ -4548,11 +4207,9 @@ server <- function(input, output,session){
   )
   
   output$WMPlot<- renderPlot({
-    
     WMnetwork()  
     plot(values$WMmap$g)
-    
-  }, #width = "auto", height = reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0)), 
+  },
   width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
   height = exprToFunction(as.numeric(input$dimension[2])*0.85),
   res = 150)
@@ -4583,34 +4240,19 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
       formatStyle(names(colData),  backgroundColor = 'white') 
-    #return(Data)
-    
   }) 
   
-  
-  
-  
-  
-  
+  # OPTIONS MENU ----
   observe({
     if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo")) & !isTRUE(values$checkControlBar)){
       updateControlbar("controlbar2")
       values$checkControlBar <- TRUE
-      #updateControlbarMenu("item_controlbar")
     }
     if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo")) & isTRUE(values$checkControlBar)){
       updateControlbar("controlbar2")
       values$checkControlBar <- FALSE
     }
   })
-  
-  # observe({
-  #   if( input$sidebarmenu != "biblioshinyy"){
-  #     shinyjs::addCssClass(selector = "aside.control-sidebar", class = "control-sidebar-collapse")
-  #   } else{
-  #     shinyjs::removeCssClass(selector = "aside.control-sidebar", class = "control-sidebar-collapse")
-  #   }
-  # })
   
   output$controlbar <- renderUI({
     controlbarMenu(
@@ -4620,10 +4262,9 @@ server <- function(input, output,session){
           fluidRow(
             column(width = 1),
             column(width=11,
-                   ## Load Data ----
+                   ### Load Data ----
                    conditionalPanel(condition = 'input.sidebarmenu == "loadData"',
                                     h3(strong("Import or Load ")),
-                                    #br(),
                                     selectInput(
                                       "load",
                                       label = "Please, choose what to do",
@@ -4646,7 +4287,6 @@ server <- function(input, output,session){
                                                     , Source WoS.")
                                       )
                                     ),
-                                    #br(),
                                     conditionalPanel(
                                       condition = "input.load == 'import'",
                                       selectInput(
@@ -4687,24 +4327,17 @@ server <- function(input, output,session){
                                         )
                                       )
                                     ),
-                                    #h6("Here accept single .txt/.bib/.csv/.xslx/.RData files, or multiple .txt/.bib/.csv files compressed in a single .zip archive."),
                                     conditionalPanel(condition = "input.load != 'null'",
                                                      actionButton("applyLoad", strong("START"),
                                                                   style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
                                                                   width = "100%"),
                                                      width = "100%"),
                                     tags$hr(),
-                                    
                                     uiOutput("textLog"),
-                                    #shinycssloaders::withSpinner(verbatimTextOutput("log")),
-                                    
                                     tags$hr(),
-                                    
                                     h3(strong(
                                       "Export collection"
                                     )),
-                                    #br(),
-                                    
                                     selectInput(
                                       'save_file',
                                       'Save as:',
@@ -4727,7 +4360,6 @@ server <- function(input, output,session){
                                       "Gather data using APIs "
                                     )),
                                     br(),
-                                    
                                     selectInput(
                                       "dbapi",
                                       label = "Database",
@@ -4746,11 +4378,6 @@ server <- function(input, output,session){
                                       verbatimTextOutput("queryLog2", placeholder = FALSE),
                                       h5(tags$b("Documents returned using your query")),
                                       verbatimTextOutput("sampleLog2", placeholder = FALSE),
-                                      # 
-                                      # 
-                                      # uiOutput("sliderLimit"),
-                                      
-                                      
                                     ),
                                     ### Pubmed API 
                                     conditionalPanel(
@@ -4763,20 +4390,16 @@ server <- function(input, output,session){
                                       verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
                                       h5(tags$b("Documents returned using your query")),
                                       verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
-                                      
                                     ),
                                     tags$hr(),
-                                    #h4(em(strong("Gather metadata"))),
                                     actionButton("apiApply", h5(strong("2.  Download metadata")),
                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
                                                  width = "100%"),
                                     tags$hr(),
-                                    
                                     h3(strong(
                                       "Export a bibliometrix file "
                                     )),
                                     br(),
-                                    
                                     selectInput(
                                       'save_file_api',
                                       'Save as:',
@@ -4801,20 +4424,13 @@ server <- function(input, output,session){
                                                  width = "100%",
                                                  icon = fa_i(name ="play")),
                                     h5(" "),
-                                    #br(),
-                                    #span(h5((strong("Dataset Overview "))),style="color:CornflowerBlue"),
                                     box(h6(htmlOutput("textDim")),
                                         width = "100%"),
-                                    # box(h5(htmlOutput("textDim")),
-                                    #     width = "100%"),
-                                    #htmlOutput("textDim"),
                                     br(),
-                                    #uiOutput("textDim"),
                                     uiOutput("selectLA"),
                                     uiOutput("sliderPY"),
                                     uiOutput("selectType"),
                                     uiOutput("sliderTCpY"),
-                                    #uiOutput("selectSource"),
                                     selectInput("bradfordSources", 
                                                 label = "Source by Bradford Law Zones",
                                                 choices = c("Core Sources"="core", 
@@ -4848,7 +4464,6 @@ server <- function(input, output,session){
                    br(),
                    br(),
                    conditionalPanel(condition = 'input.sidebarmenu == "annualScPr" & input.ASPdpi != "null"',
-                                    #h4(em(strong("Height (in inches)")), align="center"),
                                     sliderInput(
                                       'ASPh',
                                       label =h4(em(strong("Height (in inches)"))),
@@ -4885,12 +4500,9 @@ server <- function(input, output,session){
                    ),
                    ## Three field Plot ----
                    conditionalPanel(condition = 'input.sidebarmenu == "threeFieldPlot"',
-                                    # actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
-                                        #collapsed = TRUE,
                                         fluidRow(
                                           (column(6, selectInput("CentralField",
                                                                  label = "Middle Field",
@@ -4945,8 +4557,6 @@ server <- function(input, output,session){
                                     )),
                    ## Relevant Sources ----
                    conditionalPanel(condition = 'input.sidebarmenu == "relevantSources"',
-                                    # actionButton("applyMRSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
                                     h4(strong("Parameters: ")),
                                     "  ",
                                     numericInput("MostRelSourcesK", 
@@ -4980,8 +4590,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Local Cited Sources ----
                    conditionalPanel(condition ='input.sidebarmenu == "localCitedSources"',
-                                    # actionButton("applyMLCSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%")
                                     h4(strong("Parameters: ")),
                                     "  ",
                                     numericInput("MostRelCitSourcesK", 
@@ -5042,10 +4650,6 @@ server <- function(input, output,session){
                                     )),
                    ## Source Impact ----
                    conditionalPanel(condition ='input.sidebarmenu == "sourceImpact"',
-                                    # actionButton("applyHsource", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5089,10 +4693,6 @@ server <- function(input, output,session){
                    ),
                    ## Source Dynamics ----
                    conditionalPanel(condition ='input.sidebarmenu == "sourceDynamics"',
-                                    # actionButton("applySOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5101,10 +4701,6 @@ server <- function(input, output,session){
                                                     choices = c("Cumulate" = "Cum",
                                                                 "Per year" = "noCum"),
                                                     selected = "Cum"),
-                                        # selectInput("SOse", "Confidence Interval",
-                                        #             choices = c("Yes" = "Yes",
-                                        #                         "No" = "No"),
-                                        #             selected = "No"),
                                         hr(),
                                         sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = c(1,5))),
                                     selectInput(
@@ -5134,10 +4730,6 @@ server <- function(input, output,session){
                                     )),
                    ## Most relevant Authors ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostRelAuthors"',
-                                    # actionButton("applyMRAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5180,10 +4772,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Local Cited Authors ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitedAuthors"',
-                                    # actionButton("applyMLCAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(strong("Parameters: ")),
                                     "  ",
                                     numericInput("MostCitAuthorsK", 
@@ -5217,11 +4805,6 @@ server <- function(input, output,session){
                    ),
                    ## Authors production over time ----
                    conditionalPanel(condition = 'input.sidebarmenu == "authorsProdOverTime"',
-                                    # actionButton("applyAUoverTime", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(strong("Parameters: ")),
                                     "  ",
                                     numericInput("TopAuthorsProdK", 
@@ -5283,10 +4866,6 @@ server <- function(input, output,session){
                    ),
                    ## Author Impact ----
                    conditionalPanel(condition = 'input.sidebarmenu == "authorImpact"',
-                                    # actionButton("applyHAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5330,11 +4909,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Relevant Affiliations ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostRelAffiliations"',
-                                    # actionButton("applyMRAffiliations", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5376,10 +4950,6 @@ server <- function(input, output,session){
                    ),
                    ## Corresponding Author country ----
                    conditionalPanel(condition = 'input.sidebarmenu == "correspAuthorCountry"',
-                                    # actionButton("applyCAUCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(strong("Parameters: ")),
                                     numericInput("MostRelCountriesK", 
                                                  label=("Number of Countries"), 
@@ -5440,10 +5010,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Cited Countries ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostCitedCountries"',
-                                    # actionButton("applyMCCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5485,11 +5051,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Global Cited Documents
                    conditionalPanel(condition = 'input.sidebarmenu == "mostGlobalCitDoc"',
-                                    # actionButton("applyMGCDocuments", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    br(),
-                                    br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5531,11 +5092,6 @@ server <- function(input, output,session){
                    ),
                    # Most Local Cited Document
                    conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitDoc"',
-                                    # actionButton("applyMLCDocuments", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    br(),
-                                    br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5578,11 +5134,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Local Cited References ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitRef"',
-                                    # actionButton("applyMLCReferences", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5623,12 +5174,8 @@ server <- function(input, output,session){
                                                                     width = "100%")  
                                     )
                    ),
-                   ## Reference spectroscopy
+                   ## References spectroscopy
                    conditionalPanel(condition = 'input.sidebarmenu == "ReferenceSpect"',
-                                    # actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    br(),
-                                    br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
@@ -5680,11 +5227,6 @@ server <- function(input, output,session){
                    ),
                    ## Most Frequent Words ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostFreqWords"',
-                                    # actionButton("applyMFWords", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     selectInput("MostRelWords", "Field",
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
@@ -5774,11 +5316,6 @@ server <- function(input, output,session){
                    ),
                    ## Word cloud ----
                    conditionalPanel(condition = 'input.sidebarmenu == "wcloud"',
-                                    # actionButton("applyWordCloud", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(em(strong(" "))),
                                     " ",
                                     selectInput("summaryTerms", "Field",
@@ -5793,9 +5330,8 @@ server <- function(input, output,session){
                                                                              "Bigrams" = "2",
                                                                              "Trigrams" = "3"),
                                                                  selected = 1)),
-                                    #hr(),
                                     numericInput("n_words", label = "Number of words", min = 10, max = 500, step = 1, value = 50),
-                                    #hr(),
+                                    br(),
                                     box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -5818,7 +5354,6 @@ server <- function(input, output,session){
                                                                                  'Semicolon ";"' = ";",
                                                                                  'Tab '= "\t"),
                                                                      selected = ",")
-                                                         #,h5(htmlOutput("WCStopPreview"))
                                         ),
                                         selectInput("WCSynFile", "Load a list of synonyms",
                                                     choices = c("Yes" = "Y",
@@ -5841,9 +5376,8 @@ server <- function(input, output,session){
                                                                                  'Semicolon ";"' = ";",
                                                                                  'Tab '= "\t"),
                                                                      selected = ",")
-                                                         #,h5(htmlOutput("WCSynPreview"))
                                         )),
-                                    hr(),
+                                    br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -5894,11 +5428,6 @@ server <- function(input, output,session){
                    ),
                    ## Tree Map ----
                    conditionalPanel(condition = 'input.sidebarmenu == "treemap"',
-                                    # actionButton("applyTreeMap", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     selectInput("treeTerms", "Field",
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
@@ -5965,31 +5494,12 @@ server <- function(input, output,session){
                    ),
                    ## Word dynamics ----
                    conditionalPanel(condition = 'input.sidebarmenu == "wordDynamics"',
-                                    # actionButton("applyWD", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     selectInput("growthTerms", "Field",
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
                                                             "Titles" = "TI",
                                                             "Abstracts" = "AB"),
                                                 selected = "ID"),
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("cumTerms", "Occurrences",
-                                                    choices = c("Cumulate" = "Cum",
-                                                                "Per year" = "noCum"),
-                                                    selected = "Cum"),
-                                        conditionalPanel(condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
-                                                         selectInput("growthTermsngrams",'N-Grams',
-                                                                     choices = c("Unigrams" = "1",
-                                                                                 "Bigrams" = "2",
-                                                                                 "Trigrams" = "3"),
-                                                                     selected = 1)),
-                                        sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))),                                   
                                     br(),
                                     box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
@@ -6039,7 +5549,21 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("WDSynPreview"))
                                         )),
-                                    hr(),
+                                    br(),
+                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                        collapsible = TRUE, width = 15,
+                                        solidHeader = FALSE, collapsed = TRUE,
+                                        selectInput("cumTerms", "Occurrences",
+                                                    choices = c("Cumulate" = "Cum",
+                                                                "Per year" = "noCum"),
+                                                    selected = "Cum"),
+                                        conditionalPanel(condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
+                                                         selectInput("growthTermsngrams",'N-Grams',
+                                                                     choices = c("Unigrams" = "1",
+                                                                                 "Bigrams" = "2",
+                                                                                 "Trigrams" = "3"),
+                                                                     selected = 1)),
+                                        sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))),
                                     selectInput(
                                       'WDdpi',
                                       h4(strong(
@@ -6069,12 +5593,6 @@ server <- function(input, output,session){
                    ),
                    ## Trend Topic ----
                    conditionalPanel(condition = 'input.sidebarmenu == "trendTopic"',
-                                    # actionButton("applyTrendTopics", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
-                                    #h4(em(strong("Method Parameters:"))),
                                     selectInput("trendTerms", "Field",
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
@@ -6094,6 +5612,7 @@ server <- function(input, output,session){
                                                               "No" = FALSE),
                                                   selected = FALSE)),
                                     uiOutput("trendSliderPY"),
+                                    br(),
                                     box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -6142,25 +5661,23 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("TTSynPreview"))
                                         )),
-                                    hr(),
+                                    br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
-                                        #uiOutput("trendMinFreq"),
                                         fluidRow(column(6,
                                                         numericInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
                                         ),
                                         column(6,
                                                numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 5)
                                         ))),
-                                    #sliderInput("trendSize", label = "Word label size", min = 0, max = 20, step = 1, value = 5),
                                     selectInput(
                                       'TTdpi',
                                       h4(strong(
                                         "Export plot"
                                       )),
                                       choices=c(
-                                        "Please select a dpi value" = "null",
+                                        "dpi value" = "null",
                                         "75 dpi" = "75",
                                         "150 dpi" = "150",
                                         "300 dpi" = "300",
@@ -6182,11 +5699,6 @@ server <- function(input, output,session){
                    ),
                    ## Coupling ----
                    conditionalPanel(condition = 'input.sidebarmenu == "coupling"',
-                                    # actionButton("applyCM", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(em(strong(" "))),
                                     "  ",
                                     selectInput("CManalysis", 
@@ -6200,13 +5712,6 @@ server <- function(input, output,session){
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, 
                                         collapsed = FALSE,
-                                        #selectInput("cmNP", 
-                                        #            label = h4(em(strong("Parameters: "))),
-                                        #            choices = c("Hide Parameters" = "hide", 
-                                        #                        "Show Parameters" = "show"),
-                                        #            selected = "hide"),
-                                        #conditionalPanel(condition = "input.cmNP == 'show'", 
-                                        #"  ",
                                         selectInput("CMfield", 
                                                     label = "Coupling measured by",
                                                     choices = c("References" ="CR",
@@ -6248,7 +5753,6 @@ server <- function(input, output,session){
                                                  column(6,
                                                         numericInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)))
                                     ),
-                                    
                                     selectInput(
                                       'CMdpi',
                                       h4(strong(
@@ -6277,13 +5781,6 @@ server <- function(input, output,session){
                    ),
                    ## Co-Occurence Network ----
                    conditionalPanel(condition = 'input.sidebarmenu == "coOccurenceNetwork"',
-                                    # actionButton("applyCoc", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
-                                    #"  ",
-                                    #h4(em(strong("Network Parameters: "))),
                                     selectInput("field", 
                                                 "Field",
                                                 choices = c("Keywords Plus" = "ID", 
@@ -6423,10 +5920,7 @@ server <- function(input, output,session){
                                                             min = 0)
                                         )
                                         )),
-                                    #uiOutput("Focus"),
                                     br(),
-                                    #h4(em(strong("Graphical Parameters: "))),
-                                    #br(),
                                     box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -6510,15 +6004,10 @@ server <- function(input, output,session){
                                                           style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
                                                           width = "100%")
                                     )
-                                    )
+                                  )
                    ),
                    ## Thematic Map ----
                    conditionalPanel(condition = 'input.sidebarmenu == "thematicMap"',
-                                    # actionButton("applyTM", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(em(strong("    "))),
                                     "  ",
                                     selectInput("TMfield", 
@@ -6540,6 +6029,7 @@ server <- function(input, output,session){
                                                   choices = c("Yes" = TRUE,
                                                               "No" = FALSE),
                                                   selected = FALSE)),
+                                    br(),
                                     box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -6588,6 +6078,7 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("TMapSynPreview"))
                                         )),
+                                    br(),
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -6632,11 +6123,6 @@ server <- function(input, output,session){
                    ),
                    ## Thematic Evolution ----
                    conditionalPanel(condition = 'input.sidebarmenu == "thematicEvolution"',
-                                    # actionButton("applyTE", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(em(strong("    "))),
                                     "  ",
                                     selectInput("TEfield", 
@@ -6742,11 +6228,6 @@ server <- function(input, output,session){
                    ),
                    ## Factorial Analysis
                    conditionalPanel(condition = 'input.sidebarmenu == "factorialAnalysis"',
-                                    # actionButton("applyCA", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    br(),
-                                    br(),
                                     selectInput("method", 
                                                 label = "Method",
                                                 choices = c("Correspondence Analysis" = "CA",
@@ -6815,7 +6296,6 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("FASynPreview"))
                                         )),
-                                    #h4(em(strong("FA Parameters: "))),
                                     br(),
                                     box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
@@ -6841,7 +6321,6 @@ server <- function(input, output,session){
                                     box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
-                                        #h4(em(strong("Graphical Parameters: "))),
                                         fluidRow(column(6,
                                                         numericInput(
                                                           inputId = "CSlabelsize",
@@ -6894,13 +6373,6 @@ server <- function(input, output,session){
                    ),
                    ## Co-citation Network ----
                    conditionalPanel(condition = 'input.sidebarmenu == "coCitationNetwork"',
-                                    # actionButton("applyCocit", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
-                                    #"  ",
-                                    #h4(em(strong("Network Parameters: "))),
                                     selectInput("citField", 
                                                 label = "Field",
                                                 choices = c("Papers" = "CR", 
@@ -6913,6 +6385,7 @@ server <- function(input, output,session){
                                                             '".   " (Dot and 3 or more spaces)' = ".   ",
                                                             '"," (Comma)' = ","),
                                                 selected = "';'"),
+                                    br(),
                                     box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -6971,10 +6444,7 @@ server <- function(input, output,session){
                                                             min = 0)
                                         )
                                         )),
-                                    #uiOutput("Focus"),
-                                    #br(),
-                                    #h4(em(strong("Graphical Parameters: "))),
-                                    #br(),
+                                    br(),
                                     box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
                                         solidHeader = FALSE, collapsed = TRUE,
@@ -7062,12 +6532,6 @@ server <- function(input, output,session){
                    ),
                    ## Historiograph ----
                    conditionalPanel(condition = 'input.sidebarmenu == "historiograph"',
-                                    # actionButton("applyHist", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    #selectInput('save_colnet', 'Save network as:', choices = c('No, thanks!' = 'no_thanks', 'Pajek format' = 'pajek')),
-                                    #conditionalPanel(condition = "input.save_colnet == 'pajek'"
-                                    # br(),
-                                    # br(),
                                     numericInput(inputId = "histNodes",
                                                  label = "Number of Nodes",
                                                  min = 5,
@@ -7126,12 +6590,6 @@ server <- function(input, output,session){
                    ),
                    ## Collaboration Network ----
                    conditionalPanel(condition = 'input.sidebarmenu == "collabNetwork"',
-                                    # actionButton("applyCol", strong("Run"),style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
-                                    #"  ",
-                                    #h4(em(strong("Network Parameters: "))),
                                     selectInput("colField", 
                                                 label = "Field",
                                                 choices = c("Authors" = "COL_AU", 
@@ -7208,8 +6666,6 @@ server <- function(input, output,session){
                                                             min = 0)
                                         )
                                         )),
-                                    #uiOutput("Focus"),
-                                    #h4(em(strong("Graphical Parameters: "))),
                                     br(),
                                     box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
@@ -7297,11 +6753,6 @@ server <- function(input, output,session){
                    ),
                    ## Collaboration World Map ----
                    conditionalPanel(condition = 'input.sidebarmenu == "collabWorldMap"',
-                                    # actionButton("applyWM", strong("Run"),
-                                    #              style ="border-radius: 10px; border-width: 3px;",
-                                    #              width = "100%"),
-                                    # br(),
-                                    # br(),
                                     h4(strong("Method Parameters: ")),
                                     "  ",
                                     numericInput("WMedges.min", 
@@ -7350,6 +6801,5 @@ server <- function(input, output,session){
       )
     )
   })
-  
 }
-#### END ####
+# END ####

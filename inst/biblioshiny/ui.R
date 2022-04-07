@@ -1,6 +1,6 @@
 if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
-if (!(require(rio))){install.packages("rio")} 
+#if (!(require(rio))){install.packages("rio")} 
 if (!(require(DT))){install.packages("DT")};require(DT, quietly =TRUE)
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 
@@ -19,17 +19,14 @@ require(dimensionsR, quietly = TRUE)
 require(pubmedR, quietly = TRUE)
 require(dplyr, quietly = TRUE)
 require(tidyr, quietly = TRUE)
-
 source("utils.R")
 
-#### INTERFACCIA UTENTE #### 
+# UI components ----
 ## Title ----
 mytitle <- tags$link(tags$a(href = 'https://www.bibliometrix.org/',target="_blank",
                             tags$img(src="logo2.jpg", height = '40',width='40')),
                      strong("bibliometrix")
-)
-#style = "font-weight: jost"
-
+                     )
 
 intro <- "javascript:void(window.open('https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html', '_blank'))"
 importData <- "javascript:void(window.open('https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html', '_blank'))"
@@ -101,12 +98,12 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                   message = "",
                                                   href = github_aria,
                                                   icon = fa_i(name = "github")
-                                                )
-                                              )
-                                              ,
+                                                 )
+                                                ),
                                               tags$li(class = "dropdown",
-                                                      tags$style(".main-header .logo {height: 53px}"))
-)
+                                                      tags$style(".main-header .logo {height: 53px}")
+                                                      )
+                                              )
 
 ## Side Bar ----
 sidebar <- shinydashboardPlus::dashboardSidebar(
@@ -118,118 +115,80 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
              menuSubItem("Load Data", tabName = "loadData",icon = icon("chevron-right",lib = "glyphicon")),
              menuSubItem("Gathering Data", tabName = "gathData",icon = icon("chevron-right",lib = "glyphicon"))),
     menuItemOutput ("rest_of_sidebar")
-    # menuItem("Quit", tabName = "quit",icon=icon("off",lib = "glyphicon")),
-    # menuItem("K-Synth", icon = icon("globe",lib = "glyphicon"), badgeLabel = "Link", badgeColor = "blue",
-    #         href = "https://www.k-synth.unina.it")
-  ),
+    ),
   textOutput("res"), width = 300
-)
+  )
 
-### BODY ####
+## Body ####
 
 ### Theme ----
 customTheme <- shinyDashboardThemeDIY(
-  
-  ### general
-  appFontFamily = "Helvetica" # Carattere di tutto
-  # Didot, Verdana, Arial, Helvetica, Trebuchet MS, Optima,Georgia, Courier,
-  # Arial Narrow
-  ,appFontColor = "rgb(0,0,0)" # Nero
+  appFontFamily = "Helvetica"
+  ,appFontColor = "rgb(0,0,0)" 
   ,primaryFontColor = "rgb(0,0,0)"
   ,infoFontColor = "rgb(0,0,0)"
   ,successFontColor = "rgb(0,0,0)"
   ,warningFontColor = "rgb(0,0,0)"
   ,dangerFontColor = "rgb(0,0,0)"
-  ,bodyBackColor = "rgb(255,255,255)" # Bianco
+  ,bodyBackColor = "rgb(255,255,255)"
+  ,logoBackColor = "rgb(88,101,185)"
   
-  ### header
-  ,logoBackColor = "rgb(88,101,185)" # Viola, inizio biblioshiny
-  
-  ,headerButtonBackColor = "rgb(88,101,185)" # Viola punta del logo
+  ,headerButtonBackColor = "rgb(88,101,185)"
   ,headerButtonIconColor = "rgb(248,248,248)"
   ,headerButtonBackColorHover = "rgb(75,90,179)"
-  #,headerButtonBackColorHover = "rgb(75,90,179)" # Viola Scuro
   ,headerButtonIconColorHover = "rgb(248,248,248)" 
-  
-  ,headerBackColor = "rgb(88,101,185)" # Header orizzontale
-  ,headerBoxShadowColor = "rgb(210,210,210)" # Grigio
+  ,headerBackColor = "rgb(88,101,185)"
+  ,headerBoxShadowColor = "rgb(210,210,210)"
   ,headerBoxShadowSize = "2px 2px 2px"
   
-  ### sidebar
   ,sidebarBackColor = cssGradientThreeColors(
     direction = "down"
-    ,colorStart = "rgb(88,101,185)" #Viola punta logo
+    ,colorStart = "rgb(88,101,185)"
     ,colorMiddle = "rgb(29,143,225)"
     ,colorEnd = "rgb(34,220,253)"
-    ,colorStartPos = 0 # Posizione dei colori
+    ,colorStartPos = 0
     ,colorMiddlePos = 55
     ,colorEndPos = 100
   )
-  ,sidebarPadding = 0 # spazio prima della sidebar
-  
-  # Menu, colori e bordi
+  ,sidebarPadding = 0
   ,sidebarMenuBackColor = "transparent"
   ,sidebarMenuPadding = 0
   ,sidebarMenuBorderRadius = 0
-  
   ,sidebarShadowRadius = "0px 0px 0px"
   ,sidebarShadowColor = "#aaaaaa"
-  
-  # Colore testo in User
   ,sidebarUserTextColor = "rgb(255,255,255)"
-  
-  # Input Search in sidebar
   ,sidebarSearchBackColor = cssGradientThreeColors(
     direction = "right"
     ,colorStart = "rgb(34,220,253)"
     ,colorMiddle = "rgb(29,143,225)"
     ,colorEnd = "rgb(88,101,185)"
-    ,colorStartPos = 0 # Posizione dei colori
+    ,colorStartPos = 0
     ,colorMiddlePos = 75
     ,colorEndPos = 100)
   ,sidebarSearchIconColor = "rgb(255,255,255)"
   ,sidebarSearchBorderColor = "rgb(29,143,225)"
-  
-  # Testo del menu a sinistra
   ,sidebarTabTextColor = "rgb(255,255,255)"
   ,sidebarTabTextSize = 15
   ,sidebarTabBorderStyle = "none none solid none"
   ,sidebarTabBorderColor = "rgb(35,106,135)"
   ,sidebarTabBorderWidth = 1
-  
-  # Gradiente barra dopo aver selezionato una parte del menu
   ,sidebarTabBackColorSelected = cssGradientThreeColors(
     direction = "right"
     ,colorStart = "rgb(34,220,253)"
     ,colorMiddle = "rgb(29,143,225)"
     ,colorEnd = "rgb(88,101,185)"
-    ,colorStartPos = 0 # Posizione dei colori
+    ,colorStartPos = 0
     ,colorMiddlePos = 75
     ,colorEndPos = 100)
-  
-  # Colore icona della freccetta 
   ,sidebarTabTextColorSelected = "rgb(255,255,255)"
   ,sidebarTabRadiusSelected = "0px 0px 0px 0px"
-  
-  # Barra scorrimento
   ,sidebarTabBackColorHover = "rgb(255,255,255)"
-  # cssGradientThreeColors(
-  # direction = "right"
-  # ,colorStart = "rgb(34,220,253)"
-  # ,colorMiddle = "rgb(29,143,225)"
-  # ,colorEnd = "rgb(88,101,185)"
-  # ,colorStartPos = 0 # Posizione dei colori
-  # ,colorMiddlePos = 80
-  # ,colorEndPos = 100)
-  
-  # Colore testo, bordo, colore bordo, grandezza bordo dei tab panel
   ,sidebarTabTextColorHover = "rgb(50,50,50)"
   ,sidebarTabBorderStyleHover = "none none solid none"
   ,sidebarTabBorderColorHover = "rgb(75,126,151)"
   ,sidebarTabBorderWidthHover = 1
   ,sidebarTabRadiusHover = "0px 0px 0px 0px"
   
-  ### boxes
   ,boxBackColor = "rgb(255,255,255)"
   ,boxBorderRadius = 5
   ,boxShadowSize = "0px 0px 0px"
@@ -238,7 +197,7 @@ customTheme <- shinyDashboardThemeDIY(
   ,boxDefaultColor = "rgb(210,214,220)"
   ,boxPrimaryColor = "rgba(44,222,235,1)"
   ,boxInfoColor = "rgb(210,214,220)"
-  ,boxSuccessColor = "rgb(88,101,185)"  #success
+  ,boxSuccessColor = "rgb(88,101,185)"
   ,boxWarningColor = "rgb(244,156,104)"
   ,boxDangerColor = "rgb(255,88,55)"
   
@@ -250,20 +209,17 @@ customTheme <- shinyDashboardThemeDIY(
   ,tabBoxHighlightColor = "rgba(44,222,235,1)"
   ,tabBoxBorderRadius = 5
   
-  ### inputs
   ,buttonBackColor = cssGradientThreeColors(
     direction = "right"
     ,colorStart = "rgb(34,220,253)"
     ,colorMiddle = "rgb(29,143,225)"
     ,colorEnd = "rgb(88,101,185)"
-    ,colorStartPos = 0 # Posizione dei colori
+    ,colorStartPos = 0
     ,colorMiddlePos = 55
     ,colorEndPos = 100)
-  
   ,buttonTextColor = "rgb(255,255,255)"
   ,buttonBorderColor = "rgb(200,200,200)"
   ,buttonBorderRadius = 5
-  
   ,buttonBackColorHover = "rgb(255,255,255)"
   ,buttonTextColorHover = "rgb(0,0,0)"
   ,buttonBorderColorHover = "rgb(200,200,200)"
@@ -274,28 +230,23 @@ customTheme <- shinyDashboardThemeDIY(
   ,textboxBackColorSelect = "rgb(255,255,255)"
   ,textboxBorderColorSelect = "rgb(200,200,200)"
   
-  ### tables
   ,tableBackColor = "rgb(255,255,255)"
   ,tableBorderColor = "rgb(240,240,240)"
   ,tableBorderTopSize = 1
   ,tableBorderRowSize = 1
-  
-)
+  )
 
-## Create the body ----
+### Body Content ----
 body <- dashboardBody(
   customTheme,
-  ### aggiunto da Massimo il 25/02/2022
-  ### codice per risize automatico grafici ggplot statici
   tags$head(
-    tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"), # colore icone nel header
+    tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"),
     tags$style(".fa-envelope-open {font-size: 20px}"), 
     tags$style(".fa-cube {font-size: 20px}"),
     tags$style(".fa-question {font-size: 20px}"),
     tags$style(".fa-comment-dollar {font-size: 20px}"),
     tags$style(".fa-bars {font-size: 20px}"),
     tags$style(".sidebar-toggle {font-size: 15px}"),
-    #tags$style(".fa-chevron-left {font-size: 20px}"),
     tags$script(
       'var dimension = [0, 0];
               $(document).on("shiny:connected", function(e) {
@@ -309,10 +260,9 @@ body <- dashboardBody(
                   Shiny.onInputChange("dimension", dimension);
               });'
     )),
-  ### fine codice
   tabItems(
-    #### HOMEPAGE ####
-    ## Home ----    
+    #### Homepage ----
+    ##### home ----
     tabItem("biblioshinyy",
             fluidPage(
               fluidRow(
@@ -338,12 +288,11 @@ body <- dashboardBody(
               )
             )
     ),
-    #### DATA ####
-    ## Load Data ----
+    #### Data ----
+    ##### load Data ----
     tabItem("loadData",
             fluidPage(
               fluidRow(
-                ## color of datatable
                 tags$head(tags$style(
                   HTML(
                     "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
@@ -362,23 +311,21 @@ body <- dashboardBody(
                 shinycssloaders::withSpinner(DT::DTOutput("contents")
                 )
               )
-            )
-            #  )
-            # )
-    ),
-    ## Gather Data ---- 
+             )
+            ),
+    ##### gather Data ----
     tabItem("gathData",
             fluidPage(
               fluidRow(
-                ## color of datatable
                 tags$head(tags$style(
                   HTML(
                     "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
                                   }
                                   "
+                    )
                   )
-                )),
+                ),
                 tags$style(
                   HTML(
                     ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
@@ -388,17 +335,15 @@ body <- dashboardBody(
                 ),
                 shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
               )
-            )
-    ),
-    
-    ## FILTERS ----
+             )
+            ),
+    #### Filters ----
     tabItem("filters",
             fluidRow(
               DT::DTOutput("dataFiltered"))
-    ),
-    #### OVERVIEW ####
-    ## Main information ----
-    
+            ),
+    #### Overview ----
+    ##### main information ----
     tabItem("mainInfo",
             fluidPage(
               fluidRow(
@@ -424,7 +369,6 @@ body <- dashboardBody(
                                               valueBoxOutput("cagr", width = "33vh"),
                                               valueBoxOutput("coAuPerDoc", width = "33vh"),
                                               valueBoxOutput("tc", width = "33vh")),
-                                       #shinycssloaders::withSpinner(plotlyOutput(outputId = "RadarPlot", height = "105vh")))
                                      )
                             ),
                             tabPanel("Table",
@@ -434,8 +378,7 @@ body <- dashboardBody(
               )
             )
     ),
-    
-    ## Annual Scientific Production ----
+    ##### annual scientific production ----
     tabItem("annualScPr",
             fluidPage(
               fluidRow(
@@ -445,14 +388,16 @@ body <- dashboardBody(
                 tabsetPanel(id ="tabsASP",
                             type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = "75vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = "75vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
-                            ))
+                             )
+                            )
+                )
               )
-            )),
-    ## Average Citation per Year ----
+            ),
+    ##### average citation per year ----
     tabItem("averageCitPerYear",
             fluidPage(
               fluidRow(
@@ -461,14 +406,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = "75vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = "75vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("AnnualTotCitperYearTable"))
-                            ))
+                             )
+                            )
               )
-            )),
-    ## Three fields plot ----
+             )
+            ),
+    ##### three fields plot ----
     tabItem("threeFieldPlot",
             fluidPage(
               fluidRow(
@@ -481,9 +428,10 @@ body <- dashboardBody(
               fluidRow(
                 shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
               )
-            )),
-    #### SOURCES ####
-    ## Relevant Sources ----
+             )
+            ),
+    #### Sources ----
+    ##### relevant sources ----
     tabItem("relevantSources",
             fluidPage(
               fluidRow(
@@ -495,14 +443,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
-                            ))
+                             )
+                            )
               )
-            )),
-    ## Local Cited Sources ----
+             )
+            ),
+    ##### local cited sources ----
     tabItem("localCitedSources",
             fluidPage(
               fluidRow(
@@ -515,14 +465,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot", height = "75vh", width = "98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot", height = "75vh", width = "98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostRelCitSourcesTable"))
-                            ))
+                             )
+                            )
               )
-            )),
-    ## Bradford Law ----
+             )
+            ),
+    ##### bradford law ----
     tabItem("bradford",
             fluidPage(
               fluidRow(
@@ -533,14 +485,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = "75vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = "75vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
-                            ))
+                             )
+                            )
               )
-            )),
-    ## Source Impact ----
+             )
+            ),
+    ##### source impact ----
     tabItem("sourceImpact",
             fluidPage(
               fluidRow(
@@ -554,14 +508,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
-                            ))
+                             )
+                            )
+                          )
               )
-            )),
-    ## Source Dynamics ----
+            ),
+    ##### source dynamics ----
     tabItem("sourceDynamics",
             fluidPage(
               fluidRow(
@@ -575,16 +531,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     #shinycssloaders::withSpinner(plotOutput(outputId = "soGrowthPlot"))
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "soGrowthPlot", height = "90vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
-                            ))
-              ))
-    ),
-    #### AUTHORS ####
-    ## Most Relevant Authors ----
+                             )
+                            )
+               )
+              )
+             ),
+    #### Authors ----
+    ##### most relevant authors ----
     tabItem("mostRelAuthors",
             fluidPage(
               fluidRow(
@@ -597,14 +554,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
-                            ))
+                             )
+                            )
               )
-            )),
-    ## Most Local Cited Authors ----
+             )
+            ),
+    ##### most local cited authors ----
     tabItem("mostLocalCitedAuthors",
             fluidPage(
               fluidRow(
@@ -617,15 +576,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
-                            ))
+                             )
+                            )
               )
             )
-    ),
-    ## Authors Production Over Time ----
+           ),
+    ##### authors production over time ----
     tabItem("authorsProdOverTime",
             fluidPage(
               fluidRow(
@@ -646,11 +606,12 @@ body <- dashboardBody(
                             ),
                             tabPanel("Table - Author's Documents",
                                      shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
-                            ))
-              )
-            )
-    ),
-    ## Lotka Law ----
+                             )
+                            )
+               )
+             )
+           ),
+    ##### lotka law ----
     tabItem("lotka",
             fluidPage(
               fluidRow(
@@ -661,15 +622,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = "75vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = "75vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
-                            ))
-              )
-            )
-    ),
-    ## Author Impact ----
+                             )
+                            )
+               )
+             )
+           ),
+    ##### author impact ----
     tabItem("authorImpact",
             fluidPage(
               fluidRow(
@@ -683,15 +645,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))
-                            ))
-              )
-            )
-    ),
-    ## Most Relevant Affiliations ----
+                             )
+                            )
+               )
+             )
+            ),
+    ##### most relevant affiliations ----
     tabItem("mostRelAffiliations",
             fluidPage(
               fluidRow(
@@ -705,15 +668,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
-                            ))
+                             )
+                            )
               )
-            )
-    ),
-    ## Corresponding Author Country ----
+             )
+            ),
+    ##### corresponding author country ----
     tabItem("correspAuthorCountry",
             fluidPage(
               fluidRow(
@@ -726,15 +690,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
-                            ))
+                             )
+                            )
               )
-            )
-    ),
-    ## Country Scientific Production ----
+             )
+            ),
+    ##### country scientific production ----
     tabItem("countryScientProd",
             fluidPage(
               fluidRow(
@@ -743,15 +708,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = "75vh"))  #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = "75vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
-                            ))
+                             )
+                            )
               )
             )
-    ),
-    ## Most Cited Countries ----
+           ),
+    ##### most cited countries ----
     tabItem("mostCitedCountries",
             fluidPage(
               fluidRow(
@@ -763,17 +729,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = "75vh",width ="98.9%")) 
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
-                            ))
+                             )
+                            )
               )
-            )
-    ),
-    
-    #### DOCUMENTS ####
-    ## Most Global cited Documents ----
+             )
+            ),
+    #### Documents ----
+    ##### most global cited documents ----
     tabItem("mostGlobalCitDoc",
             fluidPage(
               fluidRow(
@@ -787,15 +753,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
-                            ))
+                             )
+                            )
               )
             )
-    ),
-    ## Most Local Cited Documents ----
+           ),
+    ##### most local cited documents ----
     tabItem("mostLocalCitDoc",
             fluidPage(
               fluidRow(
@@ -809,15 +776,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
-                            ))
+                             )
+                            )
               )
-            )
-    ),
-    ## Most Local Cited References ----
+             )
+            ),
+    ##### most local cited references ----
     tabItem("mostLocalCitRef",
             fluidPage(
               fluidRow(
@@ -831,20 +799,21 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = "75vh",width ="98.9%")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
-                            ))
+                             )
+                            )
+               )
               )
-            )
-    ),
-    ## Reference Spectroscopy ----
+            ),
+    ##### references spectroscopy ----
     tabItem("ReferenceSpect",
             fluidPage(
               fluidRow(
                 column(10,
-                       h2(strong("Reference Spectroscopy"), align = "center")
+                       h2(strong("References Spectroscopy"), align = "center")
                 ),
                 column(2,
                        actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
@@ -853,7 +822,7 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot", 
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))), #height = 700))),
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))),
                             tabPanel("Table - RPY", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "rpysTable"))),
@@ -862,9 +831,9 @@ body <- dashboardBody(
                                        outputId = "crTable")))
                 )
               )
-            )
-    ),
-    ## Most Frequent Words ----
+             )
+            ),
+    ##### most frequent words ----
     tabItem("mostFreqWords",
             fluidPage(
               fluidRow(
@@ -880,16 +849,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "75vh",width ="98.9%"))  #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "75vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
-                            ))
+                             )
+                            )
                 
               )
-            )
-    ),
-    ## World Cloud ----
+             )
+            ),
+    ##### word cloud ----
     tabItem("wcloud",
             fluidPage(
               fluidRow(
@@ -902,16 +872,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     wordcloud2::wordcloud2Output("wordcloud", height = "75vh") #height = "600px")
+                                     wordcloud2::wordcloud2Output("wordcloud", height = "75vh")
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
-                            ))
+                             )
+                            )
                 
               )
-            )
-    ),
-    ## Tree Map ----
+             )
+            ),
+    ##### tree map ----
     tabItem("treemap",
             fluidPage(
               fluidRow(
@@ -925,15 +896,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = "75vh")) #height = 700))
-                                     #shinycssloaders::withSpinner(plotOutput("treemap"))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = "75vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("treeTable"))
-                            ))
-              ))
-    ),
-    ## Word Dynamics ----
+                             )
+                            )
+               )
+              )
+            ),
+    ##### word dynamics ----
     tabItem("wordDynamics",
             fluidPage(
               fluidRow(
@@ -947,17 +919,16 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     #shinycssloaders::withSpinner(plotOutput(outputId = "kwGrowthPlot"))
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "kwGrowthPlot", height = "90vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "kwGrowthPlot", height = "90vh"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
-                            ))
-                
+                             )
+                            )
               )
-            )
-    ),
-    ## Trend Topic ----
+             )
+            ),
+    ##### trend topic ----
     tabItem("trendTopic",
             fluidPage(
               fluidRow(
@@ -971,18 +942,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh",width ="98.9%")) #height = 700))
-                                     #shinycssloaders::withSpinner(plotOutput(outputId = "trendTopicsPlot"))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh",width ="98.9%"))
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
-                            ))
+                             )
+                            )
                 
               )
             )
-    ),
-    #### COUPLING ####
-    ## Clustering by Coupling ----
+           ),
+    #### Clustering by Coupling ----
     tabItem("coupling",
             fluidPage(
               fluidRow(
@@ -996,10 +966,10 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Map",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CMPlot", height = "75vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CMPlot", height = "75vh"))
                             ),
                             tabPanel("Network",
-                                     shinycssloaders::withSpinner(visNetworkOutput("CMNetPlot", height = "75vh"))), #height = "750px",width = "180%"))),
+                                     shinycssloaders::withSpinner(visNetworkOutput("CMNetPlot", height = "75vh"))),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTable"))
                             ),
@@ -1009,9 +979,9 @@ body <- dashboardBody(
                 )
               )
             )
-    ),
-    #### CONCEPTUAL STRUCTURE ####
-    ## Co-occurence Network ----
+           ),
+    #### Conceptual Structure ----
+    ##### co-occurence network ----
     tabItem("coOccurenceNetwork",
             fluidPage(
               fluidRow(
@@ -1025,19 +995,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))), #height = "750px",width = "180%"))),
-                            # tabPanel("Communities", 
-                            #          shinycssloaders::withSpinner(visNetworkOutput("cocPlotComm", height = "75vh"))), #height = "750px",width = "180%"))),
+                                     shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "cocTable"))),
                             tabPanel("Degree Plot", 
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh"))) #height=700)))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh")))
                 )
               )
-            )
-    ),
-    ## Thematic Map ----
+             )
+            ),
+    ##### thematic map ----
     tabItem("thematicMap",
             fluidPage(
               fluidRow(
@@ -1050,10 +1018,10 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Map",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "75vh")) #height = 700))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "75vh"))
                             ),
                             tabPanel("Network",
-                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "75vh"))), #height = "750px",width = "180%"))),
+                                     shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "75vh"))),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
                             ),
@@ -1063,8 +1031,8 @@ body <- dashboardBody(
                 )
               )
             )
-    ),
-    ## Thematic Evolution ----
+           ),
+    ##### thematic evolution ----
     tabItem("thematicEvolution",
             fluidPage(
               fluidRow(
@@ -1077,21 +1045,22 @@ body <- dashboardBody(
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
-                            tabPanel("Thematic Evolution", tabsetPanel(type="tabs",
-                                                                       tabPanel("Map",
-                                                                                #shinycssloaders::withSpinner(networkD3::sankeyNetworkOutput(outputId = "TEPlot", height = "75vh"))  #height = "600px"))
-                                                                                shinycssloaders::withSpinner(plotlyOutput(outputId = "TEPlot", height = "75vh"))
-                                                                       ),
-                                                                       tabPanel("Table",
-                                                                                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
-                                                                       ))
+                            tabPanel("Thematic Evolution", 
+                                     tabsetPanel(type="tabs",
+                                                    tabPanel("Map",
+                                                       shinycssloaders::withSpinner(plotlyOutput(outputId = "TEPlot", height = "75vh"))
+                                                             ),
+                                                    tabPanel("Table",
+                                                       shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                                                             )
+                                                 )
                             ),
                             tabPanel("Time Slice 1", tabsetPanel(type="tabs",
                                                                  tabPanel("Map",
-                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = "75vh")) #height = 700))
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Network",
-                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "75vh")) # height = "750px",width = "180%"))
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Table",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
@@ -1099,14 +1068,14 @@ body <- dashboardBody(
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster1"))
                                                                  )
-                            )      
+                             )      
                             ),
                             tabPanel("Time Slice 2", tabsetPanel(type="tabs",
                                                                  tabPanel("Map",
-                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = "75vh"))  #height = 700))
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Network",
-                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "75vh")) #height = "750px",width = "180%"))
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Table",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
@@ -1114,14 +1083,14 @@ body <- dashboardBody(
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster2"))
                                                                  )
-                            ) 
+                             ) 
                             ),
                             tabPanel("Time Slice 3", tabsetPanel(type="tabs",
                                                                  tabPanel("Map",
-                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = "75vh")) #height = 700))
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Network",
-                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "75vh")) #height = "750px",width = "180%"))
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Table",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
@@ -1129,14 +1098,14 @@ body <- dashboardBody(
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster3"))
                                                                  )
-                            )
+                             )
                             ),
                             tabPanel("Time Slice 4", tabsetPanel(type="tabs",
                                                                  tabPanel("Map",
-                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = "75vh")) #height = 700))
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Network",
-                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "75vh")) #height = "750px",width = "180%"))
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Table",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
@@ -1144,14 +1113,14 @@ body <- dashboardBody(
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster4"))
                                                                  )
-                            ) 
+                             ) 
                             ),
                             tabPanel("Time Slice 5", tabsetPanel(type="tabs",
                                                                  tabPanel("Map",
-                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = "75vh")) #height = 700))
+                                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Network",
-                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "75vh")) #height = "750px",width = "180%"))
+                                                                          shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "75vh"))
                                                                  ),
                                                                  tabPanel("Table",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
@@ -1159,14 +1128,13 @@ body <- dashboardBody(
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster5"))
                                                                  )
-                            )
-                            )
+                             )
+                          )
                 )
               )
-            )
-            #)))
-    ),
-    ## Factorial Analysis ----
+             )
+            ),
+    ##### factorial analysis ----
     tabItem("factorialAnalysis",
             fluidPage(
               fluidRow(
@@ -1197,10 +1165,10 @@ body <- dashboardBody(
                             
                 )
               )
-            )
-    ),
-    #### INTELLECTUAL STRUCTURE ####
-    ## Co-Citation Network ----
+             )
+            ),
+    #### Intellectual Structure ----
+    ##### co-citation network ----
     tabItem("coCitationNetwork",
             fluidPage(
               fluidRow(
@@ -1213,7 +1181,7 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Newtwork", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))), #height = "750px", width = "180%"))),         
+                                     shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))),        
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "cocitTable"))),
@@ -1221,9 +1189,9 @@ body <- dashboardBody(
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height=700)))
                 )
               )
-            )
-    ),
-    ## Historiograph ----
+             )
+            ),
+    ##### historiograph ----
     tabItem("historiograph",
             fluidPage(
               fluidRow(
@@ -1234,17 +1202,16 @@ body <- dashboardBody(
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
-                            tabPanel("Plot", 
-                                     #shinycssloaders::withSpinner(plotOutput(outputId = "histPlot"))),
+                            tabPanel("Plot",
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
                 )
               )
-            )
-    ),
-    #### SOCIAL STRUCTURE ####
-    ## Collaboration Network ----
+             )
+            ),
+    #### Social Structure ----
+    ##### collaboration network ----
     tabItem("collabNetwork",
             fluidPage(
               fluidRow(
@@ -1255,18 +1222,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))), #,width = "180%"))), 
-                            #shinycssloaders::withSpinner(plotOutput(outputId = "colPlot"))),
+                                     shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))), 
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "colTable"))),
                             tabPanel("Degree Plot", 
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh"))) #height=700)))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh")))
                 )
               )
-            )
-    ),
-    ## Collaboration World Map ----
+             )
+            ),
+    ##### collaboration world map ----
     tabItem("collabWorldMap",
             fluidPage(
               fluidRow(
@@ -1284,10 +1250,12 @@ body <- dashboardBody(
                                        outputId = "WMTable")))
                 )
               )
-            ))
-  ))
+             )
+            )
+  )
+ )
 
-#### CONTROL BAR ----
+## Control Bar ####
 controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
                                                       uiOutput("controlbar"),
                                                       skin = "light",
@@ -1295,11 +1263,8 @@ controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
                                                       overlay = FALSE,
                                                       collapsed = TRUE,
                                                       shinyjs::useShinyjs()
-)
-
-
-#### UI ####
-
+                                                      )
+## UI ####
 ui <- shinydashboardPlus::dashboardPage(shinyjs::useShinyjs(),
                                         header = header, 
                                         sidebar = sidebar, 
@@ -1308,4 +1273,5 @@ ui <- shinydashboardPlus::dashboardPage(shinyjs::useShinyjs(),
                                         footer = NULL,
                                         options = list(sidebarExpandOnHover = TRUE),
                                         scrollToTop =TRUE
-)
+                                        )
+# END ----

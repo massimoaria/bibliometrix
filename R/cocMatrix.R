@@ -87,7 +87,11 @@ if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
 if (length(synonyms)>0 & class(synonyms)=="character"){
   s <- strsplit(toupper(synonyms),";")
   snew <- trimws(unlist(lapply(s,function(l) l[1])))
-  sold <- (lapply(s,function(l) trimws(l[-1])))
+  sold <- (lapply(s,function(l){
+    l <- trimws(l[-1])
+    l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
+    }))
+
   for (i in 1:length(s)){
     M[,Field] <-  str_replace_all(M[,Field], paste(sold[[i]], collapse="|",sep=""),snew[i])
   }

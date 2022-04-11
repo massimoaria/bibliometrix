@@ -206,11 +206,11 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
     if (length(synonyms)>0 & class(synonyms)=="character"){
       s <- strsplit(toupper(synonyms),";")
       snew <- trimws(unlist(lapply(s,function(l) l[1])))
-      #snew <- paste(" ",unlist(lapply(s,function(l) l[1]))," ",sep="")
-      sold <- (lapply(s,function(l) trimws(l[-1])))
-      #sold <- (lapply(s,function(l) paste(" ",l[-1]," ",sep="")))
-      #TERMS <- TERMS %>% mutate(text = paste(" ",.data$text," ", sep=""))
-      #TERMS$text <- trimws(TERMS$text)
+      sold <- (lapply(s,function(l){
+        l <- trimws(l[-1])
+        l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
+      }))
+
       for (i in 1:length(s)){
         ngrams <- ngrams %>% 
           mutate(

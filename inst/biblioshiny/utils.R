@@ -310,11 +310,13 @@ Hindex_plot <- function(values, type, input){
     switch(type,
            author={
              AU <- trim(gsub(",","",names(tableTag(values$M,"AU"))))
-             values$H <- Hindex(values$M, field = "author", elements = AU, sep = ";", years=Inf)$H
+             values$H <- Hindex(values$M, field = "author", elements = AU, sep = ";", years=Inf)$H %>% 
+               arrange(desc(.data$h_index))
            },
            source={
              SO <- names(sort(table(values$M$SO),decreasing = TRUE))
-             values$H <- Hindex(values$M, field = "source", elements = SO, sep = ";", years=Inf)$H
+             values$H <- Hindex(values$M, field = "source", elements = SO, sep = ";", years=Inf)$H %>% 
+               arrange(desc(.data$h_index))
            }
     )
     

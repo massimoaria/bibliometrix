@@ -2392,10 +2392,10 @@ server <- function(input, output,session){
   ## Cited References ----
   ### Most Local Cited References ----
   MLCReferences <- eventReactive(input$applyMLCReferences,{
-    CR=citations(values$M,sep=input$CitRefsSep)$Cited
-    TAB=data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
-    names(TAB)=c("Cited References", "Citations")
-    values$TABCitRef=TAB
+    CR <- citations(values$M,sep=input$CitRefsSep)$Cited
+    TAB <- data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
+    names(TAB) <- c("Cited References", "Citations")
+    values$TABCitRef <- TAB %>% filter(.data$`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
     
     xx=values$TABCitRef
     if (input$MostCitRefsK>dim(xx)[1]){
@@ -5500,6 +5500,12 @@ server <- function(input, output,session){
                                                             "Titles" = "TI",
                                                             "Abstracts" = "AB"),
                                                 selected = "ID"),
+                                    conditionalPanel(condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
+                                                     selectInput("growthTermsngrams",'N-Grams',
+                                                                 choices = c("Unigrams" = "1",
+                                                                             "Bigrams" = "2",
+                                                                             "Trigrams" = "3"),
+                                                                 selected = 1)),
                                     br(),
                                     box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
@@ -5557,12 +5563,6 @@ server <- function(input, output,session){
                                                     choices = c("Cumulate" = "Cum",
                                                                 "Per year" = "noCum"),
                                                     selected = "Cum"),
-                                        conditionalPanel(condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
-                                                         selectInput("growthTermsngrams",'N-Grams',
-                                                                     choices = c("Unigrams" = "1",
-                                                                                 "Bigrams" = "2",
-                                                                                 "Trigrams" = "3"),
-                                                                     selected = 1)),
                                         sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))),
                                     selectInput(
                                       'WDdpi',
@@ -5669,7 +5669,7 @@ server <- function(input, output,session){
                                                         numericInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
                                         ),
                                         column(6,
-                                               numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 5)
+                                               numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 3)
                                         ))),
                                     selectInput(
                                       'TTdpi',
@@ -6214,7 +6214,7 @@ server <- function(input, output,session){
                                                         numericInput("sizeTE", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
                                         ),
                                         column(6,
-                                               numericInput("TEn.labels", label="Number of Labels (for each cluster)",value=1,min=1,max=5,step=1)
+                                               numericInput("TEn.labels", label="Number of Labels (for each cluster)",value=3,min=1,max=5,step=1)
                                         ))
                                     ),
                                     br(),

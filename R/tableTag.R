@@ -46,7 +46,7 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL, syno
     snew <- trimws(unlist(lapply(s,function(l) l[1])))
     sold <- (lapply(s,function(l) trimws(l[-1])))
     for (i in 1:length(s)){
-      Tab <-  str_replace_all(Tab, paste(sold[[i]], collapse="|",sep=""),snew[i])
+      Tab[Tab %in% unlist(sold[[i]])] <- snew[i]
     }
   }
   

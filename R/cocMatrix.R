@@ -83,20 +83,20 @@ size<-dim(M)
 
 if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
 
-# Merge synonyms in the vector synonyms
-if (length(synonyms)>0 & class(synonyms)=="character"){
-  s <- strsplit(toupper(synonyms),";")
-  snew <- trimws(unlist(lapply(s,function(l) l[1])))
-  sold <- (lapply(s,function(l){
-    l <- trimws(l[-1])
-    l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
-    }))
-
-  for (i in 1:length(s)){
-    M[,Field] <-  str_replace_all(M[,Field], paste(sold[[i]], collapse="|",sep=""),snew[i])
-  }
-}
-##
+# # Merge synonyms in the vector synonyms
+# if (length(synonyms)>0 & class(synonyms)=="character"){
+#   s <- strsplit(toupper(synonyms),";")
+#   snew <- trimws(unlist(lapply(s,function(l) l[1])))
+#   sold <- (lapply(s,function(l){
+#     l <- trimws(l[-1])
+#     l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
+#     }))
+# 
+#   for (i in 1:length(s)){
+#     M[,Field] <-  str_replace_all(M[,Field], paste(sold[[i]], collapse="|",sep=""),snew[i])
+#   }
+# }
+# ##
 
 if (Field %in% names(M)){
   Fi<-strsplit(M[,Field],sep)} else{return(print(paste("Field",Field,"is not a column name of input data frame")))}
@@ -116,6 +116,22 @@ if (Field %in% c("ID", "DE", "TI", "TI_TM", "AB", "AB_TM")){
   allField <- anti_join(data.frame(item=trimws(allField)),data.frame(item=trimws(toupper(remove.terms))), by="item")$item
   }
 #
+
+# Merge synonyms in the vector synonyms
+if (length(synonyms)>0 & class(synonyms)=="character"){
+  s <- strsplit(toupper(synonyms),";")
+  snew <- trimws(unlist(lapply(s,function(l) l[1])))
+  sold <- (lapply(s,function(l){
+    l <- trimws(l[-1])
+    #l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
+  }))
+  
+  for (i in 1:length(s)){
+    allField[allField %in% unlist(sold[[i]])] <- snew[i]
+  }
+}
+##
+
 
 if (Field=="CR"){
   ind <- which(substr(allField,1,1)!="(")

@@ -101,13 +101,14 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   if (Field %in% c("ID","DE")){
     listTerms <- strsplit(TERMS$text,";")
     TERMS$text <- unlist(lapply(listTerms, function(l){
-      l <- tolower(paste(gsub(" ","_",trimES(trimws(l))), sep="", collapse=";"))  
+      l <- gsub("-","__",trimES(trimws(l)))
+      l <- tolower(paste(gsub(" ","_",l), sep="", collapse=";"))  
     }))
   } else {
   
   TERMS <- TERMS %>%
     mutate(text = tolower(gsub("[^[:alnum:][:blank:]\\-]", "", .data$text)),
-           text = gsub("-", "_",.data$text))
+           text = gsub("-", "__",.data$text))
   }
 
   
@@ -121,9 +122,10 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   if (length(keep.terms)>0 & class(keep.terms)=="character"){
     keep.terms <- tolower(keep.terms)
     if (Field %in% c("DE","ID")){
-      kt <- gsub(" |-","_",keep.terms)
+      kt <- gsub(" ","_",keep.terms)
+      kt <- gsub("-","__",keep.terms)
     } else {
-      kt <- gsub("-","_",keep.terms)
+      kt <- gsub("-","__",keep.terms)
     }
     for (i in 1:length(keep.terms)){
       TERMS <- TERMS %>%
@@ -131,27 +133,27 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     }
   }
 
-  ## come back to the original multiword format
-  if (Field %in% c("ID","DE")){
-    TERMS <- TERMS %>% 
-      mutate(text = gsub("_|-", " ", .data$text))
-  }
+  # ## come back to the original multiword format
+  # if (Field %in% c("ID","DE")){
+  #   TERMS <- TERMS %>% 
+  #     mutate(text = gsub("_|-", " ", .data$text))
+  # }
   
   if (is.null(remove.terms)) remove.terms <- ""
   
   TERMS <- extractNgrams(text=TERMS, Var="text", nword=ngrams, 
                              stopwords=stopwords, custom_stopwords=tolower(remove.terms),
-                             stemming=stemming, language=language, synonyms = synonyms)
+                             stemming=stemming, language=language, synonyms = synonyms, Field = Field)
   
   TERMS <- TERMS %>%
     dplyr::filter(!(.data$ngram %in% paste(rep("NA",ngrams),sep="",collapse=" "))) %>% 
     group_by(.data$SR) %>%
     summarize(text = paste(.data$ngram, collapse=";"))
   
-  if (Field %in% c("ID","DE")){
-    TERMS <- TERMS %>% 
-      mutate(text = gsub("_", " ", .data$text))
-  }
+  # if (Field %in% c("ID","DE")){
+  #   TERMS <- TERMS %>% 
+  #     mutate(text = gsub("_", " ", .data$text))
+  # }
   
   # assign the vector to the bibliographic data frame
   col_name <- paste(Field,"_TM",sep="")
@@ -175,7 +177,7 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   
 }
 
-extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemming, language, synonyms){
+extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemming, language, synonyms, Field){
   # text is data frame containing the corpus data text = M %>% select(.data$SR,.data$AB)
   # Var is a string indicating the column name. I.e. Var = "AB"
   # nword is a integer vector indicating the ngrams to extract. I.e. nword = c(2,3)
@@ -189,8 +191,16 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
   ngrams <- text %>%
     drop_na(any_of(Var)) %>%
     unnest_tokens(ngram, !!Var, token = "ngrams", n = nword) %>%
-    separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ") %>%
-    dplyr::filter(if_all(starts_with("word"), ~ !.x %in% stopwords)) 
+    separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ")
+  
+  ## come back to the original multiword format
+  if (Field %in% c("ID","DE")){
+    ngrams <- ngrams %>% 
+      mutate(word1 = gsub("__", "-", .data$word1),
+             word1 = gsub("_"," ", .data$word1))
+  }
+   
+    ngrams <- ngrams %>% dplyr::filter(if_all(starts_with("word"), ~ !.x %in% stopwords))
   
   if (isTRUE(stemming)){
     ngrams <- ngrams %>% 
@@ -208,16 +218,14 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
       snew <- trimws(unlist(lapply(s,function(l) l[1])))
       sold <- (lapply(s,function(l){
         l <- trimws(l[-1])
-        l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
+        #l <- paste("(?<![[^[:alnum:]]|[[:alnum:]]])",l,sep="")  ### string to make an exact matching
       }))
 
       for (i in 1:length(s)){
-        ngrams <- ngrams %>% 
-          mutate(
-            ngram = str_replace_all(.data$ngram, paste(sold[[i]], collapse="|",sep=""),snew[i])
-          )
+        ngrams$ngram[ngrams$ngram %in% unlist(sold[[i]])] <- snew[i]
       }
     }
     
   return(ngrams)
 }
+

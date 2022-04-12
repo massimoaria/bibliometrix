@@ -97,6 +97,8 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   
   names(TERMS) <- c("SR","text")
   
+  TERMS$text <- gsub(" - "," ",TERMS$text)
+  
   # save original multi-words keywords
   if (Field %in% c("ID","DE")){
     listTerms <- strsplit(TERMS$text,";")
@@ -133,12 +135,6 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     }
   }
 
-  # ## come back to the original multiword format
-  # if (Field %in% c("ID","DE")){
-  #   TERMS <- TERMS %>% 
-  #     mutate(text = gsub("_|-", " ", .data$text))
-  # }
-  
   if (is.null(remove.terms)) remove.terms <- ""
   
   TERMS <- extractNgrams(text=TERMS, Var="text", nword=ngrams, 
@@ -182,23 +178,33 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
   # Var is a string indicating the column name. I.e. Var = "AB"
   # nword is a integer vector indicating the ngrams to extract. I.e. nword = c(2,3)
   
-  stopwords <- c(stopwords,"elsevier", "springer", "wiley", "mdpi", "emerald")
+  stopwords <- c(stopwords,"elsevier", "springer", "wiley", "mdpi", "emerald", "originalityvalue", "designmethodologyapproach", 
+                 "-", " -", "-present", "-based", "-literature", "-matter")
   custom_stopngrams <- c(custom_stopwords,"rights reserved", "john wiley", "john wiley sons", "science bv", "mdpi basel", 
                          "mdpi licensee", "emerald publishing", "taylor francis", "paper proposes", 
-                         "we proposes", "paper aims", "articles published", "study aims")
+                         "we proposes", "paper aims", "articles published", "study aims", "research limitationsimplications")
   ngram <- NULL
   
+  # ngrams <- text %>%
+  #   drop_na(any_of(Var)) %>%
+  #   unnest_tokens(ngram, !!Var, token = "ngrams", n = nword) %>%
+  #   separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ")
   ngrams <- text %>%
     drop_na(any_of(Var)) %>%
-    unnest_tokens(ngram, !!Var, token = "ngrams", n = nword) %>%
+    unnest_tokens(ngram, !!Var, token = "ngrams", n = nword) 
+  ind <- which(substr(ngrams$ngram,1,2) %in% "__")
+  ngrams$ngram[ind] <- trimws(substr(ngrams$ngram[ind],3,nchar(ngrams$ngram[ind])))
+  
+    ngrams <- ngrams %>%  
     separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ")
   
+  
+  
   ## come back to the original multiword format
-  if (Field %in% c("ID","DE")){
-    ngrams <- ngrams %>% 
-      mutate(word1 = gsub("__", "-", .data$word1),
-             word1 = gsub("_"," ", .data$word1))
-  }
+    ngrams <- ngrams %>%
+    mutate_at(paste("word",seq(1,nword),sep=""), ~gsub("__", "-",.)) %>% 
+    mutate_at(paste("word",seq(1,nword),sep=""), ~gsub("_", " ",.))
+  ##
    
     ngrams <- ngrams %>% dplyr::filter(if_all(starts_with("word"), ~ !.x %in% stopwords))
   

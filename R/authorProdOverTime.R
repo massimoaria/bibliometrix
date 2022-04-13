@@ -23,31 +23,43 @@
 #' 
 authorProdOverTime <- function(M,k=10, graph=TRUE){
 
+  if (!("DI" %in% names(M))){M$DI="NA"}
   M$TC <- as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
   M <- M[!is.na(M$PY),] #remove rows with missing value in PY
-  AU <- names(tableTag(M,"AU"))
-  k <- min(k,length(AU))
-  AU <- AU[1:k]
-  #AU=names(AU)
-  df <- data.frame("Author"="NA","year"=NA, "TI"="NA","SO"="NA","DOI"="NA", "TC"=NA,"TCpY"=NA,stringsAsFactors = FALSE)
+  
   Y <- as.numeric(substr(Sys.time(),1,4))
-  if (!("DI" %in% names(M))){M$DI="NA"}
-  for (i in 1:length(AU)){
-   
-    ind <- which(regexpr(AU[i],M$AU)>-1)
-    TCpY <- M$TC[ind]/(Y-M$PY[ind]+1)
-    dfAU <- data.frame("Author"=rep(AU[i],length(ind)),"year"=M$PY[ind],"TI"=M$TI[ind],"SO"=M$SO[ind],"DOI"=M$DI[ind],"TC"=M$TC[ind], "TCpY"=TCpY,stringsAsFactors = TRUE)
-    df <- rbind(df,dfAU)
-  }
-  df <- df[-1,]
+  listAU <- (strsplit(M$AU, ";"))
+  nAU <- lengths(listAU)
+  df <- data.frame(AU=trimws(unlist(listAU)), SR=rep(M$SR,nAU)) 
+  AU <- df %>% 
+    group_by(.data$AU) %>% 
+    count() %>% 
+    arrange(desc(.data$n)) %>% 
+    ungroup() 
+  k <- min(k,nrow(AU))
+  AU <- AU %>% 
+    slice_head(n=k)
+  
+  df <- df %>% 
+    right_join(AU, by = "AU") %>%
+    left_join(M, by = "SR") %>% 
+    select(.data$AU.x,.data$PY, .data$TI, .data$SO, .data$DI, .data$TC) %>% 
+    mutate(TCpY = .data$TC/(Y-.data$PY+1)) %>%
+    group_by(.data$AU.x) %>% 
+    mutate(n = length(.data$AU.x)) %>% 
+    ungroup() %>% 
+    rename(Author = .data$AU.x,
+           year = .data$PY,
+           DOI = .data$DI) %>% 
+    arrange(desc(.data$n), desc(.data$year)) %>% 
+    select(-.data$n)
   
   df2 <- dplyr::group_by(df, .data$Author,.data$year) %>%
-    dplyr::summarise(freq=length(.data$year),TC=sum(.data$TC),TCpY=sum(.data$TCpY))
+    dplyr::summarise(freq=length(.data$year),TC=sum(.data$TC),TCpY=sum(.data$TCpY)) %>% 
+    as.data.frame()
   
-  df2 <- as.data.frame(df2)
-  df2$Author <- factor(df2$Author,levels=AU[1:k])
-  #theme_set(theme_bw())
+  df2$Author <- factor(df2$Author,levels=AU$AU[1:k])
   
   x <- c(0.5,1.5*k/10)
   y <- c(min(df$year),min(df$year)+diff(range(df2$year))*0.125)

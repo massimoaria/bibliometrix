@@ -202,7 +202,7 @@ ValueBoxes <- function(M){
   df <- data.frame(Description=rep(NA,12), Results=rep(NA,12))
   
   ## VB  1 - Time span
-  df[1,] <- c("Timespan",paste(range(M$PY),collapse=":"))
+  df[1,] <- c("Timespan",paste(range(M$PY, na.rm=T),collapse=":"))
   
   ## VB  2 - Authors
   listAU <- (strsplit(M$AU, ";"))

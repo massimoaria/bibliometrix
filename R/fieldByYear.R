@@ -42,7 +42,7 @@ fieldByYear <- function(M,
                         dynamic.plot = FALSE,
                         graph = TRUE) {
   
-  A <- cocMatrix(M, Field = field, binary = FALSE, remove.terms = NULL, synonyms = synonyms)
+  A <- cocMatrix(M, Field = field, binary = FALSE, remove.terms = remove.terms, synonyms = synonyms)
   n <- colSums(as.array(A))
   
   #A=tdIdf(A)

@@ -4,7 +4,7 @@ bibliometrix
 
 ## An R-tool for comprehensive science mapping analysis. 
 
-[![bibliometrix: An R-tool for comprehensive science mapping analysis.](https://www.bibliometrix.org/altro/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
+[![bibliometrix: An R-tool for comprehensive science mapping analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Build Status](https://www.bibliometrix.org/passing.png)](https://www.bibliometrix.org)
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)

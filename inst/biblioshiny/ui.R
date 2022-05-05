@@ -19,7 +19,6 @@ require(dimensionsR, quietly = TRUE)
 require(pubmedR, quietly = TRUE)
 require(dplyr, quietly = TRUE)
 require(tidyr, quietly = TRUE)
-source("utils.R")
 
 # UI components ----
 ## Title ----

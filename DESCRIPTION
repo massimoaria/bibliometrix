@@ -47,7 +47,6 @@ Suggests:
     rmarkdown,
     testthat (>= 2.1.0),
     shinycssloaders,
-		bslib,
 		visNetwork,
 		wordcloud2
 RoxygenNote: 7.1.1

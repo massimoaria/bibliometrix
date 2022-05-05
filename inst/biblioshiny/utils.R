@@ -1,3 +1,10 @@
+# utils::globalVariables("CAmap"," cocNetwork","count.duplicates","countrycollaboration",
+# "degreePlot","descriptive","emptyPlot"," freqPlot","getFileNameExtension","Hindex_plot",
+# "historiograph","igraph2vis","initial","intellectualStructure","is_online","mapworld",
+# "netLayout","notifications","plot.ly","readStopwordsFile","readSynWordsFile","reduceRefs",
+# "savenetwork","socialStructure","strPreview","strSynPreview","wordlist","ValueBoxes","countryCollab")
+
+
 ### COMMON FUNCTIONS ####
 
 getFileNameExtension <- function (fn) {
@@ -153,7 +160,7 @@ notifications <- function(){
              mutate(status = replace_na(.data$status.y,"danger")) %>% 
              rename(href = .data$href.x,
                     action = .data$action.x) %>% 
-             select(nots, href, action, status) %>% 
+             select(.data$nots, .data$href, .data$action, .data$status) %>% 
              arrange(.data$status) %>% 
              filter(.data$action == TRUE) %>% 
              dplyr::slice_head(n=5)
@@ -523,8 +530,8 @@ mapworld <- function(M, values){
   country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
   
   tab=data.frame(country.prod %>%
-                   dplyr::group_by(region) %>%
-                   dplyr::summarise(Freq=mean(Freq)))
+                   dplyr::group_by(.data$region) %>%
+                   dplyr::summarise(Freq=mean(.data$Freq)))
   
   tab=tab[!is.na(tab$Freq),]
   
@@ -535,7 +542,7 @@ mapworld <- function(M, values){
   breaks=log(breaks)
   
   g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
-    geom_polygon(aes(fill = log(Freq), group=group)) +
+    geom_polygon(aes(fill = log(.data$Freq), group=.data$group)) +
     scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
     guides(fill = guide_legend(reverse = T)) +
     #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +
@@ -844,7 +851,7 @@ countrycollaboration <- function(M,label,edgesize,min.edges, values){
   COedges=COedges[COedges$count>=min.edges,]
   
   g=ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group )) +
-    geom_polygon(aes(fill = log(Freq))) +
+    geom_polygon(aes(fill = log(.data$Freq))) +
     scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
     #guides(fill = guide_legend(reverse = T)) +
     guides(colour=FALSE, fill=FALSE)+
@@ -892,15 +899,15 @@ netLayout <- function(type){
   return(l)
 }
 
-savenetwork <- function(con){
+savenetwork <- function(con, values){
   vn=values$network$vn
-  visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE, height = "2000px",width = "2000px" ) %>%
-    visNodes(shape="box", font=list(color="black"),scaling=list(label=list(enables=TRUE))) %>%
-    visIgraphLayout(layout = values$network$l) %>%
-    visEdges(smooth = values$network$curved) %>%
-    visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-    visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE)  %>% visExport() %>%
-    visPhysics(enabled = FALSE) %>% visSave(con)
+  visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE, height = "2000px",width = "2000px" ) %>%
+    visNetwork::visNodes(shape="box", font=list(color="black"),scaling=list(label=list(enables=TRUE))) %>%
+    visNetwork::visIgraphLayout(layout = values$network$l) %>%
+    visNetwork::visEdges(smooth = values$network$curved) %>%
+    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
+    visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE)  %>% visNetwork::visExport() %>%
+    visNetwork::visPhysics(enabled = FALSE) %>% visNetwork::visSave(con)
 }
 
 igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
@@ -909,7 +916,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   
   LABEL[igraph::V(g)$labelsize==0]=""
   
-  vn <- toVisNetworkData(g)
+  vn <- visNetwork::toVisNetworkData(g)
   
   vn$nodes$label=LABEL
   vn$edges$num=1
@@ -917,8 +924,8 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   vn$edges$dashes[vn$edges$lty==2]=TRUE
   
   ## opacity
-  vn$nodes$color=adjustcolor(vn$nodes$color,alpha=min(c(opacity+0.2,1)))
-  vn$edges$color=adjustcolor(vn$edges$color,alpha=opacity)
+  vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.2,1)))
+  vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity)
   
   ## removing multiple edges
   vn$edges=unique(vn$edges)
@@ -954,23 +961,18 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   }
   
   VIS<-
-    visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
+    visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
     #visNodes(shape=shape, font=list(color="black")) %>%
-    visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
-    visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
-    visEdges(smooth = curved) %>%
-    visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-    visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
-    visOptions(manipulation = TRUE) %>%
-    visExport(type = "png", name = "network",
+    visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
+    visNetwork::visEdges(smooth = curved) %>%
+    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
+    visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
+    visNetwork::visOptions(manipulation = TRUE) %>%
+    visNetwork::visExport(type = "png", name = "network",
               label = paste0("Export graph as png"), background = "#fff",
               float = "right", style = NULL, loadDependencies = TRUE)
   #values$COCVIS=VIS
   return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
-
-#### Common functions ---- 
-
-
-
 

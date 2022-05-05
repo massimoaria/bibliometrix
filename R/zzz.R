@@ -28,6 +28,7 @@ utils::globalVariables("where")
 #' @importFrom dplyr if_all
 #' @importFrom dplyr any_of
 #' @importFrom dplyr cummean
+#' @importFrom dplyr count
 #' @importFrom dplyr desc
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
@@ -70,6 +71,7 @@ utils::globalVariables("where")
 #' @importFrom grDevices adjustcolor
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
+#' @importFrom grDevices heat.colors
 #' @importFrom DT DTOutput
 #' @importFrom DT renderDT
 #' @importFrom DT datatable
@@ -263,6 +265,7 @@ utils::globalVariables("where")
 #' @importFrom utils data
 #' @importFrom utils adist
 #' @importFrom utils read.csv
+#' @importFrom utils write.csv
 #' @importFrom SnowballC wordStem
 #' @importFrom SnowballC getStemLanguages
 # @importFrom rio import

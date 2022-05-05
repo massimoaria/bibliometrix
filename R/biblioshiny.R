@@ -29,11 +29,5 @@ biblioshiny <- function(host = "127.0.0.1", port = NULL,
   shinyOptions(maxUploadSize = maxUploadSize)
   
   runApp(system.file("biblioshiny",package="bibliometrix"),launch.browser = launch.browser, port = port, host = getOption("shiny.host", host))
-  
-  #remove utils functions from global environment
-  rm(CAmap, cocNetwork, count.duplicates, countrycollaboration, degreePlot, descriptive, emptyPlot, freqPlot,
-     getFileNameExtension, Hindex_plot, historiograph, igraph2vis, initial, intellectualStructure, is_online,
-     mapworld, netLayout, notifications, plot.ly, readStopwordsFile, readSynWordsFile, reduceRefs, savenetwork,
-     socialStructure, strPreview, strSynPreview, wordlist, ValueBoxes, countryCollab, pos = ".GlobalEnv")
-  
+
 }

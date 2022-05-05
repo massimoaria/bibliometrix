@@ -1,5 +1,6 @@
-#### SERVER ####
+source("utils.R", local=TRUE)
 
+#### SERVER ####
 server <- function(input, output,session){
   session$onSessionEnded(stopApp)
 
@@ -3188,7 +3189,7 @@ server <- function(input, output,session){
   output$networkCoc.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
-      savenetwork(con)
+      savenetwork(con, values)
     },
     contentType = "html"
   )
@@ -4024,7 +4025,7 @@ server <- function(input, output,session){
   output$networkCocit.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
-      savenetwork(con)
+      savenetwork(con, values)
     },
     contentType = "html"
   )
@@ -4178,7 +4179,7 @@ server <- function(input, output,session){
   output$networkCol.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
-      savenetwork(con)
+      savenetwork(con, values)
     },
     contentType = "html"
   )
@@ -6802,4 +6803,7 @@ server <- function(input, output,session){
     )
   })
 }
+
+
+
 # END ####

@@ -1026,6 +1026,9 @@ body <- dashboardBody(
                             ),
                             tabPanel("Clusters",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster"))
+                            ),
+                            tabPanel("Documents",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument"))
                             )
                 )
               )

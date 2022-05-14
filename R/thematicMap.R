@@ -231,19 +231,60 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   row.names(df)=NULL
 
   ### Adding column Topics
-  M$TOPIC=""
+  #M$TOPIC=""
   
-  #View(res$words)
-  if (field %in% c("ID", "DE")) {
-    ID = paste(TERMS, ";", sep = "")
-    for (i in 1:nrow(words)) {
-      w = paste(words$Words[i], ";", sep = "")
-      TOPIC = paste(words$Cluster_Label[i], ";", sep = "")
-      ind = which(regexpr(w, ID) > -1)
-      M$TOPIC[ind] = paste(M$TOPIC[ind], TOPIC, sep = "")
-    }
-  } else {M$TOPIC="NA"}
+  # #View(res$words)
+  # if (field %in% c("ID", "DE")) {
+  #   ID = paste(TERMS, ";", sep = "")
+  #   for (i in 1:nrow(words)) {
+  #     w = paste(words$Words[i], ";", sep = "")
+  #     TOPIC = paste(words$Cluster_Label[i], ";", sep = "")
+  #     ind = which(regexpr(w, ID) > -1)
+  #     M$TOPIC[ind] = paste(M$TOPIC[ind], TOPIC, sep = "")
+  #   }
+  # } else {M$TOPIC="NA"}
   
-  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net, TOPIC=M$TOPIC)
+  documentToClusters <- clusterAssignment(M, words, field)
+  
+  
+  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
 return(results)
+}
+
+# Probability calculation fro cluster assigment
+clusterAssignment <- function(M, words, field){
+  
+  words <- words %>% 
+    mutate(p_w = 1/.data$Occurrences) %>% 
+    group_by(.data$Cluster) %>% 
+    mutate(p_c = 1/length(.data$Cluster))
+  column <- ifelse(field %in% c("TI","AB"), paste0(field,"_TM"),field)
+  
+  TERMS <- strsplit(M[, column], ";")
+  nW <- lengths(TERMS)
+  
+  TERMS <- data.frame(Words = tolower(unlist(TERMS)), SR=rep(M$SR,nW))
+  TERMS <- TERMS %>% 
+    left_join(words, by = "Words")
+  
+  TERMS <- TERMS %>% 
+    group_by(.data$SR, .data$Cluster_Label) %>% 
+    summarize(weigth = sum(.data$p_w, na.rm = T)) %>% 
+    mutate(p = .data$weigth/sum(.data$weigth, na.rm=T)) %>% 
+    drop_na(.data$Cluster_Label) %>% 
+    ungroup()
+  
+  TERMS <- TERMS %>% 
+    select(-.data$weigth) %>% 
+    pivot_wider(names_from = .data$Cluster_Label, values_from = .data$p) #%>% 
+    #mutate_if(is.numeric, ~replace_na(., 0))
+  
+  if (!("DI" %in% names(M))) M$DI <- NA
+  
+  TERMS <- M %>% 
+    select(.data$DI, .data$AU, .data$TI, .data$SO, .data$PY,.data$TC, .data$SR) %>% 
+    left_join(TERMS, by = "SR") %>% 
+    mutate_if(is.numeric, ~replace_na(., 0))
+  
+  return(TERMS)
 }

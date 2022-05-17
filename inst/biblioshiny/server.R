@@ -4002,6 +4002,151 @@ server <- function(input, output,session){
       formatStyle(names(tmData),  backgroundColor = 'white') 
   })
   
+  output$TMTableDocument1 <- DT::renderDT({
+    TEMAP()
+    tmDataDoc <- values$nexus$TM[[1]]$documentToClusters
+    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
+    names(tmDataDoc)[1:7] <- c("DOI", "Authors","Title","Source","Year","TotalCitation", "SR") 
+    
+    DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmDataDoc))-1))))) %>%
+      formatStyle(names(tmDataDoc),  backgroundColor = 'white') %>% 
+      formatRound(names(tmDataDoc)[8:ncol(tmDataDoc)], 3)
+  })
+  
+  output$TMTableDocument2 <- DT::renderDT({
+    TEMAP()
+    tmDataDoc <- values$nexus$TM[[2]]$documentToClusters
+    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
+    names(tmDataDoc)[1:7] <- c("DOI", "Authors","Title","Source","Year","TotalCitation", "SR") 
+    
+    DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmDataDoc))-1))))) %>%
+      formatStyle(names(tmDataDoc),  backgroundColor = 'white') %>% 
+      formatRound(names(tmDataDoc)[8:ncol(tmDataDoc)], 3)
+  })
+  
+  output$TMTableDocument3 <- DT::renderDT({
+    TEMAP()
+    tmDataDoc <- values$nexus$TM[[3]]$documentToClusters
+    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
+    names(tmDataDoc)[1:7] <- c("DOI", "Authors","Title","Source","Year","TotalCitation", "SR") 
+    
+    DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmDataDoc))-1))))) %>%
+      formatStyle(names(tmDataDoc),  backgroundColor = 'white') %>% 
+      formatRound(names(tmDataDoc)[8:ncol(tmDataDoc)], 3)
+  })
+  
+  output$TMTableDocument4 <- DT::renderDT({
+    TEMAP()
+    tmDataDoc <- values$nexus$TM[[4]]$documentToClusters
+    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
+    names(tmDataDoc)[1:7] <- c("DOI", "Authors","Title","Source","Year","TotalCitation", "SR") 
+    
+    DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmDataDoc))-1))))) %>%
+      formatStyle(names(tmDataDoc),  backgroundColor = 'white') %>% 
+      formatRound(names(tmDataDoc)[8:ncol(tmDataDoc)], 3)
+  })
+  
+  output$TMTableDocument5 <- DT::renderDT({
+    TEMAP()
+    tmDataDoc <- values$nexus$TM[[5]]$documentToClusters
+    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
+    names(tmDataDoc)[1:7] <- c("DOI", "Authors","Title","Source","Year","TotalCitation", "SR") 
+    
+    DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Thematic_Map',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tmDataDoc))-1))))) %>%
+      formatStyle(names(tmDataDoc),  backgroundColor = 'white') %>% 
+      formatRound(names(tmDataDoc)[8:ncol(tmDataDoc)], 3)
+  })
+  
   # INTELLECTUAL STRUCTURE ####
   ### Co-citation network ----
   COCITnetwork <- eventReactive(input$applyCocit,{

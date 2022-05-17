@@ -1069,6 +1069,9 @@ body <- dashboardBody(
                                                                  ),
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster1"))
+                                                                 ),
+                                                                 tabPanel("Documents",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument1"))
                                                                  )
                              )      
                             ),
@@ -1084,6 +1087,9 @@ body <- dashboardBody(
                                                                  ),
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster2"))
+                                                                 ),
+                                                                 tabPanel("Documents",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument2"))
                                                                  )
                              ) 
                             ),
@@ -1099,6 +1105,9 @@ body <- dashboardBody(
                                                                  ),
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster3"))
+                                                                 ),
+                                                                 tabPanel("Documents",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument3"))
                                                                  )
                              )
                             ),
@@ -1114,6 +1123,9 @@ body <- dashboardBody(
                                                                  ),
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster4"))
+                                                                 ),
+                                                                 tabPanel("Documents",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument4"))
                                                                  )
                              ) 
                             ),
@@ -1129,6 +1141,9 @@ body <- dashboardBody(
                                                                  ),
                                                                  tabPanel("Clusters",
                                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster5"))
+                                                                 ),
+                                                                 tabPanel("Documents",
+                                                                          shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument5"))
                                                                  )
                              )
                           )

@@ -1285,7 +1285,8 @@ server <- function(input, output,session){
     res <- descriptive(values,type="tab7")
     values <-res$values
     values$TABSo<-values$TAB
-    xx<- values$TAB
+    xx<- values$TAB %>% 
+      drop_na()
     if (input$MostRelSourcesK>dim(xx)[1]){
       k=dim(xx)[1]
     } else {k=input$MostRelSourcesK}
@@ -1318,7 +1319,7 @@ server <- function(input, output,session){
     
     g <- MRSources()
     
-    TAB <- values$TABSo
+    TAB <- values$TABSo %>% drop_na()
     DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',

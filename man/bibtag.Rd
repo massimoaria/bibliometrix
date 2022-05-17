@@ -4,12 +4,13 @@
 \alias{bibtag}
 \title{Tag list and bibtex fields.}
 \format{
-A data frame with 40 rows and 5 variables:
+A data frame with 44 rows and 6 variables:
  \describe{
     \item{TAG}{Tag Fields}
     \item{SCOPUS}{Scopus bibtex fields}
     \item{ISI}{WOS/ISI bibtex fields}
     \item{GENERIC}{Generic bibtex fields}
+    \item{DIMENSIONS_old}{DIMENSIONS cvs/xlsx old fields}
     \item{DIMENSIONS}{DIMENSIONS cvs/xlsx fields}
     }
 }

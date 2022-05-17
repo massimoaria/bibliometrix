@@ -45,22 +45,25 @@ dimensions2df <- function(file, format = "csv") {
   
   names(DATA) <- trimES(gsub("\\.|-", " ", names(DATA)))
   
-  i <-
-    which(names(DATA) == "Authors Affiliations Name of Research organization")
-  if (length(i) > 0) {
-    names(DATA)[i] = "Authors Affiliations"
-  }
-  i <- which(names(DATA) == "Source title/Anthology title")
-  if (length(i) > 0) {
-    names(DATA)[i] = "Source title"
-  }
+  # i <-
+  #   which(names(DATA) == "Authors Affiliations Name of Research organization")
+  # if (length(i) > 0) {
+  #   names(DATA)[i] = "Authors Affiliations"
+  # }
+  # i <- which(names(DATA) == "Source title/Anthology title")
+  # if (length(i) > 0) {
+  #   names(DATA)[i] = "Source title"
+  # }
   
   fields <- names(DATA)
   
   for (i in 1:length(fields)) {
+    #print(i)
     ind <- which(bibtag$DIMENSIONS == fields[i])
+    
     if (length(ind) > 0) {
       fields[i] = bibtag$TAG[ind]
+      #if (length(ind)>1) print(ind)
     }
   }
   names(DATA) = fields
@@ -167,7 +170,11 @@ postprocessingDim <- function(DATA) {
   
   #keywords
   if (!("DE" %in% names(DATA)) & !("ID" %in% names(DATA))) {
-    DATA$DE <- DATA$ID <- "NA"
+    if ("MeSH.terms" %in% names(DATA)){
+      DATA$DE <- DATA$ID <- DATA$MeSH.terms
+    }else{
+      DATA$DE <- DATA$ID <- "NA"
+    }
   }
   if (("DE" %in% names(DATA)) & !("ID" %in% names(DATA))) {
     DATA$ID <- DATA$DE
@@ -184,11 +191,12 @@ postprocessingDim <- function(DATA) {
   #DATA$C1 <- gsub("\\)","",DATA$C1)
   #DATA$C1 <- gsub("-","",DATA$C1)
   #DATA$C1 <- gsub("\\'","",DATA$C1)
-  DATA <- metaTagExtraction(DATA, Field = "AU_UN")
+  #DATA <- metaTagExtraction(DATA, Field = "AU_UN")
   
 
   if (!("AU_CO" %in% names(DATA))) {
-    DATA$AU_CO <- "NOT AVAILABLE"
+    DATA$AU_CO <- "NA"
+    DATA$AU1_CO <- "NA"
   } else {
     DATA$AU1_CO <- unlist(lapply(strsplit(DATA$AU_CO, ";"), function(l) {
       if (length(l) > 0) {
@@ -201,15 +209,21 @@ postprocessingDim <- function(DATA) {
   }
   
   DATA$AU1_UN <-
-    unlist(lapply(strsplit(DATA$AU1_UN, ";"), function(l) {
-      if (length(l) > 0)
-        l = l[1]
+    unlist(lapply(strsplit(DATA$AU_UN, ";"), function(l) {
+      l <- ifelse(length(l) > 0,
+                  trimws(l[1]),
+                  NA)
       return(l)
     }))
   
-  if (("SO" %in% names(DATA)) & ("BO" %in% names(DATA))) {
-    ind <- which(is.na(DATA$SO))
-    DATA$SO[ind] <- DATA$BO[ind]
+  DATA$AU1_CO <- ifelse(DATA$AU1_CO=="NA",NA,DATA$AU1_CO)
+  
+  DATA$AU_CO <- ifelse(DATA$AU_CO=="NA",NA,DATA$AU_CO)
+  
+  if (("SO" %in% names(DATA)) & ("Anthology.title" %in% names(DATA))) {
+    ind <- which(is.na(DATA$SO) | DATA$SO=="")
+    DATA$SO[ind] <- DATA$Anthology.title[ind]
+    DATA$SO[DATA$SO==""] <- NA
   }
   
   if (!("SO" %in% names(DATA))) {

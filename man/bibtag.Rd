@@ -10,7 +10,7 @@ A data frame with 44 rows and 6 variables:
     \item{SCOPUS}{Scopus bibtex fields}
     \item{ISI}{WOS/ISI bibtex fields}
     \item{GENERIC}{Generic bibtex fields}
-    \item{DIMENSIONS_old}{DIMENSIONS cvs/xlsx old fields}
+    \item{DIMENSIONS_OLD}{DIMENSIONS cvs/xlsx old fields}
     \item{DIMENSIONS}{DIMENSIONS cvs/xlsx fields}
     }
 }

@@ -367,7 +367,6 @@ Hindex_plot <- function(values, type, input){
 
 descriptive <- function(values,type){
   
-  
   switch(type,
          "tab2"={
            TAB <- values$M %>% group_by(.data$PY) %>% 
@@ -468,6 +467,70 @@ descriptive <- function(values,type){
   values$TAB=TAB
   res=list(values=values,TAB=TAB)
   return(res)
+}
+
+AffiliationOverTime <- function(values,n){
+  if(!("AU_UN" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_UN")}
+  AFF <- strsplit(values$M$AU_UN, ";")
+  nAFF <- lengths(AFF)
+  
+  AFFY <- data.frame(Affiliation=unlist(AFF),Year=rep(M$PY,nAFF)) %>% 
+    drop_na(.data$Affiliation,.data$Year) %>% 
+    group_by(.data$Affiliation, .data$Year) %>% 
+    count() %>% 
+    group_by(.data$Affiliation) %>% 
+    arrange(.data$Year) %>% 
+    ungroup() %>% 
+    pivot_wider(.data$Affiliation, names_from = .data$Year, values_from = .data$n) %>% 
+    mutate_all(~replace(., is.na(.), 0)) %>% 
+    pivot_longer(cols = !Affiliation, names_to = "Year", values_to = "Articles") %>% 
+    group_by(.data$Affiliation) %>% 
+    mutate(Articles = cumsum(.data$Articles))
+
+  Affselected <- AFFY %>% 
+    filter(.data$Year == max(.data$Year)) %>% 
+    ungroup() %>% 
+    slice_max(.data$Articles, n=n)
+  
+  values$AffOverTime <- AFFY %>% 
+    filter(.data$Affiliation %in% Affselected$Affiliation) %>% 
+    mutate(Year = .data$Year %>% as.numeric())
+  
+  Text <- paste(values$AffOverTime$Affiliation," (",values$AffOverTime$Year,") ",values$AffOverTime$Articles, sep="")
+  width_scale <- 1.7 * 26 / length(unique(values$AffOverTime$Affiliation))
+  x <- c(max(values$AffOverTime$Year)-0.02-diff(range(values$AffOverTime$Year))*0.15, max(values$AffOverTime$Year)-0.02)+1
+  y <- c(min(values$AffOverTime$Articles),min(values$AffOverTime$Articles)+diff(range(values$AffOverTime$Articles))*0.15)
+  
+  
+  values$AffOverTimePlot <- ggplot(values$AffOverTime, aes(x=.data$Year,y=.data$Articles, group=.data$Affiliation, color=.data$Affiliation, text=Text))+
+    geom_line()+
+    labs(x = 'Year'
+         , y = "Articles"
+         , title = "Affiliation Production over Time") +
+    scale_x_continuous(breaks= (values$AffOverTime$Year[seq(1,length(values$AffOverTime$Year),by=ceiling(length(values$AffOverTime$Year)/20))])) +
+    geom_hline(aes(yintercept=0), alpha=0.1)+
+    labs(color = "Affiliation")+
+    theme(text = element_text(color = "#444444"),
+          legend.text=ggplot2::element_text(size=width_scale),
+          legend.box.margin = margin(6, 6, 6, 6),
+          legend.title=ggplot2::element_text(size=1.5*width_scale,face="bold"),
+          legend.position="bottom",
+          legend.direction = "vertical",
+          legend.key.size = grid::unit(width_scale/50, "inch"),
+          legend.key.width = grid::unit(width_scale/50, "inch")
+          ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.minor = element_line(color = '#EFEFEF')
+          ,panel.grid.major = element_line(color = '#EFEFEF')
+          ,plot.title = element_text(size = 24)
+          ,axis.title = element_text(size = 14, color = '#555555')
+          ,axis.title.y = element_text(vjust = 1, angle = 90)
+          ,axis.title.x = element_text(hjust = 0.95, angle = 0)
+          ,axis.text.x = element_text(size=10, angle = 90)
+          ,axis.line.x = element_line(color="black",size=0.5)
+          ,axis.line.y = element_line(color="black",size=0.5)
+    ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+  return(values)
 }
 
 wordlist <- function(M, Field, n, measure, ngrams, remove.terms=NULL, synonyms=NULL){
@@ -629,11 +692,21 @@ historiograph <- function(input,values){
 
 ### Network functions ----
 degreePlot <- function(net){
-  deg <- data.frame(node = names(net$nodeDegree), x= (1:length(net$nodeDegree)), y = net$nodeDegree)
-  p <- ggplot(data = deg, aes(x=.data$x, y=.data$y, 
-                              text=paste("Node ",.data$x," - Degree ",.data$y, sep="")))+
+  #deg <- data.frame(node = names(net$nodeDegree), x= (1:length(net$nodeDegree)), y = net$nodeDegree)
+  ma <- function(x, n = 5){stats::filter(x, rep(1 / n, n), sides = 1)}
+  
+  deg <- net$nodeDegree %>% 
+    mutate(x = row_number())
+  # ,
+  #          diff = c(diff(ma(.data$degree,10))*-1,0))
+  # cutting <- deg %>% 
+  #   slice_max(.data$diff, n=2)
+  # 
+  p <- ggplot(data = deg, aes(x=.data$x, y=.data$degree, 
+                              text=paste(.data$node," - Degree ",round(.data$degree,3), sep="")))+
     geom_point()+
     geom_line(aes(group="NA"),color = '#002F80', alpha = .5) +
+    #geom_hline(yintercept=cutting$degree, linetype="dashed",color = '#002F80', alpha = .5)+
     theme(text = element_text(color = "#444444")
           ,panel.background = element_rect(fill = '#FFFFFF')
           ,panel.grid.minor = element_line(color = '#EFEFEF')
@@ -645,7 +718,7 @@ degreePlot <- function(net){
           ,axis.line.x = element_line(color="black",size=0.5)
           ,axis.line.y = element_line(color="black",size=0.5)
     ) +
-    labs(x = "Node", y="Degree", title = "Node Degrees")
+    labs(x = "Node", y="Cumulative Degree", title = "Node Degrees")
   return(p)
 }
 

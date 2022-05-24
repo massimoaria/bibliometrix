@@ -127,9 +127,16 @@ networkPlot <-
     # vertex labels
     V(bsk.network)$name <- colnames(NetMatrix)
     
+    # node degree plot
+    #deg <- igraph::degree_distribution(bsk.network, cumulative=T, mode="all")
+    deg <- degree(bsk.network, mode = "all")
+    deg.dist <- data.frame(node=V(bsk.network)$name, degree=deg) %>% 
+      arrange(desc(.data$degree)) %>% 
+      mutate(degree = .data$degree/max(.data$degree))
+    
     
     # Compute node degrees (#links) and use that to set node size:
-    deg <- degree(bsk.network, mode = "all")
+    #deg <- degree(bsk.network, mode = "all")
     V(bsk.network)$deg <- deg
     if (isTRUE(size.cex)) {
       V(bsk.network)$size <- (deg / max(deg)[1]) * size
@@ -341,7 +348,7 @@ networkPlot <-
       community_obj = cl$net_groups,
       layout = l,
       S = S,
-      nodeDegree = sort(deg, decreasing = T) 
+      nodeDegree = deg.dist
     )
     
     return(net)

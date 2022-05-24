@@ -676,6 +676,29 @@ body <- dashboardBody(
               )
              )
             ),
+    ##### source dynamics ----
+    tabItem("AffOverTime",
+            fluidPage(
+              fluidRow(
+                column(10,
+                       h2(strong("Affiliations' Production over Time"), align = "center")),
+                column(2,actionButton("applyAFFGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",
+                                      icon = fa_i(name ="play"))
+                )
+              ),
+              fluidRow(
+                tabsetPanel(type = "tabs",
+                            tabPanel("Plot",
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "AffOverTimePlot", height = "90vh"))
+                            ),
+                            tabPanel("Table",
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "AffOverTimeTable"))
+                            )
+                )
+              )
+            )
+    ),
     ##### corresponding author country ----
     tabItem("correspAuthorCountry",
             fluidPage(

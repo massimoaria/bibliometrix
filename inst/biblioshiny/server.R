@@ -132,6 +132,7 @@ server <- function(input, output,session){
                "Countries",
                menuSubItem("Corresponding Author's Country",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Country Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
       ),
       menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
@@ -201,6 +202,7 @@ server <- function(input, output,session){
                "Countries",
                menuSubItem("Corresponding Author's Country",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Country Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
       ),
       menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
@@ -2246,6 +2248,78 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+  })
+  
+  ### Countries' Production OverTime ----  
+  COGrowth <- eventReactive(input$applyCOGrowth,{
+    
+    values <- CountryOverTime(values,input$topCO)
+    
+  }) 
+  
+  output$CountryOverTimeplot.save <- downloadHandler(
+    filename = function() {
+      paste("CountryOverTime-", Sys.Date(), ".png", sep="")
+    },
+    content <- function(file) {
+      ggsave(filename = file, plot = values$CountryOverTimePlot, dpi = as.numeric(input$COGrowthdpi), height = input$COGrowthh, width = input$COGrowthh*2, bg="white")
+    },
+    contentType = "png"
+  )
+  
+  output$CountryOverTimePlot <- renderPlotly({
+    
+    COGrowth()
+    g <- values$CountryOverTimePlot
+    leg <- list(
+      orientation = 'h', 
+      y = -0.15,
+      font = list(
+        family = "sans-serif",
+        size = 10,
+        color = "#000"),
+      bgcolor = "#FFFFFF",
+      bordercolor = "#FFFFFF",
+      borderwidth = 2) 
+    
+    plot.ly(g, flip=FALSE, side="r", aspectratio=1.8, size=0.10) %>%
+      layout(legend = leg) %>%
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines'
+             )) %>%
+      layout(hovermode = 'compare')
+  })
+  
+  output$CountryOverTimeTable <- DT::renderDT({
+    
+    COGrowth()
+    cotimeData=values$CountryOverTime
+    
+    DT::datatable(cotimeData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
+                  options = list(pageLength = 10, dom = 'Bfrtip',
+                                 buttons = list('pageLength',
+                                                list(extend = 'copy'),
+                                                list(extend = 'csv',
+                                                     filename = 'Countries_Production_Over_Time',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'excel',
+                                                     filename = 'Countries_Production_Over_Time',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'pdf',
+                                                     filename = 'Countries_Production_Over_Time',
+                                                     title = " ",
+                                                     header = TRUE),
+                                                list(extend = 'print')),
+                                 lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
+                                 columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cotimeData))-1))))) %>%
+      formatStyle(names(afftimeData),  backgroundColor = 'white') 
   })
   
   ### Most Cited Country ----    
@@ -5289,6 +5363,39 @@ server <- function(input, output,session){
                                                      downloadButton("CSPplot.save", strong("Export plot as png"),
                                                                     style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
                                                                     width = "100%")  
+                                    )
+                   ),
+                   ## Countries' Production over Time ----
+                   conditionalPanel(condition ='input.sidebarmenu == "COOverTime"',
+                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                        collapsible = TRUE, width = 15,
+                                        solidHeader = FALSE, 
+                                        collapsed = FALSE,
+                                        sliderInput("topCO", label = "Number of Countries", min = 1, max = 50, step = 1, value = 5)),
+                                    selectInput(
+                                      'COGrowthdpi',
+                                      h4(strong(
+                                        "Export plot"
+                                      )),
+                                      choices=c(
+                                        "dpi value" = "null",
+                                        "75 dpi" = "75",
+                                        "150 dpi" = "150",
+                                        "300 dpi" = "300",
+                                        "600 dpi" = "600"
+                                      ),
+                                      selected = "null"
+                                    ),
+                                    conditionalPanel(condition = "input.COGrowthdpi != 'null'",
+                                                     sliderInput(
+                                                       'COGrowthh',
+                                                       h4(em(strong(
+                                                         "Height (in inches)"
+                                                       ))),
+                                                       value = 7, min = 1, max = 20, step = 1),
+                                                     downloadButton("CountryOverTimeplot.save", strong("Export plot as png"),
+                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                    width = "100%")
                                     )
                    ),
                    ## Most Cited Countries ----

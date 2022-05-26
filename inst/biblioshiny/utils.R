@@ -474,7 +474,7 @@ AffiliationOverTime <- function(values,n){
   AFF <- strsplit(values$M$AU_UN, ";")
   nAFF <- lengths(AFF)
   
-  AFFY <- data.frame(Affiliation=unlist(AFF),Year=rep(M$PY,nAFF)) %>% 
+  AFFY <- data.frame(Affiliation=unlist(AFF),Year=rep(values$M$PY,nAFF)) %>% 
     drop_na(.data$Affiliation,.data$Year) %>% 
     group_by(.data$Affiliation, .data$Year) %>% 
     count() %>% 
@@ -510,6 +510,71 @@ AffiliationOverTime <- function(values,n){
     scale_x_continuous(breaks= (values$AffOverTime$Year[seq(1,length(values$AffOverTime$Year),by=ceiling(length(values$AffOverTime$Year)/20))])) +
     geom_hline(aes(yintercept=0), alpha=0.1)+
     labs(color = "Affiliation")+
+    theme(text = element_text(color = "#444444"),
+          legend.text=ggplot2::element_text(size=width_scale),
+          legend.box.margin = margin(6, 6, 6, 6),
+          legend.title=ggplot2::element_text(size=1.5*width_scale,face="bold"),
+          legend.position="bottom",
+          legend.direction = "vertical",
+          legend.key.size = grid::unit(width_scale/50, "inch"),
+          legend.key.width = grid::unit(width_scale/50, "inch")
+          ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
+          ,panel.background = element_rect(fill = '#FFFFFF')
+          ,panel.grid.minor = element_line(color = '#EFEFEF')
+          ,panel.grid.major = element_line(color = '#EFEFEF')
+          ,plot.title = element_text(size = 24)
+          ,axis.title = element_text(size = 14, color = '#555555')
+          ,axis.title.y = element_text(vjust = 1, angle = 90)
+          ,axis.title.x = element_text(hjust = 0.95, angle = 0)
+          ,axis.text.x = element_text(size=10, angle = 90)
+          ,axis.line.x = element_line(color="black",size=0.5)
+          ,axis.line.y = element_line(color="black",size=0.5)
+    ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+  return(values)
+}
+
+CountryOverTime <- function(values,n){
+  if(!("AU_CO" %in% names(values$M))){values$M=metaTagExtraction(values$M,Field="AU_CO")}
+  AFF <- strsplit(values$M$AU_CO, ";")
+  nAFF <- lengths(AFF)
+  
+  AFFY <- data.frame(Affiliation=unlist(AFF),Year=rep(values$M$PY,nAFF)) %>% 
+    drop_na(.data$Affiliation,.data$Year) %>% 
+    group_by(.data$Affiliation, .data$Year) %>% 
+    count() %>% 
+    group_by(.data$Affiliation) %>% 
+    arrange(.data$Year) %>% 
+    ungroup() %>% 
+    pivot_wider(.data$Affiliation, names_from = .data$Year, values_from = .data$n) %>% 
+    mutate_all(~replace(., is.na(.), 0)) %>% 
+    pivot_longer(cols = !Affiliation, names_to = "Year", values_to = "Articles") %>% 
+    group_by(.data$Affiliation) %>% 
+    mutate(Articles = cumsum(.data$Articles))
+  
+  Affselected <- AFFY %>% 
+    filter(.data$Year == max(.data$Year)) %>% 
+    ungroup() %>% 
+    slice_max(.data$Articles, n=n)
+  
+  values$CountryOverTime <- AFFY %>% 
+    filter(.data$Affiliation %in% Affselected$Affiliation) %>% 
+    mutate(Year = .data$Year %>% as.numeric()) %>% 
+    rename(Country = .data$Affiliation)
+  
+  Text <- paste(values$CountryOverTime$Country," (",values$CountryOverTime$Year,") ",values$CountryOverTime$Articles, sep="")
+  width_scale <- 1.7 * 26 / length(unique(values$CountryOverTime$Country))
+  x <- c(max(values$CountryOverTime$Year)-0.02-diff(range(values$CountryOverTime$Year))*0.15, max(values$CountryOverTime$Year)-0.02)+1
+  y <- c(min(values$CountryOverTime$Articles),min(values$CountryOverTime$Articles)+diff(range(values$CountryOverTime$Articles))*0.15)
+  
+  
+  values$CountryOverTimePlot <- ggplot(values$CountryOverTime, aes(x=.data$Year,y=.data$Articles, group=.data$Country, color=.data$Country, text=Text))+
+    geom_line()+
+    labs(x = 'Year'
+         , y = "Articles"
+         , title = "Country Production over Time") +
+    scale_x_continuous(breaks= (values$CountryOverTime$Year[seq(1,length(values$CountryOverTime$Year),by=ceiling(length(values$CountryOverTime$Year)/20))])) +
+    geom_hline(aes(yintercept=0), alpha=0.1)+
+    labs(color = "Country")+
     theme(text = element_text(color = "#444444"),
           legend.text=ggplot2::element_text(size=width_scale),
           legend.box.margin = margin(6, 6, 6, 6),

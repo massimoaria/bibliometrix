@@ -4408,12 +4408,23 @@ server <- function(input, output,session){
   })
   
   output$histTable <- DT::renderDT({
-    LCS=values$histResults$LCS
-    s=sort(LCS,decreasing = TRUE)[input$histNodes]
-    ind=which(LCS>=s)
-    Data=values$histResults$histData
-    Data=Data[ind,]
+    # LCS <- values$histResults$LCS
+    # s <- sort(LCS,decreasing = TRUE)[input$histNodes]
+    # ind <- which(LCS>=s)
+    Data <- values$histResults$histData
+    #Data <- Data[ind,]
     Data$DOI<- paste0('<a href=\"https://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
+    Data <- Data %>% 
+      left_join(
+        values$histPlot$layout %>% 
+          select(.data$name,.data$color), by= c("Paper" = "name")
+        ) %>% 
+      drop_na(.data$color) %>% 
+      mutate(cluster = match(.data$color,unique(.data$color))) %>% 
+      select(!.data$color) %>% 
+      group_by(.data$cluster) %>% 
+      arrange(.data$Year, .by_group = TRUE)
+    
     DT::datatable(Data, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',

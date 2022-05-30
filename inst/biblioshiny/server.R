@@ -2319,7 +2319,7 @@ server <- function(input, output,session){
                                                 list(extend = 'print')),
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cotimeData))-1))))) %>%
-      formatStyle(names(afftimeData),  backgroundColor = 'white') 
+      formatStyle(names(cotimeData),  backgroundColor = 'white') 
   })
   
   ### Most Cited Country ----    

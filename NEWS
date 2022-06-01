@@ -1,8 +1,9 @@
-bibliometrix v4.0.0 (Release date: )
+bibliometrix v4.0.0 (Release date: 2022-05-31)
 
 Features:
 * Biblioshiny has a completely renewed interface
 * All plots have new more readble sets of colors and fonts
+* Added several new analyses in Biblioshiny
 
 Changes:
 * A lot of bug fixes

@@ -230,42 +230,56 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   words$Cluster=as.numeric(factor(words$Cluster))
   row.names(df)=NULL
 
-  ### Adding column Topics
-  #M$TOPIC=""
   
-  # #View(res$words)
-  # if (field %in% c("ID", "DE")) {
-  #   ID = paste(TERMS, ";", sep = "")
-  #   for (i in 1:nrow(words)) {
-  #     w = paste(words$Words[i], ";", sep = "")
-  #     TOPIC = paste(words$Cluster_Label[i], ";", sep = "")
-  #     ind = which(regexpr(w, ID) > -1)
-  #     M$TOPIC[ind] = paste(M$TOPIC[ind], TOPIC, sep = "")
-  #   }
-  # } else {M$TOPIC="NA"}
-  
-  documentToClusters <- clusterAssignment(M, words, field)
+  documentToClusters <- clusterAssignment(M, words, field, remove.terms, synonyms)
   
   
   results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
 return(results)
 }
 
-# Probability calculation fro cluster assigment
-clusterAssignment <- function(M, words, field){
+# Probability calculation fro cluster assignment
+clusterAssignment <- function(M, words, field, remove.terms, synonyms){
+
+  #### integrate stopwords and synonyms in M orginal field   
+  Fi<-strsplit(M[,field],";")
+  nf <- lengths(Fi)
+  allField <- data.frame(terms=trim.leading(unlist(Fi)), SR=rep(M$SR,nf))
+  # remove terms
+  if (!is.null(remove.terms)){
+    allField <- anti_join(allField,data.frame(terms=trimws(toupper(remove.terms))), by="terms")
+  }
+    # Merge synonyms in the vector synonyms
+  if (!is.null(synonyms)){
+    s <- strsplit(toupper(synonyms),";")
+    snew <- unlist(lapply(s, function(l) l[1]))
+    sold <- lapply(s, function(l) trim.leading(l[-1]))
+    syn <- data.frame(new=rep(snew, lengths(sold)), terms=unlist(sold))
+    allField <- allField %>% left_join(syn, by="terms")
+    ind <- which(!is.na(allField$new))
+    allField$terms[ind] <- allField$new[ind]
+    allField <- allField[c("SR", "terms")]
+    #Fi <- allField %>% 
+    #  group_by(.data$SR) %>% 
+    #  summarize(terms = paste(.data$terms, sep=";", collapse=";")) 
+    #M <- M %>% 
+    #  left_join(Fi, by = "SR")
+  }
+### stop integration in M  
   
   words <- words %>% 
     mutate(p_w = 1/.data$Occurrences) %>% 
     group_by(.data$Cluster) %>% 
     mutate(p_c = 1/length(.data$Cluster))
-  column <- ifelse(field %in% c("TI","AB"), paste0(field,"_TM"),field)
+  #column <- ifelse(field %in% c("TI","AB"), paste0(field,"_TM"),field)
   
-  TERMS <- strsplit(M[, column], ";")
-  nW <- lengths(TERMS)
+  #TERMS <- strsplit(M[, column], ";")
+  #nW <- lengths(TERMS)
   
-  TERMS <- data.frame(Words = tolower(unlist(TERMS)), SR=rep(M$SR,nW))
-  TERMS <- TERMS %>% 
-    left_join(words, by = "Words")
+  #TERMS <- data.frame(Words = tolower(unlist(TERMS)), SR=rep(M$SR,nW))
+  TERMS <- allField %>% 
+    mutate(terms = .data$terms %>% tolower()) %>% 
+    left_join(words, by = c("terms" = "Words"))
   
   TERMS <- TERMS %>% 
     group_by(.data$SR, .data$Cluster_Label) %>% 
@@ -276,15 +290,27 @@ clusterAssignment <- function(M, words, field){
   
   TERMS <- TERMS %>% 
     select(-.data$weigth) %>% 
-    pivot_wider(names_from = .data$Cluster_Label, values_from = .data$p) #%>% 
-    #mutate_if(is.numeric, ~replace_na(., 0))
+    group_by(.data$SR)
+  
+  TERMS_Max <- TERMS %>% 
+    group_by(.data$SR) %>% 
+    slice_max(order_by = .data$p, n=1) %>% 
+    summarize(Assigned_cluster = paste(.data$Cluster_Label, collapse = ";"))
+  
+  TERMS <- TERMS %>% 
+    pivot_wider(names_from = .data$Cluster_Label, values_from = .data$p) %>% 
+    left_join(TERMS_Max, by = "SR")
+
+  
   
   if (!("DI" %in% names(M))) M$DI <- NA
   
   TERMS <- M %>% 
     select(.data$DI, .data$AU, .data$TI, .data$SO, .data$PY,.data$TC, .data$SR) %>% 
     left_join(TERMS, by = "SR") %>% 
-    mutate_if(is.numeric, ~replace_na(., 0))
+    mutate_if(is.numeric, ~replace_na(., 0)) %>% 
+    group_by(.data$Assigned_cluster) %>% 
+    arrange(desc(.data$TC), .by_group = TRUE)
   
   return(TERMS)
 }

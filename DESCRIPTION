@@ -49,7 +49,7 @@ Suggests:
     shinycssloaders,
 		visNetwork,
 		wordcloud2
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 NeedsCompilation: no
 Author: Massimo Aria [cre, aut],
   Corrado Cuccurullo [aut]

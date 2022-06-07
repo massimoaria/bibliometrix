@@ -386,6 +386,9 @@ clusteringNetwork <- function(bsk.network, cluster) {
     optimal = {
       net_groups <- cluster_optimal(bsk.network)
     },
+    leiden = {
+      net_groups <- cluster_leiden(bsk.network)
+    },
     louvain = {
       net_groups <- cluster_louvain(bsk.network)
     },

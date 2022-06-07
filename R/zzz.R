@@ -24,6 +24,7 @@ utils::globalVariables("where")
 #' @importFrom dplyr do
 #' @importFrom dplyr n
 #' @importFrom dplyr slice
+#' @importFrom dplyr slice_max
 #' @importFrom dplyr if_all
 #' @importFrom dplyr any_of
 #' @importFrom dplyr cummean
@@ -134,6 +135,7 @@ utils::globalVariables("where")
 #' @importFrom igraph layout.star
 #' @importFrom igraph write.graph
 #' @importFrom igraph cluster_walktrap
+#' @importFrom igraph cluster_leiden
 #' @importFrom igraph cluster_optimal
 #' @importFrom igraph cluster_infomap
 #' @importFrom igraph cluster_edge_betweenness

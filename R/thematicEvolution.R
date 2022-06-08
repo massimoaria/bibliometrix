@@ -22,6 +22,7 @@
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
+#' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
@@ -41,7 +42,7 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, ngrams=1, stemming = FALSE, n.labels = 1, repel = TRUE, remove.terms = NULL, synonyms = NULL) 
+thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, ngrams=1, stemming = FALSE, n.labels = 1, repel = TRUE, remove.terms = NULL, synonyms = NULL, cluster="leading_eigen") 
 {
   list_df <-  timeslice(M, breaks = years)
   K <-  length(list_df)
@@ -53,7 +54,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
     Y[k] <-  paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")
     resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, ngrams=ngrams,
                         stemming = stemming, size = size, n.labels = n.labels, 
-                        repel = repel, remove.terms = remove.terms, synonyms = synonyms)
+                        repel = repel, remove.terms = remove.terms, synonyms = synonyms, cluster=cluster)
     res[[k]] <-  resk
     net[[k]] <-  resk$net
   }

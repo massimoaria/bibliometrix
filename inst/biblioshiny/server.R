@@ -3582,7 +3582,7 @@ server <- function(input, output,session){
     
     values$TM <- thematicMap(values$M, field=input$TMfield, 
                              n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
-                             stemming=input$TMstemming, size=input$sizeTM, 
+                             stemming=input$TMstemming, size=input$sizeTM, cluster=input$TMCluster,
                              n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms)
     
     validate(
@@ -3748,6 +3748,7 @@ server <- function(input, output,session){
     
     if (length(values$yearSlices)>0){
       values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, 
+                                        cluster=input$TECluster,
                                         n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
@@ -6292,7 +6293,7 @@ server <- function(input, output,session){
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
+                                                           selected = "leading_eigen")
                                         )),
                                         fluidRow(column(6,
                                                         selectInput("normalize", 
@@ -6516,7 +6517,22 @@ server <- function(input, output,session){
                                         ),
                                         column(6,
                                                numericInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
-                                        ))
+                                        )),
+                                        fluidRow(column(12,
+                                                        selectInput("TMCluster", 
+                                                                    label = "Clustering Algorithm",
+                                                                    choices = c("None" = "none",
+                                                                                "Edge Betweenness" = "edge_betweenness",
+                                                                                "InfoMap" = "infomap",
+                                                                                "Leading Eigenvalues" = "leading_eigen",
+                                                                                "Leiden" = "leiden",
+                                                                                "Louvain" = "louvain",
+                                                                                "Spinglass" = "spinglass",
+                                                                                "Walktrap" = "walktrap"),
+                                                                    selected = "leading_eigen")
+                                                        )
+                                          
+                                        )
                                     ),
                                     selectInput(
                                       'TMdpi',
@@ -6638,7 +6654,22 @@ server <- function(input, output,session){
                                         ),
                                         column(6,
                                                numericInput("TEn.labels", label="Number of Labels (for each cluster)",value=3,min=1,max=5,step=1)
-                                        ))
+                                        )),
+                                        fluidRow(column(12,
+                                                        selectInput("TECluster", 
+                                                                    label = "Clustering Algorithm",
+                                                                    choices = c("None" = "none",
+                                                                                "Edge Betweenness" = "edge_betweenness",
+                                                                                "InfoMap" = "infomap",
+                                                                                "Leading Eigenvalues" = "leading_eigen",
+                                                                                "Leiden" = "leiden",
+                                                                                "Louvain" = "louvain",
+                                                                                "Spinglass" = "spinglass",
+                                                                                "Walktrap" = "walktrap"),
+                                                                    selected = "leading_eigen")
+                                        )
+                                        
+                                        )
                                     ),
                                     br(),
                                     box(title = p(strong("Time Slices"),style='font-size:16px;color:black;'), 
@@ -6860,7 +6891,7 @@ server <- function(input, output,session){
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
+                                                           selected = "leading_eigen")
                                         )),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "citNodes",
@@ -7072,7 +7103,7 @@ server <- function(input, output,session){
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
+                                                           selected = "leading_eigen")
                                         )),
                                         fluidRow(column(6,
                                                         selectInput("colnormalize", 

@@ -79,7 +79,7 @@ networkPlot <-
            label.color = FALSE,
            label.n = NULL,
            halo = FALSE,
-           cluster = "leiden",
+           cluster = "leading_eigen",
            community.repulsion = 0.1,
            vos.path = NULL,
            size = 3,

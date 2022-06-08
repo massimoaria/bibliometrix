@@ -67,7 +67,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{halo}{is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}}
 
-\item{cluster}{is a character. It indicates the type of cluster to perform among ("none", optimal", "louvain","infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
+\item{cluster}{is a character. It indicates the type of cluster to perform among ("none", "optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 
 \item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.}
 

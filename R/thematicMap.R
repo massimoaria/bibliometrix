@@ -24,6 +24,7 @@
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
+#' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
@@ -45,7 +46,7 @@
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL, synonyms=NULL){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="louvain"){
   
   minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
@@ -75,7 +76,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   #S=NetMatrix
   #t = tempfile();pdf(file=t) #### trick to hide igraph plot
   #cluster="louvain"
-  cluster="walktrap"
+  #cluster="walktrap"
   
   if (nrow(NetMatrix)>0){
     Net <- networkPlot(NetMatrix, normalize="association", Title = "Keyword co-occurrences",type="auto",

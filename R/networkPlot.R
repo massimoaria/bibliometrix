@@ -79,7 +79,7 @@ networkPlot <-
            label.color = FALSE,
            label.n = NULL,
            halo = FALSE,
-           cluster = "louvain",
+           cluster = "leiden",
            community.repulsion = 0.1,
            vos.path = NULL,
            size = 3,
@@ -387,7 +387,7 @@ clusteringNetwork <- function(bsk.network, cluster) {
       net_groups <- cluster_optimal(bsk.network)
     },
     leiden = {
-      net_groups <- cluster_leiden(bsk.network)
+      net_groups <- cluster_leiden(bsk.network, objective_function = "modularity")
     },
     louvain = {
       net_groups <- cluster_louvain(bsk.network)

@@ -46,7 +46,7 @@
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="louvain"){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="walktrap"){
   
   minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
@@ -80,7 +80,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   
   if (nrow(NetMatrix)>0){
     Net <- networkPlot(NetMatrix, normalize="association", Title = "Keyword co-occurrences",type="auto",
-                     labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,
+                     labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,community.repulsion = 0.1,
                      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                      size=1,edges.min = 1, label.n=n, verbose = FALSE)
   }else{

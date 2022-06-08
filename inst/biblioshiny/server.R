@@ -6856,10 +6856,11 @@ server <- function(input, output,session){
                                                                        "Edge Betweenness" = "edge_betweenness",
                                                                        "InfoMap" = "infomap",
                                                                        "Leading Eigenvalues" = "leading_eigen",
+                                                                       "Leiden" = "leiden",
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "louvain")
+                                                           selected = "walktrap")
                                         )),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "citNodes",
@@ -7067,10 +7068,11 @@ server <- function(input, output,session){
                                                                        "Edge Betweenness" = "edge_betweenness",
                                                                        "InfoMap" = "infomap",
                                                                        "Leading Eigenvalues" = "leading_eigen",
+                                                                       "Leiden" = "leiden",
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "louvain")
+                                                           selected = "walktrap")
                                         )),
                                         fluidRow(column(6,
                                                         selectInput("colnormalize", 

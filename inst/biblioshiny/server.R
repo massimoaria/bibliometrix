@@ -519,7 +519,7 @@ server <- function(input, output,session){
     MData = MData[nome]
     DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
                   options = list(
-                    pageLength = 10,
+                    pageLength = 5,
                     dom = 'Bfrtip',
                     buttons = list(list(extend = 'pageLength'),
                                    list(extend = 'print')),
@@ -852,7 +852,7 @@ server <- function(input, output,session){
     MData = MData[nome]
     DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
                   options = list(
-                    pageLength = 10,
+                    pageLength = 5,
                     dom = 'Bfrtip',
                     buttons = list(list(extend = 'pageLength'),
                                    list(extend = 'print')),
@@ -6895,7 +6895,7 @@ server <- function(input, output,session){
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
+                                                           selected = "leading_eigen")
                                         )),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "citNodes",

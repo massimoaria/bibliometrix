@@ -16,7 +16,8 @@ thematicEvolution(
   n.labels = 1,
   repel = TRUE,
   remove.terms = NULL,
-  synonyms = NULL
+  synonyms = NULL,
+  cluster = "leading_eigen"
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
 
 \item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
+
+\item{cluster}{is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 }
 \value{
 a list containing:

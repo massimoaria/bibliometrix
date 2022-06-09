@@ -16,7 +16,7 @@ thematicMap(
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
-  cluster = "louvain"
+  cluster = "leading_eigen"
 )
 }
 \arguments{

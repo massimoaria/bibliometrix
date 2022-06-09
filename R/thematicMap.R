@@ -245,7 +245,8 @@ return(results)
 # Probability calculation fro cluster assignment
 clusterAssignment <- function(M, words, field, remove.terms, synonyms){
 
-  #### integrate stopwords and synonyms in M orginal field   
+  #### integrate stopwords and synonyms in M original field  
+  if (field %in% c("AB","TI")) field <- paste0(field,"_TM")
   Fi<-strsplit(M[,field],";")
   nf <- lengths(Fi)
   allField <- data.frame(terms=trim.leading(unlist(Fi)), SR=rep(M$SR,nf))

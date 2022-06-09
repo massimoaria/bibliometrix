@@ -6287,13 +6287,14 @@ server <- function(input, output,session){
                                                            label = "Clustering Algorithm",
                                                            choices = c("None" = "none",
                                                                        "Edge Betweenness" = "edge_betweenness",
+                                                                       "Fast Greedy" = "fast_greedy",
                                                                        "InfoMap" = "infomap",
                                                                        "Leading Eigenvalues" = "leading_eigen",
                                                                        "Leiden" = "leiden",
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "leading_eigen")
+                                                           selected = "walktrap")
                                         )),
                                         fluidRow(column(6,
                                                         selectInput("normalize", 
@@ -6523,13 +6524,14 @@ server <- function(input, output,session){
                                                                     label = "Clustering Algorithm",
                                                                     choices = c("None" = "none",
                                                                                 "Edge Betweenness" = "edge_betweenness",
+                                                                                "Fast Greedy" = "fast_greedy",
                                                                                 "InfoMap" = "infomap",
                                                                                 "Leading Eigenvalues" = "leading_eigen",
                                                                                 "Leiden" = "leiden",
                                                                                 "Louvain" = "louvain",
                                                                                 "Spinglass" = "spinglass",
                                                                                 "Walktrap" = "walktrap"),
-                                                                    selected = "leading_eigen")
+                                                                    selected = "walktrap")
                                                         )
                                           
                                         )
@@ -6660,13 +6662,14 @@ server <- function(input, output,session){
                                                                     label = "Clustering Algorithm",
                                                                     choices = c("None" = "none",
                                                                                 "Edge Betweenness" = "edge_betweenness",
+                                                                                "Fast Greedy" = "fast_greedy",
                                                                                 "InfoMap" = "infomap",
                                                                                 "Leading Eigenvalues" = "leading_eigen",
                                                                                 "Leiden" = "leiden",
                                                                                 "Louvain" = "louvain",
                                                                                 "Spinglass" = "spinglass",
                                                                                 "Walktrap" = "walktrap"),
-                                                                    selected = "leading_eigen")
+                                                                    selected = "walktrap")
                                         )
                                         
                                         )
@@ -6885,13 +6888,14 @@ server <- function(input, output,session){
                                                            label = "Clustering Algorithm",
                                                            choices = c("None" = "none",
                                                                        "Edge Betweenness" = "edge_betweenness",
+                                                                       "Fast Greedy" = "fast_greedy",
                                                                        "InfoMap" = "infomap",
                                                                        "Leading Eigenvalues" = "leading_eigen",
                                                                        "Leiden" = "leiden",
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "leading_eigen")
+                                                           selected = "walktrap")
                                         )),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "citNodes",
@@ -7097,13 +7101,14 @@ server <- function(input, output,session){
                                                            label = "Clustering Algorithm",
                                                            choices = c("None" = "none",
                                                                        "Edge Betweenness" = "edge_betweenness",
+                                                                       "Fast Greedy" = "fast_greedy",
                                                                        "InfoMap" = "infomap",
                                                                        "Leading Eigenvalues" = "leading_eigen",
                                                                        "Leiden" = "leiden",
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "leading_eigen")
+                                                           selected = "walktrap")
                                         )),
                                         fluidRow(column(6,
                                                         selectInput("colnormalize", 

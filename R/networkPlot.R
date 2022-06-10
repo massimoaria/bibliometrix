@@ -391,8 +391,8 @@ clusteringNetwork <- function(bsk.network, cluster) {
                                    n_iterations = 3, resolution_parameter = 0.75)
     },
     louvain = {
-      #net_groups <- cluster_louvain(bsk.network)
-      net_groups <- louvain(bsk.network)
+      net_groups <- cluster_louvain(bsk.network)
+      #net_groups <- louvain(bsk.network)
     },
     fast_greedy = {
       net_groups <- cluster_fast_greedy(bsk.network)
@@ -510,13 +510,13 @@ weight.community=function(row,membership,weigth.within,weight.between){
   return(weight)
 }
 
-# louvain community detection
-louvain <- function(g){
-  cl <- 50 %>% 
-    rerun(cluster_louvain(g)$membership) %>% 
-    do.call(rbind, .) %>%
-    data.frame() %>% 
-    summarize_all(Mode)
-  cl <- list(membership=as.numeric(cl), names=V(g)$name)
-  return(cl)
-}
+# # louvain community detection
+# louvain <- function(g){
+#   cl <- 50 %>% 
+#     rerun(cluster_louvain(g)$membership) %>% 
+#     do.call(rbind, .) %>%
+#     data.frame() %>% 
+#     summarize_all(Mode)
+#   cl <- list(membership=as.numeric(cl), names=V(g)$name)
+#   return(cl)
+# }

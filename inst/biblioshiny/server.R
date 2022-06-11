@@ -3630,7 +3630,7 @@ server <- function(input, output,session){
   
   output$TMTable <- DT::renderDT({
     TMAP()
-    tmData=values$TM$words[,-4]
+    tmData=values$TM$words[,-c(4,6)]
 
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3656,8 +3656,8 @@ server <- function(input, output,session){
   
   output$TMTableCluster <- DT::renderDT({
     TMAP()
-    tmData <- values$TM$clusters[,c(7,1:4,6)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
+    tmData <- values$TM$clusters[,c(9,5:8,11)]
+    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3910,7 +3910,7 @@ server <- function(input, output,session){
   
   output$TMTable1 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[1]]$words[,-4]
+    tmData=values$nexus$TM[[1]]$words[,-c(4,6)]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3936,7 +3936,7 @@ server <- function(input, output,session){
   
   output$TMTable2 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[2]]$words[,-4]
+    tmData=values$nexus$TM[[2]]$words[,-c(4,6)]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3962,7 +3962,7 @@ server <- function(input, output,session){
   
   output$TMTable3 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[3]]$words[,-4]
+    tmData=values$nexus$TM[[3]]$words[,-c(4,6)]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3988,7 +3988,7 @@ server <- function(input, output,session){
   
   output$TMTable4 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[4]]$words[,-4]
+    tmData=values$nexus$TM[[4]]$words[,-c(4,6)]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4014,7 +4014,7 @@ server <- function(input, output,session){
   
   output$TMTable5 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[5]]$words[,-4]
+    tmData=values$nexus$TM[[5]]$words[,-c(4,6)]
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4040,8 +4040,8 @@ server <- function(input, output,session){
   
   output$TMTableCluster1 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[1]]$clusters[,c(7,1:4,6)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
+    tmData <- values$nexus$TM[[1]]$clusters[,c(9,5:8,11)]
+    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4067,8 +4067,8 @@ server <- function(input, output,session){
   
   output$TMTableCluster2 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[2]]$clusters[,c(7,1:4,6)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
+    tmData <- values$nexus$TM[[2]]$clusters[,c(9,5:8,11)]
+    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4094,8 +4094,8 @@ server <- function(input, output,session){
   
   output$TMTableCluster3 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[3]]$clusters[,c(7,1:4,6)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
+    tmData <- values$nexus$TM[[3]]$clusters[,c(9,5:8,11)]
+    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4121,8 +4121,8 @@ server <- function(input, output,session){
   
   output$TMTableCluster4 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[4]]$clusters[,c(7,1:4,6)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
+    tmData <- values$nexus$TM[[4]]$clusters[,c(9,5:8,11)]
+    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4148,8 +4148,8 @@ server <- function(input, output,session){
   
   output$TMTableCluster5 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[5]]$clusters[,c(7,1:4,6)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterColor") 
+    tmData <- values$nexus$TM[[5]]$clusters[,c(9,5:8,11)]
+    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',

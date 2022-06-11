@@ -36,6 +36,7 @@ utils::globalVariables("where")
 #' @importFrom dplyr mutate_if
 #' @importFrom dplyr ungroup
 #' @importFrom dplyr rename
+#' @importFrom dplyr rename_with
 #' @importFrom dplyr rowwise
 #' @importFrom dplyr summarise
 #' @importFrom dplyr summarize

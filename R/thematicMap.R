@@ -1,3 +1,4 @@
+globalVariables(".")
 #' Create a thematic map
 #'
 #' It creates a thematic map based on co-word network analysis and clustering.
@@ -72,12 +73,6 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
            
          })
   
-  #S <- normalizeSimilarity(NetMatrix, type = "association")
-  #S=NetMatrix
-  #t = tempfile();pdf(file=t) #### trick to hide igraph plot
-  #cluster="louvain"
-  #cluster="walktrap"
-  
   if (nrow(NetMatrix)>0){
     Net <- networkPlot(NetMatrix, normalize="association", Title = "Keyword co-occurrences",type="auto",
                      labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,community.repulsion = 0.1,
@@ -118,72 +113,62 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
 ### centrality and density
   label_cluster=unique(group)
   word_cluster=word[group]
-  centrality=c()
-  density=c()
-  labels=list()
+
+  centr <- networkStat(Net$graph,stat="all", type="closeness")$vertex
+  df_lab <- data.frame(sC=sC,words=word,groups=group,color=color,cluster_label="NA",stringsAsFactors = FALSE)
+   
+  ## new code using tidyvverse
+  df_lab <- df_lab %>% 
+    dplyr::filter(.data$sC>=minfreq) %>% 
+    group_by(.data$groups) %>% 
+    mutate(freq = sum(.data$sC),
+           cluster_label = .data$words[which.max(.data$sC)]) 
   
-  df_lab=data.frame(sC=sC,words=word,groups=group,color=color,cluster_label="NA",stringsAsFactors = FALSE)
+  sEij <- triu(sEij)
+  df_lab_top <- df_lab %>% select(.data$words,.data$groups)
   
-  color=c()
-  for (i in label_cluster){
-    ind=which(group==i)
-    w=df_lab$words[ind]
-    wi=which.max(df_lab$sC[ind])
-    df_lab$cluster_label[ind]=paste(w[wi[1:min(c(length(wi),3))]],collapse=";",sep="")
-    centrality=c(centrality,sum(sEij[ind,-ind]))
-    density=c(density,sum(sEij[ind,ind])/length(ind)*100)
-    df_lab_g=df_lab[ind,]
-    df_lab_g=df_lab_g[order(df_lab_g$sC,decreasing = T),]
-    #if (dim(df_lab_g)[1]>2){k=3}else{k=1}
-    k=1
-    labels[[length(labels)+1]]=paste(df_lab_g$words[1:k],collapse = ";")
-    color=c(color,df_lab$color[ind[1]])
-  }
-  #df_lab$cluster_label=gsub(";NA;",";",df_lab$cluster_label)
+  sEij_df <- as.matrix(sEij) %>% 
+    data.frame() %>% 
+    rename_with(~ row.names(sEij), .cols = colnames(.)) %>% 
+    mutate(words1 = row.names(sEij)) %>% 
+    pivot_longer(cols=!.data$words1, names_to = "words2", values_to = "eij") %>% 
+    dplyr::filter(.data$eij>0) %>% 
+    left_join(df_lab_top, by=c("words1" = "words")) %>% 
+    left_join(df_lab_top, by=c("words2" = "words")) %>% 
+    rename(groups =.data$groups.x,
+           groups2 =.data$groups.y)
+    
+  df_lab_top <- df_lab %>% select(.data$groups, .data$cluster_label,.data$color, .data$freq) %>% slice_head(n=1)
   
-  centrality=centrality
-  df=data.frame(centrality=centrality,density=density,rcentrality=rank(centrality),rdensity=rank(density),label=label_cluster,color=color)
- 
+  df <- sEij_df %>% 
+    dplyr::filter(.data$words1 %in% unique(df_lab$words) & .data$words2 %in% unique(df_lab$words)) %>% 
+    group_by(.data$groups) %>% 
+    mutate(ext = as.numeric(.data$groups!=.data$groups2)) %>% 
+    summarize(n=length(unique(.data$words1)),
+              centrality = sum(.data$eij*.data$ext),
+              density = sum((.data$eij*(1-.data$ext))/.data$n)*100
+              ) %>% 
+    mutate(rcentrality=rank(.data$centrality),
+      rdensity=rank(.data$density)
+    ) %>% 
+    left_join(., df_lab_top, by = "groups") %>% 
+    rename(label = .data$cluster_label)
+  
+  
   meandens=mean(df$rdensity)
   meancentr=mean(df$rcentrality)
   rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
   rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
   
-  df$name=unlist(labels)
-  df=df[order(df$label),]
-  df_lab <- df_lab[df_lab$sC>=minfreq,]
-  df=df[(df$name %in% intersect(df$name,df_lab$cluster_label)),]
-  
-  row.names(df)=df$label
-  
-  A <- group_by(df_lab, .data$groups) %>% summarise(freq = sum(.data$sC)) %>% as.data.frame
-  
-  df$freq=A[,2]
-  
-  W <- df_lab %>% group_by(.data$groups) %>% #dplyr::filter(.data$sC>1) %>% 
+  df <- df_lab %>% group_by(.data$groups) %>% #dplyr::filter(.data$sC>1) %>% 
     arrange(-.data$sC, .by_group = TRUE) %>% 
-    dplyr::top_n(10, .data$sC) %>%
-    summarise(wordlist = paste(.data$words,.data$sC,collapse="\n")) %>% as.data.frame()
-  
-  df$words=W[,2]
-  
-  ### number of labels for each cluster
-  labels=gsub("\\d", "",df$words)
-  
-  ### cut ties over 10 words
-  df$words <- unlist(lapply(df$words, function(l){
-    l <- unlist(strsplit(l,"\\\n"))
-    l <- l[1:(min(length(l),10))]
-    l <- paste0(l,collapse="\n")
-  }))
-  
-  L=unlist(lapply(labels, function(l){
-    l=strsplit(l," \\\n")
-    l=paste(l[[1]][1:min(n.labels,lengths(l))], collapse="\n")
-  }))
-  df$name_full=L
-  ###
-  
+    dplyr::slice_max(n=10, .data$sC, with_ties=FALSE) %>%
+    summarise(wordlist = paste(.data$words,.data$sC,collapse="\n"),
+              name_full = paste(.data$words[1:min(n.labels,n())], collapse="\n")) %>% 
+    right_join(., df, by = "groups") %>% 
+    rename(name = .data$label,
+      words = .data$wordlist)
+
   xlimits=c(meancentr-(rangex*1.2),meancentr+rangex*1.2)
   ylimits=c(meandens-(rangey*1.2),meandens+rangey*1.2)
   
@@ -228,17 +213,18 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
             axis.ticks.y=element_blank()
       ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
-  names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label")
-  words=df_lab[order(df_lab$Cluster),]
-  words=words[!is.na(words$Color),]
-  words$Cluster=as.numeric(factor(words$Cluster))
-  row.names(df)=NULL
+  names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label", "Cluster_Frequency")
+  
+  df_lab <- df_lab %>% 
+    arrange(.data$Cluster) %>% 
+    dplyr::filter(!is.na(.data$Color)) %>% 
+    data.frame() %>% 
+    mutate(Cluster = as.numeric(factor(.data$Cluster)))
 
+  documentToClusters <- clusterAssignment(M, words=df_lab, field, remove.terms, synonyms)
   
-  documentToClusters <- clusterAssignment(M, words, field, remove.terms, synonyms)
   
-  
-  results=list(map=g, clusters=df, words=words,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
+  results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
 return(results)
 }
 
@@ -264,11 +250,7 @@ clusterAssignment <- function(M, words, field, remove.terms, synonyms){
     ind <- which(!is.na(allField$new))
     allField$terms[ind] <- allField$new[ind]
     allField <- allField[c("SR", "terms")]
-    #Fi <- allField %>% 
-    #  group_by(.data$SR) %>% 
-    #  summarize(terms = paste(.data$terms, sep=";", collapse=";")) 
-    #M <- M %>% 
-    #  left_join(Fi, by = "SR")
+
   }
 ### stop integration in M  
   
@@ -276,12 +258,7 @@ clusterAssignment <- function(M, words, field, remove.terms, synonyms){
     mutate(p_w = 1/.data$Occurrences) %>% 
     group_by(.data$Cluster) %>% 
     mutate(p_c = 1/length(.data$Cluster))
-  #column <- ifelse(field %in% c("TI","AB"), paste0(field,"_TM"),field)
-  
-  #TERMS <- strsplit(M[, column], ";")
-  #nW <- lengths(TERMS)
-  
-  #TERMS <- data.frame(Words = tolower(unlist(TERMS)), SR=rep(M$SR,nW))
+
   TERMS <- allField %>% 
     mutate(terms = .data$terms %>% tolower()) %>% 
     left_join(words, by = c("terms" = "Words"))

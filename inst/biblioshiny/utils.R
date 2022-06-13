@@ -858,9 +858,9 @@ cocNetwork <- function(input,values){
       
       #bluefunc <- colorRampPalette(c("lightblue", "darkblue"))
       #col=bluefunc((diff(range(df$year))+1)*10)
-      col=heat.colors((diff(range(df$year))+1)*10)
-      igraph::V(g)$color=col[(max(df$year)-df$year+1)*10]
-      igraph::V(g)$year=df$year
+      col=hcl.colors((diff(range(df$year_med))+1)*10, palette="Blues 3")
+      igraph::V(g)$color=col[(max(df$year_med)-df$year_med+1)*10]
+      igraph::V(g)$year_med=df$year_med
       values$cocnet$graph=g
     }
     

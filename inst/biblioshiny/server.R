@@ -6296,7 +6296,7 @@ server <- function(input, output,session){
                                                                        "Walktrap" = "walktrap"),
                                                            selected = "walktrap")
                                         )),
-                                        fluidRow(column(12,
+                                        fluidRow(column(6,
                                                         selectInput("normalize", 
                                                                     label = "Normalization",
                                                                     choices = c("none", 
@@ -6307,13 +6307,13 @@ server <- function(input, output,session){
                                                                                 "equivalence"),
                                                                     selected = "association")
                                         ),
-                                        # column(6,
-                                        #        selectInput("cocyears",
-                                        #                    label = "Node Color by Year",
-                                        #                    choices = c("No" = "No",
-                                        #                                "Yes"= "Yes"),
-                                        #                    selected = "No")
-                                        # )
+                                        column(6,
+                                               selectInput("cocyears",
+                                                           label = "Node Color by Year",
+                                                           choices = c("No" = "No",
+                                                                       "Yes"= "Yes"),
+                                                           selected = "No")
+                                        )
                                         ),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "Nodes",

@@ -4414,6 +4414,7 @@ server <- function(input, output,session){
              hoverlabel = list(font=list(size=input$histlabelsize+9)))
     return(g)
   })
+
   
   output$HGplot.save <- downloadHandler(
     filename = function() {
@@ -4427,6 +4428,14 @@ server <- function(input, output,session){
   
   output$histPlot <- renderPlotly({
     Hist()
+  })
+  
+  output$histPlotVis <- renderVisNetwork({  
+    g <- Hist()
+    values$histPlotVis<-hist2vis(values$histPlot,curved=FALSE, 
+                               labelsize=input$histlabelsize, opacity=0.7,
+                               shape="dot")
+    values$histPlotVis$VIS
   })
   
   output$histTable <- DT::renderDT({

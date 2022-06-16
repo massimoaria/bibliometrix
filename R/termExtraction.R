@@ -121,7 +121,7 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     }
   
   # keep terms in the vector keep.terms
-  if (length(keep.terms)>0 & class(keep.terms)=="character"){
+  if (length(keep.terms)>0 & is.character(keep.terms)){
     keep.terms <- tolower(keep.terms)
     if (Field %in% c("DE","ID")){
       kt <- gsub(" ","_",keep.terms)
@@ -219,7 +219,7 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
       mutate(ngram = toupper(.data$ngram))
 
     # Merge synonyms in the vector synonyms
-    if (length(synonyms)>0 & class(synonyms)=="character"){
+    if (length(synonyms)>0 & is.character(synonyms)){
       s <- strsplit(toupper(synonyms),";")
       snew <- trimws(unlist(lapply(s,function(l) l[1])))
       sold <- (lapply(s,function(l){

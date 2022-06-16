@@ -86,7 +86,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE)
         verbose = FALSE
       ), error = function(e) err = 1)
     
-    if (class(AU_S)!="numeric") {
+    if (!is.numeric(class(AU_S))) {
       AU_S$cover_date = substr(as.character(AU_S$cover_date), 1, 4)
       
       for (i in 1:dim(AU_S)[2]) {

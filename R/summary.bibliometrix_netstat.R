@@ -24,7 +24,7 @@
 summary.bibliometrix_netstat<-function(object, ...){
   
   
-  if (class(object)!="bibliometrix_netstat"){cat('\n argument "object" have to be an object of class "netstat"\n');return(NA)}
+  if (!inherits(object,"bibliometrix_netstat")){cat('\n argument "object" have to be an object of class "netstat"\n');return(NA)}
   
   arguments <- list(...)
   if (sum(names(arguments)=="k")==0){k=10} else {k=arguments$k}

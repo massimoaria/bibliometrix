@@ -32,7 +32,7 @@
 #' @export
 networkStat<-function(object, stat="network",type="degree"){
   
-  if (class(object)!="igraph"){
+  if (!inherits(object,"igraph")){
   # Create igraph object
   net <- graph.adjacency(object,mode="undirected",weighted=NULL)
   V(net)$id <- colnames(object)}else{

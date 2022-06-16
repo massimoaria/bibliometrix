@@ -37,7 +37,7 @@
 
 summary.bibliometrix<-function(object, ...){
 
-  if (class(object)!="bibliometrix"){cat('\n argument "object" have to be an object of class "bibliometrix"\n');return(NA)}
+  if (!inherits(object,"bibliometrix")){cat('\n argument "object" have to be an object of class "bibliometrix"\n');return(NA)}
   
   options(width=130)
   

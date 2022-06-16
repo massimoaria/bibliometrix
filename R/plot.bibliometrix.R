@@ -27,7 +27,7 @@ plot.bibliometrix<-function(x, ...){
   data("logo",package="bibliometrix",envir=environment())
   logo <- grid::rasterGrob(logo,interpolate = TRUE)
   
-  if (class(x)!="bibliometrix"){cat('\n argument "x" have to be an object of class "bibliometrix"\n');return(NA)}
+  if (!inherits(x,"bibliometrix")){cat('\n argument "x" have to be an object of class "bibliometrix"\n');return(NA)}
   graphs=list()
   
   arguments <- list(...)

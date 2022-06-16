@@ -24,7 +24,6 @@
 #'   for a complete list of filed tags see:
 #'   \href{https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr
 #'   
-#'
 #' @param type indicates the output format of co-occurrences: \tabular{lll}{
 #'   \code{type = "matrix"} \tab   \tab produces an object of class
 #'   \code{matrix}\cr \code{type = "sparse"} \tab   \tab produces an object of
@@ -118,7 +117,7 @@ if (Field %in% c("ID", "DE", "TI", "TI_TM", "AB", "AB_TM")){
 #
 
 # Merge synonyms in the vector synonyms
-if (length(synonyms)>0 & class(synonyms)=="character"){
+if (length(synonyms)>0 & is.character(synonyms)){
   s <- strsplit(toupper(synonyms),";")
   snew <- trimws(unlist(lapply(s,function(l) l[1])))
   sold <- (lapply(s,function(l){

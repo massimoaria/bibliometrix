@@ -35,7 +35,7 @@ dominance<-function(results, k = 10){
   
   #options(warn=-1)
   
-  if (class(results)!="bibliometrix"){cat('\n argument "results" have to be an object of class "bibliometrix"\n');return(NA)}
+  if (!inherits(results, "bibliometrix")){cat('\n argument "results" have to be an object of class "bibliometrix"\n');return(NA)}
   
   Nmf=table(results$FirstAuthors[results$nAUperPaper>1])
   FA=names(Nmf)

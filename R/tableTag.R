@@ -40,7 +40,7 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL, syno
   Tab <- Tab[nchar(Tab)>0]
   
   # Merge synonyms in the vector synonyms
-  if (length(synonyms)>0 & class(synonyms)=="character"){
+  if (length(synonyms)>0 & is.character(synonyms)){
     s <- strsplit(toupper(synonyms),";")
     snew <- trimws(unlist(lapply(s,function(l) l[1])))
     sold <- (lapply(s,function(l) trimws(l[-1])))

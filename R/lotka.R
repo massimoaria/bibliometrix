@@ -30,8 +30,10 @@
 
 
 lotka<-function(results){
-
-  if (class(results)!="bibliometrix"){cat('\n argument "results" have to be an object of class "bibliometrix"\n');return(NA)}
+  
+  
+  
+  if (!inherits(results, "bibliometrix")){cat('\n argument "results" have to be an object of class "bibliometrix"\n');return(NA)}
   
   # Author Productivity (LOTKA's LAW)
   Authors=results$Authors

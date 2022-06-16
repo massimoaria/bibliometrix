@@ -1114,3 +1114,81 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 
+hist2vis<-function(net, labelsize = 2, curved=FALSE,shape="dot", opacity=0.7){
+  
+  #g <- net$net
+  
+  LABEL=igraph::V(net$net)$id
+  
+  LABEL[igraph::V(net$net)$labelsize==0]=""
+  
+  layout <- net$layout %>% 
+    dplyr::select(.data$x,.data$y,.data$color,.data$name)
+  
+  vn <- visNetwork::toVisNetworkData(net$net)
+  vn$nodes$label <- LABEL
+  vn$nodes <- dplyr::left_join(vn$nodes,layout, by=c("id"="name"))
+  
+  vn$edges$num <- 1
+  vn$edges$dashes <- FALSE
+  vn$edges$dashes[vn$edges$lty==2] <- TRUE
+  vn$edges$color <- "grey"
+  
+  ## opacity
+  vn$nodes$font.color <- adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.1,1)))
+  
+  vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity-0.2,1)))
+  vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity-0.2)
+  
+  ## removing multiple edges
+  vn$edges=unique(vn$edges)
+  
+  ## labelsize
+  scalemin=20
+  scalemax=150
+  
+  size=10*labelsize
+  
+  size[size<scalemin]=scalemin
+  size[size>scalemax]=scalemax
+  vn$nodes$font.size=size*0.5
+  
+  vn$nodes$size <- vn$nodes$font.size*0.7
+  
+  
+  if (shape %in% c("dot","square")){
+    vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
+  }else{
+    vn$nodes$font.vadjust <-0
+  }
+  
+  coords <- vn$nodes[,c("x","y")] %>% 
+    as.matrix()
+  
+  coords[,2] <- coords[,2]^(1/2)
+  
+  tooltipStyle = ('position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;
+                  font-size:12px;font-color:black;background-color:white;')
+  
+  ## split node tooltips into two strings
+  title <- strsplit(stringr::str_to_title(vn$nodes$title), " ")
+  
+  vn$nodes$title <- unlist(lapply(title, function(l){
+    n <- ceiling(length(l)/2)
+    paste0(paste(l[1:n], collapse=" ", sep=""),"<br>",paste(l[(n+1):length(l)], collapse=" ", sep=""))
+  }))
+  
+  VIS<-
+    visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
+    visNetwork::visNodes(shadow=FALSE, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
+    visNetwork::visEdges(smooth = curved, arrows = 'to') %>%
+    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T,
+                           manipulation = FALSE, width = "100%") %>%
+    visNetwork::visInteraction(dragNodes = F, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) %>%
+    visNetwork::visExport(type = "png", name = "network",
+                          label = paste0("Export graph as png"), background = "#fff",
+                          float = "right", style = NULL, loadDependencies = TRUE)
+  
+  return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
+}

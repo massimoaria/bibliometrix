@@ -44,7 +44,7 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE, remove.ter
   # end of block
   
   ### Merge synonyms in the vector synonyms
-  if (length(synonyms)>0 & class(synonyms)=="character"){
+  if (length(synonyms)>0 & is.character(synonyms)){
     s <- strsplit(toupper(synonyms),";")
     snew <- trimws(unlist(lapply(s,function(l) l[1])))
     sold <- (lapply(s,function(l) trimws(l[-1])))

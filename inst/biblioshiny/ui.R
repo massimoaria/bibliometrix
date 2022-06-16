@@ -1268,7 +1268,9 @@ body <- dashboardBody(
                             tabPanel("Plot",
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
                             tabPanel("Table", 
-                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))),
+                            tabPanel("Dynamic Network", 
+                                     shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "75vh")))
                 )
               )
              )

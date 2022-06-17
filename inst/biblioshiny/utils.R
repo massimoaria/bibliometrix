@@ -1110,7 +1110,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 
-hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, timeline=FALSE){
+hist2vis<-function(net, labelsize = 2, curved=FALSE, shape="dot", opacity=0.7, timeline=TRUE){
   
   LABEL <- igraph::V(net$net)$id
   
@@ -1152,6 +1152,14 @@ hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, ti
   }else{
     vn$nodes$font.vadjust <-0
   }
+  
+  text_data <- net$graph.data %>% 
+    select(.data$name, .data$DOI, .data$LCS,.data$GCS) %>% 
+    rename(id = .data$name) %>% 
+    filter(!duplicated(.data$id))
+  
+  vn$nodes <- vn$nodes %>% left_join(text_data, by = "id")
+  
   ## split node tooltips into two strings
   title <- strsplit(stringr::str_to_title(vn$nodes$title), " ")
   
@@ -1159,6 +1167,12 @@ hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, ti
     n <- ceiling(length(l)/2)
     paste0(paste(l[1:n], collapse=" ", sep=""),"<br>",paste(l[(n+1):length(l)], collapse=" ", sep=""))
   }))
+  
+  vn$nodes <- vn$nodes %>%
+    mutate(title = paste(.data$title, "<br>DOI: ",
+                        .data$DOI, "<br>LCS: ",
+                        .data$LCS, "    GCS: ",
+                        .data$GCS, sep=""))
   
   ## add time line
   vn$nodes$group <- "normal"
@@ -1177,6 +1191,7 @@ hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, ti
     vn$nodes$size[nr+1] <- vn$nodes$size[nr]
     vn$nodes$years[nr+1] <- as.numeric(vn$nodes$x[nr+1])
     vn$nodes$font.size[nr+1] <- vn$nodes$font.size[nr]
+    vn$nodes$title[nr+1] <- vn$nodes$x[nr+1]
     
     vn$nodes[nr+2,c("id","title","label","color","font.color")] <-
       c(rep(max(vn$nodes$x),3),"black","white")
@@ -1185,6 +1200,7 @@ hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, ti
     vn$nodes$size[nr+2] <- vn$nodes$size[nr]
     vn$nodes$years[nr+2] <- as.numeric(vn$nodes$x[nr+2])
     vn$nodes$font.size[nr+2] <- vn$nodes$font.size[nr]
+    vn$nodes$title[nr+2] <- vn$nodes$x[nr+2]
     vn$nodes$group[c(nr+1,nr+2)] <- "time"
     vn$nodes$shape[c(nr+1,nr+2)] <- "box"
     vn$nodes$font.vadjust[c(nr+1,nr+2)]  <- 0
@@ -1207,27 +1223,14 @@ hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, ti
   
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
-                           # ,main = paste0("Timeline:  From ", min(vn$nodes$x), " to ", max(vn$nodes$x))) %>%
-    #visNetwork::visNodes(shadow=FALSE, shape="dot", font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
-    visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust),
+                         fixed = list(x = TRUE)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
-    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T,
+    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = T,
                            autoResize = TRUE,
-                           manipulation = FALSE, height = "100%"
-                           # ,nodesIdSelection = list(enabled = TRUE,
-                           #                         selected = "1",
-                           #                         nodes = 'nodes: {fixed: {x: true}}')
-    ) %>%
-    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) 
-  # %>% 
-  #   visEvents(type = "once", startStabilizing = "function() {
-  #   this.moveTo({scale:1})}") %>%
-  #   visPhysics(stabilization = FALSE)
-  # %>%
-  #   visNetwork::visExport(type = "png", name = "network",
-  #                         label = paste0("Export graph as png"), background = "#fff",
-  #                         float = "right", style = NULL, loadDependencies = TRUE)
+                           manipulation = FALSE, height = "100%") %>%
+    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle)
   
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
 }

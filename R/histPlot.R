@@ -201,7 +201,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     print(Data[,-2])
   }
   
-  results <- list(net=bsk.network, g=g, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks))
+  results <- list(net=bsk.network, g=g, graph.data=df_net, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks))
   return(results)
 }
 

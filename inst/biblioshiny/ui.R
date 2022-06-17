@@ -1270,7 +1270,7 @@ body <- dashboardBody(
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))),
                             tabPanel("Dynamic Network", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "75vh")))
+                                     shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "80vh")))
                 )
               )
              )

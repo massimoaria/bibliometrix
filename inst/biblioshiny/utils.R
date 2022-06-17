@@ -1038,14 +1038,10 @@ netLayout <- function(type){
 }
 
 savenetwork <- function(con, values){
-  vn=values$network$vn
-  visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE, height = "2000px",width = "2000px" ) %>%
-    visNetwork::visNodes(shape="box", font=list(color="black"),scaling=list(label=list(enables=TRUE))) %>%
-    visNetwork::visIgraphLayout(layout = values$network$l) %>%
-    visNetwork::visEdges(smooth = values$network$curved) %>%
-    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-    visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE)  %>% visNetwork::visExport() %>%
-    visNetwork::visPhysics(enabled = FALSE) %>% visNetwork::visSave(con)
+
+  values$network$VIS %>% 
+    visOptions(height = "800px") %>% 
+    visNetwork::visSave(con)
 }
 
 igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
@@ -1106,21 +1102,19 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
     visNetwork::visEdges(smooth = curved) %>%
     visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
     visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
-    visNetwork::visOptions(manipulation = TRUE) %>%
-    visNetwork::visExport(type = "png", name = "network",
-              label = paste0("Export graph as png"), background = "#fff",
-              float = "right", style = NULL, loadDependencies = TRUE)
+    visNetwork::visOptions(manipulation = TRUE) #%>%
+    #visNetwork::visExport(type = "png", name = "network",
+    #          label = paste0("Export graph as png"), background = "#fff",
+    #          float = "right", style = NULL, loadDependencies = TRUE)
   #values$COCVIS=VIS
   return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 
-hist2vis<-function(net, labelsize = 2, curved=FALSE,shape="dot", opacity=0.7){
+hist2vis<-function(net, labelsize = 2, curved=TRUE, shape="dot", opacity=0.7, timeline=FALSE){
   
-  #g <- net$net
+  LABEL <- igraph::V(net$net)$id
   
-  LABEL=igraph::V(net$net)$id
-  
-  LABEL[igraph::V(net$net)$labelsize==0]=""
+  LABEL[igraph::V(net$net)$labelsize==0] <- ""
   
   layout <- net$layout %>% 
     dplyr::select(.data$x,.data$y,.data$color,.data$name)
@@ -1137,8 +1131,9 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE,shape="dot", opacity=0.7){
   ## opacity
   vn$nodes$font.color <- adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.1,1)))
   
-  vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity-0.2,1)))
-  vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity-0.2)
+  vn$nodes$color <- adjustcolor(vn$nodes$color,alpha.f=min(c(opacity-0.2,1)))
+  vn$edges$color <- adjustcolor(vn$edges$color,alpha.f=opacity-0.2)
+  vn$edges$smooth <- curved 
   
   ## removing multiple edges
   vn$edges=unique(vn$edges)
@@ -1146,30 +1141,17 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE,shape="dot", opacity=0.7){
   ## labelsize
   scalemin=20
   scalemax=150
-  
   size=10*labelsize
-  
   size[size<scalemin]=scalemin
   size[size>scalemax]=scalemax
   vn$nodes$font.size=size*0.5
-  
-  vn$nodes$size <- vn$nodes$font.size*0.7
-  
+  vn$nodes$size <- vn$nodes$font.size*0.5
   
   if (shape %in% c("dot","square")){
     vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
   }else{
     vn$nodes$font.vadjust <-0
   }
-  
-  coords <- vn$nodes[,c("x","y")] %>% 
-    as.matrix()
-  
-  coords[,2] <- coords[,2]^(1/2)
-  
-  tooltipStyle = ('position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;
-                  font-size:12px;font-color:black;background-color:white;')
-  
   ## split node tooltips into two strings
   title <- strsplit(stringr::str_to_title(vn$nodes$title), " ")
   
@@ -1178,17 +1160,75 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE,shape="dot", opacity=0.7){
     paste0(paste(l[1:n], collapse=" ", sep=""),"<br>",paste(l[(n+1):length(l)], collapse=" ", sep=""))
   }))
   
-  VIS<-
-    visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-    visNetwork::visNodes(shadow=FALSE, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+  ## add time line
+  vn$nodes$group <- "normal"
+  vn$nodes$shape <- "dot"
+  
+  if (isTRUE(timeline)){
+    vn$edges$label <- NULL
+    
+    nr <- nrow(vn$nodes)
+    y <- min(0,min(vn$nodes$y)-1)
+    
+    vn$nodes[nr+1,c("id","title","label","color","font.color")] <-
+      c(rep(min(vn$nodes$x),3),"black","white")
+    vn$nodes$x[nr+1] <- min(vn$nodes$x, na.rm=TRUE)
+    vn$nodes$y[nr+1] <- y
+    vn$nodes$size[nr+1] <- vn$nodes$size[nr]
+    vn$nodes$years[nr+1] <- as.numeric(vn$nodes$x[nr+1])
+    vn$nodes$font.size[nr+1] <- vn$nodes$font.size[nr]
+    
+    vn$nodes[nr+2,c("id","title","label","color","font.color")] <-
+      c(rep(max(vn$nodes$x),3),"black","white")
+    vn$nodes$x[nr+2] <- max(vn$nodes$x, na.rm=TRUE)
+    vn$nodes$y[nr+2] <- y
+    vn$nodes$size[nr+2] <- vn$nodes$size[nr]
+    vn$nodes$years[nr+2] <- as.numeric(vn$nodes$x[nr+2])
+    vn$nodes$font.size[nr+2] <- vn$nodes$font.size[nr]
+    vn$nodes$group[c(nr+1,nr+2)] <- "time"
+    vn$nodes$shape[c(nr+1,nr+2)] <- "box"
+    vn$nodes$font.vadjust[c(nr+1,nr+2)]  <- 0
+    
+    nr <- nrow(vn$edges)
+    vn$edges[nr+1,c(1:3)] <- c(max(vn$nodes$x),min(vn$nodes$x), "grey30")
+    vn$edges[nr+1,4] <- 1
+    vn$edges[nr+1, 5] <- TRUE
+    vn$edges$smooth[nr+1] <- FALSE
+    vn$edges$label[nr+1] <- "Timeline"
+  }
+  coords <- vn$nodes[,c("x","y")] %>% 
+    as.matrix()
+  
+  coords[,2] <- coords[,2]^(1/2)
+  
+  tooltipStyle = ('position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;
+                  font-size:12px;font-color:black;background-color:white;')
+  
+  
+  VIS <-
+    visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
+                           # ,main = paste0("Timeline:  From ", min(vn$nodes$x), " to ", max(vn$nodes$x))) %>%
+    #visNetwork::visNodes(shadow=FALSE, shape="dot", font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
-    visNetwork::visEdges(smooth = curved, arrows = 'to') %>%
+    visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
     visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T,
-                           manipulation = FALSE, width = "100%") %>%
-    visNetwork::visInteraction(dragNodes = F, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) %>%
-    visNetwork::visExport(type = "png", name = "network",
-                          label = paste0("Export graph as png"), background = "#fff",
-                          float = "right", style = NULL, loadDependencies = TRUE)
+                           autoResize = TRUE,
+                           manipulation = FALSE, height = "100%"
+                           # ,nodesIdSelection = list(enabled = TRUE,
+                           #                         selected = "1",
+                           #                         nodes = 'nodes: {fixed: {x: true}}')
+    ) %>%
+    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) 
+  # %>% 
+  #   visEvents(type = "once", startStabilizing = "function() {
+  #   this.moveTo({scale:1})}") %>%
+  #   visPhysics(stabilization = FALSE)
+  # %>%
+  #   visNetwork::visExport(type = "png", name = "network",
+  #                         label = paste0("Export graph as png"), background = "#fff",
+  #                         float = "right", style = NULL, loadDependencies = TRUE)
   
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
 }
+

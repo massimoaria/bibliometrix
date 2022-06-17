@@ -4432,7 +4432,7 @@ server <- function(input, output,session){
   
   output$histPlotVis <- renderVisNetwork({  
     g <- Hist()
-    values$histPlotVis<-hist2vis(values$histPlot,curved=FALSE, 
+    values$histPlotVis<-hist2vis(values$histPlot,curved=TRUE, 
                                labelsize=input$histlabelsize, opacity=0.7,
                                shape="dot")
     values$histPlotVis$VIS

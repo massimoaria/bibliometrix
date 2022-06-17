@@ -51,7 +51,7 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=10){
   M$TC <- as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
   M <- M %>% dplyr::filter(!is.na(.data$TC))
-  M <- M[M$TC>0,]
+  #M <- M[M$TC>0,]
   
   Today=as.numeric(substr(Sys.time(),1,4))
   past=Today-years

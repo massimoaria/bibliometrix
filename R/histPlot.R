@@ -15,7 +15,9 @@
 #' @param n is integer. It defines the number of vertices to plot.
 #' @param size is an integer. It defines the point size of the vertices. Default value is 5.
 #' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}
-#' @param title_as_label is a logical. If TRUE document titles are plotted instead of short labels.
+#' @param title_as_label is a logical. DEPRECATED
+#' @param label is a character. It indicates which label type to use as node id in the historiograph. It can be \code{label=c("short", "title", "keywords", "keywordsplus")}. 
+#' Default is \code{label = "short"}.
 #' @param verbose is logical. If TRUE, results and plots are printed on screen.
 #' @return It is list containing: a network object of the class \code{igraph} and a plot object of the class \code{ggraph}.
 #' 
@@ -33,7 +35,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = FALSE, verbose = TRUE){
+histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = FALSE, label = "short", verbose = TRUE){
   
   colorlist <-  c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   ## legacy with old argument size
@@ -58,14 +60,56 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     l=l[1:2]
     l=paste(l[1],l[2],sep=",")})
   
-  # add titles
+  # add label to nodes
   V(bsk.network)$title <- histResults$histData$Title[ind]
+  V(bsk.network)$keywords <- histResults$histData$Author_Keywords[ind]
+  V(bsk.network)$keywordsplus <- histResults$histData$KeywordsPlus[ind]
   
-  if (isTRUE(title_as_label)){
-    V(bsk.network)$id <- tolower(paste(substr(V(bsk.network)$title,1,50),"...",sep=""))
-  } else {
-    V(bsk.network)$id <- tolower(unlist(RR))
-  }
+  switch(label,
+         title={
+           title <- strsplit(stringr::str_to_title(V(bsk.network)$title), " ")
+           V(bsk.network)$id <- unlist(lapply(title, function(l){
+             n <- floor(length(l)/2)
+             paste0(paste(l[1:n], collapse=" ", sep=""),"\n",paste(l[(n+1):length(l)], collapse=" ", sep=""))
+           }))
+         },
+         keywords={
+           kw <- strsplit(stringr::str_to_title(V(bsk.network)$keywords), ";")
+           kw[is.na(kw)] <- "Not Available"
+           V(bsk.network)$id <- unlist(lapply(kw, function(l){
+             if (length(l)>1){
+               n <- floor(length(l)/2)
+               l <- trimws(l)
+               paste0(paste(l[1:n], collapse="; ", sep=""),"\n",paste(l[(n+1):length(l)], collapse="; ", sep=""))
+             }else{l}
+           }))
+         },
+         keywordsplus={
+           kw <- strsplit(stringr::str_to_title(V(bsk.network)$keywordsplus), ";")
+           kw[is.na(kw)] <- "Not Available"
+           V(bsk.network)$id <- unlist(lapply(kw, function(l){
+             if (length(l)>1){
+               n <- floor(length(l)/2)
+               l <- trimws(l)
+               paste0(paste(l[1:n], collapse="; ", sep=""),"\n",paste(l[(n+1):length(l)], collapse="; ", sep=""))
+             }else{l}
+           }))
+         },
+         {
+           V(bsk.network)$id <- tolower(unlist(RR))
+         }
+  )
+  
+  # if (isTRUE(title_as_label)){
+  #   title <- strsplit(stringr::str_to_title(V(bsk.network)$title), " ")
+  #   V(bsk.network)$id <- unlist(lapply(title, function(l){
+  #     n <- floor(length(l)/2)
+  #     paste0(paste(l[1:n], collapse=" ", sep=""),"\n",paste(l[(n+1):length(l)], collapse=" ", sep=""))
+  #   }))
+  #   #V(bsk.network)$id <- tolower(paste(substr(V(bsk.network)$title,1,50),"...",sep=""))
+  # } else {
+  #   V(bsk.network)$id <- tolower(unlist(RR))
+  # }
   
   # Compute node degrees (#links) and use that to set node size:
   deg <- LCS
@@ -111,8 +155,12 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   ################
   df_net <- dataFromIgraph(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
   df_net$color <- "slategray1"
-  df_net <- left_join(df_net,layout_m[c("name","color")], by = "name")
-  names(df_net)[10:11] <- c("color", "color_v")
+  df_net <- left_join(df_net,layout_m[c("name","color")], by = "name") %>% 
+    rename(
+      color = .data$color.x,
+      color_v =.data$color.y
+    )
+  #names(df_net)[10:11] <- c("color", "color_v")
   
   ylength <- diff(range(df_net$years))+1
   Ylabel <- (as.character(seq(min(df_net$years),max(df_net$years),length.out=ylength)))
@@ -126,6 +174,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   df_net$Title <- unlist(lapply(Title, function(x){
     paste(x,"\n",collapse="", sep="")
   }))
+  
   df_net <- df_net %>%
     mutate(text = paste(tolower(.data$Title), "doi: ",
                         .data$DOI, "\nLCS: ",

@@ -124,8 +124,8 @@ wos <- function(M, min.citations, sep, network, verbose){
   M[LCS$nLABEL, "LCS"] <- LCS$n
   M_orig$LCS <- M$LCS
   
-  histData <- M[c("LABEL","TI","DI","PY","LCS","TC")]
-  names(histData) <- c("Paper","Title", "DOI","Year","LCS","GCS")
+  histData <- M[c("LABEL","TI","DE","ID","DI","PY","LCS","TC")]
+  names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
   
   if (isTRUE(network)){
     # Citing data frame

@@ -4433,15 +4433,17 @@ server <- function(input, output,session){
   output$histPlotVis <- renderVisNetwork({  
     g <- Hist()
     values$histPlotVis<-hist2vis(values$histPlot,curved=FALSE, 
-                               labelsize=input$histlabelsize, opacity=0.7,
-                               shape="dot", timeline=FALSE)
+                               labelsize=input$histlabelsize, 
+                               nodesize=input$histsize,
+                               opacity=0.7,
+                               shape="dot",
+                               labeltype=input$titlelabel,
+                               timeline=FALSE)
     values$histPlotVis$VIS
   })
   
   output$histTable <- DT::renderDT({
-    # LCS <- values$histResults$LCS
-    # s <- sort(LCS,decreasing = TRUE)[input$histNodes]
-    # ind <- which(LCS>=s)
+
     Data <- values$histResults$histData
     #Data <- Data[ind,]
     Data$DOI<- paste0('<a href=\"https://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
@@ -5705,7 +5707,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.MRWSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("MRWSyn", "",
                                                                    multiple = FALSE,
@@ -5794,7 +5796,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.WCSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("WCSyn", "",
                                                                    multiple = FALSE,
@@ -5906,7 +5908,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.TreeMapSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("TreeMapSyn", "",
                                                                    multiple = FALSE,
@@ -5971,7 +5973,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.WDSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("WDSyn", "",
                                                                    multiple = FALSE,
@@ -6077,7 +6079,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.TTSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("TTSyn", "",
                                                                    multiple = FALSE,
@@ -6259,7 +6261,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.COCSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("COCSyn", "",
                                                                    multiple = FALSE,
@@ -6497,7 +6499,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.TMapSynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("TMapSyn", "",
                                                                    multiple = FALSE,
@@ -6623,7 +6625,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.TESynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("TESyn", "",
                                                                    multiple = FALSE,
@@ -6772,7 +6774,7 @@ server <- function(input, output,session){
                                         conditionalPanel(condition = "input.FASynFile == 'Y'",
                                                          helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
                                                                   h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator (\\n)."))
+                              Rows have to be separated by return separator."))
                                                          ),
                                                          fileInput("FASyn", "",
                                                                    multiple = FALSE,
@@ -7040,9 +7042,11 @@ server <- function(input, output,session){
                                         collapsed = FALSE,
                                         selectInput(inputId = "titlelabel",
                                                     label = "Node label",
-                                                    choices = c("Short id (1st Author, Year)" = "FALSE",
-                                                                "Document Title" = "TRUE"),
-                                                    selected = "FALSE"),
+                                                    choices = c("Short id (1st Author, Year)" = "short",
+                                                                "Document Title" = "title",
+                                                                "Authors' Keywords" = "keywords",
+                                                                "Keywords Plus" = "keywordsplus"),
+                                                    selected = "short"),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "histlabelsize",
                                                                      label = "Label size",

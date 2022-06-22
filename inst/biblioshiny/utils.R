@@ -749,8 +749,8 @@ historiograph <- function(input,values){
     values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
     values$Histfield="done"
   }
-  titlelabel <- input$titlelabel=="TRUE"
-  values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, title_as_label = titlelabel, verbose=FALSE))
+  #titlelabel <- input$titlelabel
+  values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
   return(values)
 }
 
@@ -1110,7 +1110,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 
-hist2vis<-function(net, labelsize = 2, curved=FALSE, shape="dot", opacity=0.7, timeline=TRUE){
+hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", opacity=0.7, labeltype="short", timeline=TRUE){
   
   LABEL <- igraph::V(net$net)$id
   
@@ -1120,7 +1120,12 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE, shape="dot", opacity=0.7, t
     dplyr::select(.data$x,.data$y,.data$color,.data$name)
   
   vn <- visNetwork::toVisNetworkData(net$net)
-  vn$nodes$label <- LABEL
+  if (labeltype != "short"){
+    vn$nodes$label <- paste0(vn$nodes$years,": ",LABEL)
+  }else{
+    vn$nodes$label <- LABEL
+  }
+  
   vn$nodes <- dplyr::left_join(vn$nodes,layout, by=c("id"="name"))
   
   vn$edges$num <- 1
@@ -1145,7 +1150,8 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE, shape="dot", opacity=0.7, t
   size[size<scalemin]=scalemin
   size[size>scalemax]=scalemax
   vn$nodes$font.size=size*0.5
-  vn$nodes$size <- vn$nodes$font.size*0.5
+  #vn$nodes$size <- vn$nodes$font.size*0.5
+  vn$nodes$size <- nodesize*2
   
   if (shape %in% c("dot","square")){
     vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
@@ -1164,15 +1170,23 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE, shape="dot", opacity=0.7, t
   title <- strsplit(stringr::str_to_title(vn$nodes$title), " ")
   
   vn$nodes$title <- unlist(lapply(title, function(l){
-    n <- ceiling(length(l)/2)
+    n <- floor(length(l)/2)
     paste0(paste(l[1:n], collapse=" ", sep=""),"<br>",paste(l[(n+1):length(l)], collapse=" ", sep=""))
   }))
   
   vn$nodes <- vn$nodes %>%
-    mutate(title = paste(.data$title, "<br>DOI: ",
-                        .data$DOI, "<br>LCS: ",
-                        .data$LCS, "    GCS: ",
-                        .data$GCS, sep=""))
+    mutate(title = paste("<b>Title</b>: ",
+                         .data$title,
+                         "<br><b>DOI</b>: ",
+                         paste0(
+                           '<a href=\"https://doi.org/',
+                           .data$DOI,
+                           '\" target=\"_blank\">',
+                           #"DOI: ",
+                        .data$DOI, '</a>'),
+                        "<br><b>GCS</b>: ",
+                        .data$GCS, "<br><b>LCS</b>: ",
+                        .data$LCS, sep=""))
   
   ## add time line
   vn$nodes$group <- "normal"
@@ -1225,6 +1239,9 @@ hist2vis<-function(net, labelsize = 2, curved=FALSE, shape="dot", opacity=0.7, t
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
     visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust),
                          fixed = list(x = TRUE)) %>%
+    # visGroups(groupname = "time", shape = "icon", 
+    #           icon = list(code = "f060", size = 75)) %>% 
+    # addFontAwesome() %>% 
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
     visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = T,

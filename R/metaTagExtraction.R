@@ -219,15 +219,23 @@ AU_CO<-function(M){
   M$AU_CO=NA
   C1=M$C1
   ## must replace all NA before "removing reprint info", or NA_character_ became string "NA"
-  C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
+  if ("RP" %in% names(M)){
+    C1[which(is.na(C1))]=M$RP[which(is.na(C1))]
+  }else{
+    M$RP=NA
+  }
   
   ## remove reprint information from C1
   C1=unlist(lapply(C1,function(l){
-    l=unlist(strsplit(l,";"))
-    #l=l[regexpr("REPRINT AUTHOR",l)==-1]
-    l=paste0(l,collapse=";")
+    if (!is.na(l)){
+      l=unlist(strsplit(l,";"))
+      #l=l[regexpr("REPRINT AUTHOR",l)==-1]
+      l=paste0(l,collapse=";")
+    } else{
+      "NA"
+    }
   }))
-  ### above changes all NA to 'NA'
+  ## above changes all NA to 'NA'
   
   C1=gsub("\\[.*?\\] ", "", C1)
   ## change 'NA' back to NA

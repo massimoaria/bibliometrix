@@ -4389,46 +4389,52 @@ server <- function(input, output,session){
                    values <- historiograph(input,values)
                  })
     
-    fx <- list(
-      family = "Old Standard TT, serif",
-      size = 11,
-      color = "black"
-    )
-    
-    a <- list(
-      ticks = "outside",
-      autotick = FALSE,
-      ticktext = values$histPlot$axis$label, 
-      tickvals = values$histPlot$axis$values,
-      tickmode = "array",
-      showticklabels = TRUE,
-      tickangle = 270,
-      tickfont = fx,
-      ticklen = 2,
-      tickwidth = 2,
-      tickcolor = toRGB("black")
-    )
-    
-    g <- plot.ly(values$histPlot$g, side="r", size=0.05, aspectratio = 1.5, height=-0.1) %>% 
-      layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, 
-             hoverlabel = list(font=list(size=input$histlabelsize+9)))
-    return(g)
+    # fx <- list(
+    #   family = "Old Standard TT, serif",
+    #   size = 11,
+    #   color = "black"
+    # )
+    # 
+    # a <- list(
+    #   ticks = "outside",
+    #   autotick = FALSE,
+    #   ticktext = values$histPlot$axis$label, 
+    #   tickvals = values$histPlot$axis$values,
+    #   tickmode = "array",
+    #   showticklabels = TRUE,
+    #   tickangle = 270,
+    #   tickfont = fx,
+    #   ticklen = 2,
+    #   tickwidth = 2,
+    #   tickcolor = toRGB("black")
+    # )
+    # 
+    # g <- plot.ly(values$histPlot$g, side="r", size=0.05, aspectratio = 1.5, height=-0.1) %>% 
+    #   layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, 
+    #          hoverlabel = list(font=list(size=input$histlabelsize+9)))
+    # return(g)
   })
 
   
-  output$HGplot.save <- downloadHandler(
-    filename = function() {
-      paste("Historiograph-", Sys.Date(), ".png", sep="")
-    },
-    content <- function(file) {
-      ggsave(filename = file, plot = values$histPlot$g, dpi = as.numeric(input$HGdpi),  height = input$HGh, width = input$HGh*2, bg="white")
-    },
-    contentType = "png"
-  )
+  # output$HGplot.save <- downloadHandler(
+  #   filename = function() {
+  #     paste("Historiograph-", Sys.Date(), ".png", sep="")
+  #   },
+  #   content <- function(file) {
+  #     ggsave(filename = file, plot = values$histPlot$g, dpi = as.numeric(input$HGdpi),  height = input$HGh, width = input$HGh*2, bg="white")
+  #   },
+  #   contentType = "png"
+  # )
   
-  output$histPlot <- renderPlotly({
-    Hist()
+  ### screenshot Button Historiograph
+  observeEvent(input$HGplot.save, {
+    file <- paste("Historiograph-", Sys.Date(), ".png", sep="")
+    screenshot(selector="#histPlotVis", scale=input$HGh, filename=file)
   })
+  
+  # output$histPlot <- renderPlotly({
+  #   Hist()
+  # })
   
   output$histPlotVis <- renderVisNetwork({  
     g <- Hist()
@@ -7060,31 +7066,26 @@ server <- function(input, output,session){
                                                                      max = 20,
                                                                      value = 4, step = 1)))
                                     ),
-                                    selectInput(
-                                      'HGdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.HGdpi != 'null'",
-                                                     sliderInput(
-                                                       'HGh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("HGplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
+                                    br(),
+                                    selectInput("HGh",
+                                                h4(strong("Export plot")),
+                                                choices = c(
+                                                  "Select the image scale" = 0,
+                                                  "screen resolution x1" = 1,
+                                                  "screen resolution x2" = 2,
+                                                  "screen resolution x3" = 3,
+                                                  "screen resolution x4" = 4,
+                                                  "screen resolution x5" = 5,
+                                                  "screen resolution x6" = 6,
+                                                  "screen resolution x7" = 7,
+                                                  "screen resolution x8" = 8
+                                                ),
+                                                selected = 0),
+                                    conditionalPanel(condition = "input.HGh != 0",
+                                        actionButton("HGplot.save", strong("Export plot as png"),
+                                                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                 width = "100%")
+                                   )
                    ),
                    ## Collaboration Network ----
                    conditionalPanel(condition = 'input.sidebarmenu == "collabNetwork"',

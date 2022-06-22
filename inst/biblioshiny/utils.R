@@ -1192,40 +1192,23 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   vn$nodes$group <- "normal"
   vn$nodes$shape <- "dot"
   
-  if (isTRUE(timeline)){
-    vn$edges$label <- NULL
-    
-    nr <- nrow(vn$nodes)
-    y <- min(0,min(vn$nodes$y)-1)
-    
-    vn$nodes[nr+1,c("id","title","label","color","font.color")] <-
-      c(rep(min(vn$nodes$x),3),"black","white")
-    vn$nodes$x[nr+1] <- min(vn$nodes$x, na.rm=TRUE)
-    vn$nodes$y[nr+1] <- y
-    vn$nodes$size[nr+1] <- vn$nodes$size[nr]
-    vn$nodes$years[nr+1] <- as.numeric(vn$nodes$x[nr+1])
-    vn$nodes$font.size[nr+1] <- vn$nodes$font.size[nr]
-    vn$nodes$title[nr+1] <- vn$nodes$x[nr+1]
-    
-    vn$nodes[nr+2,c("id","title","label","color","font.color")] <-
-      c(rep(max(vn$nodes$x),3),"black","white")
-    vn$nodes$x[nr+2] <- max(vn$nodes$x, na.rm=TRUE)
-    vn$nodes$y[nr+2] <- y
-    vn$nodes$size[nr+2] <- vn$nodes$size[nr]
-    vn$nodes$years[nr+2] <- as.numeric(vn$nodes$x[nr+2])
-    vn$nodes$font.size[nr+2] <- vn$nodes$font.size[nr]
-    vn$nodes$title[nr+2] <- vn$nodes$x[nr+2]
-    vn$nodes$group[c(nr+1,nr+2)] <- "time"
-    vn$nodes$shape[c(nr+1,nr+2)] <- "box"
-    vn$nodes$font.vadjust[c(nr+1,nr+2)]  <- 0
-    
-    nr <- nrow(vn$edges)
-    vn$edges[nr+1,c(1:3)] <- c(max(vn$nodes$x),min(vn$nodes$x), "grey30")
-    vn$edges[nr+1,4] <- 1
-    vn$edges[nr+1, 5] <- TRUE
-    vn$edges$smooth[nr+1] <- FALSE
-    vn$edges$label[nr+1] <- "Timeline"
-  }
+  nr <- nrow(vn$nodes)
+  y <- max(vn$nodes$y)
+  
+  vn$nodes[nr+1,c("id","title","label","color","font.color")] <-
+    c(rep("logo",3),"black","white")
+  vn$nodes$x[nr+1] <- max(vn$nodes$x, na.rm=TRUE)
+  vn$nodes$y[nr+1] <- y
+  vn$nodes$size[nr+1] <- vn$nodes$size[nr]*4
+  vn$nodes$years[nr+1] <- as.numeric(vn$nodes$x[nr+1])
+  vn$nodes$font.size[nr+1] <- vn$nodes$font.size[nr]
+  vn$nodes$group[nr+1] <- "logo"
+  vn$nodes$shape[nr+1] <- "image"
+  vn$nodes$image[nr+1] <- "logo.jpg"
+  vn$nodes$fixed.x <- TRUE
+  vn$nodes$fixed.y <- FALSE
+  vn$nodes$fixed.y[nr+1] <- TRUE
+  
   coords <- vn$nodes[,c("x","y")] %>% 
     as.matrix()
   
@@ -1237,17 +1220,16 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
-    visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust),
-                         fixed = list(x = TRUE)) %>%
-    # visGroups(groupname = "time", shape = "icon", 
-    #           icon = list(code = "f060", size = 75)) %>% 
-    # addFontAwesome() %>% 
+    visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
-    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = T,
+    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = F,
                            autoResize = TRUE,
                            manipulation = FALSE, height = "100%") %>%
     visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle)
+  # visGroups(groupname = "time", shape = "icon", 
+  #           icon = list(code = "f060", size = 75)) %>% 
+  # addFontAwesome() %>% 
   
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
 }

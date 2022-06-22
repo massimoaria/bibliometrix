@@ -14,6 +14,7 @@ if (!require(dashboardthemes)){install.packages("dashboardthemes"); require(dash
 if (!require(shinydashboardPlus)){install.packages("shinydashboardPlus"); require(shinydashboardPlus, quietly=TRUE)}
 if (!require(shinydashboard)){install.packages("shinydashboard"); require(shinydashboard, quietly=TRUE)}
 if (!require(shinyjs)){install.packages("shinyjs"); require(shinyjs, quietly=TRUE)}
+if (!require(shinyscreenshot)){install.packages("shinyscreenshot"); require(shinyscreenshot, quietly=TRUE)}
 require(Matrix, quietly = TRUE)
 require(dimensionsR, quietly = TRUE)
 require(pubmedR, quietly = TRUE)
@@ -1265,12 +1266,12 @@ body <- dashboardBody(
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
-                            tabPanel("Plot",
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
+                            tabPanel("Network", 
+                                     shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "80vh"))),
+                            # tabPanel("Plot",
+                            #          shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
                             tabPanel("Table", 
-                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))),
-                            tabPanel("Dynamic Network", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "80vh")))
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
                 )
               )
              )

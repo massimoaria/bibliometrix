@@ -10,6 +10,7 @@ histPlot(
   size = 5,
   labelsize = 5,
   title_as_label = FALSE,
+  label = "short",
   verbose = TRUE
 )
 }
@@ -30,7 +31,10 @@ is a network matrix obtained by the function \code{\link{histNetwork}}.}
 
 \item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}}
 
-\item{title_as_label}{is a logical. If TRUE document titles are plotted instead of short labels.}
+\item{title_as_label}{is a logical. DEPRECATED}
+
+\item{label}{is a character. It indicates which label type to use as node id in the historiograph. It can be \code{label=c("short", "title", "keywords", "keywordsplus")}. 
+Default is \code{label = "short"}.}
 
 \item{verbose}{is logical. If TRUE, results and plots are printed on screen.}
 }

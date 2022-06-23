@@ -221,8 +221,6 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
     data.frame() %>% 
     mutate(Cluster = as.numeric(factor(.data$Cluster)))
 
-  documentToClusters <- clusterAssignment(M, words=df_lab, field, remove.terms, synonyms)
-  
   ## Add centrality measure to words
   cluster_res <- Net$cluster_res %>% 
     dplyr::select(!.data$cluster)
@@ -230,12 +228,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   df_lab <- df_lab %>% 
     dplyr::left_join(cluster_res, by=c("Words" = "vertex"))
   
+  documentToClusters <- clusterAssignment(M, words=df_lab, field, remove.terms, synonyms, threshold=0.5)
+  
   results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
 return(results)
 }
 
 # Probability calculation fro cluster assignment
-clusterAssignment <- function(M, words, field, remove.terms, synonyms){
+clusterAssignment <- function(M, words, field, remove.terms, synonyms, threshold){
 
   #### integrate stopwords and synonyms in M original field  
   if (field %in% c("AB","TI")) field <- paste0(field,"_TM")
@@ -263,15 +263,19 @@ clusterAssignment <- function(M, words, field, remove.terms, synonyms){
   words <- words %>% 
     mutate(p_w = 1/.data$Occurrences) %>% 
     group_by(.data$Cluster) %>% 
-    mutate(p_c = 1/length(.data$Cluster))
+    rename(p_c = .data$pagerank_centrality)
+    #mutate(p_c = 1/length(.data$Cluster))
 
   TERMS <- allField %>% 
     mutate(terms = .data$terms %>% tolower()) %>% 
     left_join(words, by = c("terms" = "Words"))
   
   TERMS <- TERMS %>% 
+    group_by(.data$SR) %>% 
+    mutate(pagerank = sum(.data$p_c,na.rm = T)) %>% 
     group_by(.data$SR, .data$Cluster_Label) %>% 
-    summarize(weigth = sum(.data$p_w, na.rm = T)) %>% 
+    summarize(weigth = sum(.data$p_w),
+              pagerank = max(.data$pagerank, na.rm=TRUE)) %>% 
     mutate(p = .data$weigth/sum(.data$weigth, na.rm=T)) %>% 
     drop_na(.data$Cluster_Label) %>% 
     ungroup()
@@ -280,25 +284,41 @@ clusterAssignment <- function(M, words, field, remove.terms, synonyms){
     select(-.data$weigth) %>% 
     group_by(.data$SR)
   
+  ## Assign docs to cluser with p_max>=threshold
   TERMS_Max <- TERMS %>% 
+    dplyr::filter(.data$p>=threshold) %>% 
     group_by(.data$SR) %>% 
     slice_max(order_by = .data$p, n=1) %>% 
     summarize(Assigned_cluster = paste(.data$Cluster_Label, collapse = ";"))
   
-  TERMS <- TERMS %>% 
-    pivot_wider(names_from = .data$Cluster_Label, values_from = .data$p) %>% 
-    left_join(TERMS_Max, by = "SR")
+  ### doc pagerank centrality for the assigned cluster 
+  TERMS_pagerank <- TERMS %>% 
+    select(!.data$p) %>%
+    left_join(TERMS_Max, by="SR") %>% 
+    dplyr::filter(.data$Cluster_Label==.data$Assigned_cluster) %>% 
+    select(.data$SR,.data$pagerank)
 
-  
+  TERMS <- TERMS %>% 
+    select(!.data$pagerank) %>% 
+    pivot_wider(names_from = .data$Cluster_Label, values_from = .data$p) %>% 
+    left_join(TERMS_Max, by = "SR") %>% 
+    left_join(TERMS_pagerank, by="SR")
   
   if (!("DI" %in% names(M))) M$DI <- NA
   
+  year <- as.numeric(substr(Sys.time(),1,4))+1
+  
   TERMS <- M %>% 
-    select(.data$DI, .data$AU, .data$TI, .data$SO, .data$PY,.data$TC, .data$SR) %>% 
+    mutate(TCpY =.data$TC/(year-.data$PY)) %>% 
+    group_by(.data$PY) %>% 
+    mutate(NTC = .data$TC/mean(.data$TC, na.rm=TRUE)) %>% 
+    ungroup() %>% 
+    select(.data$DI, .data$AU, .data$TI, .data$SO, .data$PY,.data$TC, .data$TCpY, .data$NTC,.data$SR) %>% 
     left_join(TERMS, by = "SR") %>% 
     mutate_if(is.numeric, ~replace_na(., 0)) %>% 
     group_by(.data$Assigned_cluster) %>% 
     arrange(desc(.data$TC), .by_group = TRUE)
+  
   
   return(TERMS)
 }

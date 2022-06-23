@@ -84,7 +84,7 @@ CRAN page:          https://cran.r-project.org/package=bibliometrix
     
 GitHub repository:  https://github.com/massimoaria/bibliometrix
 
-Tutorial:           http://htmlpreview.github.io/?https://github.com/massimoaria/bibliometrix/master/vignettes/bibliometrix-vignette.html
+Tutorial:           https://github.com/massimoaria/bibliometrix/master/vignettes/bibliometrix-vignette.html
 
 Slides:             https://www.slideshare.net/MassimoAria/bibliometrix-phd-seminar
 

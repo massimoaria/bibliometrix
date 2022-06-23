@@ -223,6 +223,12 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
 
   documentToClusters <- clusterAssignment(M, words=df_lab, field, remove.terms, synonyms)
   
+  ## Add centrality measure to words
+  cluster_res <- Net$cluster_res %>% 
+    dplyr::select(!.data$cluster)
+  
+  df_lab <- df_lab %>% 
+    dplyr::left_join(cluster_res, by=c("Words" = "vertex"))
   
   results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
 return(results)

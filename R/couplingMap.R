@@ -28,6 +28,7 @@
 #' @param size is numerical. It indicates the size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
+#' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The coupling map as ggplot2 object\cr
@@ -52,7 +53,7 @@
 #'
 #' @export
 
-couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term=NULL, ngrams=1, impact.measure="local", minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE){
+couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term=NULL, ngrams=1, impact.measure="local", minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, cluster= "walktrap"){
   
   
   if (!(analysis %in% c("documents", "authors", "sources"))) {
@@ -62,7 +63,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   minfreq <- max(0,floor(minfreq*nrow(M)/1000))
   
 
-  Net <- network(M, analysis=analysis, field=field, stemming=stemming,n=n)
+  Net <- network(M, analysis=analysis, field=field, stemming=stemming,n=n, cluster=cluster)
   
   net=Net$graph
   
@@ -219,7 +220,7 @@ coupling <- function(M,field, analysis){
   return(NetMatrix)
 }
 
-network <- function(M, analysis,field, stemming, n){
+network <- function(M, analysis,field, stemming, n, cluster){
   switch(analysis,
          documents = {
            switch(field,
@@ -272,7 +273,7 @@ network <- function(M, analysis,field, stemming, n){
   
   if (nrow(NetMatrix)>0){
     Net <- networkPlot(NetMatrix, normalize="salton",n=n, Title = paste("Coupling network of ",analysis," using ",field,sep=""),type="auto",
-                       labelsize = 2, halo = F,cluster="louvain",remove.isolates=TRUE,
+                       labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,
                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                        size=1,edges.min = 1, label.n=n, verbose = FALSE)
   }else{

@@ -208,6 +208,12 @@ postprocessingDim <- function(DATA) {
     }))
   }
   
+  i <- which(names(DATA)=="Authors.Affiliations")
+  if (length(i)==1){
+    names(DATA)[i] <- "AU_UN"
+  }
+  
+  if ("AU_UN" %in% names(DATA)){
   DATA$AU1_UN <-
     unlist(lapply(strsplit(DATA$AU_UN, ";"), function(l) {
       l <- ifelse(length(l) > 0,
@@ -215,7 +221,10 @@ postprocessingDim <- function(DATA) {
                   NA)
       return(l)
     }))
-  
+  }else{
+    DATA$AU_UN=NA
+    DATA$AU1_UN=NA
+  }
   DATA$AU1_CO <- ifelse(DATA$AU1_CO=="NA",NA,DATA$AU1_CO)
   
   DATA$AU_CO <- ifelse(DATA$AU_CO=="NA",NA,DATA$AU_CO)

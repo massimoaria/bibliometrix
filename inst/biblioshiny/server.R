@@ -3343,6 +3343,12 @@ server <- function(input, output,session){
     contentType = "html"
   )
   
+  ### save coc network as png ###
+  observeEvent(input$cocPlot.save, {
+    file <- paste("Co_occurrence_Network-", Sys.Date(), ".png", sep="")
+    screenshot(selector="#cocPlot", scale=input$cocRes, filename=file)
+  })
+  
   output$cocTable <- DT::renderDT({
     COCnetwork()
     cocData=values$cocnet$cluster_res
@@ -4340,6 +4346,11 @@ server <- function(input, output,session){
     contentType = "net"
   )
   
+  observeEvent(input$cocitPlot.save, {
+    file <- paste("Co_citation_Network-", Sys.Date(), ".png", sep="")
+    screenshot(selector="#cocitPlot", scale=input$cocitRes, filename=file)
+  })
+  
   output$cocitTable <- DT::renderDT({
     COCITnetwork()
     cocitData=values$cocitnet$cluster_res
@@ -4520,6 +4531,11 @@ server <- function(input, output,session){
     },
     contentType = "net"
   )
+  
+  observeEvent(input$colPlot.save, {
+    file <- paste("Collaboration_Network-", Sys.Date(), ".png", sep="")
+    screenshot(selector="#colPlot", scale=input$colRes, filename=file)
+  })
   
   output$colTable <- DT::renderDT({
     COLnetwork()
@@ -6447,6 +6463,26 @@ server <- function(input, output,session){
                                                           style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
                                                           width = "100%")
                                     )
+                                  ),
+                                  br(),
+                                  selectInput("cocRes",
+                                              h4(strong("Export plot")),
+                                              choices = c(
+                                                "Select the image scale" = 0,
+                                                "screen resolution x1" = 1,
+                                                "screen resolution x2" = 2,
+                                                "screen resolution x3" = 3,
+                                                "screen resolution x4" = 4,
+                                                "screen resolution x5" = 5,
+                                                "screen resolution x6" = 6,
+                                                "screen resolution x7" = 7,
+                                                "screen resolution x8" = 8
+                                              ),
+                                              selected = 0),
+                                  conditionalPanel(condition = "input.cocRes != 0",
+                                                   actionButton("cocPlot.save", strong("Export plot as png"),
+                                                                style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                width = "100%")
                                   )
                    ),
                    ## Thematic Map ----
@@ -7029,7 +7065,26 @@ server <- function(input, output,session){
                                            downloadButton("networkCocit.fig", strong("Save HTML"),
                                                           style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
                                                           width = "100%")
-                                    )
+                                    )),
+                                    br(),
+                                    selectInput("cocitRes",
+                                                h4(strong("Export plot")),
+                                                choices = c(
+                                                  "Select the image scale" = 0,
+                                                  "screen resolution x1" = 1,
+                                                  "screen resolution x2" = 2,
+                                                  "screen resolution x3" = 3,
+                                                  "screen resolution x4" = 4,
+                                                  "screen resolution x5" = 5,
+                                                  "screen resolution x6" = 6,
+                                                  "screen resolution x7" = 7,
+                                                  "screen resolution x8" = 8
+                                                ),
+                                                selected = 0),
+                                    conditionalPanel(condition = "input.cocitRes != 0",
+                                                     actionButton("cocitPlot.save", strong("Export plot as png"),
+                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                  width = "100%")
                                     )
                    ),
                    ## Historiograph ----
@@ -7249,7 +7304,26 @@ server <- function(input, output,session){
                                            downloadButton("networkCol.fig", strong("Save HTML"),
                                                           style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
                                                           width = "100%")
-                                    )
+                                    )), 
+                                    br(),
+                                    selectInput("colRes",
+                                                h4(strong("Export plot")),
+                                                choices = c(
+                                                  "Select the image scale" = 0,
+                                                  "screen resolution x1" = 1,
+                                                  "screen resolution x2" = 2,
+                                                  "screen resolution x3" = 3,
+                                                  "screen resolution x4" = 4,
+                                                  "screen resolution x5" = 5,
+                                                  "screen resolution x6" = 6,
+                                                  "screen resolution x7" = 7,
+                                                  "screen resolution x8" = 8
+                                                ),
+                                                selected = 0),
+                                    conditionalPanel(condition = "input.colRes != 0",
+                                                     actionButton("colPlot.save", strong("Export plot as png"),
+                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                  width = "100%")
                                     )
                    ),
                    ## Collaboration World Map ----

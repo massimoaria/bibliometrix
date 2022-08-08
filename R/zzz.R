@@ -288,14 +288,14 @@ biblioshiny()\n")
 ### extract data from igraph class object
 ### Credits to François Briatte. Function is a fork of the package ggnetwork
 dataFromIgraph <- function(
-  model,
-  data = NULL,
-  layout = igraph::nicely(),
-  arrow.gap = ifelse(igraph::is.directed(model), 0.025, 0),
-  by = NULL,
-  scale = TRUE,
-  stringsAsFactors = getOption("stringsAsFactors"),
-  ...
+    model,
+    data = NULL,
+    layout = igraph::nicely(),
+    arrow.gap = ifelse(igraph::is.directed(model), 0.025, 0),
+    by = NULL,
+    scale = TRUE,
+    stringsAsFactors = getOption("stringsAsFactors"),
+    ...
 ) {
   # node placement
   if (inherits(layout, "matrix") && identical(dim(layout), c(igraph::gorder(model), 2L))) {
@@ -324,18 +324,18 @@ dataFromIgraph <- function(
 
 ### Credits to François Briatte. Function is a fork of the package ggnetwork
 format_igraph <- function(
-  model,
-  nodes = NULL,
-  weights = NULL,
-  arrow.gap = ifelse(network::is.directed(model), 0.025, 0),
-  by = NULL,
-  scale = TRUE,
-  stringsAsFactors = getOption("stringsAsFactors"),
-  .list_vertex_attributes_fun = NULL,
-  .get_vertex_attributes_fun = NULL,
-  .list_edges_attributes_fun = NULL,
-  .get_edges_attributes_fun = NULL,
-  .as_edges_list_fun = NULL
+    model,
+    nodes = NULL,
+    weights = NULL,
+    arrow.gap = ifelse(network::is.directed(model), 0.025, 0),
+    by = NULL,
+    scale = TRUE,
+    stringsAsFactors = getOption("stringsAsFactors"),
+    .list_vertex_attributes_fun = NULL,
+    .get_vertex_attributes_fun = NULL,
+    .list_edges_attributes_fun = NULL,
+    .get_edges_attributes_fun = NULL,
+    .as_edges_list_fun = NULL
 ) {
   # store coordinates
   nodes <- data.frame(nodes)
@@ -451,17 +451,17 @@ scale_data <- function(x, scale = diff(range(x))) {
 ## Plot edges using ggplot2
 ### Credits to François Briatte. Function is a fork of the package ggnetwork
 geom_network_edges <- function(
-  mapping = NULL,
-  data = NULL,
-  position = "identity",
-  arrow = NULL,
-  curvature = 0,
-  angle = 90,
-  ncp = 5,
-  na.rm = FALSE,
-  show.legend = NA,
-  inherit.aes = TRUE,
-  ...
+    mapping = NULL,
+    data = NULL,
+    position = "identity",
+    arrow = NULL,
+    curvature = 0,
+    angle = 90,
+    ncp = 5,
+    na.rm = FALSE,
+    show.legend = NA,
+    inherit.aes = TRUE,
+    ...
 ) {
   if (!curvature) {
     geom <- ggplot2::GeomSegment
@@ -492,13 +492,13 @@ geom_network_edges <- function(
 
 ### Credits to François Briatte. Function is a fork of the package ggnetwork
 geom_network_nodes <- function(
-  mapping = NULL,
-  data = NULL,
-  position = "identity",
-  na.rm = FALSE,
-  show.legend = NA,
-  inherit.aes = TRUE,
-  ...
+    mapping = NULL,
+    data = NULL,
+    position = "identity",
+    na.rm = FALSE,
+    show.legend = NA,
+    inherit.aes = TRUE,
+    ...
 ) {
   ggplot2::layer(
     data = data,

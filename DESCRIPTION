@@ -45,12 +45,13 @@ Imports: stats,
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 2.1.0),
+    testthat (>= 3.0.0),
     shinycssloaders,
-		visNetwork,
-		wordcloud2
+    visNetwork,
+    wordcloud2
 RoxygenNote: 7.2.0
 NeedsCompilation: no
 Author: Massimo Aria [cre, aut],
   Corrado Cuccurullo [aut]
 Maintainer: Massimo Aria <aria@unina.it>
+Config/testthat/edition: 3

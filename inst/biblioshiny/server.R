@@ -2729,7 +2729,8 @@ server <- function(input, output,session){
            ID={lab="Keywords Plus"},
            DE={lab="Author's Keywords"},
            TI={lab="Title's Words"},
-           AB={lab="Abstract's Words"})
+           AB={lab="Abstract's Words"},
+           WC={lab="Subject Categories"})
     
     g <- freqPlot(xx,x=2,y=1, textLaby = lab, textLabx = "Occurrences", title = "Most Relevant Words", values)
     
@@ -5699,7 +5700,8 @@ server <- function(input, output,session){
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
                                                             "Titles" = "TI",
-                                                            "Abstracts" = "AB"),
+                                                            "Abstracts" = "AB",
+                                                            "Subject Categories (WoS)" = "WC"),
                                                 selected = "ID"),
                                     conditionalPanel(condition = "input.MostRelWords == 'AB' |input.MostRelWords == 'TI'",
                                                      selectInput("MRWngrams",'N-Grams',
@@ -5782,7 +5784,7 @@ server <- function(input, output,session){
                                                                     style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
                                                                     width = "100%"))
                    ),
-                   ## Word cloud ----
+                   ## Wordcloud ----
                    conditionalPanel(condition = 'input.sidebarmenu == "wcloud"',
                                     h4(em(strong(" "))),
                                     " ",
@@ -5790,7 +5792,8 @@ server <- function(input, output,session){
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
                                                             "Titles" = "TI",
-                                                            "Abstracts" = "AB"),
+                                                            "Abstracts" = "AB",
+                                                            "Subject Categories (WoS)" = "WC"),
                                                 selected = "ID"),
                                     conditionalPanel(condition = "input.summaryTerms == 'AB' |input.summaryTerms == 'TI'",
                                                      selectInput("summaryTermsngrams",'N-Grams',
@@ -5900,7 +5903,8 @@ server <- function(input, output,session){
                                                 choices = c("Keywords Plus" = "ID",
                                                             "Author's keywords" = "DE",
                                                             "Titles" = "TI",
-                                                            "Abstracts" = "AB"),
+                                                            "Abstracts" = "AB",
+                                                            "Subject Categories (WoS)" = "WC"),
                                                 selected = "ID"),
                                     conditionalPanel(condition = "input.treeTerms == 'AB' |input.treeTerms == 'TI'",
                                                      selectInput("treeTermsngrams",'N-Grams',
@@ -6254,7 +6258,8 @@ server <- function(input, output,session){
                                                 choices = c("Keywords Plus" = "ID", 
                                                             "Author's Keywords" = "DE",
                                                             "Titles" = "TI",
-                                                            "Abstracts" = "AB"),
+                                                            "Abstracts" = "AB",
+                                                            "Subject Categories (WoS)" = "WC"),
                                                 selected = "ID"),
                                     conditionalPanel(condition = "input.field == 'TI' | input.field == 'AB'",
                                                      selectInput("cocngrams",'N-Grams',

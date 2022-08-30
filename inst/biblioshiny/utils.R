@@ -609,7 +609,10 @@ wordlist <- function(M, Field, n, measure, ngrams, remove.terms=NULL, synonyms=N
            }},
          AB={if (!("AB_TM" %in% names(M))){
            v=tableTag(M,"AB", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
-         }}
+         }},
+         WC={
+           v=tableTag(M,"WC")
+         }
   )
   names(v)=tolower(names(v))
   #v=tableTag(values$M,"ID")
@@ -834,6 +837,11 @@ cocNetwork <- function(input,values){
                #}
                values$NetWords <- biblioNetwork(values$M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
                values$Title= "Abstract Words network"
+             },
+             WC={
+               WSC <- cocMatrix(values$M, Field="WC", binary=FALSE)
+               values$NetWords <- crossprod(WSC,WSC)
+               values$Title= "Subject Categories network"
              })
       
     }

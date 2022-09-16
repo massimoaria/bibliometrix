@@ -13,6 +13,7 @@ thematicMap(
   stemming = FALSE,
   size = 0.5,
   n.labels = 1,
+  community.repulsion = 0.1,
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
@@ -37,6 +38,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{size}{is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).}
 
 \item{n.labels}{is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.}
+
+\item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.}
 
 \item{repel}{is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.}
 

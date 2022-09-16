@@ -13,6 +13,7 @@ couplingMap(
   ngrams = 1,
   impact.measure = "local",
   minfreq = 5,
+  community.repulsion = 0.1,
   stemming = FALSE,
   size = 0.5,
   n.labels = 1,
@@ -41,6 +42,8 @@ With \code{impact.measure = "local"}, \link{couplingMap} calculates elements imp
 using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
 
 \item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
+
+\item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.}
 
 \item{stemming}{is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).}
 

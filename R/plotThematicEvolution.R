@@ -11,12 +11,14 @@
 #'
 #' @examples
 #' 
+#' \dontrun{
 #' data(scientometrics, package = "bibliometrixData")
 #' years=c(2000)
 #' 
 #' nexus <- thematicEvolution(scientometrics,field="ID",years=years,n=100,minFreq=2)
 #' 
-#' #plotThematicEvolution(nexus$Nodes,nexus$Edges)
+#' plotThematicEvolution(nexus$Nodes,nexus$Edges)
+#' }
 #' 
 #' @seealso \code{\link{thematicMap}} function to create a thematic map based on co-word network analysis and clustering.
 #' @seealso \code{\link{thematicMap}} function to perform a thematic evolution analysis.

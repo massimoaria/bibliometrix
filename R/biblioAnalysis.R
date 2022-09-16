@@ -79,7 +79,7 @@ if (!("SR" %in% Tags)){M=metaTagExtraction(M,"SR")}
 
 # temporal analyis
 
-#if ("PY" %in% Tags){Years=table(M$PY)}
+if ("PY" %in% Tags){PY <- as.numeric(M$PY)}
 
 # Author's distribution
 
@@ -104,11 +104,11 @@ if ("AU" %in% Tags){
   AuSingleAuthoredArt=length(unique(FirstAuthors[nAU==1]))
   AuMultiAuthoredArt=length(Authors)-AuSingleAuthoredArt
   }
+#PY=as.numeric(M$PY)
 
 #Total Citation Distribution
 if ("TC" %in% Tags){
   TC=as.numeric(M$TC)
-  PY=as.numeric(M$PY)
   CurrentYear=as.numeric(format(Sys.Date(),"%Y"))
   TCperYear=TC/(CurrentYear-PY+1)
   if (!("DI" %in% names(M))) M$DI <- ""

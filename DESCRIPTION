@@ -2,8 +2,17 @@ Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
 Version: 4.0.1
-Authors@R: c(person("Massimo", "Aria", email = "aria@unina.it", role=c("cre","aut")),
-             person("Corrado", "Cuccurullo", email = "cuccurullocorrado@gmail.com", role="aut"))
+Authors@R: c(
+    person(given = "Massimo",
+           family = "Aria",
+           role = c("cre", "aut", "cph"),
+           email = "aria@unina.it",
+           comment = c(ORCID = "0000-0002-8517-9411")),
+    person(given = "Corrado", 
+           family = "Cuccurullo", 
+           role = "aut",
+           email = "cuccurullocorrado@gmail.com",
+           comment = c(ORCID = "0000-0002-7401-8575")))
 Description: Tool for quantitative research in scientometrics and bibliometrics.
     It provides various routines for importing bibliographic data from 'SCOPUS',
     'Clarivate Analytics Web of Science' (<https://www.webofknowledge.com/>), 'Digital Science Dimensions' 
@@ -45,13 +54,11 @@ Imports: stats,
 Suggests: 
     knitr,
     rmarkdown,
+    openalexR,
     testthat (>= 3.0.0),
     shinycssloaders,
     visNetwork,
     wordcloud2
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 NeedsCompilation: no
-Author: Massimo Aria [cre, aut],
-  Corrado Cuccurullo [aut]
-Maintainer: Massimo Aria <aria@unina.it>
 Config/testthat/edition: 3

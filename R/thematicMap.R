@@ -22,6 +22,7 @@ globalVariables(".")
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
+#' @param community.repulsion is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.
 #' @param repel is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
@@ -47,7 +48,7 @@ globalVariables(".")
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="walktrap"){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, community.repulsion = 0.1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="walktrap"){
   
   minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
@@ -75,7 +76,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   
   if (nrow(NetMatrix)>0){
     Net <- networkPlot(NetMatrix, normalize="association", Title = "Keyword co-occurrences",type="auto",
-                     labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,community.repulsion = 0.1,
+                     labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,community.repulsion = community.repulsion,
                      remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                      size=1,edges.min = 1, label.n=n, verbose = FALSE)
   }else{

@@ -2333,7 +2333,7 @@ server <- function(input, output,session){
     xx[,3]=as.numeric(xx[,3])
     if (input$MostCitCountriesK>dim(xx)[1]){
       k=dim(xx)[1]
-    } else {k=input$MostRelAffiliationsK}
+    } else {k=input$MostCitCountriesK}
     if (input$CitCountriesMeasure=="TC"){
       xx=xx[1:k,c(1,2)]
       laby="N. of Citations"
@@ -3210,6 +3210,7 @@ server <- function(input, output,session){
     values$CM <- couplingMap(values$M, analysis=input$CManalysis, field=input$CMfield, 
                              n=input$CMn, minfreq=input$CMfreq,
                              ngrams=as.numeric(input$CMngrams),
+                             community.repulsion = input$CMrepulsion,
                              impact.measure=input$CMimpact,
                              stemming=input$CMstemming, size=input$sizeCM, 
                              label.term = input$CMlabeling,
@@ -3589,6 +3590,7 @@ server <- function(input, output,session){
     
     values$TM <- thematicMap(values$M, field=input$TMfield, 
                              n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
+                             community.repulsion = input$TMrepulsion,
                              stemming=input$TMstemming, size=input$sizeTM, cluster=input$TMCluster,
                              n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms)
     
@@ -6223,7 +6225,23 @@ server <- function(input, output,session){
                                         fluidRow(column(6,
                                                         numericInput("CMn.labels", label="Labels per cluster",value=3,min=1,max=10,step=1)),
                                                  column(6,
-                                                        numericInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)))
+                                                        numericInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05))),
+                                        fluidRow(column(6,
+                                                        numericInput("CMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
+                                                 column(6,
+                                                        selectInput("CMcluster", 
+                                                                    label = "Clustering Algorithm",
+                                                                    choices = c("None" = "none",
+                                                                                "Edge Betweenness" = "edge_betweenness",
+                                                                                "Fast Greedy" = "fast_greedy",
+                                                                                "InfoMap" = "infomap",
+                                                                                "Leading Eigenvalues" = "leading_eigen",
+                                                                                "Leiden" = "leiden",
+                                                                                "Louvain" = "louvain",
+                                                                                "Spinglass" = "spinglass",
+                                                                                "Walktrap" = "walktrap"),
+                                                                    selected = "walktrap")
+                                                 ))
                                     ),
                                     selectInput(
                                       'CMdpi',
@@ -6590,7 +6608,9 @@ server <- function(input, output,session){
                                         column(6,
                                                numericInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
                                         )),
-                                        fluidRow(column(12,
+                                        fluidRow(column(6,
+                                                        numericInput("TMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
+                                          column(6,
                                                         selectInput("TMCluster", 
                                                                     label = "Clustering Algorithm",
                                                                     choices = c("None" = "none",
@@ -6604,7 +6624,6 @@ server <- function(input, output,session){
                                                                                 "Walktrap" = "walktrap"),
                                                                     selected = "walktrap")
                                                         )
-                                          
                                         )
                                     ),
                                     selectInput(
@@ -6966,7 +6985,7 @@ server <- function(input, output,session){
                                                                        "Louvain" = "louvain",
                                                                        "Spinglass" = "spinglass",
                                                                        "Walktrap" = "walktrap"),
-                                                           selected = "leading_eigen")
+                                                           selected = "walktrap")
                                         )),
                                         fluidRow(column(6,
                                                         numericInput(inputId = "citNodes",

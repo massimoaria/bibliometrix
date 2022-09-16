@@ -31,7 +31,7 @@ mytitle <- tags$link(tags$a(href = 'https://www.bibliometrix.org/',target="_blan
 intro <- "javascript:void(window.open('https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html', '_blank'))"
 importData <- "javascript:void(window.open('https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html', '_blank'))"
 slides <- "javascript:void(window.open('https://bibliometrix.org/biblioshiny/assets/player/KeynoteDHTMLPlayer.html#0', '_blank'))"
-donation <- "javascript:void(window.open('https://www.bibliometrix.org/donate.html', '_blank'))"
+donation <- "javascript:void(window.open('https://www.bibliometrix.org/home/index.php/donation', '_blank'))"
 bibliometrixWeb <- "javascript:void(window.open('https://www.bibliometrix.org/', '_blank'))" 
 k_synth <- "javascript:void(window.open('https://www.k-synth.unina.it', '_blank'))"
 github_aria <- "javascript:void(window.open('https://github.com/massimoaria/bibliometrix', '_blank'))"

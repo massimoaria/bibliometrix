@@ -24,6 +24,7 @@
 #' With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while 
 #' using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact. 
 #' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).
+#' @param community.repulsion is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
 #' @param size is numerical. It indicates the size of the cluster circles and is a number in the range (0.01,1).
 #' @param n.labels is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.
@@ -53,7 +54,9 @@
 #'
 #' @export
 
-couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term=NULL, ngrams=1, impact.measure="local", minfreq=5, stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, cluster= "walktrap"){
+couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term=NULL, ngrams=1, impact.measure="local", minfreq=5, 
+                        community.repulsion = 0.1, 
+                        stemming=FALSE, size=0.5, n.labels=1, repel=TRUE, cluster= "walktrap"){
   
   
   if (!(analysis %in% c("documents", "authors", "sources"))) {
@@ -63,7 +66,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   minfreq <- max(0,floor(minfreq*nrow(M)/1000))
   
 
-  Net <- network(M, analysis=analysis, field=field, stemming=stemming,n=n, cluster=cluster)
+  Net <- network(M, analysis=analysis, field=field, stemming=stemming,n=n, cluster=cluster, community.repulsion = community.repulsion)
   
   net=Net$graph
   
@@ -220,7 +223,7 @@ coupling <- function(M,field, analysis){
   return(NetMatrix)
 }
 
-network <- function(M, analysis,field, stemming, n, cluster){
+network <- function(M, analysis,field, stemming, n, cluster, community.repulsion){
   switch(analysis,
          documents = {
            switch(field,
@@ -273,7 +276,7 @@ network <- function(M, analysis,field, stemming, n, cluster){
   
   if (nrow(NetMatrix)>0){
     Net <- networkPlot(NetMatrix, normalize="salton",n=n, Title = paste("Coupling network of ",analysis," using ",field,sep=""),type="auto",
-                       labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE,
+                       labelsize = 2, halo = F,cluster=cluster,remove.isolates=TRUE, community.repulsion = community.repulsion,
                        remove.multiple=FALSE, noloops=TRUE, weighted=TRUE,label.cex=T,edgesize=5, 
                        size=1,edges.min = 1, label.n=n, verbose = FALSE)
   }else{

@@ -23,12 +23,13 @@
 #' 
 #' @examples
 #' # EXAMPLE Citation network
-#'
+#' \dontrun{
 #' data(management, package = "bibliometrixData")
 #'
 #' histResults <- histNetwork(management, sep = ";")
 #' 
 #' net <- histPlot(histResults, n=20, labelsize = 5)
+#' }
 #' 
 #' @seealso \code{\link{histNetwork}} to compute a historical co-citation network.
 #' @seealso \code{\link{cocMatrix}} to compute a co-occurrence matrix.

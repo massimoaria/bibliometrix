@@ -31,10 +31,12 @@
 #'
 #' @examples
 #' 
+#' \dontrun{
 #' data(scientometrics, package = "bibliometrixData")
 #' years=c(2000)
 #' 
 #' nexus <- thematicEvolution(scientometrics,field="ID", years=years, n=100,minFreq=2)
+#' }
 #' 
 #' @seealso \code{\link{thematicMap}} function to create a thematic map based on co-word network analysis and clustering.
 #' @seealso \code{\link{cocMatrix}} to compute a bibliographic bipartite network.

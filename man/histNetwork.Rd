@@ -36,10 +36,12 @@ the function returns only the local citation table.}
 data frame.
 }
 \examples{
+
+\dontrun{
 data(management, package = "bibliometrixData")
 
 histResults <- histNetwork(management, min.citations = 0, sep = ";")
-
+}
 
 }
 \seealso{

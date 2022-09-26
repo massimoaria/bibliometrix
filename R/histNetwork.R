@@ -23,10 +23,12 @@
 #'
 #'
 #' @examples
+#' 
+#' \dontrun{
 #' data(management, package = "bibliometrixData")
 #'
 #' histResults <- histNetwork(management, min.citations = 0, sep = ";")
-#'
+#' }
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS
 #'   Export file in a bibliographic data frame.

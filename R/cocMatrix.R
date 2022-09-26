@@ -85,7 +85,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
     # Crete df with all terms
     
     Fi <- strsplit(M[,Field], sep)
-    TERMS <- data.frame(item = unlist(Fi), SR = rep(M$SR,lengths(Fi)))
+    TERMS <- data.frame(item = trimws(unlist(Fi)), SR = rep(M$SR,lengths(Fi)))
     TERMS <- TERMS %>% 
       anti_join(data.frame(item=trimws(toupper(remove.terms))), by="item") %>% 
       mutate(item = trimws(.data$item))

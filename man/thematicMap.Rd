@@ -72,9 +72,11 @@ and visualizing the evolution of a research field: A practical application to th
 }
 \examples{
 
+\dontrun{
 data(scientometrics, package = "bibliometrixData")
 res <- thematicMap(scientometrics, field = "ID", n = 250, minfreq = 5, size = 0.5, repel = TRUE)
 plot(res$map)
+}
 
 }
 \seealso{

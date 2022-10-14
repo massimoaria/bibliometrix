@@ -1,6 +1,10 @@
 .Rproj.user
 .Rhistory
 .RData
+*.csv
+*.xlsx
+.txt
+.bib
 .Ruserdata
 VOSviewer.jar
 network.net
@@ -9,3 +13,4 @@ desktop.ini
 vignette.txt
 inst/doc
 _gh-pages
+

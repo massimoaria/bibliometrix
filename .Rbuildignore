@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.github$
 ^.*\.txt$
 ^.*\.bib$
 ^.*\.ini$

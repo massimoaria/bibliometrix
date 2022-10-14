@@ -25,7 +25,7 @@ bibliometrix
 [![R-CMD-check](https://github.com/massimoaria/e2tree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml)
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
-`r badger::badge_cran_download("openalexR", "grand-total")` 
+`r badger::badge_cran_download("bibliometrix", "grand-total")` 
 
 
 

@@ -15,7 +15,7 @@ developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repo
 version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 [![rstudio mirror
 downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
-[![](http://cranlogs.r-pkg.org/badges/grand-total/openalexR)](https://cran.r-project.org/package=openalexR)
+[![](http://cranlogs.r-pkg.org/badges/grand-total/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 <p align="center">
 <img src="https://www.bibliometrix.org/logo_new.png" width="400"  />

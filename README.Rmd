@@ -301,7 +301,9 @@ Here, we show an example using the function *conceptualStructure* that performs 
 
 # Conceptual Structure using keywords (method="CA")
 
-CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
+CS <- conceptualStructure(M,field="ID", method="MCA", minDegree=10, clust=5, stemming=FALSE, labelsize=15, documents=20, graph=FALSE)
+plot(CS$graph_terms)
+plot(CS$graph_dendogram)
 
 ```
 

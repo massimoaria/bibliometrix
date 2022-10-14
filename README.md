@@ -502,10 +502,17 @@ stem, base or root form.
 
 # Conceptual Structure using keywords (method="CA")
 
-CS <- conceptualStructure(M,field="ID", method="CA", minDegree=4, k.max=8, stemming=FALSE, labelsize=10, documents=10)
+CS <- conceptualStructure(M,field="ID", method="MCA", minDegree=10, clust=5, stemming=FALSE, labelsize=15, documents=20, graph=FALSE)
+plot(CS$graph_terms)
 ```
 
-<img src="man/figures/README-Co-Word Analysis-1.png" width="100%" /><img src="man/figures/README-Co-Word Analysis-2.png" width="100%" /><img src="man/figures/README-Co-Word Analysis-3.png" width="100%" /><img src="man/figures/README-Co-Word Analysis-4.png" width="100%" />
+<img src="man/figures/README-Co-Word Analysis-1.png" width="100%" />
+
+``` r
+plot(CS$graph_dendogram)
+```
+
+<img src="man/figures/README-Co-Word Analysis-2.png" width="100%" />
 
 ## Historical Direct Citation Network
 

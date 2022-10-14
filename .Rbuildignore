@@ -16,3 +16,6 @@
 LICENCE.*$
 Rubbish
 ^_gh-pages$
+^README\.Rmd$
+^_pkgdown\.yml$
+^pkgdown$

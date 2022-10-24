@@ -90,7 +90,7 @@ wos <- function(M, min.citations, sep, network, verbose){
     trimws(unlist(lapply(
       strsplit(CR$ref, 'DOI', fixed = TRUE), '[', 2
     )))
-  CR$DI[is.na(CR$DI)] <- ""
+  CR$DI[is.na(CR$DI) | CR$DI=="NA"] <- ""
   CR$AU <-
     trimws(gsub("[ ]{2,}", "", (gsub(
       "\\.", " ", unlist(lapply(strsplit(CR$ref, ',', fixed = TRUE), '[', 1))
@@ -211,12 +211,15 @@ scopus <- function(M, min.citations, sep, network, verbose){
   M$LCS <- 0
   M$LCS[papers] <- LCS
   
+
   ### HistData
   histData <- M %>%
-    select(.data$SR_FULL, .data$TI,.data$DI, .data$PY, .data$LCS, .data$TC) %>%
+    select(.data$SR_FULL, .data$TI,.data$DE,.data$ID,.data$DI, .data$PY, .data$LCS, .data$TC) %>%
     rename(
       Paper = .data$SR_FULL,
       Title = .data$TI,
+      Author_Keywords = .data$DE,
+      KeywordsPlus = .data$ID,
       DOI = .data$DI,
       Year = .data$PY,
       GCS = .data$TC

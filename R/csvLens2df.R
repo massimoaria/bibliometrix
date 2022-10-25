@@ -51,7 +51,7 @@ csvLens2df <- function(file){
 
   # Iso Source Titles
   DATA$SO[DATA$SO==""] <- DATA$Publisher[DATA$SO==""] 
-  DATA$JI <- DATA$SO
+  DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
   DATA$J9 <- gsub("\\.","",DATA$JI)
   DATA$ID <- DATA$DE
   DI <- DATA$DI

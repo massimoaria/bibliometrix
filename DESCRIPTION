@@ -22,7 +22,7 @@ Description: Tool for quantitative research in scientometrics and bibliometrics.
 License: GPL-3
 URL: https://www.bibliometrix.org, https://github.com/massimoaria/bibliometrix, https://www.k-synth.com
 BugReports: https://github.com/massimoaria/bibliometrix/issues
-LazyData: FALSE
+LazyData: true
 Encoding: UTF-8
 Depends: R (>= 3.3.0)
 Imports: stats,

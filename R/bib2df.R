@@ -194,6 +194,11 @@ postprocessing <-function(DATA,dbsource){
   DI <- DATA$DI
   URL <- DATA$url
   DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
+  if ("JI" %in% names(DATA)){
+    DATA$J9 <- gsub("\\.","",DATA$JI)
+  }else{
+    DATA$J9 <- DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
+  }
   DATA$DI <- DI
   DATA$url <- URL
   return(DATA)

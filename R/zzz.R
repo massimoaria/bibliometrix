@@ -1,4 +1,4 @@
-utils::globalVariables("where")
+#utils::globalVariables("where")
 #utils::globalVariables("any_of")
 #utils::globalVariables("if_all")
 
@@ -532,3 +532,169 @@ StatNodes <- ggplot2::ggproto("StatNodes", ggplot2::Stat,
                                 }
                               }
 )
+
+### Credits to Patrick Barks. Function is a fork of the package Abbrev
+AbbrevTerm <- function(x, check = TRUE) {
+  # data("isodata",envir=environment())
+  # ltwa_phrase <- ltwa_phrase
+  # ltwa_prefix <- ltwa_prefix
+  # ltwa_singles <- ltwa_singles
+  # df_artcon <- df_artcon
+  # df_prep <- df_prep
+  if (check == FALSE) {
+    out <- x
+  } else {
+    # check for invalid x
+    if(length(x) > 1) {
+      stop('Please provide a single string (length(x) should equal 1)')
+    } else if (grepl('[[:space:]]', x)) {
+      warning('The provided string contains spaces. This function is only designed to abbreviate a single word.')
+    }
+    
+    # check whether x is title case
+    ch1 <- substr(x, 1, 1)
+    is_title <- ch1 == toupper(ch1)
+    
+    # check for whole word match
+    #int_whole_match <- stringi::stri_cmp_equiv(x, ltwa_singles$WORD, strength = 1)
+    int_whole_match <- identical(x, ltwa_singles$WORD)
+    ind_whole_match <- which(int_whole_match == TRUE)
+    
+    if (length(ind_whole_match > 0)) {
+      abbrev <- ltwa_singles$ABBREVIATIONS[ind_whole_match]
+      word <- ltwa_singles$WORD[ind_whole_match]
+      out <- ifelse(is.na(abbrev), word, abbrev)
+    } else {
+      # else, find matching prefix
+      lgl_prefix <- stringr::str_starts(x, ltwa_prefix$WORD)
+      #lgl_prefix <- stringi::stri_startswith_coll(x, ltwa_prefix$WORD, strength = 1)
+      ind_prefix <- which(lgl_prefix == TRUE)
+      
+      # choose abbrev based on number of matching prefixes (0, 1, or 2+)
+      if (length(ind_prefix) == 0) {
+        out <- x
+      } else if (length(ind_prefix) == 1) {
+        out <- ltwa_prefix$ABBREVIATIONS[ind_prefix]
+        if (is.na(out)) out <- x
+      } else {
+        ind_prefix <- ind_prefix[which.max(nchar(ltwa_prefix$WORD[ind_prefix]))]
+        out <- ltwa_prefix$ABBREVIATIONS[ind_prefix]
+      }
+    }
+    
+    # if x contains only latin chars, remove any diacritics from abbrev
+    if (stringr::str_conv(x, 'Latin-ASCII') == x) {
+    #if (stringi::stri_trans_general(x, 'Latin-ASCII') == x) {
+      #out <- stringi::stri_trans_general(out, 'Latin-ASCII')
+      out <- stringr::str_conv(out, 'Latin-ASCII')
+    }
+    
+    # if x is title case, convert out to title case
+    if (is_title == TRUE) {
+      out <- ToTitleCase(out)
+    }
+  }
+
+  return(out)
+}
+
+### Credits to Patrick Barks. Function is a fork of the package Abbrev
+AbbrevTitle <- function(x) {
+  # data("isodata",envir=environment())
+  # ltwa_phrase <- ltwa_phrase
+  # ltwa_prefix <- ltwa_prefix
+  # ltwa_singles <- ltwa_singles
+  # df_artcon <- df_artcon
+  # df_prep <- df_prep
+  # check for invalid x
+  if(length(x) > 1) {
+    stop('Please provide a single string (length(x) should equal 1)')
+  }
+  
+  # remove parentheses and punctuation, and split string into vector of
+  #  individual words/terms
+  x <- gsub('[[:space:]]\\(.+\\)|\\,|\\.', '', x)
+  xv <- unlist(strsplit(x, ' '))
+  if (length(xv) == 1) {
+    out <- ToTitleCase(xv)
+  } else {
+    xv_which_abb <- logical(length(xv))
+    
+    lgl_phrase <- sapply(ltwa_phrase$WORD, function(y) grepl(y, tolower(x)), USE.NAMES = FALSE)
+    ind_phrase <- which(lgl_phrase)
+    
+    if (length(ind_phrase) > 0) {
+      for (i in 1:length(ind_phrase)) {
+        match_phrase <- unlist(strsplit(ltwa_phrase$WORD[ind_phrase[i]], '[[:space:]]'))
+        match_abb <- ltwa_phrase$ABBREVIATIONS[ind_phrase[i]]
+        ind_match <- sapply(match_phrase, function(y) grep(y, tolower(xv)), USE.NAMES = FALSE) # should only find sequential matches
+        xv[ind_match[1]] <- match_abb
+        xv_which_abb[ind_match[1]] <- TRUE
+        xv <- xv[-ind_match[-1]]
+        xv_which_abb <- xv_which_abb[-ind_match[-1]]
+      }
+    }
+
+    if (all(xv_which_abb == TRUE)) {
+      out <- xv
+    } else {
+
+      CheckPrep <- function(x, check) {
+        if(check == TRUE) {
+          return(ifelse(tolower(x) %in% df_prep$word, TRUE, FALSE))
+        } else {
+          return(FALSE)
+        }
+      }
+      
+      ind_rem_prep <- c(FALSE, mapply(CheckPrep, USE.NAMES = F, x = xv[-1], check = !xv_which_abb[-1]))
+      xv <- xv[!ind_rem_prep]
+      xv_which_abb <- xv_which_abb[!ind_rem_prep]
+      
+      CheckArtCon <- function(x, check) {
+        if(check == TRUE) {
+          return(ifelse(tolower(x) %in% df_artcon$word, TRUE, FALSE))
+        } else {
+          return(FALSE)
+        }
+      }
+      
+      ind_rem_artcon <- mapply(CheckArtCon, USE.NAMES = F, x = xv, check = !xv_which_abb)
+      xv <- xv[!ind_rem_artcon]
+      xv_which_abb <- xv_which_abb[!ind_rem_artcon]
+      
+      xv <- gsub("^d'(?=[[:alpha:]])|^l'(?=[[:alpha:]])", "", xv, ignore.case = TRUE, perl = TRUE)
+      
+      if (all(xv_which_abb == TRUE)) {
+        out <- xv
+      } else {
+
+        ind_dash <- grep('[[:alpha:]]-[[:alpha:]]', xv)
+        if (length(ind_dash) > 0) {
+          xv <- unlist(strsplit(xv, '-'))
+          
+          for(i in length(ind_dash):1) {
+            xv_which_abb <- append(xv_which_abb, FALSE, ind_dash[i])
+          }
+        }
+        
+        abbrev_full <- mapply(AbbrevTerm, x = xv, check = !xv_which_abb, USE.NAMES = F)
+        
+        if (length(ind_dash) > 0) {
+          for(i in 1:length(ind_dash)) {
+            dashed_terms <- abbrev_full[c(ind_dash[i], ind_dash[i] + 1)]
+            abbrev_full[ind_dash[i]] <- paste(dashed_terms, collapse = '-')
+            abbrev_full <- abbrev_full[-(ind_dash[i] + 1)]
+          }
+        }
+        
+        out <- paste(abbrev_full, collapse = ' ')
+      }
+    }
+  }
+  return(out)
+}
+
+ToTitleCase <- function(x) {
+  paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
+}

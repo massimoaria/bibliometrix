@@ -239,7 +239,8 @@ postprocessingDim <- function(DATA) {
     DATA$SO <- "NA"
   }
   
-  DATA$JI = DATA$SO
+  DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
+  DATA$J9 <- gsub("\\.","",DATA$JI)
   
   DATA$PY <- as.numeric(DATA$PY)
   

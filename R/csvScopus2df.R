@@ -42,7 +42,7 @@ csvScopus2df <- function(file){
   if ("JI" %in% names(DATA)){
     DATA$J9 <- gsub("\\.","",DATA$JI)
     }else{
-      DATA$J9 <- DATA$JI <- DATA$SO
+      DATA$J9 <- DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
     }
  
   DI <- DATA$DI

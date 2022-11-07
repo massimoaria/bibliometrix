@@ -1069,7 +1069,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.2,1)))
   ## set a darkest gray for iter-cluster edges
   vn$edges$color <- paste(substr(vn$edges$color,1,7),"90",sep="")
-  vn$edges$color[substr(vn$edges$color,1,7)=="#B3B3B3"] <- "#33333390"
+  vn$edges$color[substr(vn$edges$color,1,7)=="#B3B3B3"] <- "#33333360"
   vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity)
   
   ## removing multiple edges

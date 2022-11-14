@@ -44,13 +44,13 @@
 #'
 #' @export
 
-thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, ngrams=1, stemming = FALSE, n.labels = 1, repel = TRUE, remove.terms = NULL, synonyms = NULL, cluster="leading_eigen") 
+thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size = 0.5, ngrams=1, stemming = FALSE, n.labels = 1, repel = TRUE, remove.terms = NULL, synonyms = NULL, cluster="walktrap") 
 {
   list_df <-  timeslice(M, breaks = years)
   K <-  length(list_df)
   S <-  net <-  res <-  list()
   Y <-  NULL
-  pdf(file = NULL)
+  pdf(file = NULL) ## to improve adding graph=FALSE in thematicMap
   for (k in 1:K) {
     Mk <-  list_df[[k]]
     Y[k] <-  paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")

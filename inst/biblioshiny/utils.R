@@ -486,7 +486,7 @@ AffiliationOverTime <- function(values,n){
     pivot_longer(cols = !Affiliation, names_to = "Year", values_to = "Articles") %>% 
     group_by(.data$Affiliation) %>% 
     mutate(Articles = cumsum(.data$Articles))
-
+  
   Affselected <- AFFY %>% 
     filter(.data$Year == max(.data$Year)) %>% 
     ungroup() %>% 
@@ -1046,7 +1046,7 @@ netLayout <- function(type){
 }
 
 savenetwork <- function(con, values){
-
+  
   values$network$VIS %>% 
     visOptions(height = "800px") %>% 
     visNetwork::visSave(con)
@@ -1070,55 +1070,55 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   ## set a darkest gray for iter-cluster edges
   vn$edges$color <- paste(substr(vn$edges$color,1,7),"90",sep="")
   vn$edges$color[substr(vn$edges$color,1,7)=="#B3B3B3"] <- "#33333360"
-  vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity)
-  
-  ## removing multiple edges
-  vn$edges=unique(vn$edges)
-  
-  ## labelsize
-  scalemin=20
-  scalemax=150
-  Min=min(vn$nodes$font.size)
-  Max=max(vn$nodes$font.size)
-  if (Max>Min){
-    size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
-  } else {size=10*labelsize}
-  size[size<scalemin]=scalemin
-  size[size>scalemax]=scalemax
-  vn$nodes$font.size=size
-  l<-netLayout(type)
-  
-  ### TO ADD SHAPE AND FONT COLOR OPTIONS
-  coords <- net$layout
-  
-  vn$nodes$size <- vn$nodes$font.size*0.8
-  
-  if (shape %in% c("text")){
-    vn$nodes$font.color <- vn$nodes$color
-  }else{
-    vn$nodes$font.color <- "black"
-  }
-  
-  if (shape %in% c("dot","square")){
-    vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
-  }else{
-    vn$nodes$font.vadjust <-0
-  }
-  
-  VIS<-
-    visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-    #visNodes(shape=shape, font=list(color="black")) %>%
-    visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
-    visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
-    visNetwork::visEdges(smooth = curved) %>%
-    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-    visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
-    visNetwork::visOptions(manipulation = TRUE) #%>%
+    vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity)
+    
+    ## removing multiple edges
+    vn$edges=unique(vn$edges)
+    
+    ## labelsize
+    scalemin=20
+    scalemax=150
+    Min=min(vn$nodes$font.size)
+    Max=max(vn$nodes$font.size)
+    if (Max>Min){
+      size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
+    } else {size=10*labelsize}
+    size[size<scalemin]=scalemin
+    size[size>scalemax]=scalemax
+    vn$nodes$font.size=size
+    l<-netLayout(type)
+    
+    ### TO ADD SHAPE AND FONT COLOR OPTIONS
+    coords <- net$layout
+    
+    vn$nodes$size <- vn$nodes$font.size*0.8
+    
+    if (shape %in% c("text")){
+      vn$nodes$font.color <- vn$nodes$color
+    }else{
+      vn$nodes$font.color <- "black"
+    }
+    
+    if (shape %in% c("dot","square")){
+      vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
+    }else{
+      vn$nodes$font.vadjust <-0
+    }
+    
+    VIS<-
+      visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
+      #visNodes(shape=shape, font=list(color="black")) %>%
+      visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+      visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
+      visNetwork::visEdges(smooth = curved) %>%
+      visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
+      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
+      visNetwork::visOptions(manipulation = TRUE) #%>%
     #visNetwork::visExport(type = "png", name = "network",
     #          label = paste0("Export graph as png"), background = "#fff",
     #          float = "right", style = NULL, loadDependencies = TRUE)
-  #values$COCVIS=VIS
-  return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
+    #values$COCVIS=VIS
+    return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 
 hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", opacity=0.7, labeltype="short", timeline=TRUE){
@@ -1143,7 +1143,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   vn$edges$dashes <- FALSE
   vn$edges$dashes[vn$edges$lty==2] <- TRUE
   vn$edges$color <- "grey"
-  
+    
   ## opacity
   vn$nodes$font.color <- adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.1,1)))
   
@@ -1194,10 +1194,10 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
                            .data$DOI,
                            '\" target=\"_blank\">',
                            #"DOI: ",
-                        .data$DOI, '</a>'),
-                        "<br><b>GCS</b>: ",
-                        .data$GCS, "<br><b>LCS</b>: ",
-                        .data$LCS, sep=""))
+                           .data$DOI, '</a>'),
+                         "<br><b>GCS</b>: ",
+                         .data$GCS, "<br><b>LCS</b>: ",
+                         .data$LCS, sep=""))
   
   ## add time line
   vn$nodes$group <- "normal"
@@ -1245,3 +1245,51 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
 }
 
+
+### Excel report functions
+addDataWb <- function(list_df, wb, sheetname){
+  l <- length(list_df)
+  startRow <- 1
+  for (i in 1:l){
+    df <- list_df[[i]]
+    n <- nrow(df)
+    writeDataTable(wb, sheetname, df, startRow = startRow, startCol = 1, tableStyle = "TableStyleLight9")
+    startRow <- startRow + n + 3
+  }
+  return(wb)
+}
+
+addGgplotsWb <- function(list_plot, wb, sheetname, width=10, height=10, dpi=300){
+  l <- length(list_plot)
+  startRow <- 1
+  for (i in 1:l){
+    fileName <- tempfile(pattern = "figureImage",
+                         fileext = ".png")
+    ggsave(plot = list_plot[[i]], filename = fileName, width = width, height = height,
+           units = "in", dpi = dpi)
+    insertImage(wb = wb, sheet = sheetname, file = fileName, width = width, 
+                height = height, startRow = startRow, startCol = 1, 
+                units = "in", dpi = dpi)
+    #unlink(fileName)
+    startRow <- startRow + (height*10)+3
+  }
+  return(wb)
+}
+
+addSheetToReport <- function(list_df,list_plot,sheetname, wb){
+  ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
+  if (length(ind)>0){
+    sheetnameplot <- paste(sheetname,"Plots",length(ind)+1,sep="")
+    sheetnamedf <- paste(sheetname,"Data",length(ind)+1,sep="")
+  } else {
+    sheetnameplot <- paste(sheetname,"Plots",sep="")
+    sheetnamedf <- paste(sheetname,"Data",sep="")
+  }
+  addWorksheet(wb, sheetnamedf, gridLines = FALSE)
+  addWorksheet(wb, sheetnameplot, gridLines = FALSE)
+  wb <- addDataWb(list_df, wb = wb, sheetname = sheetnamedf)
+  print("Added data frame to report")
+  wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetnameplot)
+  print("Added plot to report")
+  return(wb)
+}

@@ -3,7 +3,7 @@ source("utils.R", local=TRUE)
 #### SERVER ####
 server <- function(input, output,session){
   session$onSessionEnded(stopApp)
-
+  
   ## suppress warnings
   options(warn = -1)
   
@@ -15,6 +15,7 @@ server <- function(input, output,session){
   ## initial values
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
+  values$wb = openxlsx::createWorkbook()
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
   values$h <- 7
@@ -42,7 +43,7 @@ server <- function(input, output,session){
   values$ApiOk <- 0
   values$checkControlBar <-FALSE
   
-## NOTIFICATION ITEM ----
+  ## NOTIFICATION ITEM ----
   
   output$notificationMenu <- renderMenu({
     notifTot <- notifications()
@@ -163,7 +164,8 @@ server <- function(input, output,session){
                menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
       menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
                menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Collaboration WorldMap", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon")))
+               menuSubItem("Collaboration WorldMap", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+      menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
     )
   })
   
@@ -233,7 +235,8 @@ server <- function(input, output,session){
                menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
       menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
                menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Collaboration WorldMap", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon")))
+               menuSubItem("Collaboration WorldMap", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+      menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
     )
   })
   
@@ -598,7 +601,7 @@ server <- function(input, output,session){
                     "",
                     width = NULL,
                     placeholder = NULL
-                    ),
+      ),
       actionButton("dsToken", "Get a token "),
       h5(tags$b("Token")),
       verbatimTextOutput("tokenLog", placeholder = FALSE),
@@ -997,7 +1000,7 @@ server <- function(input, output,session){
       formatStyle(names(values$TABvb)[1],  backgroundColor = 'white',textAlign = 'left', fontSize = '110%') %>%
       formatStyle(names(values$TABvb)[2],  backgroundColor = 'white',textAlign = 'right', fontSize = '110%')
   })
-
+  
   #### box1 ---------------
   output$Timespan <- renderValueBox({
     TAB <- ValueBoxes(values$M)
@@ -1016,7 +1019,7 @@ server <- function(input, output,session){
              icon = fa_i(name="user"), color = "light-blue",
              width = NULL)
   })
-
+  
   #### box3 ------------
   output$kw <- renderValueBox({
     TAB <- values$TABvb
@@ -1070,7 +1073,7 @@ server <- function(input, output,session){
              icon = icon("globe",lib = "glyphicon"), color = "light-blue",
              width = NULL)
   })
-
+  
   #### box9 ---------------
   output$agePerDoc <- renderValueBox({
     TAB <- values$TABvb
@@ -1120,7 +1123,7 @@ server <- function(input, output,session){
     names(Y)=c("Year","Freq")
     x <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.125, max(Y$Year)-0.02)+1
     y <- c(min(Y$Freq),min(Y$Freq)+diff(range(Y$Freq))*0.125)
-
+    
     g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
       geom_line(aes(group="NA")) +
       geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
@@ -1139,11 +1142,20 @@ server <- function(input, output,session){
             ,axis.text.x = element_text(vjust = 1, angle = 90)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
-           ) +
+      ) +
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ASPplot <- g
     
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
+  })
+  
+  observeEvent(input$reportASP,{
+    list_df <- list(values$TAB)
+    list_plot <- list(values$ASPplot)
+    wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", values$wb)
+    values$wb <- wb
+    print(values$wb$sheet_names)
+    #save(values$wb, file="/Users/massimoaria/Rpackages/bibliometrix/reportprova.rdata")
   })
   
   output$ASPplot.save <- downloadHandler(
@@ -1231,7 +1243,7 @@ server <- function(input, output,session){
             ,axis.title.x = element_text(hjust = 0)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
-           ) + 
+      ) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ACpYplot <- g
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
@@ -1504,7 +1516,7 @@ server <- function(input, output,session){
   
   ### Source Growth ----  
   SOGrowth <- eventReactive(input$applySOGrowth,{
-
+    
     if (input$cumSO=="Cum"){
       cdf=TRUE
       laby="Cumulate occurrences"
@@ -1558,7 +1570,7 @@ server <- function(input, output,session){
             ,axis.text.x = element_text(size=10, angle = 90)
             ,axis.line.x = element_line(color="black",size=0.5)
             ,axis.line.y = element_line(color="black",size=0.5)
-            ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
     values$SDplot <- g
     return(g)
@@ -2156,7 +2168,7 @@ server <- function(input, output,session){
                                ,axis.title.y = element_text(vjust = 1, angle = 0)
                                ,axis.title.x = element_text(hjust = 0)
                                ,axis.line.x = element_line(color="black",size=0.5)
-                               ) +
+                         ) +
                          coord_flip()) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
@@ -2553,7 +2565,7 @@ server <- function(input, output,session){
     } else {k=input$MostCitRefsK}
     
     xx=xx[1:k,]
-
+    
     g <- freqPlot(xx,x=2,y=1, textLaby = "References", textLabx = "Local Citations", title = "Most Local Cited References", values)
     
     values$MLCRplot <- g
@@ -2952,7 +2964,7 @@ server <- function(input, output,session){
     }else{
       cdf=FALSE
       laby="Annual occurrences"}
-
+    
     ### load file with terms to remove
     if (input$WDStopFile=="Y"){
       remove.terms <- trimws(readStopwordsFile(file=input$WDStop, sep=input$WDSep))
@@ -3452,7 +3464,7 @@ server <- function(input, output,session){
   },  width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
   height = exprToFunction(as.numeric(input$dimension[2])*0.85),
   res = 150)
-
+  
   output$CSPlot2 <- renderPlot({
     CSfactorial()
     if (input$method!="MDS"){
@@ -3640,7 +3652,7 @@ server <- function(input, output,session){
   output$TMTable <- DT::renderDT({
     TMAP()
     tmData=values$TM$words[,-c(4,6)]
-
+    
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4440,7 +4452,7 @@ server <- function(input, output,session){
     #          hoverlabel = list(font=list(size=input$histlabelsize+9)))
     # return(g)
   })
-
+  
   
   # output$HGplot.save <- downloadHandler(
   #   filename = function() {
@@ -4465,17 +4477,17 @@ server <- function(input, output,session){
   output$histPlotVis <- renderVisNetwork({  
     g <- Hist()
     values$histPlotVis<-hist2vis(values$histPlot,curved=FALSE, 
-                               labelsize=input$histlabelsize, 
-                               nodesize=input$histsize,
-                               opacity=0.7,
-                               shape="dot",
-                               labeltype=input$titlelabel,
-                               timeline=FALSE)
+                                 labelsize=input$histlabelsize, 
+                                 nodesize=input$histsize,
+                                 opacity=0.7,
+                                 shape="dot",
+                                 labeltype=input$titlelabel,
+                                 timeline=FALSE)
     values$histPlotVis$VIS
   })
   
   output$histTable <- DT::renderDT({
-
+    
     Data <- values$histResults$histData
     #Data <- Data[ind,]
     Data$DOI<- paste0('<a href=\"https://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
@@ -4483,7 +4495,7 @@ server <- function(input, output,session){
       left_join(
         values$histPlot$layout %>% 
           select(.data$name,.data$color), by= c("Paper" = "name")
-        ) %>% 
+      ) %>% 
       drop_na(.data$color) %>% 
       mutate(cluster = match(.data$color,unique(.data$color))) %>% 
       select(!.data$color) %>% 
@@ -4646,6 +4658,20 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
       formatStyle(names(colData),  backgroundColor = 'white') 
   }) 
+  
+  ### Report Save xlsx
+  output$report.save <- downloadHandler(
+    filename = function() {
+      paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep="")
+    },
+    content <- function(file) {
+      openxlsx::saveWorkbook(values$wb, file = file)
+      #ggsave(filename = file, plot = values$MCCplot, dpi = as.numeric(input$MCCdpi), height = input$MCCh, width = input$MCCh*2, bg="white")
+    },
+    contentType = "xlsx"
+  )
+  
+  
   
   # OPTIONS MENU ----
   observe({
@@ -4848,11 +4874,14 @@ server <- function(input, output,session){
                                     br(),
                                     h4(strong("Annual Growth Rate")),
                                     br(),
-                                    verbatimTextOutput("CAGR", placeholder = TRUE)
-                   ),
-                   br(),
-                   br(),
-                   conditionalPanel(condition = 'input.sidebarmenu == "annualScPr"',
+                                    verbatimTextOutput("CAGR", placeholder = TRUE),
+                                    br(),
+                                    actionButton("reportASP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "80%",
+                                                 icon = fa_i(name ="play")),
+                                    #),
+                                    br(),
+                                    #conditionalPanel(condition = 'input.sidebarmenu == "annualScPr"',
                                     selectInput(
                                       'ASPdpi',
                                       label = h4(strong("Export plot")),
@@ -6498,27 +6527,27 @@ server <- function(input, output,session){
                                                           style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
                                                           width = "100%")
                                     )
-                                  ),
-                                  br(),
-                                  selectInput("cocRes",
-                                              h4(strong("Export plot")),
-                                              choices = c(
-                                                "Select the image scale" = 0,
-                                                "screen resolution x1" = 1,
-                                                "screen resolution x2" = 2,
-                                                "screen resolution x3" = 3,
-                                                "screen resolution x4" = 4,
-                                                "screen resolution x5" = 5,
-                                                "screen resolution x6" = 6,
-                                                "screen resolution x7" = 7,
-                                                "screen resolution x8" = 8
-                                              ),
-                                              selected = 0),
-                                  conditionalPanel(condition = "input.cocRes != 0",
-                                                   actionButton("cocPlot.save", strong("Export plot as png"),
-                                                                style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                width = "100%")
-                                  )
+                                    ),
+                                    br(),
+                                    selectInput("cocRes",
+                                                h4(strong("Export plot")),
+                                                choices = c(
+                                                  "Select the image scale" = 0,
+                                                  "screen resolution x1" = 1,
+                                                  "screen resolution x2" = 2,
+                                                  "screen resolution x3" = 3,
+                                                  "screen resolution x4" = 4,
+                                                  "screen resolution x5" = 5,
+                                                  "screen resolution x6" = 6,
+                                                  "screen resolution x7" = 7,
+                                                  "screen resolution x8" = 8
+                                                ),
+                                                selected = 0),
+                                    conditionalPanel(condition = "input.cocRes != 0",
+                                                     actionButton("cocPlot.save", strong("Export plot as png"),
+                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                  width = "100%")
+                                    )
                    ),
                    ## Thematic Map ----
                    conditionalPanel(condition = 'input.sidebarmenu == "thematicMap"',
@@ -6610,7 +6639,7 @@ server <- function(input, output,session){
                                         )),
                                         fluidRow(column(6,
                                                         numericInput("TMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
-                                          column(6,
+                                                 column(6,
                                                         selectInput("TMCluster", 
                                                                     label = "Clustering Algorithm",
                                                                     choices = c("None" = "none",
@@ -6623,7 +6652,7 @@ server <- function(input, output,session){
                                                                                 "Spinglass" = "spinglass",
                                                                                 "Walktrap" = "walktrap"),
                                                                     selected = "walktrap")
-                                                        )
+                                                 )
                                         )
                                     ),
                                     selectInput(
@@ -7173,10 +7202,10 @@ server <- function(input, output,session){
                                                 ),
                                                 selected = 0),
                                     conditionalPanel(condition = "input.HGh != 0",
-                                        actionButton("HGplot.save", strong("Export plot as png"),
-                                                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                 width = "100%")
-                                   )
+                                                     actionButton("HGplot.save", strong("Export plot as png"),
+                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                                  width = "100%")
+                                    )
                    ),
                    ## Collaboration Network ----
                    conditionalPanel(condition = 'input.sidebarmenu == "collabNetwork"',
@@ -7405,6 +7434,21 @@ server <- function(input, output,session){
                                                                     style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
                                                                     width = "100%")  
                                     )
+                   ),
+                   ## Report Creation options ----
+                   conditionalPanel(condition = 'input.sidebarmenu == "report"',
+                                    #h4(strong("Method Parameters: ")),
+                                    #"  ",
+                                    # actionButton("applyReport", strong("Generate Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    #              width = "80%",
+                                    #              icon = fa_i(name ="play")) #,
+                                    downloadButton("report.save", strong("Generate Report"),
+                                                   style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                                                   width = "100%") 
+                                    #"  ",
+                                    # br(),
+                                    
+                                    
                    )
             ) 
           )

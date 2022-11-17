@@ -17,7 +17,7 @@ thematicEvolution(
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
-  cluster = "leading_eigen"
+  cluster = "walktrap"
 )
 }
 \arguments{

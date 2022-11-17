@@ -339,7 +339,33 @@ networkPlot <-
       cluster_res <- NA
     }
     
-    
+      params <- list(normalize = normalize,
+                     n = n,
+                     degree = degree,
+                     Title = Title,
+                     type = type,
+                     label = label,
+                     labelsize = labelsize,
+                     label.cex = label.cex,
+                     label.color = label.color,
+                     label.n = label.n,
+                     halo = halo,
+                     cluster = cluster,
+                     community.repulsion = community.repulsion,
+                     vos.path = vos.path,
+                     size = size,
+                     size.cex = size.cex,
+                     curved = curved,
+                     noloops = noloops,
+                     remove.multiple = remove.multiple,
+                     remove.isolates = remove.isolates,
+                     weighted = weighted,
+                     edgesize = edgesize,
+                     edges.min = edges.min,
+                     alpha = alpha,
+                     verbose = verbose)
+      params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
+      
     net <- list(
       graph = bsk.network,
       graph_pajek = bsk.save,
@@ -348,7 +374,8 @@ networkPlot <-
       community_obj = cl$net_groups,
       layout = l,
       S = S,
-      nodeDegree = deg.dist
+      nodeDegree = deg.dist,
+      params = params
     )
     
     return(net)

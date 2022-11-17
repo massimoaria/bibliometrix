@@ -233,7 +233,21 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   
   documentToClusters <- clusterAssignment(M, words=df_lab, field, remove.terms, synonyms, threshold=0.5)
   
-  results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters)
+  params <- list(field=field, 
+                 n=n, 
+                 minfreq=minfreq, 
+                 ngrams=ngrams, 
+                 stemming=stemming, 
+                 size=size, 
+                 n.labels=n.labels, 
+                 community.repulsion = community.repulsion, 
+                 repel=repel, 
+                 remove.terms=remove.terms, 
+                 synonyms=synonyms, 
+                 cluster=cluster)
+  params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
+  
+  results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters, params=params)
 return(results)
 }
 

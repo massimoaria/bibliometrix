@@ -1259,7 +1259,7 @@ addDataWb <- function(list_df, wb, sheetname){
   return(wb)
 }
 
-addGgplotsWb <- function(list_plot, wb, sheetname, width=10, height=10, dpi=300){
+addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=300){
   l <- length(list_plot)
   startRow <- 1
   for (i in 1:l){
@@ -1268,28 +1268,43 @@ addGgplotsWb <- function(list_plot, wb, sheetname, width=10, height=10, dpi=300)
     ggsave(plot = list_plot[[i]], filename = fileName, width = width, height = height,
            units = "in", dpi = dpi)
     insertImage(wb = wb, sheet = sheetname, file = fileName, width = width, 
-                height = height, startRow = startRow, startCol = 1, 
+                height = height, startRow = startRow, startCol = col, 
                 units = "in", dpi = dpi)
-    #unlink(fileName)
     startRow <- startRow + (height*10)+3
   }
   return(wb)
 }
 
-addSheetToReport <- function(list_df,list_plot,sheetname, wb){
+# addPlotlyWb <- function(selector, wb, sheetname, col, width=10, height=7, dpi=300){
+#   fileName <- tempfile(pattern = "figureImage",
+#                        tmpdir = "",
+#                        fileext = "") %>% substr(.,2,nchar(.))
+#   shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+#   insertImage(wb = wb, sheet = sheetname, file = paste(tempdir(),"/",fileName,".png",sep=""), width = width, 
+#               height = height, startRow = 1, startCol = col, 
+#               units = "in", dpi = dpi)
+#   return(wb)
+# }
+
+addSheetToReport <- function(list_df, list_plot, sheetname, wb){
   ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
   if (length(ind)>0){
-    sheetnameplot <- paste(sheetname,"Plots",length(ind)+1,sep="")
-    sheetnamedf <- paste(sheetname,"Data",length(ind)+1,sep="")
-  } else {
-    sheetnameplot <- paste(sheetname,"Plots",sep="")
-    sheetnamedf <- paste(sheetname,"Data",sep="")
-  }
-  addWorksheet(wb, sheetnamedf, gridLines = FALSE)
-  addWorksheet(wb, sheetnameplot, gridLines = FALSE)
-  wb <- addDataWb(list_df, wb = wb, sheetname = sheetnamedf)
-  print("Added data frame to report")
-  wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetnameplot)
-  print("Added plot to report")
+    sheetname <- paste(sheetname,length(ind)+1,sep="")
+  } 
+  addWorksheet(wb, sheetname, gridLines = FALSE)
+  
+  if (!is.null(list_df)) {
+    col <- max(unlist(lapply(list_df,ncol))) + 2
+    wb <- addDataWb(list_df, wb = wb, sheetname = sheetname)
+  } else {col <- 1}
+  
+  #if (is.null(selector)){
+    if (!is.null(list_plot)){
+      wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col)
+    }
+  # } else {
+  #   wb <- addPlotlyWb(selector = selector, wb = wb, sheetname = sheetname, col = col)
+  # }
   return(wb)
 }
+

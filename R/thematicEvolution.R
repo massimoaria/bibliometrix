@@ -139,8 +139,22 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
   }
   ################ 
   
+  params <- list(field = field, 
+                 years = years, 
+                 n = n, 
+                 minFreq = minFreq, 
+                 size = size, 
+                 ngrams=ngrams, 
+                 stemming = stemming, 
+                 n.labels = n.labels, 
+                 repel = repel, 
+                 remove.terms = remove.terms, 
+                 synonyms = synonyms, 
+                 cluster=cluster)
   
-  results <-  list(Nodes = Nodes, Edges = edges, Data = INC[, 
-                                                          -c(1, 2)], check = TRUE, TM = res, Net = net)
+  params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
+  
+  results <-  list(Nodes = Nodes, Edges = edges, Data = INC[, -c(1, 2)], 
+                   check = TRUE, TM = res, Net = net, params=params)
   return(results)
 }

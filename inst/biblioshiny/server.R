@@ -1150,12 +1150,12 @@ server <- function(input, output,session){
   })
   
   observeEvent(input$reportASP,{
-    list_df <- list(values$TAB)
-    list_plot <- list(values$ASPplot)
-    wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", values$wb)
-    values$wb <- wb
-    print(values$wb$sheet_names)
-    #save(values$wb, file="/Users/massimoaria/Rpackages/bibliometrix/reportprova.rdata")
+    if(!is.null(values$TAB)){
+      list_df <- list(values$TAB)
+      list_plot <- list(values$ASPplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   output$ASPplot.save <- downloadHandler(
@@ -1249,6 +1249,15 @@ server <- function(input, output,session){
     plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
   })
   
+  observeEvent(input$reportACpY,{
+    if(!is.null(values$AnnualTotCitperYear)){
+      list_df <- list(values$AnnualTotCitperYear)
+      list_plot <- list(values$ACpYplot)
+      wb <- addSheetToReport(list_df, list_plot, sheetname = "AnnualCitPerYear", wb = values$wb)
+      values$wb <- wb
+    }
+  })
+  
   output$ACpYplot.save <- downloadHandler(
     filename = function() {
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
@@ -1292,8 +1301,44 @@ server <- function(input, output,session){
   })
   
   output$ThreeFieldsPlot <- renderPlotly({
-    TFP()  
+    values$TFP <- TFP()  
+    
+    is.reactive(values$TFP)
+    values$TFP
   })
+  
+  
+  observeEvent(input$reportTFP,{
+    values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
+    list_df <- NULL
+    list_plot <- NULL
+    #a <- file.copy(from = values$fileTPF, to=sub("\\.png","Bis\\.png",values$fileTPF))
+    #print(a)
+    
+    # fileName <- tempfile(pattern = "figureImage",
+    #                      tmpdir = "",
+    #                      fileext = "") %>% substr(.,2,nchar(.))
+    # shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+
+    print(values$fileTFP)
+    print(paste(tempdir(),"/ThreeFieldPlot.png",sep=""))
+    # addWorksheet(wb = values$wb, "ThreeFieldPlot", gridLines = FALSE)
+    # 
+    # insertImage(wb = values$wb, sheet = "ThreeFieldPlot", file = paste(tempdir(),"/ThreeFieldPlot.png",sep=""), width = 10,
+    #             height = 7, startRow = 1, startCol = 1,
+    #             units = "in", dpi = 300)
+    
+  })
+  
+  screenSh <- function(selector){
+    # fileName <- tempfile(pattern = "figureImage",
+    #                      tmpdir = "",
+    #                      fileext = "") %>% substr(.,2,nchar(.))
+    fileName <- "ThreeFieldPlot"
+    shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+    file <- paste(tempdir(),"/",fileName,".png",sep="")
+    return(file)
+  }
   
   # SOURCES MENU ----
   ### Most Relevant Sources ----
@@ -1357,6 +1402,15 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+  })
+  
+  observeEvent(input$reportMRS,{
+    if(!is.null(values$TABSo)){
+      list_df <- list(values$TABSo %>% drop_na())
+      list_plot <- list(values$MRSplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelSources", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Most Local Cited Sources ---- 
@@ -1423,6 +1477,15 @@ server <- function(input, output,session){
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
   })
   
+  observeEvent(input$reportMLS,{
+    if(!is.null(values$TABSoCit)){
+      list_df <- list(values$TABSoCit)
+      list_plot <- list(values$MLCSplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitSources", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Bradford's Law ---- 
   output$bradfordPlot <- renderPlotly({
     values$bradford=bradford(values$M)
@@ -1462,6 +1525,15 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(values$bradford$table))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$bradford$table),  backgroundColor = 'white',textAlign = 'center') 
+  })
+  
+  observeEvent(input$reportBradford,{
+    if(!is.null(values$bradford$table)){
+      list_df <- list(values$bradford$table)
+      list_plot <- list(values$bradford$graph)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "BradfordLaw", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Sources' Impact ----  
@@ -1512,6 +1584,15 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center') %>% 
       formatRound(names(values$H)[4], digits=3)
+  })
+  
+  observeEvent(input$reportSI,{
+    if(!is.null(values$H)){
+      list_df <- list(values$H)
+      list_plot <- list(values$SIplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceImpact", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Source Growth ----  
@@ -1641,6 +1722,15 @@ server <- function(input, output,session){
       formatStyle(names(soData),  backgroundColor = 'white') 
   })
   
+  observeEvent(input$reportSD,{
+    if(!is.null(values$PYSO)){
+      list_df <- list(values$PYSO)
+      list_plot <- list(values$SDplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceDynamic", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   # AUTHORS MENU ----
   ## Authors ----
   ### Most Relevant Authors ----
@@ -1723,6 +1813,15 @@ server <- function(input, output,session){
       formatRound(names(TAB)[3], digits=2)
   })
   
+  observeEvent(input$reportMRA,{
+    if(!is.null(values$TABAu)){
+      list_df <- list(values$TABAu)
+      list_plot <- list(values$MRAplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAuthors", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Most Cited Authors ----  
   MLCAuthors <- eventReactive(input$applyMLCAuthors,{
     res <- descriptive(values,type="tab13")
@@ -1789,6 +1888,15 @@ server <- function(input, output,session){
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') 
   })
   
+  observeEvent(input$reportMLCA,{
+    if(!is.null(values$TABAuCit)){
+      list_df <- list(values$TABAuCit)
+      list_plot <- list(values$MLCAplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitAuthors", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Authors' Impact ----  
   HAuthors <- eventReactive(input$applyHAuthors,{
     withProgress(message = 'Calculation in progress',
@@ -1838,6 +1946,15 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$H),  backgroundColor = 'white',textAlign = 'center') %>%
       formatRound(names(values$H)[4], 3)
+  })
+  
+  observeEvent(input$reportAI,{
+    if(!is.null(values$H)){
+      list_df <- list(values$H)
+      list_plot <- list(values$AIplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorImpact", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Authors Production Over Time ----  
@@ -1916,6 +2033,15 @@ server <- function(input, output,session){
       formatRound(names(TAB)[dim(TAB)[2]], 3)
   })
   
+  observeEvent(input$reportAPOT,{
+    if(!is.null(values$AUProdOverTime$dfPapersAU)){
+      list_df <- list(values$AUProdOverTime$dfPapersAU)
+      list_plot <- list(values$AUProdOverTime$graph)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorProdOverTime", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Lotka Law ----  
   output$lotkaPlot <- renderPlotly({
     
@@ -1987,6 +2113,15 @@ server <- function(input, output,session){
       formatRound(names(values$lotka$AuthorProd)[3], 3)
   })
   
+  observeEvent(input$reportLotka,{
+    if(!is.null(values$lotka$AuthorProd)){
+      list_df <- list(values$lotka$AuthorProd)
+      list_plot <- list(values$LLplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "LotkaLaw", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   # Affiliations ----
   ### Most Relevant Affiliations ---- 
   MRAffiliations <- eventReactive(input$applyMRAffiliations,{
@@ -2054,6 +2189,15 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+  })
+  
+  observeEvent(input$reportMRAFF,{
+    if(!is.null(values$TABAffd)){
+      list_df <- list(values$TABAff)
+      list_plot <- list(values$AFFplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAffiliations", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Affiliation OverTime ----  
@@ -2126,6 +2270,15 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(afftimeData))-1))))) %>%
       formatStyle(names(afftimeData),  backgroundColor = 'white') 
+  })
+  
+  observeEvent(input$reportAFFPOT,{
+    if(!is.null(values$AffOverTime)){
+      list_df <- list(values$AffOverTime)
+      list_plot <- list(values$AffOverTimePlot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AffOverTime", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   # Countries ----
@@ -2220,6 +2373,15 @@ server <- function(input, output,session){
       formatRound(names(TAB)[6], digits=3)
   })
   
+  observeEvent(input$reportMRCO,{
+    if(!is.null(values$TABCo)){
+      list_df <- list(values$TABCo)
+      list_plot <- list(values$MRCOplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelCountries", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Country Production ----  
   output$countryProdPlot <- renderPlotly({
     values$mapworld<-mapworld(values$M, values)
@@ -2262,7 +2424,16 @@ server <- function(input, output,session){
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
   })
   
-  ### Countries' Production OverTime ----  
+  observeEvent(input$reportCSP,{
+    if(!is.null(values$mapworld$tab)){
+      list_df <- list(values$mapworld$tab)
+      list_plot <- list(values$mapworld$g)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountrySciProd", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
+  ### Countries' Production Over Time ----  
   COGrowth <- eventReactive(input$applyCOGrowth,{
     
     values <- CountryOverTime(values,input$topCO)
@@ -2334,6 +2505,15 @@ server <- function(input, output,session){
       formatStyle(names(cotimeData),  backgroundColor = 'white') 
   })
   
+  observeEvent(input$reportCPOT,{
+    if(!is.null(values$CountryOverTime)){
+      list_df <- list(values$CountryOverTime)
+      list_plot <- list(values$CountryOverTimePlot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountryProdOverTime", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Most Cited Country ----    
   MCCountries <- eventReactive(input$applyMCCountries,{
     res <- descriptive(values,type="tab6")
@@ -2401,6 +2581,15 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
       formatRound(names(TAB)[3], 2)
+  })
+  
+  observeEvent(input$reportMCCO,{
+    if(!is.null(values$TABCitCo)){
+      list_df <- list(values$TABCitCo)
+      list_plot <- list(values$MCCplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostCitCountries", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   # DOCUMENTS MENU ----
@@ -2473,6 +2662,15 @@ server <- function(input, output,session){
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>% 
       formatRound(names(TAB)[4], 2) %>%
       formatRound(names(TAB)[5], 2)
+  })
+  
+  observeEvent(input$reportMCD,{
+    if(!is.null(values$TABGlobDoc)){
+      list_df <- list(values$TABGlobDoc)
+      list_plot <- list(values$MGCDplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostGlobCitDocs", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Most Local Cited Documents ----  
@@ -2551,6 +2749,15 @@ server <- function(input, output,session){
       formatRound(names(TAB)[c(6:8)], digits=2)
   })
   
+  observeEvent(input$reportMLCD,{
+    if(!is.null(values$TABLocDoc)){
+      list_df <- list(values$TABLocDoc)
+      list_plot <- list(values$MLCDplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitDocs", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ## Cited References ----
   ### Most Local Cited References ----
   MLCReferences <- eventReactive(input$applyMLCReferences,{
@@ -2617,6 +2824,15 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+  })
+  
+  observeEvent(input$reportMLCR,{
+    if(!is.null(values$TABCitRef)){
+      list_df <- list(values$TABCitRef)
+      list_plot <- list(values$MLCRplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitRefs", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Reference Spectroscopy ---- 
@@ -2700,6 +2916,15 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(crData))-1))))) %>%
       formatStyle(names(crData),  backgroundColor = 'white')
+  })
+  
+  observeEvent(input$reportRPYS,{
+    if(!is.null(values$res$CR)){
+      list_df <- list(values$res$CR, values$res$rpysTable)
+      list_plot <- list(values$res$spectroscopy)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "RPYS", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ## Words ----
@@ -2807,6 +3032,15 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%')
+  })
+  
+  observeEvent(input$reportMFW,{
+    if(!is.null(values$TABWord)){
+      list_df <- list(values$TABWord)
+      list_plot <- list(values$MRWplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelWords", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### WordCloud ----  
@@ -3125,6 +3359,15 @@ server <- function(input, output,session){
       formatStyle(names(kwData),  backgroundColor = 'white') 
   })
   
+  observeEvent(input$reportWD,{
+    if(!is.null(values$KW)){
+      list_df <- list(values$KW)
+      list_plot <- list(values$WDplot)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "WordDynamics", wb=values$wb)
+      values$wb <- wb
+    }
+  })
+  
   ### Trend Topics ----
   output$trendSliderPY <- renderUI({
     
@@ -3213,6 +3456,15 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(tpData))-1))))) %>%
       formatStyle(names(tpData),  backgroundColor = 'white')
+  })
+  
+  observeEvent(input$reportTT,{
+    if(!is.null(values$trendTopics$df_graph)){
+      list_df <- list(values$trendTopics$df_graph)
+      list_plot <- list(values$trendTopics$graph)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "TrendTopics", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   # CLUSTERING ----
@@ -4877,11 +5129,10 @@ server <- function(input, output,session){
                                     verbatimTextOutput("CAGR", placeholder = TRUE),
                                     br(),
                                     actionButton("reportASP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "80%",
-                                                 icon = fa_i(name ="play")),
-                                    #),
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
                                     br(),
-                                    #conditionalPanel(condition = 'input.sidebarmenu == "annualScPr"',
+                                    br(),
                                     selectInput(
                                       'ASPdpi',
                                       label = h4(strong("Export plot")),
@@ -4908,6 +5159,11 @@ server <- function(input, output,session){
                    ),
                    ## Average Cit Per Year ----
                    conditionalPanel(condition = 'input.sidebarmenu == "averageCitPerYear"',
+                                    actionButton("reportACpY", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'ACpYdpi',
                                       h4(strong("Export plot"), align ="center"),
@@ -4988,7 +5244,12 @@ server <- function(input, output,session){
                                           (column(6,numericInput("RightFieldn", 
                                                                  label=("Number of items"), 
                                                                  min = 1, max = 50, step = 1, value = 20))))
-                                    )),
+                                    ),
+                                    br(),
+                                    actionButton("reportTFP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon"))
+                                    ),
                    ## Relevant Sources ----
                    conditionalPanel(condition = 'input.sidebarmenu == "relevantSources"',
                                     h4(strong("Parameters: ")),
@@ -4996,6 +5257,12 @@ server <- function(input, output,session){
                                     numericInput("MostRelSourcesK", 
                                                  label=("Number of Sources"), 
                                                  value = 10),
+                                    br(),
+                                    actionButton("reportMRS", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MRSdpi',
                                       h4(strong(
@@ -5029,6 +5296,12 @@ server <- function(input, output,session){
                                     numericInput("MostRelCitSourcesK", 
                                                  label=("Number of Sources"), 
                                                  value = 10),
+                                    br(),
+                                    actionButton("reportMLS", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MLCSdpi',
                                       h4(strong(
@@ -5057,6 +5330,12 @@ server <- function(input, output,session){
                    ),
                    ## Bradford Law ----
                    conditionalPanel(condition ='input.sidebarmenu == "bradford"',
+                                    br(),
+                                    actionButton("reportBradford", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'BLdpi',
                                       h4(strong(
@@ -5099,6 +5378,12 @@ server <- function(input, output,session){
                                         numericInput("Hksource", 
                                                      label=("Number of sources"), 
                                                      value = 10)),
+                                    br(),
+                                    actionButton("reportSI", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'SIdpi',
                                       h4(strong(
@@ -5137,6 +5422,12 @@ server <- function(input, output,session){
                                                     selected = "Cum"),
                                         hr(),
                                         sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = c(1,5))),
+                                    br(),
+                                    actionButton("reportSD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'SDdpi',
                                       h4(strong(
@@ -5178,6 +5469,12 @@ server <- function(input, output,session){
                                                                 "Percentage"="p",
                                                                 "Fractionalized Frequency"="f"),
                                                     selected = "t")),
+                                    br(),
+                                    actionButton("reportMRA", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MRAdpi',
                                       h4(strong(
@@ -5211,6 +5508,12 @@ server <- function(input, output,session){
                                     numericInput("MostCitAuthorsK", 
                                                  label=("Number of Authors"), 
                                                  value = 10),
+                                    br(),
+                                    actionButton("reportMLCA", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MLCAdpi',
                                       h4(strong(
@@ -5244,6 +5547,12 @@ server <- function(input, output,session){
                                     numericInput("TopAuthorsProdK", 
                                                  label=("Number of Authors"), 
                                                  value = 10),
+                                    br(),
+                                    actionButton("reportAPOT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'APOTdpi',
                                       h4(strong(
@@ -5272,6 +5581,12 @@ server <- function(input, output,session){
                    ),
                    ## Lotka law ----
                    conditionalPanel(condition = 'input.sidebarmenu == "lotka"',
+                                    br(),
+                                    actionButton("reportLotka", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'LLdpi',
                                       h4(strong(
@@ -5315,6 +5630,12 @@ server <- function(input, output,session){
                                         numericInput("Hkauthor", 
                                                      label=("Number of authors"), 
                                                      value = 10)),
+                                    br(),
+                                    actionButton("reportAI", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'AIdpi',
                                       h4(strong(
@@ -5356,6 +5677,12 @@ server <- function(input, output,session){
                                         numericInput("MostRelAffiliationsK", 
                                                      label=("Number of Affiliations"), 
                                                      value = 10)),
+                                    br(),
+                                    actionButton("reportMRAFF", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'AFFdpi',
                                       h4(strong(
@@ -5389,6 +5716,12 @@ server <- function(input, output,session){
                                         solidHeader = FALSE, 
                                         collapsed = FALSE,
                                         sliderInput("topAFF", label = "Number of Affiliations", min = 1, max = 50, step = 1, value = 5)),
+                                    br(),
+                                    actionButton("reportAFFPOT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'AFFGrowthdpi',
                                       h4(strong(
@@ -5421,6 +5754,12 @@ server <- function(input, output,session){
                                     numericInput("MostRelCountriesK", 
                                                  label=("Number of Countries"), 
                                                  value = 20),
+                                    br(),
+                                    actionButton("reportMRCO", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MRCOdpi',
                                       h4(strong(
@@ -5449,6 +5788,12 @@ server <- function(input, output,session){
                    ),
                    ## Country Scientific Production ----
                    conditionalPanel(condition = 'input.sidebarmenu == "countryScientProd"',
+                                    br(),
+                                    actionButton("reportCSP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'CSPdpi',
                                       h4(strong(
@@ -5482,6 +5827,12 @@ server <- function(input, output,session){
                                         solidHeader = FALSE, 
                                         collapsed = FALSE,
                                         sliderInput("topCO", label = "Number of Countries", min = 1, max = 50, step = 1, value = 5)),
+                                    br(),
+                                    actionButton("reportCPOT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'COGrowthdpi',
                                       h4(strong(
@@ -5523,6 +5874,12 @@ server <- function(input, output,session){
                                         numericInput("MostCitCountriesK", 
                                                      label=("Number of Countries"), 
                                                      value = 10)),
+                                    br(),
+                                    actionButton("reportMCCO", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MCCdpi',
                                       h4(strong(
@@ -5549,7 +5906,7 @@ server <- function(input, output,session){
                                                                     width = "100%")  
                                     )
                    ),
-                   ## Most Global Cited Documents
+                   ## Most Global Cited Documents ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostGlobalCitDoc"',
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
@@ -5564,6 +5921,12 @@ server <- function(input, output,session){
                                                     choices = c("Total Citations"="TC", 
                                                                 "Total Citations per Year"="TCY"),
                                                     selected = "TC")),
+                                    br(),
+                                    actionButton("reportMCD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MGCDdpi',
                                       h4(strong(
@@ -5590,7 +5953,7 @@ server <- function(input, output,session){
                                                                     width = "100%")  
                                     )
                    ),
-                   # Most Local Cited Document
+                   ## Most Local Cited Documents ----
                    conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitDoc"',
                                     box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
                                         collapsible = TRUE, width = 15,
@@ -5606,6 +5969,12 @@ server <- function(input, output,session){
                                                                 ".  " = ".  ",
                                                                 "," = ","),
                                                     selected = ";")),
+                                    br(),
+                                    actionButton("reportMLCD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MLCDdpi',
                                       h4(strong(
@@ -5648,6 +6017,12 @@ server <- function(input, output,session){
                                                                 ".  " = ".  ",
                                                                 "," = ","),
                                                     selected = ";")),
+                                    br(),
+                                    actionButton("reportMLCR", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MLCRdpi',
                                       h4(strong(
@@ -5698,6 +6073,12 @@ server <- function(input, output,session){
                                                                      value = NA,
                                                                      step = 1)
                                                  ))),
+                                    br(),
+                                    actionButton("reportRPYS", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'RSdpi',
                                       h4(strong(
@@ -5790,6 +6171,12 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("MRWSynPreview"))
                                         )),
+                                    br(),
+                                    actionButton("reportMFW", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'MRWdpi',
                                       h4(strong(
@@ -6067,6 +6454,12 @@ server <- function(input, output,session){
                                                                 "Per year" = "noCum"),
                                                     selected = "Cum"),
                                         sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))),
+                                    br(),
+                                    actionButton("reportWD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'WDdpi',
                                       h4(strong(
@@ -6174,6 +6567,12 @@ server <- function(input, output,session){
                                         column(6,
                                                numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 3)
                                         ))),
+                                    br(),
+                                    actionButton("reportTT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'TTdpi',
                                       h4(strong(
@@ -7444,11 +7843,9 @@ server <- function(input, output,session){
                                     #              icon = fa_i(name ="play")) #,
                                     downloadButton("report.save", strong("Generate Report"),
                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                   width = "100%") 
-                                    #"  ",
-                                    # br(),
-                                    
-                                    
+                                                   width = "100%",
+                                                   icon = icon(name ="save-file", lib="glyphicon"))
+                   
                    )
             ) 
           )

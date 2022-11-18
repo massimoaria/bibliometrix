@@ -1259,6 +1259,23 @@ addDataWb <- function(list_df, wb, sheetname){
   return(wb)
 }
 
+addDataScreenWb <- function(list_df, wb, sheetname){
+  ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
+  if (length(ind)>0){
+    sheetname <- paste(sheetname,length(ind)+1,sep="")
+  } 
+  addWorksheet(wb=wb, sheetName=sheetname, gridLines = FALSE)
+  if (!is.null(list_df)){
+    addDataWb(list_df, wb, sheetname)
+    col <- max(unlist(lapply(list_df,ncol))) + 2
+  } else {
+    col <- 1
+  }
+  
+  results <- list(wb=wb,col=col, sheetname=sheetname)
+  return(results)
+}
+
 addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=300){
   l <- length(list_plot)
   startRow <- 1
@@ -1275,16 +1292,26 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
   return(wb)
 }
 
-# addPlotlyWb <- function(selector, wb, sheetname, col, width=10, height=7, dpi=300){
-#   fileName <- tempfile(pattern = "figureImage",
-#                        tmpdir = "",
-#                        fileext = "") %>% substr(.,2,nchar(.))
-#   shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
-#   insertImage(wb = wb, sheet = sheetname, file = paste(tempdir(),"/",fileName,".png",sep=""), width = width, 
-#               height = height, startRow = 1, startCol = col, 
-#               units = "in", dpi = dpi)
-#   return(wb)
-# }
+addScreenWb <- function(df, wb, width=10, height=7, dpi=300){
+  names(df) <- c("sheet","file","n")
+  if (nrow(df)>0){
+    sheet <- unique(df$sheet)
+    for (i in 1:length(sheet)){
+      sh <- sheet[i]
+      df_sh <- df %>% dplyr::filter(.data$sheet==sh)
+      l <- nrow(df_sh)
+      startRow <- 1
+      for (j in 1:l){
+        fileName <- df_sh$file[j]
+        insertImage(wb = wb, sheet = sh, file = fileName, width = width, 
+                    height = height, startRow = startRow, startCol = df_sh$n[j], 
+                    units = "in", dpi = dpi)
+        startRow <- startRow + (height*10)+3
+      }
+    }
+  }
+  return(wb)
+}
 
 addSheetToReport <- function(list_df, list_plot, sheetname, wb){
   ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
@@ -1298,13 +1325,10 @@ addSheetToReport <- function(list_df, list_plot, sheetname, wb){
     wb <- addDataWb(list_df, wb = wb, sheetname = sheetname)
   } else {col <- 1}
   
-  #if (is.null(selector)){
     if (!is.null(list_plot)){
       wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col)
     }
-  # } else {
-  #   wb <- addPlotlyWb(selector = selector, wb = wb, sheetname = sheetname, col = col)
-  # }
+  values$sheet_name <- sheetname
   return(wb)
 }
 

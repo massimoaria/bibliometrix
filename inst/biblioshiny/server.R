@@ -15,7 +15,8 @@ server <- function(input, output,session){
   ## initial values
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
-  values$wb = openxlsx::createWorkbook()
+  values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
+  values$wb <-  openxlsx::createWorkbook()
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
   values$h <- 7
@@ -1110,6 +1111,17 @@ server <- function(input, output,session){
              width = NULL)
   })
   
+  observeEvent(input$reportMI,{
+    if(!is.null(values$TABvb)){
+      sheetname <- "MainInfo"
+      list_df <- list(values$TABvb)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      values$wb <- res$wb
+      values$fileTFP <- screenSh(selector = NULL) ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
+  })
+  
   # Annual Production ----
   output$CAGR <- renderText({
     paste0(values$GR," %")
@@ -1309,33 +1321,25 @@ server <- function(input, output,session){
   
   
   observeEvent(input$reportTFP,{
+    sheetname <- "ThreeFieldsPlot"
+    ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
+    if (length(ind)>0){
+      sheetname <- paste(sheetname,length(ind)+1,sep="")
+    } 
+    addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
     values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
-    list_df <- NULL
-    list_plot <- NULL
-    #a <- file.copy(from = values$fileTPF, to=sub("\\.png","Bis\\.png",values$fileTPF))
-    #print(a)
-    
-    # fileName <- tempfile(pattern = "figureImage",
-    #                      tmpdir = "",
-    #                      fileext = "") %>% substr(.,2,nchar(.))
-    # shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
-
-    print(values$fileTFP)
-    print(paste(tempdir(),"/ThreeFieldPlot.png",sep=""))
-    # addWorksheet(wb = values$wb, "ThreeFieldPlot", gridLines = FALSE)
-    # 
-    # insertImage(wb = values$wb, sheet = "ThreeFieldPlot", file = paste(tempdir(),"/ThreeFieldPlot.png",sep=""), width = 10,
-    #             height = 7, startRow = 1, startCol = 1,
-    #             units = "in", dpi = 300)
-    
+    values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
   })
   
   screenSh <- function(selector){
-    # fileName <- tempfile(pattern = "figureImage",
-    #                      tmpdir = "",
-    #                      fileext = "") %>% substr(.,2,nchar(.))
-    fileName <- "ThreeFieldPlot"
-    shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+    fileName <- tempfile(pattern = "figureImage",
+                         tmpdir = "",
+                         fileext = "") %>% substr(.,2,nchar(.))
+    if (is.null(selector)){
+      shinyscreenshot::screenshot(filename=fileName, download=FALSE, server_dir = tempdir())
+    } else {
+      shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+    }
     file <- paste(tempdir(),"/",fileName,".png",sep="")
     return(file)
   }
@@ -3069,7 +3073,7 @@ server <- function(input, output,session){
     resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams, remove.terms = remove.terms, synonyms = values$WCsyn.terms)
     
     W=resW$W
-    values$Words=resW$Words
+    values$Words <- resW$Words
     
     wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
                            fontFamily = input$font, fontWeight = 'normal',
@@ -3078,8 +3082,20 @@ server <- function(input, output,session){
                            rotateRatio = 0.7, shape = input$wcShape, ellipticity = input$ellipticity,
                            widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
   })
+  
   output$wordcloud <- wordcloud2::renderWordcloud2({
     WordCloud()
+  })
+  
+  observeEvent(input$reportWC,{
+    if(!is.null(values$Words)){
+      sheetname <- "WordCloud"
+      list_df <- list(values$Words)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      values$wb <- res$wb
+      values$fileTFP <- screenSh(selector = "#wordcloud") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
   })
   
   ### TreeMap ----  
@@ -3189,6 +3205,17 @@ server <- function(input, output,session){
                   class = 'cell-border compact stripe') %>%
       formatStyle(names(values$WordsT),  backgroundColor = 'white',textAlign = 'center')
   },height = 600, width = 900)
+  
+  observeEvent(input$reportTREEMAP,{
+    if(!is.null(values$WordsT)){
+      sheetname <- "TreeMap"
+      list_df <- list(values$WordsT)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      values$wb <- res$wb
+      values$fileTFP <- screenSh(selector = "#treemap") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
+  })
   
   ### Word Dynamics ----   
   WDynamics <- eventReactive(input$applyWD,{
@@ -4917,8 +4944,10 @@ server <- function(input, output,session){
       paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep="")
     },
     content <- function(file) {
+      if (nrow(values$list_file)>0){
+        values$wb <- addScreenWb(df=values$list_file, wb=values$wb, width=10, height=7, dpi=300)
+      }
       openxlsx::saveWorkbook(values$wb, file = file)
-      #ggsave(filename = file, plot = values$MCCplot, dpi = as.numeric(input$MCCdpi), height = input$MCCh, width = input$MCCh*2, bg="white")
     },
     contentType = "xlsx"
   )
@@ -6302,7 +6331,7 @@ server <- function(input, output,session){
                                                            selected = "random-dark")
                                         )),
                                         fluidRow(column(6,
-                                                        numericInput("scale", label = "Font size", min=0.2,max=5,step=0.1,value=1)
+                                                        numericInput("scale", label = "Font size", min=0.1,max=5,step=0.1,value=0.5)
                                         ),
                                         column(6,
                                                numericInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65)
@@ -6313,7 +6342,13 @@ server <- function(input, output,session){
                                         column(6,
                                                numericInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
                                         ))
-                                    )
+                                    ),
+                                    br(),
+                                    actionButton("reportWC", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                    ),
                    ## Tree Map ----
                    conditionalPanel(condition = 'input.sidebarmenu == "treemap"',
@@ -6380,7 +6415,13 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("TreeMapSynPreview"))
                                         )
-                                    )
+                                    ),
+                                    br(),
+                                    actionButton("reportTREEMAP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                    ),
                    ## Word dynamics ----
                    conditionalPanel(condition = 'input.sidebarmenu == "wordDynamics"',
@@ -7836,11 +7877,6 @@ server <- function(input, output,session){
                    ),
                    ## Report Creation options ----
                    conditionalPanel(condition = 'input.sidebarmenu == "report"',
-                                    #h4(strong("Method Parameters: ")),
-                                    #"  ",
-                                    # actionButton("applyReport", strong("Generate Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    #              width = "80%",
-                                    #              icon = fa_i(name ="play")) #,
                                     downloadButton("report.save", strong("Generate Report"),
                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
                                                    width = "100%",

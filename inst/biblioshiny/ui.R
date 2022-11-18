@@ -350,8 +350,8 @@ body <- dashboardBody(
               fluidRow(
                 h2(strong("Main Information"), align = "center")),
               fluidRow(
-                tabsetPanel(type = "tabs",
-                            tabPanel("Plot",
+                tabsetPanel(type = "tabs", id = "maininfo",
+                            tabPanel("PlotM", 
                                      fluidRow(
                                        br(),
                                        column(3,
@@ -370,7 +370,18 @@ body <- dashboardBody(
                                               valueBoxOutput("cagr", width = "33vh"),
                                               valueBoxOutput("coAuPerDoc", width = "33vh"),
                                               valueBoxOutput("tc", width = "33vh")),
-                                     )
+                                     ),
+                                     br(),
+                                     fluidRow(column(3),
+                                              column(3),
+                                              column(3),
+                                              column(3,
+                                     actionButton("reportMI", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                  width = "100%",
+                                                  icon = icon(name ="copy", lib="glyphicon")))
+                                     ),
+                                     br(),
+                                     br()
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 700)

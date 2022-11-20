@@ -31,6 +31,18 @@ strSynPreview <- function(string){
   HTML(paste("<pre>", "File Preview: ", str1,"</pre>", sep = '<br/>'))
 }
 
+# from igraph to png file
+igraph2PNG <- function(x, filename, width = 10, height = 7, dpi=300){
+  V(x)$centr <- centr_betw(x)$res
+  df <- data.frame(name=V(x)$label,cluster=V(x)$color, centr=V(x)$centr) %>% 
+    group_by(.data$cluster) %>% 
+    slice_head(n=3)
+  V(x)$label[!(V(x)$label %in% df$name)] <- ""
+  png(filename = filename, width = 10, height = 7, unit="in", res=dpi) 
+  grid::grid.draw(plot(x))
+  dev.off()
+}
+
 # from ggplot to plotly
 plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=2, height=0){
   
@@ -1127,17 +1139,12 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
     
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-      #visNodes(shape=shape, font=list(color="black")) %>%
       visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
       visNetwork::visEdges(smooth = curved) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
       visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
       visNetwork::visOptions(manipulation = TRUE) #%>%
-    #visNetwork::visExport(type = "png", name = "network",
-    #          label = paste0("Export graph as png"), background = "#fff",
-    #          float = "right", style = NULL, loadDependencies = TRUE)
-    #values$COCVIS=VIS
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 
@@ -1302,8 +1309,13 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
   for (i in 1:l){
     fileName <- tempfile(pattern = "figureImage",
                          fileext = ".png")
-    ggsave(plot = list_plot[[i]], filename = fileName, width = width, height = height,
-           units = "in", dpi = dpi)
+    if (inherits(list_plot[[i]], "ggplot")){
+      ggsave(plot = list_plot[[i]], filename = fileName, width = width, height = height,
+             units = "in", dpi = dpi)
+    }
+    if (inherits(list_plot[[i]], "igraph")){
+      igraph2PNG(x = list_plot[[i]], filename = fileName, width = width, height = height, dpi=dpi)
+    }  
     insertImage(wb = wb, sheet = sheetname, file = fileName, width = width, 
                 height = height, startRow = startRow, startCol = col, 
                 units = "in", dpi = dpi)

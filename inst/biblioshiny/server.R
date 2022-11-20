@@ -3802,27 +3802,7 @@ server <- function(input, output,session){
   
   output$CSTableW <- DT::renderDT({
     CSfactorial()
-    # switch(input$method,
-    #        CA={
-    #          WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
-    #                           stringsAsFactors = FALSE)
-    #          names(WData)[4]="cluster"
-    #        },
-    #        MCA={
-    #          WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
-    #                           stringsAsFactors = FALSE)
-    #          names(WData)[4]="cluster"
-    #        },
-    #        MDS={
-    #          WData=data.frame(word=row.names(values$CS$res), values$CS$res, 
-    #                           cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
-    #        })
-    # 
-    # WData$Dim.1=round(WData$Dim.1,2)
-    # WData$Dim.2=round(WData$Dim.2,2)
-    #print(class(WData))
     WData <- values$CS$WData
-    
     DT::datatable(WData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -3908,6 +3888,14 @@ server <- function(input, output,session){
                              stemming=input$TMstemming, size=input$sizeTM, cluster=input$TMCluster,
                              n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms)
     
+    values$TM$documentToClusters$DI<- paste0('<a href=\"https://doi.org/',values$TM$documentToClusters$DI,'\" target=\"_blank\">',values$TM$documentToClusters$DI,'</a>')
+    names(values$TM$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
+    
+    values$TM$words <- values$TM$words[,-c(4,6)]
+    
+    values$TM$clusters <- values$TM$clusters[,c(9,5:8,11)]
+    names(values$TM$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
+    
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
     )
@@ -3953,7 +3941,7 @@ server <- function(input, output,session){
   
   output$TMTable <- DT::renderDT({
     TMAP()
-    tmData=values$TM$words[,-c(4,6)]
+    tmData=values$TM$words
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3979,8 +3967,7 @@ server <- function(input, output,session){
   
   output$TMTableCluster <- DT::renderDT({
     TMAP()
-    tmData <- values$TM$clusters[,c(9,5:8,11)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
+    tmData <- values$TM$clusters
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4007,9 +3994,7 @@ server <- function(input, output,session){
   output$TMTableDocument <- DT::renderDT({
     TMAP()
     tmDataDoc <- values$TM$documentToClusters
-    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
-    names(tmDataDoc)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
-    
+   
     DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4033,6 +4018,19 @@ server <- function(input, output,session){
       formatRound(names(tmDataDoc)[7:8], 3) %>% 
       formatRound(names(tmDataDoc)[c(10:(ncol(tmDataDoc)-2),ncol(tmDataDoc))], 3) %>% 
       formatRound(names(tmDataDoc)[ncol(tmDataDoc)], 3) 
+  })
+  
+  observeEvent(input$reportTM,{
+    if(!is.null(values$TM$words)){
+      list_df <- list(values$TM$params,
+                      values$TM$words,
+                      values$TM$clusters,
+                      values$TM$documentToClusters)
+      list_plot <- list(values$TM$map,
+                        values$TM$net$graph)
+      wb <- addSheetToReport(list_df, list_plot, sheetname="ThematicMap", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Thematic Evolution ----

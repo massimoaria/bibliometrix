@@ -1,6 +1,6 @@
 if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
-#if (!(require(rio))){install.packages("rio")} 
+if (!(require(igraph))){install.packages("igraph"); require(igraph, quietly=TRUE)} 
 if (!(require(DT))){install.packages("DT")};require(DT, quietly =TRUE)
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
 if (!(require(shinycssloaders))){install.packages("shinycssloaders")} 

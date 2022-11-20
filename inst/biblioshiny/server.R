@@ -1331,19 +1331,6 @@ server <- function(input, output,session){
     values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
   })
   
-  screenSh <- function(selector){
-    fileName <- tempfile(pattern = "figureImage",
-                         tmpdir = "",
-                         fileext = "") %>% substr(.,2,nchar(.))
-    if (is.null(selector)){
-      shinyscreenshot::screenshot(filename=fileName, download=FALSE, server_dir = tempdir())
-    } else {
-      shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
-    }
-    file <- paste(tempdir(),"/",fileName,".png",sep="")
-    return(file)
-  }
-  
   # SOURCES MENU ----
   ### Most Relevant Sources ----
   MRSources <- eventReactive(input$applyMRSources,{

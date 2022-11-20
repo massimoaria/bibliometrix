@@ -1280,7 +1280,7 @@ addDataWb <- function(list_df, wb, sheetname){
   for (i in 1:l){
     df <- list_df[[i]]
     n <- nrow(df)
-    writeDataTable(wb, sheetname, df, startRow = startRow, startCol = 1, tableStyle = "TableStyleLight9")
+    writeDataTable(wb, sheetname, df, startRow = startRow, startCol = 1, tableStyle = "TableStyleMedium9")
     startRow <- startRow + n + 3
   }
   return(wb)
@@ -1322,6 +1322,19 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
     startRow <- startRow + (height*6)+1
   }
   return(wb)
+}
+
+screenSh <- function(selector){
+  fileName <- tempfile(pattern = "figureImage",
+                       tmpdir = "",
+                       fileext = "") %>% substr(.,2,nchar(.))
+  if (is.null(selector)){
+    shinyscreenshot::screenshot(filename=fileName, download=FALSE, server_dir = tempdir())
+  } else {
+    shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+  }
+  file <- paste(tempdir(),"/",fileName,".png",sep="")
+  return(file)
 }
 
 addScreenWb <- function(df, wb, width=10, height=7, dpi=300){

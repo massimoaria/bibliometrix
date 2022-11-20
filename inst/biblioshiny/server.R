@@ -3596,6 +3596,7 @@ server <- function(input, output,session){
     values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"))
+    values$degreePlot <- degreePlot(values$cocnet)
   })
   
   output$cocPlot <- renderVisNetwork({  
@@ -3671,8 +3672,22 @@ server <- function(input, output,session){
   ### Degree Plot Co-word analysis ----
   output$cocDegree <- renderPlotly({
     COCnetwork()
-    p <- degreePlot(values$cocnet)
-    plot.ly(p)
+    #values$degreePlot <- degreePlot(values$cocnet)
+    plot.ly(values$degreePlot)
+  })
+  
+  observeEvent(input$reportCOC,{
+    if(!is.null(values$cocnet$cluster_res)){
+      names(values$cocnet$cluster_res)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+      sheetname <- "CoWordNet"
+      list_df <- list(values$cocnet$cluster_res)
+      list_plot <- list(values$degreePlot)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      #values$wb <- res$wb
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+13, width=10, height=7, dpi=300)
+      values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
   })
   
   ### Correspondence Analysis ----
@@ -3787,24 +3802,26 @@ server <- function(input, output,session){
   
   output$CSTableW <- DT::renderDT({
     CSfactorial()
-    switch(input$method,
-           CA={
-             WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
-                              stringsAsFactors = FALSE)
-             names(WData)[4]="cluster"
-           },
-           MCA={
-             WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
-                              stringsAsFactors = FALSE)
-             names(WData)[4]="cluster"
-           },
-           MDS={
-             WData=data.frame(word=row.names(values$CS$res), values$CS$res, 
-                              cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
-           })
-    
-    WData$Dim.1=round(WData$Dim.1,2)
-    WData$Dim.2=round(WData$Dim.2,2)
+    # switch(input$method,
+    #        CA={
+    #          WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
+    #                           stringsAsFactors = FALSE)
+    #          names(WData)[4]="cluster"
+    #        },
+    #        MCA={
+    #          WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
+    #                           stringsAsFactors = FALSE)
+    #          names(WData)[4]="cluster"
+    #        },
+    #        MDS={
+    #          WData=data.frame(word=row.names(values$CS$res), values$CS$res, 
+    #                           cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+    #        })
+    # 
+    # WData$Dim.1=round(WData$Dim.1,2)
+    # WData$Dim.2=round(WData$Dim.2,2)
+    #print(class(WData))
+    WData <- values$CS$WData
     
     DT::datatable(WData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -3830,11 +3847,7 @@ server <- function(input, output,session){
   
   output$CSTableD <- DT::renderDT({
     CSfactorial()
-    CSData=values$CS$docCoord
-    CSData=data.frame(Documents=row.names(CSData),CSData,stringsAsFactors = FALSE)
-    CSData$dim1=round(CSData$dim1,2)
-    CSData$dim2=round(CSData$dim2,2)
-    CSData$contrib=round(CSData$contrib,2)
+    CSData <- values$CS$CSData
     DT::datatable(CSData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -3855,6 +3868,16 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(CSData))-1))))) %>%
       formatStyle(names(CSData),  backgroundColor = 'white') 
+  })
+  
+  # add to report
+  observeEvent(input$reportFA,{
+    if(!is.null(values$CS$params)){
+      list_df <- list(values$CS$params, values$CS$WData, values$CS$CSData)
+      list_plot <- list(values$CS$graph_terms, values$CS$graph_dendogram, values$CS$graph_documents_Contrib, values$CS$graph_documents_TC)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "FactorialAnalysis", wb=values$wb)
+      values$wb <- wb
+    }
   })
   
   ### Thematic Map ----
@@ -6957,6 +6980,11 @@ server <- function(input, output,session){
                                         )
                                     ),
                                     br(),
+                                    actionButton("reportCOC", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     fluidRow(column(6,
                                                     downloadButton("network.coc", strong("Save Pajek"),
                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
@@ -7095,6 +7123,12 @@ server <- function(input, output,session){
                                                  )
                                         )
                                     ),
+                                    br(),
+                                    actionButton("reportTM", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'TMdpi',
                                       h4(strong(
@@ -7241,6 +7275,12 @@ server <- function(input, output,session){
                                         "Please, write the cutting points (in year) for your collection",
                                         uiOutput("sliders")
                                     ),
+                                    br(),
+                                    actionButton("reportTE", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'TEdpi',
                                       h4(strong(
@@ -7374,6 +7414,12 @@ server <- function(input, output,session){
                                                                      label=("Num. of documents"), 
                                                                      value = 5)))
                                     ),
+                                    br(),
+                                    actionButton("reportFA", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
                                     selectInput(
                                       'FAdpi',
                                       h4(strong(

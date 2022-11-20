@@ -1228,15 +1228,15 @@ body <- dashboardBody(
                             tabPanel("Topic Dendrogram", 
                                      shinycssloaders::withSpinner(plotOutput(
                                        outputId = "CSPlot4"))),
-                            tabPanel("Table - Most Contributing Papers", 
+                            tabPanel("Most Contributing Papers", 
                                      shinycssloaders::withSpinner(plotOutput(
                                        outputId = "CSPlot2"))),
-                            tabPanel("Table - Most Cited Papers", 
+                            tabPanel("Most Cited Papers", 
                                      shinycssloaders::withSpinner(plotOutput(
                                        outputId = "CSPlot3"))),
-                            tabPanel("Table - Words by Cluster",
+                            tabPanel("Words by Cluster",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))),
-                            tabPanel("Table - Articles by Cluster",
+                            tabPanel("Articles by Cluster",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD")))
                             
                 )

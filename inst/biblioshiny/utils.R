@@ -1,9 +1,3 @@
-# utils::globalVariables("CAmap"," cocNetwork","count.duplicates","countrycollaboration",
-# "degreePlot","descriptive","emptyPlot"," freqPlot","getFileNameExtension","Hindex_plot",
-# "historiograph","igraph2vis","initial","intellectualStructure","is_online","mapworld",
-# "netLayout","notifications","plot.ly","readStopwordsFile","readSynWordsFile","reduceRefs",
-# "savenetwork","socialStructure","strPreview","strSynPreview","wordlist","ValueBoxes","countryCollab")
-
 
 ### COMMON FUNCTIONS ####
 
@@ -730,6 +724,32 @@ CAmap <- function(input, values){
                                        k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
                                        remove.terms=remove.terms, synonyms = synonyms)
       
+      CSData=values$CS$docCoord
+      CSData=data.frame(Documents=row.names(CSData),CSData,stringsAsFactors = FALSE)
+      CSData$dim1=round(CSData$dim1,2)
+      CSData$dim2=round(CSData$dim2,2)
+      CSData$contrib=round(CSData$contrib,2)
+      values$CS$CSData <- CSData
+      
+      switch(input$method,
+             CA={
+               WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
+                                stringsAsFactors = FALSE)
+               names(WData)[4]="cluster"
+             },
+             MCA={
+               WData=data.frame(word=row.names(values$CS$km.res$data.clust), values$CS$km.res$data.clust, 
+                                stringsAsFactors = FALSE)
+               names(WData)[4]="cluster"
+             },
+             MDS={
+               WData=data.frame(word=row.names(values$CS$res), values$CS$res, 
+                                cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+             })
+      
+      WData$Dim.1=round(WData$Dim.1,2)
+      WData$Dim.2=round(WData$Dim.2,2)
+      values$CS$WData <- WData
       
     }else{emptyPlot("Selected field is not included in your data collection")
       values$CS=list("NA")}
@@ -1287,7 +1307,7 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
     insertImage(wb = wb, sheet = sheetname, file = fileName, width = width, 
                 height = height, startRow = startRow, startCol = col, 
                 units = "in", dpi = dpi)
-    startRow <- startRow + (height*10)+3
+    startRow <- startRow + (height*6)+1
   }
   return(wb)
 }

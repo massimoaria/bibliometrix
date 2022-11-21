@@ -4657,7 +4657,7 @@ server <- function(input, output,session){
                         values$nexus$TM[[l]]$documentToClusters)
         list_plot <- list(values$nexus$TM[[l]]$map,
                           values$nexus$TM[[l]]$net$graph)
-        wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TM_Period_",l,sep=""), wb=wb)
+        wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TE_Period_",l,sep=""), wb=wb)
         #
       }
     }
@@ -6925,7 +6925,7 @@ server <- function(input, output,session){
                                                                      label = "Label size",
                                                                      min = 0.0,
                                                                      max = 20,
-                                                                     value = 6,
+                                                                     value = 4,
                                                                      step = 0.10)
                                         ),
                                         column(6,
@@ -7582,6 +7582,12 @@ server <- function(input, output,session){
                                         )
                                     ),
                                     br(),
+                                    actionButton("reportCOCIT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
+                                    br(),
+                                    #br(),
                                     fluidRow(column(6,
                                                     downloadButton("network.cocit", strong("Save Pajek"),
                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
@@ -7647,6 +7653,11 @@ server <- function(input, output,session){
                                                                      max = 20,
                                                                      value = 4, step = 1)))
                                     ),
+                                    br(),
+                                    actionButton("reportHIST", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                                 width = "100%",
+                                                 icon = icon(name ="copy", lib="glyphicon")),
+                                    br(),
                                     br(),
                                     selectInput("HGh",
                                                 h4(strong("Export plot")),

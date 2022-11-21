@@ -38,7 +38,7 @@ igraph2PNG <- function(x, filename, width = 10, height = 7, dpi=300){
     group_by(.data$cluster) %>% 
     slice_head(n=3)
   V(x)$label[!(V(x)$label %in% df$name)] <- ""
-  png(filename = filename, width = 10, height = 7, unit="in", res=dpi) 
+  png(filename = filename, width = width, height = height, unit="in", res=dpi) 
   grid::grid.draw(plot(x))
   dev.off()
 }
@@ -1101,7 +1101,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.2,1)))
   ## set a darkest gray for iter-cluster edges
   vn$edges$color <- paste(substr(vn$edges$color,1,7),"90",sep="")
-  vn$edges$color[substr(vn$edges$color,1,7)=="#B3B3B3"] <- "#33333360"
+  vn$edges$color[substr(vn$edges$color,1,7)=="#B3B3B3"] <- "#69696960"
     vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity)
     
     ## removing multiple edges
@@ -1125,11 +1125,11 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
     
     vn$nodes$size <- vn$nodes$font.size*0.8
     
-    if (shape %in% c("text")){
-      vn$nodes$font.color <- vn$nodes$color
-    }else{
-      vn$nodes$font.color <- "black"
-    }
+    #if (shape %in% c("text")){
+    #  vn$nodes$font.color <- vn$nodes$color
+    #}else{
+      vn$nodes$font.color <- adjustcolor("black", alpha.f = min(c(opacity-0.1,1)))
+    #}
     
     if (shape %in% c("dot","square")){
       vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
@@ -1139,12 +1139,12 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
     
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
-      visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
-      visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords) %>%
+      visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+      visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
       visNetwork::visEdges(smooth = curved) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = TRUE, hideEdgesOnDrag = TRUE) %>%
-      visNetwork::visOptions(manipulation = TRUE) #%>%
+      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE) %>%
+      visNetwork::visOptions(manipulation = TRUE, height ="100%", width = "100%") #%>%
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 

@@ -1171,6 +1171,9 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
     dplyr::select(.data$x,.data$y,.data$color,.data$name)
   
   vn <- visNetwork::toVisNetworkData(net$net)
+  
+  #vn$nodes <- vn$nodes %>% left_join(net$graph.data %>% select(.data$Label,.data$LCS), by=c("label" = "Label"))
+  
   if (labeltype != "short"){
     vn$nodes$label <- paste0(vn$nodes$years,": ",LABEL)
   }else{
@@ -1185,7 +1188,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   vn$edges$color <- "grey"
     
   ## opacity
-  vn$nodes$font.color <- adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.1,1)))
+  vn$nodes$font.color <- vn$nodes$color
   
   vn$nodes$color <- adjustcolor(vn$nodes$color,alpha.f=min(c(opacity-0.2,1)))
   vn$edges$color <- adjustcolor(vn$edges$color,alpha.f=opacity-0.2)
@@ -1211,8 +1214,8 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   }
   
   text_data <- net$graph.data %>% 
-    select(.data$name, .data$DOI, .data$LCS,.data$GCS) %>% 
-    rename(id = .data$name) %>% 
+    select(.data$Label, .data$DOI, .data$LCS,.data$GCS) %>% 
+    rename(id = .data$Label) %>% 
     filter(!duplicated(.data$id))
   
   vn$nodes <- vn$nodes %>% left_join(text_data, by = "id")
@@ -1226,6 +1229,8 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   }))
   
   vn$nodes <- vn$nodes %>%
+    #select(!.data$LCS.y) %>% 
+    #rename(LCS = .data$LCS.x) %>% 
     mutate(title = paste("<b>Title</b>: ",
                          .data$title,
                          "<br><b>DOI</b>: ",
@@ -1268,20 +1273,27 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   tooltipStyle = ('position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;
                   font-size:12px;font-color:black;background-color:white;')
   
+  ## Font opacity
+  vn$nodes$LCS[is.na(vn$nodes$LCS)] <- max(vn$nodes$LCS, na.rm=TRUE)
+  opacity_font <- sqrt((vn$nodes$LCS-min(vn$nodes$LCS))/diff(range(vn$nodes$LCS)))*0.6+0.4
+  
+  vn$nodes$size <- opacity_font*5*nodesize
+  vn$nodes$size[nrow(vn$nodes)] <- max(5*nodesize)
+
+  for (i in 1:nrow(vn$nodes)) vn$nodes$font.color[i] <-adjustcolor(vn$nodes$font.color[i], alpha.f = opacity_font[i])
   
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
-    visNetwork::visNodes(shadow=FALSE, font=list(color="black", size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visNodes(shadow=TRUE, shape=shape, size = vn$node$size, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
+    #visEdges() %>% 
+    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) %>% 
     visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = F,
-                           autoResize = TRUE,
-                           manipulation = FALSE, height = "100%") %>%
-    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle)
-  # visGroups(groupname = "time", shape = "icon", 
-  #           icon = list(code = "f060", size = 75)) %>% 
-  # addFontAwesome() %>% 
-  
+                           #autoResize = TRUE,
+                           manipulation = FALSE, height = "100%", width = "100%")
+  #VIS$sizingPolicy$browser$fill <- TRUE
+
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
 }
 

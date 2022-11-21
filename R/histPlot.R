@@ -237,21 +237,20 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   g <- g +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
+  label <- data.frame(Label = names(V(bsk.network)), stringsAsFactors = FALSE)
+  Data <-  histResults$histData
+  
+  Data <- left_join(label,Data, by = c("Label" = "Paper"))
   
   if (isTRUE(verbose)) {
     plot(g)
     
     cat("\n Legend\n\n")
     
-    label <- data.frame(Label = names(V(bsk.network)), stringsAsFactors = FALSE)
-    Data <-  histResults$histData
-    
-    Data <- left_join(label,Data, by = c("Label" = "Paper"))
-    
     print(Data[,-2])
   }
   
-  results <- list(net=bsk.network, g=g, graph.data=df_net, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks))
+  results <- list(net=bsk.network, g=g, graph.data=Data, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks))
   return(results)
 }
 

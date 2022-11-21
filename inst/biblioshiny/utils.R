@@ -1084,7 +1084,7 @@ savenetwork <- function(con, values){
     visNetwork::visSave(con)
 }
 
-igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
+igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, edgesize=5){
   
   LABEL=igraph::V(g)$name
   
@@ -1098,20 +1098,24 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
   vn$edges$dashes[vn$edges$lty==2]=TRUE
   
   ## opacity
-  vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity+0.2,1)))
+  vn$nodes$color=adjustcolor(vn$nodes$color,alpha.f=min(c(opacity,1)))
   ## set a darkest gray for iter-cluster edges
   vn$edges$color <- paste(substr(vn$edges$color,1,7),"90",sep="")
   vn$edges$color[substr(vn$edges$color,1,7)=="#B3B3B3"] <- "#69696960"
-    vn$edges$color=adjustcolor(vn$edges$color,alpha.f=opacity)
+    vn$edges$color <- adjustcolor(vn$edges$color,alpha.f=opacity)
     
     ## removing multiple edges
-    vn$edges=unique(vn$edges)
-    
+    vn$edges <- unique(vn$edges)
+
+    vn$edges$width <- vn$edges$width^2/(max(vn$edges$width^2))*(10+edgesize)
+
+    if (edgesize==0){hidden <- TRUE}else{hidden <- FALSE}
+        
     ## labelsize
-    scalemin=20
-    scalemax=150
-    Min=min(vn$nodes$font.size)
-    Max=max(vn$nodes$font.size)
+    scalemin <- 20
+    scalemax <- 150
+    Min <- min(vn$nodes$font.size)
+    Max <- max(vn$nodes$font.size)
     if (Max>Min){
       size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
     } else {size=10*labelsize}
@@ -1123,13 +1127,9 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
     ### TO ADD SHAPE AND FONT COLOR OPTIONS
     coords <- net$layout
     
-    vn$nodes$size <- vn$nodes$font.size*0.8
+    vn$nodes$size <- vn$nodes$font.size*0.7
     
-    #if (shape %in% c("text")){
-    #  vn$nodes$font.color <- vn$nodes$color
-    #}else{
-      vn$nodes$font.color <- adjustcolor("black", alpha.f = min(c(opacity-0.1,1)))
-    #}
+    vn$nodes$font.color <- adjustcolor("black", alpha.f = min(c(opacity,1)))
     
     if (shape %in% c("dot","square")){
       vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
@@ -1137,14 +1137,19 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE){
       vn$nodes$font.vadjust <-0
     }
     
+    if(isTRUE(shadow)){
+      curved <- list(type="horizontal")
+    }
+    
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
       visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
-      visNetwork::visEdges(smooth = curved) %>%
+      visNetwork::visEdges(smooth = curved, hidden = hidden) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
       visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE) %>%
-      visNetwork::visOptions(manipulation = TRUE, height ="100%", width = "100%") #%>%
+      visNetwork::visOptions(manipulation = TRUE, height ="100%", width = "100%")
+    
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
 

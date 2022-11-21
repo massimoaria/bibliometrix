@@ -3582,7 +3582,7 @@ server <- function(input, output,session){
     values <- cocNetwork(input,values)
     values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                               shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"))
+                               shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize)
     values$degreePlot <- degreePlot(values$cocnet)
   })
   
@@ -3671,7 +3671,7 @@ server <- function(input, output,session){
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+13, width=10, height=7, dpi=300)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
       values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
     }
@@ -4671,6 +4671,7 @@ server <- function(input, output,session){
     values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
                                shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"))
+    values$degreePlot <- degreePlot(values$cocitnet)
   })
   
   output$cocitPlot <- renderVisNetwork({  
@@ -4729,8 +4730,23 @@ server <- function(input, output,session){
   ### Degree Plot Co-citation analysis ####
   output$cocitDegree <- renderPlotly({
     COCITnetwork()
-    p <- degreePlot(values$cocitnet)
-    plot.ly(p)
+    #p <- degreePlot(values$cocitnet)
+    plot.ly(values$degreePlot)
+  })
+  
+  observeEvent(input$reportCOCIT,{
+
+    if(!is.null(values$cocitnet$cluster_res)){
+      names(values$cocitnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+      sheetname <- "CoCitNet"
+      list_df <- list(values$cocitnet$cluster_res)
+      list_plot <- list(values$degreePlot)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      #values$wb <- res$wb
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
+      values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
   })
   
   ### Historiograph ----
@@ -6925,14 +6941,14 @@ server <- function(input, output,session){
                                                                      label = "Label size",
                                                                      min = 0.0,
                                                                      max = 20,
-                                                                     value = 4,
+                                                                     value = 3,
                                                                      step = 0.10)
                                         ),
                                         column(6,
                                                numericInput(
                                                  inputId = "edgesize",
                                                  label = "Edge size",
-                                                 min = 0.5,
+                                                 min = 0.0,
                                                  max = 20,
                                                  value = 5,
                                                  step=0.5)
@@ -6942,7 +6958,7 @@ server <- function(input, output,session){
                                                                     label = "Node shadow",
                                                                     choices = c("Yes",
                                                                                 "No"),
-                                                                    selected = "No")
+                                                                    selected = "Yes")
                                         ),
                                         column(6,
                                                selectInput(inputId ="coc.curved",
@@ -7561,7 +7577,7 @@ server <- function(input, output,session){
                                                  label = "Edge size",
                                                  min = 0.5,
                                                  max = 20,
-                                                 value = 5,
+                                                 value = 2,
                                                  step=0.5)
                                         )), 
                                         fluidRow(column(6,
@@ -7569,7 +7585,7 @@ server <- function(input, output,session){
                                                                     label = "Node shadow",
                                                                     choices = c("Yes",
                                                                                 "No"),
-                                                                    selected = "No")
+                                                                    selected = "Yes")
                                         ),
                                         column(6,
                                                selectInput(inputId ="cocit.curved",

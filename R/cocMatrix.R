@@ -113,7 +113,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
       M[,Field] <- M$item
     
   }
-  
+  row.names(M) <- M$SR
   if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
   
   if (Field %in% names(M)){
@@ -178,8 +178,13 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
   
   if (type=="matrix" | !isTRUE(binary)){
     # Initialization of WA matrix
-    WF<-matrix(0,size[1],length(uniqueField))} else if (type=="sparse"){
-      WF<-Matrix(0,size[1],length(uniqueField))} else {print("error in type argument");return()}
+    WF<-matrix(0,size[1],length(uniqueField))
+    } else if (type=="sparse"){
+      WF<-Matrix(0,size[1],length(uniqueField))
+    } else {
+        print("error in type argument")
+      return()
+      }
   colnames(WF)<-uniqueField
   rownames(WF)<-rownames(M)
   # Population of WA matrix

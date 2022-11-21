@@ -79,6 +79,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
   # etc.
   #crossprod <- Matrix::crossprod
   size<-dim(M)
+  RowNames <- row.names(M)
   
   ### REMOVE TERMS AND MERGE SYNONYMS
   if (Field %in% c("ID", "DE", "TI", "TI_TM", "AB", "AB_TM")){
@@ -113,7 +114,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
       M[,Field] <- M$item
     
   }
-  row.names(M) <- M$SR
+  row.names(M) <- RowNames
   if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
   
   if (Field %in% names(M)){

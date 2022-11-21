@@ -3671,7 +3671,7 @@ server <- function(input, output,session){
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+16, width=10, height=7, dpi=300)
       values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
     }
@@ -4952,14 +4952,14 @@ server <- function(input, output,session){
       formatStyle(names(colData),  backgroundColor = 'white') 
   }) 
   
-  ### Report Save xlsx
+  ### Report Save xlsx ----
   output$report.save <- downloadHandler(
     filename = function() {
       paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep="")
     },
     content <- function(file) {
       if (nrow(values$list_file)>0){
-        values$wb <- addScreenWb(df=values$list_file, wb=values$wb, width=10, height=7, dpi=300)
+        values$wb <- addScreenWb(df=values$list_file, wb=values$wb)#, width=10, height=7, dpi=300)
       }
       openxlsx::saveWorkbook(values$wb, file = file)
     },
@@ -6914,7 +6914,7 @@ server <- function(input, output,session){
                                                             label = "Number of labels",
                                                             min = 0,
                                                             max = 1000,
-                                                            value = 50,
+                                                            value = 1000,
                                                             step = 1)
                                         )),
                                         fluidRow(column(6,
@@ -7541,7 +7541,7 @@ server <- function(input, output,session){
                                                             label = "Number of labels",
                                                             min = 0,
                                                             max = 1000,
-                                                            value = 50,
+                                                            value = 1000,
                                                             step = 1)
                                         )),
                                         fluidRow(column(6,

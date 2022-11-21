@@ -1142,7 +1142,12 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     }
     
     opacity_font <- sqrt((vn$nodes$font.size-min(vn$nodes$font.size))/diff(range(vn$nodes$font.size)))*0.7+0.3
-    vn$nodes$font.color <- unlist(lapply(opacity_font, function(x) adjustcolor("black",alpha.f = x)))
+    
+    if (labelsize>0){
+      vn$nodes$font.color <- unlist(lapply(opacity_font, function(x) adjustcolor("black",alpha.f = x)))
+    }else{
+        vn$nodes$font.color <- adjustcolor("black", alpha.f = 0)
+        }
     
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
@@ -1345,7 +1350,7 @@ screenSh <- function(selector){
   return(file)
 }
 
-addScreenWb <- function(df, wb, width=10, height=7, dpi=300){
+addScreenWb <- function(df, wb, width=14, height=8, dpi=300){
   names(df) <- c("sheet","file","n")
   if (nrow(df)>0){
     sheet <- unique(df$sheet)

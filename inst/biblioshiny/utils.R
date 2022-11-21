@@ -1129,7 +1129,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     
     vn$nodes$size <- vn$nodes$font.size*0.7
     
-    vn$nodes$font.color <- adjustcolor("black", alpha.f = min(c(opacity,1)))
+    #vn$nodes$font.color <- adjustcolor("black", alpha.f = min(c(opacity,1)))
     
     if (shape %in% c("dot","square")){
       vn$nodes$font.vadjust <- -0.7*vn$nodes$font.size
@@ -1140,6 +1140,9 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     if(isTRUE(shadow)){
       curved <- list(type="horizontal")
     }
+    
+    opacity_font <- sqrt((vn$nodes$font.size-min(vn$nodes$font.size))/diff(range(vn$nodes$font.size)))*0.7+0.3
+    vn$nodes$font.color <- unlist(lapply(opacity_font, function(x) adjustcolor("black",alpha.f = x)))
     
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%

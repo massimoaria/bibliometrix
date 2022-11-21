@@ -4063,8 +4063,18 @@ server <- function(input, output,session){
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
       )
+      for (i in 1:length(values$yearSlices)){
+        values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[,-c(4,6)]
+        values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[,c(9,5:8,11)]
+        names(values$nexus$TM[[i]]$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
+        
+        values$nexus$TM[[i]]$documentToClusters$DI<- paste0('<a href=\"https://doi.org/',values$nexus$TM[[i]]$documentToClusters$DI,'\" target=\"_blank\">',values$nexus$TM[[i]]$documentToClusters$DI,'</a>')
+        names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR")
+      }
+      values$nexus$Data <- values$nexus$Data[values$nexus$Data$Inc_index>0,-c(4,8)]
       plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE)
     }
+    
   })
   
   output$TEPlot <- plotly::renderPlotly({
@@ -4111,7 +4121,6 @@ server <- function(input, output,session){
   output$TETable <- DT::renderDT({
     TEMAP()
     TEData=values$nexus$Data
-    TEData=TEData[TEData$Inc_index>0,-c(4,8)]
     names(TEData)=c("From", "To", "Words", "Weighted Inclusion Index", "Inclusion Index", "Occurrences", "Stability Index")
     DT::datatable(TEData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4220,7 +4229,7 @@ server <- function(input, output,session){
   
   output$TMTable1 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[1]]$words[,-c(4,6)]
+    tmData=values$nexus$TM[[1]]$words
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4246,7 +4255,7 @@ server <- function(input, output,session){
   
   output$TMTable2 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[2]]$words[,-c(4,6)]
+    tmData=values$nexus$TM[[2]]$words
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4272,7 +4281,7 @@ server <- function(input, output,session){
   
   output$TMTable3 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[3]]$words[,-c(4,6)]
+    tmData=values$nexus$TM[[3]]$words
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4298,7 +4307,7 @@ server <- function(input, output,session){
   
   output$TMTable4 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[4]]$words[,-c(4,6)]
+    tmData=values$nexus$TM[[4]]$words
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4324,7 +4333,7 @@ server <- function(input, output,session){
   
   output$TMTable5 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[5]]$words[,-c(4,6)]
+    tmData=values$nexus$TM[[5]]$words
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4350,8 +4359,7 @@ server <- function(input, output,session){
   
   output$TMTableCluster1 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[1]]$clusters[,c(9,5:8,11)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
+    tmData <- values$nexus$TM[[1]]$clusters
     
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4377,9 +4385,7 @@ server <- function(input, output,session){
   
   output$TMTableCluster2 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[2]]$clusters[,c(9,5:8,11)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
-    
+    tmData <- values$nexus$TM[[2]]$clusters
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4404,9 +4410,7 @@ server <- function(input, output,session){
   
   output$TMTableCluster3 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[3]]$clusters[,c(9,5:8,11)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
-    
+    tmData <- values$nexus$TM[[3]]$clusters
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4431,9 +4435,7 @@ server <- function(input, output,session){
   
   output$TMTableCluster4 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[4]]$clusters[,c(9,5:8,11)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
-    
+    tmData <- values$nexus$TM[[4]]$clusters
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4458,9 +4460,7 @@ server <- function(input, output,session){
   
   output$TMTableCluster5 <- DT::renderDT({
     TEMAP()
-    tmData <- values$nexus$TM[[5]]$clusters[,c(9,5:8,11)]
-    names(tmData) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
-    
+    tmData <- values$nexus$TM[[5]]$clusters
     DT::datatable(tmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4486,8 +4486,7 @@ server <- function(input, output,session){
   output$TMTableDocument1 <- DT::renderDT({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[1]]$documentToClusters
-    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
-    names(tmDataDoc)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
+    
     
     DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4638,6 +4637,33 @@ server <- function(input, output,session){
       formatRound(names(tmDataDoc)[ncol(tmDataDoc)], 3)
   })
   
+  observeEvent(input$reportTE,{
+    if(!is.null(values$nexus$Data)){
+      sheetname <- "ThematicEvolution"
+      list_df <- list(values$nexus$params, values$nexus$Data)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      #values$wb <- res$wb
+      values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
+    ## Periods
+    L <- length(values$nexus$TM)
+    wb <- res$wb
+    for (l in 1:L){
+      if(!is.null(values$nexus$TM[[l]]$words)){
+        list_df <- list(values$nexus$TM[[l]]$params,
+                        values$nexus$TM[[l]]$words,
+                        values$nexus$TM[[l]]$clusters,
+                        values$nexus$TM[[l]]$documentToClusters)
+        list_plot <- list(values$nexus$TM[[l]]$map,
+                          values$nexus$TM[[l]]$net$graph)
+        wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TM_Period_",l,sep=""), wb=wb)
+        #
+      }
+    }
+    values$wb <- wb
+  })
+  
   # INTELLECTUAL STRUCTURE ####
   ### Co-citation network ----
   COCITnetwork <- eventReactive(input$applyCocit,{
@@ -4713,43 +4739,7 @@ server <- function(input, output,session){
                  value = 0, {
                    values <- historiograph(input,values)
                  })
-    
-    # fx <- list(
-    #   family = "Old Standard TT, serif",
-    #   size = 11,
-    #   color = "black"
-    # )
-    # 
-    # a <- list(
-    #   ticks = "outside",
-    #   autotick = FALSE,
-    #   ticktext = values$histPlot$axis$label, 
-    #   tickvals = values$histPlot$axis$values,
-    #   tickmode = "array",
-    #   showticklabels = TRUE,
-    #   tickangle = 270,
-    #   tickfont = fx,
-    #   ticklen = 2,
-    #   tickwidth = 2,
-    #   tickcolor = toRGB("black")
-    # )
-    # 
-    # g <- plot.ly(values$histPlot$g, side="r", size=0.05, aspectratio = 1.5, height=-0.1) %>% 
-    #   layout(xaxis = a, autosize=TRUE ,showlegend = FALSE, 
-    #          hoverlabel = list(font=list(size=input$histlabelsize+9)))
-    # return(g)
   })
-  
-  
-  # output$HGplot.save <- downloadHandler(
-  #   filename = function() {
-  #     paste("Historiograph-", Sys.Date(), ".png", sep="")
-  #   },
-  #   content <- function(file) {
-  #     ggsave(filename = file, plot = values$histPlot$g, dpi = as.numeric(input$HGdpi),  height = input$HGh, width = input$HGh*2, bg="white")
-  #   },
-  #   contentType = "png"
-  # )
   
   ### screenshot Button Historiograph
   observeEvent(input$HGplot.save, {

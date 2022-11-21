@@ -1289,7 +1289,7 @@ addDataWb <- function(list_df, wb, sheetname){
 addDataScreenWb <- function(list_df, wb, sheetname){
   ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
   if (length(ind)>0){
-    sheetname <- paste(sheetname,length(ind)+1,sep="")
+    sheetname <- paste(sheetname,"(",length(ind)+1,")",sep="")
   } 
   addWorksheet(wb=wb, sheetName=sheetname, gridLines = FALSE)
   if (!is.null(list_df)){
@@ -1361,7 +1361,7 @@ addScreenWb <- function(df, wb, width=10, height=7, dpi=300){
 addSheetToReport <- function(list_df, list_plot, sheetname, wb){
   ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
   if (length(ind)>0){
-    sheetname <- paste(sheetname,length(ind)+1,sep="")
+    sheetname <- paste(sheetname,"(",length(ind)+1,")",sep="")
   } 
   addWorksheet(wb, sheetname, gridLines = FALSE)
   
@@ -1373,7 +1373,7 @@ addSheetToReport <- function(list_df, list_plot, sheetname, wb){
     if (!is.null(list_plot)){
       wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col)
     }
-  values$sheet_name <- sheetname
+  #values$sheet_name <- sheetname
   return(wb)
 }
 

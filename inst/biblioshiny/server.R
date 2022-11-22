@@ -1117,8 +1117,8 @@ server <- function(input, output,session){
       list_df <- list(values$TABvb)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$wb <- res$wb
-      values$fileTFP <- screenSh(selector = NULL) ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = NULL) ## screenshot
+      #values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
     }
   })
   
@@ -1321,14 +1321,16 @@ server <- function(input, output,session){
   
   
   observeEvent(input$reportTFP,{
-    sheetname <- "ThreeFieldsPlot"
-    ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
-    if (length(ind)>0){
-      sheetname <- paste(sheetname,length(ind)+1,sep="")
-    } 
-    addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
-    values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
-    values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
+    if (!is.null(values$TFP)){
+      sheetname <- "ThreeFieldsPlot"
+      ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
+      if (length(ind)>0){
+        sheetname <- paste(sheetname,length(ind)+1,sep="")
+      } 
+      addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
+      values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
+    }
   })
   
   # SOURCES MENU ----
@@ -5171,11 +5173,6 @@ server <- function(input, output,session){
                                     br(),
                                     verbatimTextOutput("CAGR", placeholder = TRUE),
                                     br(),
-                                    actionButton("reportASP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'ASPdpi',
                                       label = h4(strong("Export plot")),
@@ -5202,10 +5199,6 @@ server <- function(input, output,session){
                    ),
                    ## Average Cit Per Year ----
                    conditionalPanel(condition = 'input.sidebarmenu == "averageCitPerYear"',
-                                    actionButton("reportACpY", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'ACpYdpi',
@@ -5287,11 +5280,7 @@ server <- function(input, output,session){
                                           (column(6,numericInput("RightFieldn", 
                                                                  label=("Number of items"), 
                                                                  min = 1, max = 50, step = 1, value = 20))))
-                                    ),
-                                    br(),
-                                    actionButton("reportTFP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon"))
+                                    )
                                     ),
                    ## Relevant Sources ----
                    conditionalPanel(condition = 'input.sidebarmenu == "relevantSources"',
@@ -5300,11 +5289,6 @@ server <- function(input, output,session){
                                     numericInput("MostRelSourcesK", 
                                                  label=("Number of Sources"), 
                                                  value = 10),
-                                    br(),
-                                    actionButton("reportMRS", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'MRSdpi',
@@ -5340,11 +5324,6 @@ server <- function(input, output,session){
                                                  label=("Number of Sources"), 
                                                  value = 10),
                                     br(),
-                                    actionButton("reportMLS", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'MLCSdpi',
                                       h4(strong(
@@ -5373,11 +5352,6 @@ server <- function(input, output,session){
                    ),
                    ## Bradford Law ----
                    conditionalPanel(condition ='input.sidebarmenu == "bradford"',
-                                    br(),
-                                    actionButton("reportBradford", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'BLdpi',
@@ -5422,11 +5396,6 @@ server <- function(input, output,session){
                                                      label=("Number of sources"), 
                                                      value = 10)),
                                     br(),
-                                    actionButton("reportSI", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'SIdpi',
                                       h4(strong(
@@ -5465,11 +5434,6 @@ server <- function(input, output,session){
                                                     selected = "Cum"),
                                         hr(),
                                         sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = c(1,5))),
-                                    br(),
-                                    actionButton("reportSD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'SDdpi',

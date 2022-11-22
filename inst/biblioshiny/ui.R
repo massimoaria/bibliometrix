@@ -1,7 +1,6 @@
 source("libraries.R", local=TRUE)
 libraries()
 
-
 # UI components ----
 ## Title ----
 mytitle <- tags$link(tags$a(href = 'https://www.bibliometrix.org/',target="_blank",
@@ -327,11 +326,17 @@ body <- dashboardBody(
     ##### main information ----
     tabItem("mainInfo",
             fluidPage(
-              fluidRow(
+              fluidRow(column(10,
                 h2(strong("Main Information"), align = "center")),
+                column(2, 
+                       actionButton("reportMI", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
+                ),
               fluidRow(
                 tabsetPanel(type = "tabs", id = "maininfo",
-                            tabPanel("PlotM", 
+                            tabPanel("Plot", 
                                      fluidRow(
                                        br(),
                                        column(3,
@@ -350,18 +355,7 @@ body <- dashboardBody(
                                               valueBoxOutput("cagr", width = "33vh"),
                                               valueBoxOutput("coAuPerDoc", width = "33vh"),
                                               valueBoxOutput("tc", width = "33vh")),
-                                     ),
-                                     br(),
-                                     fluidRow(column(3),
-                                              column(3),
-                                              column(3),
-                                              column(3,
-                                     actionButton("reportMI", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                  width = "100%",
-                                                  icon = icon(name ="copy", lib="glyphicon")))
-                                     ),
-                                     br(),
-                                     br()
+                                     )
                             ),
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 700)
@@ -373,8 +367,13 @@ body <- dashboardBody(
     ##### annual scientific production ----
     tabItem("annualScPr",
             fluidPage(
-              fluidRow(
-                h2(strong("Annual Scientific Production"), align = "center")
+              fluidRow(column(10,
+                h2(strong("Annual Scientific Production"), align = "center")),
+                column(2, 
+                       actionButton("reportASP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(id ="tabsASP",
@@ -392,8 +391,13 @@ body <- dashboardBody(
     ##### average citation per year ----
     tabItem("averageCitPerYear",
             fluidPage(
-              fluidRow(
-                h2(strong("Average Citation Per Year"), align = "center")
+              fluidRow(column(10,
+                h2(strong("Average Citation Per Year"), align = "center")),
+                column(2, 
+                       actionButton("reportACpY", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -411,11 +415,17 @@ body <- dashboardBody(
     tabItem("threeFieldPlot",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Three-Field Plot"), align = "center")),
-                column(2,actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                column(2,
+                       actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",
-                                      icon = fa_i(name ="play")))
+                                      icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportTFP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                       )
               ),
               fluidRow(
                 shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
@@ -427,10 +437,15 @@ body <- dashboardBody(
     tabItem("relevantSources",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Relevant Sources"), align = "center")),
                 column(2,actionButton("applyMRSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMRS", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -448,11 +463,16 @@ body <- dashboardBody(
     tabItem("localCitedSources",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Local Cited Sources (from Reference Lists)"), align = "center")),
                 column(2,
                        actionButton("applyMLCSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMLS", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -469,10 +489,17 @@ body <- dashboardBody(
     ##### bradford law ----
     tabItem("bradford",
             fluidPage(
-              fluidRow(
-                titlePanel(
+              fluidRow(column(10,
+                #titlePanel(
                   h2(strong("Source clustering through Bradford's Law"), align = "center")
+                ),
+                column(2, 
+                         actionButton("reportBradford", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                      width = "80%",
+                                      icon = icon(name ="plus", lib="glyphicon"))
                 )
+                
+                #)
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -490,12 +517,17 @@ body <- dashboardBody(
     tabItem("sourceImpact",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Source Local Impact"), align = "center")),
                 column(2,
                        actionButton("applyHsource", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",
-                                    icon = fa_i(name ="play")))
+                                    icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportSI", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -513,11 +545,16 @@ body <- dashboardBody(
     tabItem("sourceDynamics",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Source Dynamics"), align = "center")),
                 column(2,actionButton("applySOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",
                                       icon = fa_i(name ="play"))
+                ),
+                column(2, 
+                       actionButton("reportSD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(

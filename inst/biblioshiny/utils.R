@@ -1,4 +1,3 @@
-
 ### COMMON FUNCTIONS ####
 
 getFileNameExtension <- function (fn) {
@@ -1284,7 +1283,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
-    visNetwork::visNodes(shadow=TRUE, shape=shape, size = vn$node$size, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visNodes(shadow=FALSE, shape=shape, size = vn$node$size, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
     #visEdges() %>% 

@@ -7792,7 +7792,7 @@ server <- function(input, output,session){
                                                             label = "Number of labels",
                                                             min = 0,
                                                             max = 1000,
-                                                            value = 50,
+                                                            value = 1000,
                                                             step = 1)
                                         )),
                                         fluidRow(column(6,
@@ -7836,7 +7836,7 @@ server <- function(input, output,session){
                                                                     label = "Node shadow",
                                                                     choices = c("Yes",
                                                                                 "No"),
-                                                                    selected = "No")
+                                                                    selected = "Yes")
                                         ),
                                         column(6,
                                                selectInput(inputId ="soc.curved",

@@ -574,11 +574,16 @@ body <- dashboardBody(
     tabItem("mostRelAuthors",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Relevant Authors"), align = "center")),
                 column(2,
                        actionButton("applyMRAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMRA", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -596,11 +601,15 @@ body <- dashboardBody(
     tabItem("mostLocalCitedAuthors",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Local Cited Authors"), align = "center")),
                 column(2,actionButton("applyMLCAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
-                
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMLCA", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -618,12 +627,17 @@ body <- dashboardBody(
     tabItem("authorsProdOverTime",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Authors' Production over Time"), align = "center")),
                 column(2,
                        actionButton("applyAUoverTime", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportAPOT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -644,8 +658,13 @@ body <- dashboardBody(
     tabItem("lotka",
             fluidPage(
               fluidRow(
-                titlePanel(
+                column(10,
                   h2(strong("Author Productivity through Lotka's Law"), align = "center")
+                ),
+                column(2, 
+                       actionButton("reportLotka", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(
@@ -664,11 +683,16 @@ body <- dashboardBody(
     tabItem("authorImpact",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Author Local Impact"), align = "center")),
                 column(2,
                        actionButton("applyHAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",icon = fa_i(name ="play"))
+                ),
+                column(2, 
+                       actionButton("reportAI", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(
@@ -687,12 +711,17 @@ body <- dashboardBody(
     tabItem("mostRelAffiliations",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Relevant Affiliations"), align = "center")),
                 column(2,
                        actionButton("applyMRAffiliations", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMRAFF", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -710,11 +739,16 @@ body <- dashboardBody(
     tabItem("AffOverTime",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Affiliations' Production over Time"), align = "center")),
                 column(2,actionButton("applyAFFGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",
                                       icon = fa_i(name ="play"))
+                ),
+                column(2, 
+                       actionButton("reportAFFPOT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(
@@ -733,11 +767,16 @@ body <- dashboardBody(
     tabItem("correspAuthorCountry",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Corresponding Author's Country"), align = "center")),
                 column(2,
                        actionButton("applyCAUCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMRCO", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -754,8 +793,13 @@ body <- dashboardBody(
     ##### country scientific production ----
     tabItem("countryScientProd",
             fluidPage(
-              fluidRow(
-                h2(strong("Country Scientific Production"), align = "center")
+              fluidRow(column(10,
+                h2(strong("Country Scientific Production"), align = "center")),
+                column(2, 
+                       actionButton("reportCSP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -773,11 +817,16 @@ body <- dashboardBody(
     tabItem("COOverTime",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Countries' Production over Time"), align = "center")),
                 column(2,actionButton("applyCOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",
                                       icon = fa_i(name ="play"))
+                ),
+                column(2, 
+                       actionButton("reportCPOT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(
@@ -796,10 +845,15 @@ body <- dashboardBody(
     tabItem("mostCitedCountries",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Cited Countries"), align = "center")),
                 column(2,actionButton("applyMCCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMCCO", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -818,12 +872,17 @@ body <- dashboardBody(
     tabItem("mostGlobalCitDoc",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Global Cited Documents"), align = "center")),
                 column(2,
                        actionButton("applyMGCDocuments", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMCD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -841,12 +900,17 @@ body <- dashboardBody(
     tabItem("mostLocalCitDoc",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Local Cited Documents"), align = "center")),
                 column(2, actionButton("applyMLCDocuments", strong("Run"),
                                        style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                        width = "80%",
-                                       icon = fa_i(name="play")))
+                                       icon = fa_i(name="play"))),
+                column(2, 
+                       actionButton("reportMLCD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -864,12 +928,17 @@ body <- dashboardBody(
     tabItem("mostLocalCitRef",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Local Cited References"), align = "center")),
                 column(2,
                        actionButton("applyMLCReferences", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportMLCR", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -887,12 +956,17 @@ body <- dashboardBody(
     tabItem("ReferenceSpect",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("References Spectroscopy"), align = "center")
                 ),
                 column(2,
                        actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportRPYS", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -912,13 +986,18 @@ body <- dashboardBody(
     tabItem("mostFreqWords",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Most Frequent Words"), align = "center")
                 ),
                 column(2,
                        actionButton("applyMFWords", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",icon = fa_i(name ="play"))
+                ),
+                column(2, 
+                       actionButton("reportMFW", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(
@@ -938,11 +1017,16 @@ body <- dashboardBody(
     tabItem("wcloud",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("WordCloud"), align = "center")),
                 column(2,actionButton("applyWordCloud", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportWC", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -961,12 +1045,17 @@ body <- dashboardBody(
     tabItem("treemap",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("TreeMap"), align = "center")),
                 column(2,
                        actionButton("applyTreeMap", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportTREEMAP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -984,12 +1073,17 @@ body <- dashboardBody(
     tabItem("wordDynamics",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Word Dynamics"), align = "center")),
                 column(2,
                        actionButton("applyWD", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportWD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1007,12 +1101,17 @@ body <- dashboardBody(
     tabItem("trendTopic",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Trend Topics"), align = "center")),
                 column(2,
                        actionButton("applyTrendTopics", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportTT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1031,12 +1130,17 @@ body <- dashboardBody(
     tabItem("coupling",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Clustering by Coupling"), align = "center")),
                 column(2,
                        actionButton("applyCM", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportCC", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1060,12 +1164,17 @@ body <- dashboardBody(
     tabItem("coOccurenceNetwork",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Co-occurrence Network"), align = "center")),
                 column(2,
                        actionButton("applyCoc", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play")))
+                                    width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportCOC", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1084,11 +1193,16 @@ body <- dashboardBody(
     tabItem("thematicMap",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Thematic Map"), align = "center")),
                 column(2,actionButton("applyTM", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportTM", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1114,11 +1228,16 @@ body <- dashboardBody(
     tabItem("thematicEvolution",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Thematic Evolution"), align = "center")),
                 column(2,actionButton("applyTE", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",icon = fa_i(name ="play"))
+                ),
+                column(2, 
+                       actionButton("reportTE", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
                 )
               ),
               fluidRow(
@@ -1231,11 +1350,16 @@ body <- dashboardBody(
     tabItem("factorialAnalysis",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Factorial Analysis"), align = "center")),
                 column(2,actionButton("applyCA", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportFA", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1265,11 +1389,16 @@ body <- dashboardBody(
     tabItem("coCitationNetwork",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Co-citation Network"), align = "center")),
                 column(2,actionButton("applyCocit", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportCOCIT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1288,10 +1417,15 @@ body <- dashboardBody(
     tabItem("historiograph",
             fluidPage(
               fluidRow(
-                column(10,
+                column(8,
                        h2(strong("Historiograph"), align = "center")),
                 column(2,actionButton("applyHist", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportHIST", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1310,9 +1444,14 @@ body <- dashboardBody(
     tabItem("collabNetwork",
             fluidPage(
               fluidRow(
-                column(10,h2(strong("Collaboration Network"), align = "center")),
+                column(8,h2(strong("Collaboration Network"), align = "center")),
                 column(2,actionButton("applyCol", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportCOL", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -1331,10 +1470,15 @@ body <- dashboardBody(
     tabItem("collabWorldMap",
             fluidPage(
               fluidRow(
-                column(10,h2(strong("Collaboration WorldMap"), align = "center")),
+                column(8,h2(strong("Collaboration WorldMap"), align = "center")),
                 column(2,actionButton("applyWM", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play")))
+                                      width = "80%",icon = fa_i(name ="play"))),
+                column(2, 
+                       actionButton("reportCOLW", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
+                                    width = "80%",
+                                    icon = icon(name ="plus", lib="glyphicon"))
+                )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",

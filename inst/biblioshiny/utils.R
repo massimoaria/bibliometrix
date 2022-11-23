@@ -783,8 +783,20 @@ historiograph <- function(input,values){
     values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
     values$Histfield="done"
   }
+  
   #titlelabel <- input$titlelabel
   values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
+  values$histResults$histData$DOI<- paste0('<a href=\"https://doi.org/',values$histResults$histData$DOI,'\" target=\"_blank\">',values$histResults$histData$DOI,'</a>')
+  values$histResults$histData <- values$histResults$histData %>% 
+    left_join(
+      values$histPlot$layout %>% 
+        select(.data$name,.data$color), by= c("Paper" = "name")
+    ) %>% 
+    drop_na(.data$color) %>% 
+    mutate(cluster = match(.data$color,unique(.data$color))) %>% 
+    select(!.data$color) %>% 
+    group_by(.data$cluster) %>% 
+    arrange(.data$Year, .by_group = TRUE)
   return(values)
 }
 

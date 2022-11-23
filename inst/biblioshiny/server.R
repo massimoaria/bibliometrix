@@ -4784,18 +4784,6 @@ server <- function(input, output,session){
   output$histTable <- DT::renderDT({
     
     Data <- values$histResults$histData
-    #Data <- Data[ind,]
-    Data$DOI<- paste0('<a href=\"https://doi.org/',Data$DOI,'\" target=\"_blank\">',Data$DOI,'</a>')
-    Data <- Data %>% 
-      left_join(
-        values$histPlot$layout %>% 
-          select(.data$name,.data$color), by= c("Paper" = "name")
-      ) %>% 
-      drop_na(.data$color) %>% 
-      mutate(cluster = match(.data$color,unique(.data$color))) %>% 
-      select(!.data$color) %>% 
-      group_by(.data$cluster) %>% 
-      arrange(.data$Year, .by_group = TRUE)
     
     DT::datatable(Data, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4833,6 +4821,16 @@ server <- function(input, output,session){
       )
   })
   
+  observeEvent(input$reportHIST,{
+    if(!is.null(values$histResults$histData)){
+      sheetname <- "Historiograph"
+      list_df <- list(values$histResults$params,values$histResults$histData)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
+  })
+  
   # SOCIAL STRUCTURE ####
   ### Collaboration network ----
   COLnetwork <- eventReactive(input$applyCol,{
@@ -4840,6 +4838,8 @@ server <- function(input, output,session){
     values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
                                shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
+    values$degreePlot <-degreePlot(values$colnet)
+    names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
   })
   output$colPlot <- renderVisNetwork({  
     COLnetwork()
@@ -4862,7 +4862,6 @@ server <- function(input, output,session){
   output$colTable <- DT::renderDT({
     COLnetwork()
     colData=values$colnet$cluster_res
-    names(colData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     
     DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4902,9 +4901,24 @@ server <- function(input, output,session){
     plot.ly(p)
   })
   
+  observeEvent(input$reportCOL,{
+    if(!is.null(values$colnet$cluster_res)){
+      sheetname <- "CollabNet"
+      list_df <- list(values$colnet$params, values$colnet$cluster_res)
+      list_plot <- list(values$degreePlot)
+      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
+      values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+    }
+  })
+  
   ### WPPlot ----
   WMnetwork<- eventReactive(input$applyWM,{
-    values$WMmap=countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min, values)
+    values$WMmap <- countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min, values)
+    values$WMmap$tab <- values$WMmap$tab[,c(1,2,9)]
+    names(values$WMmap$tab)=c("From","To","Frequency")
+    
   })
   
   output$CCplot.save <- downloadHandler(
@@ -4929,8 +4943,6 @@ server <- function(input, output,session){
   output$WMTable <- DT::renderDT({
     WMnetwork()  
     colData=values$WMmap$tab
-    colData=colData[,c(1,2,9)]
-    names(colData)=c("From","To","Frequency")
     
     DT::datatable(colData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"), filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
@@ -4953,6 +4965,15 @@ server <- function(input, output,session){
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(colData))-1))))) %>%
       formatStyle(names(colData),  backgroundColor = 'white') 
   }) 
+  
+  observeEvent(input$reportCOLW,{
+    if(!is.null(values$WMmap$tab)){
+      list_df <- list(values$WMmap$tab)
+      list_plot <- list(values$WMmap$g)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CollabWorldMap", wb=values$wb)
+      values$wb <- wb
+    }
+  })
   
   ### Report Save xlsx ----
   output$report.save <- downloadHandler(
@@ -5477,11 +5498,6 @@ server <- function(input, output,session){
                                                                 "Fractionalized Frequency"="f"),
                                                     selected = "t")),
                                     br(),
-                                    actionButton("reportMRA", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'MRAdpi',
                                       h4(strong(
@@ -5515,11 +5531,6 @@ server <- function(input, output,session){
                                     numericInput("MostCitAuthorsK", 
                                                  label=("Number of Authors"), 
                                                  value = 10),
-                                    br(),
-                                    actionButton("reportMLCA", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'MLCAdpi',
@@ -5555,11 +5566,6 @@ server <- function(input, output,session){
                                                  label=("Number of Authors"), 
                                                  value = 10),
                                     br(),
-                                    actionButton("reportAPOT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'APOTdpi',
                                       h4(strong(
@@ -5588,11 +5594,6 @@ server <- function(input, output,session){
                    ),
                    ## Lotka law ----
                    conditionalPanel(condition = 'input.sidebarmenu == "lotka"',
-                                    br(),
-                                    actionButton("reportLotka", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'LLdpi',
@@ -5638,11 +5639,6 @@ server <- function(input, output,session){
                                                      label=("Number of authors"), 
                                                      value = 10)),
                                     br(),
-                                    actionButton("reportAI", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'AIdpi',
                                       h4(strong(
@@ -5685,11 +5681,6 @@ server <- function(input, output,session){
                                                      label=("Number of Affiliations"), 
                                                      value = 10)),
                                     br(),
-                                    actionButton("reportMRAFF", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'AFFdpi',
                                       h4(strong(
@@ -5724,11 +5715,6 @@ server <- function(input, output,session){
                                         collapsed = FALSE,
                                         sliderInput("topAFF", label = "Number of Affiliations", min = 1, max = 50, step = 1, value = 5)),
                                     br(),
-                                    actionButton("reportAFFPOT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'AFFGrowthdpi',
                                       h4(strong(
@@ -5762,11 +5748,6 @@ server <- function(input, output,session){
                                                  label=("Number of Countries"), 
                                                  value = 20),
                                     br(),
-                                    actionButton("reportMRCO", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'MRCOdpi',
                                       h4(strong(
@@ -5795,11 +5776,6 @@ server <- function(input, output,session){
                    ),
                    ## Country Scientific Production ----
                    conditionalPanel(condition = 'input.sidebarmenu == "countryScientProd"',
-                                    br(),
-                                    actionButton("reportCSP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'CSPdpi',
@@ -5834,11 +5810,6 @@ server <- function(input, output,session){
                                         solidHeader = FALSE, 
                                         collapsed = FALSE,
                                         sliderInput("topCO", label = "Number of Countries", min = 1, max = 50, step = 1, value = 5)),
-                                    br(),
-                                    actionButton("reportCPOT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'COGrowthdpi',
@@ -5882,11 +5853,6 @@ server <- function(input, output,session){
                                                      label=("Number of Countries"), 
                                                      value = 10)),
                                     br(),
-                                    actionButton("reportMCCO", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'MCCdpi',
                                       h4(strong(
@@ -5928,11 +5894,6 @@ server <- function(input, output,session){
                                                     choices = c("Total Citations"="TC", 
                                                                 "Total Citations per Year"="TCY"),
                                                     selected = "TC")),
-                                    br(),
-                                    actionButton("reportMCD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'MGCDdpi',
@@ -5977,11 +5938,6 @@ server <- function(input, output,session){
                                                                 "," = ","),
                                                     selected = ";")),
                                     br(),
-                                    actionButton("reportMLCD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'MLCDdpi',
                                       h4(strong(
@@ -6024,11 +5980,6 @@ server <- function(input, output,session){
                                                                 ".  " = ".  ",
                                                                 "," = ","),
                                                     selected = ";")),
-                                    br(),
-                                    actionButton("reportMLCR", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'MLCRdpi',
@@ -6080,11 +6031,6 @@ server <- function(input, output,session){
                                                                      value = NA,
                                                                      step = 1)
                                                  ))),
-                                    br(),
-                                    actionButton("reportRPYS", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'RSdpi',
@@ -6178,11 +6124,6 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("MRWSynPreview"))
                                         )),
-                                    br(),
-                                    actionButton("reportMFW", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'MRWdpi',
@@ -6320,13 +6261,7 @@ server <- function(input, output,session){
                                         column(6,
                                                numericInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
                                         ))
-                                    ),
-                                    br(),
-                                    actionButton("reportWC", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
+                                    )
                    ),
                    ## Tree Map ----
                    conditionalPanel(condition = 'input.sidebarmenu == "treemap"',
@@ -6393,13 +6328,7 @@ server <- function(input, output,session){
                                                                      selected = ","),
                                                          h5(htmlOutput("TreeMapSynPreview"))
                                         )
-                                    ),
-                                    br(),
-                                    actionButton("reportTREEMAP", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
+                                    )
                    ),
                    ## Word dynamics ----
                    conditionalPanel(condition = 'input.sidebarmenu == "wordDynamics"',
@@ -6473,11 +6402,6 @@ server <- function(input, output,session){
                                                                 "Per year" = "noCum"),
                                                     selected = "Cum"),
                                         sliderInput("topkw", label = "Number of words", min = 1, max = 100, step = 1, value = c(1,10))),
-                                    br(),
-                                    actionButton("reportWD", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'WDdpi',
@@ -6586,11 +6510,6 @@ server <- function(input, output,session){
                                         column(6,
                                                numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 3)
                                         ))),
-                                    br(),
-                                    actionButton("reportTT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'TTdpi',
@@ -6935,11 +6854,6 @@ server <- function(input, output,session){
                                         )
                                     ),
                                     br(),
-                                    actionButton("reportCOC", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     fluidRow(column(6,
                                                     downloadButton("network.coc", strong("Save Pajek"),
                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
@@ -7078,11 +6992,6 @@ server <- function(input, output,session){
                                                  )
                                         )
                                     ),
-                                    br(),
-                                    actionButton("reportTM", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'TMdpi',
@@ -7231,11 +7140,6 @@ server <- function(input, output,session){
                                         uiOutput("sliders")
                                     ),
                                     br(),
-                                    actionButton("reportTE", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
                                     selectInput(
                                       'TEdpi',
                                       h4(strong(
@@ -7262,7 +7166,7 @@ server <- function(input, output,session){
                                                                     width = "100%")
                                     )
                    ),
-                   ## Factorial Analysis
+                   ## Factorial Analysis ----
                    conditionalPanel(condition = 'input.sidebarmenu == "factorialAnalysis"',
                                     selectInput("method", 
                                                 label = "Method",
@@ -7369,11 +7273,6 @@ server <- function(input, output,session){
                                                                      label=("Num. of documents"), 
                                                                      value = 5)))
                                     ),
-                                    br(),
-                                    actionButton("reportFA", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput(
                                       'FAdpi',
@@ -7562,12 +7461,6 @@ server <- function(input, output,session){
                                         )
                                     ),
                                     br(),
-                                    actionButton("reportCOCIT", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
-                                    br(),
-                                    #br(),
                                     fluidRow(column(6,
                                                     downloadButton("network.cocit", strong("Save Pajek"),
                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
@@ -7633,11 +7526,6 @@ server <- function(input, output,session){
                                                                      max = 20,
                                                                      value = 4, step = 1)))
                                     ),
-                                    br(),
-                                    actionButton("reportHIST", strong("Add to Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                                 width = "100%",
-                                                 icon = icon(name ="copy", lib="glyphicon")),
-                                    br(),
                                     br(),
                                     selectInput("HGh",
                                                 h4(strong("Export plot")),

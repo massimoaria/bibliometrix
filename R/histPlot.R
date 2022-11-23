@@ -38,6 +38,12 @@
 #' @export
 histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = FALSE, label = "short", verbose = TRUE){
   
+  params <- list(n = n,
+                 size = size,
+                 labelsize = labelsize,
+                 title_as_label = title_as_label,
+                 label = label)
+  
   colorlist <-  c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   ## legacy with old argument size
   if (isTRUE(size)){
@@ -250,7 +256,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
     print(Data[,-2])
   }
   
-  results <- list(net=bsk.network, g=g, graph.data=Data, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks))
+  results <- list(net=bsk.network, g=g, graph.data=Data, layout=layout_m, axis=data.frame(label=Ylabel,values=Breaks), params=params)
   return(results)
 }
 

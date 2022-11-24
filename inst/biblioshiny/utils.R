@@ -1164,10 +1164,10 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
       visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
-      visNetwork::visEdges(smooth = curved, hidden = hidden) %>%
+      visNetwork::visEdges(smooth = FALSE, hidden = hidden) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
       visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE) %>%
-      visNetwork::visOptions(manipulation = TRUE, height ="100%", width = "100%")
+      visNetwork::visOptions(manipulation = curved, height ="100%", width = "100%")
     
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
@@ -1413,3 +1413,35 @@ addSheetToReport <- function(list_df, list_plot, sheetname, wb){
   return(wb)
 }
 
+## Ad to Report PopUp
+popUp <- function(title=NULL, type="success", confirmButtonText="OK"){
+  switch(type,
+         success={
+           title <- paste(title,"\n added to report",sep="")
+           subtitle <- ""
+           confirmButtonCol = "#1d8fe1"
+         },
+         error={
+           title <- "No results to add to the report "
+           subtitle <- "Please Run the analysis and then Add it to the report"
+           confirmButtonCol = "#913333"
+         })
+  
+  shinyalert(
+    title = title,
+    text = subtitle,
+    size = "s", 
+    closeOnEsc = TRUE,
+    closeOnClickOutside = FALSE,
+    html = FALSE,
+    type = type,
+    showConfirmButton = TRUE,
+    showCancelButton = FALSE,
+    confirmButtonText = confirmButtonText,
+    confirmButtonCol = confirmButtonCol,
+    timer = 0,
+    imageUrl = "",
+    animation = TRUE
+  )
+  
+}

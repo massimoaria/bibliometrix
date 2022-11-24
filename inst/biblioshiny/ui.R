@@ -238,7 +238,13 @@ body <- dashboardBody(
                   dimension[0] = window.innerWidth;
                   dimension[1] = window.innerHeight;
                   Shiny.onInputChange("dimension", dimension);
-              });'
+              });
+              $(document).ready(function(){
+                  $("a[data-toggle=tab]").on("show.bs.tab", function(e){
+                    Shiny.setInputValue("activeTab", $(this).attr("data-value"));
+                   });
+            });
+      '
     )),
   tabItems(
     #### Homepage ----
@@ -464,7 +470,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Local Cited Sources (from Reference Lists)"), align = "center")),
+                       h2(strong("Most Local Cited Sources"), align = "center")),
                 column(2,
                        actionButton("applyMLCSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 20px; margin-top: 15px;",
                                     width = "80%",icon = fa_i(name ="play"))),
@@ -491,7 +497,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(column(10,
                 #titlePanel(
-                  h2(strong("Source clustering through Bradford's Law"), align = "center")
+                  h2(strong("Core Sources by Bradford's Law"), align = "center")
                 ),
                 column(2, 
                          actionButton("reportBradford", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
@@ -513,12 +519,12 @@ body <- dashboardBody(
               )
             )
     ),
-    ##### source impact ----
+    ##### source local impact ----
     tabItem("sourceImpact",
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Source Local Impact"), align = "center")),
+                       h2(strong("Sources' Local Impact"), align = "center")),
                 column(2,
                        actionButton("applyHsource", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",
@@ -541,12 +547,12 @@ body <- dashboardBody(
               )
             )
     ),
-    ##### source dynamics ----
+    ##### sources prod over time ----
     tabItem("sourceDynamics",
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Source Dynamics"), align = "center")),
+                       h2(strong("Sources' Production over Time"), align = "center")),
                 column(2,actionButton("applySOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",
                                       icon = fa_i(name ="play"))
@@ -679,12 +685,12 @@ body <- dashboardBody(
               )
             )
     ),
-    ##### author impact ----
+    ##### authors local impact ----
     tabItem("authorImpact",
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Author Local Impact"), align = "center")),
+                       h2(strong("Authors' Local Impact"), align = "center")),
                 column(2,
                        actionButton("applyHAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",icon = fa_i(name ="play"))
@@ -794,7 +800,7 @@ body <- dashboardBody(
     tabItem("countryScientProd",
             fluidPage(
               fluidRow(column(10,
-                h2(strong("Country Scientific Production"), align = "center")),
+                h2(strong("Countries' Scientific Production"), align = "center")),
                 column(2, 
                        actionButton("reportCSP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",
@@ -957,7 +963,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("References Spectroscopy"), align = "center")
+                       h2(strong("Reference Spectroscopy"), align = "center")
                 ),
                 column(2,
                        actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
@@ -1470,7 +1476,7 @@ body <- dashboardBody(
     tabItem("collabWorldMap",
             fluidPage(
               fluidRow(
-                column(8,h2(strong("Collaboration WorldMap"), align = "center")),
+                column(8,h2(strong("Countries' Collaboration World Map"), align = "center")),
                 column(2,actionButton("applyWM", strong("Run"),
                                       style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                       width = "80%",icon = fa_i(name ="play"))),
@@ -1491,9 +1497,30 @@ body <- dashboardBody(
               )
             )
     ),
+    #### Report ----
     tabItem("report",
             fluidRow(
-              DT::DTOutput("dataReported"))
+              #DT::DTOutput("dataReported")
+              h2("Report Content")
+              ),
+            fluidRow(
+              tabsetPanel(type = "tabs", id="reportTab",
+                          tabPanel("Report content",
+                                   box(
+                                     
+                                   uiOutput('reportSheets'),
+                                   
+                                   )
+                                   # actionBttn(
+                                   #   inputId = 'allSheets',
+                                   #   label = 'Deselect All',
+                                   #   style = "pill",
+                                   #   color = "danger"
+                                   # )
+                                   #shinycssloaders::withSpinner(DT::DTOutput(outputId = "ReportContent")))
+                          )
+              )
+            )
     )
   )
 )

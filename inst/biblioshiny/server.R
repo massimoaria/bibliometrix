@@ -17,6 +17,7 @@ server <- function(input, output,session){
   values = reactiveValues()
   values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
   values$wb <-  openxlsx::createWorkbook()
+  values$myChoices <- "No Sheets"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
   values$h <- 7
@@ -119,21 +120,21 @@ server <- function(input, output,session){
                menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
                menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
                menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
-               menuSubItem("Source Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
-               menuSubItem("Source Dynamics",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
+               menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
+               menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
       menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
                "Authors",
                menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Author Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
                "Affiliations",
                menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                "Countries",
                menuSubItem("Corresponding Author's Country",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Country Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
       ),
@@ -148,7 +149,7 @@ server <- function(input, output,session){
                menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Word Dynamics",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
       ),
       menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
@@ -165,7 +166,7 @@ server <- function(input, output,session){
                menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
       menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
                menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Collaboration WorldMap", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+               menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
       menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
     )
   })
@@ -190,21 +191,21 @@ server <- function(input, output,session){
                menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
                menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
                menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
-               menuSubItem("Source Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
-               menuSubItem("Source Dynamics",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
+               menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
+               menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
       menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
                "Authors",
                menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Author Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
                "Affiliations",
                menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                "Countries",
                menuSubItem("Corresponding Author's Country",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Country Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
       ),
@@ -219,7 +220,7 @@ server <- function(input, output,session){
                menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Word Dynamics",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
       ),
       menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
@@ -236,7 +237,7 @@ server <- function(input, output,session){
                menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
       menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
                menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-               menuSubItem("Collaboration WorldMap", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+               menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
       menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
     )
   })
@@ -1117,8 +1118,10 @@ server <- function(input, output,session){
       list_df <- list(values$TABvb)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$wb <- res$wb
-      #values$fileTFP <- screenSh(selector = NULL) ## screenshot
-      #values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="Main Information", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1167,6 +1170,10 @@ server <- function(input, output,session){
       list_plot <- list(values$ASPplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", wb=values$wb)
       values$wb <- wb
+      popUp(title="Annual Scientific Production", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1267,6 +1274,10 @@ server <- function(input, output,session){
       list_plot <- list(values$ACpYplot)
       wb <- addSheetToReport(list_df, list_plot, sheetname = "AnnualCitPerYear", wb = values$wb)
       values$wb <- wb
+      popUp(title="Average Citation per Year", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1330,6 +1341,10 @@ server <- function(input, output,session){
       addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
       values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
+      popUp(title="Three Field Plot", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1403,6 +1418,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MRSplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelSources", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Relevant Sources", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1476,6 +1495,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MLCSplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitSources", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Local Cited Sources", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1526,6 +1549,10 @@ server <- function(input, output,session){
       list_plot <- list(values$bradford$graph)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "BradfordLaw", wb=values$wb)
       values$wb <- wb
+      popUp(title="Bradford's Law", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1583,8 +1610,12 @@ server <- function(input, output,session){
     if(!is.null(values$H)){
       list_df <- list(values$H)
       list_plot <- list(values$SIplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceImpact", wb=values$wb)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceLocImpact", wb=values$wb)
       values$wb <- wb
+      popUp(title="Sources' Local Impact", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1719,8 +1750,12 @@ server <- function(input, output,session){
     if(!is.null(values$PYSO)){
       list_df <- list(values$PYSO)
       list_plot <- list(values$SDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceDynamic", wb=values$wb)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceProdOverTime", wb=values$wb)
       values$wb <- wb
+      popUp(title="Sources' Production over Time", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1812,6 +1847,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MRAplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAuthors", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Relevant Authors", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1887,6 +1926,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MLCAplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitAuthors", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Local Cited Authors", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -1945,8 +1988,12 @@ server <- function(input, output,session){
     if(!is.null(values$H)){
       list_df <- list(values$H)
       list_plot <- list(values$AIplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorImpact", wb=values$wb)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorLocImpact", wb=values$wb)
       values$wb <- wb
+      popUp(title="Authors' Local Impact", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2032,6 +2079,10 @@ server <- function(input, output,session){
       list_plot <- list(values$AUProdOverTime$graph)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorProdOverTime", wb=values$wb)
       values$wb <- wb
+      popUp(title="Authors' Production over Time", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2112,6 +2163,10 @@ server <- function(input, output,session){
       list_plot <- list(values$LLplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "LotkaLaw", wb=values$wb)
       values$wb <- wb
+      popUp(title="Lotka's Law", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2190,6 +2245,10 @@ server <- function(input, output,session){
       list_plot <- list(values$AFFplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAffiliations", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Relevant Affiliations", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2271,6 +2330,10 @@ server <- function(input, output,session){
       list_plot <- list(values$AffOverTimePlot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "AffOverTime", wb=values$wb)
       values$wb <- wb
+      popUp(title="Affiliations' Production over Time", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2372,6 +2435,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MRCOplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelCountries", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Relevant Countries", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2423,6 +2490,10 @@ server <- function(input, output,session){
       list_plot <- list(values$mapworld$g)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "CountrySciProd", wb=values$wb)
       values$wb <- wb
+      popUp(title="Countries' Scientific Production", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2504,7 +2575,14 @@ server <- function(input, output,session){
       list_plot <- list(values$CountryOverTimePlot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "CountryProdOverTime", wb=values$wb)
       values$wb <- wb
+      popUp(title="Countries' Production over Time", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
+    
+    
+    
   })
   
   ### Most Cited Country ----    
@@ -2582,6 +2660,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MCCplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostCitCountries", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Cited Countries", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2663,6 +2745,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MGCDplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostGlobCitDocs", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Global Cited Documents", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2748,6 +2834,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MLCDplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitDocs", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Local Cited Documents", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2825,6 +2915,10 @@ server <- function(input, output,session){
       list_plot <- list(values$MLCRplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitRefs", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Local Cited References", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -2917,6 +3011,10 @@ server <- function(input, output,session){
       list_plot <- list(values$res$spectroscopy)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "RPYS", wb=values$wb)
       values$wb <- wb
+      popUp(title="Reference Spectroscopy", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3031,8 +3129,12 @@ server <- function(input, output,session){
     if(!is.null(values$TABWord)){
       list_df <- list(values$TABWord)
       list_plot <- list(values$MRWplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelWords", wb=values$wb)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostFreqWords", wb=values$wb)
       values$wb <- wb
+      popUp(title="Most Frequent Words", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3084,6 +3186,10 @@ server <- function(input, output,session){
       values$wb <- res$wb
       values$fileTFP <- screenSh(selector = "#wordcloud") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="WordCloud", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3203,6 +3309,10 @@ server <- function(input, output,session){
       values$wb <- res$wb
       values$fileTFP <- screenSh(selector = "#treemap") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="TreeMap", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3381,6 +3491,10 @@ server <- function(input, output,session){
       list_plot <- list(values$WDplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "WordDynamics", wb=values$wb)
       values$wb <- wb
+      popUp(title="Words' Frequency over Time", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3480,6 +3594,10 @@ server <- function(input, output,session){
       list_plot <- list(values$trendTopics$graph)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "TrendTopics", wb=values$wb)
       values$wb <- wb
+      popUp(title="Trend Topics", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3676,6 +3794,10 @@ server <- function(input, output,session){
       values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+16, width=10, height=7, dpi=300)
       values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="Co-occurrence Network", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -3846,6 +3968,10 @@ server <- function(input, output,session){
       list_plot <- list(values$CS$graph_terms, values$CS$graph_dendogram, values$CS$graph_documents_Contrib, values$CS$graph_documents_TC)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "FactorialAnalysis", wb=values$wb)
       values$wb <- wb
+      popUp(title="Factorial Analysis", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -4019,6 +4145,10 @@ server <- function(input, output,session){
                         values$TM$net$graph)
       wb <- addSheetToReport(list_df, list_plot, sheetname="ThematicMap", wb=values$wb)
       values$wb <- wb
+      popUp(title="Thematic Map", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -4647,23 +4777,28 @@ server <- function(input, output,session){
       #values$wb <- res$wb
       values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
-    }
-    ## Periods
-    L <- length(values$nexus$TM)
-    wb <- res$wb
-    for (l in 1:L){
-      if(!is.null(values$nexus$TM[[l]]$words)){
-        list_df <- list(values$nexus$TM[[l]]$params,
-                        values$nexus$TM[[l]]$words,
-                        values$nexus$TM[[l]]$clusters,
-                        values$nexus$TM[[l]]$documentToClusters)
-        list_plot <- list(values$nexus$TM[[l]]$map,
-                          values$nexus$TM[[l]]$net$graph)
-        wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TE_Period_",l,sep=""), wb=wb)
-        #
+      
+      ## Periods
+      L <- length(values$nexus$TM)
+      wb <- res$wb
+      for (l in 1:L){
+        if(!is.null(values$nexus$TM[[l]]$words)){
+          list_df <- list(values$nexus$TM[[l]]$params,
+                          values$nexus$TM[[l]]$words,
+                          values$nexus$TM[[l]]$clusters,
+                          values$nexus$TM[[l]]$documentToClusters)
+          list_plot <- list(values$nexus$TM[[l]]$map,
+                            values$nexus$TM[[l]]$net$graph)
+          wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TE_Period_",l,sep=""), wb=wb)
+          #
+        }
       }
+      values$wb <- wb
+      popUp(title="Thematic Evolution", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
-    values$wb <- wb
   })
   
   # INTELLECTUAL STRUCTURE ####
@@ -4748,6 +4883,10 @@ server <- function(input, output,session){
       values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
       values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="Co-citation Network", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -4828,6 +4967,10 @@ server <- function(input, output,session){
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="Historiograph", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -4910,6 +5053,10 @@ server <- function(input, output,session){
       values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
       values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      popUp(title="Collaboration Network", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -4972,6 +5119,10 @@ server <- function(input, output,session){
       list_plot <- list(values$WMmap$g)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "CollabWorldMap", wb=values$wb)
       values$wb <- wb
+      popUp(title="Countries' Collaboration World Map", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
     }
   })
   
@@ -4989,7 +5140,24 @@ server <- function(input, output,session){
     contentType = "xlsx"
   )
   
-  
+  ### Report UI elements
+  observe({
+  output$reportSheets <- renderUI({
+    checkboxGroupButtons(
+      inputId = "SheetsChoice",
+      label = "Select results to include into the final report:",
+      choices = values$myChoices,
+      selected = values$myChoices,
+      direction = "vertical",
+      justified = TRUE,
+      size = "lg",
+      checkIcon = list(
+        yes = icon("ok",lib = "glyphicon"),
+        no = icon("remove", lib = "glyphicon")),
+      #status = "danger"
+    )
+  })
+  })
   
   # OPTIONS MENU ----
   observe({

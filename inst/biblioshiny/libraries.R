@@ -18,6 +18,8 @@ libraries <- function(){
   if (!require(shinyjs)){install.packages("shinyjs"); require(shinyjs, quietly=TRUE)}
   if (!require(shinyscreenshot)){install.packages("shinyscreenshot"); require(shinyscreenshot, quietly=TRUE)}
   if (!require(openxlsx)){install.packages("openxlsx"); require(openxlsx, quietly=TRUE)}
+  if (!require(shinyalert)){install.packages("shinyalert"); require(shinyalert, quietly=TRUE)}
+  if (!require(shinyWidgets)){install.packages("shinyWidgets"); require(shinyWidgets, quietly=TRUE)}
   require(Matrix, quietly = TRUE)
   require(dimensionsR, quietly = TRUE)
   require(pubmedR, quietly = TRUE)

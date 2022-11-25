@@ -5132,10 +5132,13 @@ server <- function(input, output,session){
       paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep="")
     },
     content <- function(file) {
+      wb_export <- copyWorkbook(values$wb)
       if (nrow(values$list_file)>0){
-        values$wb <- addScreenWb(df=values$list_file, wb=values$wb)#, width=10, height=7, dpi=300)
+        wb_export <- addScreenWb(df=values$list_file, wb=wb_export)#, width=10, height=7, dpi=300)
       }
-      openxlsx::saveWorkbook(values$wb, file = file)
+      sheetToRemove <- setdiff(sheets(wb_export),input$reportSheets)
+      if (length(sheetToRemove)>0) removeWorksheet(wb_export,sheetToRemove)
+      openxlsx::saveWorkbook(wb_export, file = file)
     },
     contentType = "xlsx"
   )
@@ -5144,13 +5147,13 @@ server <- function(input, output,session){
   observe({
   output$reportSheets <- renderUI({
     checkboxGroupButtons(
-      inputId = "SheetsChoice",
-      label = "Select results to include into the final report:",
+      inputId = "reportSheets",
+      label = NULL,
       choices = values$myChoices,
       selected = values$myChoices,
       direction = "vertical",
       justified = TRUE,
-      size = "lg",
+      size = "normal",
       checkIcon = list(
         yes = icon("ok",lib = "glyphicon"),
         no = icon("remove", lib = "glyphicon")),

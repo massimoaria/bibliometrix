@@ -1501,16 +1501,17 @@ body <- dashboardBody(
     tabItem("report",
             fluidRow(
               #DT::DTOutput("dataReported")
-              h2("Report Content")
+              h2("Report")
               ),
             fluidRow(
               tabsetPanel(type = "tabs", id="reportTab",
-                          tabPanel("Report content",
-                                   box(
-                                     
-                                   uiOutput('reportSheets'),
-                                   
-                                   )
+                          tabPanel(id="reportTabPanel",
+                                   fluidRow(column(12,h3("Select results to include into the final report:"))),
+                                   fluidRow(#column(1),
+                                            column(3,
+                                                   offset = 1,
+                                                   uiOutput('reportSheets')
+                                                   ))
                                    # actionBttn(
                                    #   inputId = 'allSheets',
                                    #   label = 'Deselect All',
@@ -1518,7 +1519,7 @@ body <- dashboardBody(
                                    #   color = "danger"
                                    # )
                                    #shinycssloaders::withSpinner(DT::DTOutput(outputId = "ReportContent")))
-                          )
+                         )
               )
             )
     )

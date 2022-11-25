@@ -775,14 +775,11 @@ CAmap <- function(input, values){
 historiograph <- function(input,values){
   
   min.cit <- 1
-  # if (input$histsearch=="FAST"){
-  #   min.cit=quantile(values$M$TC,0.75, na.rm = TRUE)
-  # }else{min.cit=1}
-  
-  if (values$Histfield=="NA"){
+
+  #if (values$Histfield=="NA"){
     values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
-    values$Histfield="done"
-  }
+  # values$Histfield="done"
+  #}
   
   #titlelabel <- input$titlelabel
   values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
@@ -808,11 +805,7 @@ degreePlot <- function(net){
   
   deg <- net$nodeDegree %>% 
     mutate(x = row_number())
-  # ,
-  #          diff = c(diff(ma(.data$degree,10))*-1,0))
-  # cutting <- deg %>% 
-  #   slice_max(.data$diff, n=2)
-  # 
+ 
   p <- ggplot(data = deg, aes(x=.data$x, y=.data$degree, 
                               text=paste(.data$node," - Degree ",round(.data$degree,3), sep="")))+
     geom_point()+
@@ -906,9 +899,7 @@ cocNetwork <- function(input,values){
       label=igraph::V(g)$name
       ind=which(tolower(Y$df$item) %in% label)
       df=Y$df[ind,]
-      
-      #bluefunc <- colorRampPalette(c("lightblue", "darkblue"))
-      #col=bluefunc((diff(range(df$year))+1)*10)
+
       col=hcl.colors((diff(range(df$year_med))+1)*10, palette="Blues 3")
       igraph::V(g)$color=col[(max(df$year_med)-df$year_med+1)*10]
       igraph::V(g)$year_med=df$year_med
@@ -1120,7 +1111,9 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
 
     vn$edges$width <- vn$edges$width^2/(max(vn$edges$width^2))*(10+edgesize)
 
-    if (edgesize==0){hidden <- TRUE}else{hidden <- FALSE}
+    # if (edgesize==0){
+    #   vn$edges$hidden <- TRUE
+    #   }else{vn$edges$hidden <- FALSE}
         
     ## labelsize
     scalemin <- 20
@@ -1148,10 +1141,6 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
       vn$nodes$font.vadjust <-0
     }
     
-    if(isTRUE(shadow)){
-      curved <- list(type="horizontal")
-    }
-    
     opacity_font <- sqrt((vn$nodes$font.size-min(vn$nodes$font.size))/diff(range(vn$nodes$font.size)))*0.7+0.3
     
     if (labelsize>0){
@@ -1159,12 +1148,12 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     }else{
         vn$nodes$font.color <- adjustcolor("black", alpha.f = 0)
         }
-    
+
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
       visNetwork::visNodes(shadow=shadow, shape=shape, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
-      visNetwork::visEdges(smooth = FALSE, hidden = hidden) %>%
+      visNetwork::visEdges(smooth = list(type="horizontal")) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
       visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE) %>%
       visNetwork::visOptions(manipulation = curved, height ="100%", width = "100%")
@@ -1182,8 +1171,6 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
     dplyr::select(.data$x,.data$y,.data$color,.data$name)
   
   vn <- visNetwork::toVisNetworkData(net$net)
-  
-  #vn$nodes <- vn$nodes %>% left_join(net$graph.data %>% select(.data$Label,.data$LCS), by=c("label" = "Label"))
   
   if (labeltype != "short"){
     vn$nodes$label <- paste0(vn$nodes$years,": ",LABEL)
@@ -1215,7 +1202,6 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   size[size<scalemin]=scalemin
   size[size>scalemax]=scalemax
   vn$nodes$font.size=size*0.5
-  #vn$nodes$size <- vn$nodes$font.size*0.5
   vn$nodes$size <- nodesize*2
   
   if (shape %in% c("dot","square")){
@@ -1258,13 +1244,14 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   ## add time line
   vn$nodes$group <- "normal"
   vn$nodes$shape <- "dot"
+  vn$nodes$shadow <- TRUE
   
   nr <- nrow(vn$nodes)
   y <- max(vn$nodes$y)
   
   vn$nodes[nr+1,c("id","title","label","color","font.color")] <-
     c(rep("logo",3),"black","white")
-  vn$nodes$x[nr+1] <- max(vn$nodes$x, na.rm=TRUE)
+  vn$nodes$x[nr+1] <- max(vn$nodes$x, na.rm=TRUE)+1
   vn$nodes$y[nr+1] <- y
   vn$nodes$size[nr+1] <- vn$nodes$size[nr]*4
   vn$nodes$years[nr+1] <- as.numeric(vn$nodes$x[nr+1])
@@ -1275,6 +1262,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   vn$nodes$fixed.x <- TRUE
   vn$nodes$fixed.y <- FALSE
   vn$nodes$fixed.y[nr+1] <- TRUE
+  vn$nodes$shadow[nr+1] <- FALSE
   
   coords <- vn$nodes[,c("x","y")] %>% 
     as.matrix()
@@ -1295,15 +1283,12 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>% 
-    visNetwork::visNodes(shadow=FALSE, shape=shape, size = vn$node$size, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
+    visNetwork::visNodes(shadow=vn$nodes$shadow, shape=shape, size = vn$nodes$size, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
-    visNetwork::visEdges(arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% #smooth = TRUE, 
-    #visEdges() %>% 
+    visNetwork::visEdges(smooth = list(type="horizontal"), arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% 
     visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) %>% 
     visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = F,
-                           #autoResize = TRUE,
                            manipulation = FALSE, height = "100%", width = "100%")
-  #VIS$sizingPolicy$browser$fill <- TRUE
 
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
 }

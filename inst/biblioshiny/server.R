@@ -3628,7 +3628,7 @@ server <- function(input, output,session){
     CMMAP()
     values$networkCM<-igraph2vis(g=values$CM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape, net=values$CM$net,shadow=FALSE)
+                                 shape=input$coc.shape, net=values$CM$net,shadow=TRUE)
     values$networkCM$VIS
   })
   
@@ -4904,10 +4904,6 @@ server <- function(input, output,session){
     screenshot(selector="#histPlotVis", scale=input$HGh, filename=file)
   })
   
-  # output$histPlot <- renderPlotly({
-  #   Hist()
-  # })
-  
   output$histPlotVis <- renderVisNetwork({  
     g <- Hist()
     values$histPlotVis<-hist2vis(values$histPlot,curved=FALSE, 
@@ -4963,7 +4959,7 @@ server <- function(input, output,session){
   observeEvent(input$reportHIST,{
     if(!is.null(values$histResults$histData)){
       sheetname <- "Historiograph"
-      list_df <- list(values$histResults$params,values$histResults$histData)
+      list_df <- list(values$histResults$histData)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
@@ -5137,7 +5133,7 @@ server <- function(input, output,session){
         wb_export <- addScreenWb(df=values$list_file, wb=wb_export)#, width=10, height=7, dpi=300)
       }
       sheetToRemove <- setdiff(sheets(wb_export),input$reportSheets)
-      if (length(sheetToRemove)>0) removeWorksheet(wb_export,sheetToRemove)
+      if (length(sheetToRemove)>0) for (i in sheetToRemove) removeWorksheet(wb_export,i)
       openxlsx::saveWorkbook(wb_export, file = file)
     },
     contentType = "xlsx"
@@ -7016,7 +7012,7 @@ server <- function(input, output,session){
                                         ),
                                         column(6,
                                                selectInput(inputId ="coc.curved",
-                                                           label = "Curved edges",
+                                                           label = "Edit Nodes",
                                                            choices = c("Yes",
                                                                        "No"),
                                                            selected = "No")     
@@ -7623,7 +7619,7 @@ server <- function(input, output,session){
                                         ),
                                         column(6,
                                                selectInput(inputId ="cocit.curved",
-                                                           label = "Curved edges",
+                                                           label = "Edit Nodes",
                                                            choices = c("Yes",
                                                                        "No"),
                                                            selected = "No")     
@@ -7863,7 +7859,7 @@ server <- function(input, output,session){
                                         ),
                                         column(6,
                                                selectInput(inputId ="soc.curved",
-                                                           label = "Curved edges",
+                                                           label = "Edit Nodes",
                                                            choices = c("Yes",
                                                                        "No"),
                                                            selected = "No")     

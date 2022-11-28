@@ -1412,14 +1412,14 @@ popUp <- function(title=NULL, type="success", confirmButtonText="OK"){
            confirmButtonCol = "#913333"
          })
   
-  shinyalert(
+  show_alert(
     title = title,
     text = subtitle,
+    type = type,
     size = "s", 
     closeOnEsc = TRUE,
     closeOnClickOutside = FALSE,
     html = FALSE,
-    type = type,
     showConfirmButton = TRUE,
     showCancelButton = FALSE,
     confirmButtonText = confirmButtonText,
@@ -1428,5 +1428,22 @@ popUp <- function(title=NULL, type="success", confirmButtonText="OK"){
     imageUrl = "",
     animation = TRUE
   )
+  
+  # shinyalert(
+  #   title = title,
+  #   text = subtitle,
+  #   size = "s", 
+  #   closeOnEsc = TRUE,
+  #   closeOnClickOutside = FALSE,
+  #   html = FALSE,
+  #   type = type,
+  #   showConfirmButton = TRUE,
+  #   showCancelButton = FALSE,
+  #   confirmButtonText = confirmButtonText,
+  #   confirmButtonCol = confirmButtonCol,
+  #   timer = 0,
+  #   imageUrl = "",
+  #   animation = TRUE
+  # )
   
 }

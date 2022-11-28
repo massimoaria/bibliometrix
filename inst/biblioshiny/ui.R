@@ -1401,6 +1401,12 @@ body <- dashboardBody(
                                                    )),
                                    actionBttn(
                                      inputId = 'allSheets',
+                                     label = 'Select All',
+                                     style = "pill",
+                                     color = "primary"
+                                   ),
+                                   actionBttn(
+                                     inputId = 'noSheets',
                                      label = 'Deselect All',
                                      style = "pill",
                                      color = "danger"

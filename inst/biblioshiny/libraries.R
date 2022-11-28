@@ -12,7 +12,7 @@ libraries <- function(){
   if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
   if (!require(plotly)){install.packages("plotly"); require(plotly, quietly=TRUE)}
   if (!require(fontawesome)){install.packages("fontawesome"); require(fontawesome, quietly=TRUE)}
-  if (!require(dashboardthemes)){install.packages("dashboardthemes"); require(dashboardthemes, quietly=TRUE)}
+  #if (!require(dashboardthemes)){install.packages("dashboardthemes"); require(dashboardthemes, quietly=TRUE)}
   if (!require(shinydashboardPlus)){install.packages("shinydashboardPlus"); require(shinydashboardPlus, quietly=TRUE)}
   if (!require(shinydashboard)){install.packages("shinydashboard"); require(shinydashboard, quietly=TRUE)}
   if (!require(shinyjs)){install.packages("shinyjs"); require(shinyjs, quietly=TRUE)}

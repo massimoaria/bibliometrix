@@ -102,120 +102,7 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
 ## Body ####
 
 ### Theme ----
-customTheme <- shinyDashboardThemeDIY(
-  appFontFamily = "Helvetica"
-  ,appFontColor = "rgb(0,0,0)" 
-  ,primaryFontColor = "rgb(0,0,0)"
-  ,infoFontColor = "rgb(0,0,0)"
-  ,successFontColor = "rgb(0,0,0)"
-  ,warningFontColor = "rgb(0,0,0)"
-  ,dangerFontColor = "rgb(0,0,0)"
-  ,bodyBackColor = "rgb(255,255,255)"
-  ,logoBackColor = "rgb(88,101,185)"
-  
-  ,headerButtonBackColor = "rgb(88,101,185)"
-  ,headerButtonIconColor = "rgb(248,248,248)"
-  ,headerButtonBackColorHover = "rgb(75,90,179)"
-  ,headerButtonIconColorHover = "rgb(248,248,248)" 
-  ,headerBackColor = "rgb(88,101,185)"
-  ,headerBoxShadowColor = "rgb(210,210,210)"
-  ,headerBoxShadowSize = "2px 2px 2px"
-  
-  ,sidebarBackColor = cssGradientThreeColors(
-    direction = "down"
-    ,colorStart = "rgb(88,101,185)"
-    ,colorMiddle = "rgb(29,143,225)"
-    ,colorEnd = "rgb(34,220,253)"
-    ,colorStartPos = 0
-    ,colorMiddlePos = 55
-    ,colorEndPos = 100
-  )
-  ,sidebarPadding = 0
-  ,sidebarMenuBackColor = "transparent"
-  ,sidebarMenuPadding = 0
-  ,sidebarMenuBorderRadius = 0
-  ,sidebarShadowRadius = "0px 0px 0px"
-  ,sidebarShadowColor = "#aaaaaa"
-    ,sidebarUserTextColor = "rgb(255,255,255)"
-  ,sidebarSearchBackColor = cssGradientThreeColors(
-    direction = "right"
-    ,colorStart = "rgb(34,220,253)"
-    ,colorMiddle = "rgb(29,143,225)"
-    ,colorEnd = "rgb(88,101,185)"
-    ,colorStartPos = 0
-    ,colorMiddlePos = 75
-    ,colorEndPos = 100)
-  ,sidebarSearchIconColor = "rgb(255,255,255)"
-  ,sidebarSearchBorderColor = "rgb(29,143,225)"
-  ,sidebarTabTextColor = "rgb(255,255,255)"
-  ,sidebarTabTextSize = 15
-  ,sidebarTabBorderStyle = "none none solid none"
-  ,sidebarTabBorderColor = "rgb(35,106,135)"
-  ,sidebarTabBorderWidth = 1
-  ,sidebarTabBackColorSelected = cssGradientThreeColors(
-    direction = "right"
-    ,colorStart = "rgb(34,220,253)"
-    ,colorMiddle = "rgb(29,143,225)"
-    ,colorEnd = "rgb(88,101,185)"
-    ,colorStartPos = 0
-    ,colorMiddlePos = 75
-    ,colorEndPos = 100)
-  ,sidebarTabTextColorSelected = "rgb(255,255,255)"
-  ,sidebarTabRadiusSelected = "0px 0px 0px 0px"
-  ,sidebarTabBackColorHover = "rgb(255,255,255)"
-  ,sidebarTabTextColorHover = "rgb(50,50,50)"
-  ,sidebarTabBorderStyleHover = "none none solid none"
-  ,sidebarTabBorderColorHover = "rgb(75,126,151)"
-  ,sidebarTabBorderWidthHover = 1
-  ,sidebarTabRadiusHover = "0px 0px 0px 0px"
-  
-  ,boxBackColor = "rgb(255,255,255)"
-  ,boxBorderRadius = 5
-  ,boxShadowSize = "0px 0px 0px"
-  ,boxShadowColor = "rgba(0,0,0,.1)"
-  ,boxTitleSize = 16
-  ,boxDefaultColor = "rgb(210,214,220)"
-  ,boxPrimaryColor = "rgba(44,222,235,1)"
-  ,boxInfoColor = "rgb(210,214,220)"
-  ,boxSuccessColor = "rgb(88,101,185)"
-  ,boxWarningColor = "rgb(244,156,104)"
-  ,boxDangerColor = "rgb(255,88,55)"
-  
-  ,tabBoxTabColor = "rgb(255,255,255)"
-  ,tabBoxTabTextSize = 14
-  ,tabBoxTabTextColor = "rgb(0,0,0)"
-  ,tabBoxTabTextColorSelected = "rgb(0,0,0)"
-  ,tabBoxBackColor = "rgb(255,255,255)"
-  ,tabBoxHighlightColor = "rgba(44,222,235,1)"
-  ,tabBoxBorderRadius = 5
-  
-  ,buttonBackColor = cssGradientThreeColors(
-    direction = "right"
-    ,colorStart = "rgb(34,220,253)"
-    ,colorMiddle = "rgb(29,143,225)"
-    ,colorEnd = "rgb(88,101,185)"
-    ,colorStartPos = 0
-    ,colorMiddlePos = 55
-    ,colorEndPos = 100)
-  ,buttonTextColor = "rgb(255,255,255)"
-  ,buttonBorderColor = "rgb(200,200,200)"
-  ,buttonBorderRadius = 5
-  ,buttonBackColorHover = "rgb(255,255,255)"
-  ,buttonTextColorHover = "rgb(0,0,0)"
-  ,buttonBorderColorHover = "rgb(200,200,200)"
-  
-  ,textboxBackColor = "rgb(255,255,255)"
-  ,textboxBorderColor = "rgb(200,200,200)"
-  ,textboxBorderRadius = 5
-  ,textboxBackColorSelect = "rgb(255,255,255)"
-  ,textboxBorderColorSelect = "rgb(200,200,200)"
-  
-  ,tableBackColor = "rgb(255,255,255)"
-  ,tableBorderColor = "rgb(240,240,240)"
-  ,tableBorderTopSize = 1
-  ,tableBorderRowSize = 1
-)
-
+data("customTheme",envir=environment())
 ### Body Content ----
 body <- dashboardBody(
   customTheme,
@@ -1511,13 +1398,13 @@ body <- dashboardBody(
                                             column(3,
                                                    offset = 1,
                                                    uiOutput('reportSheets')
-                                                   ))
-                                   # actionBttn(
-                                   #   inputId = 'allSheets',
-                                   #   label = 'Deselect All',
-                                   #   style = "pill",
-                                   #   color = "danger"
-                                   # )
+                                                   )),
+                                   actionBttn(
+                                     inputId = 'allSheets',
+                                     label = 'Deselect All',
+                                     style = "pill",
+                                     color = "danger"
+                                   )
                                    #shinycssloaders::withSpinner(DT::DTOutput(outputId = "ReportContent")))
                          )
               )

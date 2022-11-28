@@ -5158,6 +5158,23 @@ server <- function(input, output,session){
   })
   })
   
+  observe({
+    
+    # if input$all is TRUE (basically a SELECT ALL option), all choices will be selected
+    # if input$all is FALSE (basically a NONE option), none of the choices will be selected
+    
+    updateCheckboxGroupButtons(
+      session = getDefaultReactiveDomain(), 
+      inputId = "reportSheets",
+      choices = values$myChoices,
+      checkIcon = list(
+        yes = icon("ok",lib = "glyphicon"),
+        no = icon("remove", lib = "glyphicon")),
+      selected = if(!input$allSheets) values$myChoices
+      #if (input$allSheets){rep(FALSE,length(myChoices))}else{input$SheetChoice}
+    )
+  })
+  
   # OPTIONS MENU ----
   observe({
     if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo")) & !isTRUE(values$checkControlBar)){

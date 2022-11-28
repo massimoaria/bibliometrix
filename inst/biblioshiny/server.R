@@ -5141,46 +5141,88 @@ server <- function(input, output,session){
   
   ### Report UI elements
   observe({
-  output$reportSheets <- renderUI({
-    checkboxGroupButtons(
-      inputId = "reportSheets",
-      label = NULL,
-      choices = values$myChoices,
-      selected = values$myChoices,
-      direction = "vertical",
-      justified = TRUE,
-      size = "normal",
-      checkIcon = list(
-        yes = icon("ok",lib = "glyphicon"),
-        no = icon("remove", lib = "glyphicon")),
-      #status = "danger"
-    )
-  })
+    output$reportSheets <- renderUI({
+      prettyCheckboxGroup(
+        inputId = "reportSheets",
+        label = NULL,
+        choices = values$myChoices,
+        selected = values$myChoices,
+        animation = "pulse",
+        status = "info",
+        bigger = T
+      )
+    })
   })
   
   observe({
-    updateCheckboxGroupButtons(
+    updatePrettyCheckboxGroup(
       session = getDefaultReactiveDomain(), 
       inputId = "reportSheets",
       choices = values$myChoices,
-      checkIcon = list(
-        yes = icon("ok",lib = "glyphicon"),
-        no = icon("remove", lib = "glyphicon")),
-      selected = if(!input$noSheets) values$myChoices
+      selected = if(!input$noSheets) values$myChoices,
+      prettyOptions = list(
+        animation = "pulse",
+        status = "info",
+        bigger = T
+      )
     )
   })
   
   observe({
-    updateCheckboxGroupButtons(
+    updatePrettyCheckboxGroup(
       session = getDefaultReactiveDomain(), 
       inputId = "reportSheets",
       choices = values$myChoices,
-      checkIcon = list(
-        yes = icon("ok",lib = "glyphicon"),
-        no = icon("remove", lib = "glyphicon")),
-      selected = if(input$allSheets) values$myChoices
+      selected = if(input$allSheets) values$myChoices,
+      prettyOptions = list(
+        animation = "pulse",
+        status = "info",
+        bigger = T
+      )
     )
   })
+  
+  # observe({
+  # output$reportSheets <- renderUI({
+  #   checkboxGroupButtons(
+  #     inputId = "reportSheets",
+  #     label = NULL,
+  #     choices = values$myChoices,
+  #     selected = values$myChoices,
+  #     direction = "vertical",
+  #     justified = TRUE,
+  #     size = "normal",
+  #     checkIcon = list(
+  #       yes = icon("ok",lib = "glyphicon"),
+  #       no = icon("remove", lib = "glyphicon")),
+  #     #status = "danger"
+  #   )
+  # })
+  # })
+  # 
+  # observe({
+  #   updateCheckboxGroupButtons(
+  #     session = getDefaultReactiveDomain(), 
+  #     inputId = "reportSheets",
+  #     choices = values$myChoices,
+  #     checkIcon = list(
+  #       yes = icon("ok",lib = "glyphicon"),
+  #       no = icon("remove", lib = "glyphicon")),
+  #     selected = if(!input$noSheets) values$myChoices
+  #   )
+  # })
+  # 
+  # observe({
+  #   updateCheckboxGroupButtons(
+  #     session = getDefaultReactiveDomain(), 
+  #     inputId = "reportSheets",
+  #     choices = values$myChoices,
+  #     checkIcon = list(
+  #       yes = icon("ok",lib = "glyphicon"),
+  #       no = icon("remove", lib = "glyphicon")),
+  #     selected = if(input$allSheets) values$myChoices
+  #   )
+  # })
   
   # OPTIONS MENU ----
   observe({

@@ -91,7 +91,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
           ,panel.grid.major.y = element_line( size=.2, color="grey90" ) 
     )+
     #coord_fixed(ratio = 2/1) +
-    labs(title="Top-Authors' Production over Time", 
+    labs(title="Authors' Production over Time", 
          x="Author",
          y="Year")+
     geom_line(data=df2,aes(x = .data$Author, y = .data$year, group=.data$Author),size=1.0, color="firebrick4", alpha=0.3 )+

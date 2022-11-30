@@ -285,7 +285,7 @@ body <- dashboardBody(
     tabItem("averageCitPerYear",
             fluidPage(
               fluidRow(column(10,
-                h2(strong("Average Citation Per Year"), align = "center")),
+                h2(strong("Average Citations Per Year"), align = "center")),
                 column(2, 
                        actionButton("reportACpY", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",
@@ -537,10 +537,10 @@ body <- dashboardBody(
                             tabPanel("Plot",
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "TopAuthorsProdPlot", height = "75vh",width ="98.9%"))
                             ),
-                            tabPanel("Table - Authors' Production per Year",
+                            tabPanel("Table - Production per Year",
                                      shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
                             ),
-                            tabPanel("Table - Author's Documents",
+                            tabPanel("Table - Documents",
                                      shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
                             )
                 )
@@ -661,7 +661,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Corresponding Author's Country"), align = "center")),
+                       h2(strong("Corresponding Author's Countries"), align = "center")),
                 column(2,
                        actionButton("applyCAUCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",icon = fa_i(name ="play"))),
@@ -967,7 +967,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Word Dynamics"), align = "center")),
+                       h2(strong("Words' Frequency over Time"), align = "center")),
                 column(2,
                        actionButton("applyWD", strong("Run"),
                                     style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
@@ -1295,7 +1295,7 @@ body <- dashboardBody(
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
-                            tabPanel("Newtwork", 
+                            tabPanel("Network", 
                                      shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))),        
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
@@ -1386,38 +1386,65 @@ body <- dashboardBody(
     ),
     #### Report ----
     tabItem("report",
-            fluidRow(
-              #DT::DTOutput("dataReported")
-              h2("Report")
+            fluidPage(
+              fluidRow(
+                h2(strong("Report"), align="center"),
+                br(),
               ),
-            fluidRow(
-              tabsetPanel(type = "tabs", id="reportTab",
-                          tabPanel(id="reportTabPanel",
-                                   fluidRow(column(12,h3("Select results to include into the final report:"))),
-                                   fluidRow(#column(1),
-                                            column(3,
-                                                   offset = 1,
-                                                   uiOutput('reportSheets')
-                                                   )),
-                                   actionBttn(
-                                     inputId = 'allSheets',
-                                     label = 'Select All',
-                                     style = "pill",
-                                     color = "primary"
-                                   ),
-                                   actionBttn(
-                                     inputId = 'noSheets',
-                                     label = 'Deselect All',
-                                     style = "pill",
-                                     color = "danger"
-                                   )
-                                   #shinycssloaders::withSpinner(DT::DTOutput(outputId = "ReportContent")))
-                         )
+              fluidRow(
+              column(6,
+                     h3("Click on the box to remove/include results in the report:"),
+                     uiOutput('reportSheets'),
+                     tags$style("#reportSheets {font-size:20px;}")),
+              #),
+              column(6,
+                     box(status = "danger", width = 12),
+                     column(6,
+                            actionBttn(
+                              inputId = 'allSheets',
+                              label = 'Select All',
+                              style = "pill",
+                              color = "primary",
+                              block = TRUE
+                            ),
+                            br(), br(),
+                            actionBttn(
+                              inputId = 'deleteAll',
+                              label = 'Delete Report',
+                              style = "pill",
+                              color = "warning",
+                              block = TRUE
+                            )
+                     ),
+                     column(6,
+                            actionBttn(
+                              inputId = 'noSheets',
+                              label = 'Deselect All',
+                              style = "pill",
+                              color = "danger",
+                              block = TRUE
+                            ),
+                            br(), br(),
+                            downloadBttn(
+                              outputId="report.save",
+                              label = "Save Report",
+                              style = "unite",
+                              color = "primary",
+                              size = "md",
+                              block = TRUE,
+                              no_outline = TRUE,
+                              icon = icon(name ="save-file", lib="glyphicon")
+                            )
+                     )
               )
+              
+            )
             )
     )
   )
 )
+#)
+#)
 
 ## Control Bar ####
 controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",

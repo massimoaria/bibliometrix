@@ -133,7 +133,7 @@ server <- function(input, output,session){
                menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                "Countries",
-               menuSubItem("Corresponding Author's Country",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
@@ -204,7 +204,7 @@ server <- function(input, output,session){
                menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                "Countries",
-               menuSubItem("Corresponding Author's Country",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
+               menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
@@ -925,7 +925,7 @@ server <- function(input, output,session){
       group_by(.data$PY) %>% 
       mutate(NTC = .data$TC/mean(.data$TC, na.rm=T)) %>% 
       as.data.frame()
-    sliderInput("sliderTCpY", "Average Citation per Year", min = floor(min(values$Morig$TCpY, na.rm=T)),
+    sliderInput("sliderTCpY", "Average Citations per Year", min = floor(min(values$Morig$TCpY, na.rm=T)),
                 max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
                 value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
   })
@@ -1250,7 +1250,7 @@ server <- function(input, output,session){
       geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
            , y = 'Citations'
-           , title = "Average Article Citations per Year")+
+           , title = "Average Citations per Year")+
       scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
       theme(text = element_text(color = "#444444")
             ,panel.background = element_rect(fill = '#FFFFFF')
@@ -1274,7 +1274,7 @@ server <- function(input, output,session){
       list_plot <- list(values$ACpYplot)
       wb <- addSheetToReport(list_df, list_plot, sheetname = "AnnualCitPerYear", wb = values$wb)
       values$wb <- wb
-      popUp(title="Average Citation per Year", type="success")
+      popUp(title="Average Citations per Year", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type="error")
@@ -1341,7 +1341,7 @@ server <- function(input, output,session){
       addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
       values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
-      popUp(title="Three Field Plot", type="success")
+      popUp(title="Three-Field Plot", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type="error")
@@ -1549,7 +1549,7 @@ server <- function(input, output,session){
       list_plot <- list(values$bradford$graph)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "BradfordLaw", wb=values$wb)
       values$wb <- wb
-      popUp(title="Bradford's Law", type="success")
+      popUp(title="Core Sources by Bradford's Law", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type="error")
@@ -1652,7 +1652,7 @@ server <- function(input, output,session){
       geom_line()+
       labs(x = 'Year'
            , y = laby
-           , title = "Source Growth") +
+           , title = "Sources' Production over Time") +
       scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
       geom_hline(aes(yintercept=0), alpha=0.1)+
       labs(color = "Source")+
@@ -2104,7 +2104,7 @@ server <- function(input, output,session){
       xlim(0,max(AuProd$N.Articles)+1)+
       labs(x = 'Documents written'
            , y = '% of Authors'
-           , title = "The Frequency Distribution of Scientific Productivity") +
+           , title = "Author Productivity through Lotka's Law") +
       theme(text = element_text(color = "#444444")
             ,panel.background = element_rect(fill = '#FFFFFF')
             ,panel.grid.minor = element_line(color = '#EFEFEF')
@@ -2163,7 +2163,7 @@ server <- function(input, output,session){
       list_plot <- list(values$LLplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "LotkaLaw", wb=values$wb)
       values$wb <- wb
-      popUp(title="Lotka's Law", type="success")
+      popUp(title="Author Productivity through Lotka's Law", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type="error")
@@ -2240,7 +2240,7 @@ server <- function(input, output,session){
   })
   
   observeEvent(input$reportMRAFF,{
-    if(!is.null(values$TABAffd)){
+    if(!is.null(values$TABAff)){
       list_df <- list(values$TABAff)
       list_plot <- list(values$AFFplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAffiliations", wb=values$wb)
@@ -2366,7 +2366,7 @@ server <- function(input, output,session){
                          scale_x_discrete(limits = rev(levels(xx$Country)))+
                          scale_fill_discrete(name="Collaboration",
                                              breaks=c("SCP","MCP"))+
-                         labs(title = "Corresponding Author's Country", x = "Countries", y = "N. of Documents", 
+                         labs(title = "Corresponding Author's Countries", x = "Countries", y = "N. of Documents", 
                               caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
                          theme(plot.caption = element_text(size = 9, hjust = 0.5,
                                                            color = "blue", face = "italic")
@@ -2433,9 +2433,9 @@ server <- function(input, output,session){
     if(!is.null(values$TABCo)){
       list_df <- list(values$TABCo)
       list_plot <- list(values$MRCOplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelCountries", wb=values$wb)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CorrAuthCountries", wb=values$wb)
       values$wb <- wb
-      popUp(title="Most Relevant Countries", type="success")
+      popUp(title="Corresponding Author's Countries", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type="error")
@@ -3316,7 +3316,7 @@ server <- function(input, output,session){
     }
   })
   
-  ### Word Dynamics ----   
+  ### Words' Frequency over Time ----   
   WDynamics <- eventReactive(input$applyWD,{
     if (input$cumTerms=="Cum"){
       cdf=TRUE
@@ -3375,7 +3375,7 @@ server <- function(input, output,session){
       geom_line()+
       labs(x = 'Year'
            , y = laby
-           , title = "Word Growth") +
+           , title = "Words' Frequency over Time") +
       scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
       geom_hline(aes(yintercept=0), alpha=0.1)+
       labs(color = "Term")+
@@ -5182,55 +5182,33 @@ server <- function(input, output,session){
     )
   })
   
-  # observe({
-  # output$reportSheets <- renderUI({
-  #   checkboxGroupButtons(
-  #     inputId = "reportSheets",
-  #     label = NULL,
-  #     choices = values$myChoices,
-  #     selected = values$myChoices,
-  #     direction = "vertical",
-  #     justified = TRUE,
-  #     size = "normal",
-  #     checkIcon = list(
-  #       yes = icon("ok",lib = "glyphicon"),
-  #       no = icon("remove", lib = "glyphicon")),
-  #     #status = "danger"
-  #   )
-  # })
-  # })
-  # 
-  # observe({
-  #   updateCheckboxGroupButtons(
-  #     session = getDefaultReactiveDomain(), 
-  #     inputId = "reportSheets",
-  #     choices = values$myChoices,
-  #     checkIcon = list(
-  #       yes = icon("ok",lib = "glyphicon"),
-  #       no = icon("remove", lib = "glyphicon")),
-  #     selected = if(!input$noSheets) values$myChoices
-  #   )
-  # })
-  # 
-  # observe({
-  #   updateCheckboxGroupButtons(
-  #     session = getDefaultReactiveDomain(), 
-  #     inputId = "reportSheets",
-  #     choices = values$myChoices,
-  #     checkIcon = list(
-  #       yes = icon("ok",lib = "glyphicon"),
-  #       no = icon("remove", lib = "glyphicon")),
-  #     selected = if(input$allSheets) values$myChoices
-  #   )
-  # })
+  observeEvent(input$deleteAll, {
+    ask_confirmation(
+      inputId = "delete_confirmation",
+      title = "Want to confirm?",
+      text = "All the results will be removed from the report",
+      type = "warning",
+      btn_labels = c("CANCEL", "CONFIRM"),
+    )
+  })
+  
+  observeEvent(input$delete_confirmation, {
+    if (isTRUE(input$delete_confirmation)) {
+      values$myChoices <- "No elements"
+      values$wb <-  openxlsx::createWorkbook()
+    }
+      }, ignoreNULL = TRUE
+  )
+    
+
   
   # OPTIONS MENU ----
   observe({
-    if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo")) & !isTRUE(values$checkControlBar)){
+    if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
       updateControlbar("controlbar2")
       values$checkControlBar <- TRUE
     }
-    if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo")) & isTRUE(values$checkControlBar)){
+    if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
       updateControlbar("controlbar2")
       values$checkControlBar <- FALSE
     }
@@ -8007,14 +7985,6 @@ server <- function(input, output,session){
                                                                     style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
                                                                     width = "100%")  
                                     )
-                   ),
-                   ## Report Creation options ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "report"',
-                                    downloadButton("report.save", strong("Generate Report"),
-                                                   style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                   width = "100%",
-                                                   icon = icon(name ="save-file", lib="glyphicon"))
-                   
                    )
             ) 
           )

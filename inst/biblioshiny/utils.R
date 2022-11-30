@@ -50,6 +50,7 @@ plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=
   ggplotly(g, tooltip = "text") %>% 
     config(displaylogo = FALSE,
            modeBarButtonsToRemove = c(
+             'toImage',
              'sendDataToCloud',
              'pan2d', 
              'select2d', 
@@ -341,12 +342,12 @@ Hindex_plot <- function(values, type, input){
   if (type=="author"){
     K=input$Hkauthor
     measure=input$HmeasureAuthors
-    title="Author Local Impact"
+    title="Authors' Local Impact"
     xn="Authors"
   } else {
     K=input$Hksource
     measure=input$HmeasureSources
-    title="Source Local Impact"
+    title="Sources' Local Impact"
     xn="Sources"
   }
   if (K>dim(xx)[1]){
@@ -511,7 +512,7 @@ AffiliationOverTime <- function(values,n){
     geom_line()+
     labs(x = 'Year'
          , y = "Articles"
-         , title = "Affiliation Production over Time") +
+         , title = "Affiliations' Production over Time") +
     scale_x_continuous(breaks= (values$AffOverTime$Year[seq(1,length(values$AffOverTime$Year),by=ceiling(length(values$AffOverTime$Year)/20))])) +
     geom_hline(aes(yintercept=0), alpha=0.1)+
     labs(color = "Affiliation")+
@@ -1301,7 +1302,7 @@ addDataWb <- function(list_df, wb, sheetname){
   for (i in 1:l){
     df <- list_df[[i]]
     n <- nrow(df)
-    writeDataTable(wb, sheetname, df, startRow = startRow, startCol = 1, tableStyle = "TableStyleMedium9")
+    writeDataTable(wb, sheetname, df, startRow = startRow, startCol = 1, tableStyle = "TableStyleMedium20")
     startRow <- startRow + n + 3
   }
   return(wb)
@@ -1399,51 +1400,33 @@ addSheetToReport <- function(list_df, list_plot, sheetname, wb){
 }
 
 ## Ad to Report PopUp
-popUp <- function(title=NULL, type="success", confirmButtonText="OK"){
+popUp <- function(title=NULL, type="success", btn_labels="OK"){
   switch(type,
          success={
            title <- paste(title,"\n added to report",sep="")
            subtitle <- ""
-           confirmButtonCol = "#1d8fe1"
+           btn_colors = "#1d8fe1"
          },
          error={
            title <- "No results to add to the report "
            subtitle <- "Please Run the analysis and then Add it to the report"
-           confirmButtonCol = "#913333"
+           btn_colors = "#913333"
          })
   
-  show_alert(
+show_alert(
     title = title,
     text = subtitle,
     type = type,
     size = "s", 
     closeOnEsc = TRUE,
-    closeOnClickOutside = FALSE,
+    closeOnClickOutside = TRUE,
     html = FALSE,
     showConfirmButton = TRUE,
     showCancelButton = FALSE,
-    confirmButtonText = confirmButtonText,
-    confirmButtonCol = confirmButtonCol,
+    btn_labels = btn_labels,
+    btn_colors = btn_colors,
     timer = 0,
     imageUrl = "",
     animation = TRUE
   )
-  
-  # shinyalert(
-  #   title = title,
-  #   text = subtitle,
-  #   size = "s", 
-  #   closeOnEsc = TRUE,
-  #   closeOnClickOutside = FALSE,
-  #   html = FALSE,
-  #   type = type,
-  #   showConfirmButton = TRUE,
-  #   showCancelButton = FALSE,
-  #   confirmButtonText = confirmButtonText,
-  #   confirmButtonCol = confirmButtonCol,
-  #   timer = 0,
-  #   imageUrl = "",
-  #   animation = TRUE
-  # )
-  
 }

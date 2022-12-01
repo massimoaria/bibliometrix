@@ -501,6 +501,7 @@ server <- function(input, output,session){
     } else if (is.null(inFile)) {return(NULL)}
     
     values = initial(values)
+    M <-  M %>% dplyr::select(-starts_with("X."))
     values$M <- M
     values$Morig = M
     values$Histfield = "NA"
@@ -567,9 +568,7 @@ server <- function(input, output,session){
           imageUrl = "",
           animation = TRUE
         )
-        Mtrunc <- values$M
-        Mtrunc$CR <- substr(Mtrunc$CR[nchar(Mtrunc$CR)>32767],1,32767)
-        suppressWarnings(openxlsx::write.xlsx(Mtrunc, file=file))
+        suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
       } else {
       switch(input$save_file,
              #xlsx={suppressWarnings(rio::export(values$M, file=file))},

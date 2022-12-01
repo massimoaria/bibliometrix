@@ -550,12 +550,36 @@ server <- function(input, output,session){
       paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
     },
     content <- function(file) {
+      if ((sum(nchar(values$M$CR)>32767))>0 & input$save_file=="xlsx"){
+        show_alert(
+          text = "There are some documents with a too long reference list to be saved in an excel file (>32767 characters).\nData in the column CR could be truncated",
+          title = "Please save the collection using the Rdata format",
+          type = "error",
+          size = "s", 
+          closeOnEsc = TRUE,
+          closeOnClickOutside = TRUE,
+          html = FALSE,
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          btn_labels = "OK",
+          btn_colors = "#913333",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
+        )
+        Mtrunc <- values$M
+        Mtrunc$CR <- substr(Mtrunc$CR[nchar(Mtrunc$CR)>32767],1,32767)
+        suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
+      } else {
       switch(input$save_file,
+             #xlsx={suppressWarnings(rio::export(values$M, file=file))},
+              
              xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
              RData={
                M=values$M
                save(M, file=file)
              })
+      }
     },
     contentType = input$save_file
   )

@@ -569,7 +569,7 @@ server <- function(input, output,session){
         )
         Mtrunc <- values$M
         Mtrunc$CR <- substr(Mtrunc$CR[nchar(Mtrunc$CR)>32767],1,32767)
-        suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
+        suppressWarnings(openxlsx::write.xlsx(Mtrunc, file=file))
       } else {
       switch(input$save_file,
              #xlsx={suppressWarnings(rio::export(values$M, file=file))},

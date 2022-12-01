@@ -553,9 +553,16 @@ server <- function(input, output,session){
     content <- function(file) {
       if ((sum(nchar(values$M$CR)>32767))>0 & input$save_file=="xlsx"){
         show_alert(
-          text = "There are some documents with a too long reference list to be saved in an excel file (>32767 characters).\nData in the column CR could be truncated",
-          title = "Please save the collection using the Rdata format",
-          type = "error",
+          text = tags$span(
+            tags$h4("Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
+                    style = "color: firebrick;"),
+            tags$br(),
+            tags$h4("Data in the column CR could be truncated.",
+                    style = "color: firebrick;")
+          ),
+          #text = "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).\nData in the column CR could be truncated",
+          title = "Please save the collection using the 'RData' format",
+          type = "warning",
           size = "s", 
           closeOnEsc = TRUE,
           closeOnClickOutside = TRUE,
@@ -571,8 +578,6 @@ server <- function(input, output,session){
         suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
       } else {
       switch(input$save_file,
-             #xlsx={suppressWarnings(rio::export(values$M, file=file))},
-              
              xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
              RData={
                M=values$M

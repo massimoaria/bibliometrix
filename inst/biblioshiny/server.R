@@ -1742,12 +1742,15 @@ server <- function(input, output,session){
       layout(legend = leg) %>%
       config(displaylogo = FALSE,
              modeBarButtonsToRemove = c(
+               'toImage',
                'sendDataToCloud',
                'pan2d', 
                'select2d', 
                'lasso2d',
-               'toggleSpikelines'
-             )) %>%
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             ))  %>%
       layout(hovermode = 'compare')
   })
   
@@ -2565,11 +2568,14 @@ server <- function(input, output,session){
       layout(legend = leg) %>%
       config(displaylogo = FALSE,
              modeBarButtonsToRemove = c(
+               'toImage',
                'sendDataToCloud',
                'pan2d', 
                'select2d', 
                'lasso2d',
-               'toggleSpikelines'
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
              )) %>%
       layout(hovermode = 'compare')
   })
@@ -3254,7 +3260,18 @@ server <- function(input, output,session){
       parents="Tree",
       values= W[,2],
       textinfo="label+value+percent entry",
-      domain=list(column=0))
+      domain=list(column=0)) %>% 
+      config(displaylogo = FALSE,
+             modeBarButtonsToRemove = c(
+               'toImage',
+               'sendDataToCloud',
+               'pan2d', 
+               'select2d', 
+               'lasso2d',
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             )) 
     
     values$WordsT=resW$Words
     return(resW$Words)
@@ -3482,12 +3499,15 @@ server <- function(input, output,session){
       layout(legend = leg) %>%
       config(displaylogo = FALSE,
              modeBarButtonsToRemove = c(
+               'toImage',
                'sendDataToCloud',
                'pan2d', 
                'select2d', 
                'lasso2d',
-               'toggleSpikelines'
-             )) %>%
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             ))  %>%
       layout(hovermode = 'compare')
   })
   
@@ -5167,7 +5187,7 @@ server <- function(input, output,session){
       sheetToRemove <- setdiff(sheets(wb_export),input$reportSheets)
       if (length(sheetToRemove)>0) for (i in sheetToRemove) removeWorksheet(wb_export,i)
       sheetToAdd <- sheets(wb_export)
-      for (i in sheetToAdd) {setColWidths(wb_export,sheet=i,cols=1,widths = 30, hidden = rep(FALSE, length(cols)))}
+      for (i in sheetToAdd) setColWidths(wb_export,sheet=i,cols=1,widths = 30, hidden = FALSE)
       openxlsx::saveWorkbook(wb_export, file = file)
     },
     contentType = "xlsx"
@@ -5207,7 +5227,7 @@ server <- function(input, output,session){
     updatePrettyCheckboxGroup(
       session = getDefaultReactiveDomain(), 
       inputId = "reportSheets",
-      choices = values$myChoices,
+      choices = short2long(df=values$dfLabel, myC=values$myChoices),
       selected = if(input$allSheets) values$myChoices,
       prettyOptions = list(
         animation = "pulse",

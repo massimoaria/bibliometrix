@@ -101,5 +101,16 @@ plotThematicEvolution <- function (Nodes, Edges, measure = "inclusion", min.flow
                     showarrow=F,xanchor = "center",
                     font = list(color = 'Dark',
                                 family = "TimesNewRoman",
-                                size = 18))
+                                size = 18)) %>% 
+    config(displaylogo = FALSE,
+           modeBarButtonsToRemove = c(
+             'toImage',
+             'sendDataToCloud',
+             'pan2d', 
+             'select2d', 
+             'lasso2d',
+             'toggleSpikelines',
+             'hoverClosestCartesian',
+             'hoverCompareCartesian'
+           )) 
 }

@@ -159,7 +159,18 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
                             showarrow=F,xanchor = "center",
                             font = list(color = 'Dark',
                                         family = "TimesNewRoman",
-                                        size = 14))
+                                        size = 14)) %>% 
+    config(displaylogo = FALSE,
+           modeBarButtonsToRemove = c(
+             'toImage',
+             'sendDataToCloud',
+             'pan2d', 
+             'select2d', 
+             'lasso2d',
+             'toggleSpikelines',
+             'hoverClosestCartesian',
+             'hoverCompareCartesian'
+           )) 
   
   # networkD3::sankeyNetwork(Links = Edges, Nodes = Nodes, Source = "from", Target = "to", 
   #                          NodeID = "Nodes", Value = "weight", width = width,height=height,fontSize = 12,

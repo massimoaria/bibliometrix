@@ -17,7 +17,8 @@ server <- function(input, output,session){
   values = reactiveValues()
   values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
   values$wb <-  openxlsx::createWorkbook()
-  values$myChoices <- "No Sheets"
+  values$dfLabel <- dfLabel()
+  values$myChoices <- "Empty Report"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
   values$h <- 7
@@ -3454,7 +3455,7 @@ server <- function(input, output,session){
   
   output$WDplot.save <- downloadHandler(
     filename = function() {
-      paste("WordDynamics-", Sys.Date(), ".png", sep="")
+      paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
       ggsave(filename = file, plot = values$WDplot, dpi = as.numeric(input$WDdpi), height = input$WDh, width = input$WDh*2, bg="white")
@@ -3520,7 +3521,7 @@ server <- function(input, output,session){
     if(!is.null(values$KW)){
       list_df <- list(values$KW)
       list_plot <- list(values$WDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "WordDynamics", wb=values$wb)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "WordFreqOverTime", wb=values$wb)
       values$wb <- wb
       popUp(title="Words' Frequency over Time", type="success")
       values$myChoices <- sheets(values$wb)
@@ -5165,6 +5166,8 @@ server <- function(input, output,session){
       }
       sheetToRemove <- setdiff(sheets(wb_export),input$reportSheets)
       if (length(sheetToRemove)>0) for (i in sheetToRemove) removeWorksheet(wb_export,i)
+      sheetToAdd <- sheets(wb_export)
+      for (i in sheetToAdd) {setColWidths(wb_export,sheet=i,cols=1,widths = 30, hidden = rep(FALSE, length(cols)))}
       openxlsx::saveWorkbook(wb_export, file = file)
     },
     contentType = "xlsx"
@@ -5175,8 +5178,8 @@ server <- function(input, output,session){
     output$reportSheets <- renderUI({
       prettyCheckboxGroup(
         inputId = "reportSheets",
-        label = NULL,
-        choices = values$myChoices,
+        label = NULL, #short2long(df=values$dfLabel, myC=values$myChoices),
+        choices = short2long(df=values$dfLabel, myC=values$myChoices),
         selected = values$myChoices,
         animation = "pulse",
         status = "info",
@@ -5189,7 +5192,8 @@ server <- function(input, output,session){
     updatePrettyCheckboxGroup(
       session = getDefaultReactiveDomain(), 
       inputId = "reportSheets",
-      choices = values$myChoices,
+      #label = short2long(df=values$dfLabel, myC=values$myChoices),
+      choices = short2long(df=values$dfLabel, myC=values$myChoices),
       selected = if(!input$noSheets) values$myChoices,
       prettyOptions = list(
         animation = "pulse",
@@ -5225,7 +5229,7 @@ server <- function(input, output,session){
   
   observeEvent(input$delete_confirmation, {
     if (isTRUE(input$delete_confirmation)) {
-      values$myChoices <- "No elements"
+      values$myChoices <- "Empty Report"
       values$wb <-  openxlsx::createWorkbook()
     }
       }, ignoreNULL = TRUE

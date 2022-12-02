@@ -551,7 +551,10 @@ server <- function(input, output,session){
       paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
     },
     content <- function(file) {
-      if ((sum(nchar(values$M$CR)>32767))>0 & input$save_file=="xlsx"){
+      tr <- FALSE
+      if ("CR" %in% names(values$M)) tr <- (sum(nchar(values$M$CR)>32767, na.rm=TRUE))>0
+
+      if (tr & input$save_file=="xlsx"){
         show_alert(
           text = tags$span(
             tags$h4("Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",

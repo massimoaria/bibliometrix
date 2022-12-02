@@ -56,9 +56,9 @@ summary.bibliometrix<-function(object, ...){
   MYfP <- as.numeric(substr(Sys.time(),1,4))-mean(object$Years,na.rm = TRUE)
   
   # CAGR
-  Y=table(object$Years)
-  ny=dim(Y)[1]
-  CAGR<-as.numeric(round(((Y[ny]/Y[1])^(1/(ny-1))-1)*100,2))
+  Y <- table(object$Years)
+  ny <- diff(range(as.numeric(names(Y))))  #dim(Y)[1]
+  CAGR <- as.numeric(round(((Y[length(Y)]/Y[1])^(1/(ny))-1)*100,2))
   #
   
   #IntColl<- sum(object$CountryCollaboration$MCP)/object$Articles*100

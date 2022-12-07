@@ -305,6 +305,15 @@ countryCollab<-function(M){
     length(unique(l))>1
   })))
   
+  M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
+  M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
+  M$AU1_CO=gsub("RUSSIAN FEDERATION","RUSSIA",M$AU1_CO)
+  M$AU1_CO=gsub("TAIWAN","CHINA",M$AU1_CO)
+  M$AU1_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU1_CO)
+  M$AU1_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU1_CO)
+  M$AU1_CO=gsub("WALES","UNITED KINGDOM",M$AU1_CO)
+  M$AU1_CO=gsub("NORTH IRELAND","UNITED KINGDOM",M$AU1_CO)
+  
   df <- M %>% group_by(.data$AU1_CO) %>% 
     select(.data$AU1_CO,.data$nCO) %>% 
     summarize(Articles=n(),
@@ -656,8 +665,19 @@ readSynWordsFile <- function(file, sep=","){
 mapworld <- function(M, values){
   if (!("AU_CO" %in% names(M))){M=metaTagExtraction(M,"AU_CO")}
   CO=as.data.frame(tableTag(M,"AU_CO"),stringsAsFactors = FALSE)
+  CO$Tab=gsub("[[:digit:]]","",CO$Tab)
+  CO$Tab=gsub(".", "", CO$Tab, fixed = TRUE)
+  CO$Tab=gsub(";;", ";", CO$Tab, fixed = TRUE)
+  CO$Tab=gsub("UNITED STATES","USA",CO$Tab)
+  CO$Tab=gsub("RUSSIAN FEDERATION","RUSSIA",CO$Tab)
+  CO$Tab=gsub("TAIWAN","CHINA",CO$Tab)
+  CO$Tab=gsub("ENGLAND","UNITED KINGDOM",CO$Tab)
+  CO$Tab=gsub("SCOTLAND","UNITED KINGDOM",CO$Tab)
+  CO$Tab=gsub("WALES","UNITED KINGDOM",CO$Tab)
+  CO$Tab=gsub("NORTH IRELAND","UNITED KINGDOM",CO$Tab)
   CO$Tab=gsub("UNITED KINGDOM","UK",CO$Tab)
   CO$Tab=gsub("KOREA","SOUTH KOREA",CO$Tab)
+  
   
   map.world <- map_data("world")
   map.world$region=toupper(map.world$region)

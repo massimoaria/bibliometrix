@@ -1385,6 +1385,7 @@ body <- dashboardBody(
             )
     ),
     #### Report ----
+    ## NEW ----
     tabItem("report",
             fluidPage(
               fluidRow(
@@ -1392,59 +1393,76 @@ body <- dashboardBody(
                 br(),
               ),
               fluidRow(
-              column(6,
-                     h3("Click on the box to remove/include results in the report:"),
-                     uiOutput('reportSheets'),
-                     tags$style("#reportSheets {font-size:20px;}")),
-              #),
-              column(6,
-                     box(status = "danger", width = 12),
-                     column(6,
-                            actionBttn(
-                              inputId = 'allSheets',
-                              label = 'Select All',
-                              style = "pill",
-                              color = "primary",
-                              block = TRUE
-                            ),
-                            br(), br(),
-                            actionBttn(
-                              inputId = 'deleteAll',
-                              label = 'Delete Report',
-                              style = "pill",
-                              color = "warning",
-                              block = TRUE
-                            )
-                     ),
-                     column(6,
-                            actionBttn(
-                              inputId = 'noSheets',
-                              label = 'Deselect All',
-                              style = "pill",
-                              color = "danger",
-                              block = TRUE
-                            ),
-                            br(), br(),
-                            downloadBttn(
-                              outputId="report.save",
-                              label = "Save Report",
-                              style = "unite",
-                              color = "primary",
-                              size = "md",
-                              block = TRUE,
-                              no_outline = TRUE,
-                              icon = icon(name ="save-file", lib="glyphicon")
-                            )
-                     )
+                column(7,offset = 1,
+                       box(title = strong("Select results to include in the Report",
+                                    style='font-size:25px;color:white;'), 
+                        status = "primary", width = 11, solidHeader = TRUE,
+                         tags$style(HTML("
+                         .box.box-solid.box-primary>.box-header {
+                         background:#4379cd;
+                         }
+                         .box.box-solid.box-primary{
+                         border-bottom-color:black;
+                         border-left-color:black;
+                         border-right-color:black;
+                         border-top-color:black;
+                         border-width:2px;
+                                         }")),
+                         uiOutput('reportSheets'),
+                         tags$style("#reportSheets {font-size:23px;}")
+                       )
+                ),
+                column(3, 
+                       actionBttn(
+                         inputId = 'allSheets',
+                         label = strong('SELECT ALL'),
+                         icon = icon("ok-circle", lib="glyphicon"),
+                         style = "unite", #float
+                         color = "default",
+                         block = TRUE
+                       ),
+                       tags$style("#allSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
+                       br(),
+                       actionBttn(
+                         inputId = 'noSheets',
+                         label = strong('DESELECT ALL'),
+                         icon = icon("remove-circle", lib="glyphicon"),
+                         style = "unite",
+                         color = "default",
+                         block = TRUE
+                       ),
+                       tags$style("#noSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
+                       br(),
+                       actionBttn(
+                         inputId = 'deleteAll',
+                         label = strong('DELETE REPORT'),
+                         icon = icon("exclamation-sign", lib="glyphicon"),
+                         style = "unite",
+                         color = "danger", 
+                         block = TRUE
+                       ),
+                       tags$style("#deleteAll {border-width: 3px;}"),
+                       br(),
+                       downloadBttn(
+                         outputId="report.save",
+                         label = strong("SAVE REPORT"),
+                         style = "unite",
+                         color = "primary",
+                         size = "md",
+                         block = TRUE,
+                         no_outline = TRUE,
+                         icon = icon(name ="download-alt", lib="glyphicon")
+                       ), tags$style("#report.save {border-width: 3px;}")
+                       
+                       
+                )
               )
               
-            )
+              
             )
     )
   )
 )
-#)
-#)
 
 ## Control Bar ####
 controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",

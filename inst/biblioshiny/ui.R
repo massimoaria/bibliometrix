@@ -1,5 +1,5 @@
 source("libraries.R", local=TRUE)
-libraries()
+suppressMessages(libraries())
 
 # UI components ----
 ## Title ----

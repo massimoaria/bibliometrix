@@ -437,7 +437,11 @@ server <- function(input, output,session){
     } else if (is.null(inFile)) {return(NULL)}
     
     values = initial(values)
-    M <-  M %>% dplyr::select(-starts_with("X."))
+    ## remove not useful columns
+    ind <- which(substr(names(M),1,2)=="X.")
+    if (length(ind)>0) M <- M[,-ind]
+    ##
+    
     values$M <- M
     values$Morig = M
     values$Histfield = "NA"

@@ -3992,13 +3992,14 @@ server <- function(input, output,session){
                              n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
                              community.repulsion = input$TMrepulsion,
                              stemming=input$TMstemming, size=input$sizeTM, cluster=input$TMCluster,
-                             n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms)
+                             n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms,
+                             subgraphs=TRUE)
     
     values$TM$documentToClusters$DI<- paste0('<a href=\"https://doi.org/',values$TM$documentToClusters$DI,'\" target=\"_blank\">',values$TM$documentToClusters$DI,'</a>')
     names(values$TM$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
     
     values$TM$words <- values$TM$words[,-c(4,6)]
-    
+    values$TM$clusters_orig <- values$TM$clusters
     values$TM$clusters <- values$TM$clusters[,c(9,5:8,11)]
     names(values$TM$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
     
@@ -4008,9 +4009,43 @@ server <- function(input, output,session){
   })
   output$TMPlot <- renderPlotly({
     TMAP()
-    plot.ly(values$TM$map, size=0.07, aspectratio = 1.3)
+    plot.ly(values$TM$map, size=0.07, aspectratio = 1.3, customdata=values$TM$clusters$color)
   })
   
+  ### click cluster networks
+
+  plotModal <- function(session) {
+    ns <- session$ns
+    modalDialog(
+      p("Cluster Network"),
+      visNetworkOutput(ns("cocPlotClust")),
+      size = "l",
+      easyClose = TRUE,
+      footer = tagList(
+        screenshotButton(label="Save", id = "cocPlotClust",
+                         file=paste("TMClusterGraph-", Sys.Date(), ".png", sep="")),
+        modalButton("Close")),
+    )
+  }
+  
+  observeEvent(event_data("plotly_click"), {
+    if (input$sidebarmenu=="thematicMap"){
+      showModal(plotModal(session))
+    }
+  })
+  
+  output$cocPlotClust <- renderVisNetwork({
+    values$d <- event_data("plotly_click")
+      coord <- values$d[c("x","y")]
+      color <- values$TM$clusters_orig %>% 
+        filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
+        select(.data$color) %>% as.character()
+      g <- values$TM$subgraphs[[color]]
+      igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
+  })
+  
+  ### end click cluster subgraphs
+
   output$NetPlot <- renderVisNetwork({
     TMAP()
     values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 

@@ -118,6 +118,7 @@
 #' @importFrom igraph centr_eigen
 #' @importFrom igraph mean_distance
 #' @importFrom igraph closeness
+#' @importFrom igraph induced_subgraph
 #' @importFrom igraph page.rank
 #' @importFrom igraph eigen_centrality
 #' @importFrom igraph arpack_defaults

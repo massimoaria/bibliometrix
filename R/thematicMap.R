@@ -27,6 +27,7 @@ globalVariables(".")
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
+#' @param subgraphs is a logical. If TRUE cluster subgraphs are returned.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
@@ -50,7 +51,7 @@ globalVariables(".")
 #'
 #' @export
 
-thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, community.repulsion = 0.1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="walktrap"){
+thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALSE, size=0.5, n.labels=1, community.repulsion = 0.1, repel=TRUE, remove.terms=NULL, synonyms=NULL, cluster="walktrap", subgraphs=FALSE){
   
   minfreq <- max(2,floor(minfreq*nrow(M)/1000))
   
@@ -247,7 +248,20 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
                  cluster=cluster)
   params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
   
-  results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, documentToClusters=documentToClusters, params=params)
+  ## cluster subgraphs
+  if (isTRUE(subgraphs)){
+    gcl <- list()
+    color <- unique(df$color)
+    
+    for (i in color){
+      ind <- which(V(Net$graph)$color==i)
+      gcl[[i]] <- induced_subgraph(graph = Net$graph, vids = ind, impl = "create_from_scratch")
+    }
+  } else {
+    gcl <- NA
+  }
+  
+  results=list(map=g, clusters=df, words=df_lab,nclust=dim(df)[1], net=Net, subgraphs=gcl, documentToClusters=documentToClusters, params=params)
 return(results)
 }
 

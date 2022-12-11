@@ -1215,11 +1215,14 @@ igraph2visClust<-function(g,curved=FALSE,labelsize=3,opacity=0.7,shape="dot",sha
     
     ## labelsize
     scalemin <- 20
-    scalemax <- 150
+    scalemax <- 100
+    # aggiunta
+    vn$nodes$font.size <- vn$nodes$deg
+    #
     Min <- min(vn$nodes$font.size)
     Max <- max(vn$nodes$font.size)
     if (Max>Min){
-      size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize+10
+      size=(vn$nodes$font.size-Min)/(Max-Min)*15*labelsize#+10
     } else {size=5*labelsize}
     size[size<scalemin]=scalemin
     size[size>scalemax]=scalemax
@@ -1545,7 +1548,7 @@ show_alert(
     showCancelButton = FALSE,
     btn_labels = btn_labels,
     btn_colors = btn_colors,
-    timer = 0,
+    timer = 3000,
     imageUrl = "",
     animation = TRUE
   )

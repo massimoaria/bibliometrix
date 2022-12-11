@@ -4017,7 +4017,7 @@ server <- function(input, output,session){
   plotModal <- function(session) {
     ns <- session$ns
     modalDialog(
-      p("Cluster Network"),
+      h3(strong(("Cluster Network"))),
       visNetworkOutput(ns("cocPlotClust")),
       size = "l",
       easyClose = TRUE,

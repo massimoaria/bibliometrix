@@ -120,12 +120,19 @@ notifications <- function(){
   online <- is_online()
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   if (isTRUE(is_online())){
-    suppressWarnings(notifOnline <- read.csv(location, header=TRUE, sep=","))
-    #notifOnline <- notifOnline[nchar(notifOnline)>2]
-    #n <- strsplit(notifOnline,",")
-    #notsOnline <- unlist(lapply(n,function(l) l[1]))
-    #linksOnline <- unlist(lapply(n,function(l) l[2]))
-    notifOnline$href[nchar(notifOnline$href)<6] <- NA
+    ## add check to avoid blocked app when internet connection is to slow
+    envir <- environment()
+    setTimeLimit(cpu = 3, elapsed = 3, transient = TRUE)
+    on.exit({
+      setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+    })
+    tryCatch({
+      eval(expr=suppressWarnings(notifOnline <- read.csv(location, header=TRUE, sep=",")), envir = envir)
+    }, error = function(ex) {notifOnLine=NULL}
+    )
+    if (is.null(notifOnline)){online=FALSE}else{
+      notifOnline$href[nchar(notifOnline$href)<6] <- NA
+    }
   }
   
   ## check if a file exists on the local machine and load it
@@ -182,13 +189,16 @@ notifications <- function(){
   return(notifTot)
 }
 
-is_online <- function(site="https://www.bibliometrix.org/") {
-  tryCatch({
-    readLines(site,n=1)
-    TRUE
-  },
-  warning = function(w) invokeRestart("muffleWarning"),
-  error = function(e) FALSE)
+is_online <- function(
+    #site="https://www.bibliometrix.org/"
+  ){
+  # tryCatch({
+  #   readLines(site,n=1)
+  #   TRUE
+  # },
+  # warning = function(w) invokeRestart("muffleWarning"),
+  # error = function(e) FALSE)
+  curl::has_internet()
 }
 
 initial <- function(values){

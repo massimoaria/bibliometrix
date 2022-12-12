@@ -308,7 +308,7 @@ body <- dashboardBody(
     tabItem("threeFieldPlot",
             fluidPage(
               fluidRow(
-                column(8,
+                column(6,
                        h2(strong("Three-Field Plot"), align = "center")),
                 column(2,
                        actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
@@ -318,6 +318,12 @@ body <- dashboardBody(
                        actionButton("reportTFP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
                                     width = "80%",
                                     icon = icon(name ="plus", lib="glyphicon"))
+                       ),
+                column(2,
+                       screenshotButton(label=strong("Export"), id = "ThreeFieldsPlot",
+                                        style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
+                                        scale = 2, width = "80%",
+                                        file=paste("ThreeFieldPlot-", Sys.Date(), ".png", sep=""))
                        )
               ),
               fluidRow(

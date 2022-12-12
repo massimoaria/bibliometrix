@@ -4023,6 +4023,7 @@ server <- function(input, output,session){
       easyClose = TRUE,
       footer = tagList(
         screenshotButton(label="Save", id = "cocPlotClust",
+                         scale = 2,
                          file=paste("TMClusterGraph-", Sys.Date(), ".png", sep="")),
         modalButton("Close")),
     )

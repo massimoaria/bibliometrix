@@ -1141,6 +1141,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     #   }else{vn$edges$hidden <- FALSE}
         
     ## labelsize
+    vn$nodes$font.size <- vn$nodes$deg
     scalemin <- 20
     scalemax <- 150
     Min <- min(vn$nodes$font.size)

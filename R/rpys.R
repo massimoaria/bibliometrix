@@ -17,8 +17,8 @@
 #' column of the data frame. The default is \code{sep = ";"}.
 #' @param timespan is a numeric vector c(min year,max year). The default value is NULL (the entire timespan is considered).
 #' @param graph is a logical. If TRUE the function plot the spectroscopy otherwise the plot is created but not drawn down.
-#' @return a list containing the spectroscopy (class ggplot2) and two dataframes with the number of citations
-#' per year and the list of the cited references for each year, respectively.
+#' @return a list containing the spectroscopy (class ggplot2) and three dataframes with the number of citations
+#' per year, the list of the cited references for each year, and the reference list with citations recorded year by year, respectively.
 #'  
 #'
 #' @examples
@@ -35,98 +35,88 @@
 
 rpys <- function(M, sep=";", timespan=NULL, graph=T){
 
+  options(dplyr.summarise.inform = FALSE)
   
   M$CR<-gsub("DOI;","DOI ", as.character(M$CR))
   
   Fi<-strsplit(M[,"CR"],sep)
   Fi<-lapply(Fi,trim.leading)
   Fi<-lapply(Fi,function(l) l<-l[nchar(l)>10])
+  citingYears <- rep(M$PY,lengths(Fi))
   Fi<-(unlist(Fi))
   
-  ## reference modify for ISI
-  if (M$DB[1]=="ISI"){
-  ref<-unlist(lapply(Fi, function(l){
-      l<-gsub("\\).*",")",l)
-      l<-gsub(","," ",l)
-      l<-gsub(";"," ",l)
-      l<-gsub("\\s+", " ", l)
-      l<-l[nchar(l)>0]
-      return(l)
-    }))
-  }else{
-    ref<-unlist(lapply(Fi, function(l){
-      l<-gsub(","," ",l)
-      l<-gsub(";"," ",l)
-      l<-gsub("\\s+", " ", l)
-      l<-l[nchar(l)>0]
-      return(l)
-    }))
-  }
+  df <- data.frame(Reference=Fi, citingYears=citingYears) %>% 
+    mutate(Reference = refCleaning(.data$Reference, db=M$DB[1]))
+  df$citedYears <- as.numeric(yearExtract(df$Reference, db=M$DB[1]))
   
+  df <- df %>% 
+    dplyr::filter(!is.na(.data$Reference) & .data$citedYears>1700 & .data$citedYears<=as.numeric(substr(Sys.Date(),1,4))) %>% 
+    group_by(.data$citedYears,.data$citingYears, .data$Reference) %>% 
+    summarize(citations = n()) %>% 
+    group_by(.data$citedYears,.data$citingYears) %>% 
+    mutate(benchmark = mean(.data$citations,na.rm=T),
+           status = sign(.data$citations-.data$benchmark)) %>% 
+    ungroup() %>% 
+    arrange(.data$citedYears,.data$Reference,.data$citingYears) 
 
-Years=yearExtract(ref,db=M$DB[1])
-Years=Years[!is.na(ref)]
-ref=ref[!is.na(ref)] 
+  
+  
+  CR <- df %>% 
+    group_by(.data$citedYears,.data$Reference) %>% 
+    select(-.data$citingYears, -.data$status) %>% 
+    summarize(Freq = sum(.data$citations))
 
-ref=ref[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
-Years=Years[Years>=1700 & Years<=as.numeric(substr(Sys.Date(),1,4))]
+RPYS <- CR %>% 
+  select(-.data$Reference) %>% 
+  group_by(.data$citedYears) %>% 
+  summarize(n = sum(.data$Freq, na.rm=TRUE))
+  
+yearSeq <- RPYS$citedYears
+missingYears <- setdiff(seq(min(yearSeq),max(yearSeq)), yearSeq)
+RPYS[(nrow(RPYS)+1):(nrow(RPYS)+length(missingYears)),] <- rbind(cbind(missingYears,rep(0,length(missingYears))))
+RPYS <- RPYS %>% arrange(.data$citedYears)
 
-CR=data.frame(Year=Years,Reference=ref, stringsAsFactors = FALSE)
-
-CR=dplyr::group_by(CR, .data$Year, .data$Reference) %>% dplyr::summarise(Freq = length(.data$Reference))
-
-Years=Years[!(Years %in% "")]
-
-RPYS=table(Years)
 
 ## calculating running median
-yearSeq=as.numeric(names(RPYS))
-X=seq(min(yearSeq),max(yearSeq))
-Y=rep(0,length(X))
-names(Y)=X
-Y[names(Y) %in% names(RPYS)]=RPYS
-
-
-YY=c(rep(0,4),Y)
-Median=rep(0,length(Y))
+YY <- c(rep(0,4),RPYS$n)
+Median <- numeric(nrow(RPYS))
 for (i in 5:length(YY)){
   Median[i-4]=median(YY[(i-4):i])
 }
 ####
 #Median=runmed(Y,5)
-diffMedian=Y-Median
+RPYS$diffMedian <- RPYS$n-Median
 
 
 
 if (length(timespan)==2){
-  indTime=which(X>=timespan[1] & X<=timespan[2])
-  X=X[indTime]
-  Y=Y[indTime]
-  diffMedian=diffMedian[indTime]
+  RPYS <- RPYS %>% 
+    dplyr::filter(.data$citedYears>=min(timespan) & 
+                    .data$citedYears<=max(timespan))
 }
-df=data.frame(X=X,Y=Y,diffMedian=diffMedian,stringsAsFactors = FALSE)
-RPYS=data.frame(Year=names(Y),Citations=Y,diffMedian5=diffMedian)
+names(RPYS) <- c("Year", "Citations", "diffMedian5")
 
-df$diffMedian[df$diffMedian<0] <- 0
+RPYS <- RPYS %>% 
+  mutate(diffMedian = ifelse(.data$diffMedian5>0,.data$diffMedian5,0))
 
 data("logo",envir=environment())
 logo <- grid::rasterGrob(logo,interpolate = TRUE)
 
-x <- c(min(df$X),min(df$X)+diff(range(df$X))*0.125)+1
-y <- c(min(c(df$Y,df$diffMedian)),min(c(df$Y,df$diffMedian))+diff(range(c(df$Y,df$diffMedian)))*0.125)*1.05
+x <- c(min(RPYS$Year),min(RPYS$Year)+diff(range(RPYS$Year))*0.125)+1
+y <- c(min(c(RPYS$Citations,RPYS$diffMedian)),min(c(RPYS$Citations,RPYS$diffMedian))+diff(range(c(RPYS$Citations,RPYS$diffMedian)))*0.125)*1.05
 
 
 
-g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of References: ",.data$Y)))+
+g=ggplot(RPYS, aes(x=.data$Year ,y=.data$Citations,text=paste("Year: ",.data$Year,"\nN. of References: ",.data$Citations)))+
   geom_line(aes(group="NA")) +
   geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
   #geom_hline(aes(yintercept=0, color = 'grey'))+
-  geom_line(aes(x=.data$X,y=.data$diffMedian, color="firebrick", group="NA"))+
+  geom_line(aes(x=.data$Year,y=.data$diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'
        , y = 'Cited References'
        , title = "Reference Publication Year Spectroscopy",
        caption = "Number of Cited References (black line) - Deviation from the 5-Year Median (red line)") +
-  scale_x_continuous(breaks= (df$X[seq(1,length(df$X),by=round(length(df$X)/30))])) +
+  scale_x_continuous(breaks= (RPYS$Year[seq(1,length(RPYS$Year),by=round(length(RPYS$Year)/30))])) +
   theme(text = element_text(color = "#444444"), legend.position="none"
         ,plot.caption = element_text(size = 9, hjust = 0.5,
                                      color = "black", face = "bold")
@@ -142,9 +132,15 @@ g=ggplot(df, aes(x=.data$X,y=.data$Y,text=paste("Year: ",.data$X,"\nN. of Refere
         ,axis.line.y = element_line(color="black", size=0.5)
   ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
-if (isTRUE(graph)){plot(g)}
+    if (isTRUE(graph)){plot(g)}
     CR$Reference <- reduceRefs(CR$Reference)
-    result=list(spectroscopy=g, rpysTable=RPYS, CR=CR)
+    CR <- CR %>% 
+      rename(Year = .data$citedYears) %>% 
+      ungroup()
+    result=list(spectroscopy=g, 
+                rpysTable=RPYS, 
+                CR=CR %>% mutate(Year = as.character(.data$Year)), 
+                df=df)
     return(result)
 }
 
@@ -175,4 +171,28 @@ reduceRefs<- function(A){
   ind=unlist(regexec("*DOI ", A))
   A[ind>-1]=substr(A[ind>-1],1,(ind[ind>-1]-1))
   return(A)
+}
+
+refCleaning <- function(l,db){
+  if (db=="ISI"){
+    #ref<-unlist(lapply(Fi, function(l){
+      l<-gsub("\\).*",")",l)
+      l<-gsub(","," ",l)
+      l<-gsub(";"," ",l)
+      l <- gsub("\\."," ",l)
+      l <- trimws(trimES(l))
+      l<-l[nchar(l)>0]
+      #return(l)
+   # }))
+  }else{
+    #ref<-unlist(lapply(Fi, function(l){
+      l<-gsub(","," ",l)
+      l<-gsub(";"," ",l) 
+      l <- gsub("\\."," ",l)
+      l <- trimws(trimES(l))
+      l<-l[nchar(l)>0]
+      return(l)
+    #}))
+  }
+  return(l)
 }

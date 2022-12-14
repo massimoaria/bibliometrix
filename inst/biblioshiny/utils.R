@@ -119,18 +119,19 @@ notifications <- function(){
   ## check connection and download notifications
   online <- is_online()
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
+  notifOnline=NULL
   if (isTRUE(is_online())){
     ## add check to avoid blocked app when internet connection is to slow
     envir <- environment()
-    setTimeLimit(cpu = 3, elapsed = 3, transient = TRUE)
+    setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
     on.exit({
       setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
     })
     tryCatch({
       eval(expr=suppressWarnings(notifOnline <- read.csv(location, header=TRUE, sep=",")), envir = envir)
-    }, error = function(ex) {notifOnLine=NULL}
+    }, error = function(ex) {notifOnLine <- NULL}
     )
-    if (is.null(notifOnline)){online=FALSE}else{
+    if (is.null(notifOnline)){online <- FALSE}else{
       notifOnline$href[nchar(notifOnline$href)<6] <- NA
     }
   }
@@ -189,16 +190,18 @@ notifications <- function(){
   return(notifTot)
 }
 
-is_online <- function(
-    #site="https://www.bibliometrix.org/"
-  ){
-  # tryCatch({
-  #   readLines(site,n=1)
-  #   TRUE
-  # },
-  # warning = function(w) invokeRestart("muffleWarning"),
-  # error = function(e) FALSE)
-  curl::has_internet()
+is_online <- function(){
+  ## add check to avoid blocked app when internet connection is to slow
+  envir <- environment()
+  setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
+  on.exit({
+    setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+  })
+  tryCatch({
+    eval(expr=suppressWarnings(resp <- curl::has_internet()), envir = envir)
+  }, error = function(ex) {resp <- FALSE}
+  )
+  return(resp)
 }
 
 initial <- function(values){

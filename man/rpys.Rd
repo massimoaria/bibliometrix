@@ -19,8 +19,8 @@ column of the data frame. The default is \code{sep = ";"}.}
 \item{graph}{is a logical. If TRUE the function plot the spectroscopy otherwise the plot is created but not drawn down.}
 }
 \value{
-a list containing the spectroscopy (class ggplot2) and two dataframes with the number of citations
-per year and the list of the cited references for each year, respectively.
+a list containing the spectroscopy (class ggplot2) and three dataframes with the number of citations
+per year, the list of the cited references for each year, and the reference list with citations recorded year by year, respectively.
 }
 \description{
 \code{rpys} computes a Reference Publication Year Spectroscopy for detecting 

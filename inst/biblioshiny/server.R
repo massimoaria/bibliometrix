@@ -4167,6 +4167,7 @@ server <- function(input, output,session){
   
   observeEvent(input$reportTM,{
     if(!is.null(values$TM$words)){
+      popUp(title=NULL, type="waiting")
       list_df <- list(values$TM$params,
                       values$TM$words,
                       values$TM$clusters,
@@ -4801,18 +4802,20 @@ server <- function(input, output,session){
   
   observeEvent(input$reportTE,{
     if(!is.null(values$nexus$Data)){
+      popUp(title=NULL, type="waiting")
       sheetname <- "ThematicEvolution"
       list_df <- list(values$nexus$params, values$nexus$Data)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
       values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
-      
+
       ## Periods
       L <- length(values$nexus$TM)
       wb <- res$wb
       for (l in 1:L){
         if(!is.null(values$nexus$TM[[l]]$words)){
+
           list_df <- list(values$nexus$TM[[l]]$params,
                           values$nexus$TM[[l]]$words,
                           values$nexus$TM[[l]]$clusters,

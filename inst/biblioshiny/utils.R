@@ -1541,11 +1541,20 @@ popUp <- function(title=NULL, type="success", btn_labels="OK"){
            title <- paste(title,"\n added to report",sep="")
            subtitle <- ""
            btn_colors = "#1d8fe1"
+           showButton = TRUE
          },
          error={
            title <- "No results to add to the report "
            subtitle <- "Please Run the analysis and then Add it to the report"
            btn_colors = "#913333"
+           showButton = TRUE
+         },
+         waiting={
+           title <- "Please wait... "
+           subtitle <- "Adding results to report"
+           btn_colors = "#FFA800"
+           showButton = FALSE
+           btn_labels = NA
          })
   
 show_alert(
@@ -1556,7 +1565,7 @@ show_alert(
     closeOnEsc = TRUE,
     closeOnClickOutside = TRUE,
     html = FALSE,
-    showConfirmButton = TRUE,
+    showConfirmButton = showButton,
     showCancelButton = FALSE,
     btn_labels = btn_labels,
     btn_colors = btn_colors,

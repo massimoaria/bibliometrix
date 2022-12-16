@@ -21,6 +21,8 @@
 #'
 #' @export
 tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL, synonyms=NULL){
+  ## check and remove duplicated
+  M <- M[!duplicated(M$SR),]
   
   if (Tag %in% c("AB","TI")){
     M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE, ngrams = ngrams, remove.terms=remove.terms, synonyms=synonyms)

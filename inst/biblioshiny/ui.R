@@ -260,12 +260,51 @@ body <- dashboardBody(
     ##### annual scientific production ----
     tabItem("annualScPr",
             fluidPage(
-              fluidRow(column(10,
+              fluidRow(column(9,
                 h2(strong("Annual Scientific Production"), align = "center")),
                 column(2, 
                        actionButton("reportASP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
                                     width = "80%",
                                     icon = icon(name ="plus", lib="glyphicon"))
+                ),
+                column(1,
+                br(),
+                ## dropdown options
+                dropdown(
+                  h4(strong("Annual Growth Rate")),
+                  br(),
+                  verbatimTextOutput("CAGR", placeholder = TRUE),
+                  br(),
+                  selectInput(
+                    'ASPdpi',
+                    label = h4(strong("Export plot")),
+                    choices=c(
+                      "dpi value" = "null",
+                      "75 dpi" = "75",
+                      "150 dpi" = "150",
+                      "300 dpi" = "300",
+                      "600 dpi" = "600"
+                    ),
+                    selected = "null"
+                  ),
+                  br(),
+                  conditionalPanel(condition = 'input.ASPdpi != "null"',
+                                   sliderInput(
+                                     'ASPh',
+                                     label =h4(em(strong("Height (in inches)"))),
+                                     value = 7, min = 1, max = 20, step = 1),
+                                   downloadButton("ASPplot.save", strong("Export plot as png"),
+                                                  style ="border-radius: 10px; border-width: 3px; vertical-align: 'middle';font-size: 20px;",
+                                                  width = "100%")
+                  ),
+                  right = TRUE,
+                  animate = TRUE,
+                  style = "unite", icon = icon("cog",lib="glyphicon"),
+                  width = "300px", 
+                  tooltip = "Options"#,
+                  #showOnCreate = TRUE
+                )
+                # End Dropdown options
                 )
               ),
               fluidRow(
@@ -277,8 +316,8 @@ body <- dashboardBody(
                             tabPanel("Table",
                                      shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
                             )
-                )
-              )
+                ))
+              
             )
     ),
     ##### average citation per year ----

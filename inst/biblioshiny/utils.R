@@ -59,9 +59,7 @@ plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=
              'hoverClosestCartesian',
              'hoverCompareCartesian'
            )) 
-  #if (!is.na(customdata[1])){
-    gg$x$data[[1]]$customdata <- customdata
-  #}
+  
   return(gg)
 }
 

@@ -902,6 +902,9 @@ server <- function(input, output,session){
   })
   
   ## Update filtered data ----
+  observeEvent(input$applyFilter, {
+    updateTabItems(session, "sidebarmenu", "filters")
+  })
   
   DTfiltered <- eventReactive(input$applyFilter,{
     M <- values$Morig
@@ -1112,7 +1115,7 @@ server <- function(input, output,session){
     
     g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
       geom_line(aes(group="NA")) +
-      geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
+      #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
            , y = 'Articles'
            , title = "Annual Scientific Production") +
@@ -1218,7 +1221,7 @@ server <- function(input, output,session){
     
     g <- ggplot(Table2, aes(x = .data$Year, y =.data$MeanTCperYear,text=paste("Year: ",.data$Year,"\nAverage Citations per Year: ",round(.data$MeanTCperYear,1)))) +
       geom_line(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group)) +
-      geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = 'grey90', alpha = .5) +
+      #geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
            , y = 'Citations'
            , title = "Average Citations per Year")+
@@ -5227,6 +5230,7 @@ server <- function(input, output,session){
   observeEvent(input$delete_confirmation, {
     if (isTRUE(input$delete_confirmation)) {
       values$myChoices <- "Empty Report"
+      values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
       values$wb <-  openxlsx::createWorkbook()
     }
       }, ignoreNULL = TRUE
@@ -5433,34 +5437,34 @@ server <- function(input, output,session){
                    ## Annual Scientific Prod ----
                    conditionalPanel(condition = 'input.sidebarmenu == "annualScPr"',
                                     br(),
-                                    h4(strong("Annual Growth Rate")),
-                                    br(),
-                                    verbatimTextOutput("CAGR", placeholder = TRUE),
-                                    br(),
-                                    selectInput(
-                                      'ASPdpi',
-                                      label = h4(strong("Export plot")),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    )
+                                    # h4(strong("Annual Growth Rate")),
+                                    # br(),
+                                    # verbatimTextOutput("CAGR", placeholder = TRUE),
+                                    # br(),
+                                    # selectInput(
+                                    #   'ASPdpi',
+                                    #   label = h4(strong("Export plot")),
+                                    #   choices=c(
+                                    #     "dpi value" = "null",
+                                    #     "75 dpi" = "75",
+                                    #     "150 dpi" = "150",
+                                    #     "300 dpi" = "300",
+                                    #     "600 dpi" = "600"
+                                    #   ),
+                                    #   selected = "null"
+                                    # )
                    ),
                    br(),
-                   br(),
-                   conditionalPanel(condition = 'input.sidebarmenu == "annualScPr" & input.ASPdpi != "null"',
-                                    sliderInput(
-                                      'ASPh',
-                                      label =h4(em(strong("Height (in inches)"))),
-                                      value = 7, min = 1, max = 20, step = 1),
-                                    downloadButton("ASPplot.save", strong("Export plot as png"),
-                                                   style ="border-radius: 10px; border-width: 3px; vertical-align: 'middle';font-size: 20px;",
-                                                   width = "100%")
-                   ),
+                   # br(),
+                   # conditionalPanel(condition = 'input.sidebarmenu == "annualScPr" & input.ASPdpi != "null"',
+                   #                  sliderInput(
+                   #                    'ASPh',
+                   #                    label =h4(em(strong("Height (in inches)"))),
+                   #                    value = 7, min = 1, max = 20, step = 1),
+                   #                  downloadButton("ASPplot.save", strong("Export plot as png"),
+                   #                                 style ="border-radius: 10px; border-width: 3px; vertical-align: 'middle';font-size: 20px;",
+                   #                                 width = "100%")
+                   # ),
                    ## Average Cit Per Year ----
                    conditionalPanel(condition = 'input.sidebarmenu == "averageCitPerYear"',
                                     br(),

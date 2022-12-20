@@ -1542,12 +1542,14 @@ popUp <- function(title=NULL, type="success", btn_labels="OK"){
            subtitle <- ""
            btn_colors = "#1d8fe1"
            showButton = TRUE
+           timer = 3000
          },
          error={
            title <- "No results to add to the report "
            subtitle <- "Please Run the analysis and then Add it to the report"
            btn_colors = "#913333"
            showButton = TRUE
+           timer = 3000
          },
          waiting={
            title <- "Please wait... "
@@ -1555,6 +1557,7 @@ popUp <- function(title=NULL, type="success", btn_labels="OK"){
            btn_colors = "#FFA800"
            showButton = FALSE
            btn_labels = NA
+           timer = NA
          })
   
 show_alert(
@@ -1569,7 +1572,7 @@ show_alert(
     showCancelButton = FALSE,
     btn_labels = btn_labels,
     btn_colors = btn_colors,
-    timer = 3000,
+    timer = timer,
     imageUrl = "",
     animation = TRUE
   )

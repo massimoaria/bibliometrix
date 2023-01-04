@@ -1158,7 +1158,7 @@ server <- function(input, output,session){
     },
     
     content <- function(file) {
-      ggsave(filename = file, plot = values$ASPplot, dpi = as.numeric(input$ASPdpi), height = input$ASPh, width = input$ASPh*2, bg="white")
+      ggsave(filename = file, plot = values$ASPplot, dpi = 300, height = 7, width = 7*2, bg="white")
     },
     contentType = "png"
   )
@@ -1260,7 +1260,7 @@ server <- function(input, output,session){
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$ACpYplot, dpi = as.numeric(input$ACpYdpi), height = input$ACpYh, width = input$ACpYh*2, bg="white")
+      ggsave(filename = file, plot = values$ACpYplot, dpi = 300, height = 7, width = 7*2, bg="white")
     },
     contentType = "png"
   )
@@ -5438,155 +5438,13 @@ server <- function(input, output,session){
                                                 selected = "all")
                    ),
                    ## Annual Scientific Prod ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "annualScPr"',
-                                    br(),
-                                    # h4(strong("Annual Growth Rate")),
-                                    # br(),
-                                    # verbatimTextOutput("CAGR", placeholder = TRUE),
-                                    # br(),
-                                    # selectInput(
-                                    #   'ASPdpi',
-                                    #   label = h4(strong("Export plot")),
-                                    #   choices=c(
-                                    #     "dpi value" = "null",
-                                    #     "75 dpi" = "75",
-                                    #     "150 dpi" = "150",
-                                    #     "300 dpi" = "300",
-                                    #     "600 dpi" = "600"
-                                    #   ),
-                                    #   selected = "null"
-                                    # )
-                   ),
-                   br(),
-                   # br(),
-                   # conditionalPanel(condition = 'input.sidebarmenu == "annualScPr" & input.ASPdpi != "null"',
-                   #                  sliderInput(
-                   #                    'ASPh',
-                   #                    label =h4(em(strong("Height (in inches)"))),
-                   #                    value = 7, min = 1, max = 20, step = 1),
-                   #                  downloadButton("ASPplot.save", strong("Export plot as png"),
-                   #                                 style ="border-radius: 10px; border-width: 3px; vertical-align: 'middle';font-size: 20px;",
-                   #                                 width = "100%")
-                   # ),
+                   
                    ## Average Cit Per Year ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "averageCitPerYear"',
-                                    br(),
-                                    selectInput(
-                                      'ACpYdpi',
-                                      h4(strong("Export plot"), align ="center"),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.ACpYdpi != 'null'",
-                                                     sliderInput(
-                                                       'ACpYh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("ACpYplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+  
                    ## Three field Plot ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "threeFieldPlot"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        fluidRow(
-                                          (column(6, selectInput("CentralField",
-                                                                 label = "Middle Field",
-                                                                 choices = c("Authors" = "AU",
-                                                                             "Affiliations" = "AU_UN",
-                                                                             "Countries"="AU_CO",
-                                                                             "Keywords" = "DE",
-                                                                             "Keywords Plus" = "ID",
-                                                                             "Titles" = "TI_TM",
-                                                                             "Abstract" = "AB_TM",
-                                                                             "Sources" = "SO",
-                                                                             "References" = "CR",
-                                                                             "Cited Sources" = "CR_SO"),
-                                                                 selected = "AU"))),
-                                          (column(6,numericInput("CentralFieldn", 
-                                                                 label=("Number of items"), 
-                                                                 min = 1, max = 50, step = 1, value = 20)))),
-                                        fluidRow(
-                                          (column(6,selectInput("LeftField",
-                                                                label = "Left Field",
-                                                                choices = c("Authors" = "AU",
-                                                                            "Affiliations" = "AU_UN",
-                                                                            "Countries"="AU_CO",
-                                                                            "Keywords" = "DE",
-                                                                            "Keywords Plus" = "ID",
-                                                                            "Titles" = "TI_TM",
-                                                                            "Abstract" = "AB_TM",
-                                                                            "Sources" = "SO",
-                                                                            "References" = "CR",
-                                                                            "Cited Sources" = "CR_SO"),
-                                                                selected = "CR"))),
-                                          (column(6, numericInput("LeftFieldn", 
-                                                                  label=("Number of items"), 
-                                                                  min = 1, max = 50, step = 1, value = 20)))),
-                                        fluidRow(
-                                          (column(6,selectInput("RightField",
-                                                                label = "Right Field",
-                                                                choices = c("Authors" = "AU",
-                                                                            "Affiliations" = "AU_UN",
-                                                                            "Countries"="AU_CO",
-                                                                            "Keywords" = "DE",
-                                                                            "Keywords Plus" = "ID",
-                                                                            "Titles" = "TI_TM",
-                                                                            "Abstract" = "AB_TM",
-                                                                            "Sources" = "SO",
-                                                                            "References" = "CR",
-                                                                            "Cited Sources" = "CR_SO"),
-                                                                selected = "DE"))),
-                                          (column(6,numericInput("RightFieldn", 
-                                                                 label=("Number of items"), 
-                                                                 min = 1, max = 50, step = 1, value = 20))))
-                                    )
-                                    ),
+
                    ## Relevant Sources ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "relevantSources"',
-                                    h4(strong("Parameters: ")),
-                                    "  ",
-                                    numericInput("MostRelSourcesK", 
-                                                 label=("Number of Sources"), 
-                                                 value = 10),
-                                    br(),
-                                    selectInput(
-                                      'MRSdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MRSdpi != 'null'",
-                                                     sliderInput(
-                                                       'MRSh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MRSplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   
                    ## Most Local Cited Sources ----
                    conditionalPanel(condition ='input.sidebarmenu == "localCitedSources"',
                                     h4(strong("Parameters: ")),
@@ -8031,6 +7889,18 @@ server <- function(input, output,session){
       )
     )
   })
+  
+  observeEvent(input$screenTFP,{
+    screenshot(
+      filename = paste("ThreeFieldPlot-", Sys.Date(), ".png", sep=""),
+      id = "ThreeFieldsPlot",
+      scale = 1,
+      timer = 0,
+      download = TRUE,
+      server_dir = NULL
+    )
+  })
+  
 }
 
 

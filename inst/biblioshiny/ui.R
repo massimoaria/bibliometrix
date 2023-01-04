@@ -16,6 +16,30 @@ bibliometrixWeb <- "javascript:void(window.open('https://www.bibliometrix.org/',
 k_synth <- "javascript:void(window.open('https://www.k-synth.unina.it', '_blank'))"
 github_aria <- "javascript:void(window.open('https://github.com/massimoaria/bibliometrix', '_blank'))"
 
+style_opt <-  "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
+style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
+t_report  <-  "Add Results to the Report"
+t_export  <-  "Export Plot as PNG"
+t_run <- "Run the Analysis"
+run_bttn <- list(
+  label = NULL,
+  style = "material-circle",
+  color = "primary",
+  icon = icon(name ="play", lib="glyphicon")
+)
+report_bttn <- list(
+  label = NULL,
+  style = "material-circle",
+  color = "primary",
+  icon = icon(name ="plus", lib="glyphicon")
+)
+export_bttn <- list(
+  label=NULL,
+  style = "material-circle",
+  color = "primary",
+  icon = icon(name ="download", lib="glyphicon")
+)
+
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                               titleWidth = 300,
@@ -219,13 +243,15 @@ body <- dashboardBody(
     ##### main information ----
     tabItem("mainInfo",
             fluidPage(
-              fluidRow(column(10,
+              fluidRow(column(11,
                 h2(strong("Main Information"), align = "center")),
-                column(2, 
-                       actionButton("reportMI", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
-                )
+                div(style=style_bttn,
+                    title = t_report,
+                  column(1, 
+                       do.call("actionBttn", c(report_bttn, list(
+                                  inputId = "reportMI")
+                                  ))
+                ))
                 ),
               fluidRow(
                 tabsetPanel(type = "tabs", id = "maininfo",
@@ -260,52 +286,22 @@ body <- dashboardBody(
     ##### annual scientific production ----
     tabItem("annualScPr",
             fluidPage(
-              fluidRow(column(9,
+              fluidRow(column(10,
                 h2(strong("Annual Scientific Production"), align = "center")),
-                column(2, 
-                       actionButton("reportASP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
-                ),
-                column(1,
-                br(),
-                ## dropdown options
-                dropdown(
-                  h4(strong("Annual Growth Rate")),
-                  br(),
-                  verbatimTextOutput("CAGR", placeholder = TRUE),
-                  br(),
-                  selectInput(
-                    'ASPdpi',
-                    label = h4(strong("Export plot")),
-                    choices=c(
-                      "dpi value" = "null",
-                      "75 dpi" = "75",
-                      "150 dpi" = "150",
-                      "300 dpi" = "300",
-                      "600 dpi" = "600"
-                    ),
-                    selected = "null"
-                  ),
-                  br(),
-                  conditionalPanel(condition = 'input.ASPdpi != "null"',
-                                   sliderInput(
-                                     'ASPh',
-                                     label =h4(em(strong("Height (in inches)"))),
-                                     value = 7, min = 1, max = 20, step = 1),
-                                   downloadButton("ASPplot.save", strong("Export plot as png"),
-                                                  style ="border-radius: 10px; border-width: 3px; vertical-align: 'middle';font-size: 20px;",
-                                                  width = "100%")
-                  ),
-                  right = TRUE,
-                  animate = TRUE,
-                  style = "unite", icon = icon("cog",lib="glyphicon"),
-                  width = "300px", 
-                  tooltip = "Options"#,
-                  #showOnCreate = TRUE
-                )
-                # End Dropdown options
-                )
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportASP")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "ASPplot.save")
+                           ))
+                    ))
               ),
               fluidRow(
                 tabsetPanel(id ="tabsASP",
@@ -325,11 +321,20 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(column(10,
                 h2(strong("Average Citations Per Year"), align = "center")),
-                column(2, 
-                       actionButton("reportACpY", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 20px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
-                )
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportACpY")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "ACpYplot.save")
+                           ))
+                    ))
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -347,23 +352,96 @@ body <- dashboardBody(
     tabItem("threeFieldPlot",
             fluidPage(
               fluidRow(
-                column(6,
+                column(8,
                        h2(strong("Three-Field Plot"), align = "center")),
-                column(2,
-                       actionButton("apply3F", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",
-                                      icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportTFP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
-                       ),
-                column(2,
-                       screenshotButton(label=strong("Export"), id = "ThreeFieldsPlot",
-                                        style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                        scale = 2, width = "80%",
-                                        file=paste("ThreeFieldPlot-", Sys.Date(), ".png", sep=""))
-                       )
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "apply3F")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportTFP")
+                           ))
+                    )),
+                div(style = style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenTFP")
+                           ))
+                    )),
+                div(style = style_opt,
+                  column(1,
+                         dropdown(
+                           box(title = h4(strong("Parameters")), 
+                               collapsible = FALSE, 
+                               width = 15,
+                               solidHeader = FALSE, 
+                               fluidRow(
+                                 column(6, selectInput("CentralField",
+                                                       label = "Middle Field",
+                                                       choices = c("Authors" = "AU",
+                                                                   "Affiliations" = "AU_UN",
+                                                                   "Countries"="AU_CO",
+                                                                   "Keywords" = "DE",
+                                                                   "Keywords Plus" = "ID",
+                                                                   "Titles" = "TI_TM",
+                                                                   "Abstract" = "AB_TM",
+                                                                   "Sources" = "SO",
+                                                                   "References" = "CR",
+                                                                   "Cited Sources" = "CR_SO"),
+                                                       selected = "AU")),
+                                 column(6,numericInput("CentralFieldn", 
+                                                       label=("Number of items"), 
+                                                       min = 1, max = 50, step = 1, value = 20))),
+                               fluidRow(
+                                 column(6,selectInput("LeftField",
+                                                      label = "Left Field",
+                                                      choices = c("Authors" = "AU",
+                                                                  "Affiliations" = "AU_UN",
+                                                                  "Countries"="AU_CO",
+                                                                  "Keywords" = "DE",
+                                                                  "Keywords Plus" = "ID",
+                                                                  "Titles" = "TI_TM",
+                                                                  "Abstract" = "AB_TM",
+                                                                  "Sources" = "SO",
+                                                                  "References" = "CR",
+                                                                  "Cited Sources" = "CR_SO"),
+                                                      selected = "CR")),
+                                 column(6, numericInput("LeftFieldn", 
+                                                        label=("Number of items"), 
+                                                        min = 1, max = 50, step = 1, value = 20))),
+                               fluidRow(
+                                 column(6,selectInput("RightField",
+                                                      label = "Right Field",
+                                                      choices = c("Authors" = "AU",
+                                                                  "Affiliations" = "AU_UN",
+                                                                  "Countries"="AU_CO",
+                                                                  "Keywords" = "DE",
+                                                                  "Keywords Plus" = "ID",
+                                                                  "Titles" = "TI_TM",
+                                                                  "Abstract" = "AB_TM",
+                                                                  "Sources" = "SO",
+                                                                  "References" = "CR",
+                                                                  "Cited Sources" = "CR_SO"),
+                                                      selected = "DE")),
+                                 column(6,numericInput("RightFieldn", 
+                                                       label=("Number of items"), 
+                                                       min = 1, max = 50, step = 1, value = 20)))
+                           ),
+                           right = TRUE, animate = TRUE, circle = TRUE,
+                           style = "gradient",
+                           tooltip = tooltipOptions(title = "Options"),
+                           color = "primary",
+                           icon = icon("cog",lib="glyphicon"),
+                           width = "300px"
+                         ))
+                )
               ),
               fluidRow(
                 shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
@@ -377,13 +455,46 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Relevant Sources"), align = "center")),
-                column(2,actionButton("applyMRSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMRS", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMRSources")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMRS")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MRSplot.save")
+                           ))
+                    )),
+                
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             "  ",
+                             numericInput("MostRelSourcesK", 
+                                          label=("Number of Sources"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
+                
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",

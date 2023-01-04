@@ -480,7 +480,7 @@ body <- dashboardBody(
                 div(column(1,
                            dropdown(
                              h4(strong("Parameters: ")),
-                             "  ",
+                             br(),
                              numericInput("MostRelSourcesK", 
                                           label=("Number of Sources"), 
                                           value = 10),
@@ -514,13 +514,44 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Local Cited Sources"), align = "center")),
-                column(2,
-                       actionButton("applyMLCSources", strong("Run"),style ="border-radius: 10px; border-width: 3px;font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMLS", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMLCSources")
+                           ))
+                    )),
+                
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMLS")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MLCSplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostRelCitSourcesK", 
+                                          label=("Number of Sources"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -542,13 +573,20 @@ body <- dashboardBody(
                 #titlePanel(
                   h2(strong("Core Sources by Bradford's Law"), align = "center")
                 ),
-                column(2, 
-                         actionButton("reportBradford", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",
-                                      icon = icon(name ="plus", lib="glyphicon"))
-                )
-                
-                #)
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportBradford")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "BLplot.save")
+                           ))
+                    ))
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -568,14 +606,51 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Sources' Local Impact"), align = "center")),
-                column(2,
-                       actionButton("applyHsource", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportSI", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyHsource")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportSI")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "SIplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("HmeasureSources", 
+                                         label = "Impact measure",
+                                         choices = c("H-Index"="h", 
+                                                     "G-Index"="g",
+                                                     "M-Index"="m",
+                                                     "Total Citation"="tc"),
+                                         selected = "h"),
+                             br(),
+                             numericInput("Hksource", 
+                                          label=("Number of sources"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -596,14 +671,47 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Sources' Production over Time"), align = "center")),
-                column(2,actionButton("applySOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",
-                                      icon = fa_i(name ="play"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applySOGrowth")
+                           ))
+                    )),
+                
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportSD")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "SDplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("cumSO", "Occurrences",
+                                         choices = c("Cumulate" = "Cum",
+                                                     "Per year" = "noCum"),
+                                         selected = "Cum"),
+                             sliderInput("topSO", label = "Number of Sources", 
+                                         min = 1, max = 50, step = 1, value = c(1,5)),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
                 ),
-                column(2, 
-                       actionButton("reportSD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -625,13 +733,50 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Relevant Authors"), align = "center")),
-                column(2,
-                       actionButton("applyMRAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMRA", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMRAuthors")
+                           ))
+                    )),
+                
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMRA")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MRAplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostRelAuthorsK", 
+                                          label=("Number of Authors"), 
+                                          value = 10),
+                             selectInput("AuFreqMeasure", 
+                                         label = "Frequency measure",
+                                         choices = c("N. of Documents "="t", 
+                                                     "Percentage"="p",
+                                                     "Fractionalized Frequency"="f"),
+                                         selected = "t"),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -652,12 +797,44 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Local Cited Authors"), align = "center")),
-                column(2,actionButton("applyMLCAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMLCA", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMLCAuthors")
+                           ))
+                    )),
+                
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMLCA")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MLCAplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostCitAuthorsK", 
+                                          label=("Number of Authors"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -678,14 +855,42 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Authors' Production over Time"), align = "center")),
-                column(2,
-                       actionButton("applyAUoverTime", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportAPOT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyAUoverTime")
+                           ))
+                    )),div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportAPOT")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "APOTplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("TopAuthorsProdK", 
+                                          label=("Number of Authors"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -710,11 +915,20 @@ body <- dashboardBody(
                 column(10,
                   h2(strong("Author Productivity through Lotka's Law"), align = "center")
                 ),
-                column(2, 
-                       actionButton("reportLotka", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
-                )
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportLotka")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "LLplot.save")
+                           ))
+                    ))
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -734,14 +948,50 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Authors' Local Impact"), align = "center")),
-                column(2,
-                       actionButton("applyHAuthors", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyHAuthors")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportAI")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "AIplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("HmeasureAuthors", 
+                                         label = "Impact measure",
+                                         choices = c("H-Index"="h", 
+                                                     "G-Index"="g",
+                                                     "M-Index"="m",
+                                                     "Total Citation"="tc"),
+                                         selected = "h"),
+                             numericInput("Hkauthor", 
+                                          label=("Number of authors"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
                 ),
-                column(2, 
-                       actionButton("reportAI", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -762,14 +1012,48 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Relevant Affiliations"), align = "center")),
-                column(2,
-                       actionButton("applyMRAffiliations", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMRAFF", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMRAffiliations")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMRAFF")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "AFFplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("disAff", 
+                                         label = "Affiliation Name Disambiguation",
+                                         choices = c("Yes"="Y", 
+                                                     "No"="N"),
+                                         selected = "Y"),
+                             numericInput("MostRelAffiliationsK", 
+                                          label=("Number of Affiliations"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -790,14 +1074,42 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Affiliations' Production over Time"), align = "center")),
-                column(2,actionButton("applyAFFGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",
-                                      icon = fa_i(name ="play"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyAFFGrowth")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportAFFPOT")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "AffOverTimeplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("topAFF", label = "Number of Affiliations", 
+                                          min = 1, max = 50, step = 1, value = 5),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
                 ),
-                column(2, 
-                       actionButton("reportAFFPOT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -818,13 +1130,43 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Corresponding Author's Countries"), align = "center")),
-                column(2,
-                       actionButton("applyCAUCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMRCO", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyCAUCountries")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMRCO")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MRCOplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostRelCountriesK", 
+                                          label=("Number of Countries"), 
+                                          value = 20, min = 1, max = 50),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ),
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -844,11 +1186,20 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(column(10,
                 h2(strong("Countries' Scientific Production"), align = "center")),
-                column(2, 
-                       actionButton("reportCSP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
-                )
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCSP")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "CSPplot.save")
+                           ))
+                    ))
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
@@ -868,14 +1219,42 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Countries' Production over Time"), align = "center")),
-                column(2,actionButton("applyCOGrowth", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",
-                                      icon = fa_i(name ="play"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyCOGrowth")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCPOT")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "CountryOverTimeplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             sliderInput("topCO", label = "Number of Countries", 
+                                         min = 1, max = 50, step = 1, value = 5),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
                 ),
-                column(2, 
-                       actionButton("reportCPOT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -896,12 +1275,48 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Cited Countries"), align = "center")),
-                column(2,actionButton("applyMCCountries", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMCCO", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMCCountries")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMCCO")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MCCplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("CitCountriesMeasure", 
+                                         label = "Measure",
+                                         choices = c("Total Citations"="TC", 
+                                                     "Average Citations per Year"="TCY"),
+                                         selected = "TC"),
+                             numericInput("MostCitCountriesK", 
+                                          label=("Number of Countries"), 
+                                          value = 10),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -923,14 +1338,48 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Global Cited Documents"), align = "center")),
-                column(2,
-                       actionButton("applyMGCDocuments", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMCD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMGCDocuments")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMCD")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MGCDplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostCitDocsK", 
+                                          label=("Number of Documents"), 
+                                          value = 10),
+                             selectInput("CitDocsMeasure", 
+                                         label = "Measure",
+                                         choices = c("Total Citations"="TC", 
+                                                     "Total Citations per Year"="TCY"),
+                                         selected = "TC"), 
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -951,14 +1400,49 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Local Cited Documents"), align = "center")),
-                column(2, actionButton("applyMLCDocuments", strong("Run"),
-                                       style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                       width = "80%",
-                                       icon = fa_i(name="play"))),
-                column(2, 
-                       actionButton("reportMLCD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMLCDocuments")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMLCD")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MLCDplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostLocCitDocsK", 
+                                          label=("Number of Documents"), 
+                                          value = 10),
+                             selectInput(inputId = "LocCitSep", 
+                                         label = "Field separator character", 
+                                         choices = c(";" = ";", 
+                                                     ".  " = ".  ",
+                                                     "," = ","),
+                                         selected = ";"), 
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -979,14 +1463,49 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Most Local Cited References"), align = "center")),
-                column(2,
-                       actionButton("applyMLCReferences", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportMLCR", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMLCReferences")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMLCR")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MLCRplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             numericInput("MostCitRefsK", 
+                                         label=("Number of Documents"), 
+                                         value = 10),
+                             selectInput(inputId = "CitRefsSep", 
+                                         label = "Field separator character", 
+                                         choices = c(";" = ";", 
+                                                     ".  " = ".  ",
+                                                     "," = ","),
+                                         selected = ";"), 
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -1008,13 +1527,58 @@ body <- dashboardBody(
                 column(8,
                        h2(strong("Reference Spectroscopy"), align = "center")
                 ),
-                column(2,
-                       actionButton("applyRPYS", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportRPYS", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyRPYS")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportRPYS")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "RSplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput(inputId = "rpysSep", 
+                                         label = "Field separator character", 
+                                         choices = c(";" = ";", 
+                                                     ".  " = ".  ",
+                                                     "," = ","),
+                                         selected = ";"),
+                             h4(em(strong("Time slice"))),
+                             fluidRow(column(6,
+                                             numericInput(inputId = "rpysMinYear",
+                                                          label = "Starting Year",
+                                                          value = NA,
+                                                          step = 1)),
+                                      column(6,
+                                             numericInput(inputId = "rpysMaxYear",
+                                                          label = "End Year",
+                                                          value = NA,
+                                                          step = 1)
+                                      )), 
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -1038,15 +1602,103 @@ body <- dashboardBody(
                 column(8,
                        h2(strong("Most Frequent Words"), align = "center")
                 ),
-                column(2,
-                       actionButton("applyMFWords", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))
-                ),
-                column(2, 
-                       actionButton("reportMFW", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyMFWords")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportMFW")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "MRWplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("MostRelWords", "Field",
+                                         choices = c("Keywords Plus" = "ID",
+                                                     "Author's keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB",
+                                                     "Subject Categories (WoS)" = "WC"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.MostRelWords == 'AB' |input.MostRelWords == 'TI'",
+                                              selectInput("MRWngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             numericInput("MostRelWordsN", label = "Number of words", min = 2, max = 100, step = 1, value = 10),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("MostRelWordsStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.MostRelWordsStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("MostRelWordsStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("MostRelWordsSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("MostRelWordsStopPreview"))
+                                 ),
+                                 selectInput("MRWSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.MRWSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("MRWSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("MRWSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("MRWSynPreview"))
+                                 )),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -1068,13 +1720,148 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("WordCloud"), align = "center")),
-                column(2,actionButton("applyWordCloud", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportWC", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyWordCloud")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportWC")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenWC")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("summaryTerms", "Field",
+                                         choices = c("Keywords Plus" = "ID",
+                                                     "Author's keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB",
+                                                     "Subject Categories (WoS)" = "WC"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.summaryTerms == 'AB' |input.summaryTerms == 'TI'",
+                                              selectInput("summaryTermsngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             numericInput("n_words", label = "Number of words", min = 10, max = 500, step = 1, value = 50),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("WCStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.WCStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("WCStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  selectInput("WCSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ",")
+                                 ),
+                                 selectInput("WCSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.WCSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("WCSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("WCSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ",")
+                                 )),
+                             br(),
+                             box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 selectInput("measure", "Word occurrence by",
+                                                             choices = c("Frequency" = "freq",
+                                                                         "Square root" = "sqrt",
+                                                                         "Log" = "log",
+                                                                         "Log10" = "log10"),
+                                                             selected = "freq")
+                                 ),
+                                 column(6,
+                                        selectInput("wcShape", "Shape",
+                                                    choices = c("Circle" = "circle",
+                                                                "Cardiod" = "cardioid",
+                                                                "Diamond" = "diamond",
+                                                                "Pentagon" = "pentagon",
+                                                                "Star" = "star",
+                                                                "Triangle-forward" = "triangle-forward"
+                                                                ,"Triangle" = "triangle"),
+                                                    selected = "circle")
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput("font", label = "Font type",
+                                                             choices = c("Impact", "Comic Sans MS (No plz!)" = "Comic Sans MS",
+                                                                         "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
+                                                                         "Georgia", "Times New Roman", "Andale Mono"))
+                                 ),
+                                 column(6,
+                                        selectInput("wcCol", "Text colors",
+                                                    choices = c("Random Dark" = "random-dark",
+                                                                "Random Light" = "random-light"),
+                                                    selected = "random-dark")
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput("scale", label = "Font size", min=0.1,max=5,step=0.1,value=0.5)
+                                 ),
+                                 column(6,
+                                        numericInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65)
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1)
+                                 ),
+                                 column(6,
+                                        numericInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
+                                 ))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -1096,14 +1883,104 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("TreeMap"), align = "center")),
-                column(2,
-                       actionButton("applyTreeMap", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportTREEMAP", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyTreeMap")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportTREEMAP")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenTREEMAP")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Parameters: ")),
+                             br(),
+                             selectInput("treeTerms", "Field",
+                                         choices = c("Keywords Plus" = "ID",
+                                                     "Author's keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB",
+                                                     "Subject Categories (WoS)" = "WC"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.treeTerms == 'AB' |input.treeTerms == 'TI'",
+                                              selectInput("treeTermsngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             numericInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("TreeMapStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TreeMapStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("TreeMapStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TreeMapSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TreeMapStopPreview"))
+                                 ),
+                                 selectInput("TreeMapSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TreeMapSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("TreeMapSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TreeMapSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TreeMapSynPreview"))
+                                 )
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(

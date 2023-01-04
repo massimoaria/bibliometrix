@@ -22,6 +22,7 @@ server <- function(input, output,session){
   values$myChoices <- "Empty Report"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
+  values$dpi <- 300
   values$h <- 7
   values$w <- 14 
   values$results <- list("NA")
@@ -1158,7 +1159,7 @@ server <- function(input, output,session){
     },
     
     content <- function(file) {
-      ggsave(filename = file, plot = values$ASPplot, dpi = 300, height = 7, width = 7*2, bg="white")
+      ggsave(filename = file, plot = values$ASPplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1260,7 +1261,7 @@ server <- function(input, output,session){
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$ACpYplot, dpi = 300, height = 7, width = 7*2, bg="white")
+      ggsave(filename = file, plot = values$ACpYplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1348,7 +1349,7 @@ server <- function(input, output,session){
       paste("MostRelevantSources-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRSplot, dpi = as.numeric(input$MRSdpi), height = input$MRSh, width = input$MRSh*2, bg="white")
+      ggsave(filename = file, plot = values$MRSplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1424,7 +1425,7 @@ server <- function(input, output,session){
       paste("MostLocalCitedSources-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCSplot, dpi = as.numeric(input$MLCSdpi), height = input$MLCSh, width = input$MLCSh*2, bg="white")
+      ggsave(filename = file, plot = values$MLCSplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1487,7 +1488,7 @@ server <- function(input, output,session){
       paste("BradfordLaws-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$bradford$graph, dpi = as.numeric(input$BLdpi), height = input$BLh, width = input$BLh*2, bg="white")
+      ggsave(filename = file, plot = values$bradford$graph, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1545,7 +1546,7 @@ server <- function(input, output,session){
       paste("SourceImpact-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$SIplot, dpi = as.numeric(input$SIdpi), height = input$SIh, width = input$SIh*2, bg="white")
+      ggsave(filename = file, plot = values$SIplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1660,7 +1661,7 @@ server <- function(input, output,session){
       paste("SourceDynamics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$SDplot, dpi = as.numeric(input$SDdpi), height = input$SDh, width = input$SDh*2, bg="white")
+      ggsave(filename = file, plot = values$SDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1780,7 +1781,7 @@ server <- function(input, output,session){
       paste("MostRelevantAuthors-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRAplot, dpi = as.numeric(input$MRAdpi), height = input$MRAh, width = input$MRAh*2, bg="white")
+      ggsave(filename = file, plot = values$MRAplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1860,7 +1861,7 @@ server <- function(input, output,session){
       paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCAplot, dpi = as.numeric(input$MLCAdpi), height = input$MLCAh, width = input$MLCAh*2, bg="white")
+      ggsave(filename = file, plot = values$MLCAplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1925,7 +1926,7 @@ server <- function(input, output,session){
       paste("AuthorImpact-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AIplot, dpi = as.numeric(input$AIdpi), height = input$AIh, width = input$AIh*2, bg="white")
+      ggsave(filename = file, plot = values$AIplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -1984,7 +1985,7 @@ server <- function(input, output,session){
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AUProdOverTime$graph, dpi = as.numeric(input$APOTdpi), height = input$APOTh, width = input$APOTh*2.5, bg="white")
+      ggsave(filename = file, plot = values$AUProdOverTime$graph, dpi = values$dpi, height = values$h, width = values$h*2.5, bg="white")
     },
     contentType = "png"
   )
@@ -2103,7 +2104,7 @@ server <- function(input, output,session){
       paste("LotkaLaw-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$LLplot, dpi = as.numeric(input$LLdpi), height = input$LLh, width = input$LLh*2, bg="white")
+      ggsave(filename = file, plot = values$LLplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2177,7 +2178,7 @@ server <- function(input, output,session){
       paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AFFplot, dpi = as.numeric(input$AFFdpi), height = input$AFFh, width = input$AFFh*2, bg="white")
+      ggsave(filename = file, plot = values$AFFplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2241,7 +2242,7 @@ server <- function(input, output,session){
       paste("AffiliationOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AffOverTimePlot, dpi = as.numeric(input$AFFGrowthdpi), height = input$SDh, width = input$AFFGrowthh*2, bg="white")
+      ggsave(filename = file, plot = values$AffOverTimePlot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2367,7 +2368,7 @@ server <- function(input, output,session){
       paste("MostRelevantCountries-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRCOplot, dpi = as.numeric(input$MRCOdpi), height = input$MRCOh, width = input$MRCOh*2, bg="white")
+      ggsave(filename = file, plot = values$MRCOplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2430,7 +2431,7 @@ server <- function(input, output,session){
       paste("CountryScientificProduction-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$mapworld$g, dpi = as.numeric(input$CSPdpi), height = input$CSPh, width = input$CSPh*2, bg="white")
+      ggsave(filename = file, plot = values$mapworld$g, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2486,7 +2487,7 @@ server <- function(input, output,session){
       paste("CountryOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CountryOverTimePlot, dpi = as.numeric(input$COGrowthdpi), height = input$COGrowthh, width = input$COGrowthh*2, bg="white")
+      ggsave(filename = file, plot = values$CountryOverTimePlot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2597,7 +2598,7 @@ server <- function(input, output,session){
       paste("MostCitedCountries-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MCCplot, dpi = as.numeric(input$MCCdpi), height = input$MCCh, width = input$MCCh*2, bg="white")
+      ggsave(filename = file, plot = values$MCCplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2680,7 +2681,7 @@ server <- function(input, output,session){
       paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MGCDplot, dpi = as.numeric(input$MGCDdpi), height = input$MGCDh, width = input$MGCDh*2, bg="white")
+      ggsave(filename = file, plot = values$MGCDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2768,7 +2769,7 @@ server <- function(input, output,session){
       paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCDplot, dpi = as.numeric(input$MLCDdpi), height = input$MLCDh, width = input$MLCDh*2, bg="white")
+      ggsave(filename = file, plot = values$MLCDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2847,7 +2848,7 @@ server <- function(input, output,session){
       paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCRplot, dpi = as.numeric(input$MLCRdpi), height = input$MLCRh, width = input$MLCRh*2, bg="white")
+      ggsave(filename = file, plot = values$MLCRplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -2919,7 +2920,7 @@ server <- function(input, output,session){
       paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$res$spectroscopy, dpi = as.numeric(input$RSdpi), height = input$RSh, width = input$RSh*2, bg="white")
+      ggsave(filename = file, plot = values$res$spectroscopy, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -3067,7 +3068,7 @@ server <- function(input, output,session){
       paste("MostRelevantWords-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRWplot, dpi = as.numeric(input$MRWdpi), height = input$MRWh, width = input$MRWh*2, bg="white")
+      ggsave(filename = file, plot = values$MRWplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -3417,7 +3418,7 @@ server <- function(input, output,session){
       paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$WDplot, dpi = as.numeric(input$WDdpi), height = input$WDh, width = input$WDh*2, bg="white")
+      ggsave(filename = file, plot = values$WDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -3546,7 +3547,7 @@ server <- function(input, output,session){
       paste("TrendTopics-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$trendTopics$graph, dpi = as.numeric(input$TTdpi), height = input$TTh, width = input$TTh*2, bg="white")
+      ggsave(filename = file, plot = values$trendTopics$graph, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -3631,7 +3632,7 @@ server <- function(input, output,session){
       paste("CouplingMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CM$map, dpi = as.numeric(input$CMdpi), height = input$CMh, width = input$CMh*2, bg="white")
+      ggsave(filename = file, plot = values$CM$map, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -3822,7 +3823,7 @@ server <- function(input, output,session){
       paste("FactorialMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_terms, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*1.5, bg="white")
+      ggsave(filename = file, plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
     },
     contentType = "png"
   )
@@ -3832,7 +3833,7 @@ server <- function(input, output,session){
       paste("Dendrogram-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_dendogram, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*2, bg="white")
+      ggsave(filename = file, plot = values$CS$graph_dendogram,dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -3842,7 +3843,7 @@ server <- function(input, output,session){
       paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*1.5, bg="white")
+      ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
     },
     contentType = "png"
   )
@@ -3852,7 +3853,7 @@ server <- function(input, output,session){
       paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = as.numeric(input$FAdpi), height = input$FAh, width = input$FAh*1.5, bg="white")
+      ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
     },
     contentType = "png"
   )
@@ -4079,7 +4080,7 @@ server <- function(input, output,session){
       paste("ThematicMap-", Sys.Date(), ".png", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$TM$map, dpi = as.numeric(input$TMdpi),  height = input$TMh, width = input$TMh*1.5, bg="white")
+      ggsave(filename = file, plot = values$TM$map, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
     },
     contentType = "png"
   )
@@ -4273,7 +4274,7 @@ server <- function(input, output,session){
       
       for (i in 1:length(values$nexus$TM)){
         fileName <- paste("ThematicEvolution-Map_",i,"_",Sys.Date(), ".png", sep="")
-        ggsave(filename = fileName, plot = values$nexus$TM[[i]]$map, dpi = as.numeric(input$TEdpi),  height = input$TEh, width = input$TEh*1.5, bg="white")
+        ggsave(filename = fileName, plot = values$nexus$TM[[i]]$map, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
         files <- c(fileName,files)
       }
       zip(file,files)
@@ -5103,7 +5104,7 @@ server <- function(input, output,session){
     },
     content <- function(file) {
       g <- values$WMmap$g + labs(title = "Country Collaboration Map")
-      ggsave(filename = file, plot = g, dpi = as.numeric(input$CCdpi),  height = input$CCh, width = input$CCh*2, bg="white")
+      ggsave(filename = file, plot = g, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
     },
     contentType = "png"
   )
@@ -5446,998 +5447,49 @@ server <- function(input, output,session){
                    ## Relevant Sources ----
                    
                    ## Most Local Cited Sources ----
-                   conditionalPanel(condition ='input.sidebarmenu == "localCitedSources"',
-                                    h4(strong("Parameters: ")),
-                                    "  ",
-                                    numericInput("MostRelCitSourcesK", 
-                                                 label=("Number of Sources"), 
-                                                 value = 10),
-                                    br(),
-                                    selectInput(
-                                      'MLCSdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MLCSdpi != 'null'",
-                                                     sliderInput(
-                                                       'MLCSh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MLCSplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   
                    ## Bradford Law ----
-                   conditionalPanel(condition ='input.sidebarmenu == "bradford"',
-                                    br(),
-                                    selectInput(
-                                      'BLdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.BLdpi != 'null'",
-                                                     sliderInput(
-                                                       'BLh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("BLplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )),
+                   
                    ## Source Impact ----
-                   conditionalPanel(condition ='input.sidebarmenu == "sourceImpact"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput("HmeasureSources", 
-                                                    label = "Impact measure",
-                                                    choices = c("H-Index"="h", 
-                                                                "G-Index"="g",
-                                                                "M-Index"="m",
-                                                                "Total Citation"="tc"),
-                                                    selected = "h"),
-                                        "  ",
-                                        numericInput("Hksource", 
-                                                     label=("Number of sources"), 
-                                                     value = 10)),
-                                    br(),
-                                    selectInput(
-                                      'SIdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.SIdpi != 'null'",
-                                                     sliderInput(
-                                                       'SIh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("SIplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   
                    ## Source Dynamics ----
-                   conditionalPanel(condition ='input.sidebarmenu == "sourceDynamics"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput("cumSO", "Occurrences",
-                                                    choices = c("Cumulate" = "Cum",
-                                                                "Per year" = "noCum"),
-                                                    selected = "Cum"),
-                                        hr(),
-                                        sliderInput("topSO", label = "Number of Sources", min = 1, max = 50, step = 1, value = c(1,5))),
-                                    br(),
-                                    selectInput(
-                                      'SDdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.SDdpi != 'null'",
-                                                     sliderInput(
-                                                       'SDh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("SDplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )),
+                   
                    ## Most relevant Authors ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostRelAuthors"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        numericInput("MostRelAuthorsK", 
-                                                     label=("Number of Authors"), 
-                                                     value = 10),
-                                        "  ",
-                                        selectInput("AuFreqMeasure", 
-                                                    label = "Frequency measure",
-                                                    choices = c("N. of Documents "="t", 
-                                                                "Percentage"="p",
-                                                                "Fractionalized Frequency"="f"),
-                                                    selected = "t")),
-                                    br(),
-                                    selectInput(
-                                      'MRAdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MRAdpi != 'null'",
-                                                     sliderInput(
-                                                       'MRAh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MRAplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   
                    ## Most Local Cited Authors ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitedAuthors"',
-                                    h4(strong("Parameters: ")),
-                                    "  ",
-                                    numericInput("MostCitAuthorsK", 
-                                                 label=("Number of Authors"), 
-                                                 value = 10),
-                                    br(),
-                                    selectInput(
-                                      'MLCAdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MLCAdpi != 'null'",
-                                                     sliderInput(
-                                                       'MLCAh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MLCAplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")   
-                                    )
-                   ),
+                   
                    ## Authors production over time ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "authorsProdOverTime"',
-                                    h4(strong("Parameters: ")),
-                                    "  ",
-                                    numericInput("TopAuthorsProdK", 
-                                                 label=("Number of Authors"), 
-                                                 value = 10),
-                                    br(),
-                                    selectInput(
-                                      'APOTdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.APOTdpi != 'null'",
-                                                     sliderInput(
-                                                       'APOTh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("APOTplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")   
-                                    )
-                   ),
+                   
                    ## Lotka law ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "lotka"',
-                                    br(),
-                                    selectInput(
-                                      'LLdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.LLdpi != 'null'",
-                                                     sliderInput(
-                                                       'LLh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("LLplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")   
-                                    )
-                   ),
+                   
                    ## Author Impact ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "authorImpact"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput("HmeasureAuthors", 
-                                                    label = "Impact measure",
-                                                    choices = c("H-Index"="h", 
-                                                                "G-Index"="g",
-                                                                "M-Index"="m",
-                                                                "Total Citation"="tc"),
-                                                    selected = "h"),
-                                        "  ",
-                                        numericInput("Hkauthor", 
-                                                     label=("Number of authors"), 
-                                                     value = 10)),
-                                    br(),
-                                    selectInput(
-                                      'AIdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.AIdpi != 'null'",
-                                                     sliderInput(
-                                                       'AIh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("AIplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")   
-                                    )
-                   ),
+                   
                    ## Most Relevant Affiliations ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostRelAffiliations"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput("disAff", 
-                                                    label = "Affiliation Name Disambiguation",
-                                                    choices = c("Yes"="Y", 
-                                                                "No"="N"),
-                                                    selected = "Y"),
-                                        "  ",
-                                        numericInput("MostRelAffiliationsK", 
-                                                     label=("Number of Affiliations"), 
-                                                     value = 10)),
-                                    br(),
-                                    selectInput(
-                                      'AFFdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.AFFdpi != 'null'",
-                                                     sliderInput(
-                                                       'AFFh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("AFFplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## Affiliations' Production over Time ----
-                   conditionalPanel(condition ='input.sidebarmenu == "AffOverTime"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        sliderInput("topAFF", label = "Number of Affiliations", min = 1, max = 50, step = 1, value = 5)),
-                                    br(),
-                                    selectInput(
-                                      'AFFGrowthdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.AFFGrowthdpi != 'null'",
-                                                     sliderInput(
-                                                       'AFFGrowthh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("AffOverTimeplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )),
                    
                    ## Corresponding Author country ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "correspAuthorCountry"',
-                                    h4(strong("Parameters: ")),
-                                    numericInput("MostRelCountriesK", 
-                                                 label=("Number of Countries"), 
-                                                 value = 20),
-                                    br(),
-                                    selectInput(
-                                      'MRCOdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MRCOdpi != 'null'",
-                                                     sliderInput(
-                                                       'MRCOh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MRCOplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## Country Scientific Production ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "countryScientProd"',
-                                    br(),
-                                    selectInput(
-                                      'CSPdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.CSPdpi != 'null'",
-                                                     sliderInput(
-                                                       'CSPh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("CSPplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## Countries' Production over Time ----
-                   conditionalPanel(condition ='input.sidebarmenu == "COOverTime"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        sliderInput("topCO", label = "Number of Countries", min = 1, max = 50, step = 1, value = 5)),
-                                    br(),
-                                    selectInput(
-                                      'COGrowthdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.COGrowthdpi != 'null'",
-                                                     sliderInput(
-                                                       'COGrowthh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("CountryOverTimeplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   
                    ## Most Cited Countries ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostCitedCountries"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput("CitCountriesMeasure", 
-                                                    label = "Measure",
-                                                    choices = c("Total Citations"="TC", 
-                                                                "Average Citations per Year"="TCY"),
-                                                    selected = "TC"),
-                                        "  ",
-                                        numericInput("MostCitCountriesK", 
-                                                     label=("Number of Countries"), 
-                                                     value = 10)),
-                                    br(),
-                                    selectInput(
-                                      'MCCdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MCCdpi != 'null'",
-                                                     sliderInput(
-                                                       'MCCh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MCCplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## Most Global Cited Documents ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostGlobalCitDoc"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        numericInput("MostCitDocsK", 
-                                                     label=("Number of Documents"), 
-                                                     value = 10),
-                                        "  ",
-                                        selectInput("CitDocsMeasure", 
-                                                    label = "Measure",
-                                                    choices = c("Total Citations"="TC", 
-                                                                "Total Citations per Year"="TCY"),
-                                                    selected = "TC")),
-                                    br(),
-                                    selectInput(
-                                      'MGCDdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MGCDdpi != 'null'",
-                                                     sliderInput(
-                                                       'MGCDh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MGCDplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## Most Local Cited Documents ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitDoc"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        numericInput("MostLocCitDocsK", 
-                                                     label=("Number of Documents"), 
-                                                     value = 10),
-                                        "  ",
-                                        selectInput(inputId = "LocCitSep", 
-                                                    label = "Field separator character", 
-                                                    choices = c(";" = ";", 
-                                                                ".  " = ".  ",
-                                                                "," = ","),
-                                                    selected = ";")),
-                                    br(),
-                                    selectInput(
-                                      'MLCDdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MLCDdpi != 'null'",
-                                                     sliderInput(
-                                                       'MLCDh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MLCDplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## Most Local Cited References ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostLocalCitRef"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        numericInput("MostCitRefsK", 
-                                                     label=("Number of Documents"), 
-                                                     value = 10),
-                                        "  ",
-                                        selectInput(inputId = "CitRefsSep", 
-                                                    label = "Field separator character", 
-                                                    choices = c(";" = ";", 
-                                                                ".  " = ".  ",
-                                                                "," = ","),
-                                                    selected = ";")),
-                                    br(),
-                                    selectInput(
-                                      'MLCRdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MLCRdpi != 'null'",
-                                                     sliderInput(
-                                                       'MLCRh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MLCRplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   ),
+                   
                    ## References spectroscopy
-                   conditionalPanel(condition = 'input.sidebarmenu == "ReferenceSpect"',
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput(inputId = "rpysSep", 
-                                                    label = "Field separator character", 
-                                                    choices = c(";" = ";", 
-                                                                ".  " = ".  ",
-                                                                "," = ","),
-                                                    selected = ";"),
-                                        h4(em(strong("Time slice"))),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "rpysMinYear",
-                                                                     label = "Starting Year",
-                                                                     value = NA,
-                                                                     step = 1)),
-                                                 column(6,
-                                                        numericInput(inputId = "rpysMaxYear",
-                                                                     label = "End Year",
-                                                                     value = NA,
-                                                                     step = 1)
-                                                 ))),
-                                    br(),
-                                    selectInput(
-                                      'RSdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.RSdpi != 'null'",
-                                                     sliderInput(
-                                                       'RSh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("RSplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                                     
-                                    )
-                   ),
+                   
                    ## Most Frequent Words ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "mostFreqWords"',
-                                    selectInput("MostRelWords", "Field",
-                                                choices = c("Keywords Plus" = "ID",
-                                                            "Author's keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts" = "AB",
-                                                            "Subject Categories (WoS)" = "WC"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.MostRelWords == 'AB' |input.MostRelWords == 'TI'",
-                                                     selectInput("MRWngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    numericInput("MostRelWordsN", label = "Number of words", min = 2, max = 100, step = 1, value = 10),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("MostRelWordsStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.MostRelWordsStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("MostRelWordsStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("MostRelWordsSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("MostRelWordsStopPreview"))
-                                        ),
-                                        selectInput("MRWSynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.MRWSynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("MRWSyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("MRWSynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("MRWSynPreview"))
-                                        )),
-                                    br(),
-                                    selectInput(
-                                      'MRWdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.MRWdpi != 'null'",
-                                                     sliderInput(
-                                                       'MRWh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("MRWplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%"))
-                   ),
+                   
                    ## Wordcloud ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "wcloud"',
-                                    h4(em(strong(" "))),
-                                    " ",
-                                    selectInput("summaryTerms", "Field",
-                                                choices = c("Keywords Plus" = "ID",
-                                                            "Author's keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts" = "AB",
-                                                            "Subject Categories (WoS)" = "WC"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.summaryTerms == 'AB' |input.summaryTerms == 'TI'",
-                                                     selectInput("summaryTermsngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    numericInput("n_words", label = "Number of words", min = 10, max = 500, step = 1, value = 50),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("WCStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.WCStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("WCStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         selectInput("WCSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ",")
-                                        ),
-                                        selectInput("WCSynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.WCSynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("WCSyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("WCSynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ",")
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        selectInput("measure", "Word occurrence by",
-                                                                    choices = c("Frequency" = "freq",
-                                                                                "Square root" = "sqrt",
-                                                                                "Log" = "log",
-                                                                                "Log10" = "log10"),
-                                                                    selected = "freq")
-                                        ),
-                                        column(6,
-                                               selectInput("wcShape", "Shape",
-                                                           choices = c("Circle" = "circle",
-                                                                       "Cardiod" = "cardioid",
-                                                                       "Diamond" = "diamond",
-                                                                       "Pentagon" = "pentagon",
-                                                                       "Star" = "star",
-                                                                       "Triangle-forward" = "triangle-forward"
-                                                                       ,"Triangle" = "triangle"),
-                                                           selected = "circle")
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput("font", label = "Font type",
-                                                                    choices = c("Impact", "Comic Sans MS (No plz!)" = "Comic Sans MS",
-                                                                                "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
-                                                                                "Georgia", "Times New Roman", "Andale Mono"))
-                                        ),
-                                        column(6,
-                                               selectInput("wcCol", "Text colors",
-                                                           choices = c("Random Dark" = "random-dark",
-                                                                       "Random Light" = "random-light"),
-                                                           selected = "random-dark")
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput("scale", label = "Font size", min=0.1,max=5,step=0.1,value=0.5)
-                                        ),
-                                        column(6,
-                                               numericInput("ellipticity", label = "Ellipticity", min=0,max=1,step=0.05,value=0.65)
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1)
-                                        ),
-                                        column(6,
-                                               numericInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
-                                        ))
-                                    )
-                   ),
+                   
                    ## Tree Map ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "treemap"',
-                                    selectInput("treeTerms", "Field",
-                                                choices = c("Keywords Plus" = "ID",
-                                                            "Author's keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts" = "AB",
-                                                            "Subject Categories (WoS)" = "WC"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.treeTerms == 'AB' |input.treeTerms == 'TI'",
-                                                     selectInput("treeTermsngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    numericInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("TreeMapStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.TreeMapStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("TreeMapStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("TreeMapSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("TreeMapStopPreview"))
-                                        ),
-                                        selectInput("TreeMapSynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.TreeMapSynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("TreeMapSyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("TreeMapSynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("TreeMapSynPreview"))
-                                        )
-                                    )
-                   ),
+                   
                    ## Word dynamics ----
                    conditionalPanel(condition = 'input.sidebarmenu == "wordDynamics"',
                                     selectInput("growthTerms", "Field",
@@ -7890,10 +6942,33 @@ server <- function(input, output,session){
     )
   })
   
+  ### screenshot buttons
   observeEvent(input$screenTFP,{
     screenshot(
       filename = paste("ThreeFieldPlot-", Sys.Date(), ".png", sep=""),
       id = "ThreeFieldsPlot",
+      scale = 1,
+      timer = 0,
+      download = TRUE,
+      server_dir = NULL
+    )
+  })
+  
+  observeEvent(input$screenWC,{
+    screenshot(
+      filename = paste("WordCloud-", Sys.Date(), ".png", sep=""),
+      id = "wordcloud",
+      scale = 1,
+      timer = 0,
+      download = TRUE,
+      server_dir = NULL
+    )
+  })
+  
+  observeEvent(input$screenTREEMAP,{
+    screenshot(
+      filename = paste("TreeMap-", Sys.Date(), ".png", sep=""),
+      id = "treemap",
       scale = 1,
       timer = 0,
       download = TRUE,

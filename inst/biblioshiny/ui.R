@@ -479,7 +479,7 @@ body <- dashboardBody(
                 
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostRelSourcesK", 
                                           label=("Number of Sources"), 
@@ -538,7 +538,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostRelCitSourcesK", 
                                           label=("Number of Sources"), 
@@ -629,7 +629,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("HmeasureSources", 
                                          label = "Impact measure",
@@ -695,7 +695,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("cumSO", "Occurrences",
                                          choices = c("Cumulate" = "Cum",
@@ -757,7 +757,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostRelAuthorsK", 
                                           label=("Number of Authors"), 
@@ -821,7 +821,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostCitAuthorsK", 
                                           label=("Number of Authors"), 
@@ -877,7 +877,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("TopAuthorsProdK", 
                                           label=("Number of Authors"), 
@@ -971,7 +971,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("HmeasureAuthors", 
                                          label = "Impact measure",
@@ -1035,7 +1035,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("disAff", 
                                          label = "Affiliation Name Disambiguation",
@@ -1097,7 +1097,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("topAFF", label = "Number of Affiliations", 
                                           min = 1, max = 50, step = 1, value = 5),
@@ -1153,7 +1153,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostRelCountriesK", 
                                           label=("Number of Countries"), 
@@ -1242,7 +1242,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              sliderInput("topCO", label = "Number of Countries", 
                                          min = 1, max = 50, step = 1, value = 5),
@@ -1298,7 +1298,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("CitCountriesMeasure", 
                                          label = "Measure",
@@ -1361,7 +1361,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostCitDocsK", 
                                           label=("Number of Documents"), 
@@ -1423,7 +1423,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostLocCitDocsK", 
                                           label=("Number of Documents"), 
@@ -1486,7 +1486,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              numericInput("MostCitRefsK", 
                                          label=("Number of Documents"), 
@@ -1550,7 +1550,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput(inputId = "rpysSep", 
                                          label = "Field separator character", 
@@ -1625,7 +1625,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("MostRelWords", "Field",
                                          choices = c("Keywords Plus" = "ID",
@@ -1743,7 +1743,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("summaryTerms", "Field",
                                          choices = c("Keywords Plus" = "ID",
@@ -1906,7 +1906,7 @@ body <- dashboardBody(
                     )),
                 div(column(1,
                            dropdown(
-                             h4(strong("Parameters: ")),
+                             h4(strong("Options: ")),
                              br(),
                              selectInput("treeTerms", "Field",
                                          choices = c("Keywords Plus" = "ID",
@@ -2001,14 +2001,111 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Words' Frequency over Time"), align = "center")),
-                column(2,
-                       actionButton("applyWD", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportWD", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyWD")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportWD")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "WDplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("growthTerms", "Field",
+                                         choices = c("Keywords Plus" = "ID",
+                                                     "Author's keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
+                                              selectInput("growthTermsngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("WDStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.WDStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("WDStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("WDSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("WDStopPreview"))
+                                 ),
+                                 selectInput("WDSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.WDSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("WDSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("WDSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("WDSynPreview"))
+                                 )),
+                             br(),
+                             box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("cumTerms", "Occurrences",
+                                             choices = c("Cumulate" = "Cum",
+                                                         "Per year" = "noCum"),
+                                             selected = "Cum"),
+                                 sliderInput("topkw", label = "Number of words", 
+                                             min = 1, max = 100, step = 1, value = c(1,10))),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2029,14 +2126,118 @@ body <- dashboardBody(
               fluidRow(
                 column(8,
                        h2(strong("Trend Topics"), align = "center")),
-                column(2,
-                       actionButton("applyTrendTopics", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportTT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyTrendTopics")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportTT")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "TTplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("trendTerms", "Field",
+                                         choices = c("Keywords Plus" = "ID",
+                                                     "Author's keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
+                                              selectInput("trendTermsngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             conditionalPanel(
+                               condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
+                               selectInput("trendStemming", label="Word Stemming",
+                                           choices = c("Yes" = TRUE,
+                                                       "No" = FALSE),
+                                           selected = FALSE)),
+                             uiOutput("trendSliderPY"),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("TTStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TTStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("TTStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TTSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TTStopPreview"))
+                                 ),
+                                 selectInput("TTSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TTSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("TTSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TTSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TTSynPreview"))
+                                 )),
+                             br(),
+                             box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
+                                 ),
+                                 column(6,
+                                        numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 3)
+                                 ))),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(

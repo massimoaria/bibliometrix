@@ -466,7 +466,8 @@ server <- function(input, output,session){
     MData = MData[nome]
     DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
                   options = list(
-                    pageLength = 5,
+                    pageLength = 3,
+                    autoWidth = FALSE, scrollX = TRUE, 
                     dom = 'Bfrtip',
                     buttons = list(list(extend = 'pageLength'),
                                    list(extend = 'print')),
@@ -829,7 +830,8 @@ server <- function(input, output,session){
     MData = MData[nome]
     DT::datatable(MData,escape = FALSE,rownames = FALSE, extensions = c("Buttons"),
                   options = list(
-                    pageLength = 5,
+                    pageLength = 3,
+                    autoWidth = FALSE, scrollX = TRUE, 
                     dom = 'Bfrtip',
                     buttons = list(list(extend = 'pageLength'),
                                    list(extend = 'print')),
@@ -928,7 +930,8 @@ server <- function(input, output,session){
     Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)    
     if (dim(Mdisp)[1]>0){
       DT::datatable(Mdisp, rownames = FALSE, extensions = c("Buttons"),
-                    options = list(pageLength = 10, dom = 'Bfrtip',
+                    options = list(pageLength = 3, dom = 'Bfrtip',
+                                   autoWidth = FALSE, scrollX = TRUE, 
                                    buttons = list('pageLength',
                                                   list(extend = 'copy'),
                                                   list(extend = 'csv',
@@ -5263,181 +5266,181 @@ server <- function(input, output,session){
             column(width = 1),
             column(width=11,
                    ### Load Data ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "loadData"',
-                                    h3(strong("Import or Load ")),
-                                    selectInput(
-                                      "load",
-                                      label = "Please, choose what to do",
-                                      choices = c(
-                                        " " = "null",
-                                        "Import raw file(s)" = "import",
-                                        "Load bibliometrix file(s)" = "load",
-                                        "Use a sample collection" = "demo"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(
-                                      condition = "input.load == 'demo'",
-                                      helpText(h4(strong("The use of bibliometric approaches in business and management disciplines.")),
-                                               h5(strong("Dataset 'Management'")),
-                                               em("A collection of scientific articles about the use of bibliometric approaches",
-                                                  "in business and management disciplines."),
-                                               br(),
-                                               em("Period: 1985 - 2020
-                                                    , Source WoS.")
-                                      )
-                                    ),
-                                    conditionalPanel(
-                                      condition = "input.load == 'import'",
-                                      selectInput(
-                                        "dbsource",
-                                        label = "Database",
-                                        choices = c(
-                                          "Web of Science (WoS/WoK)" = "isi",
-                                          "Scopus" = "scopus",
-                                          "Dimensions" = "dimensions",
-                                          "Lens.org" = "lens",
-                                          "PubMed" = "pubmed",
-                                          "Cochrane Library" = "cochrane"
-                                        ),
-                                        selected = "isi"
-                                      )
-                                    ),
-                                    conditionalPanel(
-                                      condition = "input.load != 'null' & input.load != 'demo'",
-                                      conditionalPanel(
-                                        condition = "input.load == 'load'",
-                                        helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix")
-                                        )),
-                                      fileInput(
-                                        "file1",
-                                        "Choose a file",
-                                        multiple = FALSE,
-                                        accept = c(
-                                          ".csv",
-                                          ".txt",
-                                          ".ciw",
-                                          ".bib",
-                                          ".xlsx",
-                                          ".zip",
-                                          ".xls",
-                                          ".rdata",
-                                          ".rda",
-                                          ".rds"
-                                        )
-                                      )
-                                    ),
-                                    conditionalPanel(condition = "input.load != 'null'",
-                                                     actionButton("applyLoad", strong("START"),
-                                                                  style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                                  width = "100%"),
-                                                     width = "100%"),
-                                    tags$hr(),
-                                    uiOutput("textLog"),
-                                    tags$hr(),
-                                    h3(strong(
-                                      "Export collection"
-                                    )),
-                                    selectInput(
-                                      'save_file',
-                                      'Save as:',
-                                      choices = c(
-                                        ' ' = 'null',
-                                        'Excel' = 'xlsx',
-                                        'R Data Format' = 'RData'
-                                      ),
-                                      selected = 'null'
-                                    ),
-                                    conditionalPanel(condition = "input.save_file != 'null'",
-                                                     downloadButton("collection.save", strong("Export"),
-                                                                    style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   # conditionalPanel(condition = 'input.sidebarmenu == "loadData"',
+                   #                  h3(strong("Import or Load ")),
+                   #                  selectInput(
+                   #                    "load",
+                   #                    label = "Please, choose what to do",
+                   #                    choices = c(
+                   #                      " " = "null",
+                   #                      "Import raw file(s)" = "import",
+                   #                      "Load bibliometrix file(s)" = "load",
+                   #                      "Use a sample collection" = "demo"
+                   #                    ),
+                   #                    selected = "null"
+                   #                  ),
+                   #                  conditionalPanel(
+                   #                    condition = "input.load == 'demo'",
+                   #                    helpText(h4(strong("The use of bibliometric approaches in business and management disciplines.")),
+                   #                             h5(strong("Dataset 'Management'")),
+                   #                             em("A collection of scientific articles about the use of bibliometric approaches",
+                   #                                "in business and management disciplines."),
+                   #                             br(),
+                   #                             em("Period: 1985 - 2020
+                   #                                  , Source WoS.")
+                   #                    )
+                   #                  ),
+                   #                  conditionalPanel(
+                   #                    condition = "input.load == 'import'",
+                   #                    selectInput(
+                   #                      "dbsource",
+                   #                      label = "Database",
+                   #                      choices = c(
+                   #                        "Web of Science (WoS/WoK)" = "isi",
+                   #                        "Scopus" = "scopus",
+                   #                        "Dimensions" = "dimensions",
+                   #                        "Lens.org" = "lens",
+                   #                        "PubMed" = "pubmed",
+                   #                        "Cochrane Library" = "cochrane"
+                   #                      ),
+                   #                      selected = "isi"
+                   #                    )
+                   #                  ),
+                   #                  conditionalPanel(
+                   #                    condition = "input.load != 'null' & input.load != 'demo'",
+                   #                    conditionalPanel(
+                   #                      condition = "input.load == 'load'",
+                   #                      helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix")
+                   #                      )),
+                   #                    fileInput(
+                   #                      "file1",
+                   #                      "Choose a file",
+                   #                      multiple = FALSE,
+                   #                      accept = c(
+                   #                        ".csv",
+                   #                        ".txt",
+                   #                        ".ciw",
+                   #                        ".bib",
+                   #                        ".xlsx",
+                   #                        ".zip",
+                   #                        ".xls",
+                   #                        ".rdata",
+                   #                        ".rda",
+                   #                        ".rds"
+                   #                      )
+                   #                    )
+                   #                  ),
+                   #                  conditionalPanel(condition = "input.load != 'null'",
+                   #                                   actionButton("applyLoad", strong("START"),
+                   #                                                style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
+                   #                                                width = "100%"),
+                   #                                   width = "100%"),
+                   #                  tags$hr(),
+                   #                  uiOutput("textLog"),
+                   #                  tags$hr(),
+                   #                  h3(strong(
+                   #                    "Export collection"
+                   #                  )),
+                   #                  selectInput(
+                   #                    'save_file',
+                   #                    'Save as:',
+                   #                    choices = c(
+                   #                      ' ' = 'null',
+                   #                      'Excel' = 'xlsx',
+                   #                      'R Data Format' = 'RData'
+                   #                    ),
+                   #                    selected = 'null'
+                   #                  ),
+                   #                  conditionalPanel(condition = "input.save_file != 'null'",
+                   #                                   downloadButton("collection.save", strong("Export"),
+                   #                                                  style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
+                   #                                                  width = "100%")
+                   #                  )
+                   # ),
                    ## Gathering Data ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "gathData"',
-                                    h3(strong(
-                                      "Gather data using APIs "
-                                    )),
-                                    br(),
-                                    selectInput(
-                                      "dbapi",
-                                      label = "Database",
-                                      choices = c("DS Dimensions" = "ds",
-                                                  "PubMed" = "pubmed"),
-                                      selected = "pubmed"
-                                    ),
-                                    ## Dimenions API 
-                                    conditionalPanel(
-                                      condition = "input.dbapi == 'ds'",
-                                      br(),
-                                      actionButton("dsShow",  h5(strong("1.  Configure API request")),
-                                                   style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                   width = "100%"),
-                                      h5(tags$b("Your Query")),
-                                      verbatimTextOutput("queryLog2", placeholder = FALSE),
-                                      h5(tags$b("Documents returned using your query")),
-                                      verbatimTextOutput("sampleLog2", placeholder = FALSE),
-                                    ),
-                                    ### Pubmed API 
-                                    conditionalPanel(
-                                      condition = "input.dbapi == 'pubmed'",
-                                      br(),
-                                      actionButton("pmShow", h5(strong("1.  Configure API request")),
-                                                   style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                   width = "100%"),
-                                      h5(tags$b("Your Query")),
-                                      verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
-                                      h5(tags$b("Documents returned using your query")),
-                                      verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
-                                    ),
-                                    tags$hr(),
-                                    actionButton("apiApply", h5(strong("2.  Download metadata")),
-                                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                 width = "100%"),
-                                    tags$hr(),
-                                    h3(strong(
-                                      "Export a bibliometrix file "
-                                    )),
-                                    br(),
-                                    selectInput(
-                                      'save_file_api',
-                                      'Save as:',
-                                      choices = c(
-                                        ' ' = 'null',
-                                        'Excel' = 'xlsx',
-                                        'R Data Format' = 'RData'
-                                      ),
-                                      selected = 'null'
-                                    ),
-                                    conditionalPanel(condition = "input.save_file_api != 'null'",
-                                                     downloadButton("collection.save_api", strong("Export"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+                   # conditionalPanel(condition = 'input.sidebarmenu == "gathData"',
+                   #                  h3(strong(
+                   #                    "Gather data using APIs "
+                   #                  )),
+                   #                  br(),
+                   #                  selectInput(
+                   #                    "dbapi",
+                   #                    label = "Database",
+                   #                    choices = c("DS Dimensions" = "ds",
+                   #                                "PubMed" = "pubmed"),
+                   #                    selected = "pubmed"
+                   #                  ),
+                   #                  ## Dimenions API 
+                   #                  conditionalPanel(
+                   #                    condition = "input.dbapi == 'ds'",
+                   #                    br(),
+                   #                    actionButton("dsShow",  h5(strong("1.  Configure API request")),
+                   #                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                   #                                 width = "100%"),
+                   #                    h5(tags$b("Your Query")),
+                   #                    verbatimTextOutput("queryLog2", placeholder = FALSE),
+                   #                    h5(tags$b("Documents returned using your query")),
+                   #                    verbatimTextOutput("sampleLog2", placeholder = FALSE),
+                   #                  ),
+                   #                  ### Pubmed API 
+                   #                  conditionalPanel(
+                   #                    condition = "input.dbapi == 'pubmed'",
+                   #                    br(),
+                   #                    actionButton("pmShow", h5(strong("1.  Configure API request")),
+                   #                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                   #                                 width = "100%"),
+                   #                    h5(tags$b("Your Query")),
+                   #                    verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
+                   #                    h5(tags$b("Documents returned using your query")),
+                   #                    verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
+                   #                  ),
+                   #                  tags$hr(),
+                   #                  actionButton("apiApply", h5(strong("2.  Download metadata")),
+                   #                               style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                   #                               width = "100%"),
+                   #                  tags$hr(),
+                   #                  h3(strong(
+                   #                    "Export a bibliometrix file "
+                   #                  )),
+                   #                  br(),
+                   #                  selectInput(
+                   #                    'save_file_api',
+                   #                    'Save as:',
+                   #                    choices = c(
+                   #                      ' ' = 'null',
+                   #                      'Excel' = 'xlsx',
+                   #                      'R Data Format' = 'RData'
+                   #                    ),
+                   #                    selected = 'null'
+                   #                  ),
+                   #                  conditionalPanel(condition = "input.save_file_api != 'null'",
+                   #                                   downloadButton("collection.save_api", strong("Export"),
+                   #                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+                   #                                                  width = "100%")
+                   #                  )
+                   # ),
                    ## Filters ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "filters"',
-                                    h3(strong("Filters")),
-                                    br(),
-                                    actionButton("applyFilter", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-                                                 width = "100%",
-                                                 icon = fa_i(name ="play")),
-                                    h5(" "),
-                                    box(h6(htmlOutput("textDim")),
-                                        width = "100%"),
-                                    br(),
-                                    uiOutput("selectLA"),
-                                    uiOutput("sliderPY"),
-                                    uiOutput("selectType"),
-                                    uiOutput("sliderTCpY"),
-                                    selectInput("bradfordSources", 
-                                                label = "Source by Bradford Law Zones",
-                                                choices = c("Core Sources"="core", 
-                                                            "Core + Zone 2 Sources"="zone2",
-                                                            "All Sources"="all"),
-                                                selected = "all")
-                   ),
+                   # conditionalPanel(condition = 'input.sidebarmenu == "filters"',
+                   #                  h3(strong("Filters")),
+                   #                  br(),
+                   #                  actionButton("applyFilter", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
+                   #                               width = "100%",
+                   #                               icon = fa_i(name ="play")),
+                   #                  h5(" "),
+                   #                  box(h6(htmlOutput("textDim")),
+                   #                      width = "100%"),
+                   #                  br(),
+                   #                  uiOutput("selectLA"),
+                   #                  uiOutput("sliderPY"),
+                   #                  uiOutput("selectType"),
+                   #                  uiOutput("sliderTCpY"),
+                   #                  selectInput("bradfordSources", 
+                   #                              label = "Source by Bradford Law Zones",
+                   #                              choices = c("Core Sources"="core", 
+                   #                                          "Core + Zone 2 Sources"="zone2",
+                   #                                          "All Sources"="all"),
+                   #                              selected = "all")
+                   # ),
                    ## Annual Scientific Prod ----
                    
                    ## Average Cit Per Year ----

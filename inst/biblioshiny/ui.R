@@ -180,7 +180,7 @@ body <- dashboardBody(
                        div(p("For an introduction and live examples, visit the ",
                              em(a("bibliometrix website.", 
                                   href = "https://www.bibliometrix.org", target="_blank")), 
-                             style="text-align:center; font-size:20px;")),
+                             style="text-align:center; font-size:20px;"))
                 )
               )
             )
@@ -190,22 +190,125 @@ body <- dashboardBody(
     tabItem("loadData",
             fluidPage(
               fluidRow(
-                tags$head(tags$style(
-                  HTML(
-                    "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                div(
+                  tags$head(tags$style(
+                    HTML(
+                      "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
                                   }
                                   "
-                  )
-                )),
-                tags$style(
-                  HTML(
-                    ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                    )
+                  )),
+                  tags$style(
+                    HTML(
+                      ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
                   color: #000000 !important;
                   }"
+                    )
+                  ),
+                  column(9,
+                         shinycssloaders::withSpinner(DT::DTOutput("contents"))),
+                  column(3, 
+                         fluidRow(
+                           box(
+                             width = "100%",
+                             h3(strong("Import or Load ")),
+                             selectInput("load", label = "Please, choose what to do",
+                                         choices = c(
+                                           " " = "null",
+                                           "Import raw file(s)" = "import",
+                                           "Load bibliometrix file(s)" = "load",
+                                           "Use a sample collection" = "demo"
+                                         ),
+                                         selected = "null"
+                             ),
+                             conditionalPanel(
+                               condition = "input.load == 'demo'",
+                               helpText(h4(strong("The use of bibliometric approaches in business and management disciplines.")),
+                                        h5(strong("Dataset 'Management'")),
+                                        em("A collection of scientific articles about the use of bibliometric approaches",
+                                           "in business and management disciplines."),
+                                        br(),
+                                        em("Period: 1985 - 2020
+                                                    , Source WoS."))
+                             ),
+                             conditionalPanel(
+                               condition = "input.load == 'import'",
+                               selectInput(
+                                 "dbsource",
+                                 label = "Database",
+                                 choices = c(
+                                   "Web of Science (WoS/WoK)" = "isi",
+                                   "Scopus" = "scopus",
+                                   "Dimensions" = "dimensions",
+                                   "Lens.org" = "lens",
+                                   "PubMed" = "pubmed",
+                                   "Cochrane Library" = "cochrane"
+                                 ),
+                                 selected = "isi"
+                               )
+                             ),
+                             conditionalPanel(
+                               condition = "input.load != 'null' & input.load != 'demo'",
+                               conditionalPanel(
+                                 condition = "input.load == 'load'",
+                                 helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix")
+                                 )),
+                               fileInput(
+                                 "file1",
+                                 "Choose a file",
+                                 multiple = FALSE,
+                                 accept = c(
+                                   ".csv",
+                                   ".txt",
+                                   ".ciw",
+                                   ".bib",
+                                   ".xlsx",
+                                   ".zip",
+                                   ".xls",
+                                   ".rdata",
+                                   ".rda",
+                                   ".rds"
+                                 )
+                               )
+                             ),
+                             conditionalPanel(condition = "input.load != 'null'",
+                                              fluidRow(column(12,
+                                                              div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                                                                  align = "center",
+                                                                  width="100%",
+                                                                  actionBttn(inputId = "applyLoad", label = strong("Start"),
+                                                                             width = "100%", style = "pill", color = "primary",
+                                                                             icon = icon(name ="play", lib="glyphicon")))))
+                             ),
+                             tags$hr(),
+                             uiOutput("textLog"),
+                             tags$hr(),
+                             h3(strong(
+                               "Export collection"
+                             )),
+                             selectInput(
+                               'save_file',
+                               'Save as:',
+                               choices = c(
+                                 ' ' = 'null',
+                                 'Excel' = 'xlsx',
+                                 'R Data Format' = 'RData'
+                               ),
+                               selected = 'null'
+                             ),
+                             conditionalPanel(condition = "input.save_file != 'null'",
+                                              fluidRow(column(12,
+                                                              div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                                                                  align = "center",
+                                                                  width="100%",
+                                                                  downloadBttn(outputId = "collection.save", label = strong("Export"),
+                                                                               #width = "100%", 
+                                                                               style = "pill", color = "primary"))))
+                             ) 
+                           )
+                         )
                   )
-                ),
-                shinycssloaders::withSpinner(DT::DTOutput("contents")
                 )
               )
             )
@@ -220,24 +323,128 @@ body <- dashboardBody(
                                   background-color: #9c4242 !important;
                                   }
                                   "
-                  )
-                )
-                ),
+                  ))),
                 tags$style(
                   HTML(
                     ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
                   color: #000000 !important;
                   }"
-                  )
-                ),
-                shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
+                  )),
+                column(9,shinycssloaders::withSpinner(DT::DTOutput("apiContents"))),
+                column(3,
+                       box(
+                         width = "100%",
+                         h3(strong(
+                           "Gather data using APIs "
+                         )),
+                         br(),
+                         selectInput(
+                           "dbapi",
+                           label = "Database",
+                           choices = c("DS Dimensions" = "ds",
+                                       "PubMed" = "pubmed"),
+                           selected = "pubmed"
+                         ),
+                         ## Dimenions API 
+                         conditionalPanel(
+                           condition = "input.dbapi == 'ds'",
+                           br(),
+                           fluidRow(column(12,
+                                           div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                               align = "center",
+                                               width="100%",
+                                               actionBttn(inputId = "dsShow", label ="1. Configure API",
+                                                          style = "pill", color = "primary",
+                                                          icon = icon(name ="sliders"))))),
+                                    #h5(tags$b("Your Query")),
+                                    verbatimTextOutput("queryLog2", placeholder = FALSE),
+                                    h5(tags$b("Documents returned using your query")),
+                                    verbatimTextOutput("sampleLog2", placeholder = FALSE)
+                           ),
+                           ### Pubmed API 
+                           conditionalPanel(
+                             condition = "input.dbapi == 'pubmed'",
+                             br(),
+                             fluidRow(column(12,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 actionBttn(inputId = "pmShow", label ="1. Configure API",
+                                                            style = "pill", color = "primary",
+                                                            icon = icon(name ="sliders"))))),
+                             #h5(tags$b("Your Query")),
+                             verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
+                             h5(tags$b("Documents returned using your query")),
+                             verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
+                           ),
+                           tags$hr(),
+                           fluidRow(column(12,
+                                           div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                               align = "center",
+                                               width="100%",
+                                               actionBttn(inputId = "apiApply", label = "2. Download",
+                                                          style = "pill", color = "primary",
+                                                          icon(name ="download"))))),
+                           tags$hr(),
+                           h3(strong("Export a bibliometrix file ")),
+                           br(),
+                           selectInput(
+                             'save_file_api',
+                             'Save as:',
+                             choices = c(
+                               ' ' = 'null',
+                               'Excel' = 'xlsx',
+                               'R Data Format' = 'RData'
+                             ),
+                             selected = 'null'
+                           ),
+                           conditionalPanel(condition = "input.save_file_api != 'null'",
+                                            fluidRow(column(12,
+                                                            div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                                                                align = "center",
+                                                                width="100%",
+                                                                downloadBttn(outputId = "collection.save_api", label = strong("Export"),
+                                                                             style = "pill", color = "primary"))))
+                           )
+                         )
+                       
+                )
               )
             )
     ),
     #### Filters ----
     tabItem("filters",
             fluidRow(
-              DT::DTOutput("dataFiltered"))
+              column(9,DT::DTOutput("dataFiltered")),
+              column(3,
+                     box(
+                       width = "100%",
+                       h3(strong("Filters")),
+                       br(),
+                       fluidRow(column(12,
+                                       div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                                           align = "center",
+                                           width="100%",
+                                           actionBttn(inputId = "applyFilter", label = strong("Apply"),
+                                                      width = "100%", style = "pill", color = "primary",
+                                                      icon = icon(name ="play", lib="glyphicon"))))),
+                       h5(" "),
+                       box(h6(htmlOutput("textDim")),
+                           width = "100%"),
+                       br(),
+                       uiOutput("selectLA"),
+                       uiOutput("sliderPY"),
+                       uiOutput("selectType"),
+                       uiOutput("sliderTCpY"),
+                       selectInput("bradfordSources", 
+                                   label = "Source by Bradford Law Zones",
+                                   choices = c("Core Sources"="core", 
+                                               "Core + Zone 2 Sources"="zone2",
+                                               "All Sources"="all"),
+                                   selected = "all")
+                     )
+              )
+            )
     ),
     #### Overview ----
     ##### main information ----

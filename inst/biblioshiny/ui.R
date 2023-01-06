@@ -645,7 +645,7 @@ body <- dashboardBody(
                            style = "gradient",
                            tooltip = tooltipOptions(title = "Options"),
                            color = "primary",
-                           icon = icon("cog",lib="glyphicon"),
+                           icon = icon("sliders"),
                            width = "300px"
                          ))
                 )
@@ -695,7 +695,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -754,7 +754,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -853,7 +853,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -914,7 +914,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -979,7 +979,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1037,7 +1037,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1093,7 +1093,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1194,7 +1194,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1256,7 +1256,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1312,7 +1312,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1369,7 +1369,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1457,7 +1457,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ),
@@ -1519,7 +1519,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -1582,7 +1582,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -1645,7 +1645,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -1708,7 +1708,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -1781,7 +1781,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -1901,7 +1901,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -2064,7 +2064,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -2183,7 +2183,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -2308,7 +2308,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -2440,7 +2440,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -2563,7 +2563,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -2853,7 +2853,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -3010,7 +3010,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -3186,7 +3186,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -3439,7 +3439,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -3665,7 +3665,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -3968,7 +3968,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 
@@ -4037,7 +4037,7 @@ body <- dashboardBody(
                              style = "gradient",
                              tooltip = tooltipOptions(title = "Options"),
                              color = "primary",
-                             icon = icon("cog",lib="glyphicon"),
+                             icon = icon("sliders"),
                              width = "300px"
                            )
                 ), 

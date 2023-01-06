@@ -5653,6 +5653,26 @@ server <- function(input, output,session){
     )
   })
   
+  observeEvent(input$applyMLCSources, {
+    updateTabItems(session, "sidebarmenu", "localCitedSources")
+  })
+  
+  observeEvent(input$applyCOGrowth, {
+    updateTabItems(session, "sidebarmenu", "COOverTime")
+  })
+  
+  observeEvent(input$applyMCCountries, {
+    updateTabItems(session, "sidebarmenu", "mostCitedCountries")
+  })
+  
+  observeEvent(input$applyCocit, {
+    updateTabItems(session, "sidebarmenu", "coCitationNetwork")
+  })
+  
+  observeEvent(input$applyCol, {
+    updateTabItems(session, "sidebarmenu", "collabNetwork")
+  })
+  
 }
 
 

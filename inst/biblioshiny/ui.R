@@ -43,7 +43,7 @@ export_bttn <- list(
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                               titleWidth = 300,
-                                              controlbarIcon = fa_i(name ="bars"),
+                                              #controlbarIcon = fa_i(name ="bars"),
                                               dropdownMenuOutput("notificationMenu"),
                                               dropdownMenu(
                                                 type = "messages",
@@ -103,8 +103,8 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                   href = github_aria,
                                                   icon = fa_i(name = "github")
                                                 )
-                                              ),
-                                              tags$li(class = "dropdown",
+                                              )
+                                              ,tags$li(class = "dropdown",
                                                       tags$style(".main-header .logo {height: 53px}")
                                               )
 )
@@ -2588,7 +2588,7 @@ body <- dashboardBody(
             )
     ),
     #### Conceptual Structure ----
-    ##### co-occurence network ----
+    ##### co-occurrence network ----
     tabItem("coOccurenceNetwork",
             fluidPage(
               fluidRow(
@@ -4056,7 +4056,6 @@ body <- dashboardBody(
             )
     ),
     #### Report ----
-    ## NEW ----
     tabItem("report",
             fluidPage(
               fluidRow(
@@ -4136,20 +4135,21 @@ body <- dashboardBody(
 )
 
 ## Control Bar ####
-controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
-                                                      uiOutput("controlbar"),
-                                                      skin = "light",
-                                                      width = 350,
-                                                      overlay = FALSE,
-                                                      collapsed = TRUE,
-                                                      shinyjs::useShinyjs()
-)
+# controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
+#                                                       uiOutput("controlbar"),
+#                                                       skin = "light",
+#                                                       width = 350,
+#                                                       overlay = FALSE,
+#                                                       collapsed = TRUE,
+#                                                       shinyjs::useShinyjs()
+# )
 ## UI ####
-ui <- shinydashboardPlus::dashboardPage(shinyjs::useShinyjs(),
+ui <- shinydashboardPlus::dashboardPage(
+                                        #shinyjs::useShinyjs(),
                                         header = header, 
                                         sidebar = sidebar, 
                                         body = body,
-                                        controlbar = controlbar,
+                                        #controlbar = controlbar,
                                         footer = NULL,
                                         options = list(sidebarExpandOnHover = TRUE),
                                         scrollToTop =TRUE

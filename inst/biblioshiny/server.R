@@ -22,9 +22,14 @@ server <- function(input, output,session){
   values$myChoices <- "Empty Report"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
+  
+  ### setting values
   values$dpi <- 300
   values$h <- 7
   values$w <- 14 
+  values$path <- paste(getwd(),"/", sep="")
+  ###
+  
   values$results <- list("NA")
   values$log <- "working..."
   values$load="FALSE"
@@ -3742,12 +3747,6 @@ server <- function(input, output,session){
     contentType = "html"
   )
   
-  ### save coc network as png ###
-  observeEvent(input$cocPlot.save, {
-    file <- paste("Co_occurrence_Network-", Sys.Date(), ".png", sep="")
-    screenshot(selector="#cocPlot", scale=input$cocRes, filename=file)
-  })
-  
   output$cocTable <- DT::renderDT({
     COCnetwork()
     cocData=values$cocnet$cluster_res
@@ -3821,45 +3820,114 @@ server <- function(input, output,session){
     }
   })
   
-  output$FA1plot.save <- downloadHandler(
+  output$FAplot.save <- downloadHandler(
     filename = function() {
-      paste("FactorialMap-", Sys.Date(), ".png", sep="")
+      #
+      paste("FactorialAnalysis_", Sys.Date(), ".zip", sep="")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+      #go to a temp dir to avoid permission issues
+      owd <- setwd(tempdir())
+      on.exit(setwd(owd))
+      files <- c(paste("FactorialMap_", Sys.Date(), ".png", sep=""),
+                 paste("Dendrogram_", Sys.Date(), ".png", sep=""),
+                 paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
+                 paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
+      )
+      ggsave(filename = files[1], plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+      ggsave(filename = files[2], plot = values$CS$graph_dendogram,dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(filename = files[3], plot = values$CS$graph_documents_Contrib, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+      ggsave(filename = files[4], plot = values$CS$graph_documents_TC, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+      
+      zip(file,files)
     },
-    contentType = "png"
+    contentType = "zip"
   )
   
-  output$FA2plot.save <- downloadHandler(
-    filename = function() {
-      paste("Dendrogram-", Sys.Date(), ".png", sep="")
-    },
-    content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_dendogram,dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
-    },
-    contentType = "png"
-  )
+  # saveFAModal <- function(session) {
+  #   ns <- session$ns
+  #   modalDialog(
+  #     h3(strong("Download Plots in PNG")),
+  #     br(),
+  #     h4("Factorial Map"),
+  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+  #         #align = "center",
+  #         width="100%",
+  #         downloadBttn(outputId = "FA1plot.save", label = ("   "),
+  #                      style = "pill", color = "primary")),
+  #     br(),
+  #     h4("Dendrogram"),
+  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+  #         #align = "center",
+  #         width="100%",
+  #         downloadBttn(outputId = "FA2plot.save", label = ("   "),
+  #                      style = "pill", color = "primary")),
+  #     br(),
+  #     h4("Most Contributing Docs"),
+  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+  #         #align = "center",
+  #         width="100%",
+  #         downloadBttn(outputId = "FA3plot.save", label = ("   "),
+  #                      style = "pill", color = "primary")),
+  #     br(),
+  #     h4("Most Cited Docs"),
+  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+  #         #align = "center",
+  #         width="100%",
+  #         downloadBttn(outputId = "FA4plot.save", label = ("   "),
+  #                      style = "pill", color = "primary")),
+  #     size = "s",
+  #     easyClose = TRUE,
+  #     footer = tagList(
+  #       modalButton("Close")),
+  #   )
+  # }
+  # 
+  # observeEvent(input$FAplot.save, {
+  #   if (input$sidebarmenu=="factorialAnalysis"){
+  #     showModal(saveFAModal(session))
+  #   }
+  # })
   
-  output$FA3plot.save <- downloadHandler(
-    filename = function() {
-      paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
-    },
-    content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-    },
-    contentType = "png"
-  )
-  
-  output$FA4plot.save <- downloadHandler(
-    filename = function() {
-      paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
-    },
-    content <- function(file) {
-      ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-    },
-    contentType = "png"
-  )
+  # output$FA1plot.save <- downloadHandler(
+  #   filename = function() {
+  #     paste("FactorialMap-", Sys.Date(), ".png", sep="")
+  #   },
+  #   content <- function(file) {
+  #     ggsave(filename = file, plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+  #   },
+  #   contentType = "png"
+  # )
+  # 
+  # output$FA2plot.save <- downloadHandler(
+  #   filename = function() {
+  #     paste("Dendrogram-", Sys.Date(), ".png", sep="")
+  #   },
+  #   content <- function(file) {
+  #     ggsave(filename = file, plot = values$CS$graph_dendogram,dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+  #   },
+  #   contentType = "png"
+  # )
+  # 
+  # output$FA3plot.save <- downloadHandler(
+  #   filename = function() {
+  #     paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
+  #   },
+  #   content <- function(file) {
+  #     ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+  #   },
+  #   contentType = "png"
+  # )
+  # 
+  # output$FA4plot.save <- downloadHandler(
+  #   filename = function() {
+  #     paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
+  #   },
+  #   content <- function(file) {
+  #     ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+  #   },
+  #   contentType = "png"
+  # )
   
   output$CSPlot1 <- renderPlot({
     CSfactorial()
@@ -4219,8 +4287,12 @@ server <- function(input, output,session){
     ### end of block
     
     values$yearSlices <- as.numeric()
-    for (i in 1:as.integer(input$numSlices)){
-      if (length(input[[paste0("Slice", i)]])>0){values$yearSlices=c(values$yearSlices,input[[paste0("Slice", i)]])}
+    if (is.null(values$nexus)){
+      values$yearSlices <- median(values$M$PY, na.rm=TRUE)
+    }else{
+      for (i in 1:as.integer(input$numSlices)){
+        if (length(input[[paste0("Slice", i)]])>0){values$yearSlices <- c(values$yearSlices,input[[paste0("Slice", i)]])}
+      }
     }
     
     if (length(values$yearSlices)>0){
@@ -4280,6 +4352,14 @@ server <- function(input, output,session){
         ggsave(filename = fileName, plot = values$nexus$TM[[i]]$map, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
         files <- c(fileName,files)
       }
+      screenshot(
+        filename = paste("ThematicEvolution_", Sys.Date(), ".png", sep=""),
+        id = "TEPlot",
+        scale = 1,
+        timer = 0,
+        download = TRUE,
+        server_dir = NULL
+      )
       zip(file,files)
     },
     contentType = "zip"
@@ -4861,11 +4941,6 @@ server <- function(input, output,session){
     contentType = "net"
   )
   
-  observeEvent(input$cocitPlot.save, {
-    file <- paste("Co_citation_Network-", Sys.Date(), ".png", sep="")
-    screenshot(selector="#cocitPlot", scale=input$cocitRes, filename=file)
-  })
-  
   output$cocitTable <- DT::renderDT({
     COCITnetwork()
     cocitData=values$cocitnet$cluster_res
@@ -4933,12 +5008,6 @@ server <- function(input, output,session){
                  value = 0, {
                    values <- historiograph(input,values)
                  })
-  })
-  
-  ### screenshot Button Historiograph
-  observeEvent(input$HGplot.save, {
-    file <- paste("Historiograph-", Sys.Date(), ".png", sep="")
-    screenshot(selector="#histPlotVis", scale=input$HGh, filename=file)
   })
   
   output$histPlotVis <- renderVisNetwork({  
@@ -5029,11 +5098,6 @@ server <- function(input, output,session){
     },
     contentType = "net"
   )
-  
-  observeEvent(input$colPlot.save, {
-    file <- paste("Collaboration_Network-", Sys.Date(), ".png", sep="")
-    screenshot(selector="#colPlot", scale=input$colRes, filename=file)
-  })
   
   output$colTable <- DT::renderDT({
     COLnetwork()
@@ -5498,1243 +5562,23 @@ server <- function(input, output,session){
                    ## Trend Topic ----
 
                    ## Coupling ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "coupling"',
-                                    h4(em(strong(" "))),
-                                    "  ",
-                                    selectInput("CManalysis", 
-                                                label = "Unit of Analysis",
-                                                choices = c("Documents" = "documents", 
-                                                            "Authors" = "authors",
-                                                            "Sources" = "sources"),
-                                                selected = "documents"),
-                                    " ",
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput("CMfield", 
-                                                    label = "Coupling measured by",
-                                                    choices = c("References" ="CR",
-                                                                "Keywords Plus" = "ID", 
-                                                                "Author's Keywords" = "DE",
-                                                                "Titles" = "TI",
-                                                                "Abstracts" = "AB"),
-                                                    selected = "CR"),
-                                        conditionalPanel(condition = "input.CMfield == 'TI' | input.CMfield == 'AB'",
-                                                         selectInput("CMstemming", label="Word Stemming",
-                                                                     choices = c("Yes" = TRUE,
-                                                                                 "No" = FALSE),
-                                                                     selected = FALSE)),
-                                        selectInput("CMimpact", 
-                                                    label = "Impact measure",
-                                                    choices = c("Local Citation Score" = "local", 
-                                                                "Global Citation Score" = "global"),
-                                                    selected = "local"),
-                                        selectInput("CMlabeling", 
-                                                    label = "Cluster labeling by",
-                                                    choices = c("None" = "none", 
-                                                                "Keyword Plus" = "ID",
-                                                                "Authors' keywords" = "DE",
-                                                                "Title terms" = "TI",
-                                                                "Abstract terms" = "AB"),
-                                                    selected = "ID"),
-                                        conditionalPanel(condition = "input.CMlabeling == 'TI' | input.CMlabeling == 'AB'",
-                                                         selectInput("CMngrams",'N-Grams',
-                                                                     choices = c("Unigrams" = "1",
-                                                                                 "Bigrams" = "2",
-                                                                                 "Trigrams" = "3"),
-                                                                     selected = 1)),
-                                        fluidRow(column(6,
-                                                        numericInput("CMn", label="Number of Units\n ",value=250,min=50,max=5000,step=1)),
-                                                 column(6,
-                                                        numericInput("CMfreq", label="Min Cluster Freq. ",value=5,min=1,max=100,step=1))),
-                                        fluidRow(column(6,
-                                                        numericInput("CMn.labels", label="Labels per cluster",value=3,min=1,max=10,step=1)),
-                                                 column(6,
-                                                        numericInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05))),
-                                        fluidRow(column(6,
-                                                        numericInput("CMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
-                                                 column(6,
-                                                        selectInput("CMcluster", 
-                                                                    label = "Clustering Algorithm",
-                                                                    choices = c("None" = "none",
-                                                                                "Edge Betweenness" = "edge_betweenness",
-                                                                                "Fast Greedy" = "fast_greedy",
-                                                                                "InfoMap" = "infomap",
-                                                                                "Leading Eigenvalues" = "leading_eigen",
-                                                                                "Leiden" = "leiden",
-                                                                                "Louvain" = "louvain",
-                                                                                "Spinglass" = "spinglass",
-                                                                                "Walktrap" = "walktrap"),
-                                                                    selected = "walktrap")
-                                                 ))
-                                    ),
-                                    selectInput(
-                                      'CMdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "Dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.CMdpi != 'null'",
-                                                     sliderInput(
-                                                       'CMh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("CMplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+
                    ## Co-Occurence Network ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "coOccurenceNetwork"',
-                                    selectInput("field", 
-                                                "Field",
-                                                choices = c("Keywords Plus" = "ID", 
-                                                            "Author's Keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts" = "AB",
-                                                            "Subject Categories (WoS)" = "WC"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.field == 'TI' | input.field == 'AB'",
-                                                     selectInput("cocngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("COCStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.COCStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("COCStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("COCSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("COCStopPreview"))
-                                        ),
-                                        selectInput("COCSynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.COCSynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("COCSyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("COCSynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("COCSynPreview"))
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        selectInput("layout", 
-                                                                    label = "Network Layout",
-                                                                    choices = c("Automatic layout"="auto", 
-                                                                                "Circle"="circle",
-                                                                                "Fruchterman & Reingold"="fruchterman",
-                                                                                "Kamada & Kawai"="kamada",
-                                                                                "MultiDimensional Scaling"="mds",
-                                                                                "Sphere"="sphere",
-                                                                                "Star"="star"),
-                                                                    selected = "auto")
-                                        ),
-                                        column(6,
-                                               selectInput("cocCluster", 
-                                                           label = "Clustering Algorithm",
-                                                           choices = c("None" = "none",
-                                                                       "Edge Betweenness" = "edge_betweenness",
-                                                                       "Fast Greedy" = "fast_greedy",
-                                                                       "InfoMap" = "infomap",
-                                                                       "Leading Eigenvalues" = "leading_eigen",
-                                                                       "Leiden" = "leiden",
-                                                                       "Louvain" = "louvain",
-                                                                       "Spinglass" = "spinglass",
-                                                                       "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput("normalize", 
-                                                                    label = "Normalization",
-                                                                    choices = c("none", 
-                                                                                "association",
-                                                                                "jaccard", 
-                                                                                "salton",
-                                                                                "inclusion",
-                                                                                "equivalence"),
-                                                                    selected = "association")
-                                        ),
-                                        column(6,
-                                               selectInput("cocyears",
-                                                           label = "Node Color by Year",
-                                                           choices = c("No" = "No",
-                                                                       "Yes"= "Yes"),
-                                                           selected = "No")
-                                        )
-                                        ),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "Nodes",
-                                                                     label = "Number of Nodes",
-                                                                     min = 5,
-                                                                     max = 1000,
-                                                                     value = 50,
-                                                                     step = 1)
-                                        ),
-                                        column(6,
-                                               numericInput(inputId = "coc.repulsion",
-                                                            label = "Repulsion Force",
-                                                            min = 0,
-                                                            max = 1,
-                                                            value = 0.1,
-                                                            step = 0.1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="coc.isolates",
-                                                                    label = "Remove Isolated Nodes",
-                                                                    choices = c("Yes" = "yes",
-                                                                                "No" = "no"),
-                                                                    selected = "yes")
-                                        ),
-                                        column(6,
-                                               numericInput("edges.min", 
-                                                            label=("Minimum Number of Edges"),
-                                                            value = 2,
-                                                            step = 1,
-                                                            min = 0)
-                                        )
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "cocAlpha",
-                                                                     label = "Opacity",
-                                                                     min = 0,
-                                                                     max = 1,
-                                                                     value = 0.7,
-                                                                     step=0.05)
-                                        ),
-                                        column(6,
-                                               numericInput(inputId = "Labels",
-                                                            label = "Number of labels",
-                                                            min = 0,
-                                                            max = 1000,
-                                                            value = 1000,
-                                                            step = 1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="label.cex",
-                                                                    label = "Label cex",
-                                                                    choices = c("Yes", 
-                                                                                "No"),
-                                                                    selected = "Yes")
-                                        ),
-                                        column(6,
-                                               selectInput(inputId ="coc.shape",
-                                                           label = "Node Shape",
-                                                           choices = c(
-                                                             "Box"="box",
-                                                             "Circle"="circle",
-                                                             "Dot"="dot",
-                                                             "Ellipse"="ellipse",
-                                                             "Square"="square",
-                                                             "Text"="text"),
-                                                           selected = "dot")
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "labelsize",
-                                                                     label = "Label size",
-                                                                     min = 0.0,
-                                                                     max = 20,
-                                                                     value = 3,
-                                                                     step = 0.10)
-                                        ),
-                                        column(6,
-                                               numericInput(
-                                                 inputId = "edgesize",
-                                                 label = "Edge size",
-                                                 min = 0.0,
-                                                 max = 20,
-                                                 value = 5,
-                                                 step=0.5)
-                                        )), 
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="coc.shadow",
-                                                                    label = "Node shadow",
-                                                                    choices = c("Yes",
-                                                                                "No"),
-                                                                    selected = "Yes")
-                                        ),
-                                        column(6,
-                                               selectInput(inputId ="coc.curved",
-                                                           label = "Edit Nodes",
-                                                           choices = c("Yes",
-                                                                       "No"),
-                                                           selected = "No")     
-                                               
-                                        )
-                                        )
-                                    ),
-                                    br(),
-                                    fluidRow(column(6,
-                                                    downloadButton("network.coc", strong("Save Pajek"),
-                                                                   style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
-                                                                   width = "100%")
-                                    ),
-                                    column(6,
-                                           downloadButton("networkCoc.fig", strong("Save HTML"),
-                                                          style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
-                                                          width = "100%")
-                                    )
-                                    ),
-                                    br(),
-                                    selectInput("cocRes",
-                                                h4(strong("Export plot")),
-                                                choices = c(
-                                                  "Select the image scale" = 0,
-                                                  "screen resolution x1" = 1,
-                                                  "screen resolution x2" = 2,
-                                                  "screen resolution x3" = 3,
-                                                  "screen resolution x4" = 4,
-                                                  "screen resolution x5" = 5,
-                                                  "screen resolution x6" = 6,
-                                                  "screen resolution x7" = 7,
-                                                  "screen resolution x8" = 8
-                                                ),
-                                                selected = 0),
-                                    conditionalPanel(condition = "input.cocRes != 0",
-                                                     actionButton("cocPlot.save", strong("Export plot as png"),
-                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                  width = "100%")
-                                    )
-                   ),
+
                    ## Thematic Map ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "thematicMap"',
-                                    h4(em(strong("    "))),
-                                    "  ",
-                                    selectInput("TMfield", 
-                                                label = "Field",
-                                                choices = c("Keywords Plus" = "ID", 
-                                                            "Author's Keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts" = "AB"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
-                                                     selectInput("TMngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    conditionalPanel(
-                                      condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
-                                      selectInput("TMstemming", label="Word Stemming",
-                                                  choices = c("Yes" = TRUE,
-                                                              "No" = FALSE),
-                                                  selected = FALSE)),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("TMStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.TMStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("TMStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("TMSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("TMStopPreview"))
-                                        ),
-                                        selectInput("TMapSynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.TMapSynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("TMapSyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("TMapSynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("TMapSynPreview"))
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        numericInput("TMn", label="Number of Words",value=250,min=50,max=5000,step=1)
-                                        ),
-                                        column(6,
-                                               numericInput("TMfreq", label="Min Cluster Frequency (per thousand docs)",value=5,min=1,max=100,step=1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput("TMn.labels", label="Number of Labels",value=3,min=0,max=10,step=1)
-                                        ),
-                                        column(6,
-                                               numericInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput("TMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
-                                                 column(6,
-                                                        selectInput("TMCluster", 
-                                                                    label = "Clustering Algorithm",
-                                                                    choices = c("None" = "none",
-                                                                                "Edge Betweenness" = "edge_betweenness",
-                                                                                "Fast Greedy" = "fast_greedy",
-                                                                                "InfoMap" = "infomap",
-                                                                                "Leading Eigenvalues" = "leading_eigen",
-                                                                                "Leiden" = "leiden",
-                                                                                "Louvain" = "louvain",
-                                                                                "Spinglass" = "spinglass",
-                                                                                "Walktrap" = "walktrap"),
-                                                                    selected = "walktrap")
-                                                 )
-                                        )
-                                    ),
-                                    br(),
-                                    selectInput(
-                                      'TMdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.TMdpi != 'null'",
-                                                     sliderInput(
-                                                       'TMh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("TMplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+
                    ## Thematic Evolution ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "thematicEvolution"',
-                                    h4(em(strong("    "))),
-                                    "  ",
-                                    selectInput("TEfield", 
-                                                label = "Field",
-                                                choices = c("Keywords Plus" = "ID", 
-                                                            "Author's Keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts
-                                                           " = "AB"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.TEfield == 'TI' | input.TEfield == 'AB'",
-                                                     selectInput("TEngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("TEStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.TEStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("TEStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("TESep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("TEStopPreview"))
-                                        ),
-                                        selectInput("TESynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.TESynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("TESyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("TESynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("TESynPreview"))
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        numericInput("nTE", label="Number of Words",value=250,min=50,max=5000,step=1)
-                                        ),
-                                        column(6,
-                                               numericInput("fTE", label="Min Cluster Frequency (per thousand docs)",value=5,min=1,max=100,step=1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput("TEmeasure", 
-                                                                    label = "Weight index",
-                                                                    choices = c("Inclusion Index" = "inclusion", 
-                                                                                "Inclusion Index weighted by Word-Occurrences" = "weighted",
-                                                                                "Stability Index" = "stability"
-                                                                    ),
-                                                                    selected = "weighted")
-                                        ),
-                                        column(6,
-                                               numericInput("minFlowTE", label="Min Weight Index",value=0.1,min=0.02,max=1,step=0.02)
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput("sizeTE", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
-                                        ),
-                                        column(6,
-                                               numericInput("TEn.labels", label="Number of Labels (for each cluster)",value=3,min=1,max=5,step=1)
-                                        )),
-                                        fluidRow(column(12,
-                                                        selectInput("TECluster", 
-                                                                    label = "Clustering Algorithm",
-                                                                    choices = c("None" = "none",
-                                                                                "Edge Betweenness" = "edge_betweenness",
-                                                                                "Fast Greedy" = "fast_greedy",
-                                                                                "InfoMap" = "infomap",
-                                                                                "Leading Eigenvalues" = "leading_eigen",
-                                                                                "Leiden" = "leiden",
-                                                                                "Louvain" = "louvain",
-                                                                                "Spinglass" = "spinglass",
-                                                                                "Walktrap" = "walktrap"),
-                                                                    selected = "walktrap")
-                                        )
-                                        
-                                        )
-                                    ),
-                                    br(),
-                                    box(title = p(strong("Time Slices"),style='font-size:16px;color:black;'), 
-                                        collapsible = FALSE, width = 15,
-                                        solidHeader = FALSE, collapsed = FALSE,
-                                        numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
-                                        "Please, write the cutting points (in year) for your collection",
-                                        uiOutput("sliders")
-                                    ),
-                                    br(),
-                                    selectInput(
-                                      'TEdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.TEdpi != 'null'",
-                                                     sliderInput(
-                                                       'TEh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("TEplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+
                    ## Factorial Analysis ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "factorialAnalysis"',
-                                    selectInput("method", 
-                                                label = "Method",
-                                                choices = c("Correspondence Analysis" = "CA",
-                                                            "Multiple Correspondence Analysis" = "MCA",
-                                                            "Multidimensional Scaling"= "MDS"),
-                                                selected = "MCA"),
-                                    selectInput("CSfield", 
-                                                label = "Field",
-                                                choices = c("Keywords Plus" = "ID", 
-                                                            "Author's Keywords" = "DE",
-                                                            "Titles" = "TI",
-                                                            "Abstracts" = "AB"),
-                                                selected = "ID"),
-                                    conditionalPanel(condition = "input.CSfield == 'TI' | input.CSfield == 'AB'",
-                                                     selectInput("CSngrams",'N-Grams',
-                                                                 choices = c("Unigrams" = "1",
-                                                                             "Bigrams" = "2",
-                                                                             "Trigrams" = "3"),
-                                                                 selected = 1)),
-                                    br(),
-                                    box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        selectInput("CSStopFile", "Load a list of terms to remove",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.CSStopFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                                                         ),
-                                                         fileInput("CSStop", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("CSSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("CSStopPreview"))
-                                        ),
-                                        selectInput("FASynFile", "Load a list of synonyms",
-                                                    choices = c("Yes" = "Y",
-                                                                "No" = "N"),
-                                                    selected = "N"),
-                                        conditionalPanel(condition = "input.FASynFile == 'Y'",
-                                                         helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                                                                  h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
-                              Rows have to be separated by return separator."))
-                                                         ),
-                                                         fileInput("FASyn", "",
-                                                                   multiple = FALSE,
-                                                                   accept = c("text/csv",
-                                                                              "text/comma-separated-values,text/plain",
-                                                                              ".csv",
-                                                                              ".txt")),
-                                                         
-                                                         selectInput("FASynSep", "File Separator",
-                                                                     choices = c('Comma ","' = ",",
-                                                                                 'Semicolon ";"' = ";",
-                                                                                 'Tab '= "\t"),
-                                                                     selected = ","),
-                                                         h5(htmlOutput("FASynPreview"))
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        numericInput("CSn", 
-                                                                     label=("Number of terms"), 
-                                                                     value = 50, step = 1)),
-                                                 column(6,
-                                                        selectInput("nClustersCS", 
-                                                                    label = "N. of Clusters",
-                                                                    choices = c("Auto" = "0", 
-                                                                                "2" = "2",
-                                                                                "3" = "3",
-                                                                                "4" = "4",
-                                                                                "5" = "5",
-                                                                                "6" = "6",
-                                                                                "7" = "7",
-                                                                                "8" = "8"),
-                                                                    selected = "0")))
-                                    ),
-                                    br(),
-                                    box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        numericInput(
-                                                          inputId = "CSlabelsize",
-                                                          label = "Label size",
-                                                          min = 5,
-                                                          max = 30,
-                                                          value = 10)),
-                                                 column(6,
-                                                        numericInput("CSdoc", 
-                                                                     label=("Num. of documents"), 
-                                                                     value = 5)))
-                                    ),
-                                    br(),
-                                    selectInput(
-                                      'FAdpi',
-                                      h4(strong(
-                                        "Export plots as png"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.FAdpi != 'null'",
-                                                     sliderInput(
-                                                       'FAh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("FA1plot.save", strong("Term Factorial Map "),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%"),
-                                                     h4(" "),
-                                                     downloadButton("FA2plot.save", strong("Topic Dendrogram "),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%"),
-                                                     h4(" "),
-                                                     downloadButton("FA3plot.save", strong("Most Contributing Map "),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%"),
-                                                     h4(" "),
-                                                     downloadButton("FA4plot.save", strong("Most Cited Map "),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")
-                                    )
-                   ),
+
                    ## Co-citation Network ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "coCitationNetwork"',
-                                    selectInput("citField", 
-                                                label = "Field",
-                                                choices = c("Papers" = "CR", 
-                                                            "Authors" = "CR_AU",
-                                                            "Sources" = "CR_SO"),
-                                                selected = "CR"),
-                                    selectInput(inputId = "citSep", 
-                                                label = "Field separator character", 
-                                                choices = c('";" (Semicolon)' = ";", 
-                                                            '".   " (Dot and 3 or more spaces)' = ".   ",
-                                                            '"," (Comma)' = ","),
-                                                selected = "';'"),
-                                    br(),
-                                    box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        selectInput("citlayout", 
-                                                                    label = "Network Layout",
-                                                                    choices = c("Automatic layout"="auto", 
-                                                                                "Circle"="circle",
-                                                                                "Fruchterman & Reingold"="fruchterman",
-                                                                                "Kamada & Kawai"="kamada",
-                                                                                "MultiDimensional Scaling"="mds",
-                                                                                "Sphere"="sphere",
-                                                                                "Star"="star"),
-                                                                    selected = "auto")
-                                        ),
-                                        column(6,
-                                               selectInput("cocitCluster", 
-                                                           label = "Clustering Algorithm",
-                                                           choices = c("None" = "none",
-                                                                       "Edge Betweenness" = "edge_betweenness",
-                                                                       "Fast Greedy" = "fast_greedy",
-                                                                       "InfoMap" = "infomap",
-                                                                       "Leading Eigenvalues" = "leading_eigen",
-                                                                       "Leiden" = "leiden",
-                                                                       "Louvain" = "louvain",
-                                                                       "Spinglass" = "spinglass",
-                                                                       "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "citNodes",
-                                                                     label = "Number of Nodes",
-                                                                     min = 5,
-                                                                     max = 1000,
-                                                                     value = 50,
-                                                                     step = 1)
-                                        ),
-                                        column(6,
-                                               numericInput(inputId = "cocit.repulsion",
-                                                            label = "Repulsion Force",
-                                                            min = 0,
-                                                            max = 1,
-                                                            value = 0.1,
-                                                            step = 0.1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="cit.isolates",
-                                                                    label = "Remove Isolated Nodes",
-                                                                    choices = c("Yes" = "yes",
-                                                                                "No" = "no"),
-                                                                    selected = "yes")
-                                        ),
-                                        column(6,
-                                               numericInput("citedges.min", 
-                                                            label=("Minimum Number of Edges"),
-                                                            value = 2,
-                                                            step = 1,
-                                                            min = 0)
-                                        )
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="citShortlabel",
-                                                                    label = "Short Label",
-                                                                    choices = c("Yes", 
-                                                                                "No"),
-                                                                    selected = "Yes"),
-                                                        
-                                        ),
-                                        column(6,
-                                               numericInput(inputId = "citLabels",
-                                                            label = "Number of labels",
-                                                            min = 0,
-                                                            max = 1000,
-                                                            value = 1000,
-                                                            step = 1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="citlabel.cex",
-                                                                    label = "Label cex",
-                                                                    choices = c("Yes", 
-                                                                                "No"),
-                                                                    selected = "Yes")
-                                        ),
-                                        column(6,
-                                               selectInput(inputId ="cocit.shape",
-                                                           label = "Node Shape",
-                                                           choices = c(
-                                                             "Box"="box",
-                                                             "Circle"="circle",
-                                                             "Dot"="dot",
-                                                             "Ellipse"="ellipse",
-                                                             "Square"="square",
-                                                             "Text"="text"),
-                                                           selected = "dot")
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "citlabelsize",
-                                                                     label = "Label size",
-                                                                     min = 0.0,
-                                                                     max = 20,
-                                                                     value = 2,
-                                                                     step = 0.10)
-                                        ),
-                                        column(6,
-                                               numericInput(
-                                                 inputId = "citedgesize",
-                                                 label = "Edge size",
-                                                 min = 0.5,
-                                                 max = 20,
-                                                 value = 2,
-                                                 step=0.5)
-                                        )), 
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="cocit.shadow",
-                                                                    label = "Node shadow",
-                                                                    choices = c("Yes",
-                                                                                "No"),
-                                                                    selected = "Yes")
-                                        ),
-                                        column(6,
-                                               selectInput(inputId ="cocit.curved",
-                                                           label = "Edit Nodes",
-                                                           choices = c("Yes",
-                                                                       "No"),
-                                                           selected = "No")     
-                                               
-                                        )
-                                        )
-                                    ),
-                                    br(),
-                                    fluidRow(column(6,
-                                                    downloadButton("network.cocit", strong("Save Pajek"),
-                                                                   style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
-                                                                   width = "100%")
-                                    ),
-                                    column(6,
-                                           downloadButton("networkCocit.fig", strong("Save HTML"),
-                                                          style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
-                                                          width = "100%")
-                                    )),
-                                    br(),
-                                    selectInput("cocitRes",
-                                                h4(strong("Export plot")),
-                                                choices = c(
-                                                  "Select the image scale" = 0,
-                                                  "screen resolution x1" = 1,
-                                                  "screen resolution x2" = 2,
-                                                  "screen resolution x3" = 3,
-                                                  "screen resolution x4" = 4,
-                                                  "screen resolution x5" = 5,
-                                                  "screen resolution x6" = 6,
-                                                  "screen resolution x7" = 7,
-                                                  "screen resolution x8" = 8
-                                                ),
-                                                selected = 0),
-                                    conditionalPanel(condition = "input.cocitRes != 0",
-                                                     actionButton("cocitPlot.save", strong("Export plot as png"),
-                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                  width = "100%")
-                                    )
-                   ),
-                   ## Historiograph ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "historiograph"',
-                                    numericInput(inputId = "histNodes",
-                                                 label = "Number of Nodes",
-                                                 min = 5,
-                                                 max = 100,
-                                                 value = 20,
-                                                 step = 1),
-                                    "  ",
-                                    br(),
-                                    box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, 
-                                        collapsed = FALSE,
-                                        selectInput(inputId = "titlelabel",
-                                                    label = "Node label",
-                                                    choices = c("Short id (1st Author, Year)" = "short",
-                                                                "Document Title" = "title",
-                                                                "Authors' Keywords" = "keywords",
-                                                                "Keywords Plus" = "keywordsplus"),
-                                                    selected = "short"),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "histlabelsize",
-                                                                     label = "Label size",
-                                                                     min = 0.0,
-                                                                     max = 20,
-                                                                     value = 3, step = 1)),
-                                                 column(6,
-                                                        numericInput(inputId = "histsize",
-                                                                     label = "Node size",
-                                                                     min = 0,
-                                                                     max = 20,
-                                                                     value = 4, step = 1)))
-                                    ),
-                                    br(),
-                                    selectInput("HGh",
-                                                h4(strong("Export plot")),
-                                                choices = c(
-                                                  "Select the image scale" = 0,
-                                                  "screen resolution x1" = 1,
-                                                  "screen resolution x2" = 2,
-                                                  "screen resolution x3" = 3,
-                                                  "screen resolution x4" = 4,
-                                                  "screen resolution x5" = 5,
-                                                  "screen resolution x6" = 6,
-                                                  "screen resolution x7" = 7,
-                                                  "screen resolution x8" = 8
-                                                ),
-                                                selected = 0),
-                                    conditionalPanel(condition = "input.HGh != 0",
-                                                     actionButton("HGplot.save", strong("Export plot as png"),
-                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                  width = "100%")
-                                    )
-                   ),
-                   ## Collaboration Network ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "collabNetwork"',
-                                    selectInput("colField", 
-                                                label = "Field",
-                                                choices = c("Authors" = "COL_AU", 
-                                                            "Institutions" = "COL_UN",
-                                                            "Countries" = "COL_CO"),
-                                                selected = "COL_AU"),
-                                    br(),
-                                    box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        selectInput("collayout", 
-                                                                    label = "Network Layout",
-                                                                    choices = c("Automatic layout"="auto", 
-                                                                                "Circle"="circle",
-                                                                                "Fruchterman & Reingold"="fruchterman",
-                                                                                "Kamada & Kawai"="kamada",
-                                                                                "MultiDimensional Scaling"="mds",
-                                                                                "Sphere"="sphere",
-                                                                                "Star"="star"),
-                                                                    selected = "auto")
-                                        ),
-                                        column(6,
-                                               selectInput("colCluster", 
-                                                           label = "Clustering Algorithm",
-                                                           choices = c("None" = "none",
-                                                                       "Edge Betweenness" = "edge_betweenness",
-                                                                       "Fast Greedy" = "fast_greedy",
-                                                                       "InfoMap" = "infomap",
-                                                                       "Leading Eigenvalues" = "leading_eigen",
-                                                                       "Leiden" = "leiden",
-                                                                       "Louvain" = "louvain",
-                                                                       "Spinglass" = "spinglass",
-                                                                       "Walktrap" = "walktrap"),
-                                                           selected = "walktrap")
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput("colnormalize", 
-                                                                    label = "Normalization",
-                                                                    choices = c("none", 
-                                                                                "association",
-                                                                                "jaccard", 
-                                                                                "salton",
-                                                                                "inclusion",
-                                                                                "equivalence"),
-                                                                    selected = "association")
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "colNodes",
-                                                                     label = "Number of Nodes",
-                                                                     min = 5,
-                                                                     max = 1000,
-                                                                     value = 50,
-                                                                     step = 1)
-                                        ),
-                                        column(6,
-                                               numericInput(inputId = "col.repulsion",
-                                                            label = "Repulsion Force",
-                                                            min = 0,
-                                                            max = 1,
-                                                            value = 0.1,
-                                                            step = 0.1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="col.isolates",
-                                                                    label = "Remove Isolated Nodes",
-                                                                    choices = c("Yes" = "yes",
-                                                                                "No" = "no"),
-                                                                    selected = "yes")
-                                        ),
-                                        column(6,
-                                               numericInput("coledges.min", 
-                                                            label=("Minimum Number of Edges"),
-                                                            value = 1,
-                                                            step = 1,
-                                                            min = 0)
-                                        )
-                                        )),
-                                    br(),
-                                    box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
-                                        collapsible = TRUE, width = 15,
-                                        solidHeader = FALSE, collapsed = TRUE,
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "colAlpha",
-                                                                     label = "Opacity",
-                                                                     min = 0,
-                                                                     max = 1,
-                                                                     value = 0.7,
-                                                                     step=0.05)
-                                        ),
-                                        column(6,
-                                               numericInput(inputId = "colLabels",
-                                                            label = "Number of labels",
-                                                            min = 0,
-                                                            max = 1000,
-                                                            value = 1000,
-                                                            step = 1)
-                                        )),
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="collabel.cex",
-                                                                    label = "Label cex",
-                                                                    choices = c("Yes", 
-                                                                                "No"),
-                                                                    selected = "Yes")
-                                        ),
-                                        column(6,
-                                               selectInput(inputId ="col.shape",
-                                                           label = "Node Shape",
-                                                           choices = c(
-                                                             "Box"="box",
-                                                             "Circle"="circle",
-                                                             "Dot"="dot",
-                                                             "Ellipse"="ellipse",
-                                                             "Square"="square",
-                                                             "Text"="text"),
-                                                           selected = "dot")
-                                        )),
-                                        fluidRow(column(6,
-                                                        numericInput(inputId = "collabelsize",
-                                                                     label = "Label size",
-                                                                     min = 0.0,
-                                                                     max = 20,
-                                                                     value = 2,
-                                                                     step = 0.10)
-                                        ),
-                                        column(6,
-                                               numericInput(
-                                                 inputId = "coledgesize",
-                                                 label = "Edge size",
-                                                 min = 0.5,
-                                                 max = 20,
-                                                 value = 5,
-                                                 step=0.5)
-                                        )), 
-                                        fluidRow(column(6,
-                                                        selectInput(inputId ="col.shadow",
-                                                                    label = "Node shadow",
-                                                                    choices = c("Yes",
-                                                                                "No"),
-                                                                    selected = "Yes")
-                                        ),
-                                        column(6,
-                                               selectInput(inputId ="soc.curved",
-                                                           label = "Edit Nodes",
-                                                           choices = c("Yes",
-                                                                       "No"),
-                                                           selected = "No")     
-                                               
-                                        ))
-                                    ),
-                                    br(),
-                                    fluidRow(column(6,
-                                                    downloadButton("network.col", strong("Save Pajek"),
-                                                                   style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
-                                                                   width = "100%")
-                                    ),
-                                    column(6,
-                                           downloadButton("networkCol.fig", strong("Save HTML"),
-                                                          style ="border-radius: 10px; border-width: 3px;font-size: 15px;",
-                                                          width = "100%")
-                                    )), 
-                                    br(),
-                                    selectInput("colRes",
-                                                h4(strong("Export plot")),
-                                                choices = c(
-                                                  "Select the image scale" = 0,
-                                                  "screen resolution x1" = 1,
-                                                  "screen resolution x2" = 2,
-                                                  "screen resolution x3" = 3,
-                                                  "screen resolution x4" = 4,
-                                                  "screen resolution x5" = 5,
-                                                  "screen resolution x6" = 6,
-                                                  "screen resolution x7" = 7,
-                                                  "screen resolution x8" = 8
-                                                ),
-                                                selected = 0),
-                                    conditionalPanel(condition = "input.colRes != 0",
-                                                     actionButton("colPlot.save", strong("Export plot as png"),
-                                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                  width = "100%")
-                                    )
-                   ),
+
+                   # ## Historiograph ----
+
+                   # ## Collaboration Network ----
+                   
                    ## Collaboration World Map ----
-                   conditionalPanel(condition = 'input.sidebarmenu == "collabWorldMap"',
-                                    h4(strong("Method Parameters: ")),
-                                    "  ",
-                                    numericInput("WMedges.min", 
-                                                 label=("Min edges"),
-                                                 value = 2,
-                                                 step = 1),
-                                    "  ",
-                                    br(),
-                                    h4(strong("Graphical Parameters: ")),
-                                    "  ",
-                                    sliderInput(inputId = "WMedgesize",
-                                                label = "Edge size",
-                                                min = 0.1,
-                                                max = 20,
-                                                value = 5),
-                                    br(),
-                                    selectInput(
-                                      'CCdpi',
-                                      h4(strong(
-                                        "Export plot"
-                                      )),
-                                      choices=c(
-                                        "dpi value" = "null",
-                                        "75 dpi" = "75",
-                                        "150 dpi" = "150",
-                                        "300 dpi" = "300",
-                                        "600 dpi" = "600"
-                                      ),
-                                      selected = "null"
-                                    ),
-                                    conditionalPanel(condition = "input.CCdpi != 'null'",
-                                                     sliderInput(
-                                                       'CCh',
-                                                       h4(em(strong(
-                                                         "Height (in inches)"
-                                                       ))),
-                                                       value = 7, min = 1, max = 20, step = 1),
-                                                     downloadButton("CCplot.save", strong("Export plot as png"),
-                                                                    style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-                                                                    width = "100%")  
-                                    )
-                   )
+
             ) 
           )
         )
@@ -6769,6 +5613,39 @@ server <- function(input, output,session){
     screenshot(
       filename = paste("TreeMap-", Sys.Date(), ".png", sep=""),
       id = "treemap",
+      scale = 1,
+      timer = 0,
+      download = TRUE,
+      server_dir = NULL
+    )
+  })
+  
+  observeEvent(input$screenCOCIT,{
+    screenshot(
+      filename = paste("Co_occurrenceNetwork-", Sys.Date(), ".png", sep=""),
+      id = "cocitPlot",
+      scale = 1,
+      timer = 0,
+      download = TRUE,
+      server_dir = NULL
+    )
+  })
+  
+  observeEvent(input$screenHIST,{
+    screenshot(
+      filename = paste("Historiograph-", Sys.Date(), ".png", sep=""),
+      id = "histPlotVis",
+      scale = 1,
+      timer = 0,
+      download = TRUE,
+      server_dir = NULL
+    )
+  })
+  
+  observeEvent(input$screenCOL,{
+    screenshot(
+      filename = paste("Collaboration_Network-", Sys.Date(), ".png", sep=""),
+      id = "colPlot",
       scale = 1,
       timer = 0,
       download = TRUE,

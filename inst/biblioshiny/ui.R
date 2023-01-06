@@ -451,7 +451,7 @@ body <- dashboardBody(
     tabItem("mainInfo",
             fluidPage(
               fluidRow(column(11,
-                h2(strong("Main Information"), align = "center")),
+                h3(strong("Main Information"), align = "center")),
                 div(style=style_bttn,
                     title = t_report,
                   column(1, 
@@ -494,7 +494,7 @@ body <- dashboardBody(
     tabItem("annualScPr",
             fluidPage(
               fluidRow(column(10,
-                h2(strong("Annual Scientific Production"), align = "center")),
+                h3(strong("Annual Scientific Production"), align = "center")),
                 div(style=style_bttn,
                     title = t_report,
                     column(1, 
@@ -527,7 +527,7 @@ body <- dashboardBody(
     tabItem("averageCitPerYear",
             fluidPage(
               fluidRow(column(10,
-                h2(strong("Average Citations Per Year"), align = "center")),
+                h3(strong("Average Citations Per Year"), align = "center")),
                 div(style=style_bttn,
                     title = t_report,
                     column(1, 
@@ -560,7 +560,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Three-Field Plot"), align = "center")),
+                       h3(strong("Three-Field Plot"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -661,7 +661,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Relevant Sources"), align = "center")),
+                       h3(strong("Most Relevant Sources"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -720,7 +720,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Local Cited Sources"), align = "center")),
+                       h3(strong("Most Local Cited Sources"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -778,7 +778,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(column(10,
                 #titlePanel(
-                  h2(strong("Core Sources by Bradford's Law"), align = "center")
+                  h3(strong("Core Sources by Bradford's Law"), align = "center")
                 ),
                 div(style=style_bttn,
                     title = t_report,
@@ -812,7 +812,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Sources' Local Impact"), align = "center")),
+                       h3(strong("Sources' Local Impact"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -877,7 +877,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Sources' Production over Time"), align = "center")),
+                       h3(strong("Sources' Production over Time"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -939,7 +939,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Relevant Authors"), align = "center")),
+                       h3(strong("Most Relevant Authors"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1003,7 +1003,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Local Cited Authors"), align = "center")),
+                       h3(strong("Most Local Cited Authors"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1061,7 +1061,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Authors' Production over Time"), align = "center")),
+                       h3(strong("Authors' Production over Time"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1120,7 +1120,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(10,
-                  h2(strong("Author Productivity through Lotka's Law"), align = "center")
+                  h3(strong("Author Productivity through Lotka's Law"), align = "center")
                 ),
                 div(style=style_bttn,
                     title = t_report,
@@ -1154,7 +1154,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Authors' Local Impact"), align = "center")),
+                       h3(strong("Authors' Local Impact"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1218,7 +1218,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Relevant Affiliations"), align = "center")),
+                       h3(strong("Most Relevant Affiliations"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1280,7 +1280,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Affiliations' Production over Time"), align = "center")),
+                       h3(strong("Affiliations' Production over Time"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1336,7 +1336,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Corresponding Author's Countries"), align = "center")),
+                       h3(strong("Corresponding Author's Countries"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1392,7 +1392,7 @@ body <- dashboardBody(
     tabItem("countryScientProd",
             fluidPage(
               fluidRow(column(10,
-                h2(strong("Countries' Scientific Production"), align = "center")),
+                h3(strong("Countries' Scientific Production"), align = "center")),
                 div(style=style_bttn,
                     title = t_report,
                     column(1, 
@@ -1425,7 +1425,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Countries' Production over Time"), align = "center")),
+                       h3(strong("Countries' Production over Time"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1481,7 +1481,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Cited Countries"), align = "center")),
+                       h3(strong("Most Cited Countries"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1544,7 +1544,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Global Cited Documents"), align = "center")),
+                       h3(strong("Most Global Cited Documents"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1606,7 +1606,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Local Cited Documents"), align = "center")),
+                       h3(strong("Most Local Cited Documents"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1669,7 +1669,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Local Cited References"), align = "center")),
+                       h3(strong("Most Local Cited References"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -1732,7 +1732,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Reference Spectroscopy"), align = "center")
+                       h3(strong("Reference Spectroscopy"), align = "center")
                 ),
                 div(style=style_bttn,
                     title = t_run,
@@ -1807,7 +1807,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Most Frequent Words"), align = "center")
+                       h3(strong("Most Frequent Words"), align = "center")
                 ),
                 div(style=style_bttn,
                     title = t_run,
@@ -1926,7 +1926,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("WordCloud"), align = "center")),
+                       h3(strong("WordCloud"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -2089,7 +2089,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("TreeMap"), align = "center")),
+                       h3(strong("TreeMap"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -2207,7 +2207,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Words' Frequency over Time"), align = "center")),
+                       h3(strong("Words' Frequency over Time"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -2332,7 +2332,7 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Trend Topics"), align = "center")),
+                       h3(strong("Trend Topics"), align = "center")),
                 div(style=style_bttn,
                     title = t_run,
                     column(1, 
@@ -2465,15 +2465,109 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Clustering by Coupling"), align = "center")),
-                column(2,
-                       actionButton("applyCM", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportCC", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Clustering by Coupling"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyCM")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCC")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "CMplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("CManalysis", 
+                                         label = "Unit of Analysis",
+                                         choices = c("Documents" = "documents", 
+                                                     "Authors" = "authors",
+                                                     "Sources" = "sources"),
+                                         selected = "documents"),
+                             " ",
+                             box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, 
+                                 collapsed = FALSE,
+                                 selectInput("CMfield", 
+                                             label = "Coupling measured by",
+                                             choices = c("References" ="CR",
+                                                         "Keywords Plus" = "ID", 
+                                                         "Author's Keywords" = "DE",
+                                                         "Titles" = "TI",
+                                                         "Abstracts" = "AB"),
+                                             selected = "CR"),
+                                 conditionalPanel(condition = "input.CMfield == 'TI' | input.CMfield == 'AB'",
+                                                  selectInput("CMstemming", label="Word Stemming",
+                                                              choices = c("Yes" = TRUE,
+                                                                          "No" = FALSE),
+                                                              selected = FALSE)),
+                                 selectInput("CMimpact", 
+                                             label = "Impact measure",
+                                             choices = c("Local Citation Score" = "local", 
+                                                         "Global Citation Score" = "global"),
+                                             selected = "local"),
+                                 selectInput("CMlabeling", 
+                                             label = "Cluster labeling by",
+                                             choices = c("None" = "none", 
+                                                         "Keyword Plus" = "ID",
+                                                         "Authors' keywords" = "DE",
+                                                         "Title terms" = "TI",
+                                                         "Abstract terms" = "AB"),
+                                             selected = "ID"),
+                                 conditionalPanel(condition = "input.CMlabeling == 'TI' | input.CMlabeling == 'AB'",
+                                                  selectInput("CMngrams",'N-Grams',
+                                                              choices = c("Unigrams" = "1",
+                                                                          "Bigrams" = "2",
+                                                                          "Trigrams" = "3"),
+                                                              selected = 1)),
+                                 fluidRow(column(6,
+                                                 numericInput("CMn", label="Number of Units\n ",value=250,min=50,max=5000,step=1)),
+                                          column(6,
+                                                 numericInput("CMfreq", label="Min Cluster Freq. ",value=5,min=1,max=100,step=1))),
+                                 fluidRow(column(6,
+                                                 numericInput("CMn.labels", label="Labels per cluster",value=3,min=1,max=10,step=1)),
+                                          column(6,
+                                                 numericInput("sizeCM", label="Label size",value=0.3,min=0.0,max=1,step=0.05))),
+                                 fluidRow(column(6,
+                                                 numericInput("CMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
+                                          column(6,
+                                                 selectInput("CMcluster", 
+                                                             label = "Clustering Algorithm",
+                                                             choices = c("None" = "none",
+                                                                         "Edge Betweenness" = "edge_betweenness",
+                                                                         "Fast Greedy" = "fast_greedy",
+                                                                         "InfoMap" = "infomap",
+                                                                         "Leading Eigenvalues" = "leading_eigen",
+                                                                         "Leiden" = "leiden",
+                                                                         "Louvain" = "louvain",
+                                                                         "Spinglass" = "spinglass",
+                                                                         "Walktrap" = "walktrap"),
+                                                             selected = "walktrap")
+                                          ))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2499,15 +2593,271 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Co-occurrence Network"), align = "center")),
-                column(2,
-                       actionButton("applyCoc", strong("Run"),
-                                    style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportCOC", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Co-occurrence Network"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyCoc")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCOC")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "cocPlot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("field", 
+                                         "Field",
+                                         choices = c("Keywords Plus" = "ID", 
+                                                     "Author's Keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB",
+                                                     "Subject Categories (WoS)" = "WC"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.field == 'TI' | input.field == 'AB'",
+                                              selectInput("cocngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("COCStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.COCStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("COCStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("COCSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("COCStopPreview"))
+                                 ),
+                                 selectInput("COCSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.COCSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("COCSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("COCSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("COCSynPreview"))
+                                 )),
+                             br(),
+                             box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 selectInput("layout", 
+                                                             label = "Network Layout",
+                                                             choices = c("Automatic layout"="auto", 
+                                                                         "Circle"="circle",
+                                                                         "Fruchterman & Reingold"="fruchterman",
+                                                                         "Kamada & Kawai"="kamada",
+                                                                         "MultiDimensional Scaling"="mds",
+                                                                         "Sphere"="sphere",
+                                                                         "Star"="star"),
+                                                             selected = "auto")
+                                 ),
+                                 column(6,
+                                        selectInput("cocCluster", 
+                                                    label = "Clustering Algorithm",
+                                                    choices = c("None" = "none",
+                                                                "Edge Betweenness" = "edge_betweenness",
+                                                                "Fast Greedy" = "fast_greedy",
+                                                                "InfoMap" = "infomap",
+                                                                "Leading Eigenvalues" = "leading_eigen",
+                                                                "Leiden" = "leiden",
+                                                                "Louvain" = "louvain",
+                                                                "Spinglass" = "spinglass",
+                                                                "Walktrap" = "walktrap"),
+                                                    selected = "walktrap")
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput("normalize", 
+                                                             label = "Normalization",
+                                                             choices = c("none", 
+                                                                         "association",
+                                                                         "jaccard", 
+                                                                         "salton",
+                                                                         "inclusion",
+                                                                         "equivalence"),
+                                                             selected = "association")
+                                 ),
+                                 column(6,
+                                        selectInput("cocyears",
+                                                    label = "Node Color by Year",
+                                                    choices = c("No" = "No",
+                                                                "Yes"= "Yes"),
+                                                    selected = "No")
+                                 )
+                                 ),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "Nodes",
+                                                              label = "Number of Nodes",
+                                                              min = 5,
+                                                              max = 1000,
+                                                              value = 50,
+                                                              step = 1)
+                                 ),
+                                 column(6,
+                                        numericInput(inputId = "coc.repulsion",
+                                                     label = "Repulsion Force",
+                                                     min = 0,
+                                                     max = 1,
+                                                     value = 0.1,
+                                                     step = 0.1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="coc.isolates",
+                                                             label = "Remove Isolated Nodes",
+                                                             choices = c("Yes" = "yes",
+                                                                         "No" = "no"),
+                                                             selected = "yes")
+                                 ),
+                                 column(6,
+                                        numericInput("edges.min", 
+                                                     label=("Minimum Number of Edges"),
+                                                     value = 2,
+                                                     step = 1,
+                                                     min = 0)
+                                 )
+                                 )),
+                             br(),
+                             box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "cocAlpha",
+                                                              label = "Opacity",
+                                                              min = 0,
+                                                              max = 1,
+                                                              value = 0.7,
+                                                              step=0.05)
+                                 ),
+                                 column(6,
+                                        numericInput(inputId = "Labels",
+                                                     label = "Number of labels",
+                                                     min = 0,
+                                                     max = 1000,
+                                                     value = 1000,
+                                                     step = 1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="label.cex",
+                                                             label = "Label cex",
+                                                             choices = c("Yes", 
+                                                                         "No"),
+                                                             selected = "Yes")
+                                 ),
+                                 column(6,
+                                        selectInput(inputId ="coc.shape",
+                                                    label = "Node Shape",
+                                                    choices = c(
+                                                      "Box"="box",
+                                                      "Circle"="circle",
+                                                      "Dot"="dot",
+                                                      "Ellipse"="ellipse",
+                                                      "Square"="square",
+                                                      "Text"="text"),
+                                                    selected = "dot")
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "labelsize",
+                                                              label = "Label size",
+                                                              min = 0.0,
+                                                              max = 20,
+                                                              value = 3,
+                                                              step = 0.10)
+                                 ),
+                                 column(6,
+                                        numericInput(
+                                          inputId = "edgesize",
+                                          label = "Edge size",
+                                          min = 0.0,
+                                          max = 20,
+                                          value = 5,
+                                          step=0.5)
+                                 )), 
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="coc.shadow",
+                                                             label = "Node shadow",
+                                                             choices = c("Yes",
+                                                                         "No"),
+                                                             selected = "Yes")
+                                 ),
+                                 column(6,
+                                        selectInput(inputId ="coc.curved",
+                                                    label = "Edit Nodes",
+                                                    choices = c("Yes",
+                                                                "No"),
+                                                    selected = "No")     
+                                        
+                                 )
+                                 )
+                             ),
+                             br(),
+                             fluidRow(column(6,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 downloadBttn(outputId = "network.coc", label = ("Pajek"),
+                                                              style = "pill", color = "primary"))),
+                                      column(6,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 downloadBttn(outputId = "networkCoc.fig", label = ("HTML"),
+                                                              style = "pill", color = "primary")))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2528,14 +2878,143 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Thematic Map"), align = "center")),
-                column(2,actionButton("applyTM", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportTM", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Thematic Map"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyTM")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportTM")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "TMplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("TMfield", 
+                                         label = "Field",
+                                         choices = c("Keywords Plus" = "ID", 
+                                                     "Author's Keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
+                                              selectInput("TMngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             conditionalPanel(
+                               condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
+                               selectInput("TMstemming", label="Word Stemming",
+                                           choices = c("Yes" = TRUE,
+                                                       "No" = FALSE),
+                                           selected = FALSE)),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("TMStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TMStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("TMStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TMSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TMStopPreview"))
+                                 ),
+                                 selectInput("TMapSynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TMapSynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("TMapSyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TMapSynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TMapSynPreview"))
+                                 )),
+                             br(),
+                             box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput("TMn", label="Number of Words",value=250,min=50,max=5000,step=1)
+                                 ),
+                                 column(6,
+                                        numericInput("TMfreq", label="Min Cluster Frequency (per thousand docs)",value=5,min=1,max=100,step=1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput("TMn.labels", label="Number of Labels",value=3,min=0,max=10,step=1)
+                                 ),
+                                 column(6,
+                                        numericInput("sizeTM", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput("TMrepulsion", label="Community Repulsion",value=0,min=0,max=1,step=0.01)),
+                                          column(6,
+                                                 selectInput("TMCluster", 
+                                                             label = "Clustering Algorithm",
+                                                             choices = c("None" = "none",
+                                                                         "Edge Betweenness" = "edge_betweenness",
+                                                                         "Fast Greedy" = "fast_greedy",
+                                                                         "InfoMap" = "infomap",
+                                                                         "Leading Eigenvalues" = "leading_eigen",
+                                                                         "Leiden" = "leiden",
+                                                                         "Louvain" = "louvain",
+                                                                         "Spinglass" = "spinglass",
+                                                                         "Walktrap" = "walktrap"),
+                                                             selected = "walktrap")
+                                          )
+                                 )
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2563,15 +3042,155 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Thematic Evolution"), align = "center")),
-                column(2,actionButton("applyTE", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))
-                ),
-                column(2, 
-                       actionButton("reportTE", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Thematic Evolution"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyTE")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportTE")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "TEplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("TEfield", 
+                                         label = "Field",
+                                         choices = c("Keywords Plus" = "ID", 
+                                                     "Author's Keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts
+                                                           " = "AB"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.TEfield == 'TI' | input.TEfield == 'AB'",
+                                              selectInput("TEngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("TEStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TEStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("TEStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TESep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TEStopPreview"))
+                                 ),
+                                 selectInput("TESynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.TESynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("TESyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("TESynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("TESynPreview"))
+                                 )),
+                             br(),
+                             box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput("nTE", label="Number of Words",value=250,min=50,max=5000,step=1)
+                                 ),
+                                 column(6,
+                                        numericInput("fTE", label="Min Cluster Frequency (per thousand docs)",value=5,min=1,max=100,step=1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput("TEmeasure", 
+                                                             label = "Weight index",
+                                                             choices = c("Inclusion Index" = "inclusion", 
+                                                                         "Inclusion Index weighted by Word-Occurrences" = "weighted",
+                                                                         "Stability Index" = "stability"
+                                                             ),
+                                                             selected = "weighted")
+                                 ),
+                                 column(6,
+                                        numericInput("minFlowTE", label="Min Weight Index",value=0.1,min=0.02,max=1,step=0.02)
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput("sizeTE", label="Label size",value=0.3,min=0.0,max=1,step=0.05)
+                                 ),
+                                 column(6,
+                                        numericInput("TEn.labels", label="Number of Labels (for each cluster)",value=3,min=1,max=5,step=1)
+                                 )),
+                                 fluidRow(column(12,
+                                                 selectInput("TECluster", 
+                                                             label = "Clustering Algorithm",
+                                                             choices = c("None" = "none",
+                                                                         "Edge Betweenness" = "edge_betweenness",
+                                                                         "Fast Greedy" = "fast_greedy",
+                                                                         "InfoMap" = "infomap",
+                                                                         "Leading Eigenvalues" = "leading_eigen",
+                                                                         "Leiden" = "leiden",
+                                                                         "Louvain" = "louvain",
+                                                                         "Spinglass" = "spinglass",
+                                                                         "Walktrap" = "walktrap"),
+                                                             selected = "walktrap"))
+                                 )
+                             ),
+                             br(),
+                             box(title = p(strong("Time Slices"),style='font-size:16px;color:black;'), 
+                                 collapsible = FALSE, width = 15,
+                                 solidHeader = FALSE, collapsed = FALSE,
+                                 numericInput("numSlices", label="Number of Cutting Points",min=1,max=4,value=1),
+                                 "Please, write the cutting points (in year) for your collection",
+                                 uiOutput("sliders")
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2685,14 +3304,146 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Factorial Analysis"), align = "center")),
-                column(2,actionButton("applyCA", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportFA", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Factorial Analysis"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyCA")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportFA")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "FAplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("method", 
+                                         label = "Method",
+                                         choices = c("Correspondence Analysis" = "CA",
+                                                     "Multiple Correspondence Analysis" = "MCA",
+                                                     "Multidimensional Scaling"= "MDS"),
+                                         selected = "MCA"),
+                             selectInput("CSfield", 
+                                         label = "Field",
+                                         choices = c("Keywords Plus" = "ID", 
+                                                     "Author's Keywords" = "DE",
+                                                     "Titles" = "TI",
+                                                     "Abstracts" = "AB"),
+                                         selected = "ID"),
+                             conditionalPanel(condition = "input.CSfield == 'TI' | input.CSfield == 'AB'",
+                                              selectInput("CSngrams",'N-Grams',
+                                                          choices = c("Unigrams" = "1",
+                                                                      "Bigrams" = "2",
+                                                                      "Trigrams" = "3"),
+                                                          selected = 1)),
+                             br(),
+                             box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 selectInput("CSStopFile", "Load a list of terms to remove",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.CSStopFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                                                  ),
+                                                  fileInput("CSStop", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("CSSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("CSStopPreview"))
+                                 ),
+                                 selectInput("FASynFile", "Load a list of synonyms",
+                                             choices = c("Yes" = "Y",
+                                                         "No" = "N"),
+                                             selected = "N"),
+                                 conditionalPanel(condition = "input.FASynFile == 'Y'",
+                                                  helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
+                                                           h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator). 
+                              Rows have to be separated by return separator."))
+                                                  ),
+                                                  fileInput("FASyn", "",
+                                                            multiple = FALSE,
+                                                            accept = c("text/csv",
+                                                                       "text/comma-separated-values,text/plain",
+                                                                       ".csv",
+                                                                       ".txt")),
+                                                  
+                                                  selectInput("FASynSep", "File Separator",
+                                                              choices = c('Comma ","' = ",",
+                                                                          'Semicolon ";"' = ";",
+                                                                          'Tab '= "\t"),
+                                                              selected = ","),
+                                                  h5(htmlOutput("FASynPreview"))
+                                 )),
+                             br(),
+                             box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput("CSn", 
+                                                              label=("Number of terms"), 
+                                                              value = 50, step = 1)),
+                                          column(6,
+                                                 selectInput("nClustersCS", 
+                                                             label = "N. of Clusters",
+                                                             choices = c("Auto" = "0", 
+                                                                         "2" = "2",
+                                                                         "3" = "3",
+                                                                         "4" = "4",
+                                                                         "5" = "5",
+                                                                         "6" = "6",
+                                                                         "7" = "7",
+                                                                         "8" = "8"),
+                                                             selected = "0")))
+                             ),
+                             br(),
+                             box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput(
+                                                   inputId = "CSlabelsize",
+                                                   label = "Label size",
+                                                   min = 5,
+                                                   max = 30,
+                                                   value = 10)),
+                                          column(6,
+                                                 numericInput("CSdoc", 
+                                                              label=("Num. of documents"), 
+                                                              value = 5)))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2724,14 +3475,201 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Co-citation Network"), align = "center")),
-                column(2,actionButton("applyCocit", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportCOCIT", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Co-citation Network"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyCocit")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCOCIT")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenCOCIT")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("citField",
+                                         label = "Field",
+                                         choices = c("Papers" = "CR",
+                                                     "Authors" = "CR_AU",
+                                                     "Sources" = "CR_SO"),
+                                         selected = "CR"),
+                             selectInput(inputId = "citSep",
+                                         label = "Field separator character",
+                                         choices = c('";" (Semicolon)' = ";",
+                                                     '".   " (Dot and 3 or more spaces)' = ".   ",
+                                                     '"," (Comma)' = ","),
+                                         selected = "';'"),
+                             br(),
+                             box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'),
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 selectInput("citlayout",
+                                                             label = "Network Layout",
+                                                             choices = c("Automatic layout"="auto",
+                                                                         "Circle"="circle",
+                                                                         "Fruchterman & Reingold"="fruchterman",
+                                                                         "Kamada & Kawai"="kamada",
+                                                                         "MultiDimensional Scaling"="mds",
+                                                                         "Sphere"="sphere",
+                                                                         "Star"="star"),
+                                                             selected = "auto")
+                                 ),
+                                 column(6,
+                                        selectInput("cocitCluster",
+                                                    label = "Clustering Algorithm",
+                                                    choices = c("None" = "none",
+                                                                "Edge Betweenness" = "edge_betweenness",
+                                                                "Fast Greedy" = "fast_greedy",
+                                                                "InfoMap" = "infomap",
+                                                                "Leading Eigenvalues" = "leading_eigen",
+                                                                "Leiden" = "leiden",
+                                                                "Louvain" = "louvain",
+                                                                "Spinglass" = "spinglass",
+                                                                "Walktrap" = "walktrap"),
+                                                    selected = "walktrap")
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "citNodes",
+                                                              label = "Number of Nodes",
+                                                              min = 5,
+                                                              max = 1000,
+                                                              value = 50,
+                                                              step = 1)
+                                 ),
+                                 column(6,
+                                        numericInput(inputId = "cocit.repulsion",
+                                                     label = "Repulsion Force",
+                                                     min = 0,
+                                                     max = 1,
+                                                     value = 0.1,
+                                                     step = 0.1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="cit.isolates",
+                                                             label = "Remove Isolated Nodes",
+                                                             choices = c("Yes" = "yes",
+                                                                         "No" = "no"),
+                                                             selected = "yes")
+                                 ),
+                                 column(6,
+                                        numericInput("citedges.min",
+                                                     label=("Minimum Number of Edges"),
+                                                     value = 2,
+                                                     step = 1,
+                                                     min = 0)
+                                 )
+                                 )),
+                             br(),
+                             box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'),
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="citShortlabel",
+                                                             label = "Short Label",
+                                                             choices = c("Yes",
+                                                                         "No"),
+                                                             selected = "Yes"),
+                                                 
+                                 ),
+                                 column(6,
+                                        numericInput(inputId = "citLabels",
+                                                     label = "Number of labels",
+                                                     min = 0,
+                                                     max = 1000,
+                                                     value = 1000,
+                                                     step = 1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="citlabel.cex",
+                                                             label = "Label cex",
+                                                             choices = c("Yes",
+                                                                         "No"),
+                                                             selected = "Yes")
+                                 ),
+                                 column(6,
+                                        selectInput(inputId ="cocit.shape",
+                                                    label = "Node Shape",
+                                                    choices = c(
+                                                      "Box"="box",
+                                                      "Circle"="circle",
+                                                      "Dot"="dot",
+                                                      "Ellipse"="ellipse",
+                                                      "Square"="square",
+                                                      "Text"="text"),
+                                                    selected = "dot")
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "citlabelsize",
+                                                              label = "Label size",
+                                                              min = 0.0,
+                                                              max = 20,
+                                                              value = 2,
+                                                              step = 0.10)
+                                 ),
+                                 column(6,
+                                        numericInput(
+                                          inputId = "citedgesize",
+                                          label = "Edge size",
+                                          min = 0.5,
+                                          max = 20,
+                                          value = 2,
+                                          step=0.5)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="cocit.shadow",
+                                                             label = "Node shadow",
+                                                             choices = c("Yes",
+                                                                         "No"),
+                                                             selected = "Yes")
+                                 ),
+                                 column(6,
+                                        selectInput(inputId ="cocit.curved",
+                                                    label = "Edit Nodes",
+                                                    choices = c("Yes",
+                                                                "No"),
+                                                    selected = "No")
+                                        
+                                 )
+                                 )
+                             ),
+                             br(),
+                             fluidRow(column(6,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 downloadBttn(outputId = "network.cocit", label = ("Pajek"),
+                                                              style = "pill", color = "primary"))),
+                                      column(6,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 downloadBttn(outputId = "networkCocit.fig", label = ("HTML"),
+                                                              style = "pill", color = "primary")))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2752,21 +3690,79 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 column(8,
-                       h2(strong("Historiograph"), align = "center")),
-                column(2,actionButton("applyHist", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportHIST", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                       h3(strong("Historiograph"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyHist")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportHIST")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenHIST")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             numericInput(inputId = "histNodes",
+                                          label = "Number of Nodes",
+                                          min = 5,
+                                          max = 100,
+                                          value = 20,
+                                          step = 1),
+                             "  ",
+                             br(),
+                             box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'),
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE,
+                                 collapsed = FALSE,
+                                 selectInput(inputId = "titlelabel",
+                                             label = "Node label",
+                                             choices = c("Short id (1st Author, Year)" = "short",
+                                                         "Document Title" = "title",
+                                                         "Authors' Keywords" = "keywords",
+                                                         "Keywords Plus" = "keywordsplus"),
+                                             selected = "short"),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "histlabelsize",
+                                                              label = "Label size",
+                                                              min = 0.0,
+                                                              max = 20,
+                                                              value = 3, step = 1)),
+                                          column(6,
+                                                 numericInput(inputId = "histsize",
+                                                              label = "Node size",
+                                                              min = 0,
+                                                              max = 20,
+                                                              value = 4, step = 1)))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("sliders"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
                                      shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "80vh"))),
-                            # tabPanel("Plot",
-                            #          shinycssloaders::withSpinner(plotlyOutput(outputId = "histPlot", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable")))
                 )
@@ -2778,13 +3774,205 @@ body <- dashboardBody(
     tabItem("collabNetwork",
             fluidPage(
               fluidRow(
-                column(8,h2(strong("Collaboration Network"), align = "center")),
-                column(2,actionButton("applyCol", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportCOL", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                column(8,h3(strong("Collaboration Network"), align = "center")),
+                div(style=style_bttn,
+                     title = t_run,
+                     column(1, 
+                            do.call("actionBttn", c(run_bttn, list(
+                              inputId = "applyCol")
+                            ))
+                     )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCOL")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenCOL")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             selectInput("colField",
+                                         label = "Field",
+                                         choices = c("Authors" = "COL_AU",
+                                                     "Institutions" = "COL_UN",
+                                                     "Countries" = "COL_CO"),
+                                         selected = "COL_AU"),
+                             br(),
+                             box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'),
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 selectInput("collayout",
+                                                             label = "Network Layout",
+                                                             choices = c("Automatic layout"="auto",
+                                                                         "Circle"="circle",
+                                                                         "Fruchterman & Reingold"="fruchterman",
+                                                                         "Kamada & Kawai"="kamada",
+                                                                         "MultiDimensional Scaling"="mds",
+                                                                         "Sphere"="sphere",
+                                                                         "Star"="star"),
+                                                             selected = "auto")
+                                 ),
+                                 column(6,
+                                        selectInput("colCluster",
+                                                    label = "Clustering Algorithm",
+                                                    choices = c("None" = "none",
+                                                                "Edge Betweenness" = "edge_betweenness",
+                                                                "Fast Greedy" = "fast_greedy",
+                                                                "InfoMap" = "infomap",
+                                                                "Leading Eigenvalues" = "leading_eigen",
+                                                                "Leiden" = "leiden",
+                                                                "Louvain" = "louvain",
+                                                                "Spinglass" = "spinglass",
+                                                                "Walktrap" = "walktrap"),
+                                                    selected = "walktrap")
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput("colnormalize",
+                                                             label = "Normalization",
+                                                             choices = c("none",
+                                                                         "association",
+                                                                         "jaccard",
+                                                                         "salton",
+                                                                         "inclusion",
+                                                                         "equivalence"),
+                                                             selected = "association")
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "colNodes",
+                                                              label = "Number of Nodes",
+                                                              min = 5,
+                                                              max = 1000,
+                                                              value = 50,
+                                                              step = 1)
+                                 ),
+                                 column(6,
+                                        numericInput(inputId = "col.repulsion",
+                                                     label = "Repulsion Force",
+                                                     min = 0,
+                                                     max = 1,
+                                                     value = 0.1,
+                                                     step = 0.1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="col.isolates",
+                                                             label = "Remove Isolated Nodes",
+                                                             choices = c("Yes" = "yes",
+                                                                         "No" = "no"),
+                                                             selected = "yes")
+                                 ),
+                                 column(6,
+                                        numericInput("coledges.min",
+                                                     label=("Minimum Number of Edges"),
+                                                     value = 1,
+                                                     step = 1,
+                                                     min = 0)
+                                 )
+                                 )),
+                             br(),
+                             box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'),
+                                 collapsible = TRUE, width = 15,
+                                 solidHeader = FALSE, collapsed = TRUE,
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "colAlpha",
+                                                              label = "Opacity",
+                                                              min = 0,
+                                                              max = 1,
+                                                              value = 0.7,
+                                                              step=0.05)
+                                 ),
+                                 column(6,
+                                        numericInput(inputId = "colLabels",
+                                                     label = "Number of labels",
+                                                     min = 0,
+                                                     max = 1000,
+                                                     value = 1000,
+                                                     step = 1)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="collabel.cex",
+                                                             label = "Label cex",
+                                                             choices = c("Yes",
+                                                                         "No"),
+                                                             selected = "Yes")
+                                 ),
+                                 column(6,
+                                        selectInput(inputId ="col.shape",
+                                                    label = "Node Shape",
+                                                    choices = c(
+                                                      "Box"="box",
+                                                      "Circle"="circle",
+                                                      "Dot"="dot",
+                                                      "Ellipse"="ellipse",
+                                                      "Square"="square",
+                                                      "Text"="text"),
+                                                    selected = "dot")
+                                 )),
+                                 fluidRow(column(6,
+                                                 numericInput(inputId = "collabelsize",
+                                                              label = "Label size",
+                                                              min = 0.0,
+                                                              max = 20,
+                                                              value = 2,
+                                                              step = 0.10)
+                                 ),
+                                 column(6,
+                                        numericInput(
+                                          inputId = "coledgesize",
+                                          label = "Edge size",
+                                          min = 0.5,
+                                          max = 20,
+                                          value = 5,
+                                          step=0.5)
+                                 )),
+                                 fluidRow(column(6,
+                                                 selectInput(inputId ="col.shadow",
+                                                             label = "Node shadow",
+                                                             choices = c("Yes",
+                                                                         "No"),
+                                                             selected = "Yes")
+                                 ),
+                                 column(6,
+                                        selectInput(inputId ="soc.curved",
+                                                    label = "Edit Nodes",
+                                                    choices = c("Yes",
+                                                                "No"),
+                                                    selected = "No")
+                                        
+                                 ))
+                             ),
+                             br(),
+                             fluidRow(column(6,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 downloadBttn(outputId = "network.col", label = ("Pajek"),
+                                                              style = "pill", color = "primary"))),
+                                      column(6,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                                                 align = "center",
+                                                 width="100%",
+                                                 downloadBttn(outputId = "networkCol.fig", label = ("HTML"),
+                                                              style = "pill", color = "primary")))
+                             ),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2804,14 +3992,56 @@ body <- dashboardBody(
     tabItem("collabWorldMap",
             fluidPage(
               fluidRow(
-                column(8,h2(strong("Countries' Collaboration World Map"), align = "center")),
-                column(2,actionButton("applyWM", strong("Run"),
-                                      style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                      width = "80%",icon = fa_i(name ="play"))),
-                column(2, 
-                       actionButton("reportCOLW", strong("Report"),style ="border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;",
-                                    width = "80%",
-                                    icon = icon(name ="plus", lib="glyphicon"))
+                column(8,h3(strong("Countries' Collaboration World Map"), align = "center")),
+                div(style=style_bttn,
+                    title = t_run,
+                    column(1, 
+                           do.call("actionBttn", c(run_bttn, list(
+                             inputId = "applyWM")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_report,
+                    column(1, 
+                           do.call("actionBttn", c(report_bttn, list(
+                             inputId = "reportCOLW")
+                           ))
+                    )),
+                div(style=style_bttn,
+                    title = t_export,
+                    column(1, 
+                           do.call("downloadBttn", c(export_bttn, list(
+                             outputId = "CCplot.save")
+                           ))
+                    )),
+                div(column(1,
+                           dropdown(
+                             h4(strong("Options: ")),
+                             br(),
+                             h4(strong("Method Parameters: ")),
+                             "  ",
+                             numericInput("WMedges.min", 
+                                          label=("Min edges"),
+                                          value = 2,
+                                          step = 1),
+                             "  ",
+                             br(),
+                             h4(strong("Graphical Parameters: ")),
+                             "  ",
+                             numericInput(inputId = "WMedgesize",
+                                          label = "Edge size",
+                                          min = 0.1,
+                                          max = 20,
+                                          value = 5),
+                             right = TRUE, animate = TRUE, circle = TRUE,
+                             style = "gradient",
+                             tooltip = tooltipOptions(title = "Options"),
+                             color = "primary",
+                             icon = icon("cog",lib="glyphicon"),
+                             width = "300px"
+                           )
+                ), 
+                style = style_opt
                 )
               ),
               fluidRow(
@@ -2830,7 +4060,7 @@ body <- dashboardBody(
     tabItem("report",
             fluidPage(
               fluidRow(
-                h2(strong("Report"), align="center"),
+                h3(strong("Report"), align="center"),
                 br(),
               ),
               fluidRow(

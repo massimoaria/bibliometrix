@@ -4130,6 +4130,15 @@ body <- dashboardBody(
               
               
             )
+    ),
+    #### Report ----
+    tabItem("settings",
+            fluidPage(
+              fluidRow(
+                h3(strong("Settings"), align="center"),
+                br(),
+              )
+            )
     )
   )
 )

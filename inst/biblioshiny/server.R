@@ -169,7 +169,8 @@ server <- function(input, output,session){
           menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
                    menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
                    menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
-          menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
+          menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
+          menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
         )
     } else {
       sidebarMenu()

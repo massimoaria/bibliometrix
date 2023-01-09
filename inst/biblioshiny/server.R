@@ -15,8 +15,8 @@ server <- function(input, output,session){
   ## initial values
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
-  values$sidebar <- sidebarMenu()
   values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
+  values$sidebar <- FALSE
   values$wb <-  openxlsx::createWorkbook()
   values$dfLabel <- dfLabel()
   values$myChoices <- "Empty Report"
@@ -110,7 +110,7 @@ server <- function(input, output,session){
   ## SIDEBAR MENU ----
   ### Apply Data----
   output$rest_of_sidebar <- renderMenu({
-    if (ncol(values$M)>1){
+      if (isTRUE(values$sidebar)){
         sidebarMenu(
           menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
           menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
@@ -172,17 +172,9 @@ server <- function(input, output,session){
           menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
           menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
         )
-    } else {
-      sidebarMenu()
-    }
-  })
-  
-  observeEvent(input$applyLoad, {
-    updateTabItems(session, "sidebarmenu", "loadData")
-  })
-  
-  observeEvent(input$apiApply, {
-    updateTabItems(session, "sidebarmenu", "gathData")
+      } else {
+        sidebarMenu()
+      }
   })
   
   ## Load Menu ----
@@ -241,6 +233,7 @@ server <- function(input, output,session){
       values$Morig = management
       values$Histfield = "NA"
       values$results = list("NA")
+      values$sidebar <- TRUE
       return()
     }
     inFile <- input$file1
@@ -455,6 +448,7 @@ server <- function(input, output,session){
     values$Morig = M
     values$Histfield = "NA"
     values$results = list("NA")
+    if (ncol(M)>1) {values$sidebar <- TRUE}
     
   })
   output$contents <- DT::renderDT({
@@ -792,7 +786,7 @@ server <- function(input, output,session){
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
-               
+               if (ncol(M)>1) {values$sidebar <- TRUE}
                values$Histfield = "NA"
                values$results = list("NA")
                contentTable(values)
@@ -810,6 +804,7 @@ server <- function(input, output,session){
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
+               if (ncol(M)>1) {values$sidebar <- TRUE}
                values$Histfield = "NA"
                values$results = list("NA")
              }
@@ -5313,16 +5308,16 @@ server <- function(input, output,session){
 
   
   # OPTIONS MENU ----
-  observe({
-    if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
-      updateControlbar("controlbar2")
-      values$checkControlBar <- TRUE
-    }
-    if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
-      updateControlbar("controlbar2")
-      values$checkControlBar <- FALSE
-    }
-  })
+  # observe({
+  #   if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
+  #     updateControlbar("controlbar2")
+  #     values$checkControlBar <- TRUE
+  #   }
+  #   if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
+  #     updateControlbar("controlbar2")
+  #     values$checkControlBar <- FALSE
+  #   }
+  # })
   
   # output$controlbar <- renderUI({
   #   controlbarMenu(
@@ -5667,24 +5662,12 @@ server <- function(input, output,session){
     )
   })
   
-  observeEvent(input$applyMLCSources, {
-    updateTabItems(session, "sidebarmenu", "localCitedSources")
+  observeEvent(input$applyLoad, {
+    updateTabItems(session, "sidebarmenu", "loadData")
   })
   
-  observeEvent(input$applyCOGrowth, {
-    updateTabItems(session, "sidebarmenu", "COOverTime")
-  })
-  
-  observeEvent(input$applyMCCountries, {
-    updateTabItems(session, "sidebarmenu", "mostCitedCountries")
-  })
-  
-  observeEvent(input$applyCocit, {
-    updateTabItems(session, "sidebarmenu", "coCitationNetwork")
-  })
-  
-  observeEvent(input$applyCol, {
-    updateTabItems(session, "sidebarmenu", "collabNetwork")
+  observeEvent(input$apiApply, {
+    updateTabItems(session, "sidebarmenu", "gathData")
   })
   
   ### settings ----

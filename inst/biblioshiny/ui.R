@@ -138,25 +138,26 @@ body <- dashboardBody(
     tags$style(".fa-comment-dollar {font-size: 20px}"),
     tags$style(".fa-bars {font-size: 20px}"),
     tags$style(".sidebar-toggle {font-size: 15px}"),
-    tags$script(
-      'var dimension = [0, 0];
-              $(document).on("shiny:connected", function(e) {
-                  dimension[0] = window.innerWidth;
-                  dimension[1] = window.innerHeight;
-                  Shiny.onInputChange("dimension", dimension);
-              });
-              $(window).resize(function(e) {
-                  dimension[0] = window.innerWidth;
-                  dimension[1] = window.innerHeight;
-                  Shiny.onInputChange("dimension", dimension);
-              });
-              $(document).ready(function(){
-                  $("a[data-toggle=tab]").on("show.bs.tab", function(e){
-                    Shiny.setInputValue("activeTab", $(this).attr("data-value"));
-                   });
-            });
-      '
-    )),
+    # tags$script(
+    #   'var dimension = [0, 0];
+    #           $(document).on("shiny:connected", function(e) {
+    #               dimension[0] = window.innerWidth;
+    #               dimension[1] = window.innerHeight;
+    #               Shiny.onInputChange("dimension", dimension);
+    #           });
+    #           $(window).resize(function(e) {
+    #               dimension[0] = window.innerWidth;
+    #               dimension[1] = window.innerHeight;
+    #               Shiny.onInputChange("dimension", dimension);
+    #           });
+    #           $(document).ready(function(){
+    #               $("a[data-toggle=tab]").on("show.bs.tab", function(e){
+    #                 Shiny.setInputValue("activeTab", $(this).attr("data-value"));
+    #                });
+    #         });
+    #   '
+    # )
+    ),
   tabItems(
     #### Homepage ----
     ##### home ----

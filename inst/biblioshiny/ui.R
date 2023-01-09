@@ -2611,8 +2611,8 @@ body <- dashboardBody(
                 div(style=style_bttn,
                     title = t_export,
                     column(1, 
-                           do.call("downloadBttn", c(export_bttn, list(
-                             outputId = "cocPlot.save")
+                           do.call("actionBttn", c(export_bttn, list(
+                             inputId = "screenCOC")
                            ))
                     )),
                 div(column(1,

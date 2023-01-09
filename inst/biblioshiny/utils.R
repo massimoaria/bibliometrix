@@ -1470,7 +1470,7 @@ screenSh <- function(selector){
   return(file)
 }
 
-addScreenWb <- function(df, wb, width=14, height=8, dpi=300){
+addScreenWb <- function(df, wb, width=14, height=8, dpi=75){
   names(df) <- c("sheet","file","n")
   if (nrow(df)>0){
     sheet <- unique(df$sheet)
@@ -1491,7 +1491,7 @@ addScreenWb <- function(df, wb, width=14, height=8, dpi=300){
   return(wb)
 }
 
-addSheetToReport <- function(list_df, list_plot, sheetname, wb){
+addSheetToReport <- function(list_df, list_plot, sheetname, wb, dpi=75){
   ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
   if (length(ind)>0){
     sheetname <- paste(sheetname,"(",length(ind)+1,")",sep="")
@@ -1504,7 +1504,7 @@ addSheetToReport <- function(list_df, list_plot, sheetname, wb){
   } else {col <- 1}
   
     if (!is.null(list_plot)){
-      wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col)
+      wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col, dpi = dpi)
     }
   #values$sheet_name <- sheetname
   return(wb)

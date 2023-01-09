@@ -57,6 +57,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
     resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, ngrams=ngrams,
                         stemming = stemming, size = size, n.labels = n.labels, 
                         repel = repel, remove.terms = remove.terms, synonyms = synonyms, cluster=cluster)
+    resk$params <- resk$params %>% dplyr::filter(.data$params!="minfreq")
     res[[k]] <-  resk
     net[[k]] <-  resk$net
   }

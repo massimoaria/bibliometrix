@@ -3146,8 +3146,8 @@ body <- dashboardBody(
                                                  selectInput("TEmeasure", 
                                                              label = "Weight index",
                                                              choices = c("Inclusion Index" = "inclusion", 
-                                                                         "Inclusion Index weighted by Word-Occurrences" = "weighted",
-                                                                         "Stability Index" = "stability"
+                                                                         "Inclusion Index weighted by Word-Occurrences" = "weighted"#,
+                                                                         #"Stability Index" = "stability"
                                                              ),
                                                              selected = "weighted")
                                  ),
@@ -4140,7 +4140,7 @@ body <- dashboardBody(
                 br()
               ),
               fluidRow(column(6,
-                              h3("Plot settings:"),
+                              h3("PNG Export Settings:"),
                               br(),
                               sliderTextInput(
                                 inputId = "dpi",
@@ -4161,6 +4161,20 @@ body <- dashboardBody(
                                 choices = seq(5,15),
                                 selected = "7"
                               )
+                              #,
+                              # br(),
+                              # br(),
+                              # h3("Report Export Settings:"),
+                              # br(),
+                              # sliderTextInput(
+                              #   inputId = "dpiReport",
+                              #   label = "Please select the desired DPI", 
+                              #   grid = TRUE,
+                              #   force_edges = TRUE,
+                              #   choices = c("75", "150", "300", "600"),
+                              #   width = "70%",
+                              #   selected = "75"
+                              #   )
               ), column(6
                         ### To insert settings for default path, etc.
                         )
@@ -4170,15 +4184,7 @@ body <- dashboardBody(
   )
 )
 
-## Control Bar ####
-# controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
-#                                                       uiOutput("controlbar"),
-#                                                       skin = "light",
-#                                                       width = 350,
-#                                                       overlay = FALSE,
-#                                                       collapsed = TRUE,
-#                                                       shinyjs::useShinyjs()
-# )
+
 ## UI ####
 ui <- shinydashboardPlus::dashboardPage(
                                         #shinyjs::useShinyjs(),

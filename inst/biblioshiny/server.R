@@ -404,7 +404,9 @@ server <- function(input, output,session){
       switch(ext,
              ### excel format
              xlsx={
-               M <- readxl::read_excel(inFile$datapath) %>% as.data.frame(stringsAsFactors=FALSE)
+               M <- readxl::read_excel(inFile$datapath, col_types = "text") %>% as.data.frame(stringsAsFactors=FALSE)
+               M$PY <- as.numeric(M$PY)
+               M$TC <- as.numeric(M$TC)
                class(M) <- c("bibliometrixDB", "data.frame")
                ### M row names
                ### identify duplicated SRs 

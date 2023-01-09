@@ -15,8 +15,9 @@ server <- function(input, output,session){
   ## initial values
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
+  values$sidebar <- sidebarMenu()
+  values$rest_sidebar <- FALSE
   values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
-  values$sidebar <- FALSE
   values$wb <-  openxlsx::createWorkbook()
   values$dfLabel <- dfLabel()
   values$myChoices <- "Empty Report"
@@ -26,7 +27,7 @@ server <- function(input, output,session){
   ### setting values
   values$dpi <- 300
   values$h <- 7
-  values$dpiReport <- 75 
+  #values$w <- 14 
   values$path <- paste(getwd(),"/", sep="")
   ###
   
@@ -110,71 +111,79 @@ server <- function(input, output,session){
   ## SIDEBAR MENU ----
   ### Apply Data----
   output$rest_of_sidebar <- renderMenu({
-    if (isTRUE(values$sidebar)){
-      sidebarMenu(
-        menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
-        menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
-                 menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon"))),
-        menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
-                 menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
-        menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
-                 "Authors",
-                 menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Affiliations",
-                 menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Countries",
-                 menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
-        ),
-        menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
-                 "Documents",
-                 menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Cited References",
-                 menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Words",
-                 menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
-        ),
-        menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
-                 menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
-                 "Network Approach",
-                 menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
-                 menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
-                 "Factorial Approach",
-                 menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
-                 menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
-                 menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
-        menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
-      )
+    if (isTRUE(values$rest_sidebar)){
+        sidebarMenu(
+          menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
+          menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
+                   menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon"))),
+          menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
+                   menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
+                   menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
+          menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
+                   "Authors",
+                   menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
+                   "Affiliations",
+                   menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+                   "Countries",
+                   menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
+          ),
+          menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
+                   "Documents",
+                   menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
+                   "Cited References",
+                   menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
+                   "Words",
+                   menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
+          ),
+          menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
+                   menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon"))),
+          menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
+                   "Network Approach",
+                   menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
+                   menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
+                   "Factorial Approach",
+                   menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon"))),
+          menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
+                   menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
+          menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
+                   menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
+                   menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+          menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
+          menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
+        )
     } else {
       sidebarMenu()
     }
+  })
+  
+  observeEvent(input$applyLoad, {
+    updateTabItems(session, "sidebarmenu", "loadData")
+  })
+  
+  observeEvent(input$apiApply, {
+    updateTabItems(session, "sidebarmenu", "gathData")
   })
   
   ## Load Menu ----
@@ -233,7 +242,7 @@ server <- function(input, output,session){
       values$Morig = management
       values$Histfield = "NA"
       values$results = list("NA")
-      values$sidebar <- TRUE
+      values$rest_sidebar <- TRUE
       return()
     }
     inFile <- input$file1
@@ -448,8 +457,7 @@ server <- function(input, output,session){
     values$Morig = M
     values$Histfield = "NA"
     values$results = list("NA")
-    if (ncol(M)>1) {values$sidebar <- TRUE}
-    
+    if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
   })
   output$contents <- DT::renderDT({
     DATAloading()   
@@ -497,7 +505,7 @@ server <- function(input, output,session){
     content <- function(file) {
       tr <- FALSE
       if ("CR" %in% names(values$M)) tr <- (sum(nchar(values$M$CR)>32767, na.rm=TRUE))>0
-      
+
       if (tr & input$save_file=="xlsx"){
         show_alert(
           text = tags$span(
@@ -524,12 +532,12 @@ server <- function(input, output,session){
         )
         suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
       } else {
-        switch(input$save_file,
-               xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
-               RData={
-                 M=values$M
-                 save(M, file=file)
-               })
+      switch(input$save_file,
+             xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
+             RData={
+               M=values$M
+               save(M, file=file)
+             })
       }
     },
     contentType = input$save_file
@@ -786,7 +794,7 @@ server <- function(input, output,session){
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
-               if (ncol(M)>1) {values$sidebar <- TRUE}
+               if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
                values$Histfield = "NA"
                values$results = list("NA")
                contentTable(values)
@@ -804,7 +812,7 @@ server <- function(input, output,session){
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
-               if (ncol(M)>1) {values$sidebar <- TRUE}
+               if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
                values$Histfield = "NA"
                values$results = list("NA")
              }
@@ -1149,7 +1157,7 @@ server <- function(input, output,session){
     if(!is.null(values$TAB)){
       list_df <- list(values$TAB)
       list_plot <- list(values$ASPplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", wb=values$wb)
       values$wb <- wb
       popUp(title="Annual Scientific Production", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1253,7 +1261,7 @@ server <- function(input, output,session){
     if(!is.null(values$AnnualTotCitperYear)){
       list_df <- list(values$AnnualTotCitperYear)
       list_plot <- list(values$ACpYplot)
-      wb <- addSheetToReport(list_df, list_plot, sheetname = "AnnualCitPerYear", wb = values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df, list_plot, sheetname = "AnnualCitPerYear", wb = values$wb)
       values$wb <- wb
       popUp(title="Average Citations per Year", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1397,7 +1405,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABSo)){
       list_df <- list(values$TABSo %>% drop_na())
       list_plot <- list(values$MRSplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelSources", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelSources", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Relevant Sources", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1474,7 +1482,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABSoCit)){
       list_df <- list(values$TABSoCit)
       list_plot <- list(values$MLCSplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitSources", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitSources", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Local Cited Sources", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1528,7 +1536,7 @@ server <- function(input, output,session){
     if(!is.null(values$bradford$table)){
       list_df <- list(values$bradford$table)
       list_plot <- list(values$bradford$graph)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "BradfordLaw", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "BradfordLaw", wb=values$wb)
       values$wb <- wb
       popUp(title="Core Sources by Bradford's Law", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1591,7 +1599,7 @@ server <- function(input, output,session){
     if(!is.null(values$H)){
       list_df <- list(values$H)
       list_plot <- list(values$SIplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceLocImpact", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceLocImpact", wb=values$wb)
       values$wb <- wb
       popUp(title="Sources' Local Impact", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1734,7 +1742,7 @@ server <- function(input, output,session){
     if(!is.null(values$PYSO)){
       list_df <- list(values$PYSO)
       list_plot <- list(values$SDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceProdOverTime", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceProdOverTime", wb=values$wb)
       values$wb <- wb
       popUp(title="Sources' Production over Time", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1829,7 +1837,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABAu)){
       list_df <- list(values$TABAu)
       list_plot <- list(values$MRAplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAuthors", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAuthors", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Relevant Authors", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1908,7 +1916,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABAuCit)){
       list_df <- list(values$TABAuCit)
       list_plot <- list(values$MLCAplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitAuthors", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitAuthors", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Local Cited Authors", type="success")
       values$myChoices <- sheets(values$wb)
@@ -1972,7 +1980,7 @@ server <- function(input, output,session){
     if(!is.null(values$H)){
       list_df <- list(values$H)
       list_plot <- list(values$AIplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorLocImpact", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorLocImpact", wb=values$wb)
       values$wb <- wb
       popUp(title="Authors' Local Impact", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2145,7 +2153,7 @@ server <- function(input, output,session){
     if(!is.null(values$lotka$AuthorProd)){
       list_df <- list(values$lotka$AuthorProd)
       list_plot <- list(values$LLplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "LotkaLaw", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "LotkaLaw", wb=values$wb)
       values$wb <- wb
       popUp(title="Author Productivity through Lotka's Law", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2227,7 +2235,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABAff)){
       list_df <- list(values$TABAff)
       list_plot <- list(values$AFFplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAffiliations", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAffiliations", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Relevant Affiliations", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2312,7 +2320,7 @@ server <- function(input, output,session){
     if(!is.null(values$AffOverTime)){
       list_df <- list(values$AffOverTime)
       list_plot <- list(values$AffOverTimePlot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AffOverTime", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "AffOverTime", wb=values$wb)
       values$wb <- wb
       popUp(title="Affiliations' Production over Time", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2417,7 +2425,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABCo)){
       list_df <- list(values$TABCo)
       list_plot <- list(values$MRCOplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CorrAuthCountries", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CorrAuthCountries", wb=values$wb)
       values$wb <- wb
       popUp(title="Corresponding Author's Countries", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2472,7 +2480,7 @@ server <- function(input, output,session){
     if(!is.null(values$mapworld$tab)){
       list_df <- list(values$mapworld$tab)
       list_plot <- list(values$mapworld$g)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountrySciProd", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountrySciProd", wb=values$wb)
       values$wb <- wb
       popUp(title="Countries' Scientific Production", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2560,7 +2568,7 @@ server <- function(input, output,session){
     if(!is.null(values$CountryOverTime)){
       list_df <- list(values$CountryOverTime)
       list_plot <- list(values$CountryOverTimePlot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountryProdOverTime", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountryProdOverTime", wb=values$wb)
       values$wb <- wb
       popUp(title="Countries' Production over Time", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2645,7 +2653,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABCitCo)){
       list_df <- list(values$TABCitCo)
       list_plot <- list(values$MCCplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostCitCountries", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostCitCountries", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Cited Countries", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2730,7 +2738,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABGlobDoc)){
       list_df <- list(values$TABGlobDoc)
       list_plot <- list(values$MGCDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostGlobCitDocs", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostGlobCitDocs", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Global Cited Documents", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2819,7 +2827,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABLocDoc)){
       list_df <- list(values$TABLocDoc)
       list_plot <- list(values$MLCDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitDocs", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitDocs", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Local Cited Documents", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2900,7 +2908,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABCitRef)){
       list_df <- list(values$TABCitRef)
       list_plot <- list(values$MLCRplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitRefs", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitRefs", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Local Cited References", type="success")
       values$myChoices <- sheets(values$wb)
@@ -2996,7 +3004,7 @@ server <- function(input, output,session){
     if(!is.null(values$res$CR)){
       list_df <- list(values$res$CR, values$res$rpysTable)
       list_plot <- list(values$res$spectroscopy)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "RPYS", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "RPYS", wb=values$wb)
       values$wb <- wb
       popUp(title="Reference Spectroscopy", type="success")
       values$myChoices <- sheets(values$wb)
@@ -3116,7 +3124,7 @@ server <- function(input, output,session){
     if(!is.null(values$TABWord)){
       list_df <- list(values$TABWord)
       list_plot <- list(values$MRWplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostFreqWords", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostFreqWords", wb=values$wb)
       values$wb <- wb
       popUp(title="Most Frequent Words", type="success")
       values$myChoices <- sheets(values$wb)
@@ -3490,7 +3498,7 @@ server <- function(input, output,session){
     if(!is.null(values$KW)){
       list_df <- list(values$KW)
       list_plot <- list(values$WDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "WordFreqOverTime", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "WordFreqOverTime", wb=values$wb)
       values$wb <- wb
       popUp(title="Words' Frequency over Time", type="success")
       values$myChoices <- sheets(values$wb)
@@ -3593,7 +3601,7 @@ server <- function(input, output,session){
     if(!is.null(values$trendTopics$df_graph)){
       list_df <- list(values$trendTopics$df_graph)
       list_plot <- list(values$trendTopics$graph)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "TrendTopics", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "TrendTopics", wb=values$wb)
       values$wb <- wb
       popUp(title="Trend Topics", type="success")
       values$myChoices <- sheets(values$wb)
@@ -3786,7 +3794,7 @@ server <- function(input, output,session){
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+16, width=10, height=7, dpi = values$dpiReport)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+16, width=10, height=7, dpi=75)
       values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
       popUp(title="Co-occurrence Network", type="success")
@@ -4030,7 +4038,7 @@ server <- function(input, output,session){
     if(!is.null(values$CS$params)){
       list_df <- list(values$CS$params, values$CS$WData, values$CS$CSData)
       list_plot <- list(values$CS$graph_terms, values$CS$graph_dendogram, values$CS$graph_documents_Contrib, values$CS$graph_documents_TC)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "FactorialAnalysis", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "FactorialAnalysis", wb=values$wb)
       values$wb <- wb
       popUp(title="Factorial Analysis", type="success")
       values$myChoices <- sheets(values$wb)
@@ -4086,7 +4094,7 @@ server <- function(input, output,session){
   })
   
   ### click cluster networks
-  
+
   plotModal <- function(session) {
     ns <- session$ns
     modalDialog(
@@ -4110,16 +4118,16 @@ server <- function(input, output,session){
   
   output$cocPlotClust <- renderVisNetwork({
     values$d <- event_data("plotly_click")
-    coord <- values$d[c("x","y")]
-    color <- values$TM$clusters_orig %>% 
-      filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
-      select(.data$color) %>% as.character()
-    g <- values$TM$subgraphs[[color]]
-    igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
+      coord <- values$d[c("x","y")]
+      color <- values$TM$clusters_orig %>% 
+        filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
+        select(.data$color) %>% as.character()
+      g <- values$TM$subgraphs[[color]]
+      igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
   })
   
   ### end click cluster subgraphs
-  
+
   output$NetPlot <- renderVisNetwork({
     TMAP()
     values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
@@ -4209,7 +4217,7 @@ server <- function(input, output,session){
   output$TMTableDocument <- DT::renderDT({
     TMAP()
     tmDataDoc <- values$TM$documentToClusters
-    
+   
     DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4244,7 +4252,7 @@ server <- function(input, output,session){
                       values$TM$documentToClusters)
       list_plot <- list(values$TM$map,
                         values$TM$net$graph)
-      wb <- addSheetToReport(list_df, list_plot, sheetname="ThematicMap", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df, list_plot, sheetname="ThematicMap", wb=values$wb)
       values$wb <- wb
       popUp(title="Thematic Map", type="success")
       values$myChoices <- sheets(values$wb)
@@ -4285,8 +4293,7 @@ server <- function(input, output,session){
     ### end of block
     
     values$yearSlices <- as.numeric()
-    #if (is.null(values$nexus)){
-    if (is.null(input$numSlices)){
+    if (is.null(values$nexus)){
       values$yearSlices <- median(values$M$PY, na.rm=TRUE)
     }else{
       for (i in 1:as.integer(input$numSlices)){
@@ -4301,12 +4308,6 @@ server <- function(input, output,session){
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
       )
-      if (input$TEmeasure == "inclusion"){
-        TEmeasure <- "Inclusion Index"
-      } else {
-        TEmeasure <- "Inclusion Index weighted by Word-Occurrences"
-      }
-      values$nexus$params <- rbind(values$nexus$params,c( "Weight index", TEmeasure))
       for (i in 1:length(values$yearSlices)){
         values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[,-c(4,6)]
         values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[,c(9,5:8,11)]
@@ -4739,6 +4740,7 @@ server <- function(input, output,session){
     TEMAP()
     tmDataDoc <- values$nexus$TM[[1]]$documentToClusters
     
+    
     DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4897,20 +4899,20 @@ server <- function(input, output,session){
       #values$wb <- res$wb
       values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
-      
+
       ## Periods
       L <- length(values$nexus$TM)
       wb <- res$wb
       for (l in 1:L){
         if(!is.null(values$nexus$TM[[l]]$words)){
-          
+
           list_df <- list(values$nexus$TM[[l]]$params,
                           values$nexus$TM[[l]]$words,
                           values$nexus$TM[[l]]$clusters,
                           values$nexus$TM[[l]]$documentToClusters)
           list_plot <- list(values$nexus$TM[[l]]$map,
                             values$nexus$TM[[l]]$net$graph)
-          wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TE_Period_",l,sep=""), wb=wb, dpi = values$dpiReport)
+          wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TE_Period_",l,sep=""), wb=wb)
           #
         }
       }
@@ -4988,7 +4990,7 @@ server <- function(input, output,session){
   })
   
   observeEvent(input$reportCOCIT,{
-    
+
     if(!is.null(values$cocitnet$cluster_res)){
       names(values$cocitnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
       sheetname <- "CoCitNet"
@@ -4996,7 +4998,7 @@ server <- function(input, output,session){
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi = values$dpiReport)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=75)
       values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
       popUp(title="Co-citation Network", type="success")
@@ -5151,7 +5153,7 @@ server <- function(input, output,session){
       list_df <- list(values$colnet$params, values$colnet$cluster_res)
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=300)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=75)
       values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
       popUp(title="Collaboration Network", type="success")
@@ -5218,7 +5220,7 @@ server <- function(input, output,session){
     if(!is.null(values$WMmap$tab)){
       list_df <- list(values$WMmap$tab)
       list_plot <- list(values$WMmap$g)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CollabWorldMap", wb=values$wb, dpi = values$dpiReport)
+      wb <- addSheetToReport(list_df,list_plot,sheetname = "CollabWorldMap", wb=values$wb)
       values$wb <- wb
       popUp(title="Countries' Collaboration World Map", type="success")
       values$myChoices <- sheets(values$wb)
@@ -5235,7 +5237,7 @@ server <- function(input, output,session){
     content <- function(file) {
       wb_export <- copyWorkbook(values$wb)
       if (nrow(values$list_file)>0){
-        wb_export <- addScreenWb(df=values$list_file, wb=wb_export, dpi = values$dpiReport)#, width=10, height=7, dpi=300)
+        wb_export <- addScreenWb(df=values$list_file, wb=wb_export)#, width=10, height=7, dpi=300)
       }
       sheetToRemove <- setdiff(sheets(wb_export),input$reportSheets)
       if (length(sheetToRemove)>0) for (i in sheetToRemove) removeWorksheet(wb_export,i)
@@ -5251,7 +5253,7 @@ server <- function(input, output,session){
     output$reportSheets <- renderUI({
       prettyCheckboxGroup(
         inputId = "reportSheets",
-        label = NULL, 
+        label = NULL, #short2long(df=values$dfLabel, myC=values$myChoices),
         choices = short2long(df=values$dfLabel, myC=values$myChoices),
         selected = values$myChoices,
         icon = icon("check"),
@@ -5267,6 +5269,7 @@ server <- function(input, output,session){
     updatePrettyCheckboxGroup(
       session = getDefaultReactiveDomain(), 
       inputId = "reportSheets",
+      #label = short2long(df=values$dfLabel, myC=values$myChoices),
       choices = short2long(df=values$dfLabel, myC=values$myChoices),
       selected = if(!input$noSheets) values$myChoices,
       prettyOptions = list(
@@ -5307,9 +5310,287 @@ server <- function(input, output,session){
       values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
       values$wb <-  openxlsx::createWorkbook()
     }
-  }, ignoreNULL = TRUE
+      }, ignoreNULL = TRUE
   )
+    
+
   
+  # OPTIONS MENU ----
+  observe({
+    if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
+      updateControlbar("controlbar2")
+      values$checkControlBar <- TRUE
+    }
+    if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
+      updateControlbar("controlbar2")
+      values$checkControlBar <- FALSE
+    }
+  })
+  
+  # output$controlbar <- renderUI({
+  #   controlbarMenu(
+  #     controlbarItem(
+  #       h2(strong("Options"),align="center"),
+  #       fluidPage(
+  #         fluidRow(
+  #           column(width = 1),
+  #           column(width=11,
+  #                  ### Load Data ----
+  #                  # conditionalPanel(condition = 'input.sidebarmenu == "loadData"',
+  #                  #                  h3(strong("Import or Load ")),
+  #                  #                  selectInput(
+  #                  #                    "load",
+  #                  #                    label = "Please, choose what to do",
+  #                  #                    choices = c(
+  #                  #                      " " = "null",
+  #                  #                      "Import raw file(s)" = "import",
+  #                  #                      "Load bibliometrix file(s)" = "load",
+  #                  #                      "Use a sample collection" = "demo"
+  #                  #                    ),
+  #                  #                    selected = "null"
+  #                  #                  ),
+  #                  #                  conditionalPanel(
+  #                  #                    condition = "input.load == 'demo'",
+  #                  #                    helpText(h4(strong("The use of bibliometric approaches in business and management disciplines.")),
+  #                  #                             h5(strong("Dataset 'Management'")),
+  #                  #                             em("A collection of scientific articles about the use of bibliometric approaches",
+  #                  #                                "in business and management disciplines."),
+  #                  #                             br(),
+  #                  #                             em("Period: 1985 - 2020
+  #                  #                                  , Source WoS.")
+  #                  #                    )
+  #                  #                  ),
+  #                  #                  conditionalPanel(
+  #                  #                    condition = "input.load == 'import'",
+  #                  #                    selectInput(
+  #                  #                      "dbsource",
+  #                  #                      label = "Database",
+  #                  #                      choices = c(
+  #                  #                        "Web of Science (WoS/WoK)" = "isi",
+  #                  #                        "Scopus" = "scopus",
+  #                  #                        "Dimensions" = "dimensions",
+  #                  #                        "Lens.org" = "lens",
+  #                  #                        "PubMed" = "pubmed",
+  #                  #                        "Cochrane Library" = "cochrane"
+  #                  #                      ),
+  #                  #                      selected = "isi"
+  #                  #                    )
+  #                  #                  ),
+  #                  #                  conditionalPanel(
+  #                  #                    condition = "input.load != 'null' & input.load != 'demo'",
+  #                  #                    conditionalPanel(
+  #                  #                      condition = "input.load == 'load'",
+  #                  #                      helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix")
+  #                  #                      )),
+  #                  #                    fileInput(
+  #                  #                      "file1",
+  #                  #                      "Choose a file",
+  #                  #                      multiple = FALSE,
+  #                  #                      accept = c(
+  #                  #                        ".csv",
+  #                  #                        ".txt",
+  #                  #                        ".ciw",
+  #                  #                        ".bib",
+  #                  #                        ".xlsx",
+  #                  #                        ".zip",
+  #                  #                        ".xls",
+  #                  #                        ".rdata",
+  #                  #                        ".rda",
+  #                  #                        ".rds"
+  #                  #                      )
+  #                  #                    )
+  #                  #                  ),
+  #                  #                  conditionalPanel(condition = "input.load != 'null'",
+  #                  #                                   actionButton("applyLoad", strong("START"),
+  #                  #                                                style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
+  #                  #                                                width = "100%"),
+  #                  #                                   width = "100%"),
+  #                  #                  tags$hr(),
+  #                  #                  uiOutput("textLog"),
+  #                  #                  tags$hr(),
+  #                  #                  h3(strong(
+  #                  #                    "Export collection"
+  #                  #                  )),
+  #                  #                  selectInput(
+  #                  #                    'save_file',
+  #                  #                    'Save as:',
+  #                  #                    choices = c(
+  #                  #                      ' ' = 'null',
+  #                  #                      'Excel' = 'xlsx',
+  #                  #                      'R Data Format' = 'RData'
+  #                  #                    ),
+  #                  #                    selected = 'null'
+  #                  #                  ),
+  #                  #                  conditionalPanel(condition = "input.save_file != 'null'",
+  #                  #                                   downloadButton("collection.save", strong("Export"),
+  #                  #                                                  style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
+  #                  #                                                  width = "100%")
+  #                  #                  )
+  #                  # ),
+  #                  ## Gathering Data ----
+  #                  # conditionalPanel(condition = 'input.sidebarmenu == "gathData"',
+  #                  #                  h3(strong(
+  #                  #                    "Gather data using APIs "
+  #                  #                  )),
+  #                  #                  br(),
+  #                  #                  selectInput(
+  #                  #                    "dbapi",
+  #                  #                    label = "Database",
+  #                  #                    choices = c("DS Dimensions" = "ds",
+  #                  #                                "PubMed" = "pubmed"),
+  #                  #                    selected = "pubmed"
+  #                  #                  ),
+  #                  #                  ## Dimenions API 
+  #                  #                  conditionalPanel(
+  #                  #                    condition = "input.dbapi == 'ds'",
+  #                  #                    br(),
+  #                  #                    actionButton("dsShow",  h5(strong("1.  Configure API request")),
+  #                  #                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+  #                  #                                 width = "100%"),
+  #                  #                    h5(tags$b("Your Query")),
+  #                  #                    verbatimTextOutput("queryLog2", placeholder = FALSE),
+  #                  #                    h5(tags$b("Documents returned using your query")),
+  #                  #                    verbatimTextOutput("sampleLog2", placeholder = FALSE),
+  #                  #                  ),
+  #                  #                  ### Pubmed API 
+  #                  #                  conditionalPanel(
+  #                  #                    condition = "input.dbapi == 'pubmed'",
+  #                  #                    br(),
+  #                  #                    actionButton("pmShow", h5(strong("1.  Configure API request")),
+  #                  #                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+  #                  #                                 width = "100%"),
+  #                  #                    h5(tags$b("Your Query")),
+  #                  #                    verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
+  #                  #                    h5(tags$b("Documents returned using your query")),
+  #                  #                    verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
+  #                  #                  ),
+  #                  #                  tags$hr(),
+  #                  #                  actionButton("apiApply", h5(strong("2.  Download metadata")),
+  #                  #                               style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+  #                  #                               width = "100%"),
+  #                  #                  tags$hr(),
+  #                  #                  h3(strong(
+  #                  #                    "Export a bibliometrix file "
+  #                  #                  )),
+  #                  #                  br(),
+  #                  #                  selectInput(
+  #                  #                    'save_file_api',
+  #                  #                    'Save as:',
+  #                  #                    choices = c(
+  #                  #                      ' ' = 'null',
+  #                  #                      'Excel' = 'xlsx',
+  #                  #                      'R Data Format' = 'RData'
+  #                  #                    ),
+  #                  #                    selected = 'null'
+  #                  #                  ),
+  #                  #                  conditionalPanel(condition = "input.save_file_api != 'null'",
+  #                  #                                   downloadButton("collection.save_api", strong("Export"),
+  #                  #                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
+  #                  #                                                  width = "100%")
+  #                  #                  )
+  #                  # ),
+  #                  ## Filters ----
+  #                  # conditionalPanel(condition = 'input.sidebarmenu == "filters"',
+  #                  #                  h3(strong("Filters")),
+  #                  #                  br(),
+  #                  #                  actionButton("applyFilter", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
+  #                  #                               width = "100%",
+  #                  #                               icon = fa_i(name ="play")),
+  #                  #                  h5(" "),
+  #                  #                  box(h6(htmlOutput("textDim")),
+  #                  #                      width = "100%"),
+  #                  #                  br(),
+  #                  #                  uiOutput("selectLA"),
+  #                  #                  uiOutput("sliderPY"),
+  #                  #                  uiOutput("selectType"),
+  #                  #                  uiOutput("sliderTCpY"),
+  #                  #                  selectInput("bradfordSources", 
+  #                  #                              label = "Source by Bradford Law Zones",
+  #                  #                              choices = c("Core Sources"="core", 
+  #                  #                                          "Core + Zone 2 Sources"="zone2",
+  #                  #                                          "All Sources"="all"),
+  #                  #                              selected = "all")
+  #                  # ),
+  #                  ## Annual Scientific Prod ----
+  #                  
+  #                  ## Average Cit Per Year ----
+  # 
+  #                  ## Three field Plot ----
+  # 
+  #                  ## Relevant Sources ----
+  #                  
+  #                  ## Most Local Cited Sources ----
+  #                  
+  #                  ## Bradford Law ----
+  #                  
+  #                  ## Source Impact ----
+  #                  
+  #                  ## Source Dynamics ----
+  #                  
+  #                  ## Most relevant Authors ----
+  #                  
+  #                  ## Most Local Cited Authors ----
+  #                  
+  #                  ## Authors production over time ----
+  #                  
+  #                  ## Lotka law ----
+  #                  
+  #                  ## Author Impact ----
+  #                  
+  #                  ## Most Relevant Affiliations ----
+  #                  
+  #                  ## Affiliations' Production over Time ----
+  #                  
+  #                  ## Corresponding Author country ----
+  #                  
+  #                  ## Country Scientific Production ----
+  #                  
+  #                  ## Countries' Production over Time ----
+  #                  
+  #                  ## Most Cited Countries ----
+  #                  
+  #                  ## Most Global Cited Documents ----
+  #                  
+  #                  ## Most Local Cited Documents ----
+  #                  
+  #                  ## Most Local Cited References ----
+  #                  
+  #                  ## References spectroscopy
+  #                  
+  #                  ## Most Frequent Words ----
+  #                  
+  #                  ## Wordcloud ----
+  #                  
+  #                  ## Tree Map ----
+  #                  
+  #                  ## Word dynamics ----
+  # 
+  #                  ## Trend Topic ----
+  # 
+  #                  ## Coupling ----
+  # 
+  #                  ## Co-Occurence Network ----
+  # 
+  #                  ## Thematic Map ----
+  # 
+  #                  ## Thematic Evolution ----
+  # 
+  #                  ## Factorial Analysis ----
+  # 
+  #                  ## Co-citation Network ----
+  # 
+  #                  # ## Historiograph ----
+  # 
+  #                  # ## Collaboration Network ----
+  #                  
+  #                  ## Collaboration World Map ----
+  # 
+  #           ) 
+  #         )
+  #       )
+  #     )
+  #   )
+  # })
   
   ### screenshot buttons
   observeEvent(input$screenTFP,{
@@ -5389,12 +5670,24 @@ server <- function(input, output,session){
     )
   })
   
-  observeEvent(input$applyLoad, {
-    updateTabItems(session, "sidebarmenu", "loadData")
+  observeEvent(input$applyMLCSources, {
+    updateTabItems(session, "sidebarmenu", "localCitedSources")
   })
   
-  observeEvent(input$apiApply, {
-    updateTabItems(session, "sidebarmenu", "gathData")
+  observeEvent(input$applyCOGrowth, {
+    updateTabItems(session, "sidebarmenu", "COOverTime")
+  })
+  
+  observeEvent(input$applyMCCountries, {
+    updateTabItems(session, "sidebarmenu", "mostCitedCountries")
+  })
+  
+  observeEvent(input$applyCocit, {
+    updateTabItems(session, "sidebarmenu", "coCitationNetwork")
+  })
+  
+  observeEvent(input$applyCol, {
+    updateTabItems(session, "sidebarmenu", "collabNetwork")
   })
   
   ### settings ----
@@ -5404,10 +5697,6 @@ server <- function(input, output,session){
   
   observeEvent(input$h,{
     values$h <- as.numeric(input$h)
-  })
-  
-  observeEvent(input$dpiReport, {
-    values$dpiReport <- as.numeric(input$dpiReport)
   })
   
 }

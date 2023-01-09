@@ -8,13 +8,13 @@ mytitle <- tags$link(tags$a(href = 'https://www.bibliometrix.org/',target="_blan
                      strong("bibliometrix")
 )
 
-intro <- "javascript:void(window.open('https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html', '_blank'))"
-importData <- "javascript:void(window.open('https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html', '_blank'))"
-slides <- "javascript:void(window.open('https://bibliometrix.org/biblioshiny/assets/player/KeynoteDHTMLPlayer.html#0', '_blank'))"
-donation <- "javascript:void(window.open('https://www.bibliometrix.org/home/index.php/donation', '_blank'))"
-bibliometrixWeb <- "javascript:void(window.open('https://www.bibliometrix.org/', '_blank'))" 
-k_synth <- "javascript:void(window.open('https://www.k-synth.unina.it', '_blank'))"
-github_aria <- "javascript:void(window.open('https://github.com/massimoaria/bibliometrix', '_blank'))"
+intro <- 'https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html'
+importData <- 'https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html'
+slides <- 'https://bibliometrix.org/biblioshiny/assets/player/KeynoteDHTMLPlayer.html#0'
+donation <- 'https://www.bibliometrix.org/home/index.php/donation'
+bibliometrixWeb <- 'https://www.bibliometrix.org/' 
+k_synth <- 'https://www.k-synth.unina.it'
+github_aria <- 'https://github.com/massimoaria/bibliometrix'
 
 style_opt <-  "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
 style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
@@ -50,19 +50,19 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                 icon = icon("question"),
                                                 badgeStatus = NULL,
                                                 headerText = strong("Help Menu"),
-                                                messageItem(
+                                                messageItem2(
                                                   from = "Package Tutorial",
                                                   message = "",
                                                   href = intro,
                                                   icon = icon("play-circle", lib = "glyphicon")
                                                 ),
-                                                messageItem(
+                                                messageItem2(
                                                   from = "Convert and Import Data",
                                                   message = "",
                                                   icon = icon("info-sign", lib = "glyphicon"),
                                                   href = importData
                                                 ),
-                                                messageItem(
+                                                messageItem2(
                                                   icon = icon("play", lib = "glyphicon"),
                                                   from = "biblioshiny Tutorial",
                                                   message = "",
@@ -73,7 +73,7 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                            icon = icon("comment-dollar", lib = "font-awesome"),
                                                            badgeStatus = NULL,
                                                            headerText = strong("Donate"),
-                                                           messageItem(
+                                                           messageItem2(
                                                              from = "Donation",
                                                              message = "",
                                                              href = donation,
@@ -85,19 +85,19 @@ header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                                 icon = fa_i(name="cube"),
                                                 badgeStatus = NULL,
                                                 headerText = strong("Credits"),
-                                                messageItem(
+                                                messageItem2(
                                                   from = "Bibliometrix",
                                                   message = "",
                                                   href = bibliometrixWeb,
                                                   icon = fa_i(name = "globe")
                                                 ),
-                                                messageItem(
+                                                messageItem2(
                                                   from = "K-Synth",
                                                   message = "",
                                                   href = k_synth,
                                                   icon = fa_i(name = "watchman-monitoring")
                                                 ),
-                                                messageItem(
+                                                messageItem2(
                                                   from = "Github",
                                                   message = "",
                                                   href = github_aria,
@@ -138,26 +138,25 @@ body <- dashboardBody(
     tags$style(".fa-comment-dollar {font-size: 20px}"),
     tags$style(".fa-bars {font-size: 20px}"),
     tags$style(".sidebar-toggle {font-size: 15px}"),
-    # tags$script(
-    #   'var dimension = [0, 0];
-    #           $(document).on("shiny:connected", function(e) {
-    #               dimension[0] = window.innerWidth;
-    #               dimension[1] = window.innerHeight;
-    #               Shiny.onInputChange("dimension", dimension);
-    #           });
-    #           $(window).resize(function(e) {
-    #               dimension[0] = window.innerWidth;
-    #               dimension[1] = window.innerHeight;
-    #               Shiny.onInputChange("dimension", dimension);
-    #           });
-    #           $(document).ready(function(){
-    #               $("a[data-toggle=tab]").on("show.bs.tab", function(e){
-    #                 Shiny.setInputValue("activeTab", $(this).attr("data-value"));
-    #                });
-    #         });
-    #   '
-    # )
-    ),
+    tags$script(
+      'var dimension = [0, 0];
+              $(document).on("shiny:connected", function(e) {
+                  dimension[0] = window.innerWidth;
+                  dimension[1] = window.innerHeight;
+                  Shiny.onInputChange("dimension", dimension);
+              });
+              $(window).resize(function(e) {
+                  dimension[0] = window.innerWidth;
+                  dimension[1] = window.innerHeight;
+                  Shiny.onInputChange("dimension", dimension);
+              });
+              $(document).ready(function(){
+                  $("a[data-toggle=tab]").on("show.bs.tab", function(e){
+                    Shiny.setInputValue("activeTab", $(this).attr("data-value"));
+                   });
+            });
+      '
+    )),
   tabItems(
     #### Homepage ----
     ##### home ----
@@ -504,7 +503,7 @@ body <- dashboardBody(
                            ))
                     )),
                 div(style=style_bttn,
-                    title = t_report,
+                    title = t_export,
                     column(1, 
                            do.call("downloadBttn", c(export_bttn, list(
                              outputId = "ASPplot.save")
@@ -3146,8 +3145,8 @@ body <- dashboardBody(
                                                  selectInput("TEmeasure", 
                                                              label = "Weight index",
                                                              choices = c("Inclusion Index" = "inclusion", 
-                                                                         "Inclusion Index weighted by Word-Occurrences" = "weighted"#,
-                                                                         #"Stability Index" = "stability"
+                                                                         "Inclusion Index weighted by Word-Occurrences" = "weighted",
+                                                                         "Stability Index" = "stability"
                                                              ),
                                                              selected = "weighted")
                                  ),
@@ -4140,7 +4139,7 @@ body <- dashboardBody(
                 br()
               ),
               fluidRow(column(6,
-                              h3("PNG Export Settings:"),
+                              h3("Plot settings:"),
                               br(),
                               sliderTextInput(
                                 inputId = "dpi",
@@ -4161,20 +4160,6 @@ body <- dashboardBody(
                                 choices = seq(5,15),
                                 selected = "7"
                               )
-                              #,
-                              # br(),
-                              # br(),
-                              # h3("Report Export Settings:"),
-                              # br(),
-                              # sliderTextInput(
-                              #   inputId = "dpiReport",
-                              #   label = "Please select the desired DPI", 
-                              #   grid = TRUE,
-                              #   force_edges = TRUE,
-                              #   choices = c("75", "150", "300", "600"),
-                              #   width = "70%",
-                              #   selected = "75"
-                              #   )
               ), column(6
                         ### To insert settings for default path, etc.
                         )
@@ -4184,7 +4169,15 @@ body <- dashboardBody(
   )
 )
 
-
+## Control Bar ####
+# controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
+#                                                       uiOutput("controlbar"),
+#                                                       skin = "light",
+#                                                       width = 350,
+#                                                       overlay = FALSE,
+#                                                       collapsed = TRUE,
+#                                                       shinyjs::useShinyjs()
+# )
 ## UI ####
 ui <- shinydashboardPlus::dashboardPage(
                                         #shinyjs::useShinyjs(),

@@ -315,7 +315,7 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
   
   #clusters <- unique(df$Cluster)
   #w <- character(length(clusters))
-  
+  df$SR <- df$documents
   tab_global <- tableTag(df, term)
   tab_global <- data.frame(label=names(tab_global),tot=as.numeric(tab_global), n=nrow(M),stringsAsFactors = FALSE)
   

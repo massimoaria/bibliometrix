@@ -4293,7 +4293,7 @@ server <- function(input, output,session){
     ### end of block
     
     values$yearSlices <- as.numeric()
-    if (is.null(values$nexus)){
+    if (is.null(input$numSlices)){
       values$yearSlices <- median(values$M$PY, na.rm=TRUE)
     }else{
       for (i in 1:as.integer(input$numSlices)){

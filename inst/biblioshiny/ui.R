@@ -4136,7 +4136,33 @@ body <- dashboardBody(
             fluidPage(
               fluidRow(
                 h3(strong("Settings"), align="center"),
-                br(),
+                br()
+              ),
+              fluidRow(column(6,
+                              h3("Plot settings:"),
+                              br(),
+                              sliderTextInput(
+                                inputId = "dpi",
+                                label = "Please select the desired DPI", 
+                                grid = TRUE,
+                                force_edges = TRUE,
+                                choices = c("75", "150", "300", "600"),
+                                width = "70%",
+                                selected = "300"
+                              ),
+                              br(),
+                              sliderTextInput(
+                                inputId = "h",
+                                label = "Please select the desired heigth in inches", 
+                                grid = TRUE,
+                                force_edges = TRUE,
+                                width = "70%",
+                                choices = seq(5,15),
+                                selected = "7"
+                              )
+              ), column(6
+                        ### To insert settings for default path, etc.
+                        )
               )
             )
     )

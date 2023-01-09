@@ -31,7 +31,7 @@ strSynPreview <- function(string){
 }
 
 # from igraph to png file
-igraph2PNG <- function(x, filename, width = 10, height = 7, dpi=300){
+igraph2PNG <- function(x, filename, width = 10, height = 7, dpi=75){
   V(x)$centr <- centr_betw(x)$res
   df <- data.frame(name=V(x)$label,cluster=V(x)$color, centr=V(x)$centr) %>% 
     group_by(.data$cluster) %>% 
@@ -1436,7 +1436,7 @@ addDataScreenWb <- function(list_df, wb, sheetname){
   return(results)
 }
 
-addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=300){
+addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=75){
   l <- length(list_plot)
   startRow <- 1
   for (i in 1:l){

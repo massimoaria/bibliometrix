@@ -26,7 +26,7 @@ server <- function(input, output,session){
   ### setting values
   values$dpi <- 300
   values$h <- 7
-  values$w <- 14 
+  #values$w <- 14 
   values$path <- paste(getwd(),"/", sep="")
   ###
   
@@ -5685,6 +5685,15 @@ server <- function(input, output,session){
   
   observeEvent(input$applyCol, {
     updateTabItems(session, "sidebarmenu", "collabNetwork")
+  })
+  
+  ### settings ----
+  observeEvent(input$dpi, {
+    values$dpi <- as.numeric(input$dpi)
+  })
+  
+  observeEvent(input$h,{
+    values$h <- as.numeric(input$h)
   })
   
 }

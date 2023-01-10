@@ -1205,8 +1205,8 @@ server <- function(input, output,session){
   
   ## Annual Citation per Year ----
   output$AnnualTotCitperYearPlot <- renderPlotly({
+    current_year = as.numeric(substr(Sys.Date(),1,4))+1
     Table2 <- values$M %>%
-      mutate(current_year = as.numeric(substr(Sys.Date(),1,4))+1) %>% 
       group_by(PY) %>% 
       summarize(MeanTCperArt=round(mean(TC, na.rm=TRUE),2),
                 N =n()) %>% 

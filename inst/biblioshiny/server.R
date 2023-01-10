@@ -1205,29 +1205,7 @@ server <- function(input, output,session){
   
   ## Annual Citation per Year ----
   output$AnnualTotCitperYearPlot <- renderPlotly({
-    # if (values$results[[1]]=="NA"){
-    #   values$results=biblioAnalysis(values$M)}
-    # x=values$results
-    # 
-    # # Total Citation Plot
-    # Table2=aggregate(x$TotalCitation,by=list(x$Years),length)
-    # Table2$xx=aggregate(x$TotalCitation,by=list(x$Years),mean)$x
-    # Table2$Annual=NA
-    # d=date()
-    # d=as.numeric(substring(d,nchar(d)-3,nchar(d)))
-    # Table2$Years=d-Table2$Group.1
-    # Table2$Annual=Table2$xx/Table2$Years
-    # names(Table2)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
-    # 
-    # ## inserting missing years
-    # YY=setdiff(seq(min(x$Years,na.rm=TRUE),max(x$Years,na.rm=TRUE)),Table2$Year)
-    # if (length(YY>0)){
-    #   YY=data.frame(YY,0,0,0,0)
-    #   names(YY)=c("Year","N","MeanTCperArt","MeanTCperYear","CitableYears")
-    #   Table2=rbind(Table2,YY)
-    #   Table2=Table2[order(Table2$Year),]
-    #   row.names(Table2)=Table2$Year}
-    Table2 <- M %>%
+    Table2 <- values$M %>%
       mutate(current_year = as.numeric(substr(Sys.Date(),1,4))+1) %>% 
       group_by(PY) %>% 
       summarize(MeanTCperArt=round(mean(TC, na.rm=TRUE),2),

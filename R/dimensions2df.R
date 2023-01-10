@@ -240,7 +240,7 @@ postprocessingDim <- function(DATA) {
   }
   
   ####
-  cat("\nGenerating ISO Source names...")
+  cat("\nCreating ISO Source names...")
   DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
   DATA$J9 <- gsub("\\.","",DATA$JI)
   ####

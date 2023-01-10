@@ -3608,7 +3608,8 @@ server <- function(input, output,session){
                              stemming=input$CMstemming, size=input$sizeCM, 
                              label.term = input$CMlabeling,
                              n.labels=input$CMn.labels, repel=FALSE)
-    
+    values$CM$data <- values$CM$data[,c(1,5,2)]
+    values$CM$clusters <- values$CM$clusters[,c(7,1:4,6)]
     validate(
       need(values$CM$nclust > 0, "\n\nNo clusters in one or more periods. Please select a different set of parameters.")
     )
@@ -3639,8 +3640,8 @@ server <- function(input, output,session){
   
   output$CMTable <- DT::renderDT({
     CMMAP()
-    cmData=values$CM$data[,c(2,1,3,5)]
-    
+    #cmData=values$CM$data[,c(2,1,3,5)]
+    cmData <- values$CM$data
     DT::datatable(cmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -3665,8 +3666,8 @@ server <- function(input, output,session){
   
   output$CMTableCluster <- DT::renderDT({
     CMMAP()
-    cmData=values$CM$clusters[,c(7,1:4,6)]
-    
+    #cmData=values$CM$clusters[,c(7,1:4,6)]
+    cmData <- values$CM$clusters
     DT::datatable(cmData, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -3687,6 +3688,23 @@ server <- function(input, output,session){
                                  lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
                                  columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(cmData))-1))))) %>%
       formatStyle(names(cmData),  backgroundColor = 'white') 
+  })
+  
+  observeEvent(input$reportCM,{
+    if(!is.null(values$CM$data)){
+      popUp(title=NULL, type="waiting")
+      list_df <- list(values$CM$params,
+                      values$CM$data,
+                      values$CM$clusters)
+      list_plot <- list(values$CM$map,
+                        values$CM$net$graph)
+      wb <- addSheetToReport(list_df, list_plot, sheetname="CouplingMap", wb=values$wb)
+      values$wb <- wb
+      popUp(title="Coupling Map", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
+    }
   })
   
   # CONCEPTUAL STRUCTURE ----
@@ -5302,282 +5320,17 @@ server <- function(input, output,session){
 
   
   # OPTIONS MENU ----
-  observe({
-    if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
-      updateControlbar("controlbar2")
-      values$checkControlBar <- TRUE
-    }
-    if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
-      updateControlbar("controlbar2")
-      values$checkControlBar <- FALSE
-    }
-  })
-  
-  # output$controlbar <- renderUI({
-  #   controlbarMenu(
-  #     controlbarItem(
-  #       h2(strong("Options"),align="center"),
-  #       fluidPage(
-  #         fluidRow(
-  #           column(width = 1),
-  #           column(width=11,
-  #                  ### Load Data ----
-  #                  # conditionalPanel(condition = 'input.sidebarmenu == "loadData"',
-  #                  #                  h3(strong("Import or Load ")),
-  #                  #                  selectInput(
-  #                  #                    "load",
-  #                  #                    label = "Please, choose what to do",
-  #                  #                    choices = c(
-  #                  #                      " " = "null",
-  #                  #                      "Import raw file(s)" = "import",
-  #                  #                      "Load bibliometrix file(s)" = "load",
-  #                  #                      "Use a sample collection" = "demo"
-  #                  #                    ),
-  #                  #                    selected = "null"
-  #                  #                  ),
-  #                  #                  conditionalPanel(
-  #                  #                    condition = "input.load == 'demo'",
-  #                  #                    helpText(h4(strong("The use of bibliometric approaches in business and management disciplines.")),
-  #                  #                             h5(strong("Dataset 'Management'")),
-  #                  #                             em("A collection of scientific articles about the use of bibliometric approaches",
-  #                  #                                "in business and management disciplines."),
-  #                  #                             br(),
-  #                  #                             em("Period: 1985 - 2020
-  #                  #                                  , Source WoS.")
-  #                  #                    )
-  #                  #                  ),
-  #                  #                  conditionalPanel(
-  #                  #                    condition = "input.load == 'import'",
-  #                  #                    selectInput(
-  #                  #                      "dbsource",
-  #                  #                      label = "Database",
-  #                  #                      choices = c(
-  #                  #                        "Web of Science (WoS/WoK)" = "isi",
-  #                  #                        "Scopus" = "scopus",
-  #                  #                        "Dimensions" = "dimensions",
-  #                  #                        "Lens.org" = "lens",
-  #                  #                        "PubMed" = "pubmed",
-  #                  #                        "Cochrane Library" = "cochrane"
-  #                  #                      ),
-  #                  #                      selected = "isi"
-  #                  #                    )
-  #                  #                  ),
-  #                  #                  conditionalPanel(
-  #                  #                    condition = "input.load != 'null' & input.load != 'demo'",
-  #                  #                    conditionalPanel(
-  #                  #                      condition = "input.load == 'load'",
-  #                  #                      helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix")
-  #                  #                      )),
-  #                  #                    fileInput(
-  #                  #                      "file1",
-  #                  #                      "Choose a file",
-  #                  #                      multiple = FALSE,
-  #                  #                      accept = c(
-  #                  #                        ".csv",
-  #                  #                        ".txt",
-  #                  #                        ".ciw",
-  #                  #                        ".bib",
-  #                  #                        ".xlsx",
-  #                  #                        ".zip",
-  #                  #                        ".xls",
-  #                  #                        ".rdata",
-  #                  #                        ".rda",
-  #                  #                        ".rds"
-  #                  #                      )
-  #                  #                    )
-  #                  #                  ),
-  #                  #                  conditionalPanel(condition = "input.load != 'null'",
-  #                  #                                   actionButton("applyLoad", strong("START"),
-  #                  #                                                style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-  #                  #                                                width = "100%"),
-  #                  #                                   width = "100%"),
-  #                  #                  tags$hr(),
-  #                  #                  uiOutput("textLog"),
-  #                  #                  tags$hr(),
-  #                  #                  h3(strong(
-  #                  #                    "Export collection"
-  #                  #                  )),
-  #                  #                  selectInput(
-  #                  #                    'save_file',
-  #                  #                    'Save as:',
-  #                  #                    choices = c(
-  #                  #                      ' ' = 'null',
-  #                  #                      'Excel' = 'xlsx',
-  #                  #                      'R Data Format' = 'RData'
-  #                  #                    ),
-  #                  #                    selected = 'null'
-  #                  #                  ),
-  #                  #                  conditionalPanel(condition = "input.save_file != 'null'",
-  #                  #                                   downloadButton("collection.save", strong("Export"),
-  #                  #                                                  style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-  #                  #                                                  width = "100%")
-  #                  #                  )
-  #                  # ),
-  #                  ## Gathering Data ----
-  #                  # conditionalPanel(condition = 'input.sidebarmenu == "gathData"',
-  #                  #                  h3(strong(
-  #                  #                    "Gather data using APIs "
-  #                  #                  )),
-  #                  #                  br(),
-  #                  #                  selectInput(
-  #                  #                    "dbapi",
-  #                  #                    label = "Database",
-  #                  #                    choices = c("DS Dimensions" = "ds",
-  #                  #                                "PubMed" = "pubmed"),
-  #                  #                    selected = "pubmed"
-  #                  #                  ),
-  #                  #                  ## Dimenions API 
-  #                  #                  conditionalPanel(
-  #                  #                    condition = "input.dbapi == 'ds'",
-  #                  #                    br(),
-  #                  #                    actionButton("dsShow",  h5(strong("1.  Configure API request")),
-  #                  #                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-  #                  #                                 width = "100%"),
-  #                  #                    h5(tags$b("Your Query")),
-  #                  #                    verbatimTextOutput("queryLog2", placeholder = FALSE),
-  #                  #                    h5(tags$b("Documents returned using your query")),
-  #                  #                    verbatimTextOutput("sampleLog2", placeholder = FALSE),
-  #                  #                  ),
-  #                  #                  ### Pubmed API 
-  #                  #                  conditionalPanel(
-  #                  #                    condition = "input.dbapi == 'pubmed'",
-  #                  #                    br(),
-  #                  #                    actionButton("pmShow", h5(strong("1.  Configure API request")),
-  #                  #                                 style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-  #                  #                                 width = "100%"),
-  #                  #                    h5(tags$b("Your Query")),
-  #                  #                    verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
-  #                  #                    h5(tags$b("Documents returned using your query")),
-  #                  #                    verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
-  #                  #                  ),
-  #                  #                  tags$hr(),
-  #                  #                  actionButton("apiApply", h5(strong("2.  Download metadata")),
-  #                  #                               style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-  #                  #                               width = "100%"),
-  #                  #                  tags$hr(),
-  #                  #                  h3(strong(
-  #                  #                    "Export a bibliometrix file "
-  #                  #                  )),
-  #                  #                  br(),
-  #                  #                  selectInput(
-  #                  #                    'save_file_api',
-  #                  #                    'Save as:',
-  #                  #                    choices = c(
-  #                  #                      ' ' = 'null',
-  #                  #                      'Excel' = 'xlsx',
-  #                  #                      'R Data Format' = 'RData'
-  #                  #                    ),
-  #                  #                    selected = 'null'
-  #                  #                  ),
-  #                  #                  conditionalPanel(condition = "input.save_file_api != 'null'",
-  #                  #                                   downloadButton("collection.save_api", strong("Export"),
-  #                  #                                                  style ="border-radius: 10px; border-width: 3px;font-size: 20px;",
-  #                  #                                                  width = "100%")
-  #                  #                  )
-  #                  # ),
-  #                  ## Filters ----
-  #                  # conditionalPanel(condition = 'input.sidebarmenu == "filters"',
-  #                  #                  h3(strong("Filters")),
-  #                  #                  br(),
-  #                  #                  actionButton("applyFilter", strong("Run"),style ="border-radius: 10px; border-width: 3px; font-size: 20px;",
-  #                  #                               width = "100%",
-  #                  #                               icon = fa_i(name ="play")),
-  #                  #                  h5(" "),
-  #                  #                  box(h6(htmlOutput("textDim")),
-  #                  #                      width = "100%"),
-  #                  #                  br(),
-  #                  #                  uiOutput("selectLA"),
-  #                  #                  uiOutput("sliderPY"),
-  #                  #                  uiOutput("selectType"),
-  #                  #                  uiOutput("sliderTCpY"),
-  #                  #                  selectInput("bradfordSources", 
-  #                  #                              label = "Source by Bradford Law Zones",
-  #                  #                              choices = c("Core Sources"="core", 
-  #                  #                                          "Core + Zone 2 Sources"="zone2",
-  #                  #                                          "All Sources"="all"),
-  #                  #                              selected = "all")
-  #                  # ),
-  #                  ## Annual Scientific Prod ----
-  #                  
-  #                  ## Average Cit Per Year ----
-  # 
-  #                  ## Three field Plot ----
-  # 
-  #                  ## Relevant Sources ----
-  #                  
-  #                  ## Most Local Cited Sources ----
-  #                  
-  #                  ## Bradford Law ----
-  #                  
-  #                  ## Source Impact ----
-  #                  
-  #                  ## Source Dynamics ----
-  #                  
-  #                  ## Most relevant Authors ----
-  #                  
-  #                  ## Most Local Cited Authors ----
-  #                  
-  #                  ## Authors production over time ----
-  #                  
-  #                  ## Lotka law ----
-  #                  
-  #                  ## Author Impact ----
-  #                  
-  #                  ## Most Relevant Affiliations ----
-  #                  
-  #                  ## Affiliations' Production over Time ----
-  #                  
-  #                  ## Corresponding Author country ----
-  #                  
-  #                  ## Country Scientific Production ----
-  #                  
-  #                  ## Countries' Production over Time ----
-  #                  
-  #                  ## Most Cited Countries ----
-  #                  
-  #                  ## Most Global Cited Documents ----
-  #                  
-  #                  ## Most Local Cited Documents ----
-  #                  
-  #                  ## Most Local Cited References ----
-  #                  
-  #                  ## References spectroscopy
-  #                  
-  #                  ## Most Frequent Words ----
-  #                  
-  #                  ## Wordcloud ----
-  #                  
-  #                  ## Tree Map ----
-  #                  
-  #                  ## Word dynamics ----
-  # 
-  #                  ## Trend Topic ----
-  # 
-  #                  ## Coupling ----
-  # 
-  #                  ## Co-Occurence Network ----
-  # 
-  #                  ## Thematic Map ----
-  # 
-  #                  ## Thematic Evolution ----
-  # 
-  #                  ## Factorial Analysis ----
-  # 
-  #                  ## Co-citation Network ----
-  # 
-  #                  # ## Historiograph ----
-  # 
-  #                  # ## Collaboration Network ----
-  #                  
-  #                  ## Collaboration World Map ----
-  # 
-  #           ) 
-  #         )
-  #       )
-  #     )
-  #   )
+  # observe({
+  #   if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
+  #     updateControlbar("controlbar2")
+  #     values$checkControlBar <- TRUE
+  #   }
+  #   if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
+  #     updateControlbar("controlbar2")
+  #     values$checkControlBar <- FALSE
+  #   }
   # })
-  
+
   ### screenshot buttons
   observeEvent(input$screenTFP,{
     screenshot(
@@ -5656,25 +5409,6 @@ server <- function(input, output,session){
     )
   })
   
-  observeEvent(input$applyMLCSources, {
-    updateTabItems(session, "sidebarmenu", "localCitedSources")
-  })
-  
-  observeEvent(input$applyCOGrowth, {
-    updateTabItems(session, "sidebarmenu", "COOverTime")
-  })
-  
-  observeEvent(input$applyMCCountries, {
-    updateTabItems(session, "sidebarmenu", "mostCitedCountries")
-  })
-  
-  observeEvent(input$applyCocit, {
-    updateTabItems(session, "sidebarmenu", "coCitationNetwork")
-  })
-  
-  observeEvent(input$applyCol, {
-    updateTabItems(session, "sidebarmenu", "collabNetwork")
-  })
   
   ### settings ----
   observeEvent(input$dpi, {

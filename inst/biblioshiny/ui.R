@@ -2477,7 +2477,7 @@ body <- dashboardBody(
                     title = t_report,
                     column(1, 
                            do.call("actionBttn", c(report_bttn, list(
-                             inputId = "reportCC")
+                             inputId = "reportCM")
                            ))
                     )),
                 div(style=style_bttn,

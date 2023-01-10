@@ -536,12 +536,7 @@ StatNodes <- ggplot2::ggproto("StatNodes", ggplot2::Stat,
 
 ### Credits to Patrick Barks. Function is a fork of the package Abbrev
 AbbrevTerm <- function(x, check = TRUE) {
-  # data("isodata",envir=environment())
-  # ltwa_phrase <- ltwa_phrase
-  # ltwa_prefix <- ltwa_prefix
-  # ltwa_singles <- ltwa_singles
-  # df_artcon <- df_artcon
-  # df_prep <- df_prep
+  
   if (check == FALSE) {
     out <- x
   } else {
@@ -557,37 +552,40 @@ AbbrevTerm <- function(x, check = TRUE) {
     is_title <- ch1 == toupper(ch1)
     
     # check for whole word match
-    #int_whole_match <- stringi::stri_cmp_equiv(x, ltwa_singles$WORD, strength = 1)
-    int_whole_match <- identical(x, ltwa_singles$WORD)
+    # TODO: find way to deal with multiple whole word matches (e.g. w/ and w/o diacritics)
+    int_whole_match <- stringi::stri_cmp_equiv(x, ltwa_singles$WORD, strength = 1)
     ind_whole_match <- which(int_whole_match == TRUE)
     
     if (length(ind_whole_match > 0)) {
+      # if whole-word match is found, return corresponding abbrev (if no abbrev,
+      #  return original x)
       abbrev <- ltwa_singles$ABBREVIATIONS[ind_whole_match]
       word <- ltwa_singles$WORD[ind_whole_match]
       out <- ifelse(is.na(abbrev), word, abbrev)
     } else {
       # else, find matching prefix
-      lgl_prefix <- stringr::str_starts(x, ltwa_prefix$WORD)
-      #lgl_prefix <- stringi::stri_startswith_coll(x, ltwa_prefix$WORD, strength = 1)
+      # TODO: give preference to matches with higher strength
+      lgl_prefix <- stringi::stri_startswith_coll(x, ltwa_prefix$WORD, strength = 1)
       ind_prefix <- which(lgl_prefix == TRUE)
       
       # choose abbrev based on number of matching prefixes (0, 1, or 2+)
       if (length(ind_prefix) == 0) {
+        # if no matching prefixes, return original x
         out <- x
       } else if (length(ind_prefix) == 1) {
+        # if one matching prefixes, return corresponding abbrev
         out <- ltwa_prefix$ABBREVIATIONS[ind_prefix]
         if (is.na(out)) out <- x
       } else {
+        # if multiple matching prefixes, choose abbrev from longest match
         ind_prefix <- ind_prefix[which.max(nchar(ltwa_prefix$WORD[ind_prefix]))]
         out <- ltwa_prefix$ABBREVIATIONS[ind_prefix]
       }
     }
     
     # if x contains only latin chars, remove any diacritics from abbrev
-    if (stringr::str_conv(x, 'Latin-ASCII') == x) {
-    #if (stringi::stri_trans_general(x, 'Latin-ASCII') == x) {
-      #out <- stringi::stri_trans_general(out, 'Latin-ASCII')
-      out <- stringr::str_conv(out, 'Latin-ASCII')
+    if (stringi::stri_trans_general(x, 'Latin-ASCII') == x) {
+      out <- stringi::stri_trans_general(out, 'Latin-ASCII')
     }
     
     # if x is title case, convert out to title case
@@ -595,18 +593,17 @@ AbbrevTerm <- function(x, check = TRUE) {
       out <- ToTitleCase(out)
     }
   }
-
+  
+  # return
   return(out)
 }
 
+
 ### Credits to Patrick Barks. Function is a fork of the package Abbrev
 AbbrevTitle <- function(x) {
-  # data("isodata",envir=environment())
-  # ltwa_phrase <- ltwa_phrase
-  # ltwa_prefix <- ltwa_prefix
-  # ltwa_singles <- ltwa_singles
-  # df_artcon <- df_artcon
-  # df_prep <- df_prep
+  ind <- rank(-nchar(ltwa_phrase$WORD), ties.method = "last")
+  ltwa_phrase[ind,] <- ltwa_phrase
+
   # check for invalid x
   if(length(x) > 1) {
     stop('Please provide a single string (length(x) should equal 1)')
@@ -616,71 +613,78 @@ AbbrevTitle <- function(x) {
   #  individual words/terms
   x <- gsub('[[:space:]]\\(.+\\)|\\,|\\.', '', x)
   xv <- unlist(strsplit(x, ' '))
+  
+  # if title contains only one word, return that word
   if (length(xv) == 1) {
     out <- ToTitleCase(xv)
   } else {
+    # otherwise... check for matching multi-word phrases
+    
+    # vector to track which elements of xv already abbreviated
     xv_which_abb <- logical(length(xv))
     
+    # search for multi-word matches (e.g. South Pacific)
     lgl_phrase <- sapply(ltwa_phrase$WORD, function(y) grepl(y, tolower(x)), USE.NAMES = FALSE)
     ind_phrase <- which(lgl_phrase)
     
+    # if any matching multi-word phrases
     if (length(ind_phrase) > 0) {
+      
       for (i in 1:length(ind_phrase)) {
         match_phrase <- unlist(strsplit(ltwa_phrase$WORD[ind_phrase[i]], '[[:space:]]'))
         match_abb <- ltwa_phrase$ABBREVIATIONS[ind_phrase[i]]
         ind_match <- sapply(match_phrase, function(y) grep(y, tolower(xv)), USE.NAMES = FALSE) # should only find sequential matches
-        xv[ind_match[1]] <- match_abb
-        xv_which_abb[ind_match[1]] <- TRUE
-        xv <- xv[-ind_match[-1]]
-        xv_which_abb <- xv_which_abb[-ind_match[-1]]
+        if (length(ind_match[[1]])>0){
+        ind <- ind_match[[1]]:(ind_match[[1]]+length(ind_match)-1)
+        xv[ind[1]] <- match_abb
+        xv <- c(xv[-ind[-1]])
+        xv_which_abb[ind[1]] <- TRUE
+        xv_which_abb <- c(xv_which_abb[-ind[-1]])
+        }
       }
     }
-
+    
+    # if title fully matches multi-word phrase(s), return
     if (all(xv_which_abb == TRUE)) {
       out <- xv
     } else {
-
-      CheckPrep <- function(x, check) {
-        if(check == TRUE) {
-          return(ifelse(tolower(x) %in% df_prep$word, TRUE, FALSE))
-        } else {
-          return(FALSE)
-        }
-      }
+      # otherwise... deal with prepositions, articles, and conjunctions
       
+      # remove prepositions not at beginning of word
       ind_rem_prep <- c(FALSE, mapply(CheckPrep, USE.NAMES = F, x = xv[-1], check = !xv_which_abb[-1]))
       xv <- xv[!ind_rem_prep]
       xv_which_abb <- xv_which_abb[!ind_rem_prep]
       
-      CheckArtCon <- function(x, check) {
-        if(check == TRUE) {
-          return(ifelse(tolower(x) %in% df_artcon$word, TRUE, FALSE))
-        } else {
-          return(FALSE)
-        }
-      }
-      
+      # remove articles and conjunctions
       ind_rem_artcon <- mapply(CheckArtCon, USE.NAMES = F, x = xv, check = !xv_which_abb)
       xv <- xv[!ind_rem_artcon]
       xv_which_abb <- xv_which_abb[!ind_rem_artcon]
       
+      # remove d' and l', if followed by character
       xv <- gsub("^d'(?=[[:alpha:]])|^l'(?=[[:alpha:]])", "", xv, ignore.case = TRUE, perl = TRUE)
       
+      # if title fully matches multi-word phrase(s) (minus articles/conjunctions), return
       if (all(xv_which_abb == TRUE)) {
         out <- xv
       } else {
-
+        # otherwise... check for hyphenated words
+      
+        # check for hyphenated words
         ind_dash <- grep('[[:alpha:]]-[[:alpha:]]', xv)
         if (length(ind_dash) > 0) {
+          # if hyphens, split hyphenated strings into vectors
           xv <- unlist(strsplit(xv, '-'))
           
+          # update xv_which_abb based on hyphens
           for(i in length(ind_dash):1) {
             xv_which_abb <- append(xv_which_abb, FALSE, ind_dash[i])
           }
         }
         
+        # abbreviate all words in title (excluding multi-word phrases)
         abbrev_full <- mapply(AbbrevTerm, x = xv, check = !xv_which_abb, USE.NAMES = F)
         
+        # add dashes back in, if applicable
         if (length(ind_dash) > 0) {
           for(i in 1:length(ind_dash)) {
             dashed_terms <- abbrev_full[c(ind_dash[i], ind_dash[i] + 1)]
@@ -689,6 +693,7 @@ AbbrevTitle <- function(x) {
           }
         }
         
+        # collapse title to vector
         out <- paste(abbrev_full, collapse = ' ')
       }
     }
@@ -700,3 +705,18 @@ ToTitleCase <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
 
+CheckPrep <- function(x, check) {
+  if(check == TRUE) {
+    return(ifelse(tolower(x) %in% df_prep$word, TRUE, FALSE))
+  } else {
+    return(FALSE)
+  }
+}
+
+CheckArtCon <- function(x, check) {
+  if(check == TRUE) {
+    return(ifelse(tolower(x) %in% df_artcon$word, TRUE, FALSE))
+  } else {
+    return(FALSE)
+  }
+}

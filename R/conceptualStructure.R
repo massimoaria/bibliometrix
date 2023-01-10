@@ -409,36 +409,34 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     b_doc_TC <- b_doc_TC + annotation_custom(logo, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2]) 
     ##
 
-    params <- list(field = field, 
-                   ngrams = ngrams,
-                   method=method,
-                   quali.supp=quali.supp,
-                   quanti.supp=quanti.supp,
-                   minDegree=minDegree,
-                   clust=clust,
-                   k.max=k.max,
-                   stemming = stemming, 
-                   labelsize=labelsize,
-                   documents=documents,
-                   graph=graph, 
-                   remove.terms = remove.terms, 
-                   synonyms = synonyms)
-    
-    params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
     
     if (isTRUE(graph)){plot(b_doc_TC)}
 
     semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,
-                         graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord,
-                         params=params)
+                         graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
     
   }else{
 
     semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,
-                         graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL,
-                         params=params)
+                         graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL)
     }
   
+  params <- list(field = field, 
+                 ngrams = ngrams,
+                 method=method,
+                 quali.supp=quali.supp,
+                 quanti.supp=quanti.supp,
+                 minDegree=minDegree,
+                 clust=clust,
+                 k.max=k.max,
+                 stemming = stemming, 
+                 labelsize=labelsize,
+                 documents=documents,
+                 graph=graph, 
+                 remove.terms = remove.terms, 
+                 synonyms = synonyms)
+  
+  semanticResults$params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
   
   
   return(semanticResults)

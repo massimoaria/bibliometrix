@@ -76,7 +76,7 @@ dimensions2df <- function(file, format = "csv") {
 
 
 postprocessingDim <- function(DATA) {
-  DATA <- data.frame(lapply(DATA, toupper), stringsAsFactors = FALSE)
+  # DATA <- data.frame(lapply(DATA, toupper), stringsAsFactors = FALSE)
   
   ## Converting original references in WOS format (AU, PY, SO, VOL, NUM, DOI)
   if ("Cited.references" %in% names(DATA)) {
@@ -232,15 +232,20 @@ postprocessingDim <- function(DATA) {
   if (("SO" %in% names(DATA)) & ("Anthology.title" %in% names(DATA))) {
     ind <- which(is.na(DATA$SO) | DATA$SO=="")
     DATA$SO[ind] <- DATA$Anthology.title[ind]
-    DATA$SO[DATA$SO==""] <- NA
+    DATA$SO[is.na(DATA$SO) | DATA$SO==""] <- "NA"
   }
   
   if (!("SO" %in% names(DATA))) {
     DATA$SO <- "NA"
   }
   
+  ####
+  cat("\nGenerating ISO Source names...")
   DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
   DATA$J9 <- gsub("\\.","",DATA$JI)
+  ####
+  
+  DATA <- data.frame(lapply(DATA, toupper), stringsAsFactors = FALSE)
   
   DATA$PY <- as.numeric(DATA$PY)
   

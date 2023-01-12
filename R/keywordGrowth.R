@@ -52,8 +52,8 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top=10, cdf=TRUE, remove.ter
       A <- A %>% 
         mutate(
           # Tab = str_replace_all(Tab, paste(sold[[i]], collapse="|",sep=""),snew[i])
-          Tab= str_replace_all(Tab, str_replace_all(str_replace_all(paste(sold[[i]], collapse="|",sep=""),"\\(","\\\\("),"\\)","\\\\)"),snew[i])
-
+          #Tab= str_replace_all(Tab, str_replace_all(str_replace_all(paste(sold[[i]], collapse="|",sep=""),"\\(","\\\\("),"\\)","\\\\)"),snew[i]),
+          Tab= stringi::stri_replace_all_regex(Tab, stringi::stri_replace_all_regex(stringi::stri_replace_all_regex(paste(sold[[i]], collapse="|",sep=""),"\\(","\\\\("),"\\)","\\\\)"),snew[i])
         )
     }
   }

@@ -48,7 +48,7 @@ Imports: stats,
 		 shiny,
 		 SnowballC,
 		 stringdist,
-		 stringr,
+		 stringi,
 		 tidyr,
 		 tidytext
 Suggests: 

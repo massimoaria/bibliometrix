@@ -74,14 +74,14 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   
   switch(label,
          title={
-           title <- strsplit(stringr::str_to_title(V(bsk.network)$title), " ")
+           title <- strsplit(stringi::stri_trans_totitle(V(bsk.network)$title), " ")
            V(bsk.network)$id <- unlist(lapply(title, function(l){
              n <- floor(length(l)/2)
              paste0(paste(l[1:n], collapse=" ", sep=""),"\n",paste(l[(n+1):length(l)], collapse=" ", sep=""))
            }))
          },
          keywords={
-           kw <- strsplit(stringr::str_to_title(V(bsk.network)$keywords), ";")
+           kw <- strsplit(stringi::stri_trans_totitle(V(bsk.network)$keywords), ";")
            kw[is.na(kw)] <- "Not Available"
            V(bsk.network)$id <- unlist(lapply(kw, function(l){
              if (length(l)>1){
@@ -92,7 +92,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
            }))
          },
          keywordsplus={
-           kw <- strsplit(stringr::str_to_title(V(bsk.network)$keywordsplus), ";")
+           kw <- strsplit(stringi::stri_trans_totitle(V(bsk.network)$keywordsplus), ";")
            kw[is.na(kw)] <- "Not Available"
            V(bsk.network)$id <- unlist(lapply(kw, function(l){
              if (length(l)>1){
@@ -107,24 +107,13 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
          }
   )
   
-  # if (isTRUE(title_as_label)){
-  #   title <- strsplit(stringr::str_to_title(V(bsk.network)$title), " ")
-  #   V(bsk.network)$id <- unlist(lapply(title, function(l){
-  #     n <- floor(length(l)/2)
-  #     paste0(paste(l[1:n], collapse=" ", sep=""),"\n",paste(l[(n+1):length(l)], collapse=" ", sep=""))
-  #   }))
-  #   #V(bsk.network)$id <- tolower(paste(substr(V(bsk.network)$title,1,50),"...",sep=""))
-  # } else {
-  #   V(bsk.network)$id <- tolower(unlist(RR))
-  # }
-  
   # Compute node degrees (#links) and use that to set node size:
   deg <- LCS
   V(bsk.network)$size <- size
     #rep(size,length(V(bsk.network)))}
   
   #Years=histResults$histData$Year[ind]
-  Years <- as.numeric(unlist(str_extract_all(unlist(RR),"[[:digit:]]{4}$")))
+  Years <- as.numeric(unlist(stringi::stri_extract_all_regex(unlist(RR),"[[:digit:]]{4}$")))
   V(bsk.network)$years <- Years
   
   # Remove loops

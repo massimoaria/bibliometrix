@@ -7,7 +7,7 @@
 #' 
 #' The results of the function allow us to understand which analyses can be performed with bibliometrix 
 #' and which cannot based on the completeness (or status) of different metadata.
-#' @param M is a bibliographic data frame obtained by \code{\link{convert2df}} function.
+#' @param df is a bibliographic data frame obtained by \code{\link{convert2df}} function.
 #' 
 #' @return The function \code{missingData} returns a list containing two objects:
 #' \tabular{lll}{

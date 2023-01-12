@@ -7,7 +7,7 @@
 missingData(df)
 }
 \arguments{
-\item{M}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
+\item{df}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
 }
 \value{
 The function \code{missingData} returns a list containing two objects:

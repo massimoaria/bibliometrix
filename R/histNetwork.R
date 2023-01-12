@@ -203,8 +203,8 @@ scopus <- function(M, min.citations, sep, network, verbose){
   nCum <- c(1, cumsum(n[-length(n)]))
   CR <- paste(CR, collapse = " ")
   
-  L <- str_locate_all(CR, TIpost)
-  
+  #L <- str_locate_all(CR, TIpost)
+  L <- stringi::stri_locate_all_regex(CR,TIpost, omit_no_match = TRUE)
   
   LCS <- lengths(L) / 2
   

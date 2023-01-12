@@ -13,6 +13,7 @@
 #' @import shiny
 #' @import readr
 #' @import readxl
+#' @import stringi
 #' @import tidytext
 #' @importFrom dplyr %>%
 #' @importFrom dplyr across
@@ -255,9 +256,9 @@
 #' @importFrom Matrix updown
 #' @importFrom Matrix which
 #' @importFrom Matrix writeMM
-#' @importFrom stringr str_locate_all
-#' @importFrom stringr str_extract_all
-#' @importFrom stringr str_replace_all
+# #' @importFrom stringr str_locate_all
+# #' @importFrom stringr str_extract_all
+# #' @importFrom stringr str_replace_all
 #' @importFrom graphics barplot
 #' @importFrom graphics legend
 #' @importFrom graphics lines

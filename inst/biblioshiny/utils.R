@@ -1330,7 +1330,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   vn$nodes <- vn$nodes %>% left_join(text_data, by = "id")
   
   ## split node tooltips into two strings
-  title <- strsplit(stringr::str_to_title(vn$nodes$title), " ")
+  title <- strsplit(stringi::stri_trans_totitle(vn$nodes$title), " ")
   
   vn$nodes$title <- unlist(lapply(title, function(l){
     n <- floor(length(l)/2)

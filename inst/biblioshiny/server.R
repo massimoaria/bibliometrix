@@ -243,6 +243,7 @@ server <- function(input, output,session){
       values$Histfield = "NA"
       values$results = list("NA")
       values$rest_sidebar <- TRUE
+      #showModal(missingModal(session))
       return()
     }
     inFile <- input$file1
@@ -458,7 +459,9 @@ server <- function(input, output,session){
     values$Histfield = "NA"
     values$results = list("NA")
     if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
+    if (ncol(values$M)>1){showModal(missingModal(session))}
   })
+  
   output$contents <- DT::renderDT({
     DATAloading()   
     MData = as.data.frame(apply(values$M, 2, function(x) {
@@ -496,6 +499,97 @@ server <- function(input, output,session){
         fontSize = '70%'
       ) 
   })
+  
+  ### Missing Data in Metadata ----
+  output$missingDataTable <- DT::renderDT({
+    values$missingdf <- df <- missingData(values$M)$mandatoryTags
+    
+    names(df) <- c("Metadata", "Description", "Missing Counts", "Missing %", "Status")
+    DT::datatable(df,escape = FALSE,rownames = FALSE, #extensions = c("Buttons"),
+                  class = 'cell-border stripe',
+                  selection = 'none',
+      options = list(
+        pageLength = nrow(df),
+        info = FALSE,
+        autoWidth = FALSE, scrollX = TRUE, 
+        dom = 'rti',
+        ordering=F,
+        columnDefs = list(
+          list(
+            targets = ncol(df)-1,
+            createdCell = JS(
+              "function(td, cellData, rowData, row, col) {",
+              "  if (cellData === 'Completely missing') {",
+              "    $(td).css('background-color', '#b22222');",
+              "  } else if (cellData === 'Critical') {",
+              "    $(td).css('background-color', '#f08080');",
+              "  } else if (cellData === 'Acceptable') {",
+              "    $(td).css('background-color', '#f0e68c');",
+              "  } else if (cellData === 'Good') {",
+              "    $(td).css('background-color', '#90ee90');",
+              "  } else if (cellData === 'Excellent') {",
+              "    $(td).css('background-color', '#32cd32');",
+              "  }",
+              "}")
+          )
+        )
+      )
+    ) 
+
+  })
+  
+  observeEvent(input$missingMessage,{
+    
+    tag <- values$missingdf$description[values$missingdf$status %in% c("Critical", "Completely missing")]
+    
+    #cat("\nAnalyses that require the following information:\n",paste("- ",tag,"\n",sep=""),"cannot be performed!\n", sep="")
+    show_alert(
+      title = NULL,
+      #text = HTML(paste("Analyses that require the following information:<br>",paste("- ",tag,"<br>", collapse=""),"cannot be performed!",collapse="")),
+      text =tagList(
+        div(
+        h4(HTML(paste("Analyses that require the following information:<br><br>",paste("- ","<em>",tag,"</em>","<br>", collapse=""),"<br>cannot be performed!",collapse=""))),
+        style="text-align:left")
+      ),
+      type = "warning",
+      size = "s", 
+      closeOnEsc = TRUE,
+      closeOnClickOutside = TRUE,
+      html = TRUE,
+      showConfirmButton = TRUE,
+      showCancelButton = FALSE,
+      btn_labels = "OK",
+      btn_colors = "#1d8fe1",
+      timer = NULL,
+      imageUrl = "",
+      animation = TRUE
+    )
+  })
+  
+  missingModal <- function(session) {
+    ns <- session$ns
+    modalDialog(
+      h3(strong(("Completeness of bibliographic metadata"))),
+      DT::DTOutput(ns("missingDataTable")),
+      # br(),
+      # verbatimTextOutput("missingMessage"),
+      size = "l",
+      easyClose = TRUE,
+      footer = tagList(
+        actionButton(label="Advice", inputId = "missingMessage",
+                     icon = icon("exclamation-sign", lib = "glyphicon")),
+        screenshotButton(label="Save", id = "missingDataTable",
+                         scale = 2,
+                         file=paste("MissingDataTable-", Sys.Date(), ".png", sep="")),
+        modalButton("Close")),
+    )
+  }
+  
+  # observeEvent(event_data("plotly_click"), {
+  #   if (input$sidebarmenu=="thematicMap"){
+  #     showModal(plotModal(session))
+  #   }
+  # })
   
   ## export functions ----
   output$collection.save <- downloadHandler(
@@ -795,6 +889,7 @@ server <- function(input, output,session){
                values$M <- M
                values$Morig = M
                if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
+               if (ncol(values$M)>1){showModal(missingModal(session))}
                values$Histfield = "NA"
                values$results = list("NA")
                contentTable(values)
@@ -813,6 +908,7 @@ server <- function(input, output,session){
                values$M <- M
                values$Morig = M
                if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
+               if (ncol(values$M)>1){showModal(missingModal(session))}
                values$Histfield = "NA"
                values$results = list("NA")
              }

@@ -24,20 +24,20 @@
 missingData <- function(df) {
   cols <- names(df)
   missing_counts <- sapply(cols, function(x){
-    sum(is.na(df[,x]) | df[,x]=="NA" | df[,x]=="")
+    sum(is.na(df[,x]) | df[,x] %in% c("NA,0000,NA","NA",""))
     })
   missing_pct <- round(missing_counts/nrow(df) * 100, 2)
   df_all <- data.frame(cols, missing_counts, missing_pct)
   
   tag <- unlist(
     strsplit(
-      "AB,AU,AU_CO,C1,CR,DE,DI,DT,ID,LA,NR,PY,RP,SC,SO,TC,TI,WC",","
+      "AB,AU,AU_CO,C1,CR,DE,DI,DT,ID,LA,NR,PY,RP,SO,TC,TI, WC",","
       )
   )
   description <- trimws(unlist(
     strsplit(
-      "abstract,author,country,affiliation,cited-references,keywords,doi,type,keywords-plus,language,number-of-cited-references,
-      publication year,corresponding author,research-areas,journal,times-cited,title,web-of-science-categories", ","
+      "Abstract,Author,Country,Affiliation,Cited References,Keywords,DOI,Document Type,Keywords Plus,Language,Number of Cited References,
+      Publication Year,Corresponding Author, Journal, Total Citation, Title, Science Categories", ","
     )
   ))
   

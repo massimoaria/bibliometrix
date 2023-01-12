@@ -4081,57 +4081,64 @@ body <- dashboardBody(
                          uiOutput('reportSheets'),
                          tags$style("#reportSheets {font-size:23px;}")
                        )
-                ),
-                column(3, 
+                ),column(1),
+                column(2, 
+                       div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
+                          align = "center",
+                          #width="100%",
                        actionBttn(
                          inputId = 'allSheets',
                          label = strong('SELECT ALL'),
                          icon = icon("ok-circle", lib="glyphicon"),
-                         style = "unite", #float
-                         color = "default",
+                         style = "pill", color = "primary",
+                         # style = "unite", #float
+                         # color = "default",
                          block = TRUE
                        ),
-                       tags$style("#allSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
+                       #tags$style("#allSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
                        br(),
                        actionBttn(
                          inputId = 'noSheets',
                          label = strong('DESELECT ALL'),
                          icon = icon("remove-circle", lib="glyphicon"),
-                         style = "unite",
-                         color = "default",
+                         style = "pill", color = "primary",
+                         # style = "unite",
+                         # color = "default",
                          block = TRUE
                        ),
-                       tags$style("#noSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
+                       #tags$style("#noSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
                        br(),
                        actionBttn(
                          inputId = 'deleteAll',
                          label = strong('DELETE REPORT'),
                          icon = icon("exclamation-sign", lib="glyphicon"),
-                         style = "unite",
-                         color = "danger", 
+                         style = "pill", color = "danger",
+                         # style = "unite",
+                         # color = "danger", 
                          block = TRUE
                        ),
-                       tags$style("#deleteAll {border-width: 3px;}"),
+                       #tags$style("#deleteAll {border-width: 3px;}"),
                        br(),
                        downloadBttn(
                          outputId="report.save",
                          label = strong("SAVE REPORT"),
-                         style = "unite",
-                         color = "primary",
+                         style = "pill", color = "primary",
+                         # style = "unite",
+                         # color = "primary",
                          size = "md",
                          block = TRUE,
                          no_outline = TRUE,
                          icon = icon(name ="download-alt", lib="glyphicon")
-                       ), tags$style("#report.save {border-width: 3px;}")
+                       )#, tags$style("#report.save {border-width: 3px;}")
                        
-                       
+                       )   
                 )
               )
               
               
             )
     ),
-    #### Report ----
+    #### Settings ----
     tabItem("settings",
             fluidPage(
               fluidRow(

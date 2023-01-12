@@ -112,67 +112,67 @@ server <- function(input, output,session){
   ### Apply Data----
   output$rest_of_sidebar <- renderMenu({
     if (isTRUE(values$rest_sidebar)){
-        sidebarMenu(
-          menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
-          menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
-                   menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon"))),
-          menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
-                   menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
-                   menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
-          menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
-                   "Authors",
-                   menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
-                   "Affiliations",
-                   menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                   "Countries",
-                   menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
-          ),
-          menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
-                   "Documents",
-                   menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
-                   "Cited References",
-                   menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
-                   "Words",
-                   menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
-          ),
-          menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
-                   menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon"))),
-          menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
-                   "Network Approach",
-                   menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
-                   menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
-                   "Factorial Approach",
-                   menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon"))),
-          menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
-                   menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
-          menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
-                   menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-                   menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
-          menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
-          menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
-        )
+      sidebarMenu(
+        menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
+        menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
+                 menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon"))),
+        menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
+                 menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
+                 menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
+        menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
+                 "Authors",
+                 menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
+                 "Affiliations",
+                 menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+                 "Countries",
+                 menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
+        ),
+        menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
+                 "Documents",
+                 menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
+                 "Cited References",
+                 menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
+                 "Words",
+                 menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
+        ),
+        menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
+                 menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon"))),
+        menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
+                 "Network Approach",
+                 menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
+                 menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
+                 "Factorial Approach",
+                 menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon"))),
+        menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
+                 menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
+        menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
+                 menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
+                 menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+        menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
+        menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
+      )
     } else {
       sidebarMenu()
     }
@@ -508,50 +508,68 @@ server <- function(input, output,session){
     DT::datatable(df,escape = FALSE,rownames = FALSE, #extensions = c("Buttons"),
                   class = 'cell-border stripe',
                   selection = 'none',
-      options = list(
-        pageLength = nrow(df),
-        info = FALSE,
-        autoWidth = FALSE, scrollX = TRUE, 
-        dom = 'rti',
-        ordering=F,
-        columnDefs = list(
-          list(
-            targets = ncol(df)-1,
-            createdCell = JS(
-              "function(td, cellData, rowData, row, col) {",
-              "  if (cellData === 'Completely missing') {",
-              "    $(td).css('background-color', '#b22222');",
-              "  } else if (cellData === 'Critical') {",
-              "    $(td).css('background-color', '#f08080');",
-              "  } else if (cellData === 'Acceptable') {",
-              "    $(td).css('background-color', '#f0e68c');",
-              "  } else if (cellData === 'Good') {",
-              "    $(td).css('background-color', '#90ee90');",
-              "  } else if (cellData === 'Excellent') {",
-              "    $(td).css('background-color', '#32cd32');",
-              "  }",
-              "}")
-          )
-        )
+                  options = list(
+                    pageLength = nrow(df),
+                    info = FALSE,
+                    autoWidth = FALSE, scrollX = TRUE, 
+                    dom = 'rti',
+                    ordering=F,
+                    columnDefs = list(
+                      list(
+                        targets = ncol(df)-1,
+                        createdCell = JS(
+                          "function(td, cellData, rowData, row, col) {",
+                          "  if (cellData === 'Completely missing') {",
+                          "    $(td).css('background-color', '#b22222');",
+                          "  } else if (cellData === 'Critical') {",
+                          "    $(td).css('background-color', '#f08080');",
+                          "  } else if (cellData === 'Poor') {",
+                          "    $(td).css('background-color', 'lightgrey');",
+                          "  } else if (cellData === 'Acceptable') {",
+                          "    $(td).css('background-color', '#f0e68c');",
+                          "  } else if (cellData === 'Good') {",
+                          "    $(td).css('background-color', '#90ee90');",
+                          "  } else if (cellData === 'Excellent') {",
+                          "    $(td).css('background-color', '#32cd32');",
+                          "  }",
+                          "}")
+                      )
+                    )
+                  )
+    ) %>% 
+      formatRound("Missing %", digits=2) %>% 
+      formatStyle(
+        "Status",
+        textAlign = 'center'
       )
-    ) 
-
+    # ) %>% 
+    # formatStyle(
+    #   "Missing %",
+    #   background = styleColorBar(df[,4], '#b22222')
+    # )
+    
   })
   
   observeEvent(input$missingMessage,{
-    
     tag <- values$missingdf$description[values$missingdf$status %in% c("Critical", "Completely missing")]
-    
-    #cat("\nAnalyses that require the following information:\n",paste("- ",tag,"\n",sep=""),"cannot be performed!\n", sep="")
+    if (length(tag)>0){
+      text <- paste("Analyses that require the following information:<br><br>",paste("- ","<em>",tag,"</em>","<br>", collapse=""),
+                    "<br>cannot be performed!",collapse="")
+      type <- "warning"
+    }else{
+      text <- "Your metadata have no critical issues"
+      type <- "success"
+    }
+   
     show_alert(
       title = NULL,
       #text = HTML(paste("Analyses that require the following information:<br>",paste("- ",tag,"<br>", collapse=""),"cannot be performed!",collapse="")),
       text =tagList(
         div(
-        h4(HTML(paste("Analyses that require the following information:<br><br>",paste("- ","<em>",tag,"</em>","<br>", collapse=""),"<br>cannot be performed!",collapse=""))),
-        style="text-align:left")
+          h4(HTML(text)),
+          style="text-align:left")
       ),
-      type = "warning",
+      type = type,
       size = "s", 
       closeOnEsc = TRUE,
       closeOnClickOutside = TRUE,
@@ -599,7 +617,7 @@ server <- function(input, output,session){
     content <- function(file) {
       tr <- FALSE
       if ("CR" %in% names(values$M)) tr <- (sum(nchar(values$M$CR)>32767, na.rm=TRUE))>0
-
+      
       if (tr & input$save_file=="xlsx"){
         show_alert(
           text = tags$span(
@@ -626,12 +644,12 @@ server <- function(input, output,session){
         )
         suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
       } else {
-      switch(input$save_file,
-             xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
-             RData={
-               M=values$M
-               save(M, file=file)
-             })
+        switch(input$save_file,
+               xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
+               RData={
+                 M=values$M
+                 save(M, file=file)
+               })
       }
     },
     contentType = input$save_file
@@ -4194,7 +4212,7 @@ server <- function(input, output,session){
   })
   
   ### click cluster networks
-
+  
   plotModal <- function(session) {
     ns <- session$ns
     modalDialog(
@@ -4218,16 +4236,16 @@ server <- function(input, output,session){
   
   output$cocPlotClust <- renderVisNetwork({
     values$d <- event_data("plotly_click")
-      coord <- values$d[c("x","y")]
-      color <- values$TM$clusters_orig %>% 
-        filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
-        select(.data$color) %>% as.character()
-      g <- values$TM$subgraphs[[color]]
-      igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
+    coord <- values$d[c("x","y")]
+    color <- values$TM$clusters_orig %>% 
+      filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
+      select(.data$color) %>% as.character()
+    g <- values$TM$subgraphs[[color]]
+    igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
   })
   
   ### end click cluster subgraphs
-
+  
   output$NetPlot <- renderVisNetwork({
     TMAP()
     values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
@@ -4317,7 +4335,7 @@ server <- function(input, output,session){
   output$TMTableDocument <- DT::renderDT({
     TMAP()
     tmDataDoc <- values$TM$documentToClusters
-   
+    
     DT::datatable(tmDataDoc, escape = FALSE, rownames = FALSE, extensions = c("Buttons"),filter = 'top',
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
@@ -4999,13 +5017,13 @@ server <- function(input, output,session){
       #values$wb <- res$wb
       values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
-
+      
       ## Periods
       L <- length(values$nexus$TM)
       wb <- res$wb
       for (l in 1:L){
         if(!is.null(values$nexus$TM[[l]]$words)){
-
+          
           list_df <- list(values$nexus$TM[[l]]$params,
                           values$nexus$TM[[l]]$words,
                           values$nexus$TM[[l]]$clusters,
@@ -5090,7 +5108,7 @@ server <- function(input, output,session){
   })
   
   observeEvent(input$reportCOCIT,{
-
+    
     if(!is.null(values$cocitnet$cluster_res)){
       names(values$cocitnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
       sheetname <- "CoCitNet"
@@ -5410,10 +5428,10 @@ server <- function(input, output,session){
       values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
       values$wb <-  openxlsx::createWorkbook()
     }
-      }, ignoreNULL = TRUE
+  }, ignoreNULL = TRUE
   )
-    
-
+  
+  
   
   # OPTIONS MENU ----
   # observe({
@@ -5426,7 +5444,7 @@ server <- function(input, output,session){
   #     values$checkControlBar <- FALSE
   #   }
   # })
-
+  
   ### screenshot buttons
   observeEvent(input$screenTFP,{
     screenshot(

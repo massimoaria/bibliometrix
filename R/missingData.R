@@ -31,12 +31,12 @@ missingData <- function(df) {
   
   tag <- unlist(
     strsplit(
-      "AB,AU,AU_CO,C1,CR,DE,DI,DT,ID,LA,NR,PY,RP,SO,TC,TI, WC",","
+      "AB,AU,C1,CR,DE,DI,DT,ID,LA,NR,PY,RP,SO,TC,TI,WC",","
       )
   )
   description <- trimws(unlist(
     strsplit(
-      "Abstract,Author,Country,Affiliation,Cited References,Keywords,DOI,Document Type,Keywords Plus,Language,Number of Cited References,
+      "Abstract, Author,Affiliation,Cited References,Keywords,DOI,Document Type,Keywords Plus,Language,Number of Cited References,
       Publication Year,Corresponding Author, Journal, Total Citation, Title, Science Categories", ","
     )
   ))
@@ -59,7 +59,8 @@ status <- function(x){
   y[x==0] <- "Excellent"
   y[x>0 & x<= 10] <- "Good"
   y[x>10 & x<= 20] <- "Acceptable"
-  y[x>20 & x<100] <- "Critical"
+  y[x>20 & x<=50] <- "Poor"
+  y[x>50 & x<100] <- "Critical"
   y[is.na(x) | x==100] <- "Completely missing"
   return(y)
 }

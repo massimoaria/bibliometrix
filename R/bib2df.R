@@ -22,8 +22,10 @@ bib2df<-function(D, dbsource = "isi"){
   
   if (dbsource == "isi") D <- gsub(" = \\{","={",D)
   
+  D <- gsub("\\\t","",gsub(" = \\{","=\\{",D)) # to work also with new scopus bib format
+  
   D[Papers] <- paste("Paper={",D[Papers],sep="")
-  #ii <- regexpr("\\{",D[Papers])
+
   ind <- regexpr("=\\{",D) # sep among tags and contents
   ind[Papers] <- 6
   

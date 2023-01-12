@@ -4063,9 +4063,9 @@ body <- dashboardBody(
                 br(),
               ),
               fluidRow(
-                column(7,offset = 1,
+                  column(6,offset = 1,
                        box(title = strong("Select results to include in the Report",
-                                    style='font-size:25px;color:white;'), 
+                                    style='font-size:20px;color:white;'), 
                         status = "primary", width = 11, solidHeader = TRUE,
                          tags$style(HTML("
                          .box.box-solid.box-primary>.box-header {
@@ -4079,57 +4079,52 @@ body <- dashboardBody(
                          border-width:2px;
                                          }")),
                          uiOutput('reportSheets'),
-                         tags$style("#reportSheets {font-size:23px;}")
+                         tags$style("#reportSheets {font-size:18px;}")
                        )
-                ),column(1),
+                ),#column(1),
                 column(2, 
                        div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
                           align = "center",
                           #width="100%",
                        actionBttn(
                          inputId = 'allSheets',
-                         label = strong('SELECT ALL'),
+                         label = strong('Select All'),
                          icon = icon("ok-circle", lib="glyphicon"),
                          style = "pill", color = "primary",
-                         # style = "unite", #float
-                         # color = "default",
                          block = TRUE
                        ),
                        #tags$style("#allSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
                        br(),
                        actionBttn(
                          inputId = 'noSheets',
-                         label = strong('DESELECT ALL'),
+                         label = strong('Deselect All'),
                          icon = icon("remove-circle", lib="glyphicon"),
                          style = "pill", color = "primary",
-                         # style = "unite",
-                         # color = "default",
                          block = TRUE
                        ),
                        #tags$style("#noSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
-                       br(),
-                       actionBttn(
-                         inputId = 'deleteAll',
-                         label = strong('DELETE REPORT'),
-                         icon = icon("exclamation-sign", lib="glyphicon"),
-                         style = "pill", color = "danger",
-                         # style = "unite",
-                         # color = "danger", 
-                         block = TRUE
-                       ),
+                       
                        #tags$style("#deleteAll {border-width: 3px;}"),
                        br(),
+                       hr(),
                        downloadBttn(
                          outputId="report.save",
-                         label = strong("SAVE REPORT"),
-                         style = "pill", color = "primary",
-                         # style = "unite",
-                         # color = "primary",
+                         label = strong("Export Report"),
+                         style = "pill", color = "success",
                          size = "md",
                          block = TRUE,
                          no_outline = TRUE,
                          icon = icon(name ="download-alt", lib="glyphicon")
-                       )#, tags$style("#report.save {border-width: 3px;}")
+                       ),#, tags$style("#report.save {border-width: 3px;}")
+                       br(),
+                       hr(),
+                       actionBttn(
+                         inputId = 'deleteAll',
+                         label = strong('Delete Report'),
+                         icon = icon("exclamation-sign", lib="glyphicon"),
+                         style = "pill", color = "danger",
+                         block = TRUE
+                       )
                        
                        )   
                 )

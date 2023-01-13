@@ -11,7 +11,7 @@
 #' 
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 #' @param field is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","TI","AB"). Default value is \code{field="ID"}.
-#' @param years is a numeric vector of two or more unique cut points.
+#' @param years is a numeric vector of one or more unique cut points.
 #' @param n is numerical. It indicates the number of words to use in the network analysis
 #' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.
 #' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
@@ -57,6 +57,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
     resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, ngrams=ngrams,
                         stemming = stemming, size = size, n.labels = n.labels, 
                         repel = repel, remove.terms = remove.terms, synonyms = synonyms, cluster=cluster)
+    resk$params <- resk$params %>% dplyr::filter(.data$params!="minfreq")
     res[[k]] <-  resk
     net[[k]] <-  resk$net
   }

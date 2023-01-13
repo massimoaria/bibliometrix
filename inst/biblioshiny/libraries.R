@@ -26,3 +26,12 @@ libraries <- function(){
   require(dplyr, quietly = TRUE)
   require(tidyr, quietly = TRUE)
 }
+
+messageItem2 <- function (from, message, icon = shiny::icon("user"), time = NULL, 
+                          href = NULL, inputId = NULL){
+  if (is.null(href)) 
+    href <- "#"
+  shiny::tags$li(shiny::a(id = inputId, class = if (!is.null(inputId)) 
+    "action-button", href = href, target = "_blank", icon, shiny::h4(from, if (!is.null(time)) 
+      shiny::tags$small(shiny::icon("clock-o"), time)), shiny::p(message)))
+}

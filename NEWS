@@ -1,3 +1,17 @@
+bibliometrix v4.0.1 (Release date: 2023-01-13)
+
+Features:
+* Added a new function missingData() to check the completeness of metadata included in a bibliographic data frame 
+* Biblioshiny: Added the ability to create an excel report by adding step by step results of different analysis
+* Biblioshiny: Added a popup that returns the results of the metadata completeness check of imported collections
+* Biblioshiny: Revamped interface with floating options menu and more space for graphical analysis results
+
+Changes:
+* Several bug fixes
+* Computational speed improvements
+
+
+
 bibliometrix v4.0.1 (Release date: 2022-09-16)
 
 Features:

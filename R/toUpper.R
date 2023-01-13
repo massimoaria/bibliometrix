@@ -1,3 +1,3 @@
 toUpper <- function(D){
-  stringr::str_to_upper(D, locale = "en")
+  stringi::stri_trans_toupper(D, locale = "en")
 }

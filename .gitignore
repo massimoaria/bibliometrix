@@ -6,11 +6,14 @@
 .txt
 .bib
 .Ruserdata
+.DS_Store
 VOSviewer.jar
 network.net
 Rubbish
 desktop.ini
 vignette.txt
 inst/doc
+inst/biblioshiny/__MACOSX
+inst/biblioshiny/rsconnect
 _gh-pages
 

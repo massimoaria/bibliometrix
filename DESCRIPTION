@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
-Version: 4.0.2
+Version: 4.1.0
 Authors@R: c(
     person(given = "Massimo",
            family = "Aria",
@@ -48,7 +48,7 @@ Imports: stats,
 		 shiny,
 		 SnowballC,
 		 stringdist,
-		 stringr,
+		 stringi,
 		 tidyr,
 		 tidytext
 Suggests: 
@@ -59,6 +59,6 @@ Suggests:
     shinycssloaders,
     visNetwork,
     wordcloud2
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 NeedsCompilation: no
 Config/testthat/edition: 3

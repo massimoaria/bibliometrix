@@ -109,7 +109,7 @@ y <- c(min(c(RPYS$Citations,RPYS$diffMedian)),min(c(RPYS$Citations,RPYS$diffMedi
 
 g=ggplot(RPYS, aes(x=.data$Year ,y=.data$Citations,text=paste("Year: ",.data$Year,"\nN. of References: ",.data$Citations)))+
   geom_line(aes(group="NA")) +
-  geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
+  #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
   #geom_hline(aes(yintercept=0, color = 'grey'))+
   geom_line(aes(x=.data$Year,y=.data$diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'

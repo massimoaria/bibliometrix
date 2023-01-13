@@ -195,7 +195,22 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   row.names(df)=NULL
   df <- df %>% rename(items = .data$words)
   
-  results=list(map=g, clusters=df, data=df_lab,nclust=dim(df)[1], NCS = D, net=Net)
+  params <- list(analysis = analysis,
+                 field=field, 
+                 n=n, 
+                 minfreq=minfreq,
+                 label.term=label.term, 
+                 ngrams=ngrams, 
+                 impact.measure=impact.measure,
+                 stemming=stemming, 
+                 n.labels=n.labels, 
+                 size=size,
+                 community.repulsion = community.repulsion, 
+                 repel=repel, 
+                 cluster=cluster)
+  params <- data.frame(params=names(unlist(params)),values=unlist(params), row.names = NULL)
+  
+  results=list(map=g, clusters=df, data=df_lab,nclust=dim(df)[1], NCS = D, net=Net, params=params)
   return(results)
 }
 
@@ -315,7 +330,7 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
   
   #clusters <- unique(df$Cluster)
   #w <- character(length(clusters))
-  
+  df$SR <- df[,1]
   tab_global <- tableTag(df, term)
   tab_global <- data.frame(label=names(tab_global),tot=as.numeric(tab_global), n=nrow(M),stringsAsFactors = FALSE)
   

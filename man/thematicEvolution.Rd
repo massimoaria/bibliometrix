@@ -25,7 +25,7 @@ thematicEvolution(
 
 \item{field}{is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","TI","AB"). Default value is \code{field="ID"}.}
 
-\item{years}{is a numeric vector of two or more unique cut points.}
+\item{years}{is a numeric vector of one or more unique cut points.}
 
 \item{n}{is numerical. It indicates the number of words to use in the network analysis}
 

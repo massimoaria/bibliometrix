@@ -31,7 +31,7 @@ strSynPreview <- function(string){
 }
 
 # from igraph to png file
-igraph2PNG <- function(x, filename, width = 10, height = 7, dpi=300){
+igraph2PNG <- function(x, filename, width = 10, height = 7, dpi=75){
   V(x)$centr <- centr_betw(x)$res
   df <- data.frame(name=V(x)$label,cluster=V(x)$color, centr=V(x)$centr) %>% 
     group_by(.data$cluster) %>% 
@@ -1330,7 +1330,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   vn$nodes <- vn$nodes %>% left_join(text_data, by = "id")
   
   ## split node tooltips into two strings
-  title <- strsplit(stringr::str_to_title(vn$nodes$title), " ")
+  title <- strsplit(stringi::stri_trans_totitle(vn$nodes$title), " ")
   
   vn$nodes$title <- unlist(lapply(title, function(l){
     n <- floor(length(l)/2)
@@ -1436,7 +1436,7 @@ addDataScreenWb <- function(list_df, wb, sheetname){
   return(results)
 }
 
-addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=300){
+addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=75){
   l <- length(list_plot)
   startRow <- 1
   for (i in 1:l){
@@ -1470,7 +1470,7 @@ screenSh <- function(selector){
   return(file)
 }
 
-addScreenWb <- function(df, wb, width=14, height=8, dpi=300){
+addScreenWb <- function(df, wb, width=14, height=8, dpi=75){
   names(df) <- c("sheet","file","n")
   if (nrow(df)>0){
     sheet <- unique(df$sheet)
@@ -1491,7 +1491,7 @@ addScreenWb <- function(df, wb, width=14, height=8, dpi=300){
   return(wb)
 }
 
-addSheetToReport <- function(list_df, list_plot, sheetname, wb){
+addSheetToReport <- function(list_df, list_plot, sheetname, wb, dpi=75){
   ind <- which(regexpr(sheetname,wb$sheet_names)>-1)
   if (length(ind)>0){
     sheetname <- paste(sheetname,"(",length(ind)+1,")",sep="")
@@ -1504,7 +1504,7 @@ addSheetToReport <- function(list_df, list_plot, sheetname, wb){
   } else {col <- 1}
   
     if (!is.null(list_plot)){
-      wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col)
+      wb <- addGgplotsWb(list_plot, wb = wb, sheetname = sheetname, col = col, dpi = dpi)
     }
   #values$sheet_name <- sheetname
   return(wb)
@@ -1523,13 +1523,13 @@ dfLabel <- function(){
   short <- c("Empty Report", "MainInfo",            "AnnualSciProd",       "AnnualCitPerYear",    "ThreeFieldsPlot",     "MostRelSources",      "MostLocCitSources",   "BradfordLaw",         "SourceLocImpact",    
              "SourceProdOverTime",  "MostRelAuthors",      "MostLocCitAuthors",   "AuthorProdOverTime",  "LotkaLaw",            "AuthorLocImpact",     "MostRelAffiliations", "AffOverTime",        
              "CorrAuthCountries",   "CountrySciProd",      "CountryProdOverTime", "MostCitCountries",    "MostGlobCitDocs",     "MostLocCitDocs",      "MostLocCitRefs",      "RPYS",               
-             "MostFreqWords",       "WordCloud",           "TreeMap",             "WordFreqOverTime",        "TrendTopics",         "CoWordNet",           "ThematicMap",         "ThematicEvolution",  
+             "MostFreqWords",       "WordCloud",           "TreeMap",             "WordFreqOverTime",        "TrendTopics",         "CouplingMap", "CoWordNet",           "ThematicMap",         "ThematicEvolution",  
              "TE_Period_1","TE_Period_2", "TE_Period_3","TE_Period_4","TE_Period_5",       "FactorialAnalysis",   "CoCitNet",            "Historiograph",       "CollabNet",           "CollabWorldMap")
   
   long <- c("Empty Report", "Main Information", "Annual Scientific Production", "Annual Citation Per Year", "Three-Field Plot", "Most Relevant Sources","Most Local Cited Sources","Bradfords Law","Sources Local Impact",
             "Sources Production over Time", "Most Relevant Authors","Most Local Cited Authors","Authors Production over Time", "Lotkas Law","Authors Local Impact","Most Relevant Affiliations","Affiliations Production over Time",
             "Corresponding Authors Countries","Countries Scientific Production","Countries Production over Time","Most Cited Countries", "Most Global Cited Documents","Most Local Cited Documents","Most Local Cited References","Reference Spectroscopy",
-            "Most Frequent Words","WordCloud", "TreeMap", "Words Frequency over Time", "Trend Topics", "Co-occurence Network", "Thematic Map", "Thematic Evolution", 
+            "Most Frequent Words","WordCloud", "TreeMap", "Words Frequency over Time", "Trend Topics", "Clustering by Coupling","Co-occurence Network", "Thematic Map", "Thematic Evolution", 
             "TE_Period_1","TE_Period_2", "TE_Period_3","TE_Period_4","TE_Period_5","Factorial Analysis", "Co-citation Network", "Historiograph", "Collaboration Network", "Countries Collaboration World Map")
   data.frame(short=short,long=long)
 }

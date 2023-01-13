@@ -2,12 +2,14 @@
 #'
 #' It calculates the percentage of missing data in the metadata of a bibliographic data frame. 
 #' 
-#' Each metadata is assigned a status c("Excellent," "Good," "Acceptable," "Critical," "Completely missing") 
-#' depending on the percentage of missing data ("0%," "1% to 10%," "11% to 20%"m "21% to 99%," "100%").
+#' Each metadata is assigned a status c("Excellent," "Good," "Acceptable", "Poor", "Critical," "Completely missing") 
+#' depending on the percentage of missing data. In particular, the column *status* classifies the percentage of missing 
+#' value in 5 categories: "Excellent" (0%), "Good" (0.01% to 10.00%), "Acceptable" (from 10.01% to 20.00%), 
+#' "Poor" (from 20.01% to 50.00%), "Critical" (from 50.01% to 99.99%), "Completely missing" (100%).
 #' 
 #' The results of the function allow us to understand which analyses can be performed with bibliometrix 
 #' and which cannot based on the completeness (or status) of different metadata.
-#' @param df is a bibliographic data frame obtained by \code{\link{convert2df}} function.
+#' @param M is a bibliographic data frame obtained by \code{\link{convert2df}} function.
 #' 
 #' @return The function \code{missingData} returns a list containing two objects:
 #' \tabular{lll}{
@@ -21,12 +23,12 @@
 #'
 #' @export
 #' 
-missingData <- function(df) {
-  cols <- names(df)
+missingData <- function(M) {
+  cols <- names(M)
   missing_counts <- sapply(cols, function(x){
-    sum(is.na(df[,x]) | df[,x] %in% c("NA,0000,NA","NA",""))
+    sum(is.na(M[,x]) | M[,x] %in% c("NA,0000,NA","NA",""))
     })
-  missing_pct <- round(missing_counts/nrow(df) * 100, 2)
+  missing_pct <- round(missing_counts/nrow(M) * 100, 2)
   df_all <- data.frame(cols, missing_counts, missing_pct)
   
   tag <- unlist(
@@ -43,11 +45,11 @@ missingData <- function(df) {
   
   df_all <- df_all %>% 
     mutate(status = status(missing_pct)) %>% 
-    replace_na(replace = list(missing_counts = nrow(df), missing_pct = 100))
+    replace_na(replace = list(missing_counts = nrow(M), missing_pct = 100))
   
   df_tags <- data.frame(tag, description) %>% 
     left_join(df_all, by = c("tag" = "cols")) %>% 
-    replace_na(replace = list(missing_counts = nrow(df), missing_pct = 100, status = "Completely missing")) %>% 
+    replace_na(replace = list(missing_counts = nrow(M), missing_pct = 100, status = "Completely missing")) %>% 
     arrange(missing_pct,description)
   
   results <- list(allTags=df_all, mandatoryTags=df_tags)

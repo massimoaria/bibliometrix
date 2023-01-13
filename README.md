@@ -81,8 +81,8 @@ It supports scholars in easy use of the main features of bibliometrix:
 
 ### How to use biblioshiny
 
-Please follow the biblioshiny tutorial at
-www.bibliometrix.org/biblioshiny
+Please follow the biblioshiny tutorial at the section tutorial of
+bibliometrix website <https://www.bibliometrix.org/>
 
 ## How to cite bibliometrix
 
@@ -102,11 +102,13 @@ CRAN page: <https://cran.r-project.org/package=bibliometrix>
 
 GitHub repository: <https://github.com/massimoaria/bibliometrix>
 
-Tutorial:
+Tutorials
+
+How to use:
 <https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html>
 
-Slides:
-<https://www.slideshare.net/MassimoAria/bibliometrix-phd-seminar>
+Data importing and converting:
+<https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html>
 
 ## Installation
 
@@ -179,6 +181,51 @@ Data frame columns are named using the standard Clarivate Analytics WoS
 Field Tag codify
 [(https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf)](https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf).
 
+## Check completeness of metadata included in the bibliographic data frame
+
+After importing a bibliographic data frame, we can check the
+completeness of the metadata included in it through **missingData()**.
+
+**missingData**(*M*)
+
+The argument *M* is a bibliographic data frame obtained by
+**convert2df** function.
+
+``` r
+## An example from bibliometrix vignettes
+
+com <- missingData(M)
+
+com$mandatoryTags
+#>    tag                description missing_counts missing_pct     status
+#> 1   AU                     Author              0        0.00  Excellent
+#> 2   DT              Document Type              0        0.00  Excellent
+#> 3   SO                    Journal              0        0.00  Excellent
+#> 4   LA                   Language              0        0.00  Excellent
+#> 5   NR Number of Cited References              0        0.00  Excellent
+#> 6   WC         Science Categories              0        0.00  Excellent
+#> 7   TI                      Title              0        0.00  Excellent
+#> 8   TC             Total Citation              0        0.00  Excellent
+#> 9   CR           Cited References              2        0.22       Good
+#> 10  AB                   Abstract              7        0.78       Good
+#> 11  PY           Publication Year              9        1.00       Good
+#> 12  RP       Corresponding Author             10        1.11       Good
+#> 13  C1                Affiliation             21        2.34       Good
+#> 14  DI                        DOI             36        4.01       Good
+#> 15  DE                   Keywords             79        8.80       Good
+#> 16  ID              Keywords Plus             97       10.80 Acceptable
+```
+
+**missingData** returns a list containing two data frame. The first one,
+*allTags* includes the results for all metadata in M. The latter,
+*mandatoryTags*, reports the results only for the metadata needed to
+perform analyses with bibliometrix or biblioshiny.
+
+The column *status* classifies the percentage of missing value in 5
+categories: “Excellent” (0%), “Good” (0.01% to 10.00%), “Acceptable”
+(from 10.01% to 20.00%), “Poor” (from 20.01% to 50.00%), “Critical”
+(from 50.01% to 99.99%), “Completely missing” (100%).
+
 ## Bibliometric Analysis
 
 The first step is to perform a descriptive analysis of the bibliographic
@@ -216,9 +263,9 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #>  Sources (Journals, Books, etc)        281 
 #>  Documents                             898 
 #>  Annual Growth Rate %                  0 
-#>  Document Average Age                  7.19 
+#>  Document Average Age                  8.19 
 #>  Average citations per doc             37.12 
-#>  Average citations per year per doc    4.609 
+#>  Average citations per year per doc    3.926 
 #>  References                            43935 
 #>  
 #> DOCUMENT TYPES                     
@@ -303,16 +350,16 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #> Top manuscripts per citations
 #> 
 #>                                  Paper                                     DOI   TC TCperYear   NTC
-#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    196.45 15.64
-#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844    105.50 17.17
-#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     35.11  3.76
-#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     48.15  9.82
-#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     33.47  5.67
-#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     17.59  2.66
-#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     23.53  3.48
-#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     14.61  2.15
-#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      8.16  1.81
-#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     14.33  2.40
+#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    180.08 15.64
+#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     93.78 17.17
+#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     33.35  3.76
+#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     44.71  9.82
+#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     31.61  5.67
+#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     16.83  2.66
+#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     22.06  3.48
+#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     14.00  2.15
+#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.95  1.81
+#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     13.68  2.40
 #> 
 #> 
 #> Corresponding Author's Countries
@@ -630,29 +677,57 @@ net <- histPlot(histResults, n=20, size = FALSE,label="short")
 
 ## Main Authors’ references (about bibliometrics)
 
-Aria, M. & Cuccurullo, C. (2017). *bibliometrix*: An R-tool for
+Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for
 comprehensive science mapping analysis, *Journal of Informetrics*,
 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
-(<https://doi.org/10.1016/j.joi.2017.08.007>).
+(<https://doi.org/10.1016/j.joi.2017.08.007>)
+
+Aria, M., Cuccurullo, C., D’Aniello, L., Misuraca, M., & Spano, M.
+(2022). Thematic Analysis as a New Culturomic Tool: The Social Media
+Coverage on COVID-19 Pandemic in Italy. *Sustainability*, 14(6), 3643,
+(<https://doi.org/10.3390/su14063643>)
+
+Belfiore, A., Salatino, A., & Osborne, F. (2022). Characterising
+Research Areas in the field of AI. *arXiv preprint
+arXiv:2205.13471*.(<https://doi.org/10.48550/arXiv.2205.13471>)
+
+Belfiore, A., Cuccurullo, C., & Aria, M. (2022). IoT in healthcare: A
+scientometric analysis. *Technological Forecasting and Social Change*,
+184, 122001. (<https://doi.org/10.1016/j.techfore.2022.122001>)
+
+D’Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). Academic
+Health Centers’ configurations, scientific productivity, and impact:
+insights from the Italian setting. *Health Policy*.
+(<https://doi.org/10.1016/j.healthpol.2022.09.007>)
+
+Aria M., Misuraca M., Spano M. (2020) Mapping the evolution of social
+research and data science on 30 years of Social Indicators Research,
+*Social Indicators Research*. (DOI:
+<https://doi.org/10.1007/s11205-020-02281-3>)
+
+Aria M., Alterisio A., Scandurra A, Pinelli C., D’Aniello B, (2021) The
+scholar’s best friend: research trends in dog cognitive and behavioural
+studies, A*nimal Cognition*.
+(<https://doi.org/10.1007/s10071-020-01448-2>)
 
 Cuccurullo, C., Aria, M., & Sarto, F. (2016). Foundations and trends in
 performance management. A twenty-five years bibliometric analysis in
 business and public administration domains, *Scientometrics*, DOI:
-10.1007/s11192-016-1948-8 (<https://doi.org/10.1007/s11192-016-1948-8>).
+10.1007/s11192-016-1948-8 (<https://doi.org/10.1007/s11192-016-1948-8>)
 
 Cuccurullo, C., Aria, M., & Sarto, F. (2015). Twenty years of research
 on performance management in business and public administration domains.
 Presentation at the *Correspondence Analysis and Related Methods
 conference (CARME 2015)* in September 2015
-(<https://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf>).
+(<https://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf>)
 
 Sarto, F., Cuccurullo, C., & Aria, M. (2014). Exploring healthcare
 governance literature: systematic review and paths for future research.
 *Mecosan*
-(<https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en>).
+(<https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en>)
 
 Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research
 on performance management in business and public administration domains.
 In *Academy of Management Proceedings* (Vol. 2013, No. 1, p. 14270).
 Academy of Management
-(<https://doi.org/10.5465/AMBPP.2013.14270abstract>).
+(<https://doi.org/10.5465/AMBPP.2013.14270abstract>)

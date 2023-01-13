@@ -4,10 +4,10 @@
 \alias{missingData}
 \title{Completeness of bibliographic metadata}
 \usage{
-missingData(df)
+missingData(M)
 }
 \arguments{
-\item{df}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
+\item{M}{is a bibliographic data frame obtained by \code{\link{convert2df}} function.}
 }
 \value{
 The function \code{missingData} returns a list containing two objects:
@@ -19,8 +19,10 @@ The function \code{missingData} returns a list containing two objects:
 It calculates the percentage of missing data in the metadata of a bibliographic data frame.
 }
 \details{
-Each metadata is assigned a status c("Excellent," "Good," "Acceptable," "Critical," "Completely missing") 
-depending on the percentage of missing data ("0%," "1% to 10%," "11% to 20%"m "21% to 99%," "100%").
+Each metadata is assigned a status c("Excellent," "Good," "Acceptable", "Poor", "Critical," "Completely missing") 
+depending on the percentage of missing data. In particular, the column *status* classifies the percentage of missing 
+value in 5 categories: "Excellent" (0%), "Good" (0.01% to 10.00%), "Acceptable" (from 10.01% to 20.00%), 
+"Poor" (from 20.01% to 50.00%), "Critical" (from 50.01% to 99.99%), "Completely missing" (100%).
 
 The results of the function allow us to understand which analyses can be performed with bibliometrix 
 and which cannot based on the completeness (or status) of different metadata.

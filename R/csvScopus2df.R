@@ -58,35 +58,80 @@ csvScopus2df <- function(file){
 
 labelling <- function(DATA){
   ## column re-labelling
-  label <- names(DATA)
-  label <- gsub("Abbreviated Source Title","JI",label)
-  label <- gsub("Authors with affiliations","C1",label)
-  label <- gsub("Author Addresses","C1",label)
-  #label <- gsub("Affiliations","RP",label)
-  label <- gsub("Authors","AU",label)
-  label <- gsub("Author Names","AU",label)
-  label <- gsub("Source title","SO",label)
-  label <- gsub("Title","TI",label)
-  label <- gsub("Publication Year","PY",label)
-  label <- gsub("Year","PY",label)
-  label <- gsub("Volume","VL",label)
-  label <- gsub("Issue","IS",label)
-  label <- gsub("Page count","PP",label)
-  label <- gsub("Cited by","TC",label)
-  label <- gsub("DOI","DI",label)
-  label <- gsub("Link","URL",label)
-  label <- gsub("Abstract","AB",label)
-  label <- gsub("Author Keywords","DE",label)
-  label <- gsub("Index Keywords","ID",label)
-  label <- gsub("Funding Details","FU",label)
-  label <- gsub("Funding Text 1","FX",label)
-  label <- gsub("References","CR",label)
-  label <- gsub("Correspondence Address","RP",label)
-  label <- gsub("Funding Details","FU",label)
-  label <- gsub("Language of Original Document","LA",label)
-  label <- gsub("Document Type","DT",label)
-  label <- gsub("Source","DB",label)
-  label <- gsub("EID","UT",label)
-  names(DATA) <- label
+  
+  df_tag <- data.frame(
+    rbind(c("Abbreviated Source Title","JI"),
+          c("Authors with affiliations","C1"),
+          c("Author Addresses","C1"),
+          c("Authors","AU"),
+          c("Author Names","AU"),
+          c("Author full names", "AF"),
+          c("Source title","SO"),
+          c("Titles","TI"),
+          c("Title","TI"),
+          c("Publication Year","PY"),
+          c("Year","PY"),
+          c("Volume","VL"),
+          c("Issue","IS"),
+          c("Page count","PP"),
+          c("Cited by","TC"),
+          c("DOI","DI"),
+          c("Link","URL"),
+          c("Abstract","AB"),
+          c("Author Keywords","DE"),
+          c("Indexed Keywords","ID"),
+          c("Index Keywords","ID"),
+          c("Funding Details","FU"),
+          c("Funding Texts","FX"),
+          c("Funding Text 1","FX"),
+          c("References","CR"),
+          c("Correspondence Address","RP"),
+          c("Publisher","PU"),
+          c("Open Access","OA"),
+          c("Language of Original Document","LA"),
+          c("Document Type","DT"),
+          c("Source","DB"),
+          c("EID","UT"))) %>% 
+    rename(orig = .data$X1,
+           tag = .data$X2)
+  
+  label <- data.frame(orig=names(DATA)) %>% 
+    left_join(df_tag,by = "orig") %>% 
+    mutate(tag = ifelse(is.na(.data$tag),.data$orig,.data$tag))
+  
+  names(DATA) <- label$tag
+  
+  
+  # label <- names(DATA)
+  # label <- gsub("Abbreviated Source Title","JI",label)
+  # label <- gsub("Authors with affiliations","C1",label)
+  # label <- gsub("Author Addresses","C1",label)
+  # #label <- gsub("Affiliations","RP",label)
+  # label <- gsub("Authors","AU",label)
+  # label <- gsub("Author Names","AU",label)
+  # label <- gsub("Source title","SO",label)
+  # label <- gsub("Titles","TI",label)
+  # label <- gsub("Title","TI",label)
+  # label <- gsub("Publication Year","PY",label)
+  # label <- gsub("Year","PY",label)
+  # label <- gsub("Volume","VL",label)
+  # label <- gsub("Issue","IS",label)
+  # label <- gsub("Page count","PP",label)
+  # label <- gsub("Cited by","TC",label)
+  # label <- gsub("DOI","DI",label)
+  # label <- gsub("Link","URL",label)
+  # label <- gsub("Abstract","AB",label)
+  # label <- gsub("Author Keywords","DE",label)
+  # label <- gsub("Index Keywords","ID",label)
+  # label <- gsub("Funding Details","FU",label)
+  # label <- gsub("Funding Text 1","FX",label)
+  # label <- gsub("References","CR",label)
+  # label <- gsub("Correspondence Address","RP",label)
+  # label <- gsub("Funding Details","FU",label)
+  # label <- gsub("Language of Original Document","LA",label)
+  # label <- gsub("Document Type","DT",label)
+  # label <- gsub("Source","DB",label)
+  # label <- gsub("EID","UT",label)
+  # names(DATA) <- label
   return(DATA)
 }

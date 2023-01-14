@@ -5347,6 +5347,7 @@ server <- function(input, output,session){
     }
   })
   
+  # REPORT ----
   ### Report Save xlsx ----
   output$report.save <- downloadHandler(
     filename = function() {
@@ -5431,21 +5432,7 @@ server <- function(input, output,session){
   }, ignoreNULL = TRUE
   )
   
-  
-  
-  # OPTIONS MENU ----
-  # observe({
-  #   if (!(input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & !isTRUE(values$checkControlBar)){
-  #     updateControlbar("controlbar2")
-  #     values$checkControlBar <- TRUE
-  #   }
-  #   if ((input$sidebarmenu %in% c("biblioshinyy","mainInfo", "report")) & isTRUE(values$checkControlBar)){
-  #     updateControlbar("controlbar2")
-  #     values$checkControlBar <- FALSE
-  #   }
-  # })
-  
-  ### screenshot buttons
+  ### screenshot buttons ----
   observeEvent(input$screenTFP,{
     screenshot(
       filename = paste("ThreeFieldPlot-", Sys.Date(), ".png", sep=""),

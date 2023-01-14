@@ -26,7 +26,7 @@
 missingData <- function(M) {
   cols <- names(M)
   missing_counts <- sapply(cols, function(x){
-    sum(is.na(M[,x]) | M[,x] %in% c("NA,0000,NA","NA",""))
+    sum(is.na(M[,x]) | M[,x] %in% c("NA,0000,NA","NA","","none"))
     })
   missing_pct <- round(missing_counts/nrow(M) * 100, 2)
   df_all <- data.frame(cols, missing_counts, missing_pct)

@@ -18,7 +18,7 @@ collabByRegionPlot(
   label.n = Inf,
   halo = FALSE,
   cluster = "walktrap",
-  community.repulsion = 0.1,
+  community.repulsion = 0,
   vos.path = NULL,
   size = 3,
   size.cex = FALSE,
@@ -106,4 +106,21 @@ It is a list containing the following elements:
 \description{
 A function to plot country collaboration networks by Region
 The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
+}
+\examples{
+
+\dontrun{
+data(management, package="bibliometrixData")
+
+management <- metaTagExtraction(management, Field = "AU_CO")
+
+NetMatrix <- biblioNetwork(management, analysis = "collaboration", network = "countries") 
+
+net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, weighted = TRUE, size=0.5, size.cex=TRUE, verbose=FALSE, community.repulsion = 0)
+
+cbind(names(net))
+
+plot(net[[4]]$graph)
+}
+
 }

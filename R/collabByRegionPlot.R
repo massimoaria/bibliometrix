@@ -45,7 +45,25 @@
 #' \code{cluster_obj} \tab  \tab a \code{\link{communities}} object of the package \code{igraph}\cr
 #' \code{cluster_res} \tab  \tab a data frame with main results of clustering procedure.\cr}
 #' 
+#' 
+#' @examples 
+#' 
+#' \dontrun{
+#' data(management, package="bibliometrixData")
+#' 
+#' management <- metaTagExtraction(management, Field = "AU_CO")
+#' 
+#' NetMatrix <- biblioNetwork(management, analysis = "collaboration", network = "countries") 
+#' 
+#' net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0, verbose=FALSE)
+#' 
+#' cbind(names(net))
+#' 
+#' plot(net[[4]]$graph)
+#' }
+#' 
 #' @export
+#' 
 collabByRegionPlot <- function(
     NetMatrix,
     normalize = NULL,

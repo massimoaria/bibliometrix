@@ -166,12 +166,7 @@ body <- dashboardBody(
                 column(12,
                        div(h1("biblioshiny: the shiny app for bibliometrix", 
                               style="text-align:center; font-size:50px;")),
-                       br(),
-                       div(h6("Aria, M., & Cuccurullo, C. (2017).", strong(" bibliometrix: An R-tool for comprehensive"), 
-                              style="text-align:center; font-size:20px;")),
-                       div(h6(strong("science mapping analysis."), 
-                              em("Journal of Informetrics"),", 11(4), 959-975.", 
-                              style="text-align:center; font-size:20px;")),
+                       br()
                 ),
                 column(12,
                        div(img(src = "logo.jpg", height = "35%",width = "35%"), style="text-align: center;")
@@ -180,8 +175,26 @@ body <- dashboardBody(
                        div(p("For an introduction and live examples, visit the ",
                              em(a("bibliometrix website.", 
                                   href = "https://www.bibliometrix.org", target="_blank")), 
-                             style="text-align:center; font-size:20px;"))
-                )
+                             style="text-align:center; font-size:18px;")),
+                       br(),
+                       hr()
+                ),
+                column(12,
+                       div(h6("biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.", 
+                              style="text-align:center; font-size:19px;")),
+                       div(h6("When they are used in a publication, we ask that authors to cite the following reference:", 
+                              style="text-align:center; font-size:19px;")),
+                       br(),
+                       div(h6("Aria, M., & Cuccurullo, C. (2017).", strong(" bibliometrix: An R-tool for comprehensive"), 
+                              style="text-align:center; font-size:19px;")),
+                       div(h6(strong("science mapping analysis."), 
+                              em("Journal of Informetrics"),", 11(4), 959-975.", 
+                              style="text-align:center; font-size:19px;")),
+                       br(),
+                       div(h6("Failure to properly cite the software is considered a violation of the license.", 
+                              style="text-align:center; font-size:19px;"))
+                       )
+                
               )
             )
     ),

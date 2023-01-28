@@ -25,17 +25,22 @@
 #' 
 missingData <- function(M) {
   cols <- names(M)
+  # count the number of missing values in each column
   missing_counts <- sapply(cols, function(x){
     sum(is.na(M[,x]) | M[,x] %in% c("NA,0000,NA","NA","","none"))
     })
+  # calculate the percentage of missing values in each column
   missing_pct <- round(missing_counts/nrow(M) * 100, 2)
+  # create a dataframe with the column names, number of missing values and percentage of missing values
   df_all <- data.frame(cols, missing_counts, missing_pct)
   
+  # create a vector with the tags
   tag <- unlist(
     strsplit(
       "AB,AU,C1,CR,DE,DI,DT,ID,LA,NR,PY,RP,SO,TC,TI,WC",","
       )
   )
+  # create a vector with the description of the tags
   description <- trimws(unlist(
     strsplit(
       "Abstract, Author,Affiliation,Cited References,Keywords,DOI,Document Type,Keywords Plus,Language,Number of Cited References,
@@ -43,6 +48,7 @@ missingData <- function(M) {
     )
   ))
   
+  # create a dataframe with the column names, number of missing values, percentage of missing values and status
   df_all <- df_all %>% 
     mutate(status = status(missing_pct)) %>% 
     replace_na(replace = list(missing_counts = nrow(M), missing_pct = 100))

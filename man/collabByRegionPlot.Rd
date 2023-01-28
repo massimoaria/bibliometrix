@@ -116,7 +116,7 @@ management <- metaTagExtraction(management, Field = "AU_CO")
 
 NetMatrix <- biblioNetwork(management, analysis = "collaboration", network = "countries") 
 
-net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, weighted = TRUE, size=0.5, size.cex=TRUE, verbose=FALSE, community.repulsion = 0)
+net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0, verbose=FALSE)
 
 cbind(names(net))
 

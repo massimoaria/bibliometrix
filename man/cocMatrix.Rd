@@ -2,7 +2,7 @@
 % Please edit documentation in R/cocMatrix.R
 \name{cocMatrix}
 \alias{cocMatrix}
-\title{Co-occurrence matrix}
+\title{Occurrence Matrix}
 \usage{
 cocMatrix(
   M,
@@ -56,10 +56,10 @@ a co-occurrence matrix with cases corresponding to manuscripts and variables to 
   objects extracted from the Tag \code{Field}.
 }
 \description{
-\code{cocMatrix} computes co-occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
+\code{cocMatrix} computes occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
 }
 \details{
-This co-occurrence matrix can be transformed into a collection of compatible
+This occurrence matrix can be transformed into a collection of compatible
 networks. Through matrix multiplication you can obtain different networks. 
 The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 

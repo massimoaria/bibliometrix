@@ -1,8 +1,8 @@
-#' Co-occurrence matrix
+#' Occurrence Matrix
 #'
-#' \code{cocMatrix} computes co-occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
+#' \code{cocMatrix} computes occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
 #'
-#' This co-occurrence matrix can be transformed into a collection of compatible
+#' This occurrence matrix can be transformed into a collection of compatible
 #' networks. Through matrix multiplication you can obtain different networks. 
 #' The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 #' 
@@ -66,7 +66,7 @@
 cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=TRUE, 
                     short = FALSE, remove.terms = NULL, synonyms = NULL){
   #
-  # The function creates co-occurrences data between Works and Field
+  # The function creates occurrences data between Works and Field
   #
   # type indicates the output format of co-occurrences:
   #   "matrix" argument generates a W x Field sparse matrix

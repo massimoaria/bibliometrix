@@ -89,8 +89,8 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=10){
       h_index = h_calc(.data$TC),
       #h_index = which(1:length(.data$TC) >= sort(.data$TC,decreasing = T))[1]-1,
       g_index = g_calc(.data$TC),
-      PY_start = min(.data$PY),
-      TC = sum(.data$TC),
+      PY_start = min(.data$PY, na.rm = TRUE),
+      TC = sum(.data$TC, na.rm = TRUE),
       NP = length(.data$AUs)) %>%
     mutate(
       m_index = .data$h_index / (Today -.data$PY_start+1)

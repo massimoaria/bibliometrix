@@ -108,6 +108,7 @@ collabByRegionPlot <- function(
   n_regions <- length(regions)
   
   net <- list()
+
   for (i in regions){
     reg_co <- labelCo %>% 
       dplyr::filter(.data$continent %in% i) %>% 
@@ -119,11 +120,19 @@ collabByRegionPlot <- function(
                               label = label, labelsize = labelsize, label.cex = label.cex, label.color = label.color, label.n = label.n,
                               halo = halo, cluster = cluster, community.repulsion = community.repulsion, vos.path = NULL, size = size,
                               size.cex = size.cex, curved = curved, noloops = noloops, remove.multiple = remove.multiple, remove.isolates = remove.isolates,
-                              weighted = weighted, edgesize = edgesize, edges.min = edges.min, alpha = alpha, verbose = verbose)
-      if (verbose) plot(net[[i]]$graph)
-    }
-    net[[i]]$NetMatrix_reg <- NetMatrix_reg
+                              weighted = weighted, edgesize = edgesize, edges.min = edges.min, alpha = alpha, verbose = FALSE)
+      net[[i]]$NetMatrix_reg <- NetMatrix_reg
+      }
+    
   }
   
+  if (verbose){ 
+    l <- ceiling(length(net)/2)
+    par(mfrow=c(l,2))
+    # for (i in 1:length(net)){
+    #   plot(net[[i]]$graph)
+    # }
+    lapply(net, function(x){plot(x$graph)})
+  }
   return(net)
 }

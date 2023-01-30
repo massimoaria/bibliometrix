@@ -10,7 +10,7 @@
 #' "author", the argument has the form C("SURNAME1 N","SURNAME2 N",...), in other words, for each author: surname and initials separated by one blank space. If elements=NULL, the function calculates impact indices for all elements contained in the data frame.
 #' i.e for the authors SEMPRONIO TIZIO CAIO and ARIA MASSIMO \code{elements} argument is \code{elements = c("SEMPRONIO TC", "ARIA M")}.
 #' @param sep is the field separator character. This character separates authors in each string of AU column of the bibliographic data frame. The default is \code{sep = ";"}.
-#' @param years is a integer. It indicates the number of years to consider for Hindex calculation. Default is 10.
+#' @param years is a integer. It indicates the number of years to consider for Hindex calculation. Default is Inf.
 #' @return an object of \code{class} "list". It contains two elements: H is a data frame with h-index, g-index and m-index for each author; CitationList is a list with the bibliographic collection for each author.
 #'
 #' 
@@ -45,12 +45,12 @@
 #' 
 #' @export
 
-Hindex <- function(M, field="author", elements=NULL, sep = ";",years=10){
+Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
   
   #elements=paste("\\\b",elements,"\\\b",sep="")
   M$TC <- as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
-  M <- M %>% dplyr::filter(!is.na(.data$TC))
+  M <- M %>% dplyr::filter(!is.na(.data$TC) | !is.na(.data$TC))
   #M <- M[M$TC>0,]
   
   Today=as.numeric(substr(Sys.time(),1,4))
@@ -87,7 +87,6 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=10){
     group_by(.data$AUs) %>% 
     summarize(#Element = .data$AUs[1],
       h_index = h_calc(.data$TC),
-      #h_index = which(1:length(.data$TC) >= sort(.data$TC,decreasing = T))[1]-1,
       g_index = g_calc(.data$TC),
       PY_start = min(.data$PY),
       TC = sum(.data$TC),

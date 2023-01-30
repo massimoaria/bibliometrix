@@ -42,13 +42,13 @@ summary.bibliometrix<-function(object, ...){
   options(width=130)
   
   arguments <- list(...)
-  if (sum(names(arguments)=="k")==0){k=10} else {k=arguments$k}
-  if (sum(names(arguments)=="pause")==0){pause=FALSE} else {pause=arguments$pause}
-  if (sum(names(arguments)=="width")==0){options(width=120)} else {options(width=arguments$width)}
-  if (sum(names(arguments)=="verbose")==0){verbose=TRUE} else {verbose=FALSE}
-  K=k
-  Co=NULL
-  AC=NULL
+  if (sum(names(arguments)=="k")==0){k=10} else {k <- arguments$k}
+  if (sum(names(arguments)=="pause")==0){pause <- FALSE} else {pause <- arguments$pause}
+  if (sum(names(arguments)=="width")==0){options(width = 120)} else {options(width = arguments$width)}
+  if (sum(names(arguments)=="verbose")==0){verbose <- TRUE} else {verbose <- FALSE}
+  K <- k
+  Co <- NULL
+  AC <- NULL
   
   TCm <- format(mean(as.numeric(object$TotalCitation), na.rm=TRUE),digits = 4)
   TCmy <- format(mean(as.numeric(object$MostCitedPapers$TCperYear), na.rm = TRUE), digits = 4) 

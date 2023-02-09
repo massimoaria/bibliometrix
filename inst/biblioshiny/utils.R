@@ -454,7 +454,7 @@ descriptive <- function(values,type){
              rename(Country = .data$AU1_CO,
                     TotalCitation = .data$TC) %>% 
              group_by(.data$Country) %>% 
-             summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
+             summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=round(sum(.data$TotalCitation)/length(.data$TotalCitation),1)) %>%
              arrange(-.data$TC) %>% as.data.frame(.data,stringasfactor=FALSE)
          },
          "tab7"={
@@ -1280,7 +1280,7 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
   LABEL[igraph::V(net$net)$labelsize==0] <- ""
   
   layout <- net$layout %>% 
-    dplyr::select(.data$x,.data$y,.data$color,.data$name)
+    dplyr::select(.data$x,.data$y,.data$color,.data$name) 
   
   vn <- visNetwork::toVisNetworkData(net$net)
   

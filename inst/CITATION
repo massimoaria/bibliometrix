@@ -1,14 +1,12 @@
 citHeader("To cite bibliometrix in publications, please use:")
 
-citEntry(entry = "article",
-  author = "Massimo Aria and Corrado Cuccurullo",
-  title = "bibliometrix: An R-tool for comprehensive science mapping analysis",
-  journal = "Journal of Informetrics",
-  volume = "11",
-  number = "4",
-  pages = "959-975",
-  publisher = "Elsevier",
-  year = "2017",
-  url = "https://doi.org/10.1016/j.joi.2017.08.007",
-  textVersion = "Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier."
-)
+bibentry(bibtype="Article",
+         title = "bibliometrix: An R-tool for comprehensive science mapping analysis",
+         author = "Massimo Aria and Corrado Cuccurullo",
+         journal = "Journal of Informetrics",
+         year = "2017",
+         doi = "10.1016/j.joi.2017.08.007",
+         textVersion =
+           paste("Aria, M., & Cuccurullo, C. (2017),",
+           "bibliometrix: An R-tool for comprehensive science mapping analysis,", 
+           "Journal of informetrics, 11(4), 959-975, Elsevier."))

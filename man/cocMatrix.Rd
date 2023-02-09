@@ -2,7 +2,7 @@
 % Please edit documentation in R/cocMatrix.R
 \name{cocMatrix}
 \alias{cocMatrix}
-\title{Occurrence Matrix}
+\title{Bibliographic bipartite network matrices}
 \usage{
 cocMatrix(
   M,
@@ -52,15 +52,16 @@ column of the data frame. The default is \code{sep = ";"}.}
 \item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 }
 \value{
-a co-occurrence matrix with cases corresponding to manuscripts and variables to the
+a bipartite network matrix with cases corresponding to manuscripts and variables to the
   objects extracted from the Tag \code{Field}.
 }
 \description{
-\code{cocMatrix} computes occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
+\code{cocMatrix} computes occurrences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
 }
 \details{
-This occurrence matrix can be transformed into a collection of compatible
-networks. Through matrix multiplication you can obtain different networks. 
+This occurrence matrix represents a bipartite network which can be transformed into a collection of bibliographic
+networks such as coupling, co-citation, etc.. 
+
 The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 
 References:\cr
@@ -68,18 +69,18 @@ Batagelj, V., & Cerinsek, M. (2013). On bibliographic networks. Scientometrics, 
 Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of Informetrics, 11(4), 959-975.\cr
 }
 \examples{
-# EXAMPLE 1: Articles x Authors co-occurrence matrix
+# EXAMPLE 1: Articles x Authors occurrence matrix
 
 data(scientometrics, package = "bibliometrixData")
 WA <- cocMatrix(scientometrics, Field = "AU", type = "sparse", sep = ";")
 
-# EXAMPLE 2: Articles x Cited References co-occurrence matrix
+# EXAMPLE 2: Articles x Cited References occurrence matrix
 
 # data(scientometrics, package = "bibliometrixData")
 
 # WCR <- cocMatrix(scientometrics, Field = "CR", type = "sparse", sep = ";")
 
-# EXAMPLE 3: Articles x Cited First Authors co-occurrence matrix
+# EXAMPLE 3: Articles x Cited First Authors occurrence matrix
 
 # data(scientometrics, package = "bibliometrixData")
 # scientometrics <- metaTagExtraction(scientometrics, Field = "CR_AU", sep = ";")

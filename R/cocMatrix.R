@@ -1,9 +1,10 @@
-#' Occurrence Matrix
+#' Bibliographic bipartite network matrices
 #'
-#' \code{cocMatrix} computes occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
+#' \code{cocMatrix} computes occurrences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
 #'
-#' This occurrence matrix can be transformed into a collection of compatible
-#' networks. Through matrix multiplication you can obtain different networks. 
+#' This occurrence matrix represents a bipartite network which can be transformed into a collection of bibliographic
+#' networks such as coupling, co-citation, etc.. 
+#' 
 #' The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 #' 
 #' References:\cr
@@ -36,22 +37,22 @@
 #' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
-#' @return a co-occurrence matrix with cases corresponding to manuscripts and variables to the
+#' @return a bipartite network matrix with cases corresponding to manuscripts and variables to the
 #'   objects extracted from the Tag \code{Field}.
 #'
 #' @examples
-#' # EXAMPLE 1: Articles x Authors co-occurrence matrix
+#' # EXAMPLE 1: Articles x Authors occurrence matrix
 #'
 #' data(scientometrics, package = "bibliometrixData")
 #' WA <- cocMatrix(scientometrics, Field = "AU", type = "sparse", sep = ";")
 #'
-#' # EXAMPLE 2: Articles x Cited References co-occurrence matrix
+#' # EXAMPLE 2: Articles x Cited References occurrence matrix
 #'
 #' # data(scientometrics, package = "bibliometrixData")
 #'
 #' # WCR <- cocMatrix(scientometrics, Field = "CR", type = "sparse", sep = ";")
 #'
-#' # EXAMPLE 3: Articles x Cited First Authors co-occurrence matrix
+#' # EXAMPLE 3: Articles x Cited First Authors occurrence matrix
 #'
 #' # data(scientometrics, package = "bibliometrixData")
 #' # scientometrics <- metaTagExtraction(scientometrics, Field = "CR_AU", sep = ";")
@@ -68,10 +69,10 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
   #
   # The function creates occurrences data between Works and Field
   #
-  # type indicates the output format of co-occurrences:
+  # type indicates the output format of occurrences:
   #   "matrix" argument generates a W x Field sparse matrix
   #   "sparse" argument generates a compact representation of the matrix (using the package Matrix)
-  #    it represents a compact representation of a co-occurrences matrix.
+  #    it represents a compact representation of a occurrences matrix.
   # Field indicates the ISI Tag
   # if Field is AU -> WA (Works x Authors)
   # if Field is CR -> WR (Works x References)

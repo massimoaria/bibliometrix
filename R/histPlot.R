@@ -149,14 +149,53 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   layout_m$y <- (diff(range(layout_m$x))/diff(range(layout_m$y)))*layout_m$y
 
   ################
-  df_net <- dataFromIgraph(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
+  # df_net <- dataFromIgraph(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
+  # df_net$color <- "slategray1"
+  # df_net <- left_join(df_net,layout_m[c("name","color")], by = "name") %>% 
+  #   rename(
+  #     color = .data$color.x,
+  #     color_v =.data$color.y
+  #   )
+  # #names(df_net)[10:11] <- c("color", "color_v")
+  
+  df_net <- igraph::as_long_data_frame(bsk.network) 
   df_net$color <- "slategray1"
-  df_net <- left_join(df_net,layout_m[c("name","color")], by = "name") %>% 
+    
+  ID <- setdiff(df_net$to,df_net$from)
+  
+  df_from <- df_net %>%   
+    select(.data$from,.data$to,.data$color,.data$from_name, .data$from_title, .data$from_keywords, .data$from_keywordsplus, .data$from_id, .data$from_size, .data$from_years)
+  
+  df_to <- df_net %>% dplyr::filter(.data$to %in% ID) %>% 
+    mutate(from2=.data$to) %>% 
+    select(.data$from2,.data$to,.data$color,.data$to_name, .data$to_title, .data$to_keywords, .data$to_keywordsplus, .data$to_id, .data$to_size, .data$to_years)
+  
+  df_to <- df_to[!duplicated(df_to$to),]
+  
+  label <- c("from", "to", "color","name", "title", "keywords", "keywordsplus", "id", "size", "years")
+  
+  names(df_from) <- label
+  names(df_to) <- label
+  
+  df_net <- rbind(df_from,df_to)
+  
+  layout_norm <- layout_m %>% 
+    mutate(x = (.data$x-min(.data$x))/(max(.data$x)-min(.data$x)),
+           y = (.data$y-min(.data$y))/(max(.data$y)-min(.data$y)))
+  df_net <- left_join(df_net,layout_norm[c("name","color","x","y")], by = c("name" ="name")) %>% 
     rename(
       color = .data$color.x,
       color_v =.data$color.y
-    )
-  #names(df_net)[10:11] <- c("color", "color_v")
+    ) 
+  
+  df_coord <- layout_norm %>%
+    mutate(to=row_number()) %>% 
+    select(.data$to,.data$x,.data$y) %>% 
+    rename(xend=.data$x,
+           yend=.data$y)
+  
+  df_net <- df_net %>% 
+    left_join(df_coord, by="to") 
   
   ylength <- diff(range(df_net$years))+1
   Ylabel <- (as.character(seq(min(df_net$years),max(df_net$years),length.out=ylength)))

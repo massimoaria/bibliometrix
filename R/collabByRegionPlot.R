@@ -1,5 +1,6 @@
-#' A function to plot country collaboration networks by Region
-#' The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
+#' Country Collaboration Networks by Region
+#' 
+#' A function to create and plot country collaboration networks by Region
 #' 
 #' @param NetMatrix is a country collaboration matrix obtained by the function \code{\link{biblioNetwork}}. 
 #' @param normalize is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
@@ -55,7 +56,9 @@
 #' 
 #' NetMatrix <- biblioNetwork(management, analysis = "collaboration", network = "countries") 
 #' 
-#' net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0, verbose=FALSE)
+#' net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, 
+#'                           weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0, 
+#'                          verbose=FALSE)
 #' 
 #' cbind(names(net))
 #' 

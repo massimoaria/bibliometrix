@@ -1523,7 +1523,7 @@ body <- dashboardBody(
                              selectInput("CitCountriesMeasure", 
                                          label = "Measure",
                                          choices = c("Total Citations"="TC", 
-                                                     "Average Citations per Year"="TCY"),
+                                                     "Average Article Citations"="TCY"),
                                          selected = "TC"),
                              numericInput("MostCitCountriesK", 
                                           label=("Number of Countries"), 

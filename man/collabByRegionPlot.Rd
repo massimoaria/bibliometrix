@@ -2,8 +2,7 @@
 % Please edit documentation in R/collabByRegionPlot.R
 \name{collabByRegionPlot}
 \alias{collabByRegionPlot}
-\title{A function to plot country collaboration networks by Region
-The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.}
+\title{Country Collaboration Networks by Region}
 \usage{
 collabByRegionPlot(
   NetMatrix,
@@ -104,8 +103,7 @@ It is a list containing the following elements:
 \code{cluster_res} \tab  \tab a data frame with main results of clustering procedure.\cr}
 }
 \description{
-A function to plot country collaboration networks by Region
-The function \code{\link{networkPlot}} can plot a bibliographic network previously created by \code{\link{biblioNetwork}}.
+A function to create and plot country collaboration networks by Region
 }
 \examples{
 
@@ -116,7 +114,9 @@ management <- metaTagExtraction(management, Field = "AU_CO")
 
 NetMatrix <- biblioNetwork(management, analysis = "collaboration", network = "countries") 
 
-net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0, verbose=FALSE)
+net <- collabByRegionPlot(NetMatrix, edgesize = 4, label.cex = TRUE, labelsize=2.5, 
+                          weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0, 
+                         verbose=FALSE)
 
 cbind(names(net))
 

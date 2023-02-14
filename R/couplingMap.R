@@ -243,7 +243,7 @@ network <- function(M, analysis,field, stemming, n, cluster, community.repulsion
          documents = {
            switch(field,
                   CR = {
-                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", short = TRUE, shortlabel = FALSE)
+                    NetMatrix <- biblioNetwork(M, analysis = "coupling", network = "references", short = TRUE, shortlabel = FALSE, sep=";")
                     type <- "D_CR"
                   },
                   {

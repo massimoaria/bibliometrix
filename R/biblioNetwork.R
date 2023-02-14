@@ -85,7 +85,6 @@ biblioNetwork <-
            synonyms = NULL) {
     crossprod <- Matrix::crossprod
     NetMatrix <-  NA
-    
     if (analysis == "coupling") {
       switch(
         network,
@@ -183,16 +182,27 @@ biblioNetwork <-
     NetMatrix <- NetMatrix[nchar(colnames(NetMatrix)) != 0, nchar(colnames(NetMatrix)) != 0]
     
     # short label for scopus references
-    if (network == "references") {
+    if (network == "references" & M$DB[1]=="SCOPUS") {
       ind <- which(regexpr("[A-Za-z]", substr(colnames(NetMatrix), 1, 1)) == 1)
       NetMatrix <- NetMatrix[ind, ind]
-      if (isTRUE(shortlabel)) {
-        LABEL <- labelShort(NetMatrix, db = tolower(M$DB[1]))
-        LABEL <- removeDuplicatedlabels(LABEL)
-        colnames(NetMatrix) <- rownames(NetMatrix) <-  LABEL
-      }
-      
     }
+    if (network == "references" & isTRUE(shortlabel)) {
+      LABEL <- labelShort(NetMatrix, db = tolower(M$DB[1]))
+      LABEL <- removeDuplicatedlabels(LABEL)
+      colnames(NetMatrix) <- rownames(NetMatrix) <-  LABEL
+    }
+    # short label for scopus references
+    # if (network == "references") {
+    #   ind <- which(regexpr("[A-Za-z]", substr(colnames(NetMatrix), 1, 1)) == 1)
+    #   NetMatrix <- NetMatrix[ind, ind]
+    #   if (isTRUE(shortlabel)) {
+    #     LABEL <- labelShort(NetMatrix, db = tolower(M$DB[1]))
+    #     LABEL <- removeDuplicatedlabels(LABEL)
+    #     colnames(NetMatrix) <- rownames(NetMatrix) <-  LABEL
+    #   }
+    #   
+    # }
+    
     # if (analysis != "coupling") {
     #   attr(NetMatrix, "PY") <- attr(WA, "PY")
     # }

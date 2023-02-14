@@ -1051,6 +1051,8 @@ server <- function(input, output,session){
            "all"={SO=B$SO})
     M=M[M$SO %in% SO,]
     values<-initial(values)
+    row.names(M) <- M$SR
+    class(M) <- c("bibliometrixDB", "data.frame")
     values$M=M
     Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)    
     if (dim(Mdisp)[1]>0){

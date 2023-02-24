@@ -80,7 +80,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
   # etc.
   #crossprod <- Matrix::crossprod
   size<-dim(M)
-  row.names(M) <- M$SR
+  if (!"LABEL" %in% names(M)) row.names(M) <- M$SR
   RowNames <- row.names(M)
   
   ### REMOVE TERMS AND MERGE SYNONYMS

@@ -1047,9 +1047,9 @@ countrycollaboration <- function(M,label,edgesize,min.edges, values){
   COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE),stringsAsFactors = FALSE)
   
   map.world <- map_data("world")
-  map.world$region=toupper(map.world$region)
-  map.world$region=gsub("UK","UNITED KINGDOM",map.world$region)
-  map.world$region=gsub("SOUTH KOREA","KOREA",map.world$region)
+  map.world$region <- toupper(map.world$region)
+  map.world$region <- gsub("^UK$","UNITED KINGDOM",map.world$region)
+  map.world$region <- gsub("^SOUTH KOREA$","KOREA",map.world$region)
   
   country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
   

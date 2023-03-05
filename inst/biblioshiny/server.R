@@ -5210,7 +5210,13 @@ server <- function(input, output,session){
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
                                shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
     values$degreePlot <-degreePlot(values$colnet)
-    names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+    if (is.null(dim(values$colnet$cluster_res))){
+      values$colnet$cluster_res <- data.frame(Node=NA, Cluster=NA, Betweenness=NA, 
+                                                                             Closeness = NA, PageRank = NA)
+    }else{
+      names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+    }
+    
   })
   output$colPlot <- renderVisNetwork({  
     COLnetwork()

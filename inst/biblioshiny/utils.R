@@ -455,7 +455,7 @@ descriptive <- function(values,type){
                     TotalCitation = .data$TC) %>% 
              group_by(.data$Country) %>% 
              summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=round(sum(.data$TotalCitation)/length(.data$TotalCitation),1)) %>%
-             arrange(-.data$TC) %>% as.data.frame(.data,stringasfactor=FALSE)
+             arrange(-.data$TC) %>% as.data.frame(.data)
          },
          "tab7"={
            TAB <- values$M %>% 
@@ -999,7 +999,7 @@ socialStructure<-function(input,values){
     values$colField=input$colField
     
     
-    values$cluster="walktrap"
+    #values$cluster="walktrap"
     switch(input$colField,
            COL_AU={
              values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")

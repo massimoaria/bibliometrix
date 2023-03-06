@@ -82,8 +82,7 @@ wos <- function(M, min.citations, sep, network, verbose){
   
   CR <- lapply(seq_along(CR), function(i) {
     l <- data.frame(ref = CR[[i]],
-                    paper = i,
-                    stringsAsFactors = FALSE)
+                    paper = i)
   })
   CR <- (do.call(rbind, CR))
   CR$DI <-
@@ -159,7 +158,7 @@ wos <- function(M, min.citations, sep, network, verbose){
     missingLABEL <- setdiff((M$LABEL), colnames(WLCR))
     colLab <- c(colnames(WLCR), missingLABEL)
     WLCR <- cbind(WLCR, matrix(0, nrow(WLCR), length(missingLABEL)))
-    WLCR <- as.data.frame(as.matrix(WLCR), stringsAsFactors = FALSE)
+    WLCR <- as.data.frame(as.matrix(WLCR))
     colnames(WLCR) <- colLab
     LABEL <- (row.names(WLCR))
     WLCR <- as.matrix(WLCR[LABEL])
@@ -233,8 +232,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
       l <-
         data.frame(
           ref = L[[i]],
-          paper = rep(papers[i], length(L[[i]][, 1])),
-          stringsAsFactors = FALSE
+          paper = rep(papers[i], length(L[[i]][, 1]))
         )
     })
     df <- (do.call(rbind, df))

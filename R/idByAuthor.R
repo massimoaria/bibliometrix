@@ -61,7 +61,7 @@ idByAuthor<-function(df,api_key){
       AU_count[j]=NA
       }
   }
-  authorsID=data.frame(lastname=df[,1],firstname=df[,2],id=AU_ID,affiliation=AU_AFF,count=AU_count,stringsAsFactors = FALSE)
+  authorsID=data.frame(lastname=df[,1],firstname=df[,2],id=AU_ID,affiliation=AU_AFF,count=AU_count)
   return(authorsID)
 }
     

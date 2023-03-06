@@ -455,7 +455,7 @@ descriptive <- function(values,type){
                     TotalCitation = .data$TC) %>% 
              group_by(.data$Country) %>% 
              summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=round(sum(.data$TotalCitation)/length(.data$TotalCitation),1)) %>%
-             arrange(-.data$TC) %>% as.data.frame(.data,stringasfactor=FALSE)
+             arrange(-.data$TC) %>% as.data.frame(.data)
          },
          "tab7"={
            TAB <- values$M %>% 
@@ -483,7 +483,7 @@ descriptive <- function(values,type){
          },
          "tab12"={
            TAB=tableTag(values$M,"C1")
-           TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB),stringsAsFactors = FALSE)
+           TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB))
            TAB=TAB[nchar(TAB[,1])>4,]
            #names(TAB)=c("Affiliations", "Articles")
            
@@ -491,7 +491,7 @@ descriptive <- function(values,type){
          "tab13"={
            CR<-localCitations(values$M,fast.search = FALSE, verbose = FALSE)
            TAB <- CR$Authors
-           #TAB=data.frame(Authors=names(CR$Authors$Author), Citations=as.numeric(CR$Cited),stringsAsFactors = FALSE)
+           #TAB=data.frame(Authors=names(CR$Authors$Author), Citations=as.numeric(CR$Cited))
          }
   )
   values$TAB=TAB
@@ -679,7 +679,7 @@ readSynWordsFile <- function(file, sep=","){
 
 mapworld <- function(M, values){
   if (!("AU_CO" %in% names(M))){M=metaTagExtraction(M,"AU_CO")}
-  CO=as.data.frame(tableTag(M,"AU_CO"),stringsAsFactors = FALSE)
+  CO=as.data.frame(tableTag(M,"AU_CO"))
   CO$Tab=gsub("[[:digit:]]","",CO$Tab)
   CO$Tab=gsub(".", "", CO$Tab, fixed = TRUE)
   CO$Tab=gsub(";;", ";", CO$Tab, fixed = TRUE)
@@ -772,7 +772,7 @@ CAmap <- function(input, values){
                                        remove.terms=remove.terms, synonyms = synonyms)
       
       CSData=values$CS$docCoord
-      CSData=data.frame(Documents=row.names(CSData),CSData,stringsAsFactors = FALSE)
+      CSData=data.frame(Documents=row.names(CSData),CSData)
       CSData$dim1=round(CSData$dim1,2)
       CSData$dim2=round(CSData$dim2,2)
       CSData$contrib=round(CSData$contrib,2)
@@ -791,7 +791,7 @@ CAmap <- function(input, values){
              },
              MDS={
                WData=data.frame(word=row.names(values$CS$res), values$CS$res, 
-                                cluster=values$CS$km.res$cluster,stringsAsFactors = FALSE)
+                                cluster=values$CS$km.res$cluster)
              })
       
       WData$Dim.1=round(WData$Dim.1,2)
@@ -999,7 +999,7 @@ socialStructure<-function(input,values){
     values$colField=input$colField
     
     
-    values$cluster="walktrap"
+    #values$cluster="walktrap"
     switch(input$colField,
            COL_AU={
              values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")
@@ -1042,9 +1042,9 @@ socialStructure<-function(input,values){
 countrycollaboration <- function(M,label,edgesize,min.edges, values){
   M=metaTagExtraction(M,"AU_CO")
   net=biblioNetwork(M,analysis="collaboration",network="countries")
-  CO=data.frame(Tab=rownames(net),Freq=diag(net),stringsAsFactors = FALSE)
+  CO=data.frame(Tab=rownames(net),Freq=diag(net))
   bsk.network=igraph::graph_from_adjacency_matrix(net,mode="undirected")
-  COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE),stringsAsFactors = FALSE)
+  COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE))
   
   map.world <- map_data("world")
   map.world$region <- toupper(map.world$region)

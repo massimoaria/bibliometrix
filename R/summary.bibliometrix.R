@@ -103,7 +103,7 @@ summary.bibliometrix<-function(object, ...){
   Description <- gsub(':','',Description)
   Description <- trimws(gsub('\\.','', Description))
   Results <- gsub("[^0-9\\.:]", "", MainInfo)
-  MainInfoDF=data.frame("Description"=Description,"Results"=Results, stringsAsFactors = FALSE)
+  MainInfoDF=data.frame("Description"=Description,"Results"=Results)
   
   if (isTRUE(verbose)){cat(MainInfo)}
 
@@ -125,6 +125,7 @@ summary.bibliometrix<-function(object, ...){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
 
+  
   # Most Productive Authors
   if (isTRUE(verbose)){cat("\nMost Productive Authors\n\n")}
   if (K==Inf){
@@ -155,6 +156,7 @@ summary.bibliometrix<-function(object, ...){
   if (pause==TRUE & isTRUE(verbose)){
     cat("Hit <Return> to see next table: ")
     line <- readline()}
+  
   if (K==Inf){
     k=length(object$Countries)
   }
@@ -182,11 +184,13 @@ summary.bibliometrix<-function(object, ...){
   # Total Citation per Country
   if (isTRUE(verbose)){cat("\nTotal Citations per Country\n\n")}
 
-  Co2=data.frame(Country=object$CO,TotalCitation=object$TotalCitation)
-  Co2=Co2[!is.na(Co2[,1]),]
-  AC=Co2 %>% group_by(.data$Country) %>% 
+  Co2 <- data.frame(Country=object$CO,TotalCitation=object$TotalCitation)
+  Co2 <- Co2[!is.na(Co2[,1]),]
+  AC <- Co2 %>% group_by(.data$Country) %>% 
     summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
-    arrange(-.data$TC) %>% as.data.frame(.data,stringasfactor=FALSE)
+    arrange(-.data$TC) #%>% as.data.frame(.data)
+  
+  AC <- as.data.frame(AC)
   
   names(AC)=c("Country     ", "Total Citations", "Average Article Citations")
   AC=format(AC,justify="left",digits=3)[1:kk,]

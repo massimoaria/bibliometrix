@@ -95,7 +95,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE)
         }
       }
       
-      M_AU = data.frame(AU_S, stringsAsFactors = FALSE)
+      M_AU = data.frame(AU_S)
       
       if (dim(M_AU)[2] <= dim(M)[2]) {
         M_AU[setdiff(names(M), names(M_AU))] = NA
@@ -150,7 +150,7 @@ retrievalByAuthorID<-function(id, api_key, remove.duplicated=TRUE, country=TRUE)
   }
   #########
   }
-  M <- data.frame(lapply(M,toupper),stringsAsFactors = FALSE)
+  M <- data.frame(lapply(M,toupper))
   M$TC=as.numeric(M$TC)
   M$PY=as.numeric(M$PY)
   M$DB="SCOPUS"

@@ -89,7 +89,7 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
   
   Nodes=data.frame(Nodes=Nodes,
                    group=c(rep(fields[1],length(TopL)),rep(fields[2],length(TopM)),rep(fields[3],length(TopR))),
-                   level=c(rep(1,length(TopL)),rep(2,length(TopM)),rep(3,length(TopR))), stringsAsFactors = FALSE)
+                   level=c(rep(1,length(TopL)),rep(2,length(TopM)),rep(3,length(TopR))))
   
   
   min.flow=1
@@ -106,8 +106,9 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
     mutate(
       coordX=rep(seq(from= 0, to= 1, by= 1/(Kx-0.8)),as.numeric(table(.data$level))),
       coordY= rep(0.1, Ky))
-           
-  Nodes$color <- colorRampPalette(brewer.pal(10,"Spectral"))(nrow(Nodes))
+  
+  colornodes <- c("#9E0142", "#D53E4F", "#F46D43", "#FDAE61", "#FEE08B", "#E6F598", "#ABDDA4", "#66C2A5", "#3288BD", "#5E4FA2")         
+  Nodes$color <- colorRampPalette(colornodes)(nrow(Nodes))
   Nodes$id <- (1:nrow(Nodes))-1
   
   ## identify and remove nodes with empty edges
@@ -188,8 +189,7 @@ meltx <- function(LM) {
     data.frame(
       Var1 = rownames(LM)[var1],
       Var2 = colnames(LM)[var2],
-      value = matrix(LM, length(LM), 1),
-      stringsAsFactors = FALSE
+      value = matrix(LM, length(LM), 1)
     )
   return(LMM)
 }

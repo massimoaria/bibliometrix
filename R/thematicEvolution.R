@@ -112,8 +112,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
   edges <-  INC[, c("CL1", "CL2", "Inc_index", "Inc_Weighted", 
                   "Stability")]
   # edges = edges[edges[, 3] > 0, ]
-  nodes <-  data.frame(name = unique(c(edges$CL1, edges$CL2)), 
-                     stringsAsFactors = FALSE)
+  nodes <-  data.frame(name = unique(c(edges$CL1, edges$CL2)))
   nodes$group <-  nodes$name
   
   cont <-  0

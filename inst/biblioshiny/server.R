@@ -414,7 +414,7 @@ server <- function(input, output,session){
       switch(ext,
              ### excel format
              xlsx={
-               M <- readxl::read_excel(inFile$datapath, col_types = "text") %>% as.data.frame(stringsAsFactors=FALSE)
+               M <- readxl::read_excel(inFile$datapath, col_types = "text") %>% as.data.frame()
                M$PY <- as.numeric(M$PY)
                M$TC <- as.numeric(M$TC)
                class(M) <- c("bibliometrixDB", "data.frame")
@@ -466,7 +466,7 @@ server <- function(input, output,session){
     DATAloading()   
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
-    }), stringsAsFactors = FALSE)
+    }))
     MData$DOI <-
       paste0(
         '<a href=\"https://doi.org/',
@@ -942,7 +942,7 @@ server <- function(input, output,session){
   contentTable <- function(values){
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
-    }), stringsAsFactors = FALSE)
+    }))
     MData$DOI <-
       paste0(
         '<a href=\"https://doi.org/',
@@ -1054,7 +1054,7 @@ server <- function(input, output,session){
     row.names(M) <- M$SR
     class(M) <- c("bibliometrixDB", "data.frame")
     values$M=M
-    Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}),stringsAsFactors = FALSE)    
+    Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}))    
     if (dim(Mdisp)[1]>0){
       DT::datatable(Mdisp, rownames = FALSE, extensions = c("Buttons"),
                     options = list(pageLength = 3, dom = 'Bfrtip',
@@ -1074,7 +1074,7 @@ server <- function(input, output,session){
                                    columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(Mdisp))-1)))),
                     class = 'cell-border compact stripe') %>%
         formatStyle(names(Mdisp),  backgroundColor = 'white',textAlign = 'center', fontSize = '70%')
-    }else{Mdisp=data.frame(Message="Empty collection",stringsAsFactors = FALSE, row.names = " ")}
+    }else{Mdisp=data.frame(Message="Empty collection", row.names = " ")}
   })
   
   output$dataFiltered <- DT::renderDT({
@@ -1520,7 +1520,7 @@ server <- function(input, output,session){
   MLCSources <- eventReactive(input$applyMLCSources,{
     values$M=metaTagExtraction(values$M,"CR_SO")
     TAB=tableTag(values$M,"CR_SO")
-    TAB=data.frame(Sources=names(TAB),Articles=as.numeric(TAB),stringsAsFactors = FALSE)
+    TAB=data.frame(Sources=names(TAB),Articles=as.numeric(TAB))
     values$TABSoCit<-TAB
     xx<- TAB
     if (input$MostRelCitSourcesK>dim(xx)[1]){
@@ -1730,7 +1730,7 @@ server <- function(input, output,session){
     term=rep(term,each=dim(values$PYSO)[1])
     n=dim(values$PYSO)[1]*(dim(values$PYSO)[2]-1)
     freq=matrix(as.matrix(values$PYSO[,-1]),n,1)
-    values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq, stringsAsFactors = TRUE)
+    values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq)
     
     Text <- paste(values$SODF$Source," (",values$SODF$Year,") ",values$SODF$Freq, sep="")
     
@@ -2865,7 +2865,7 @@ server <- function(input, output,session){
     
     xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], 
                   "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],"LC/GC Ratio"=TAB[6], 
-                  "Normalized Local Citations"=TAB[,7],"Normalized Global Citations"=TAB[,8], stringsAsFactors = FALSE)
+                  "Normalized Local Citations"=TAB[,7],"Normalized Global Citations"=TAB[,8])
     values$TABLocDoc=xx
     
     if (input$MostLocCitDocsK>dim(xx)[1]){
@@ -2942,7 +2942,7 @@ server <- function(input, output,session){
   ### Most Local Cited References ----
   MLCReferences <- eventReactive(input$applyMLCReferences,{
     CR <- citations(values$M,sep=input$CitRefsSep)$Cited
-    TAB <- data.frame(names(CR),as.numeric(CR),stringsAsFactors = FALSE)
+    TAB <- data.frame(names(CR),as.numeric(CR))
     names(TAB) <- c("Cited References", "Citations")
     values$TABCitRef <- TAB %>% filter(.data$`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
     
@@ -3140,7 +3140,7 @@ server <- function(input, output,session){
     
     WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
     
-    TAB=data.frame(names(WR),as.numeric(WR),stringsAsFactors = FALSE)
+    TAB=data.frame(names(WR),as.numeric(WR))
     names(TAB)=c("Words", "Occurrences")
     values$TABWord=TAB
     
@@ -3470,7 +3470,7 @@ server <- function(input, output,session){
     term=rep(term,each=dim(values$KW)[1])
     n=dim(values$KW)[1]*(dim(values$KW)[2]-1)
     freq=matrix(as.matrix(values$KW[,-1]),n,1)
-    values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq, stringsAsFactors = TRUE)
+    values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq)
     
     width_scale <- 2.5 * 26 / length(unique(values$DF$Term))
     
@@ -5210,7 +5210,13 @@ server <- function(input, output,session){
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
                                shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
     values$degreePlot <-degreePlot(values$colnet)
-    names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+    if (is.null(dim(values$colnet$cluster_res))){
+      values$colnet$cluster_res <- data.frame(Node=NA, Cluster=NA, Betweenness=NA, 
+                                                                             Closeness = NA, PageRank = NA)
+    }else{
+      names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+    }
+    
   })
   output$colPlot <- renderVisNetwork({  
     COLnetwork()

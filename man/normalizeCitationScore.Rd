@@ -36,7 +36,7 @@ The NLCS is the NCS calculated using the local citations (total citations that a
 
 \dontrun{
 data(management, package = "bibliometrixData")
-NCS <- normalizeCitationScore(M, field = "authors", impact.measure = "local")
+NCS <- normalizeCitationScore(management, field = "authors", impact.measure = "local")
 }
 
 }

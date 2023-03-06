@@ -27,7 +27,7 @@
 #' 
 #' \dontrun{
 #' data(management, package = "bibliometrixData")
-#' NCS <- normalizeCitationScore(M, field = "authors", impact.measure = "local")
+#' NCS <- normalizeCitationScore(management, field = "authors", impact.measure = "local")
 #' }
 #'
 #' @export
@@ -69,7 +69,7 @@ normalizeCitationScore <- function(M,field="documents", impact.measure = "local"
          authors={
            #### Authors Impact by Normalized Local Citations ####
            AU=names(tableTag(M,"AU"))
-           df=data.frame("Author"="NA","SR"=NA,"year"=NA, "TC"=NA,"LCS"=NA,"NGCS"=NA,"NLCS"=NA,stringsAsFactors = FALSE)
+           df=data.frame("Author"="NA","SR"=NA,"year"=NA, "TC"=NA,"LCS"=NA,"NGCS"=NA,"NLCS"=NA)
            
            if (!("DI" %in% names(M))){M$DI="NA"}
            for (i in 1:length(AU)){
@@ -77,7 +77,7 @@ normalizeCitationScore <- function(M,field="documents", impact.measure = "local"
              ind=which(regexpr(AU[i],M$AU)>-1)
              dfAU=data.frame("Author"=rep(AU[i],length(ind)), "SR"=M$PY[ind], "year"=M$PY[ind],
                              "TC"=M$TC[ind], "LCS"=M$LCS[ind],"NGCS"=M$NGCS[ind],
-                             "NLCS"=M$NLCS[ind],stringsAsFactors = FALSE)
+                             "NLCS"=M$NLCS[ind])
              df=rbind(df,dfAU)
            }
            df=df[-1,]

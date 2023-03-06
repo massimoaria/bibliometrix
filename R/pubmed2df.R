@@ -13,14 +13,14 @@ pubmed2df<-function(D){
   
   numPapers <- rep(1:nP,rowPapers)
   
-  DATA <- data.frame(Tag = substr(D,1,4), content = substr(D,7,nchar(D)), Paper=numPapers, stringsAsFactors = FALSE)
+  DATA <- data.frame(Tag = substr(D,1,4), content = substr(D,7,nchar(D)), Paper=numPapers)
   DATA$Tag <- gsub(" ","",DATA$Tag)
   df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
     summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
     arrange(.data$Tag, .data$Paper) %>%
     pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
-    ungroup() %>%
-    as.data.frame()
+    ungroup()
+  df <- as.data.frame(df)
   
   # rename field tags
   error <- 0
@@ -51,13 +51,13 @@ Please, take a look at the vignettes:
   
   df1 <- data.frame(lapply(df[tagsComma],function(x){
     gsub("---",";",x)
-  }),stringsAsFactors = FALSE)
+  }))
   
   ### replace "---" with " "
   otherTags <- setdiff(names(df),tagsComma)
   df2 <- data.frame(lapply(df[otherTags],function(x){
     trimES(gsub("---"," ",x))
-  }),stringsAsFactors = FALSE)
+  }))
   df <- cbind(df1,df2)
   rm(df1,df2)
   
@@ -65,7 +65,7 @@ Please, take a look at the vignettes:
   
   # remove * char from keywords
   df$DE <- df$ID <- gsub("\\*","",df$DE)
-  df <- data.frame(lapply(df,toupper),stringsAsFactors = FALSE)
+  df <- data.frame(lapply(df,toupper))
   
   # add sep ; to affiliations
   df$C1 <- gsub("\\.",".;",df$C1)

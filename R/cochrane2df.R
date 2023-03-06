@@ -9,7 +9,7 @@ cochrane2df<-function(D){
   
   numPapers <- rep(1:nP,rowPapers)
   
-  DATA <- data.frame(Tag = substr(D,1,4), content = substr(D,5,nchar(D)), Paper=numPapers, stringsAsFactors = FALSE)
+  DATA <- data.frame(Tag = substr(D,1,4), content = substr(D,5,nchar(D)), Paper=numPapers)
   DATA$Tag <- gsub(" ","",gsub(":","",DATA$Tag))
   df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
     summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
@@ -30,7 +30,7 @@ cochrane2df<-function(D){
   tagsComma <- c("AU","ID")
   df1 <- data.frame(lapply(df[tagsComma],function(x){
     gsub("---",";",x)
-  }),stringsAsFactors = FALSE)
+  }))
   
   ### replace "---" with " "
   otherTags <- setdiff(names(df),tagsComma)

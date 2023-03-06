@@ -96,7 +96,7 @@ Please, take a look at the vignettes:
   tagsComma <- tagsComma[(!(tagsComma %in% nolab))]
   df1 <- data.frame(lapply(df[tagsComma],function(x){
     gsub("---",";",x)
-  }),stringsAsFactors = FALSE)
+  }))
   
   ### replace "---" with " "
   otherTags <- setdiff(names(df),tagsComma)

@@ -770,13 +770,17 @@ CAmap <- function(input, values){
       values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
                                        k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
                                        remove.terms=remove.terms, synonyms = synonyms)
-      
+      if (input$method!="MDS"){
       CSData=values$CS$docCoord
       CSData=data.frame(Documents=row.names(CSData),CSData)
       CSData$dim1=round(CSData$dim1,2)
       CSData$dim2=round(CSData$dim2,2)
       CSData$contrib=round(CSData$contrib,2)
       values$CS$CSData <- CSData
+      } else{
+        values$CS$CSData <- data.frame(Docuemnts=NA,dim1=NA,dim2=NA)
+      }
+      
       
       switch(input$method,
              CA={
@@ -1406,6 +1410,265 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
 }
 
 
+## Dendogram to Visnetwork
+dend2vis <- function(hc, labelsize, nclusters=1, community=FALSE){
+  
+  # community = TRUE means that hc is an igraph community detection object
+  # community = FALSE mean that hc is a hclust object
+  
+  # transform and plot a community igraph object using dendrogram
+  if (community){
+    hc=as.hclust(hc, use.modularity = TRUE)
+  }
+  
+  h_tail <- round((max(hc$height)*0.12),1)
+  
+  hc$height <- hc$height+h_tail
+  
+  VIS <- visHclust(hc, cutree = nclusters, colorEdges = "grey60", horizontal = TRUE, export=FALSE)
+  VIS$x$edges <- data.frame(color=unique(VIS$x$edges$color)) %>%
+    mutate(new_color=colorlist()[1:nrow(.)]) %>%
+    right_join(VIS$x$edges, by = "color") %>%
+    select(-color) %>%
+    rename(color = new_color)
+  VIS$x$nodes <- VIS$x$nodes %>%
+    mutate(
+      label = ifelse(group!="individual", NA,label),
+      group=ifelse(group=="individual","word",group),
+      title=gsub("individuals","words",title),
+      value=1,
+      scaling.min=10,
+      scaling.max=10)
+  coords <- VIS$x$nodes %>% select(x,y) %>% as.matrix()
+  
+  edges <- VIS$x$edges
+  nodes <- VIS$x$nodes %>% select(id,label) %>% dplyr::filter(label!="1")
+  
+  VIS$x$edges <- edges %>%
+    select(-id) %>%
+    left_join(nodes, by=c("to" = "id")) %>%
+    select(-label.x) %>%
+    rename(label=label.y) %>%
+    mutate(value=10,
+           font.color=color,
+           font.size=labelsize*10,
+           font.vadjust=-0.2*font.size,
+           label = ifelse(is.na(label),"",label))
+  
+  VIS <- VIS %>% visGroups(groupname = "group", color ="gray90",
+                           shape = "dot", size = 10)  %>%
+    visGroups(groupname = "word",
+              font = list(size = 0),
+              color = list(background = "white", border = "#80B1D3",
+                           highlight = "#e2e9e9", hover = "orange"), shape = "box") %>%
+    visNodes(font=list(align=VIS$x$nodes$font.align)) %>%
+    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=list(to=1000,from=0), algorithm="hierarchical"), nodesIdSelection = FALSE,
+                           manipulation = FALSE, height ="100%", width = "100%") %>%
+    visNetwork::visInteraction(dragNodes = FALSE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed=0.4) %>%
+    visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type="full") %>%
+    visEdges(font = list(align="top", size=VIS$x$edges$font.size)) %>%
+    visEvents(click = "function(nodes){
+                  Shiny.onInputChange('click_dend', nodes.nodes[0]);
+                  ;}"
+    )
+  
+  for (i in 1:nrow(VIS$x$nodes)){
+    if (VIS$x$nodes$group[i]=="group"){
+      old_inertia <- as.character(VIS$x$nodes$inertia[i])
+      inertia <- as.character(VIS$x$nodes$inertia[i]-h_tail)
+      VIS$x$nodes$title[i] <- gsub(old_inertia,inertia,VIS$x$nodes$title[i])
+    }
+  }
+  
+  VIS
+}
+
+## Factorial Analysis dynamic plots
+ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.10, labelsize=16, size=5){
+  
+  switch(method,
+         CA={
+           contrib = rowSums(CS$res$col$contrib %>% as.data.frame())/2
+           wordCoord <- CS$res$col$coord[,1:2] %>%
+             data.frame() %>%
+             mutate(label = row.names(CS$res$col$coord),
+                    contrib = contrib) %>% 
+             select(c(3,1,2,4))
+         },
+         MCA={
+           contrib =rowSums(CS$res$var$contrib)/2
+           wordCoord <- CS$res$var$coord[,1:2] %>%
+             data.frame() %>%
+             mutate(label = row.names(CS$res$var$coord),
+                    contrib = contrib) %>% 
+             select(c(3,1,2,4)) %>% 
+             filter(substr(label,nchar(label)-1,nchar(label))=="_1") 
+         },
+         MDS={
+           contrib = size
+         })
+  
+  xlabel <- paste0("Dim.",dimX)
+  ylabel <- paste0("Dim.",dimY)
+  dimContrLabel <- paste0("Contrib",c(dimX,dimY))
+  ymax <- diff(range((wordCoord[,3])))
+  xmax <- diff(range((wordCoord[,2])))
+  threshold2 <- threshold*mean(xmax,ymax)
+  
+  # scaled size for dots
+  dotScale <- (wordCoord$contrib)+size
+  
+  #Threshold labels to plot
+  thres <- sort(dotScale, decreasing = TRUE)[min(topWordPlot, nrow(wordCoord))]
+  
+  names(wordCoord)[2:3] <- c("Dim1","Dim2")
+  
+  wordCoord <- wordCoord %>%
+    mutate(dotSize = dotScale,
+           groups = CS$km.res$cluster,
+           labelToPlot = ifelse(dotSize>=thres, label, ""),
+           font.color = ifelse(labelToPlot=="", NA, adjustcolor(colorlist()[groups], alpha.f = 0.85)),
+           font.size = round(dotSize*2 ,0))
+  
+  ## Avoid label overlapping
+  labelToRemove <- avoidOverlaps(wordCoord, threshold = threshold2, dimX=dimX, dimY=dimY)
+  wordCoord <- wordCoord %>%
+    mutate(labelToPlot = ifelse(labelToPlot %in% labelToRemove, "",labelToPlot)) %>% 
+    mutate(label = gsub("_1","",label),
+           labelToPlot = gsub("_1","",labelToPlot))
+  
+  hoverText <- paste(" <b>", wordCoord$label,"</b>\n Contribute: ", round(wordCoord$contrib,3), sep="")
+  
+  fig <- plot_ly(data = wordCoord, x = wordCoord[,"Dim1"], y = wordCoord[,"Dim2"], #customdata=results$wordCoord,
+                 type="scatter",
+                 mode   = 'markers',
+                 marker = list(
+                   size = dotScale,
+                   color = adjustcolor(colorlist()[wordCoord$groups], alpha.f = 0.3), #'rgb(79, 121, 66, .5)',
+                   line = list(color = adjustcolor(colorlist()[wordCoord$groups], alpha.f = 0.3), #'rgb(79, 121, 66, .8)',
+                               width = 2)
+                 ),
+                 text = hoverText,
+                 hoverinfo = 'text',
+                 alpha = .3
+  )
+  
+  fig <- fig %>% layout(yaxis = list(title = ylabel, showgrid = TRUE, showline = FALSE, showticklabels = TRUE, domain= c(0, 1)),
+                        xaxis = list(title = xlabel, zeroline = TRUE, showgrid = TRUE, showline = FALSE, showticklabels = TRUE),
+                        plot_bgcolor  = "rgba(0, 0, 0, 0)",
+                        paper_bgcolor = "rgba(0, 0, 0, 0)")
+  
+  for (i in seq_len(max(wordCoord$groups))){
+    w <- wordCoord %>% dplyr::filter(groups == i) %>%
+      mutate(Dim1 = Dim1+dotSize*0.005,
+             Dim2 = Dim2+dotSize*0.01)
+    hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
+    fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
+                                color = I(hull_df$color[1]), opacity=0.3, line=list(width=0), 
+                                text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points") %>% 
+      add_annotations(data = w,x = ~Dim1, y = ~Dim2, xref = 'x1', yref = 'y',
+                                   text = ~labelToPlot,
+                                   font = list(family = 'sans serif', size = labelsize, color = w$font.color[1]), #'rgb(79, 121, 66)'),
+                                   showarrow = FALSE)
+      
+  }
+  
+
+  
+
+  
+  fig <- fig %>% config(displaylogo = FALSE,
+                        modeBarButtonsToRemove = c(
+                          #'toImage',
+                          'sendDataToCloud',
+                          'pan2d',
+                          'select2d',
+                          'lasso2d',
+                          'toggleSpikelines',
+                          'hoverClosestCartesian',
+                          'hoverCompareCartesian'
+                        )) %>%
+    event_register("plotly_selecting")
+  return(fig)
+  }
+
+
+## function to avoid label overlapping ----
+avoidOverlaps <- function(w,threshold=0.10, dimX=1, dimY=2){
+  
+  w[,"Dim2"] <- w[,"Dim2"]/2
+  
+  Ds <- dist(w %>%
+               dplyr::filter(labelToPlot!="") %>%
+               select(.data$Dim1,.data$Dim2),
+             method="manhattan", upper=T) %>%
+    dist2df() %>%
+    rename(from = row,
+           to = col,
+           dist = value) %>%
+    left_join(
+      w %>% dplyr::filter(labelToPlot!="") %>%
+        select(labelToPlot, dotSize),
+      by=c("from" = "labelToPlot")
+    ) %>%
+    rename(w_from = dotSize) %>%
+    left_join(
+      w %>% dplyr::filter(labelToPlot!="") %>%
+        select(labelToPlot, dotSize),
+      by=c("to" = "labelToPlot")
+    ) %>%
+    rename(w_to = dotSize) %>%
+    filter(dist<threshold)
+  
+  st <- TRUE
+  i <- 1
+  label <- NULL
+  case <- "n"
+  
+  while(isTRUE(st)){
+    if (Ds$w_from[i]>Ds$w_to[i] & Ds$dist[i]<threshold){
+      case <- "y"
+      lab <- Ds$to[i]
+      
+    } else if (Ds$w_from[i]<=Ds$w_to[i] & Ds$dist[i]<threshold){
+      case <- "y"
+      lab <- Ds$from[i]
+    }
+    
+    switch(case,
+           "y"={
+             Ds <- Ds[Ds$from != lab,]
+             Ds <- Ds[Ds$to != lab,]
+             label <- c(label,lab)
+           },
+           "n"={
+             Ds <- Ds[-1,]
+           })
+    
+    if (i>=nrow(Ds)){
+      st <- FALSE
+    }
+    case <- "n"
+    #print(nrow(Ds))
+  }
+  
+  label
+  
+}
+
+## convert a distance object into a data.frame ----
+dist2df <- function(inDist) {
+  if (class(inDist) != "dist") stop("wrong input type")
+  A <- attr(inDist, "Size")
+  B <- if (is.null(attr(inDist, "Labels"))) sequence(A) else attr(inDist, "Labels")
+  if (isTRUE(attr(inDist, "Diag"))) attr(inDist, "Diag") <- FALSE
+  if (isTRUE(attr(inDist, "Upper"))) attr(inDist, "Upper") <- FALSE
+  data.frame(
+    row = B[unlist(lapply(sequence(A)[-1], function(x) x:A))],
+    col = rep(B[-length(B)], (length(B)-1):1),
+    value = as.vector(inDist))
+}
+
 ### Excel report functions
 addDataWb <- function(list_df, wb, sheetname){
   l <- length(list_df)
@@ -1578,3 +1841,8 @@ show_alert(
   )
 }
 
+colorlist <- function(){
+  c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999","#66C2A5","#FC8D62","#8DA0CB","#E78AC3","#A6D854","#FFD92F"
+             ,"#B3B3B3","#A6CEE3","#1F78B4","#B2DF8A","#33A02C","#FB9A99","#E31A1C","#FDBF6F","#FF7F00","#CAB2D6","#6A3D9A","#B15928","#8DD3C7","#BEBADA"
+             ,"#FB8072","#80B1D3","#FDB462","#B3DE69","#D9D9D9","#BC80BD","#CCEBC5")
+}

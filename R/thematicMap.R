@@ -119,7 +119,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   word_cluster=word[group]
 
   centr <- networkStat(Net$graph,stat="all", type="closeness")$vertex
-  df_lab <- data.frame(sC=sC,words=word,groups=group,color=color,cluster_label="NA",stringsAsFactors = FALSE)
+  df_lab <- data.frame(sC=sC,words=word,groups=group,color=color,cluster_label="NA")
    
   ## new code using tidyvverse
   df_lab <- df_lab %>% 

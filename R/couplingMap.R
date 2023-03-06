@@ -332,7 +332,7 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
   #w <- character(length(clusters))
   df$SR <- df[,1]
   tab_global <- tableTag(df, term)
-  tab_global <- data.frame(label=names(tab_global),tot=as.numeric(tab_global), n=nrow(M),stringsAsFactors = FALSE)
+  tab_global <- data.frame(label=names(tab_global),tot=as.numeric(tab_global), n=nrow(M))
   
   df <- df %>% 
     group_by(.data$Cluster) %>% 
@@ -343,7 +343,7 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
   # for (i in 1:length(clusters)){
   #   ind <- which(df$Cluster == clusters[i])
   #   tab <- round((tableTag(df[ind,], term)[1:n.labels])/length(ind),1)
-  #   tab <- data.frame(label=names(tab), value=as.numeric(tab),stringsAsFactors = FALSE)
+  #   tab <- data.frame(label=names(tab), value=as.numeric(tab))
   #   tab <- tab %>% 
   #     left_join(tab_global, by = "label") %>% 
   #     mutate(freq = .data$value/.data$tot*100) 

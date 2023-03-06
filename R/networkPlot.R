@@ -398,12 +398,13 @@ delete.isolates <- function(graph, mode = 'all') {
 ### clusteringNetwork
 
 clusteringNetwork <- function(bsk.network, cluster) {
-  colorlist <- c(
-    brewer.pal(9, 'Set1')[-6],
-    brewer.pal(8, 'Set2')[-7],
-    brewer.pal(12, 'Paired')[-11],
-    brewer.pal(12, 'Set3')[-c(2, 8, 12)]
-  )
+  colorlist <- colorlist() 
+  #   c(
+  #   brewer.pal(9, 'Set1')[-6],
+  #   brewer.pal(8, 'Set2')[-7],
+  #   brewer.pal(12, 'Paired')[-11],
+  #   brewer.pal(12, 'Set3')[-c(2, 8, 12)]
+  # )
   
   switch(
     cluster,
@@ -453,12 +454,13 @@ clusteringNetwork <- function(bsk.network, cluster) {
   V(bsk.network)$community <- net_groups$membership
   El <- as.data.frame(get.edgelist(bsk.network, names = F))
   
-  colorlist <- c(
-    brewer.pal(9, 'Set1')[-6],
-    brewer.pal(8, 'Set2')[-7],
-    brewer.pal(12, 'Paired')[-11],
-    brewer.pal(12, 'Set3')[-c(2, 8, 12)]
-  )
+  colorlist <- colorlist()
+  #   c(
+  #   brewer.pal(9, 'Set1')[-6],
+  #   brewer.pal(8, 'Set2')[-7],
+  #   brewer.pal(12, 'Paired')[-11],
+  #   brewer.pal(12, 'Set3')[-c(2, 8, 12)]
+  # )
   E(bsk.network)$color <- apply(El, 1, function(x) {
     if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]) {
       C <- colorlist[V(bsk.network)$community[x[1]]]

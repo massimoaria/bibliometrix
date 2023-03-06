@@ -10,7 +10,8 @@ dimensions2df <- function(file, format = "csv") {
              
              D <- read_csv(file[i], na=character(), quote='"', skip=1, trim_ws = FALSE, progress = show_progress()) %>%
                mutate(across(where(is.numeric), as.character)) %>% 
-               mutate(across(where(is.character), tidyr::replace_na,"")) %>% as.data.frame(stringsAsFactors=FALSE)
+               mutate(across(where(is.character), tidyr::replace_na,""))
+             D <- as.data.frame(D)
              
              
              if (i>1){
@@ -25,7 +26,8 @@ dimensions2df <- function(file, format = "csv") {
          excel = {
            for (i in 1:length(file)){
              #D1 <- rio::import(file[i], skip=1)
-             D <- readxl::read_excel(file[1],skip=1) %>% as.data.frame(stringsAsFactors=FALSE)
+             D <- readxl::read_excel(file[1],skip=1)
+             D <- as.data.frame(D)
              
              if (i>1){
                l <- intersect(l,names(D))
@@ -185,14 +187,6 @@ postprocessingDim <- function(DATA) {
   
   # Affiliations
   DATA$RP = NA
-  #DATA$C1 <- trimws(gsub("(?:\\(.*?\\)|\\.)(*SKIP)(*F)|[\\w' ,\\\"]+", "", DATA$C1, perl=TRUE))
-  #DATA$C1 <- gsub("\\.","",DATA$C1)
-  #DATA$C1 <- gsub("\\(","",DATA$C1)
-  #DATA$C1 <- gsub("\\)","",DATA$C1)
-  #DATA$C1 <- gsub("-","",DATA$C1)
-  #DATA$C1 <- gsub("\\'","",DATA$C1)
-  #DATA <- metaTagExtraction(DATA, Field = "AU_UN")
-  
 
   if (!("AU_CO" %in% names(DATA))) {
     DATA$AU_CO <- "NA"

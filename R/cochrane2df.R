@@ -21,8 +21,8 @@ cochrane2df<-function(D){
            "ID" = "KY",
            "URL" = "US",
            "DI" = "DOI",
-           "NR" = "NO") %>%
-    as.data.frame()
+           "NR" = "NO") 
+  df <- as.data.frame(df)
   
   df$PY <- as.numeric(df$PY)
   

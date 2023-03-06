@@ -41,15 +41,16 @@ bib2df<-function(D, dbsource = "isi"){
   
   numPapers <- rep(1:nP,rowPapers)
   
-  DATA <- data.frame(Tag = substr(D,1,ind+1), content = substr(D,ind+2,nchar(D)), Paper=numPapers, stringsAsFactors = FALSE)
+  DATA <- data.frame(Tag = substr(D,1,ind+1), content = substr(D,ind+2,nchar(D)), Paper=numPapers)
   DATA$content <- gsub("\\}|\\},|\\{","",DATA$content)
   #DATA$content <- gsub("\\{","",DATA$content)
   df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
     summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
     arrange(.data$Tag, .data$Paper) %>%
     pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
-    ungroup() %>%
-    as.data.frame()
+    ungroup()
+  
+  df <- as.data.frame(df)
   
   rm(DATA)
   bibtag <- NULL

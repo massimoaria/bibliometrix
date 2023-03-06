@@ -44,7 +44,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
                  title_as_label = title_as_label,
                  label = label)
   
-  colorlist <-  c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
+  colorlist <-  colorlist()
+    #c(brewer.pal(9, 'Set1')[-6], brewer.pal(8, 'Set2')[-7], brewer.pal(12, 'Paired')[-11],brewer.pal(12, 'Set3')[-c(2,8,12)])
   ## legacy with old argument size
   if (isTRUE(size)){
     size <- 5
@@ -271,7 +272,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   g <- g +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
-  label <- data.frame(Label = names(V(bsk.network)), stringsAsFactors = FALSE)
+  label <- data.frame(Label = names(V(bsk.network)))
   Data <-  histResults$histData
   
   Data <- left_join(label,Data, by = c("Label" = "Paper"))

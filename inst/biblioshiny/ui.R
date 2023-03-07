@@ -3467,12 +3467,12 @@ body <- dashboardBody(
                             tabPanel("Topic Dendrogram", 
                                      shinycssloaders::withSpinner(visNetworkOutput("CSPlot4", width="auto", height = "75vh"),
                                                                   color = getOption("spinner.color", default = "#4F7942"))),
-                            tabPanel("Most Contributing Papers", 
-                                     shinycssloaders::withSpinner(plotOutput(
-                                       outputId = "CSPlot2"))),
-                            tabPanel("Most Cited Papers", 
-                                     shinycssloaders::withSpinner(plotOutput(
-                                       outputId = "CSPlot3"))),
+                            # tabPanel("Most Contributing Papers", 
+                            #          shinycssloaders::withSpinner(plotOutput(
+                            #            outputId = "CSPlot2"))),
+                            # tabPanel("Most Cited Papers", 
+                            #          shinycssloaders::withSpinner(plotOutput(
+                            #            outputId = "CSPlot3"))),
                             tabPanel("Words by Cluster",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))),
                             tabPanel("Articles by Cluster",

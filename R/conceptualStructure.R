@@ -273,7 +273,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
   if (isTRUE(graph)){plot(b)}
   
-  b_dend <- dendPlot(km.res, clust=clust, label.cex = labelsize*0.15, graph = FALSE)
+  b_dend <- dendPlot(km.res, clust=clust, label.cex = labelsize*0.07, graph = FALSE)
 
   if (isTRUE(graph)){plot(b_dend)}
   

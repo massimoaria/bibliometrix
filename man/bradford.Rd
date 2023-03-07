@@ -31,9 +31,9 @@ Bradford, S. C. (1934). Sources of information on specific subjects. Engineering
 \examples{
 
 \dontrun{
-file <- 'https://www.bibliometrix.org/datasets/bibliometrics_articles.txt'
-M <- convert2df(file = file, dbsource = "isi", format = "bibtex")
-BR <- bradford(M)
+data(management, package = "bibliometrixData")
+
+BR <- bradford(management)
 }
 
 }

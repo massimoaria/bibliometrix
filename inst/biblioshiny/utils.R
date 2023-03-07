@@ -768,7 +768,7 @@ CAmap <- function(input, values){
       minDegree=as.numeric(tab[input$CSn])
       
       values$CS <- conceptualStructure(values$M, method=input$method , field=input$CSfield, minDegree=minDegree, clust=input$nClustersCS, 
-                                       k.max = 8, stemming=F, labelsize=input$CSlabelsize,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
+                                       k.max = 8, stemming=F, labelsize=input$CSlabelsize/2,documents=input$CSdoc,graph=FALSE, ngrams=ngrams, 
                                        remove.terms=remove.terms, synonyms = synonyms)
       if (input$method!="MDS"){
       CSData=values$CS$docCoord
@@ -1494,6 +1494,8 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
              mutate(label = row.names(CS$res$col$coord),
                     contrib = contrib) %>% 
              select(c(3,1,2,4))
+           xlabel <- paste0("Dim 1 (",round(CS$res$eigCorr$perc[1],2),"%)")
+           ylabel <- paste0("Dim 2 (",round(CS$res$eigCorr$perc[2],2),"%)")
          },
          MCA={
            contrib =rowSums(CS$res$var$contrib)/2
@@ -1503,13 +1505,15 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
                     contrib = contrib) %>% 
              select(c(3,1,2,4)) %>% 
              filter(substr(label,nchar(label)-1,nchar(label))=="_1") 
+           xlabel <- paste0("Dim 1 (",round(CS$res$eigCorr$perc[1],2),"%)")
+           ylabel <- paste0("Dim 2 (",round(CS$res$eigCorr$perc[2],2),"%)")
          },
          MDS={
            contrib = size
+           xlabel <- "Dim 1"
+           ylabel <- "Dim 2"
          })
   
-  xlabel <- paste0("Dim.",dimX)
-  ylabel <- paste0("Dim.",dimY)
   dimContrLabel <- paste0("Contrib",c(dimX,dimY))
   ymax <- diff(range((wordCoord[,3])))
   xmax <- diff(range((wordCoord[,2])))
@@ -1572,10 +1576,6 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
                                    showarrow = FALSE)
       
   }
-  
-
-  
-
   
   fig <- fig %>% config(displaylogo = FALSE,
                         modeBarButtonsToRemove = c(
@@ -1712,6 +1712,15 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
     if (inherits(list_plot[[i]], "igraph")){
       igraph2PNG(x = list_plot[[i]], filename = fileName, width = width, height = height, dpi=dpi)
     }  
+    if (inherits(list_plot[[i]], "bibliodendrogram")){
+      #print("dendrogram plot")
+      # 1. Open jpeg file
+      png(filename = fileName, width = width, height = height, res=300, units="in")
+      # 2. Create the plot
+      plot(list_plot[[i]])
+      # 3. Close the file
+      dev.off()
+    }
     insertImage(wb = wb, sheet = sheetname, file = fileName, width = width, 
                 height = height, startRow = startRow, startCol = col, 
                 units = "in", dpi = dpi)

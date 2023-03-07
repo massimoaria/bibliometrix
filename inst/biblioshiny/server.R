@@ -3956,152 +3956,32 @@ server <- function(input, output,session){
       owd <- setwd(tempdir())
       on.exit(setwd(owd))
       files <- c(paste("FactorialMap_", Sys.Date(), ".png", sep=""),
-                 paste("Dendrogram_", Sys.Date(), ".png", sep=""),
-                 paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
-                 paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
+                 paste("Dendrogram_", Sys.Date(), ".png", sep="")
+                 #paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
+                 #paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
       )
       ggsave(filename = files[1], plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-      ggsave(filename = files[2], plot = values$CS$graph_dendogram,dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
-      ggsave(filename = files[3], plot = values$CS$graph_documents_Contrib, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-      ggsave(filename = files[4], plot = values$CS$graph_documents_TC, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-      
+      png(filename = files[2],  height = values$h, width = values$h*2, units="in", res = values$dpi)
+          plot(values$CS$graph_dendogram)
+      dev.off()
       zip(file,files)
     },
     contentType = "zip"
   )
-  
-  # saveFAModal <- function(session) {
-  #   ns <- session$ns
-  #   modalDialog(
-  #     h3(strong("Download Plots in PNG")),
-  #     br(),
-  #     h4("Factorial Map"),
-  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
-  #         #align = "center",
-  #         width="100%",
-  #         downloadBttn(outputId = "FA1plot.save", label = ("   "),
-  #                      style = "pill", color = "primary")),
-  #     br(),
-  #     h4("Dendrogram"),
-  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
-  #         #align = "center",
-  #         width="100%",
-  #         downloadBttn(outputId = "FA2plot.save", label = ("   "),
-  #                      style = "pill", color = "primary")),
-  #     br(),
-  #     h4("Most Contributing Docs"),
-  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
-  #         #align = "center",
-  #         width="100%",
-  #         downloadBttn(outputId = "FA3plot.save", label = ("   "),
-  #                      style = "pill", color = "primary")),
-  #     br(),
-  #     h4("Most Cited Docs"),
-  #     div(style ="border-radius: 10px; border-width: 3px; font-size: 10px;",
-  #         #align = "center",
-  #         width="100%",
-  #         downloadBttn(outputId = "FA4plot.save", label = ("   "),
-  #                      style = "pill", color = "primary")),
-  #     size = "s",
-  #     easyClose = TRUE,
-  #     footer = tagList(
-  #       modalButton("Close")),
-  #   )
-  # }
-  # 
-  # observeEvent(input$FAplot.save, {
-  #   if (input$sidebarmenu=="factorialAnalysis"){
-  #     showModal(saveFAModal(session))
-  #   }
-  # })
-  
-  # output$FA1plot.save <- downloadHandler(
-  #   filename = function() {
-  #     paste("FactorialMap-", Sys.Date(), ".png", sep="")
-  #   },
-  #   content <- function(file) {
-  #     ggsave(filename = file, plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-  #   },
-  #   contentType = "png"
-  # )
-  # 
-  # output$FA2plot.save <- downloadHandler(
-  #   filename = function() {
-  #     paste("Dendrogram-", Sys.Date(), ".png", sep="")
-  #   },
-  #   content <- function(file) {
-  #     ggsave(filename = file, plot = values$CS$graph_dendogram,dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
-  #   },
-  #   contentType = "png"
-  # )
-  # 
-  # output$FA3plot.save <- downloadHandler(
-  #   filename = function() {
-  #     paste("MostContribDocuments-", Sys.Date(), ".png", sep="")
-  #   },
-  #   content <- function(file) {
-  #     ggsave(filename = file, plot = values$CS$graph_documents_Contrib, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-  #   },
-  #   contentType = "png"
-  # )
-  # 
-  # output$FA4plot.save <- downloadHandler(
-  #   filename = function() {
-  #     paste("MostCitedDocuments-", Sys.Date(), ".png", sep="")
-  #   },
-  #   content <- function(file) {
-  #     ggsave(filename = file, plot = values$CS$graph_documents_TC, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-  #   },
-  #   contentType = "png"
-  # )
-  
-  output$CSPlot1 <- renderPlot({
+
+  output$CSPlot1 <- renderPlotly({
     CSfactorial()
-    plot(values$CS$graph_terms)
-  },  width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
-  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
-  res = 150)
+    #CS=values$CS
+    #save(CS,file="provaCS.rdata")
+    values$plotCS <- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
+  })
   
-  output$CSPlot2 <- renderPlot({
+
+  output$CSPlot4 <- renderVisNetwork({
     CSfactorial()
-    if (input$method!="MDS"){
-      if (values$CS[[1]][1]!="NA"){
-        plot(values$CS$graph_documents_Contrib)
-      }else{
-        emptyPlot("Selected field is not included in your data collection")
-      }
-    }else{
-      emptyPlot("This plot is available only for CA or MCA analyses")
-    }
-  }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
-  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
-  res = 150)
-  
-  output$CSPlot3 <- renderPlot({
-    CSfactorial()
-    if (input$method!="MDS"){
-      if (values$CS[[1]][1]!="NA"){
-        plot(values$CS$graph_documents_TC)
-      }else{
-        emptyPlot("Selected field is not included in your data collection")
-      }
-    }else{
-      emptyPlot("This plot is available only for CA or MCA analyses")
-    }
-  }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
-  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
-  res = 150)
-  
-  output$CSPlot4 <- renderPlot({
-    CSfactorial()
-    if (values$CS[[1]][1]!="NA"){
-      plot(values$CS$graph_dendogram)
-    }else{
-      emptyPlot("Selected field is not included in your data collection")
-    }
-  }, width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
-  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
-  res = 150)
+      dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
+      #values$CS$graph_dendogram)
+  })
   
   output$CSTableW <- DT::renderDT({
     CSfactorial()
@@ -4157,7 +4037,7 @@ server <- function(input, output,session){
   observeEvent(input$reportFA,{
     if(!is.null(values$CS$params)){
       list_df <- list(values$CS$params, values$CS$WData, values$CS$CSData)
-      list_plot <- list(values$CS$graph_terms, values$CS$graph_dendogram, values$CS$graph_documents_Contrib, values$CS$graph_documents_TC)
+      list_plot <- list(values$CS$graph_terms, values$CS$graph_dendogram)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "FactorialAnalysis", wb=values$wb)
       values$wb <- wb
       popUp(title="Factorial Analysis", type="success")

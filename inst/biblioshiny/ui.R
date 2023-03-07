@@ -3422,7 +3422,7 @@ body <- dashboardBody(
                                           column(6,
                                                  selectInput("nClustersCS", 
                                                              label = "N. of Clusters",
-                                                             choices = c("Auto" = "0", 
+                                                             choices = c("1" = "1",
                                                                          "2" = "2",
                                                                          "3" = "3",
                                                                          "4" = "4",
@@ -3430,7 +3430,7 @@ body <- dashboardBody(
                                                                          "6" = "6",
                                                                          "7" = "7",
                                                                          "8" = "8"),
-                                                             selected = "0")))
+                                                             selected = "1")))
                              ),
                              br(),
                              box(title = p(strong("Graphical Parameters"),style='font-size:16px;color:black;'), 
@@ -3462,17 +3462,17 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Word Map", 
-                                     shinycssloaders::withSpinner(plotOutput(
-                                       outputId = "CSPlot1"))),
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CSPlot1", height = "75vh",width ="98.9%"),
+                                                                  color = getOption("spinner.color", default = "#4F7942"))),
                             tabPanel("Topic Dendrogram", 
-                                     shinycssloaders::withSpinner(plotOutput(
-                                       outputId = "CSPlot4"))),
-                            tabPanel("Most Contributing Papers", 
-                                     shinycssloaders::withSpinner(plotOutput(
-                                       outputId = "CSPlot2"))),
-                            tabPanel("Most Cited Papers", 
-                                     shinycssloaders::withSpinner(plotOutput(
-                                       outputId = "CSPlot3"))),
+                                     shinycssloaders::withSpinner(visNetworkOutput("CSPlot4", width="auto", height = "75vh"),
+                                                                  color = getOption("spinner.color", default = "#4F7942"))),
+                            # tabPanel("Most Contributing Papers", 
+                            #          shinycssloaders::withSpinner(plotOutput(
+                            #            outputId = "CSPlot2"))),
+                            # tabPanel("Most Cited Papers", 
+                            #          shinycssloaders::withSpinner(plotOutput(
+                            #            outputId = "CSPlot3"))),
                             tabPanel("Words by Cluster",
                                      shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))),
                             tabPanel("Articles by Cluster",

@@ -189,7 +189,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
   if (clust=="auto"){
       clust=min((length(km.res$height)-which.max(diff(km.res$height))+1),k.max)
-      }else{clust=max(2,min(as.numeric(clust),k.max))}
+      }else{clust=max(1,min(as.numeric(clust),k.max))}
   
   km.res$data=df
   km.res$cluster=cutree(km.res,k=clust)
@@ -204,29 +204,44 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   data("logo",envir=environment())
   logo <- grid::rasterGrob(logo,interpolate = TRUE)
   
-  b=fviz_cluster(km.res, stand=FALSE, data = df,labelsize=labelsize, repel = TRUE)+
+  df_clust <- km.res$data.clust %>% 
+    mutate(shape = "1",
+           label = row.names(.)) %>% 
+    bind_rows(km.res$centers %>% mutate(shape = "0", label="")) %>% 
+    mutate(color = colorlist()[.data$clust])
+  
+  hull_data <- 
+    df_clust %>%
+    group_by(.data$clust) %>% 
+    slice(chull(.data$Dim.1, .data$Dim.2))
+  
+  size <- labelsize
+  
+  b <- ggplot(df_clust, aes(x=.data$Dim.1, y=.data$Dim.2, shape=.data$shape, color=.data$color)) +
+    geom_point() + 
+    geom_polygon(data = hull_data,
+                 aes(fill = .data$color,
+                     colour = .data$color),
+                 alpha = 0.3,
+                 show.legend = FALSE) +
+    ggrepel::geom_text_repel(aes(label=.data$label)) +
     theme_minimal()+
-    scale_color_manual(values = cbPalette[1:clust])+
-    scale_fill_manual(values = cbPalette[1:clust]) +
     labs(title= paste("Conceptual Structure Map - method: ",method,collapse="",sep="")) +
-    geom_point() +
     geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
     geom_vline(xintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
     theme(
-      #panel.border =  element_rect(fill=NA, size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
-          text = element_text(size=labelsize),
-          axis.title=element_text(size=labelsize,face="bold"),
-          plot.title=element_text(size=labelsize+1,face="bold"),
-          panel.background = element_rect(fill = "white", colour = "white"),
-          #panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
-          axis.line.x = element_line(color="black",size=0.5),
-          axis.line.y = element_line(color="black",size=0.5),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
-   if (method!="MDS"){
-     b=b+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
-       ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))
-   }else{b=b+xlab("Dim 1")+ylab("Dim 2")}
+      text = element_text(size=size),
+      axis.title=element_text(size=size,face="bold"),
+      plot.title=element_text(size=size+1,face="bold"),
+      panel.background = element_rect(fill = "white", colour = "white"),
+      axis.line.x = element_line(color="black",linewidth=0.5),
+      axis.line.y = element_line(color="black",linewidth=0.5),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
+  if (method!="MDS"){
+    b=b+xlab(paste("Dim 1 (",round(res.mca$eigCorr$perc[1],2),"%)",sep=""))+
+      ylab(paste("Dim 2 (",round(res.mca$eigCorr$perc[2],2),"%)",sep=""))
+  }else{b=b+xlab("Dim 1")+ylab("Dim 2")}
   
   if (!is.null(quali.supp)){
     s_df_quali=df_quali[(abs(df_quali[,1]) >= quantile(abs(df_quali[,1]),0.75) | abs(df_quali[,2]) >= quantile(abs(df_quali[,2]),0.75)),]
@@ -253,31 +268,13 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   
   ## logo coordinates
   coord_b <- plotCoord(b)
-
+  
   b <- b + annotation_custom(logo, xmin = coord_b[1], xmax = coord_b[2], ymin = coord_b[3], ymax = coord_b[4]) 
-  ##
   
   if (isTRUE(graph)){plot(b)}
   
-  b_dend <- fviz_dend(km.res, rect = TRUE, k=clust, 
-                                       cex=labelsize/20, main="Topic Dendrogram",
-                                       k_colors = cbPalette[1:clust])+ 
-    #scale_color_manual(values = cbPalette[(clust+1):1])+
-    #scale_fill_manual(values = cbPalette[(clust+1):1])+
-    theme(plot.title=element_text(size=labelsize+1,face="bold"), 
-          axis.title=element_text(size=labelsize,face="bold") ,
-          panel.background = element_rect(fill = "white",
-                                          colour = "white"),
-          #size = 1, linetype = "solid"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
-  
-  ## logo coordinates
-  coord <- plotCoord(b_dend, side="u")
-  
-  b_dend <- b_dend + annotation_custom(logo, xmin = coord[1], xmax = coord[2], ymin = coord[3], ymax = coord[4]) 
-  ##
-  
+  b_dend <- dendPlot(km.res, clust=clust, label.cex = labelsize*0.07, graph = FALSE)
+
   if (isTRUE(graph)){plot(b_dend)}
   
   if (method !="MDS"){
@@ -413,12 +410,12 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     if (isTRUE(graph)){plot(b_doc_TC)}
 
     semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,
-                         graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord)
+                         graph_documents_Contrib=b_doc,graph_documents_TC=b_doc_TC,docCoord=docCoord, hull_data=hull_data)
     
   }else{
 
     semanticResults=list(net=CW,res=res.mca,km.res=km.res,graph_terms=b,graph_dendogram=b_dend,
-                         graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL)
+                         graph_documents_Contrib=NULL,graph_documents_TC=NULL,docCoord=NULL, hull_data=hull_data)
     }
   
   params <- list(field = field, 
@@ -453,17 +450,20 @@ factorial<-function(X,method,quanti,quali){
            res.mca <- CA(X, quanti.sup=quanti, quali.sup=quali, ncp=2, graph=FALSE)
            
            # Get coordinates of keywords 
-           coord=get_ca_col(res.mca)
-           df=data.frame(coord$coord)
+           #coord=get_ca_col(res.mca)
+           #df=data.frame(coord$coord)
+           coord <- list(coord=res.mca$col$coord, contrib=res.mca$col$contrib, cos2=res.mca$col$cos2)
+           df <- data.frame(coord$coord)
            if (!is.null(quali)){
              df_quali=data.frame(res.mca$quali.sup$coord)
            }
            if (!is.null(quanti)){
              df_quanti=data.frame(res.mca$quanti.sup$coord)
            }
-           coord_doc=get_ca_row(res.mca)
-           df_doc=data.frame(coord_doc$coord)
-           
+           #coord_doc=get_ca_row(res.mca)
+           #df_doc=data.frame(coord_doc$coord)
+           coord_doc <- list(coord=res.mca$row$coord, contrib=res.mca$row$contrib, cos2=res.mca$row$cos2)
+           df_doc <- data.frame(coord_doc$coord)
            },
          ### MULTIPLE CORRESPONDENCE ANALYSIS ###
          MCA={
@@ -471,8 +471,9 @@ factorial<-function(X,method,quanti,quali){
            X[,-quanti]=data.frame(apply(X[,-quanti],2,factor))} else{X=data.frame(apply(X,2,factor))}
            res.mca <- MCA(X, quanti.sup=quanti, quali.sup=quali, ncp=2, graph=FALSE)
            # Get coordinates of keywords (we take only categories "1"")
-           coord=get_mca_var(res.mca)
-           df=data.frame(coord$coord)[seq(2,dim(coord$coord)[1],by=2),]
+           #coord=get_mca_var(res.mca)
+           #df=data.frame(coord$coord)[seq(2,dim(coord$coord)[1],by=2),]
+           df <- data.frame(res.mca$var$coord)[seq(2,dim(res.mca$var$coord)[1],by=2),]
            row.names(df)=gsub("_1","",row.names(df))
            if (!is.null(quali)){
              df_quali=data.frame(res.mca$quali.sup$coord)[seq(1,dim(res.mca$quali.sup$coord)[1],by=2),]
@@ -482,9 +483,10 @@ factorial<-function(X,method,quanti,quali){
              df_quanti=data.frame(res.mca$quanti.sup$coord)[seq(1,dim(res.mca$quanti.sup$coord)[1],by=2),]
              row.names(df_quanti)=gsub("_1","",row.names(df_quanti))
            } 
-           coord_doc=get_mca_ind(res.mca)
-           df_doc=data.frame(coord_doc$coord)
-           
+           #coord_doc=get_mca_ind(res.mca)
+           #df_doc=data.frame(coord_doc$coord)
+           coord_doc <- list(coord=res.mca$ind$coord, contrib=res.mca$ind$contrib, cos2=res.mca$ind$cos2)
+           df_doc=data.frame(res.mca$ind$coord)
            },
          MDS={
            NetMatrix=Matrix::crossprod(X,X)
@@ -585,4 +587,39 @@ plotCoord <- function(g, side="b"){
   }
   coord <- c(xl,yl)
   
+}
+
+
+dendPlot <- function(km.res,clust, label.cex, graph=FALSE){
+  # Dendrogram object
+  dend <- as.dendrogram(km.res)
+  # vector of colors
+  labelColors <-  colorlist()[1:clust]
+  
+  # cut dendrogram in k clusters
+  clusMember <-  cutree(km.res, clust)
+  
+  # function to get color labels
+  colLab <- function(n) {
+    if (is.leaf(n)) {
+      a <- attributes(n)
+      labCol <- labelColors[clusMember[which(names(clusMember) == a$label)]]
+      attr(n, "nodePar") <- c(a$nodePar$lab.col, list(lab.col = labCol,lab.cex=label.cex))
+      #attr(n, "label_cex") <- c(a$nodePar$lab.cex, label_cex = 0.1)
+    }
+    n
+  }
+  
+  # using dendrapply
+  clusDendro <- dendrapply(dend, colLab)
+  k <-  clust
+  n <-  length(km.res$labels)
+  MidPoint = (km.res$height[n-k] + km.res$height[n-k+1]) / 2
+  
+  plotRes <- list(dend=clusDendro, line=MidPoint)
+  class(plotRes) <- c("bibliodendrogram")
+  
+  if (graph) plot(plotRes)
+  
+  return(plotRes)
 }

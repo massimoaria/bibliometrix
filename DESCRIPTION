@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
-Version: 4.1.2
+Version: 4.1.3
 Authors@R: c(
     person(given = "Massimo",
            family = "Aria",

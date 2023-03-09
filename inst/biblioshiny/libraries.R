@@ -12,13 +12,13 @@ libraries <- function(){
   if (!require(visNetwork)){install.packages("visNetwork"); require(visNetwork, quietly=TRUE)}
   if (!require(plotly)){install.packages("plotly"); require(plotly, quietly=TRUE)}
   if (!require(fontawesome)){install.packages("fontawesome"); require(fontawesome, quietly=TRUE)}
-  #if (!require(dashboardthemes)){install.packages("dashboardthemes"); require(dashboardthemes, quietly=TRUE)}
+  if (!require(sparkline)){install.packages("sparkline"); require(sparkline, quietly=TRUE)}
   if (!require(shinydashboardPlus)){install.packages("shinydashboardPlus"); require(shinydashboardPlus, quietly=TRUE)}
   if (!require(shinydashboard)){install.packages("shinydashboard"); require(shinydashboard, quietly=TRUE)}
   if (!require(shinyjs)){install.packages("shinyjs"); require(shinyjs, quietly=TRUE)}
   if (!require(shinyscreenshot)){install.packages("shinyscreenshot"); require(shinyscreenshot, quietly=TRUE)}
   if (!require(openxlsx)){install.packages("openxlsx"); require(openxlsx, quietly=TRUE)}
-  #if (!require(shinyalert)){install.packages("shinyalert"); require(shinyalert, quietly=TRUE)}
+  if (!require(tidygraph)){install.packages("tidygraph"); require(tidygraph, quietly=TRUE)}
   if (!require(shinyWidgets)){install.packages("shinyWidgets"); require(shinyWidgets, quietly=TRUE)}
   require(Matrix, quietly = TRUE)
   require(dimensionsR, quietly = TRUE)

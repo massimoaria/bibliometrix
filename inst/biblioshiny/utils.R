@@ -1568,7 +1568,7 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
              Dim2 = Dim2+dotSize*0.01)
     hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
     fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
-                                color = I(hull_df$color[1]), opacity=0.3, line=list(width=0), 
+                                color = I(hull_df$color[1]), opacity=0.3, line=list(width=2), 
                                 text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points") %>% 
       add_annotations(data = w,x = ~Dim1, y = ~Dim2, xref = 'x1', yref = 'y',
                                    text = ~labelToPlot,

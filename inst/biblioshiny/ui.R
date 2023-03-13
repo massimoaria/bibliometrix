@@ -3462,11 +3462,9 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Word Map", 
-                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CSPlot1", height = "75vh",width ="98.9%"),
-                                                                  color = getOption("spinner.color", default = "#4F7942"))),
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "CSPlot1", height = "75vh",width ="98.9%"))),
                             tabPanel("Topic Dendrogram", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("CSPlot4", width="auto", height = "75vh"),
-                                                                  color = getOption("spinner.color", default = "#4F7942"))),
+                                     shinycssloaders::withSpinner(visNetworkOutput("CSPlot4", width="auto", height = "75vh"))),
                             # tabPanel("Most Contributing Papers", 
                             #          shinycssloaders::withSpinner(plotOutput(
                             #            outputId = "CSPlot2"))),

@@ -1566,10 +1566,13 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
     w <- wordCoord %>% dplyr::filter(groups == i) %>%
       mutate(Dim1 = Dim1+dotSize*0.005,
              Dim2 = Dim2+dotSize*0.01)
-    hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
-    fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
-                                color = I(hull_df$color[1]), opacity=0.3, line=list(width=2), 
-                                text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points") %>% 
+    if (max(CS$hull_data$clust)>1){
+      hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
+      fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
+                                  color = I(hull_df$color[1]), opacity=0.3, line=list(width=2),
+                                  text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points")
+    }
+    fig <- fig %>% 
       add_annotations(data = w,x = ~Dim1, y = ~Dim2, xref = 'x1', yref = 'y',
                                    text = ~labelToPlot,
                                    font = list(family = 'sans serif', size = labelsize, color = w$font.color[1]), #'rgb(79, 121, 66)'),

@@ -220,7 +220,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
       hull_data %>% group_by(clust) %>% slice_head(n=1)
     ) %>%
     mutate(id = row_number()) %>%
-    arrange(clust,id)
+    arrange(.data$clust,.data$id)
   
   size <- labelsize
   

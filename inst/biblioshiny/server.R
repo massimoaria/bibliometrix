@@ -5188,13 +5188,11 @@ server <- function(input, output,session){
     contentType = "png"
   )
   
-  output$WMPlot<- renderPlot({
+  output$WMPlot<- renderPlotly({
     WMnetwork()  
-    plot(values$WMmap$g)
-  },
-  width = exprToFunction(as.numeric(input$dimension[1])*0.6), 
-  height = exprToFunction(as.numeric(input$dimension[2])*0.85),
-  res = 150)
+    plot.ly(values$WMmap$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
+    #plot(values$WMmap$g)
+  })
   
   output$WMTable <- DT::renderDT({
     WMnetwork()  

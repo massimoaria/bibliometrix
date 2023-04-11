@@ -4058,7 +4058,9 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Plot", 
-                                     shinycssloaders::withSpinner(plotOutput(outputId = "WMPlot"))),
+                                     #shinycssloaders::withSpinner(plotOutput(outputId = "WMPlot"))
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "WMPlot", height = "75vh"))
+                                     ),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "WMTable")))

@@ -697,9 +697,9 @@ mapworld <- function(M, values){
   map.world <- map_data("world")
   map.world$region=toupper(map.world$region)
   
-  dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
+  #dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
   
-  country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
+  country.prod <- dplyr::left_join(map.world, CO, by = c('region' = 'Tab')) 
   
   tab=data.frame(country.prod %>%
                    dplyr::group_by(.data$region) %>%
@@ -709,13 +709,15 @@ mapworld <- function(M, values){
   
   tab=tab[order(-tab$Freq),]
   
-  breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
-  names(breaks)=breaks
-  breaks=log(breaks)
+  # breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
+  # names(breaks)=breaks
+  # breaks=log(breaks)
+  breaks <- as.numeric(cut(CO$Freq,breaks=10))
+  names(breaks) <- breaks
   
   g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
-    geom_polygon(aes(fill = log(.data$Freq), group=.data$group)) +
-    scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+    geom_polygon(aes(fill = .data$Freq, group=.data$group)) +
+    scale_fill_continuous(low='#87CEEB', high='dodgerblue4',breaks=breaks, na.value="grey80") +
     guides(fill = guide_legend(reverse = T)) +
     #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +
     labs(fill = 'N.Documents'
@@ -1044,9 +1046,9 @@ socialStructure<-function(input,values){
 }
 
 countrycollaboration <- function(M,label,edgesize,min.edges, values){
-  M=metaTagExtraction(M,"AU_CO")
-  net=biblioNetwork(M,analysis="collaboration",network="countries")
-  CO=data.frame(Tab=rownames(net),Freq=diag(net))
+  M <- metaTagExtraction(M,"AU_CO")
+  net <- biblioNetwork(M,analysis="collaboration",network="countries")
+  CO <- data.frame(Tab=rownames(net),Freq=diag(net))
   bsk.network=igraph::graph_from_adjacency_matrix(net,mode="undirected")
   COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE))
   
@@ -1057,28 +1059,35 @@ countrycollaboration <- function(M,label,edgesize,min.edges, values){
   
   country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
   
-  breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
-  names(breaks)=breaks
-  breaks=log(breaks)
+  #breaks <- as.numeric(round(quantile(CO$Freq,seq(0.1,1,by=0.1))))
+  breaks <- as.numeric(cut(CO$Freq,breaks=10))
+  names(breaks) <- breaks
+  #breaks=breaks
   data("countries",envir=environment())
-  names(countries)[1]="Tab"
+  names(countries)[1] <- "Tab"
   
-  COedges=dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
-  COedges=dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
-  COedges=COedges[COedges$V1!=COedges$V2,]
-  COedges=count.duplicates(COedges)
-  tab=COedges
-  COedges=COedges[COedges$count>=min.edges,]
+  COedges <- dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
+  COedges <- dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
+  COedges <- COedges[COedges$V1!=COedges$V2,]
+  COedges <- count.duplicates(COedges)
+  tab <- COedges
+  COedges <- COedges[COedges$count>=min.edges,]
+  COedges$region <- paste("\nCollaboration between\n",COedges$V1,"\n and \n",COedges$V2)
   
-  g=ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group )) +
-    geom_polygon(aes(fill = log(.data$Freq))) +
-    scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+  g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group, text=paste("Country: ",.data$region))) +
+    geom_polygon(aes(fill = .data$Freq)) +
+    scale_fill_continuous(low='#87CEEB', high='dodgerblue4',breaks=breaks, na.value="grey80") +
     #guides(fill = guide_legend(reverse = T)) +
     guides(colour=FALSE, fill=FALSE)+
-    geom_curve(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
-                                 color = "firebrick4", size = .data$count, group=.data$continent.x),
-               curvature = 0.33,
-               alpha = 0.5) +
+    # geom_curve(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
+    #                              color = "firebrick4", size = .data$count, group=.data$continent.x),
+    #            curvature = 0.33,
+    #            alpha = 0.5) +
+    geom_segment(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
+                                 size = .data$count, group=.data$continent.x),
+                 color = "orangered4",#FFB347",
+               #curvature = 0.33,
+               alpha = 0.3) +
     scale_size_continuous(guide = FALSE, range = c(0.25, edgesize))+
     labs(title = NULL, x = "Latitude", y = "Longitude") +
     theme(text = element_text(color = '#333333')
@@ -1096,9 +1105,12 @@ countrycollaboration <- function(M,label,edgesize,min.edges, values){
   if (isTRUE(label)){
     CO=dplyr::inner_join(CO,countries, by=c('Tab'='Tab'))
     g=g+
-      ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
-                               hjust = 0, nudge_x = 1, nudge_y = 4,
-                               size = 3, color = "orange", fontface = "bold")
+      # ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
+      #                          hjust = 0, nudge_x = 1, nudge_y = 4,
+      #                          size = 3, color = "orange", fontface = "bold")
+    ggrepel::geom_text(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
+                             hjust = 0, nudge_x = 1, nudge_y = 4,
+                             size = 3, color = "orange", fontface = "bold")
   }
   
   results=list(g=g,tab=tab)

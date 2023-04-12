@@ -936,16 +936,16 @@ cocNetwork <- function(input,values){
                               cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), 
                               community.repulsion = input$coc.repulsion/2, verbose = FALSE)
     if (input$cocyears=="Yes"){
-      Y=fieldByYear(values$M, field = input$field, graph=FALSE)
-      g=values$cocnet$graph
-      label=igraph::V(g)$name
-      ind=which(tolower(Y$df$item) %in% label)
-      df=Y$df[ind,]
+      Y <- fieldByYear(values$M, field = input$field, graph=FALSE)
+      g <- values$cocnet$graph
+      label <- igraph::V(g)$name
+      ind <- which(tolower(Y$df$item) %in% label)
+      df <- Y$df[ind,]
 
-      col=hcl.colors((diff(range(df$year_med))+1)*10, palette="Blues 3")
-      igraph::V(g)$color=col[(max(df$year_med)-df$year_med+1)*10]
-      igraph::V(g)$year_med=df$year_med
-      values$cocnet$graph=g
+      col <- hcl.colors((diff(range(df$year_med))+1)*10, palette="Blues 3")
+      igraph::V(g)$color <- col[(max(df$year_med)-df$year_med+1)*10]
+      igraph::V(g)$year_med <- df$year_med
+      values$cocnet$graph <- g
     }
     
   }else{
@@ -1201,7 +1201,19 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
       vn$nodes$font.color <- unlist(lapply(opacity_font, function(x) adjustcolor("black",alpha.f = x)))
     }else{
         vn$nodes$font.color <- adjustcolor("black", alpha.f = 0)
-        }
+    }
+    
+    ## avoid label overlaps
+    threshold <- 0.05
+    ymax <- diff(range(coords[,2]))
+    xmax <- diff(range(coords[,1]))
+    threshold2 <- threshold*mean(xmax,ymax)
+    w <- data.frame(x=coords[,1],y=coords[,2],labelToPlot=vn$nodes$label, dotSize=size, row.names = vn$nodes$label)
+    labelToRemove <- avoidNetOverlaps(w, threshold = threshold2)
+    vn$nodes <- vn$nodes %>% 
+      mutate(label = ifelse(label %in% labelToRemove, "",label),
+             title = id)
+    ##
 
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
@@ -1214,6 +1226,72 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
+
+## function to avoid label overlapping ----
+avoidNetOverlaps <- function(w,threshold=0.10){
+  
+  w[,2] <- w[,2]/2
+  
+  Ds <- dist(w %>%
+               dplyr::filter(labelToPlot!="") %>%
+               select(1:2),
+             method="manhattan", upper=T) %>%
+    dist2df() %>%
+    rename(from = row,
+           to = col,
+           dist = value) %>%
+    left_join(
+      w %>% dplyr::filter(labelToPlot!="") %>%
+        select(labelToPlot, dotSize),
+      by=c("from" = "labelToPlot")
+    ) %>%
+    rename(w_from = dotSize) %>%
+    left_join(
+      w %>% dplyr::filter(labelToPlot!="") %>%
+        select(labelToPlot, dotSize),
+      by=c("to" = "labelToPlot")
+    ) %>%
+    rename(w_to = dotSize) %>%
+    filter(dist<threshold)
+  
+  st <- TRUE
+  i <- 1
+  label <- NULL
+  case <- "n"
+  
+  while(isTRUE(st)){
+    if (Ds$w_from[i]>Ds$w_to[i] & Ds$dist[i]<threshold){
+      case <- "y"
+      lab <- Ds$to[i]
+      
+    } else if (Ds$w_from[i]<=Ds$w_to[i] & Ds$dist[i]<threshold){
+      case <- "y"
+      lab <- Ds$from[i]
+    }
+    
+    switch(case,
+           "y"={
+             Ds <- Ds[Ds$from != lab,]
+             Ds <- Ds[Ds$to != lab,]
+             label <- c(label,lab)
+           },
+           "n"={
+             Ds <- Ds[-1,]
+           })
+    
+    if (i>=nrow(Ds)){
+      st <- FALSE
+    }
+    case <- "n"
+    #print(nrow(Ds))
+  }
+  
+  label
+  
+}
+
+
+
 
 ## visnetwork for subgraphs
 igraph2visClust<-function(g,curved=FALSE,labelsize=3,opacity=0.7,shape="dot",shadow=TRUE, edgesize=5){
@@ -1611,7 +1689,7 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
 ## function to avoid label overlapping ----
 avoidOverlaps <- function(w,threshold=0.10, dimX=1, dimY=2){
   
-  w[,"Dim2"] <- w[,"Dim2"]/2
+  w[,"Dim2"] <- w[,"Dim2"]/3
   
   Ds <- dist(w %>%
                dplyr::filter(labelToPlot!="") %>%

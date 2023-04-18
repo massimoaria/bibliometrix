@@ -697,9 +697,9 @@ mapworld <- function(M, values){
   map.world <- map_data("world")
   map.world$region=toupper(map.world$region)
   
-  dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
+  #dplyr::anti_join(CO, map.world, by = c('Tab' = 'region'))
   
-  country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
+  country.prod <- dplyr::left_join(map.world, CO, by = c('region' = 'Tab')) 
   
   tab=data.frame(country.prod %>%
                    dplyr::group_by(.data$region) %>%
@@ -709,13 +709,15 @@ mapworld <- function(M, values){
   
   tab=tab[order(-tab$Freq),]
   
-  breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
-  names(breaks)=breaks
-  breaks=log(breaks)
+  # breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
+  # names(breaks)=breaks
+  # breaks=log(breaks)
+  breaks <- as.numeric(cut(CO$Freq,breaks=10))
+  names(breaks) <- breaks
   
   g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group=.data$group, text=paste("Country: ",.data$region,"\nN.of Documents: ",.data$Freq))) +
-    geom_polygon(aes(fill = log(.data$Freq), group=.data$group)) +
-    scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+    geom_polygon(aes(fill = .data$Freq, group=.data$group)) +
+    scale_fill_continuous(low='#87CEEB', high='dodgerblue4',breaks=breaks, na.value="grey80") +
     guides(fill = guide_legend(reverse = T)) +
     #geom_text(data=centroids, aes(label = centroids$Tab, x = centroids$long, y = centroids$lat, group=centroids$Tab)) +
     labs(fill = 'N.Documents'
@@ -934,16 +936,16 @@ cocNetwork <- function(input,values){
                               cluster=input$cocCluster, remove.isolates = (input$coc.isolates=="yes"), 
                               community.repulsion = input$coc.repulsion/2, verbose = FALSE)
     if (input$cocyears=="Yes"){
-      Y=fieldByYear(values$M, field = input$field, graph=FALSE)
-      g=values$cocnet$graph
-      label=igraph::V(g)$name
-      ind=which(tolower(Y$df$item) %in% label)
-      df=Y$df[ind,]
+      Y <- fieldByYear(values$M, field = input$field, graph=FALSE)
+      g <- values$cocnet$graph
+      label <- igraph::V(g)$name
+      ind <- which(tolower(Y$df$item) %in% label)
+      df <- Y$df[ind,]
 
-      col=hcl.colors((diff(range(df$year_med))+1)*10, palette="Blues 3")
-      igraph::V(g)$color=col[(max(df$year_med)-df$year_med+1)*10]
-      igraph::V(g)$year_med=df$year_med
-      values$cocnet$graph=g
+      col <- hcl.colors((diff(range(df$year_med))+1)*10, palette="Blues 3")
+      igraph::V(g)$color <- col[(max(df$year_med)-df$year_med+1)*10]
+      igraph::V(g)$year_med <- df$year_med
+      values$cocnet$graph <- g
     }
     
   }else{
@@ -1044,9 +1046,9 @@ socialStructure<-function(input,values){
 }
 
 countrycollaboration <- function(M,label,edgesize,min.edges, values){
-  M=metaTagExtraction(M,"AU_CO")
-  net=biblioNetwork(M,analysis="collaboration",network="countries")
-  CO=data.frame(Tab=rownames(net),Freq=diag(net))
+  M <- metaTagExtraction(M,"AU_CO")
+  net <- biblioNetwork(M,analysis="collaboration",network="countries")
+  CO <- data.frame(Tab=rownames(net),Freq=diag(net))
   bsk.network=igraph::graph_from_adjacency_matrix(net,mode="undirected")
   COedges=as.data.frame(igraph::ends(bsk.network,igraph::E(bsk.network),names=TRUE))
   
@@ -1057,28 +1059,35 @@ countrycollaboration <- function(M,label,edgesize,min.edges, values){
   
   country.prod <- dplyr::left_join( map.world, CO, by = c('region' = 'Tab')) 
   
-  breaks=as.numeric(round(quantile(CO$Freq,c(0.2,0.4,0.6,0.8,1))))
-  names(breaks)=breaks
-  breaks=log(breaks)
+  #breaks <- as.numeric(round(quantile(CO$Freq,seq(0.1,1,by=0.1))))
+  breaks <- as.numeric(cut(CO$Freq,breaks=10))
+  names(breaks) <- breaks
+  #breaks=breaks
   data("countries",envir=environment())
-  names(countries)[1]="Tab"
+  names(countries)[1] <- "Tab"
   
-  COedges=dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
-  COedges=dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
-  COedges=COedges[COedges$V1!=COedges$V2,]
-  COedges=count.duplicates(COedges)
-  tab=COedges
-  COedges=COedges[COedges$count>=min.edges,]
+  COedges <- dplyr::inner_join(COedges,countries, by=c('V1'='Tab'))
+  COedges <- dplyr::inner_join(COedges,countries, by=c('V2'='Tab'))
+  COedges <- COedges[COedges$V1!=COedges$V2,]
+  COedges <- count.duplicates(COedges)
+  tab <- COedges
+  COedges <- COedges[COedges$count>=min.edges,]
+  COedges$region <- paste("\nCollaboration between\n",COedges$V1,"\n and \n",COedges$V2)
   
-  g=ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group )) +
-    geom_polygon(aes(fill = log(.data$Freq))) +
-    scale_fill_continuous(low='dodgerblue', high='dodgerblue4',breaks=breaks)+
+  g <- ggplot(country.prod, aes( x = .data$long, y = .data$lat, group = .data$group, text=paste("Country: ",.data$region))) +
+    geom_polygon(aes(fill = .data$Freq)) +
+    scale_fill_continuous(low='#87CEEB', high='dodgerblue4',breaks=breaks, na.value="grey80") +
     #guides(fill = guide_legend(reverse = T)) +
     guides(colour=FALSE, fill=FALSE)+
-    geom_curve(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
-                                 color = "firebrick4", size = .data$count, group=.data$continent.x),
-               curvature = 0.33,
-               alpha = 0.5) +
+    # geom_curve(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
+    #                              color = "firebrick4", size = .data$count, group=.data$continent.x),
+    #            curvature = 0.33,
+    #            alpha = 0.5) +
+    geom_segment(data=COedges, aes(x = .data$Longitude.x , y = .data$Latitude.x, xend = .data$Longitude.y, yend = .data$Latitude.y,     # draw edges as arcs
+                                 size = .data$count, group=.data$continent.x),
+                 color = "orangered4",#FFB347",
+               #curvature = 0.33,
+               alpha = 0.3) +
     scale_size_continuous(guide = FALSE, range = c(0.25, edgesize))+
     labs(title = NULL, x = "Latitude", y = "Longitude") +
     theme(text = element_text(color = '#333333')
@@ -1096,9 +1105,12 @@ countrycollaboration <- function(M,label,edgesize,min.edges, values){
   if (isTRUE(label)){
     CO=dplyr::inner_join(CO,countries, by=c('Tab'='Tab'))
     g=g+
-      ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
-                               hjust = 0, nudge_x = 1, nudge_y = 4,
-                               size = 3, color = "orange", fontface = "bold")
+      # ggrepel::geom_text_repel(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
+      #                          hjust = 0, nudge_x = 1, nudge_y = 4,
+      #                          size = 3, color = "orange", fontface = "bold")
+    ggrepel::geom_text(data=CO, aes(x = .data$Longitude, y = .data$Latitude, label = .data$Tab, group=.data$continent),             # draw text labels
+                             hjust = 0, nudge_x = 1, nudge_y = 4,
+                             size = 3, color = "orange", fontface = "bold")
   }
   
   results=list(g=g,tab=tab)
@@ -1189,7 +1201,19 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
       vn$nodes$font.color <- unlist(lapply(opacity_font, function(x) adjustcolor("black",alpha.f = x)))
     }else{
         vn$nodes$font.color <- adjustcolor("black", alpha.f = 0)
-        }
+    }
+    
+    ## avoid label overlaps
+    threshold <- 0.05
+    ymax <- diff(range(coords[,2]))
+    xmax <- diff(range(coords[,1]))
+    threshold2 <- threshold*mean(xmax,ymax)
+    w <- data.frame(x=coords[,1],y=coords[,2],labelToPlot=vn$nodes$label, dotSize=size, row.names = vn$nodes$label)
+    labelToRemove <- avoidNetOverlaps(w, threshold = threshold2)
+    vn$nodes <- vn$nodes %>% 
+      mutate(label = ifelse(label %in% labelToRemove, "",label),
+             title = id)
+    ##
 
     VIS<-
       visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type="full", smooth=TRUE, physics=FALSE) %>%
@@ -1202,6 +1226,72 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
 }
+
+## function to avoid label overlapping ----
+avoidNetOverlaps <- function(w,threshold=0.10){
+  
+  w[,2] <- w[,2]/2
+  
+  Ds <- dist(w %>%
+               dplyr::filter(labelToPlot!="") %>%
+               select(1:2),
+             method="manhattan", upper=T) %>%
+    dist2df() %>%
+    rename(from = row,
+           to = col,
+           dist = value) %>%
+    left_join(
+      w %>% dplyr::filter(labelToPlot!="") %>%
+        select(labelToPlot, dotSize),
+      by=c("from" = "labelToPlot")
+    ) %>%
+    rename(w_from = dotSize) %>%
+    left_join(
+      w %>% dplyr::filter(labelToPlot!="") %>%
+        select(labelToPlot, dotSize),
+      by=c("to" = "labelToPlot")
+    ) %>%
+    rename(w_to = dotSize) %>%
+    filter(dist<threshold)
+  
+  st <- TRUE
+  i <- 1
+  label <- NULL
+  case <- "n"
+  
+  while(isTRUE(st)){
+    if (Ds$w_from[i]>Ds$w_to[i] & Ds$dist[i]<threshold){
+      case <- "y"
+      lab <- Ds$to[i]
+      
+    } else if (Ds$w_from[i]<=Ds$w_to[i] & Ds$dist[i]<threshold){
+      case <- "y"
+      lab <- Ds$from[i]
+    }
+    
+    switch(case,
+           "y"={
+             Ds <- Ds[Ds$from != lab,]
+             Ds <- Ds[Ds$to != lab,]
+             label <- c(label,lab)
+           },
+           "n"={
+             Ds <- Ds[-1,]
+           })
+    
+    if (i>=nrow(Ds)){
+      st <- FALSE
+    }
+    case <- "n"
+    #print(nrow(Ds))
+  }
+  
+  label
+  
+}
+
+
+
 
 ## visnetwork for subgraphs
 igraph2visClust<-function(g,curved=FALSE,labelsize=3,opacity=0.7,shape="dot",shadow=TRUE, edgesize=5){
@@ -1566,10 +1656,13 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
     w <- wordCoord %>% dplyr::filter(groups == i) %>%
       mutate(Dim1 = Dim1+dotSize*0.005,
              Dim2 = Dim2+dotSize*0.01)
-    hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
-    fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
-                                color = I(hull_df$color[1]), opacity=0.3, line=list(width=0), 
-                                text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points") %>% 
+    if (max(CS$hull_data$clust)>1){
+      hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
+      fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
+                                  color = I(hull_df$color[1]), opacity=0.3, line=list(width=2),
+                                  text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points")
+    }
+    fig <- fig %>% 
       add_annotations(data = w,x = ~Dim1, y = ~Dim2, xref = 'x1', yref = 'y',
                                    text = ~labelToPlot,
                                    font = list(family = 'sans serif', size = labelsize, color = w$font.color[1]), #'rgb(79, 121, 66)'),
@@ -1596,7 +1689,7 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
 ## function to avoid label overlapping ----
 avoidOverlaps <- function(w,threshold=0.10, dimX=1, dimY=2){
   
-  w[,"Dim2"] <- w[,"Dim2"]/2
+  w[,"Dim2"] <- w[,"Dim2"]/3
   
   Ds <- dist(w %>%
                dplyr::filter(labelToPlot!="") %>%

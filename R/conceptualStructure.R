@@ -215,6 +215,13 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     group_by(.data$clust) %>% 
     slice(chull(.data$Dim.1, .data$Dim.2))
   
+  hull_data <- hull_data %>%
+    bind_rows(
+      hull_data %>% group_by(clust) %>% slice_head(n=1)
+    ) %>%
+    mutate(id = row_number()) %>%
+    arrange(.data$clust,.data$id)
+  
   size <- labelsize
   
   b <- ggplot(df_clust, aes(x=.data$Dim.1, y=.data$Dim.2, shape=.data$shape, color=.data$color)) +

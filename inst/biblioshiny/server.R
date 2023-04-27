@@ -1,4 +1,6 @@
 source("utils.R", local=TRUE)
+source("libraries.R", local=TRUE)
+suppressMessages(libraries())
 
 #### SERVER ####
 server <- function(input, output,session){
@@ -420,20 +422,21 @@ server <- function(input, output,session){
                class(M) <- c("bibliometrixDB", "data.frame")
                ### M row names
                ### identify duplicated SRs 
-               SR=M$SR
-               tab=table(SR)
-               tab2=table(tab)
-               ind=as.numeric(names(tab2))
-               ind=ind[which(ind>1)]
+               SR <- M$SR
+               tab <- table(SR)
+               tab2 <- table(tab)
+               ind <- as.numeric(names(tab2))
+               ind <- ind[which(ind>1)]
                if (length(ind)>0){
                  for (i in ind){
                    indice=names(which(tab==i))
                    for (j in indice){
-                     indice2=which(SR==j)
-                     SR[indice2]=paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
+                     indice2 <- which(SR==j)
+                     SR[indice2] <- paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
                    }
                  }
                }
+               M$SR <- SR
                row.names(M) <- SR
              },
              ### RData format

@@ -114,9 +114,9 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
       M <- M %>% 
         left_join(TERMS, by="SR")
       M[,Field] <- M$item
-    
+      row.names(M) <- RowNames
   }
-  row.names(M) <- RowNames
+  
   if (Field=="CR"){M$CR<-gsub("DOI;","DOI ",as.character(M$CR))}
   
   if (Field %in% names(M)){

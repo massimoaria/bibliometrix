@@ -173,7 +173,7 @@ notifications <- function(){
          AB={
            notifTot <- left_join(notifOnline %>% mutate(status = "danger"),
                                  notifLocal%>% mutate(status = "info"), by="nots") %>% 
-             mutate(status = replace_na(.data$status.y,"danger")) %>% 
+             mutate(status = tidyr::replace_na(.data$status.y,"danger")) %>% 
              rename(href = .data$href.x,
                     action = .data$action.x) %>% 
              select(.data$nots, .data$href, .data$action, .data$status) %>% 
@@ -1254,38 +1254,41 @@ avoidNetOverlaps <- function(w,threshold=0.10){
     rename(w_to = dotSize) %>%
     filter(dist<threshold)
   
-  st <- TRUE
-  i <- 1
-  label <- NULL
-  case <- "n"
-  
-  while(isTRUE(st)){
-    if (Ds$w_from[i]>Ds$w_to[i] & Ds$dist[i]<threshold){
-      case <- "y"
-      lab <- Ds$to[i]
-      
-    } else if (Ds$w_from[i]<=Ds$w_to[i] & Ds$dist[i]<threshold){
-      case <- "y"
-      lab <- Ds$from[i]
-    }
-    
-    switch(case,
-           "y"={
-             Ds <- Ds[Ds$from != lab,]
-             Ds <- Ds[Ds$to != lab,]
-             label <- c(label,lab)
-           },
-           "n"={
-             Ds <- Ds[-1,]
-           })
-    
-    if (i>=nrow(Ds)){
-      st <- FALSE
-    }
+  if (nrow(Ds)>0){
+    st <- TRUE
+    i <- 1
+    label <- NULL
     case <- "n"
-    #print(nrow(Ds))
+    
+    while(isTRUE(st)){
+      if (Ds$w_from[i]>Ds$w_to[i] & Ds$dist[i]<threshold){
+        case <- "y"
+        lab <- Ds$to[i]
+        
+      } else if (Ds$w_from[i]<=Ds$w_to[i] & Ds$dist[i]<threshold){
+        case <- "y"
+        lab <- Ds$from[i]
+      }
+      
+      switch(case,
+             "y"={
+               Ds <- Ds[Ds$from != lab,]
+               Ds <- Ds[Ds$to != lab,]
+               label <- c(label,lab)
+             },
+             "n"={
+               Ds <- Ds[-1,]
+             })
+      
+      if (i>=nrow(Ds)){
+        st <- FALSE
+      }
+      case <- "n"
+      #print(nrow(Ds))
+    }
+  } else {
+    label=NULL
   }
-  
   label
   
 }

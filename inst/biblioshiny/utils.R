@@ -732,9 +732,9 @@ mapworld <- function(M, values){
           ,panel.grid = element_blank()
           ,panel.background = element_rect(fill = '#FFFFFF')  #'#333333'
           ,plot.background = element_rect(fill = '#FFFFFF')
-          ,legend.position = c(.18,.36)
-          ,legend.background = element_blank()
-          ,legend.key = element_blank()
+          ,legend.position = "none"
+          # ,legend.background = element_blank()
+          # ,legend.key = element_blank()
     ) + annotation_custom(values$logoGrid, xmin = 143, xmax = 189.5, ymin = -69, ymax = -48) 
   
   results=list(g=g,tab=tab)

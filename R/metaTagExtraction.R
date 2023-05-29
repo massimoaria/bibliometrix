@@ -340,7 +340,7 @@ AU1_CO<-function(M,sep){
 AU_UN<-function(M,sep){
   
   ## remove reprint information from C1
-  C1=M$C1
+  C1 <- M$C1
   if (!("RP" %in% names(M))){
     M$RP <- NA
   }
@@ -363,7 +363,7 @@ AU_UN<-function(M,sep){
           "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND","CLIMA","METEOR","OFFICE","ENVIR",
           "CONSORTIUM","OBSERVAT","AGRI", "MIT ", "INFN", "SUNY ")
   
-  AFFL=lapply(listAFF, function(l){
+  AFFL <- lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
     l<-gsub("\\(REPRINT AUTHOR\\)","",l)
     index=NULL
@@ -395,6 +395,9 @@ AU_UN<-function(M,sep){
   })
   AFFL=unlist(AFFL)
   M$AU_UN=AFFL
+  if (M$DB[1]=="ISI" & "C3" %in% names(M)){
+    M$AU_UN[!is.na(M$C3) & M$C3!=""] <- M$C3[!is.na(M$C3) & M$C3!=""]
+  }
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)
   

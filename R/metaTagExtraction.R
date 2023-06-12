@@ -214,7 +214,11 @@ AU_CO<-function(M){
   if (M$DB[1] %in% c("ISI", "PUBMED")){
     countries=as.character(sapply(countries,function(s) paste0(s,".",collapse="")))
   } else if (M$DB[1]=="SCOPUS"){
-    countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
+    countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))
+  } else if (M$DB[1]=="DIMENSIONS"){
+    countries=as.character(sapply(countries,function(s) paste0(s,")",collapse="")))
+    } 
+  
   
   M$AU_CO=NA
   C1=M$C1
@@ -242,6 +246,7 @@ AU_CO<-function(M){
   C1[which(C1 == "NA")]=NA
   if (M$DB[1]=="ISI"){ C1=lastChar(C1,last=".")}
   if (M$DB[1]=="SCOPUS"){ C1=lastChar(C1,last=";")}
+  if (M$DB[1]=="DIMENSIONS"){ C1 <- gsub("\\.)",")",C1)}
   
   #C1=gsub("[[:punct:][:blank:]]+", " ", C1)
   RP=M$RP
@@ -262,6 +267,7 @@ AU_CO<-function(M){
   }
   
   M$AU_CO=gsub("[[:digit:]]","",M$AU_CO)
+  M$AU_CO=gsub("\\(|)","",M$AU_CO)
   M$AU_CO=gsub(".", "", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub(";;", ";", M$AU_CO, fixed = TRUE)
   M$AU_CO=gsub("UNITED STATES","USA",M$AU_CO)
@@ -280,59 +286,63 @@ AU_CO<-function(M){
 
 ### AU1_CO field
 AU1_CO<-function(M,sep){
-  size=dim(M)[1]
-  # Countries
-  data("countries",envir=environment())
-  countries=as.character(countries[[1]])
-  #if (M$DB[1]=="ISI"){
-  #countries=as.character(sapply(countries,function(s) paste0(" ",s," ",collapse="")))
-  #} else if (M$DB[1]=="SCOPUS"){
-  #  countries=as.character(sapply(countries,function(s) paste0(s,";",collapse="")))}
-  countries=paste(" ",countries," ",sep="")
-  M$AU1_CO=NA
-  C1=M$C1
-  C1[which(!is.na(M$RP))]=M$RP[which(!is.na(M$RP))]
-  ## do this before strsplit(), otherwise entries with multiple (reprint) author would be split between first group of authors
-  C1=gsub("\\[.*?\\] ", "", C1)
-  ## remove string before the first "(REPRINT AUTHOR)", otherwise C1 may get split between first group of authors, thus removing address, forcing it to default to RP.
-  C1=gsub("^.*?\\(REPRINT\\sAUTHOR\\)", "", C1)
-  C1=unlist(lapply(strsplit(C1,sep),function(l) l[1]))
-  ## remove all characters before the last comma, thus constantly leaving only country, or in the case of US, state + zip_code + country.
-  ## this way the need to distinguish Georgia and Georgia, US is eliminated.
-  C1=gsub("^(.+)?,", "", C1)
-  C1=gsub("[[:punct:][:blank:]]+", " ", C1)
-  C1=paste(trim(C1)," ",sep="")
-  if (M$DB[1]!="PUBMED"){
-    RP=M$RP
-    #RP[which(is.na(RP))]=M$RRP)
-    RP=paste(RP,";",sep="")
-    RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {
-      RP <- C1 <-paste(" ",gsub("[[:punct:]]","",C1),sep="")
+  if (M$DB[1]=="DIMENSIONS"){
+    M2 <- AU_CO(M)
+    M$AU1_CO <- unlist(lapply(strsplit(M2$AU_CO,";"), function(l) l[1]))
+  } else {
+    size=dim(M)[1]
+    # Countries
+    data("countries",envir=environment())
+    countries=as.character(countries[[1]])
+    countries=paste(" ",countries," ",sep="")
+    M$AU1_CO=NA
+    C1=M$C1
+    C1[which(!is.na(M$RP))]=M$RP[which(!is.na(M$RP))]
+    ## do this before strsplit(), otherwise entries with multiple (reprint) author would be split between first group of authors
+    C1=gsub("\\[.*?\\] ", "", C1)
+    ## remove string before the first "(REPRINT AUTHOR)", otherwise C1 may get split between first group of authors, thus removing address, forcing it to default to RP.
+    
+    
+    
+    C1=gsub("^.*?\\(REPRINT\\sAUTHOR\\)", "", C1)
+    C1=unlist(lapply(strsplit(C1,sep),function(l) l[1]))
+    ## remove all characters before the last comma, thus constantly leaving only country, or in the case of US, state + zip_code + country.
+    ## this way the need to distinguish Georgia and Georgia, US is eliminated.
+    C1=gsub("^(.+)?,", "", C1)
+    C1=gsub("[[:punct:][:blank:]]+", " ", C1)
+    C1=paste(trim(C1)," ",sep="")
+    if (M$DB[1]!="PUBMED"){
+      RP=M$RP
+      #RP[which(is.na(RP))]=M$RRP)
+      RP=paste(RP,";",sep="")
+      RP=gsub("[[:punct:][:blank:]]+", " ", RP)} else {
+        RP <- C1 <-paste(" ",gsub("[[:punct:]]","",C1),sep="")
       }
-  
-  for (i in 1:size[1]){
-    if (!is.na(C1[i])){
-      ind=unlist(sapply(countries, function (l) (gregexpr ( l , C1[i],fixed=TRUE))))
-      if (sum(ind>-1)>0) {M$AU1_CO[i]=paste(unique(names(ind[ind>-1][1])),collapse=";")
-      #print(i)
-      #print(M$AU1_CO[i])
+    
+    for (i in 1:size[1]){
+      if (!is.na(C1[i])){
+        ind=unlist(sapply(countries, function (l) (gregexpr ( l , C1[i],fixed=TRUE))))
+        if (sum(ind>-1)>0) {M$AU1_CO[i]=paste(unique(names(ind[ind>-1][1])),collapse=";")
+        #print(i)
+        #print(M$AU1_CO[i])
+        }
+      }
+      if (is.na(M$AU1_CO[i])){
+        ind=unlist(sapply(countries, function (l) (gregexpr ( l , RP[i],fixed=TRUE))))
+        if (sum(ind>-1)>0) {M$AU1_CO[i]=paste(unique(names(ind[ind>-1][1])),collapse=";")}  
       }
     }
-    if (is.na(M$AU1_CO[i])){
-      ind=unlist(sapply(countries, function (l) (gregexpr ( l , RP[i],fixed=TRUE))))
-      if (sum(ind>-1)>0) {M$AU1_CO[i]=paste(unique(names(ind[ind>-1][1])),collapse=";")}  
-    }
+    M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
+    M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
+    M$AU1_CO=gsub("RUSSIAN FEDERATION","RUSSIA",M$AU1_CO)
+    M$AU1_CO=gsub("TAIWAN","CHINA",M$AU1_CO)
+    M$AU1_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU1_CO)
+    M$AU1_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU1_CO)
+    M$AU1_CO=gsub("WALES","UNITED KINGDOM",M$AU1_CO)
+    M$AU1_CO=gsub("NORTH IRELAND","UNITED KINGDOM",M$AU1_CO)
+    #M$AU1_CO=gsub(".", "", M$AU1_CO, fixed = TRUE)
+    #M$AU1_CO=gsub(";;", ";", M$AU1_CO, fixed = TRUE)
   }
-  M$AU1_CO=trim(gsub("[[:digit:]]","",M$AU1_CO))
-  M$AU1_CO=gsub("UNITED STATES","USA",M$AU1_CO)
-  M$AU1_CO=gsub("RUSSIAN FEDERATION","RUSSIA",M$AU1_CO)
-  M$AU1_CO=gsub("TAIWAN","CHINA",M$AU1_CO)
-  M$AU1_CO=gsub("ENGLAND","UNITED KINGDOM",M$AU1_CO)
-  M$AU1_CO=gsub("SCOTLAND","UNITED KINGDOM",M$AU1_CO)
-  M$AU1_CO=gsub("WALES","UNITED KINGDOM",M$AU1_CO)
-  M$AU1_CO=gsub("NORTH IRELAND","UNITED KINGDOM",M$AU1_CO)
-  #M$AU1_CO=gsub(".", "", M$AU1_CO, fixed = TRUE)
-  #M$AU1_CO=gsub(";;", ";", M$AU1_CO, fixed = TRUE)
   return(M)
 }
 
@@ -340,7 +350,7 @@ AU1_CO<-function(M,sep){
 AU_UN<-function(M,sep){
   
   ## remove reprint information from C1
-  C1=M$C1
+  C1 <- M$C1
   if (!("RP" %in% names(M))){
     M$RP <- NA
   }
@@ -363,7 +373,7 @@ AU_UN<-function(M,sep){
           "LIBRAR","CLIN","FDN","OECD","FAC","WORLD BANK","POLITECN","INT MONETARY FUND","CLIMA","METEOR","OFFICE","ENVIR",
           "CONSORTIUM","OBSERVAT","AGRI", "MIT ", "INFN", "SUNY ")
   
-  AFFL=lapply(listAFF, function(l){
+  AFFL <- lapply(listAFF, function(l){
     #l=gsub(","," ,",l)
     l<-gsub("\\(REPRINT AUTHOR\\)","",l)
     index=NULL
@@ -395,6 +405,9 @@ AU_UN<-function(M,sep){
   })
   AFFL=unlist(AFFL)
   M$AU_UN=AFFL
+  if (M$DB[1]=="ISI" & "C3" %in% names(M)){
+    M$AU_UN[!is.na(M$C3) & M$C3!=""] <- M$C3[!is.na(M$C3) & M$C3!=""]
+  }
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)
   

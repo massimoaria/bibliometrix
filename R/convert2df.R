@@ -140,6 +140,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
              },
              {
                M <- dimensions2df(file, format = format)
+               M$DB <- "DIMENSIONS"
              })
       
     }
@@ -161,12 +162,12 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   
   cat("Done!\n\n")
   
-  if (!(dbsource %in% c("dimensions", "pubmed", "lens"))) {
+  if (!(dbsource %in% c("pubmed", "lens"))) {
     ## AU_UN field creation
     if ("C1" %in% names(M)) {
       cat("\nGenerating affiliation field tag AU_UN from C1:  ")
       
-      M <- metaTagExtraction(M, Field = "AU_UN")
+      if (!"AU_UN" %in% names(M)) M <- metaTagExtraction(M, Field = "AU_UN")
       cat("Done!\n\n")
     } else{
       M$C1 = NA

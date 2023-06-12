@@ -10,7 +10,7 @@ dimensions2df <- function(file, format = "csv") {
              
              D <- read_csv(file[i], na=character(), quote='"', skip=1, trim_ws = FALSE, progress = show_progress()) %>%
                mutate(across(where(is.numeric), as.character)) %>% 
-               mutate(across(where(is.character), tidyr::replace_na,""))
+               mutate(across(where(is.character), \(x) tidyr::replace_na(x,"")))
              D <- as.data.frame(D)
              
              
@@ -81,7 +81,7 @@ postprocessingDim <- function(DATA) {
   # DATA <- data.frame(lapply(DATA, toupper), stringsAsFactors = FALSE)
   
   ## Converting original references in WOS format (AU, PY, SO, VOL, NUM, DOI)
-  if ("Cited.references" %in% names(DATA)) {
+  if ("Cited references" %in% names(DATA)) {
     aaa <- strsplit(DATA$Cited.references, ";\\[")
     cr <- (unlist(lapply(aaa, function(l) {
       l <- gsub("\\|", "!!!", l)
@@ -172,8 +172,8 @@ postprocessingDim <- function(DATA) {
   
   #keywords
   if (!("DE" %in% names(DATA)) & !("ID" %in% names(DATA))) {
-    if ("MeSH.terms" %in% names(DATA)){
-      DATA$DE <- DATA$ID <- DATA$MeSH.terms
+    if ("MeSH terms" %in% names(DATA)){
+      DATA$DE <- DATA$ID <- DATA$`MeSH terms`
     }else{
       DATA$DE <- DATA$ID <- "NA"
     }
@@ -186,46 +186,33 @@ postprocessingDim <- function(DATA) {
   }
   
   # Affiliations
-  DATA$RP = NA
-
-  if (!("AU_CO" %in% names(DATA))) {
-    DATA$AU_CO <- "NA"
-    DATA$AU1_CO <- "NA"
-  } else {
-    DATA$AU1_CO <- unlist(lapply(strsplit(DATA$AU_CO, ";"), function(l) {
-      if (length(l) > 0) {
-        l = l[[1]]
+  
+  RP <- lapply(regmatches(DATA$RP, gregexpr("(?<=\\().*?(?=\\))", DATA$RP, perl=T)), function(l){
+    if (length(l[1])==0){l <- NA
+    } else {
+      l <- paste(l, collapse=";")
+    }
+    return(l)
+  })
+  DATA$AU1_UN <- unlist(RP)
+  
+  i <- which(names(DATA) %in% c("Authors Affiliations"))
+  if (length(i)==1){
+    #names(DATA)[i] <- "AU_UN"
+    C1 <- lapply(regmatches(DATA$C1, gregexpr("(?<=\\().*?(?=\\))", DATA$C1, perl=T)), function(l){
+      if (length(l[1])==0){l <- NA
       } else {
-        l = "NA"
+        l <- paste(l, collapse=";")
       }
       return(l)
-    }))
+    })
+    DATA$AU_UN <- unlist(C1)
+    DATA$AU_UN <- gsub("\\(|)"," ",DATA$AU_UN)
   }
-  
-  i <- which(names(DATA)=="Authors.Affiliations")
-  if (length(i)==1){
-    names(DATA)[i] <- "AU_UN"
-  }
-  
-  if ("AU_UN" %in% names(DATA)){
-  DATA$AU1_UN <-
-    unlist(lapply(strsplit(DATA$AU_UN, ";"), function(l) {
-      l <- ifelse(length(l) > 0,
-                  trimws(l[1]),
-                  NA)
-      return(l)
-    }))
-  }else{
-    DATA$AU_UN=NA
-    DATA$AU1_UN=NA
-  }
-  DATA$AU1_CO <- ifelse(DATA$AU1_CO=="NA",NA,DATA$AU1_CO)
-  
-  DATA$AU_CO <- ifelse(DATA$AU_CO=="NA",NA,DATA$AU_CO)
-  
-  if (("SO" %in% names(DATA)) & ("Anthology.title" %in% names(DATA))) {
+
+  if (("SO" %in% names(DATA)) & ("Anthology title" %in% names(DATA))) {
     ind <- which(is.na(DATA$SO) | DATA$SO=="")
-    DATA$SO[ind] <- DATA$Anthology.title[ind]
+    DATA$SO[ind] <- DATA$`Anthology title`[ind]
     DATA$SO[is.na(DATA$SO) | DATA$SO==""] <- "NA"
   }
   
@@ -246,7 +233,11 @@ postprocessingDim <- function(DATA) {
   
   DATA$TC <- as.numeric(DATA$TC)
   
-  DATA$DB <- "ISI"
+  DATA$DB <- "DIMENSIONS"
   
+  DATA <- metaTagExtraction(DATA, "AU_CO")
+  
+  DATA <- metaTagExtraction(DATA, "AU1_CO")
   return(DATA)
 }
+

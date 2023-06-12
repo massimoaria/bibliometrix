@@ -19,3 +19,6 @@ Rubbish
 ^README\.Rmd$
 ^_pkgdown\.yml$
 ^pkgdown$
+^inst/biblioshiny/rsconnect
+^rsconnect
+

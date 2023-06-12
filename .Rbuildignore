@@ -20,4 +20,5 @@ Rubbish
 ^_pkgdown\.yml$
 ^pkgdown$
 ^inst/biblioshiny/rsconnect
+^rsconnect
 

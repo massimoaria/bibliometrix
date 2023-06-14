@@ -2877,6 +2877,8 @@ body <- dashboardBody(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
                                      shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))),
+                            tabPanel("Overlay", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "cocOverlay", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "cocTable"))),
@@ -3686,7 +3688,9 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))),        
+                                     shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))),       
+                            tabPanel("Overlay", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitOverlay", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "cocitTable"))),
@@ -3989,7 +3993,9 @@ body <- dashboardBody(
               fluidRow(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
-                                     shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))), 
+                                     shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))),
+                            tabPanel("Overlay", 
+                                     shinycssloaders::withSpinner(plotlyOutput(outputId = "colOverlay", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
                                        outputId = "colTable"))),

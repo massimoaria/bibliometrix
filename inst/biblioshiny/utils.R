@@ -1951,3 +1951,79 @@ colorlist <- function(){
              ,"#B3B3B3","#A6CEE3","#1F78B4","#B2DF8A","#33A02C","#FB9A99","#E31A1C","#FDBF6F","#FF7F00","#CAB2D6","#6A3D9A","#B15928","#8DD3C7","#BEBADA"
              ,"#FB8072","#80B1D3","#FDB462","#B3DE69","#D9D9D9","#BC80BD","#CCEBC5")
 }
+
+overlayPlotly <- function(VIS){
+  
+  # colorscale_VOS=matrix(c(0, 'rgba(66,65,135,255)', 0.1, 'rgba(34,170,134,255)',
+  #                         0.3, 'rgba(202,224,31,255)',
+  #                         1, 'rgba(244,227,92,255)'),4,2, byrow=T)
+  
+  # colorscale_Our=matrix(c(0, 'rgba(238,238,238,255)', 
+  #                         0.1, 'rgba(232,202,177,255)',
+  #                         0.2, 'rgba(217,137,100,255)',
+  #                         0.6, 'rgba(199,107,90,255)',
+  #                         0.9, 'rgba(164,38,39,255)',
+  #                         1,   'rgba(178,34,34,255)'),
+  #                       6,2, byrow=T)
+  
+  Reds <- matrix(
+    c( "0",     "rgb(255,255,255)",
+       "0.05",  "rgb(238,238,238)",
+       "0.125", "rgb(254,224,210)",
+       "0.25",  "rgb(252,187,161)",
+       "0.375", "rgb(252,146,114)",
+       "0.5",   "rgb(251,106,74)" ,
+       "0.625", "rgb(239,59,44)"  ,
+       "0.75",  "rgb(203,24,29)"  ,
+       "0.875", "rgb(165,15,21)"  ,
+       "1",     "rgb(103,0,13)" )
+  )
+  
+  nodes <- VIS$x$nodes %>% 
+    mutate(y = y*(-1),
+           font.size = (((font.size-min(font.size))/diff(range(font.size)))*20)+10)
+
+  colori <- c("Blackbody","Bluered","Blues","Cividis","Earth","Electric","Greens","Greys","Hot","Jet","Picnic","Portland",
+              "Rainbow","RdBu","Reds","Viridis","YlGnBu","YlOrRd")
+
+  nodes2 <- nodes %>% group_by(id) %>% 
+    mutate(log = ceiling(log(deg))) %>% 
+    slice(rep(1, each = log))
+  
+  p <- plot_ly(nodes2, x = ~x, y = ~y) %>%
+    add_histogram2d(histnorm="density", zsmooth="fast", 
+                    colorscale=Reds,
+                    #colorscale=colori[15],
+                    showscale=FALSE)
+  
+  for (i in 1:nrow(nodes)){
+    p <- p %>% 
+      add_annotations(xref = 'x1', yref = 'y', 
+                      x = nodes$x[i],  y = nodes$y[i],
+                      text = nodes$label[i],
+                      font = list(family = 'Arial', size = nodes$font.size[i], color =adjustcolor(nodes$font.color[i], alpha.f=0.8)),
+                      showarrow = FALSE)
+  }
+  p <- p %>% layout(yaxis = list(title = "", zeroline=FALSE, showgrid = FALSE, showline = FALSE, 
+                                 showticklabels = FALSE, domain= c(-1, 1), gridcolor = '#FFFFFF', 
+                                 tickvals = list(NA)),
+                    xaxis = list(title = "", zeroline=FALSE, showgrid = FALSE, showline = FALSE, 
+                                 showticklabels = FALSE, domain= c(-1, 1), gridcolor = '#FFFFFF', 
+                                 tickvals = list(NA)),
+                    plot_bgcolor  = "rgba(0, 0, 0, 0)",
+                    paper_bgcolor = "rgba(0, 0, 0, 0)",
+                    showlegend = FALSE) %>% 
+    style(hoverinfo = "none") %>% 
+    config(displaylogo = FALSE,
+           modeBarButtonsToRemove = c(
+             #'toImage',
+             'sendDataToCloud',
+             'pan2d',
+             'select2d',
+             'lasso2d',
+             'toggleSpikelines',
+             'hoverClosestCartesian',
+             'hoverCompareCartesian'
+           ))
+  return(p)
+}

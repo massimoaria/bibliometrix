@@ -3835,12 +3835,18 @@ server <- function(input, output,session){
     values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize)
+    values$cocOverlay <- overlayPlotly(values$network$VIS)
     values$degreePlot <- degreePlot(values$cocnet)
   })
   
   output$cocPlot <- renderVisNetwork({  
     COCnetwork()
     values$network$VIS
+  })
+  
+  output$cocOverlay <- renderPlotly({
+    COCnetwork()
+    values$cocOverlay
   })
   
   output$COCStopPreview <-  renderUI({
@@ -4934,12 +4940,18 @@ server <- function(input, output,session){
     values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
                                shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"))
+    values$cocitOverlay <- overlayPlotly(values$network$VIS)
     values$degreePlot <- degreePlot(values$cocitnet)
   })
   
   output$cocitPlot <- renderVisNetwork({  
     COCITnetwork()
     isolate(values$network$VIS)
+  })
+  
+  output$cocitOverlay <- renderPlotly({
+    COCITnetwork()
+    values$cocitOverlay
   })
   
   output$network.cocit <- downloadHandler(
@@ -5092,6 +5104,7 @@ server <- function(input, output,session){
     values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
                                shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
+    values$colOverlay <- overlayPlotly(values$network$VIS)
     values$degreePlot <-degreePlot(values$colnet)
     if (is.null(dim(values$colnet$cluster_res))){
       values$colnet$cluster_res <- data.frame(Node=NA, Cluster=NA, Betweenness=NA, 
@@ -5104,6 +5117,11 @@ server <- function(input, output,session){
   output$colPlot <- renderVisNetwork({  
     COLnetwork()
     values$network$VIS
+  })
+  
+  output$colOverlay <- renderPlotly({
+    COLnetwork()
+    values$colOverlay
   })
   
   output$network.col <- downloadHandler(

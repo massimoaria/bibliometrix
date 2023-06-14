@@ -8,7 +8,8 @@ csvLens2df <- function(file){
     #D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F) #fileEncoding = "UTF-8-BOM")
     D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress()) %>%
       mutate(across(where(is.numeric), as.character)) %>% 
-      mutate(across(where(is.character), tidyr::replace_na,"")) %>% as.data.frame()
+      mutate(across(where(is.character), \(x) tidyr::replace_na(x,""))) %>% 
+      as.data.frame()
 
     if (i>1){
       l <- intersect(l,names(D))

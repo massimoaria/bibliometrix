@@ -1131,9 +1131,9 @@ netLayout <- function(type){
   return(l)
 }
 
-savenetwork <- function(con, values){
+savenetwork <- function(con, VIS){
   
-  values$network$VIS %>% 
+  VIS %>% 
     visOptions(height = "800px") %>% 
     visNetwork::visSave(con)
 }

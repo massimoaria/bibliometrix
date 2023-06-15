@@ -3832,16 +3832,16 @@ server <- function(input, output,session){
   COCnetwork <- eventReactive(input$applyCoc,{
     
     values <- cocNetwork(input,values)
-    values$network<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
+    values$COCnetwork<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
                                shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize)
-    values$cocOverlay <- overlayPlotly(values$network$VIS)
+    values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocnet)
   })
   
   output$cocPlot <- renderVisNetwork({  
     COCnetwork()
-    values$network$VIS
+    values$COCnetwork$VIS
   })
   
   output$cocOverlay <- renderPlotly({
@@ -3877,7 +3877,7 @@ server <- function(input, output,session){
   output$networkCoc.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
-      savenetwork(con, values)
+      savenetwork(con, values$COCnetwork$VIS)
     },
     contentType = "html"
   )
@@ -4937,16 +4937,16 @@ server <- function(input, output,session){
   ### Co-citation network ----
   COCITnetwork <- eventReactive(input$applyCocit,{
     values <- intellectualStructure(input,values)
-    values$network<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
+    values$COCITnetwork<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
                                shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"))
-    values$cocitOverlay <- overlayPlotly(values$network$VIS)
+    values$cocitOverlay <- overlayPlotly(values$COCITnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocitnet)
   })
   
   output$cocitPlot <- renderVisNetwork({  
     COCITnetwork()
-    isolate(values$network$VIS)
+    isolate(values$COCITnetwork$VIS)
   })
   
   output$cocitOverlay <- renderPlotly({
@@ -4992,7 +4992,7 @@ server <- function(input, output,session){
   output$networkCocit.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
-      savenetwork(con, values)
+      savenetwork(con, values$COCITnetwork$VIS)
     },
     contentType = "html"
   )
@@ -5101,10 +5101,10 @@ server <- function(input, output,session){
   ### Collaboration network ----
   COLnetwork <- eventReactive(input$applyCol,{
     values <- socialStructure(input,values)
-    values$network<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
+    values$COLnetwork<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
                                shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
-    values$colOverlay <- overlayPlotly(values$network$VIS)
+    values$colOverlay <- overlayPlotly(values$COLnetwork$VIS)
     values$degreePlot <-degreePlot(values$colnet)
     if (is.null(dim(values$colnet$cluster_res))){
       values$colnet$cluster_res <- data.frame(Node=NA, Cluster=NA, Betweenness=NA, 
@@ -5116,7 +5116,7 @@ server <- function(input, output,session){
   })
   output$colPlot <- renderVisNetwork({  
     COLnetwork()
-    values$network$VIS
+    values$COLnetwork$VIS
   })
   
   output$colOverlay <- renderPlotly({
@@ -5162,7 +5162,7 @@ server <- function(input, output,session){
   output$networkCol.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
-      savenetwork(con, values)
+      savenetwork(con, values$COLnetwork$VIS)
     },
     contentType = "html"
   )

@@ -9,6 +9,33 @@ server <- function(input, output,session){
   ## suppress warnings
   options(warn = -1)
   
+  ## chrome configration for shinyapps server
+  #message(curl::curl_version()) # check curl is installed
+  if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
+    chromote::set_default_chromote_object(
+      chromote::Chromote$new(chromote::Chrome$new(
+        args = c("--disable-gpu",
+                 "--no-sandbox",
+                 "--disable-dev-shm-usage", # required bc the target easily crashes
+                 c("--force-color-profile", "srgb"))
+      ))
+    )
+  }
+  ## end configuration
+  
+  ## Check if Chrome browser is installed on the computer
+  if(is.null(chromote::find_chrome())){
+    showModal(modalDialog(
+      title = strong("Warning message!"),
+      HTML("Chrome or a Chromium-based browser is not installed on your computer.<br>
+If you do not have either of these browsers installed, TALL will be unable to export graphs.<br>
+To ensure the functionality of TALL,
+           please download Chrome by <a href='https://www.google.com/intl/it_it/chrome/' target='_blank' > <b>clicking here</b></a>."),
+      footer = modalButton("Dismiss"),
+      easyClose = TRUE
+    ))
+  }
+  
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)

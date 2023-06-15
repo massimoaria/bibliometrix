@@ -1825,17 +1825,54 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
   return(wb)
 }
 
-screenSh <- function(selector){
+# screenSh <- function(selector){
+#   fileName <- tempfile(pattern = "figureImage",
+#                        tmpdir = "",
+#                        fileext = "") %>% substr(.,2,nchar(.))
+#   if (is.null(selector)){
+#     shinyscreenshot::screenshot(filename=fileName, download=FALSE, server_dir = tempdir())
+#   } else {
+#     shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
+#   }
+#   file <- paste(tempdir(),"/",fileName,".png",sep="")
+#   return(file)
+# }
+
+screenSh <- function(p, zoom = 2, type="vis"){
+  tmpdir = tempdir()
   fileName <- tempfile(pattern = "figureImage",
-                       tmpdir = "",
-                       fileext = "") %>% substr(.,2,nchar(.))
-  if (is.null(selector)){
-    shinyscreenshot::screenshot(filename=fileName, download=FALSE, server_dir = tempdir())
-  } else {
-    shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
-  }
-  file <- paste(tempdir(),"/",fileName,".png",sep="")
-  return(file)
+                       tmpdir = tmpdir,
+                       fileext = ".png") #%>% substr(.,2,nchar(.))
+
+  plot2png(p, filename=fileName, zoom = zoom, type=type, tmpdir=tmpdir)
+
+  return(fileName)
+}
+
+screenShot <- function(p, filename, type){
+  switch(Sys.info()[['sysname']],
+         Windows= {home <- Sys.getenv('R_USER')},
+         Linux  = {home <- Sys.getenv('HOME')},
+         Darwin = {home <- Sys.getenv('HOME')})
+  
+  # setting up the main directory
+  filename <- paste0(file.path(home,"downloads/"),filename)
+  
+  plot2png(p, filename, zoom = 2, type=type, tmpdir = tempdir())
+  
+}
+
+plot2png <- function(p, filename, zoom = 2, type="vis", tmpdir){
+  html_name <- tempfile(fileext = ".html",
+                        tmpdir=tmpdir)
+  switch(type,
+         vis={
+           visSave(p, html_name)
+         },
+         plotly={
+           htmlwidgets::saveWidget(p, file=html_name)
+         })
+  webshot2::webshot(url = html_name, zoom = zoom, file = filename)#, verbose=FALSE)
 }
 
 addScreenWb <- function(df, wb, width=14, height=8, dpi=75){

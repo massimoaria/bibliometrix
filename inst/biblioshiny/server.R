@@ -508,7 +508,7 @@ server <- function(input, output,session){
     values$missingdf <- df <- missingData(values$M)$mandatoryTags
     
     names(df) <- c("Metadata", "Description", "Missing Counts", "Missing %", "Status")
-    DT::datatable(df,escape = FALSE,rownames = FALSE, #extensions = c("Buttons"),
+    values$missingDataTable <- DT::datatable(df,escape = FALSE,rownames = FALSE, #extensions = c("Buttons"),
                   class = 'cell-border stripe',
                   selection = 'none',
                   options = list(
@@ -550,7 +550,7 @@ server <- function(input, output,session){
     #   "Missing %",
     #   background = styleColorBar(df[,4], '#b22222')
     # )
-    
+    values$missingDataTable
   })
   
   observeEvent(input$missingMessage,{
@@ -599,18 +599,16 @@ server <- function(input, output,session){
       footer = tagList(
         actionButton(label="Advice", inputId = "missingMessage",
                      icon = icon("exclamation-sign", lib = "glyphicon")),
-        screenshotButton(label="Save", id = "missingDataTable",
-                         scale = 2,
-                         file=paste("MissingDataTable-", Sys.Date(), ".png", sep="")),
+        actionButton(label="Save", inputId = "missingDataTable",
+                     icon = icon("camera", lib = "glyphicon")),
         modalButton("Close")),
     )
   }
   
-  # observeEvent(event_data("plotly_click"), {
-  #   if (input$sidebarmenu=="thematicMap"){
-  #     showModal(plotModal(session))
-  #   }
-  # })
+  observeEvent(input$missingDataTable,{
+    filename = paste("missingDataTable-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$missingDataTable, filename=filename, type="plotly")
+  })
   
   ## export functions ----
   output$collection.save <- downloadHandler(
@@ -1433,7 +1431,8 @@ server <- function(input, output,session){
         sheetname <- paste(sheetname,length(ind)+1,sep="")
       } 
       addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
-      values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
+      #values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
+      values$fileTFP <- screenSh(values$TFP, zoom = 2, type="plotly")
       values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
       popUp(title="Three-Field Plot", type="success")
       values$myChoices <- sheets(values$wb)
@@ -3266,7 +3265,7 @@ server <- function(input, output,session){
     W=resW$W
     values$Words <- resW$Words
     
-    wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
+    values$WordCloud <- wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
                            fontFamily = input$font, fontWeight = 'normal',
                            color = input$wcCol, backgroundColor = "white", #input$wcBGCol,
                            minRotation = 0, maxRotation = input$rotate/10, shuffle = TRUE,
@@ -3276,6 +3275,7 @@ server <- function(input, output,session){
   
   output$wordcloud <- wordcloud2::renderWordcloud2({
     WordCloud()
+    values$WordCloud
   })
   
   observeEvent(input$reportWC,{
@@ -3284,8 +3284,9 @@ server <- function(input, output,session){
       list_df <- list(values$Words)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$wb <- res$wb
-      values$fileTFP <- screenSh(selector = "#wordcloud") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#wordcloud") ## screenshot
+      values$fileWC <- screenSh(values$WordCloud, zoom = 2, type="plotly")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileWC,res$col))
       popUp(title="WordCloud", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
@@ -3418,8 +3419,9 @@ server <- function(input, output,session){
       list_df <- list(values$WordsT)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$wb <- res$wb
-      values$fileTFP <- screenSh(selector = "#treemap") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#treemap") ## screenshot
+      values$fileTreeMap <- screenSh(values$TreeMap, zoom = 2, type="plotly")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTreeMap,res$col))
       popUp(title="TreeMap", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
@@ -3924,8 +3926,9 @@ server <- function(input, output,session){
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
       values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+16, width=10, height=7, dpi=75)
-      values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
+      values$fileCOC <- screenSh(values$COCnetwork$VIS, zoom = 2, type="vis")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOC,res$col))
       popUp(title="Co-occurrence Network", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
@@ -4112,12 +4115,17 @@ server <- function(input, output,session){
       size = "l",
       easyClose = TRUE,
       footer = tagList(
-        screenshotButton(label="Save", id = "cocPlotClust",
-                         scale = 2,
-                         file=paste("TMClusterGraph-", Sys.Date(), ".png", sep="")),
+        actionButton(label="Save", inputId = "cocPlotClust",
+                     icon = icon("camera", lib = "glyphicon")),
         modalButton("Close")),
     )
   }
+  
+  observeEvent(input$cocPlotClust,{
+    #Time <- format(Sys.time(),'%H%M%S')
+    filename = paste("TMClusterGraph-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$plotClust , filename=filename, type="vis")
+  })
   
   observeEvent(event_data("plotly_click"), {
     if (input$sidebarmenu=="thematicMap"){
@@ -4132,7 +4140,8 @@ server <- function(input, output,session){
       filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
       select(.data$color) %>% as.character()
     g <- values$TM$subgraphs[[color]]
-    igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
+    values$plotClust <- igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
+    values$plotClust 
   })
   
   ### end click cluster subgraphs
@@ -4326,13 +4335,14 @@ server <- function(input, output,session){
         names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR")
       }
       values$nexus$Data <- values$nexus$Data[values$nexus$Data$Inc_index>0,-c(4,8)]
-      plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE)
+      values$TEplot <- plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE)
     }
     
   })
   
   output$TEPlot <- plotly::renderPlotly({
     TEMAP()
+    values$TEplot
   })
   
   output$TEStopPreview <-  renderUI({
@@ -4358,23 +4368,26 @@ server <- function(input, output,session){
     },
     content <- function(file) {
       #go to a temp dir to avoid permission issues
-      owd <- setwd(tempdir())
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
       on.exit(setwd(owd))
-      files <- NULL;
+      files <- filenameTE <- paste("ThematicEvolution_", Sys.Date(), ".png", sep="")
       
       for (i in 1:length(values$nexus$TM)){
         fileName <- paste("ThematicEvolution-Map_",i,"_",Sys.Date(), ".png", sep="")
         ggsave(filename = fileName, plot = values$nexus$TM[[i]]$map, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
         files <- c(fileName,files)
       }
-      screenshot(
-        filename = paste("ThematicEvolution_", Sys.Date(), ".png", sep=""),
-        id = "TEPlot",
-        scale = 1,
-        timer = 0,
-        download = TRUE,
-        server_dir = NULL
-      )
+      plot2png(values$TEplot, filename= filenameTE, 
+               zoom = 2, type="plotly", tmpdir=tmpdir)
+      # screenshot(
+      #   filename = paste("ThematicEvolution_", Sys.Date(), ".png", sep=""),
+      #   id = "TEPlot",
+      #   scale = 1,
+      #   timer = 0,
+      #   download = TRUE,
+      #   server_dir = NULL
+      # )
       zip(file,files)
     },
     contentType = "zip"
@@ -4906,8 +4919,9 @@ server <- function(input, output,session){
       list_df <- list(values$nexus$params, values$nexus$Data)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
+      values$fileTEplot <- screenSh(values$TEplot, zoom = 2, type="plotly")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTEplot,res$col))
       
       ## Periods
       L <- length(values$nexus$TM)
@@ -5014,8 +5028,9 @@ server <- function(input, output,session){
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
       values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=75)
-      values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
+      values$fileCOCIT <- screenSh(values$COCITnetwork$VIS, zoom = 2, type="vis")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOCIT,res$col))
       popUp(title="Co-citation Network", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
@@ -5088,8 +5103,9 @@ server <- function(input, output,session){
       sheetname <- "Historiograph"
       list_df <- list(values$histResults$histData)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
-      values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
+      values$fileHIST <- screenSh(values$histPlotVis$VIS, zoom = 2, type="vis")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileHIST,res$col))
       popUp(title="Historiograph", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
@@ -5181,8 +5197,9 @@ server <- function(input, output,session){
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=75)
-      values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTFP,res$col))
+      #values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
+      values$fileCOL <- screenSh(values$COLnetwork$VIS, zoom = 2, type="vis")
+      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOL,res$col))
       popUp(title="Collaboration Network", type="success")
       values$myChoices <- sheets(values$wb)
     } else {
@@ -5341,80 +5358,38 @@ server <- function(input, output,session){
   
   ### screenshot buttons ----
   observeEvent(input$screenTFP,{
-    screenshot(
-      filename = paste("ThreeFieldPlot-", Sys.Date(), ".png", sep=""),
-      id = "ThreeFieldsPlot",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("ThreeFieldPlot-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$TFP, filename=filename, type="plotly")
   })
   
   observeEvent(input$screenWC,{
-    screenshot(
-      filename = paste("WordCloud-", Sys.Date(), ".png", sep=""),
-      id = "wordcloud",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("WordCloud-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$WordCloud, filename=filename, type="plotly")
   })
   
   observeEvent(input$screenTREEMAP,{
-    screenshot(
-      filename = paste("TreeMap-", Sys.Date(), ".png", sep=""),
-      id = "treemap",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("TreeMap-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$TreeMap, filename=filename, type="plotly")
   })
   
   observeEvent(input$screenCOC,{
-    screenshot(
-      filename = paste("Co_occurrenceNetwork-", Sys.Date(), ".png", sep=""),
-      id = "cocPlot",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("Co_occurrenceNetwork-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$COCnetwork$VIS, filename=filename, type="vis")
   })
   
   observeEvent(input$screenCOCIT,{
-    screenshot(
-      filename = paste("Co_citationNetwork-", Sys.Date(), ".png", sep=""),
-      id = "cocitPlot",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("Co_citationNetwork-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$COCITnetwork$VIS, filename=filename, type="vis")
   })
   
   observeEvent(input$screenHIST,{
-    screenshot(
-      filename = paste("Historiograph-", Sys.Date(), ".png", sep=""),
-      id = "histPlotVis",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("Historiograph-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$histPlotVis$VIS, filename=filename, type="vis")
   })
   
   observeEvent(input$screenCOL,{
-    screenshot(
-      filename = paste("Collaboration_Network-", Sys.Date(), ".png", sep=""),
-      id = "colPlot",
-      scale = 1,
-      timer = 0,
-      download = TRUE,
-      server_dir = NULL
-    )
+    filename = paste("Collaboration_Network-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$COLnetwork$VIS, filename=filename, type="vis")
   })
   
   

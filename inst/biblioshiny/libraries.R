@@ -16,9 +16,10 @@ libraries <- function(){
   if (!require(shinydashboardPlus, quietly=TRUE)){install.packages("shinydashboardPlus"); require(shinydashboardPlus, quietly=TRUE)}
   if (!require(shinydashboard, quietly=TRUE)){install.packages("shinydashboard"); require(shinydashboard, quietly=TRUE)}
   if (!require(shinyjs, quietly=TRUE)){install.packages("shinyjs"); require(shinyjs, quietly=TRUE)}
-  if (!require(shinyscreenshot, quietly=TRUE)){install.packages("shinyscreenshot"); require(shinyscreenshot, quietly=TRUE)}
+  #if (!require(shinyscreenshot, quietly=TRUE)){install.packages("shinyscreenshot"); require(shinyscreenshot, quietly=TRUE)}
   if (!require(openxlsx, quietly=TRUE)){install.packages("openxlsx"); require(openxlsx, quietly=TRUE)}
   if (!require(shinyWidgets, quietly=TRUE)){install.packages("shinyWidgets"); require(shinyWidgets, quietly=TRUE)}
+  if (!require(webshot2)){install.packages("webshot2")}
   require(Matrix, quietly = TRUE)
   require(dimensionsR, quietly = TRUE)
   require(pubmedR, quietly = TRUE)

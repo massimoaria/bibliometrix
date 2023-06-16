@@ -37,13 +37,13 @@ missingData <- function(M) {
   # create a vector with the tags
   tag <- unlist(
     strsplit(
-      "AB,AU,C1,CR,DE,DI,DT,ID,LA,NR,PY,RP,SO,TC,TI,WC",","
+      "AB,AU,C1,CR,DE,DI,DT,ID,LA,PY,RP,SO,TC,TI,WC",","
       )
   )
   # create a vector with the description of the tags
   description <- trimws(unlist(
     strsplit(
-      "Abstract, Author,Affiliation,Cited References,Keywords,DOI,Document Type,Keywords Plus,Language,Number of Cited References,
+      "Abstract, Author,Affiliation,Cited References,Keywords,DOI,Document Type,Keywords Plus,Language,
       Publication Year,Corresponding Author, Journal, Total Citation, Title, Science Categories", ","
     )
   ))

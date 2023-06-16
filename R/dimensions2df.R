@@ -69,6 +69,20 @@ dimensions2df <- function(file, format = "csv") {
     }
   }
   names(DATA) = fields
+  ind <- which(names(DATA)=="Source title/Anthology title")
+  if (length(ind)==1){
+    names(DATA)[ind] <- "SO"
+  }
+  ind <- which(names(DATA)=="Authors Affiliations Name of Research organization" )
+  if (length(ind)==1){
+    names(DATA)[ind] <- "C1"
+    DATA$AU_UN <- DATA$C1
+  }
+  ind <- which(names(DATA)== "Authors Affiliations Country of Research organization")
+  if (length(ind)==1){
+    names(DATA)[ind] <- "AU_CO"
+  }
+  
   
   DATA <- postprocessingDim(DATA)
   
@@ -82,7 +96,7 @@ postprocessingDim <- function(DATA) {
   
   ## Converting original references in WOS format (AU, PY, SO, VOL, NUM, DOI)
   if ("Cited references" %in% names(DATA)) {
-    aaa <- strsplit(DATA$Cited.references, ";\\[")
+    aaa <- strsplit(DATA$`Cited references`, ";\\[")
     cr <- (unlist(lapply(aaa, function(l) {
       l <- gsub("\\|", "!!!", l)
       l <- strsplit(l, "!!!")
@@ -235,7 +249,16 @@ postprocessingDim <- function(DATA) {
   
   DATA$DB <- "DIMENSIONS"
   
-  DATA <- metaTagExtraction(DATA, "AU_CO")
+  if (!"AU_CO" %in% names(DATA)) DATA <- metaTagExtraction(DATA, "AU_CO")
+  
+  DATA$AU1_CO <- unlist(lapply(strsplit(DATA$AU_CO,";"), function(l){
+    if (length(l)>0){
+      l <- l[1]
+    } else {
+      l <- "NA"
+    }
+    return(l)
+  }))
   
   DATA <- metaTagExtraction(DATA, "AU1_CO")
   return(DATA)

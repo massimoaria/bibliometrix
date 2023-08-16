@@ -127,22 +127,28 @@ wos <- function(M, min.citations, sep, network, verbose){
   
   histData <- M[c("LABEL","TI","DE","ID","DI","PY","LCS","TC")]
   names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
+  histData <- histData %>% 
+    dplyr::filter(.data$GCS>=min.citations)
   
   if (isTRUE(network)){
     # Citing data frame
-    CITING <- L %>% group_by(.data$CITING) %>%
+    CITING <- L %>% 
+      group_by(.data$CITING) %>%
       summarize(
         LCR = paste(.data$LABEL, collapse = ";"),
         PY = .data$CIT_PY[1],
         Paper = .data$paper[1]
       ) %>%
       ungroup() %>%
-      arrange(.data$PY) %>% as.data.frame()
+      arrange(.data$PY) %>% 
+      as.data.frame()
     
     M_orig$LCR <- NA
     M_orig$LCR[CITING$Paper] <- CITING$LCR
     M_orig$LABEL <- M$LABEL
-    M <- M_orig
+    M <- M_orig %>% 
+      dplyr::filter(.data$TC >= min.citations)
+    
   
   ## assign an unique name to each document
     st<-i<-0
@@ -189,6 +195,10 @@ scopus <- function(M, min.citations, sep, network, verbose){
     cat("\nSCOPUS DB: Searching local citations (LCS) by document titles (TI) and DOIs...\n")
   }
   
+  if (!("SR_FULL" %in% names(M))) {
+    M = metaTagExtraction(M, Field = "SR")
+  }
+  
   M$nCITING <- 1:nrow(M)
   papers <- M$nCITING[M$TC >= min.citations]
   
@@ -224,6 +234,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
       GCS = .data$TC
     ) %>%
     arrange(.data$Year) %>%
+    dplyr::filter(.data$GCS>=min.citations) %>% 
     as.data.frame()
   
   if (isTRUE(network)) {
@@ -242,6 +253,8 @@ scopus <- function(M, min.citations, sep, network, verbose){
     df$CITINGn <- unlist(apply(A, 1, which.min))
     df$CITING <- M$SR[df$CITINGn]
     df$CITED <- M$SR[df$paper]
+    df <- df %>% 
+      dplyr::filter(.data$CITING %in% histData$Paper)
     
     NetMatrix <-
       (as_adjacency_matrix(graph_from_data_frame(df[, c(6, 5)], directed = T)))

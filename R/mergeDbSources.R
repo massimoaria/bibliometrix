@@ -79,5 +79,6 @@ mergeDbSources <- function(...,remove.duplicated=TRUE){
     M=M[!d,]
   }
   class(M) <- c("bibliometrixDB", "data.frame")
+  M$SR <- row.names(M)
   return(M)
 }

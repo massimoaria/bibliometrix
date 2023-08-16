@@ -117,7 +117,7 @@ networkStat<-function(object, stat="network",type="degree"){
            betweenness={
              # Betweenness centrality. 
              # Another way to gauge a node's influence is to consider its role in linking other nodes together in the network.
-             BC <- betweenness(net, v = V(net), directed = FALSE, weights = NULL, nobigint = TRUE, normalized = TRUE)
+             BC <- betweenness(net, v = V(net), directed = FALSE, weights = NULL, normalized = TRUE)
            },
            eigenvector={
              # Eigenvector centrality. 
@@ -147,7 +147,7 @@ networkStat<-function(object, stat="network",type="degree"){
            all={
              DC <- degree(net, v = V(net), mode = c("all"), loops = TRUE, normalized = TRUE)
              CC <- suppressWarnings(closeness(net, vids = V(net), mode = c("all"), normalized = TRUE))
-             BC <- betweenness(net, v = V(net), directed = FALSE, weights = NULL, nobigint = TRUE, normalized = TRUE)
+             BC <- betweenness(net, v = V(net), directed = FALSE, weights = NULL, normalized = TRUE)
              EC <- eigen_centrality(net, directed = FALSE, scale = TRUE, weights = NULL, options = arpack_defaults)$vector
              PR <- page_rank(net, algo = c("prpack"), vids = V(net),
                              directed = FALSE, damping = 0.85, personalized = NULL, weights = NULL,

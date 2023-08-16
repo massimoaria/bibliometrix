@@ -9,7 +9,7 @@ server <- function(input, output,session){
   ## suppress warnings
   options(warn = -1)
   
-  ## chrome configration for shinyapps server
+  ## chrome configuration for shinyapps server
   #message(curl::curl_version()) # check curl is installed
   if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
     chromote::set_default_chromote_object(

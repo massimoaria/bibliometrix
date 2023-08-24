@@ -5,7 +5,7 @@
 #'
 #' @param M is a bibliographic data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-#'   manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
+#'   manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex and Clarivate
 #'   Analitics Web of Science file.
 #' @param min.citations is a positive integer. It sets the minimum number of citations 
 #'   for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.
@@ -30,8 +30,8 @@
 #' histResults <- histNetwork(management, min.citations = 0, sep = ";")
 #' }
 #'
-#' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS
-#'   Export file in a bibliographic data frame.
+#' @seealso \code{\link{convert2df}} to import and convert a supported
+#'   export file in a bibliographic data frame.
 #' @seealso \code{\link{summary}} to obtain a summary of the results.
 #' @seealso \code{\link{plot}} to draw some useful plots of the results.
 #' @seealso \code{\link{biblioNetwork}} to compute a bibliographic network.
@@ -56,6 +56,9 @@ histNetwork<-function(M, min.citations = 1, sep = ";", network = TRUE, verbose =
          },
          SCOPUS={
            results <- scopus(M=M, min.citations=min.citations, sep=sep, network=network, verbose=verbose)
+         },
+         OPENALEX={
+           results <- openalex(M=M, min.citations=min.citations, sep=sep, network=network, verbose=verbose)
          },
          {cat("\nDatabase not compatible with direct citation analysis\n")})
   
@@ -237,6 +240,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
     dplyr::filter(.data$GCS>=min.citations) %>% 
     as.data.frame()
   
+  
   if (isTRUE(network)) {
     ## Network matrix
     df <- lapply(seq_along(L), function(i) {
@@ -273,6 +277,62 @@ scopus <- function(M, min.citations, sep, network, verbose){
       NetMatrix = NetMatrix,
       histData = histData,
       M = M,
+      LCS = M$LCS
+    )
+}
+
+openalex <- function(M, min.citations=min.citations, sep=sep, network=network, verbose=verbose){
+  
+  M$CR[is.na(M$CR)] <- "none"
+  ids <- M$id_oa
+  CR <- strsplit(M$CR, ";")
+  CR <- data.frame(id_oa = rep(M$id_oa,lengths(CR)), ref = unlist(CR)) %>% 
+    dplyr::filter(.data$ref %in% ids)
+  
+  LCS <- CR %>% 
+    count(id_oa = ref) %>% 
+    rename(LCS = .data$n)
+  
+  histData <- M %>% 
+    left_join(LCS, by = c("id_oa")) %>% 
+    mutate(LCS = ifelse(is.na(.data$LCS),0,.data$LCS),
+           DE = .data$ID) %>% 
+    rename(LABEL = .data$SR,
+           GCS = .data$TC) %>% 
+    select(c("LABEL","TI","DE","ID","DI","PY","LCS","GCS")) %>% 
+    dplyr::filter(.data$GCS>=min.citations)
+  
+  names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
+  
+  if (isTRUE(network)){
+    WLCR <- CR %>%
+      mutate(value = 1) %>% 
+      pivot_wider(names_from = "ref", values_from = "value", values_fill = 0) 
+    
+    SRrow <- WLCR %>% select(.data$id_oa) %>% 
+      left_join(M %>% 
+                  select(.data$id_oa, .data$SR), 
+                by="id_oa")
+    
+    SR_col <- data.frame(id_oa = colnames(WLCR)[-1]) %>% 
+      left_join(M %>% 
+                  select(.data$id_oa, .data$SR), 
+                by="id_oa")
+    
+    WLCR <- as.matrix(WLCR %>% select(-1))
+    row.names(WLCR) <- SRrow$SR
+    colnames(WLCR) <- SR_col$SR
+  } else {
+    WLCR = NULL
+  }
+  
+  results <-
+    list(
+      NetMatrix = WLCR,
+      histData = histData,
+      M = M %>% 
+        left_join(LCS, by = "id_oa") %>% 
+        replace_na(list(LCS = 0)),
       LCS = M$LCS
     )
 }

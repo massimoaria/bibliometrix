@@ -7,14 +7,16 @@
 convert2df(file, dbsource = "wos", format = "plaintext")
 }
 \arguments{
-\item{file}{a character array containing a sequence of object names coming from: 
+\item{file}{a character array containing a sequence of object names coming from WoS, Scopus, Dimensions, Lens.org, Pubmed. Alternatively, \code{file} can be 
+an object resulting from an API query fetched from Dimensions, PubMed or OpenAlex databases: 
 \tabular{lll}{
 a)\tab \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
 b)\tab \tab SCOPUS (exclusively in bibtex format '.bib');\cr
 c)\tab \tab Digital Science Dimensions (in csv '.csv' or excel '.xlsx' formats);\cr
 d)\tab \tab Lens.org (in csv '.csv');\cr
 e)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
-f)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package.}}
+f)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package;\cr
+g)\tab \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
 
 \item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.}
 

@@ -15,6 +15,7 @@
 #' @import readxl
 #' @import stringi
 #' @import tidytext
+#' @import openalexR
 #' @importFrom dplyr %>%
 #' @importFrom dplyr across
 #' @importFrom dplyr row_number

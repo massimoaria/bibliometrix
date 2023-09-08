@@ -3895,11 +3895,23 @@ To ensure the functionality of TALL,
   })
   
   output$network.coc <- downloadHandler(
-    filename = "Co_occurrence_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$cocnet$graph_pajek,file=file, format="pajek")
+    filename = function() {
+      paste("Co_occurrence_network-", Sys.Date(), ".zip", sep="")
     },
-    contentType = "net"
+    content <- function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+      print(tmpdir)
+      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
+      myfile <- paste("mynetwork-", Sys.Date(), sep="")
+      files <- paste0(myfile, c(".net",".vec",".clu"))
+      graph2Pajek(values$cocnet$graph, file=myfile)
+      print(files)
+      print(dir())
+      zip(file,files)
+    },
+    contentType = "zip"
   )
   
   ##### save coc network image as html ####
@@ -4996,11 +5008,23 @@ To ensure the functionality of TALL,
   })
   
   output$network.cocit <- downloadHandler(
-    filename = "Co_citation_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$cocitnet$graph_pajek,file=file, format="pajek")
+    filename = function() {
+      paste("Co_citation_network-", Sys.Date(), ".zip", sep="")
     },
-    contentType = "net"
+    content <- function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+      print(tmpdir)
+      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
+      myfile <- paste("mynetwork-", Sys.Date(), sep="")
+      files <- paste0(myfile, c(".net",".vec",".clu"))
+      graph2Pajek(values$cocitnet$graph, file=myfile)
+      print(files)
+      print(dir())
+      zip(file,files)
+    },
+    contentType = "zip"
   )
   
   output$cocitTable <- DT::renderDT({
@@ -5168,11 +5192,23 @@ To ensure the functionality of TALL,
   })
   
   output$network.col <- downloadHandler(
-    filename = "Collaboration_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$colnet$graph_pajek,file=file, format="pajek")
+    filename = function() {
+      paste("Collaboration_network-", Sys.Date(), ".zip", sep="")
     },
-    contentType = "net"
+    content <- function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+      print(tmpdir)
+      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
+      myfile <- paste("mynetwork-", Sys.Date(), sep="")
+      files <- paste0(myfile, c(".net",".vec",".clu"))
+      graph2Pajek(values$colnet$graph, file=myfile)
+      print(files)
+      print(dir())
+      zip(file,files)
+    },
+    contentType = "zip"
   )
   
   output$colTable <- DT::renderDT({

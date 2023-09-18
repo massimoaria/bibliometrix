@@ -333,6 +333,9 @@ To ensure the functionality of Biblioshiny,
                                 })
                  })
         },
+        openalex = {
+          M <- smart_load(inFile$datapath)
+        },
         lens = {
           switch(ext,
                  ###  Lens.org ZIP Files

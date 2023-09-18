@@ -240,8 +240,10 @@ ValueBoxes <- function(M){
   df[2,] <- c("Authors",length(listAU))
   
   ## VB  3 - Author's Keywords (DE)
+  if (!"DE" %in% names(M)){M$DE <- ""}
   DE <- unique(trimws(gsub("\\s+|\\.|\\,"," ",unlist(strsplit(M$DE, ";")))))
   DE <- DE[!is.na(DE)]
+  
   df[3,] <- c("Author's Keywords (DE)",length(DE))
   
   ## VB  4 - Sources
@@ -479,12 +481,13 @@ descriptive <- function(values,type){
              drop_na(.data$Affiliation) %>% 
              arrange(desc(.data$n)) %>% 
              rename(Articles = .data$n) %>% 
+             filter(.data$Affiliation!="NA") %>%
              as.data.frame()
          },
          "tab12"={
-           TAB=tableTag(values$M,"C1")
-           TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB))
-           TAB=TAB[nchar(TAB[,1])>4,]
+           TAB <- tableTag(values$M,"C1")
+           TAB <- data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB))
+           TAB <- TAB[nchar(TAB[,1])>4,]
            #names(TAB)=c("Affiliations", "Articles")
            
          },
@@ -505,6 +508,7 @@ AffiliationOverTime <- function(values,n){
   nAFF <- lengths(AFF)
   
   AFFY <- data.frame(Affiliation=unlist(AFF),Year=rep(values$M$PY,nAFF)) %>% 
+    filter(.data$Affiliation!="NA") %>%
     drop_na(.data$Affiliation,.data$Year) %>% 
     group_by(.data$Affiliation, .data$Year) %>% 
     count() %>% 

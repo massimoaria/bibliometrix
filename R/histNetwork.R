@@ -290,7 +290,7 @@ openalex <- function(M, min.citations=min.citations, sep=sep, network=network, v
     dplyr::filter(.data$ref %in% ids)
   
   LCS <- CR %>% 
-    count(id_oa = ref) %>% 
+    count(id_oa = .data$ref) %>% 
     rename(LCS = .data$n)
   
   histData <- M %>% 

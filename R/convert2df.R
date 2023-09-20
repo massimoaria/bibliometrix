@@ -149,7 +149,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     },
     openalex = {
       if (!"bibliometrixDB" %in% class(file)){
-        M <- oa2bibliometrix(file)
+        M <- openalexR::oa2bibliometrix(file)
       } else {
         M <- file
       }

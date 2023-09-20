@@ -240,8 +240,10 @@ ValueBoxes <- function(M){
   df[2,] <- c("Authors",length(listAU))
   
   ## VB  3 - Author's Keywords (DE)
+  if (!"DE" %in% names(M)){M$DE <- ""}
   DE <- unique(trimws(gsub("\\s+|\\.|\\,"," ",unlist(strsplit(M$DE, ";")))))
   DE <- DE[!is.na(DE)]
+  
   df[3,] <- c("Author's Keywords (DE)",length(DE))
   
   ## VB  4 - Sources
@@ -479,12 +481,13 @@ descriptive <- function(values,type){
              drop_na(.data$Affiliation) %>% 
              arrange(desc(.data$n)) %>% 
              rename(Articles = .data$n) %>% 
+             filter(.data$Affiliation!="NA") %>%
              as.data.frame()
          },
          "tab12"={
-           TAB=tableTag(values$M,"C1")
-           TAB=data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB))
-           TAB=TAB[nchar(TAB[,1])>4,]
+           TAB <- tableTag(values$M,"C1")
+           TAB <- data.frame(Affiliations=names(TAB), Articles=as.numeric(TAB))
+           TAB <- TAB[nchar(TAB[,1])>4,]
            #names(TAB)=c("Affiliations", "Articles")
            
          },
@@ -505,6 +508,7 @@ AffiliationOverTime <- function(values,n){
   nAFF <- lengths(AFF)
   
   AFFY <- data.frame(Affiliation=unlist(AFF),Year=rep(values$M$PY,nAFF)) %>% 
+    filter(.data$Affiliation!="NA") %>%
     drop_na(.data$Affiliation,.data$Year) %>% 
     group_by(.data$Affiliation, .data$Year) %>% 
     count() %>% 
@@ -1221,7 +1225,7 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
       visNetwork::visEdges(smooth = list(type="horizontal")) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE) %>%
+      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
       visNetwork::visOptions(manipulation = curved, height ="100%", width = "100%")
     
     return(list(VIS=VIS,vn=vn, type=type, l=l, curved=curved))
@@ -1363,7 +1367,7 @@ igraph2visClust<-function(g,curved=FALSE,labelsize=3,opacity=0.7,shape="dot",sha
       visNetwork::visIgraphLayout(layout = "layout_nicely", type = "full") %>%
       visNetwork::visEdges(smooth = list(type="horizontal")) %>%
       visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=1), nodesIdSelection = T) %>%
-      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE) %>%
+      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
       visNetwork::visOptions(manipulation = curved, height ="100%", width = "100%")
     
     return(list(VIS=VIS,vn=vn))
@@ -1495,11 +1499,52 @@ hist2vis<-function(net, labelsize = 2, nodesize= 2, curved=FALSE, shape="dot", o
     visNetwork::visNodes(shadow=vn$nodes$shadow, shape=shape, size = vn$nodes$size, font=list(color=vn$nodes$font.color, size=vn$nodes$font.size,vadjust=vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     visNetwork::visEdges(smooth = list(type="horizontal"), arrows=list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>% 
-    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle) %>% 
+    visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag =F, tooltipStyle = tooltipStyle, zoomSpeed = 0.2) %>% 
     visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = F,
                            manipulation = FALSE, height = "100%", width = "100%")
 
   return(list(VIS=VIS,vn=vn, type="historiograph", curved=curved))
+}
+
+
+## Pajek Export
+graph2Pajek <- function(graph, filename="my_pajek_network"){
+  
+  nodes <- igraph::as_data_frame(graph, what = c("vertices")) %>% 
+    mutate(id = row_number())
+  
+  edges <- igraph::as_data_frame(graph, what = c("edges"))
+  edges <- edges %>% 
+    left_join(nodes %>% select(id, name), by=c("from" = "name")) %>% 
+    rename(id_from = id) %>% 
+    left_join(nodes %>% select(id, name), by=c("to" = "name")) %>% 
+    rename(id_to = id)
+  
+  ### Creation of NET file
+  file <- paste0(filename,".net")
+  
+  # Nodes
+  write(paste0("*Vertices ",nrow(nodes)), file=file)
+  write(paste0(nodes$id, ' "', nodes$name,'"'), file=file, append = T)
+  
+  # Edges
+  write(paste0("*Edges ",nrow(nodes)), file=file, append = T)
+  write(paste0(edges$id_from, " ",edges$id_to," ",edges$weight), file=file, append = T)
+  
+  ### Creation of VEC file
+  file <- paste0(filename,".vec")
+  
+  # Nodes
+  write(paste0("*Vertices ",nrow(nodes)), file=file)
+  write(paste0(nodes$deg), file=file, append = T)
+  
+  ### Creation of CLU file
+  file <- paste0(filename,".clu")
+  
+  # Nodes
+  write(paste0("*Vertices ",nrow(nodes)), file=file)
+  write(paste0(nodes$community), file=file, append = T)
+  
 }
 
 

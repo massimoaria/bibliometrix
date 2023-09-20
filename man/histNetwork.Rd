@@ -9,7 +9,7 @@ histNetwork(M, min.citations = 1, sep = ";", network = TRUE, verbose = TRUE)
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
 \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
+manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex and Clarivate
 Analitics Web of Science file.}
 
 \item{min.citations}{is a positive integer. It sets the minimum number of citations 
@@ -45,8 +45,8 @@ histResults <- histNetwork(management, min.citations = 0, sep = ";")
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert an ISI or SCOPUS
-  Export file in a bibliographic data frame.
+\code{\link{convert2df}} to import and convert a supported
+  export file in a bibliographic data frame.
 
 \code{\link{summary}} to obtain a summary of the results.
 

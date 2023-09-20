@@ -7,20 +7,20 @@
 convert2df(file, dbsource = "wos", format = "plaintext")
 }
 \arguments{
-\item{file}{a character array containing a sequence of object names coming from WoS, Scopus, Dimensions, Lens.org, Pubmed. Alternatively, \code{file} can be 
+\item{file}{a character array containing a sequence of filenames coming from WoS, Scopus, Dimensions, Lens.org, and Pubmed. Alternatively, \code{file} can be 
 an object resulting from an API query fetched from Dimensions, PubMed or OpenAlex databases: 
 \tabular{lll}{
-a)\tab \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
-b)\tab \tab SCOPUS (exclusively in bibtex format '.bib');\cr
-c)\tab \tab Digital Science Dimensions (in csv '.csv' or excel '.xlsx' formats);\cr
-d)\tab \tab Lens.org (in csv '.csv');\cr
-e)\tab \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
-f)\tab \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package;\cr
-g)\tab \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
+a)\tab 'wos' \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
+b)\tab 'scopus' \tab SCOPUS (exclusively in bibtex format '.bib');\cr
+c)\tab 'dimensions' \tab Digital Science Dimensions (in csv '.csv' or excel '.xlsx' formats);\cr
+d)\tab 'lens' \tab Lens.org (in csv '.csv');\cr
+e)\tab 'pubmed' \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
+f)\tab 'dimensions' \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package;\cr
+g)\tab 'openalex' \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
 
-\item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{"isi"}, \code{"wos"}, \code{"scopus"}, \code{"dimensions"} or \code{"pubmed"}. Default is \code{dbsource = "isi"}.}
+\item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{dbsource = c('cochrane','dimensions','generic','isi','openalex', 'pubmed','scopus','wos', 'lens')} . Default is \code{dbsource = "isi"}.}
 
-\item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{"api"}, \code{"bibtex"}, \code{"plaintext"}, \code{"endnote"}, \code{"csv"} or \code{"excel"}. Default is \code{format = "plaintext"}.}
+\item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed')}. Default is \code{format = "plaintext"}.}
 }
 \value{
 a data frame with cases corresponding to articles and variables to Field Tags in the original export file.

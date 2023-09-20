@@ -28,8 +28,8 @@ server <- function(input, output,session){
     showModal(modalDialog(
       title = strong("Warning message!"),
       HTML("Chrome or a Chromium-based browser is not installed on your computer.<br>
-If you do not have either of these browsers installed, TALL will be unable to export graphs.<br>
-To ensure the functionality of TALL,
+If you do not have either of these browsers installed, Biblioshiny will be unable to export graphs.<br>
+To ensure the functionality of Biblioshiny,
            please download Chrome by <a href='https://www.google.com/intl/it_it/chrome/' target='_blank' > <b>clicking here</b></a>."),
       footer = modalButton("Dismiss"),
       easyClose = TRUE
@@ -332,6 +332,9 @@ To ensure the functionality of TALL,
                                                   format = "bibtex")
                                 })
                  })
+        },
+        openalex = {
+          M <- smart_load(inFile$datapath)
         },
         lens = {
           switch(ext,
@@ -3895,11 +3898,23 @@ To ensure the functionality of TALL,
   })
   
   output$network.coc <- downloadHandler(
-    filename = "Co_occurrence_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$cocnet$graph_pajek,file=file, format="pajek")
+    filename = function() {
+      paste("Co_occurrence_network-", Sys.Date(), ".zip", sep="")
     },
-    contentType = "net"
+    content <- function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+      print(tmpdir)
+      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
+      myfile <- paste("mynetwork-", Sys.Date(), sep="")
+      files <- paste0(myfile, c(".net",".vec",".clu"))
+      graph2Pajek(values$cocnet$graph, file=myfile)
+      print(files)
+      print(dir())
+      zip(file,files)
+    },
+    contentType = "zip"
   )
   
   ##### save coc network image as html ####
@@ -4996,11 +5011,23 @@ To ensure the functionality of TALL,
   })
   
   output$network.cocit <- downloadHandler(
-    filename = "Co_citation_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$cocitnet$graph_pajek,file=file, format="pajek")
+    filename = function() {
+      paste("Co_citation_network-", Sys.Date(), ".zip", sep="")
     },
-    contentType = "net"
+    content <- function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+      print(tmpdir)
+      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
+      myfile <- paste("mynetwork-", Sys.Date(), sep="")
+      files <- paste0(myfile, c(".net",".vec",".clu"))
+      graph2Pajek(values$cocitnet$graph, file=myfile)
+      print(files)
+      print(dir())
+      zip(file,files)
+    },
+    contentType = "zip"
   )
   
   output$cocitTable <- DT::renderDT({
@@ -5168,11 +5195,23 @@ To ensure the functionality of TALL,
   })
   
   output$network.col <- downloadHandler(
-    filename = "Collaboration_network.net",
-    content <- function(file) {
-      igraph::write.graph(values$colnet$graph_pajek,file=file, format="pajek")
+    filename = function() {
+      paste("Collaboration_network-", Sys.Date(), ".zip", sep="")
     },
-    contentType = "net"
+    content <- function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+      print(tmpdir)
+      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
+      myfile <- paste("mynetwork-", Sys.Date(), sep="")
+      files <- paste0(myfile, c(".net",".vec",".clu"))
+      graph2Pajek(values$colnet$graph, file=myfile)
+      print(files)
+      print(dir())
+      zip(file,files)
+    },
+    contentType = "zip"
   )
   
   output$colTable <- DT::renderDT({

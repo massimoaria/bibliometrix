@@ -35,14 +35,14 @@ localCitations <- function(M, fast.search=FALSE, sep = ";", verbose = FALSE){
     loccit=quantile(as.numeric(M$TC),0.75, na.rm = TRUE)
   } else {loccit=1}
   
-  H=histNetwork(M,min.citations = loccit, sep=sep, network=FALSE, verbose = verbose)
-  LCS=H$histData
+  H=histNetwork(M, min.citations = loccit, sep=sep, network=FALSE, verbose = verbose)
+  LCS=H$histData 
   M=H$M
   rm(H)
   AU=strsplit(M$AU,split=";")
   n=lengths(AU)
   
-  df=data.frame(AU=unlist(AU),LCS=rep(LCS$LCS,n))
+  df=data.frame(AU=unlist(AU),LCS=rep(M$LCS,n))
   AU=aggregate(df$LCS,by=list(df$AU),FUN="sum")
   names(AU)=c("Author", "LocalCitations" )
   AU=AU[order(-AU$LocalCitations),]

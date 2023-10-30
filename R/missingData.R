@@ -29,6 +29,8 @@ missingData <- function(M) {
   missing_counts <- sapply(cols, function(x){
     sum(is.na(M[,x]) | M[,x] %in% c("NA,0000,NA","NA","","none"))
     })
+  
+  if (sum(M$TC, na.rm=T)==0){missing_counts["TC"]=nrow(M)}
   # calculate the percentage of missing values in each column
   missing_pct <- round(missing_counts/nrow(M) * 100, 2)
   # create a dataframe with the column names, number of missing values and percentage of missing values

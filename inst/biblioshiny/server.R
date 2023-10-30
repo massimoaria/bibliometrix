@@ -52,6 +52,7 @@ To ensure the functionality of Biblioshiny,
   values$myChoices <- "Empty Report"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
+  values$missTags <- NULL
   
   ### setting values
   values$dpi <- 300
@@ -139,73 +140,82 @@ To ensure the functionality of Biblioshiny,
   
   ## SIDEBAR MENU ----
   ### Apply Data----
+  
   output$rest_of_sidebar <- renderMenu({
     if (isTRUE(values$rest_sidebar)){
-      sidebarMenu(
-        menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
-        menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
-                 menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon"))),
-        menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
-                 menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
-                 menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
-        menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
-                 "Authors",
-                 menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Affiliations",
-                 menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Countries",
-                 menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
-        ),
-        menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
-                 "Documents",
-                 menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Cited References",
-                 menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
-                 "Words",
-                 menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
-        ),
-        menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
-                 menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
-                 "Network Approach",
-                 menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
-                 menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
-                 "Factorial Approach",
-                 menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
-                 menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
-                 menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
-                 menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
-        menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
-        menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
-      )
+      sidebarMenu(.list=values$menu)
     } else {
       sidebarMenu()
     }
   })
+  
+  # output$rest_of_sidebar <- renderMenu({
+  #   if (isTRUE(values$rest_sidebar)){
+  #     sidebarMenu(
+  #       menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter")),
+  #       menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
+  #                menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
+  #                menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
+  #                 menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon")),
+  #                menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon"))),
+  #       menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
+  #                menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
+  #                menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon")),
+  #                menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
+  #                menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon")),
+  #                menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon"))),
+  #       menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
+  #                "Authors",
+  #                menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon")),
+  #                "Affiliations",
+  #                menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+  #                "Countries",
+  #                menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
+  #       ),
+  #       menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
+  #                "Documents",
+  #                menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon")),
+  #                "Cited References",
+  #                menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon")),
+  #                "Words",
+  #                menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
+  #       ),
+  #       menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
+  #                menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon"))),
+  #       menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
+  #                "Network Approach",
+  #                menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
+  #                menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
+  #                "Factorial Approach",
+  #                menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon"))),
+  #       menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
+  #                menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))),
+  #       menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
+  #                menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
+  #                menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))),
+  #       menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt")),
+  #       menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
+  #     )
+  #   } else {
+  #     sidebarMenu()
+  #   }
+  # })
   
   observeEvent(input$applyLoad, {
     updateTabItems(session, "sidebarmenu", "loadData")
@@ -213,6 +223,10 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$apiApply, {
     updateTabItems(session, "sidebarmenu", "gathData")
+  })
+  
+  observeEvent(values$missTags, {
+    updateTabItems(session, "sidebarmenu", "loadData")
   })
   
   ## Load Menu ----
@@ -536,6 +550,8 @@ To ensure the functionality of Biblioshiny,
   ### Missing Data in Metadata ----
   output$missingDataTable <- DT::renderDT({
     values$missingdf <- df <- missingData(values$M)$mandatoryTags
+    values$missTags <- df$tag[df$missing_pct>50]
+    values$menu <- menuList(values)
     
     names(df) <- c("Metadata", "Description", "Missing Counts", "Missing %", "Status")
     values$missingDataTable <- DT::datatable(df,escape = FALSE,rownames = FALSE, #extensions = c("Buttons"),
@@ -633,7 +649,7 @@ To ensure the functionality of Biblioshiny,
                      icon = icon("exclamation-sign", lib = "glyphicon")),
         actionButton(label="Save", inputId = "missingDataTable",
                      icon = icon("camera", lib = "glyphicon")),
-        modalButton("Close")),
+        modalButton(label="Close")),
     )
   }
   
@@ -641,11 +657,6 @@ To ensure the functionality of Biblioshiny,
     filename = paste("missingDataTable-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
     screenShot(values$missingDataTable, filename=filename, type="plotly")
   })
-  
-  # observeEvent(input$missingReport,{
-  #   filename = paste("missingDataTable-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-  #   screenShot(values$missingDataTable, filename=filename, type="plotly")
-  # })
   
   observeEvent(input$missingReport,{
     if (!is.null(values$missingDataTable)){

@@ -1970,13 +1970,13 @@ short2long <- function(df, myC){
 }
 
 dfLabel <- function(){
-  short <- c("Empty Report", "MainInfo",            "AnnualSciProd",       "AnnualCitPerYear",    "ThreeFieldsPlot",     "MostRelSources",      "MostLocCitSources",   "BradfordLaw",         "SourceLocImpact",    
+  short <- c("Empty Report", "MissingData","MainInfo",            "AnnualSciProd",       "AnnualCitPerYear",    "ThreeFieldsPlot",     "MostRelSources",      "MostLocCitSources",   "BradfordLaw",         "SourceLocImpact",    
              "SourceProdOverTime",  "MostRelAuthors",      "MostLocCitAuthors",   "AuthorProdOverTime",  "LotkaLaw",            "AuthorLocImpact",     "MostRelAffiliations", "AffOverTime",        
              "CorrAuthCountries",   "CountrySciProd",      "CountryProdOverTime", "MostCitCountries",    "MostGlobCitDocs",     "MostLocCitDocs",      "MostLocCitRefs",      "RPYS",               
              "MostFreqWords",       "WordCloud",           "TreeMap",             "WordFreqOverTime",        "TrendTopics",         "CouplingMap", "CoWordNet",           "ThematicMap",         "ThematicEvolution",  
              "TE_Period_1","TE_Period_2", "TE_Period_3","TE_Period_4","TE_Period_5",       "FactorialAnalysis",   "CoCitNet",            "Historiograph",       "CollabNet",           "CollabWorldMap")
   
-  long <- c("Empty Report", "Main Information", "Annual Scientific Production", "Annual Citation Per Year", "Three-Field Plot", "Most Relevant Sources","Most Local Cited Sources","Bradfords Law","Sources Local Impact",
+  long <- c("Empty Report", "Missing Data Table", "Main Information", "Annual Scientific Production", "Annual Citation Per Year", "Three-Field Plot", "Most Relevant Sources","Most Local Cited Sources","Bradfords Law","Sources Local Impact",
             "Sources Production over Time", "Most Relevant Authors","Most Local Cited Authors","Authors Production over Time", "Lotkas Law","Authors Local Impact","Most Relevant Affiliations","Affiliations Production over Time",
             "Corresponding Authors Countries","Countries Scientific Production","Countries Production over Time","Most Cited Countries", "Most Global Cited Documents","Most Local Cited Documents","Most Local Cited References","Reference Spectroscopy",
             "Most Frequent Words","WordCloud", "TreeMap", "Words Frequency over Time", "Trend Topics", "Clustering by Coupling","Co-occurence Network", "Thematic Map", "Thematic Evolution", 

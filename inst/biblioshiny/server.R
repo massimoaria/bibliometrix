@@ -629,6 +629,8 @@ To ensure the functionality of Biblioshiny,
       footer = tagList(
         actionButton(label="Advice", inputId = "missingMessage",
                      icon = icon("exclamation-sign", lib = "glyphicon")),
+        actionButton(label="Add to Report", inputId = "missingReport",
+                     icon = icon("exclamation-sign", lib = "glyphicon")),
         actionButton(label="Save", inputId = "missingDataTable",
                      icon = icon("camera", lib = "glyphicon")),
         modalButton("Close")),
@@ -638,6 +640,29 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$missingDataTable,{
     filename = paste("missingDataTable-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
     screenShot(values$missingDataTable, filename=filename, type="plotly")
+  })
+  
+  # observeEvent(input$missingReport,{
+  #   filename = paste("missingDataTable-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
+  #   screenShot(values$missingDataTable, filename=filename, type="plotly")
+  # })
+  
+  observeEvent(input$missingReport,{
+    if (!is.null(values$missingDataTable)){
+      sheetname <- "MissingData"
+      ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
+      if (length(ind)>0){
+        sheetname <- paste(sheetname,length(ind)+1,sep="")
+      } 
+      addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
+      #values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
+      values$fileMissingData <- screenSh(values$missingDataTable, zoom = 2, type="plotly")
+      values$list_file <- rbind(values$list_file, c(sheetname,values$fileMissingData,1))
+      popUp(title="Missing Data Table", type="success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type="error")
+    }
   })
   
   ## export functions ----

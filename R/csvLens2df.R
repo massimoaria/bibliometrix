@@ -25,6 +25,8 @@ csvLens2df <- function(file){
   # column re-labelling
   DATA <- relabelling(DATA)
   
+  DATA$TC <- as.numeric(DATA$TC)
+  
   # Authors' names cleaning (surname and initials)
   DATA$AF <- DATA$AU
   
@@ -95,6 +97,7 @@ relabelling <- function(DATA){
   label <- gsub("Document Type","DT",label)
   label <- gsub("Source","DB",label)
   label <- gsub("Lens ID","UT",label)
+  label <- gsub("Citing Works Count", "TC", label)
   names(DATA) <- label
   
   return(DATA)

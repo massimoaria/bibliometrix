@@ -52,7 +52,7 @@ To ensure the functionality of Biblioshiny,
   values$myChoices <- "Empty Report"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
-  values$missTags <- NULL
+  #values$missTags <- NULL
   
   ### setting values
   values$dpi <- 300
@@ -286,6 +286,7 @@ To ensure the functionality of Biblioshiny,
       values$Histfield = "NA"
       values$results = list("NA")
       values$rest_sidebar <- TRUE
+      values$menu <- menuList(values)
       #showModal(missingModal(session))
       return()
     }

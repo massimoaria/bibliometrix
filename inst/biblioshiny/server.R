@@ -52,7 +52,7 @@ To ensure the functionality of Biblioshiny,
   values$myChoices <- "Empty Report"
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
-  #values$missTags <- NULL
+  values$out <- NULL
   
   ### setting values
   values$dpi <- 300
@@ -286,6 +286,7 @@ To ensure the functionality of Biblioshiny,
       values$Histfield = "NA"
       values$results = list("NA")
       values$rest_sidebar <- TRUE
+      values$missTags <- NULL
       values$menu <- menuList(values)
       #showModal(missingModal(session))
       return()
@@ -602,9 +603,9 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$missingMessage,{
     tag <- values$missingdf$description[values$missingdf$status %in% c("Critical", "Completely missing")]
-    if (length(tag)>0){
-      text <- paste("Analyses that require the following information:<br><br>",paste("- ","<em>",tag,"</em>","<br>", collapse=""),
-                    "<br>cannot be performed!",collapse="")
+    if (length(values$out)>0){
+      text <- paste("The following analyses could not be performed: <br><br>",paste("- ","<em>",values$out,"</em>","<br>", collapse=""),
+                    "<br>These menu will be hidden in the Biblioshiny dashboard!",collapse="")
       type <- "warning"
     }else{
       text <- "Your metadata have no critical issues"
@@ -634,20 +635,28 @@ To ensure the functionality of Biblioshiny,
     )
   })
   
+  output$missingTitle <- renderUI({
+    ndocs <- nrow(values$M)
+    txt1 <- paste0("Completeness of bibliographic metadata - ", strong(ndocs)," documents from ", strong(firstup(values$M$DB[1])))
+    tagList(
+      div(
+        h3(HTML(txt1)),
+        style="text-align:center")
+    )
+  })
+  
   missingModal <- function(session) {
     ns <- session$ns
     modalDialog(
-      h3(strong(("Completeness of bibliographic metadata"))),
+      uiOutput("missingTitle"),
       DT::DTOutput(ns("missingDataTable")),
-      # br(),
-      # verbatimTextOutput("missingMessage"),
       size = "l",
       easyClose = TRUE,
       footer = tagList(
         actionButton(label="Advice", inputId = "missingMessage",
                      icon = icon("exclamation-sign", lib = "glyphicon")),
-        actionButton(label="Add to Report", inputId = "missingReport",
-                     icon = icon("exclamation-sign", lib = "glyphicon")),
+        actionButton(label="Report", inputId = "missingReport",
+                     icon = icon("plus", lib = "glyphicon")),
         actionButton(label="Save", inputId = "missingDataTable",
                      icon = icon("camera", lib = "glyphicon")),
         modalButton(label="Close")),

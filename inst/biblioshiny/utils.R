@@ -13,6 +13,14 @@ getFileNameExtension <- function (fn) {
   ext
 }
 
+#Initial to upper case
+firstup <- function(x) {
+  x <- tolower(x)
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
+
 # string preview (stopwords)
 strPreview <- function(string, sep=","){
   str1 <- unlist(strsplit(string, sep))
@@ -2127,6 +2135,9 @@ menuList <- function(values){
   if( sum(c("SCOPUS","ISI") %in% values$M$DB[1])>0) DB_CR <- TRUE
   if( sum(c("SCOPUS","ISI","OPENALEX","LENS") %in% values$M$DB[1])>0) DB_TC <- TRUE
   
+ # out <- list(TC,ISI,MLCS,AFF,MCC,DB_TC,DB_CR,CR)
+  out <- NULL
+  
   L <- list()
   
   L[[length(L)+1]] <- 
@@ -2150,7 +2161,7 @@ menuList <- function(values){
              menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
              if (isTRUE(TC)){
                menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon"))
-             },
+             }, 
              menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon")))
   
   AU <- 
@@ -2179,12 +2190,15 @@ menuList <- function(values){
              },
              if (isTRUE(AFF)){
                menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
                menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
                menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon"))
              },
              if (isTRUE(MCC)){
                menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
-               
              }
     )
   
@@ -2236,9 +2250,7 @@ menuList <- function(values){
   if (!"CR" %in% values$missTags){
     L[[length(L)+1]] <- 
       menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
-               if (isTRUE(CR)){
-                 menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon"))
-               },
+               menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
                if (isTRUE(DB_TC) & isTRUE(CR)){
                  menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))
                }
@@ -2256,6 +2268,21 @@ menuList <- function(values){
   L[[length(L)+1]] <- menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
   
   L[[length(L)+1]] <- menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
+  
+  if (!isTRUE(TC)){out <- c(out, "Average Citations per Year", "Sources' Local Impact", "Authors' Local Impact", 
+                            "Most Global Cited Documents")}
+  if (!isTRUE(MLCS)){out <- c(out, "Most Local Cited Sources")}
+  if (!isTRUE(ISI)){out <- c(out, "Most Local Cited Authors")}
+  if (!isTRUE(AFF)){out <- c(out, "Most Relevant Affiliations", "Affiliations' Production over Time", 
+                             "Corresponding Author's Countries", "Countries' Scientific Production", 
+                             "Countries' Production over Time", "Countries' Collaboration World Map")}
+  if (!isTRUE(MCC)){out <- c(out, "Most Cited Countries")}
+  if (!(isTRUE(DB_TC) & isTRUE(CR) & isTRUE(TC))){out <- c(out, "Most Local Cited Documents")}
+  if (!isTRUE(DB_CR)){out <- c(out, "Most Local Cited References", "References Spectroscopy")}
+  if (!isTRUE(CR)){out <- c(out, "Co-citation Network")}
+  if (!(isTRUE(DB_TC) & isTRUE(CR))){out <- c(out, "Historiograph")}
+  
+  values$out <- out
   
   return(L)
 }

@@ -840,7 +840,7 @@ historiograph <- function(input,values){
   #}
   
   #titlelabel <- input$titlelabel
-  values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
+  values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, remove.isolates=(input$hist.isolates=="yes"), labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
   values$histResults$histData$DOI<- paste0('<a href=\"https://doi.org/',values$histResults$histData$DOI,'\" target=\"_blank\">',values$histResults$histData$DOI,'</a>')
   values$histResults$histData <- values$histResults$histData %>% 
     left_join(

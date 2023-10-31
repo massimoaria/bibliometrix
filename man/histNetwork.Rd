@@ -4,7 +4,7 @@
 \alias{histNetwork}
 \title{Historical co-citation network}
 \usage{
-histNetwork(M, min.citations = 1, sep = ";", network = TRUE, verbose = TRUE)
+histNetwork(M, min.citations, sep = ";", network = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
@@ -12,8 +12,7 @@ histNetwork(M, min.citations = 1, sep = ";", network = TRUE, verbose = TRUE)
 manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex, Lens.org and Clarivate
 Analitics Web of Science file.}
 
-\item{min.citations}{is a positive integer. It sets the minimum number of citations 
-for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.}
+\item{min.citations}{DEPRECATED. New algorithm does not use this parameters. It will be remove in the next version of bibliometrix.}
 
 \item{sep}{is the field separator character. This character separates strings
 in CR column of the data frame. The default is \code{sep = ";"}.}
@@ -40,7 +39,7 @@ data frame.
 \dontrun{
 data(management, package = "bibliometrixData")
 
-histResults <- histNetwork(management, min.citations = 0, sep = ";")
+histResults <- histNetwork(management, sep = ";")
 }
 
 }

@@ -7,8 +7,7 @@
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 #'   manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex, Lens.org and Clarivate
 #'   Analitics Web of Science file.
-#' @param min.citations is a positive integer. It sets the minimum number of citations 
-#'   for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.
+#' @param min.citations DEPRECATED. New algorithm does not use this parameters. It will be remove in the next version of bibliometrix. 
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
 #' @param network is logical. If TRUE, fuction calculates and returns also the direct citation network. If FALSE,
@@ -27,7 +26,7 @@
 #' \dontrun{
 #' data(management, package = "bibliometrixData")
 #'
-#' histResults <- histNetwork(management, min.citations = 0, sep = ";")
+#' histResults <- histNetwork(management, sep = ";")
 #' }
 #'
 #' @seealso \code{\link{convert2df}} to import and convert a supported
@@ -38,8 +37,9 @@
 #'
 #' @export
 
-histNetwork<-function(M, min.citations = 1, sep = ";", network = TRUE, verbose = TRUE){
+histNetwork<-function(M, min.citations, sep = ";", network = TRUE, verbose = TRUE){
   
+  min.citations = 0
   db <- M$DB[1]
   if (!("DI" %in% names(M))){M$DI <- ""}else{M$DI[is.na(M$DI)] <- ""}
   if (!("CR" %in% names(M))){

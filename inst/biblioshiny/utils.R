@@ -832,7 +832,7 @@ CAmap <- function(input, values){
 
 historiograph <- function(input,values){
   
-  min.cit <- 1
+  min.cit <- 0
 
   #if (values$Histfield=="NA"){
     values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")

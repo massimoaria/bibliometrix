@@ -9,6 +9,7 @@ histPlot(
   n = 20,
   size = 5,
   labelsize = 5,
+  remove.isolates = TRUE,
   title_as_label = FALSE,
   label = "short",
   verbose = TRUE
@@ -29,7 +30,9 @@ is a network matrix obtained by the function \code{\link{histNetwork}}.}
 
 \item{size}{is an integer. It defines the point size of the vertices. Default value is 5.}
 
-\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}}
+\item{labelsize}{is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}.}
+
+\item{remove.isolates}{is logical. If TRUE isolates vertices are not plotted.}
 
 \item{title_as_label}{is a logical. DEPRECATED}
 

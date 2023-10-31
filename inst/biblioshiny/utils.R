@@ -13,6 +13,14 @@ getFileNameExtension <- function (fn) {
   ext
 }
 
+#Initial to upper case
+firstup <- function(x) {
+  x <- tolower(x)
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
+
 # string preview (stopwords)
 strPreview <- function(string, sep=","){
   str1 <- unlist(strsplit(string, sep))
@@ -256,7 +264,11 @@ ValueBoxes <- function(M){
   ## VB  6 - References
   CR <- trimws(gsub("\\s+|\\.|\\,"," ",unlist(strsplit(M$CR,";"))))
   CR <- CR[nchar(CR)>0 & !is.na(CR)]
-  df[6,] <- c("References",length(unique(CR)))
+  nCR <- length(unique(CR))
+  if (nCR==1){
+    nCR <- 0
+  }
+  df[6,] <- c("References",nCR)
   
   ## VB  7 - Documents
   df[7,] <- c("Documents", nrow(M))
@@ -820,7 +832,7 @@ CAmap <- function(input, values){
 
 historiograph <- function(input,values){
   
-  min.cit <- 1
+  min.cit <- 0
 
   #if (values$Histfield=="NA"){
     values$histResults <- histNetwork(values$M, min.citations=min.cit, sep = ";")
@@ -828,7 +840,7 @@ historiograph <- function(input,values){
   #}
   
   #titlelabel <- input$titlelabel
-  values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
+  values$histlog<- (values$histPlot <- histPlot(values$histResults, n=input$histNodes, size =input$histsize, remove.isolates=(input$hist.isolates=="yes"), labelsize = input$histlabelsize, label = input$titlelabel, verbose=FALSE))
   values$histResults$histData$DOI<- paste0('<a href=\"https://doi.org/',values$histResults$histData$DOI,'\" target=\"_blank\">',values$histResults$histData$DOI,'</a>')
   values$histResults$histData <- values$histResults$histData %>% 
     left_join(
@@ -1970,13 +1982,13 @@ short2long <- function(df, myC){
 }
 
 dfLabel <- function(){
-  short <- c("Empty Report", "MainInfo",            "AnnualSciProd",       "AnnualCitPerYear",    "ThreeFieldsPlot",     "MostRelSources",      "MostLocCitSources",   "BradfordLaw",         "SourceLocImpact",    
+  short <- c("Empty Report", "MissingData","MainInfo",            "AnnualSciProd",       "AnnualCitPerYear",    "ThreeFieldsPlot",     "MostRelSources",      "MostLocCitSources",   "BradfordLaw",         "SourceLocImpact",    
              "SourceProdOverTime",  "MostRelAuthors",      "MostLocCitAuthors",   "AuthorProdOverTime",  "LotkaLaw",            "AuthorLocImpact",     "MostRelAffiliations", "AffOverTime",        
              "CorrAuthCountries",   "CountrySciProd",      "CountryProdOverTime", "MostCitCountries",    "MostGlobCitDocs",     "MostLocCitDocs",      "MostLocCitRefs",      "RPYS",               
              "MostFreqWords",       "WordCloud",           "TreeMap",             "WordFreqOverTime",        "TrendTopics",         "CouplingMap", "CoWordNet",           "ThematicMap",         "ThematicEvolution",  
              "TE_Period_1","TE_Period_2", "TE_Period_3","TE_Period_4","TE_Period_5",       "FactorialAnalysis",   "CoCitNet",            "Historiograph",       "CollabNet",           "CollabWorldMap")
   
-  long <- c("Empty Report", "Main Information", "Annual Scientific Production", "Annual Citation Per Year", "Three-Field Plot", "Most Relevant Sources","Most Local Cited Sources","Bradfords Law","Sources Local Impact",
+  long <- c("Empty Report", "Missing Data Table", "Main Information", "Annual Scientific Production", "Annual Citation Per Year", "Three-Field Plot", "Most Relevant Sources","Most Local Cited Sources","Bradfords Law","Sources Local Impact",
             "Sources Production over Time", "Most Relevant Authors","Most Local Cited Authors","Authors Production over Time", "Lotkas Law","Authors Local Impact","Most Relevant Affiliations","Affiliations Production over Time",
             "Corresponding Authors Countries","Countries Scientific Production","Countries Production over Time","Most Cited Countries", "Most Global Cited Documents","Most Local Cited Documents","Most Local Cited References","Reference Spectroscopy",
             "Most Frequent Words","WordCloud", "TreeMap", "Words Frequency over Time", "Trend Topics", "Clustering by Coupling","Co-occurence Network", "Thematic Map", "Thematic Evolution", 
@@ -2108,4 +2120,169 @@ overlayPlotly <- function(VIS){
              'hoverCompareCartesian'
            ))
   return(p)
+}
+
+
+menuList <- function(values){
+  
+  TC <- ISI <- MLCS <- AFF <- MCC <- DB_TC <- DB_CR <- CR <- FALSE
+  if (!"TC" %in% values$missTags) TC <- TRUE
+  if ("ISI" %in% values$M$DB[1] & !"CR" %in% values$missTags) MLCS <- TRUE
+  if ("ISI" %in% values$M$DB[1]) ISI <- TRUE
+  if (!"C1" %in% values$missTags) AFF <- TRUE
+  if (!"CR" %in% values$missTags) CR <- TRUE
+  if (!"TC" %in% values$missTags & !"C1" %in% values$missTags) MCC <- TRUE
+  if( sum(c("SCOPUS","ISI") %in% values$M$DB[1])>0) DB_CR <- TRUE
+  if( sum(c("SCOPUS","ISI","OPENALEX","LENS") %in% values$M$DB[1])>0) DB_TC <- TRUE
+  
+ # out <- list(TC,ISI,MLCS,AFF,MCC,DB_TC,DB_CR,CR)
+  out <- NULL
+  
+  L <- list()
+  
+  L[[length(L)+1]] <- 
+    menuItem("Filters",tabName = "filters",icon = fa_i(name ="filter"))
+  
+  L[[length(L)+1]] <-
+    menuItem("Overview",tabName = "overview",icon=fa_i(name = "table"),startExpanded = FALSE,
+             menuSubItem("Main Information",tabName="mainInfo",icon = icon("chevron-right",lib = "glyphicon")),
+             menuSubItem("Annual Scientific Production",tabName = "annualScPr",icon = icon("chevron-right",lib = "glyphicon")),
+             if (isTRUE(TC)){
+               menuSubItem("Average Citations per Year",tabName = "averageCitPerYear",icon = icon("chevron-right",lib = "glyphicon"))
+             },
+             menuSubItem("Three-Field Plot", tabName ="threeFieldPlot",icon = icon("chevron-right",lib = "glyphicon")))
+  
+  L[[length(L)+1]] <- 
+    menuItem("Sources", tabName = "sources",icon = fa_i(name ="book"), startExpanded = FALSE,
+             menuSubItem("Most Relevant Sources", tabName = "relevantSources",icon = icon("chevron-right",lib = "glyphicon")),
+             if (isTRUE(MLCS)){
+               menuSubItem("Most Local Cited Sources",tabName = "localCitedSources",icon = icon("chevron-right",lib = "glyphicon"))
+             },
+             menuSubItem("Bradford's Law",tabName = "bradford",icon = icon("chevron-right",lib = "glyphicon")),
+             if (isTRUE(TC)){
+               menuSubItem("Sources' Local Impact",tabName = "sourceImpact",icon = icon("chevron-right",lib = "glyphicon"))
+             }, 
+             menuSubItem("Sources' Production over Time",tabName = "sourceDynamics",icon = icon("chevron-right",lib = "glyphicon")))
+  
+  AU <- 
+    menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
+             "Authors",
+             menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
+             if (isTRUE(ISI)){
+               menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),
+             menuSubItem("Lotka's Law",tabName = "lotka",icon = icon("chevron-right", lib = "glyphicon")),
+             if (isTRUE(TC)){
+               menuSubItem("Authors' Local Impact",tabName = "authorImpact",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
+               "Affiliations"
+             },
+             if (isTRUE(AFF)){
+               menuSubItem("Most Relevant Affiliations",tabName = "mostRelAffiliations",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
+               menuSubItem("Affiliations' Production over Time",tabName = "AffOverTime",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
+               "Countries"
+             },
+             if (isTRUE(AFF)){
+               menuSubItem("Corresponding Author's Countries",tabName = "correspAuthorCountry",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
+               menuSubItem("Countries' Scientific Production",tabName = "countryScientProd",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(AFF)){
+               menuSubItem("Countries' Production over Time",tabName = "COOverTime",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(MCC)){
+               menuSubItem("Most Cited Countries",tabName = "mostCitedCountries",icon = icon("chevron-right", lib = "glyphicon"))
+             }
+    )
+  
+  L[[length(L)+1]] <- AU
+  
+  DOC <- 
+    menuItem("Documents", tabName = "documents",icon = fa_i(name="layer-group"), startExpanded = FALSE,
+             if (isTRUE(TC) | isTRUE(DB_TC)){
+               "Documents"
+             },
+             if (isTRUE(TC)){
+               menuSubItem("Most Global Cited Documents",tabName = "mostGlobalCitDoc",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(DB_TC) & isTRUE(CR) & isTRUE(TC)){
+               menuSubItem("Most Local Cited Documents",tabName = "mostLocalCitDoc",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(DB_CR)){
+               "Cited References"
+             },
+             if (isTRUE(DB_CR)){
+               menuSubItem("Most Local Cited References",tabName = "mostLocalCitRef",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             if (isTRUE(DB_CR)){
+               menuSubItem("References Spectroscopy",tabName = "ReferenceSpect",icon = icon("chevron-right", lib = "glyphicon"))
+             },
+             "Words",
+             menuSubItem("Most Frequent Words",tabName = "mostFreqWords",icon = icon("chevron-right", lib = "glyphicon")),
+             menuSubItem("WordCloud", tabName = "wcloud",icon = icon("chevron-right", lib = "glyphicon")),
+             menuSubItem("TreeMap",tabName = "treemap",icon = icon("chevron-right", lib = "glyphicon")),
+             menuSubItem("Words' Frequency over Time",tabName = "wordDynamics",icon = icon("chevron-right", lib = "glyphicon")),
+             menuSubItem("Trend Topics",tabName = "trendTopic",icon = icon("chevron-right", lib = "glyphicon"))
+    )
+  
+  L[[length(L)+1]] <- DOC
+  
+  L[[length(L)+1]] <- 
+    menuItem("Clustering", tabName = "clustering",icon = fa_i(name ="spinner"),startExpanded = FALSE,
+             menuSubItem("Clustering by Coupling",tabName = "coupling",icon = icon("chevron-right", lib = "glyphicon")))
+  
+  L[[length(L)+1]] <- 
+    menuItem("Conceptual Structure",tabName = "concepStructure",icon = fa_i(name="spell-check"),startExpanded = FALSE,
+             "Network Approach",
+             menuSubItem("Co-occurence Network",tabName = "coOccurenceNetwork",icon = icon("chevron-right", lib = "glyphicon") ),
+             menuSubItem("Thematic Map",tabName = "thematicMap", icon = icon("chevron-right", lib = "glyphicon")),
+             menuSubItem("Thematic Evolution",tabName = "thematicEvolution", icon = icon("chevron-right", lib = "glyphicon")),
+             "Factorial Approach",
+             menuSubItem("Factorial Analysis", tabName = "factorialAnalysis", icon = icon("chevron-right", lib = "glyphicon")))
+  
+  if (!"CR" %in% values$missTags){
+    L[[length(L)+1]] <- 
+      menuItem("Intellectual Structure",tabName = "intStruct",icon = fa_i(name="gem"), startExpanded = FALSE,
+               menuSubItem("Co-citation Network",tabName = "coCitationNetwork", icon = icon("chevron-right", lib = "glyphicon")),
+               if (isTRUE(DB_TC) & isTRUE(CR)){
+                 menuSubItem("Historiograph",tabName = "historiograph", icon = icon("chevron-right", lib = "glyphicon"))
+               }
+      )
+  } 
+  
+  L[[length(L)+1]] <- 
+    menuItem("Social Structure",tabName = "socialStruct", icon = fa_i("users"),startExpanded = FALSE,
+             menuSubItem("Collaboration Network",tabName = "collabNetwork",icon = icon("chevron-right", lib = "glyphicon")),
+             if (isTRUE(AFF)){
+               menuSubItem("Countries' Collaboration World Map", tabName = "collabWorldMap",icon = icon("chevron-right", lib = "glyphicon"))
+             }
+    )
+  
+  L[[length(L)+1]] <- menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
+  
+  L[[length(L)+1]] <- menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
+  
+  if (!isTRUE(TC)){out <- c(out, "Average Citations per Year", "Sources' Local Impact", "Authors' Local Impact", 
+                            "Most Global Cited Documents")}
+  if (!isTRUE(MLCS)){out <- c(out, "Most Local Cited Sources")}
+  if (!isTRUE(ISI)){out <- c(out, "Most Local Cited Authors")}
+  if (!isTRUE(AFF)){out <- c(out, "Most Relevant Affiliations", "Affiliations' Production over Time", 
+                             "Corresponding Author's Countries", "Countries' Scientific Production", 
+                             "Countries' Production over Time", "Countries' Collaboration World Map")}
+  if (!isTRUE(MCC)){out <- c(out, "Most Cited Countries")}
+  if (!(isTRUE(DB_TC) & isTRUE(CR) & isTRUE(TC))){out <- c(out, "Most Local Cited Documents")}
+  if (!isTRUE(DB_CR)){out <- c(out, "Most Local Cited References", "References Spectroscopy")}
+  if (!isTRUE(CR)){out <- c(out, "Co-citation Network")}
+  if (!(isTRUE(DB_TC) & isTRUE(CR))){out <- c(out, "Historiograph")}
+  
+  values$out <- out
+  
+  return(L)
 }

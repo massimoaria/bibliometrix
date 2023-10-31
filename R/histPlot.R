@@ -14,7 +14,8 @@
 #' is a network matrix obtained by the function \code{\link{histNetwork}}. 
 #' @param n is integer. It defines the number of vertices to plot.
 #' @param size is an integer. It defines the point size of the vertices. Default value is 5.
-#' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}
+#' @param labelsize is an integer. It indicates the label size in the plot. Default is \code{labelsize=5}.
+#' @param remove.isolates is logical. If TRUE isolates vertices are not plotted.
 #' @param title_as_label is a logical. DEPRECATED
 #' @param label is a character. It indicates which label type to use as node id in the historiograph. It can be \code{label=c("short", "title", "keywords", "keywordsplus")}. 
 #' Default is \code{label = "short"}.
@@ -36,7 +37,7 @@
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
 #' 
 #' @export
-histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = FALSE, label = "short", verbose = TRUE){
+histPlot<-function(histResults, n=20, size = 5, labelsize = 5, remove.isolates = TRUE, title_as_label = FALSE, label = "short", verbose = TRUE){
   
   params <- list(n = n,
                  size = size,
@@ -125,7 +126,8 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, title_as_label = 
   
   E(bsk.network)$color <- "slategray1"
   
-  bsk.network <- delete.isolates(bsk.network)
+  if (isTRUE(remove.isolates)) bsk.network <- delete.isolates(bsk.network)
+  
   dg <- decompose.graph(bsk.network)
 
   layout_m <- as.data.frame(layout.fruchterman.reingold(bsk.network))

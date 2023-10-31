@@ -5,10 +5,9 @@
 #'
 #' @param M is a bibliographic data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
-#'   manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex and Clarivate
+#'   manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex, Lens.org and Clarivate
 #'   Analitics Web of Science file.
-#' @param min.citations is a positive integer. It sets the minimum number of citations 
-#'   for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.
+#' @param min.citations DEPRECATED. New algorithm does not use this parameters. It will be remove in the next version of bibliometrix. 
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
 #' @param network is logical. If TRUE, fuction calculates and returns also the direct citation network. If FALSE,
@@ -27,7 +26,7 @@
 #' \dontrun{
 #' data(management, package = "bibliometrixData")
 #'
-#' histResults <- histNetwork(management, min.citations = 0, sep = ";")
+#' histResults <- histNetwork(management, sep = ";")
 #' }
 #'
 #' @seealso \code{\link{convert2df}} to import and convert a supported
@@ -38,8 +37,9 @@
 #'
 #' @export
 
-histNetwork<-function(M, min.citations = 1, sep = ";", network = TRUE, verbose = TRUE){
+histNetwork<-function(M, min.citations, sep = ";", network = TRUE, verbose = TRUE){
   
+  min.citations = 0
   db <- M$DB[1]
   if (!("DI" %in% names(M))){M$DI <- ""}else{M$DI[is.na(M$DI)] <- ""}
   if (!("CR" %in% names(M))){
@@ -59,6 +59,9 @@ histNetwork<-function(M, min.citations = 1, sep = ";", network = TRUE, verbose =
          },
          OPENALEX={
            results <- openalex(M=M, min.citations=min.citations, sep=sep, network=network, verbose=verbose)
+         },
+         LENS={
+           results <- lens(M=M, min.citations=min.citations, sep=sep, network=network, verbose=verbose)
          },
          {cat("\nDatabase not compatible with direct citation analysis\n")})
   
@@ -332,6 +335,62 @@ openalex <- function(M, min.citations=min.citations, sep=sep, network=network, v
       histData = histData,
       M = M %>% 
         left_join(LCS, by = "id_oa") %>% 
+        replace_na(list(LCS = 0)),
+      LCS = M$LCS
+    )
+}
+
+lens <- function(M, min.citations=min.citations, sep=sep, network=network, verbose=verbose){
+  
+  M$CR[is.na(M$CR)] <- "none"
+  ids <- M$UT
+  CR <- lapply(strsplit(M$CR, ";"), trimws)
+  CR <- data.frame(UT = rep(M$UT,lengths(CR)), ref = unlist(CR)) %>% 
+    dplyr::filter(.data$ref %in% ids)
+  
+  LCS <- CR %>% 
+    count(UT = .data$ref) %>% 
+    rename(LCS = .data$n)
+  
+  histData <- M %>% 
+    left_join(LCS, by = c("UT")) %>% 
+    mutate(LCS = ifelse(is.na(.data$LCS),0,.data$LCS),
+           DE = .data$ID) %>% 
+    rename(LABEL = .data$SR,
+           GCS = .data$TC) %>% 
+    select(c("LABEL","TI","DE","ID","DI","PY","LCS","GCS")) %>% 
+    dplyr::filter(.data$GCS>=min.citations)
+  
+  names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
+  
+  if (isTRUE(network)){
+    WLCR <- CR %>%
+      mutate(value = 1) %>% 
+      pivot_wider(names_from = "ref", values_from = "value", values_fill = 0) 
+    
+    SRrow <- WLCR %>% select(.data$UT) %>% 
+      left_join(M %>% 
+                  select(.data$UT, .data$SR), 
+                by="UT")
+    
+    SR_col <- data.frame(UT = colnames(WLCR)[-1]) %>% 
+      left_join(M %>% 
+                  select(.data$UT, .data$SR), 
+                by="UT")
+    
+    WLCR <- as.matrix(WLCR %>% select(-1))
+    row.names(WLCR) <- SRrow$SR
+    colnames(WLCR) <- SR_col$SR
+  } else {
+    WLCR = NULL
+  }
+  
+  results <-
+    list(
+      NetMatrix = WLCR,
+      histData = histData,
+      M = M %>% 
+        left_join(LCS, by = "UT") %>% 
         replace_na(list(LCS = 0)),
       LCS = M$LCS
     )

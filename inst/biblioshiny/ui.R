@@ -2878,7 +2878,7 @@ body <- dashboardBody(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
                                      shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))),
-                            tabPanel("Overlay", 
+                            tabPanel("Density", 
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "cocOverlay", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
@@ -3690,7 +3690,7 @@ body <- dashboardBody(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
                                      shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))),       
-                            tabPanel("Overlay", 
+                            tabPanel("Density", 
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitOverlay", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(
@@ -3995,7 +3995,7 @@ body <- dashboardBody(
                 tabsetPanel(type = "tabs",
                             tabPanel("Network", 
                                      shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))),
-                            tabPanel("Overlay", 
+                            tabPanel("Density", 
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "colOverlay", height = "75vh"))),
                             tabPanel("Table", 
                                      shinycssloaders::withSpinner(DT::DTOutput(

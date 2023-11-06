@@ -2,7 +2,10 @@ bibliometrix v4.1.4 (Release date: )
 
 Changes:
 * Start to adding support to OpenAlex data
-* Improvements in historiograph
+* Improvements in historiograph: 
+   - Improved Scopus algorithm to match local citations
+   - Added OpenAlex algorithm to match local citations
+   - Added Lens.org algorithm to match local citations
 * Improved pajek export in biblioshiny
 * Computational speed improvements
 

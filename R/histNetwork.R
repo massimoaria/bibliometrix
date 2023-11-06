@@ -195,39 +195,143 @@ wos <- function(M, min.citations, sep, network, verbose){
   return(results)
 }
 
+# scopus <- function(M, min.citations, sep, network, verbose){
+#   
+#   if (isTRUE(verbose)) {
+#     cat("\nSCOPUS DB: Searching local citations (LCS) by document titles (TI) and DOIs...\n")
+#   }
+#   
+#   if (!("SR_FULL" %in% names(M))) {
+#     M = metaTagExtraction(M, Field = "SR")
+#   }
+#   
+#   M$nCITING <- 1:nrow(M)
+#   papers <- M$nCITING[M$TC >= min.citations]
+#   
+#   TIpost <-
+#     paste(gsub("[[:punct:]]", "", M$TI[papers]), " ", M$PY[papers], " ", sep = "")
+#   
+#   CR <- gsub("[[:punct:]]", "", M$CR)
+#   n <- nchar(CR)
+#   n[is.na(n)] <- 2
+#   n <- n + 1
+#   nCum <- c(1, cumsum(n[-length(n)]))
+#   CR <- paste(CR, collapse = " ")
+#   
+#   #L <- str_locate_all(CR, TIpost)
+#   L <- stringi::stri_locate_all_regex(CR,TIpost, omit_no_match = TRUE)
+#   
+#   LCS <- lengths(L) / 2
+#   
+#   M$LCS <- 0
+#   M$LCS[papers] <- LCS
+#   
+# 
+#   ### HistData
+#   histData <- M %>%
+#     select(.data$SR_FULL, .data$TI,.data$DE,.data$ID,.data$DI, .data$PY, .data$LCS, .data$TC) %>%
+#     rename(
+#       Paper = .data$SR_FULL,
+#       Title = .data$TI,
+#       Author_Keywords = .data$DE,
+#       KeywordsPlus = .data$ID,
+#       DOI = .data$DI,
+#       Year = .data$PY,
+#       GCS = .data$TC
+#     ) %>%
+#     arrange(.data$Year) %>%
+#     dplyr::filter(.data$GCS>=min.citations) %>% 
+#     as.data.frame()
+#   
+#   
+#   if (isTRUE(network)) {
+#     ## Network matrix
+#     df <- lapply(seq_along(L), function(i) {
+#       l <-
+#         data.frame(
+#           ref = L[[i]],
+#           paper = rep(papers[i], length(L[[i]][, 1]))
+#         )
+#     })
+#     df <- (do.call(rbind, df))
+#     
+#     A <- outer(df$ref.start, nCum, "-")
+#     A[A < 0] <- NA
+#     df$CITINGn <- unlist(apply(A, 1, which.min))
+#     df$CITING <- M$SR[df$CITINGn]
+#     df$CITED <- M$SR[df$paper]
+#     df <- df %>% 
+#       dplyr::filter(.data$CITING %in% histData$Paper)
+#     
+#     NetMatrix <-
+#       (as_adjacency_matrix(graph_from_data_frame(df[, c(6, 5)], directed = T)))
+#   } else{
+#     NetMatrix = NULL
+#   }
+#   
+#   if (isTRUE(verbose)) {
+#     cat("\nFound",
+#         length(M$LCS[M$LCS > 0]),
+#         "documents with no empty Local Citations (LCS)\n")
+#   }
+#   
+#   results <-
+#     list(
+#       NetMatrix = NetMatrix,
+#       histData = histData,
+#       M = M,
+#       LCS = M$LCS
+#     )
+# }
+
+# New algorithm for Scopus
+# Local citation matching is based on First Author, Year and PP
 scopus <- function(M, min.citations, sep, network, verbose){
-  
-  if (isTRUE(verbose)) {
-    cat("\nSCOPUS DB: Searching local citations (LCS) by document titles (TI) and DOIs...\n")
-  }
   
   if (!("SR_FULL" %in% names(M))) {
     M = metaTagExtraction(M, Field = "SR")
   }
   
-  M$nCITING <- 1:nrow(M)
-  papers <- M$nCITING[M$TC >= min.citations]
+  CR <- strsplit(M$CR,";")
   
-  TIpost <-
-    paste(gsub("[[:punct:]]", "", M$TI[papers]), " ", M$PY[papers], " ", sep = "")
+  CR <- data.frame(SR_citing=rep(M$SR,lengths(CR)), ref=trimws(unlist(CR)))
   
-  CR <- gsub("[[:punct:]]", "", M$CR)
-  n <- nchar(CR)
-  n[is.na(n)] <- 2
-  n <- n + 1
-  nCum <- c(1, cumsum(n[-length(n)]))
-  CR <- paste(CR, collapse = " ")
+  CR$PY <- as.numeric(gsub(".*\\((\\d{4})\\).*", "\\1", CR$ref))
   
-  #L <- str_locate_all(CR, TIpost)
-  L <- stringi::stri_locate_all_regex(CR,TIpost, omit_no_match = TRUE)
+  CR$AU <- trimws(gsub("\\.", "", gsub("\\. ", "", gsub("^(.*?),.*$", "\\1", CR$ref))))
   
-  LCS <- lengths(L) / 2
+  CR$PP <- gsub(".*PP\\. ([0-9-]+).*", "\\1", CR$ref)
   
-  M$LCS <- 0
-  M$LCS[papers] <- LCS
+  CR <- CR %>% 
+    dplyr::filter(!is.na(.data$PY), (substr(CR$PP,1,1) %in% 0:9))
   
-
-  ### HistData
+  M_merge <- M %>% 
+    select(.data$AU,.data$PY,.data$Page.start, .data$Page.end, .data$PP, .data$SR) %>% 
+    mutate(AU = gsub(";.*$", "", .data$AU),
+           Page.start = as.numeric(.data$Page.start),
+           Page.end = as.numeric(.data$Page.end),
+           PP = ifelse(!is.na(.data$Page.start), paste0(.data$Page.start,"-",.data$Page.end), NA),
+           Included = TRUE
+    ) %>% 
+    rename(SR_cited = .data$SR)
+  
+  CR <- CR %>% 
+    left_join(M_merge, join_by("PY", "AU"), relationship = "many-to-many") %>% 
+    dplyr::filter(!is.na(.data$Included)) %>% 
+    group_by(.data$PY,.data$AU) %>% 
+    mutate(toRemove = ifelse(!is.na(.data$PP.y) & .data$PP.x!=.data$PP.y, TRUE,FALSE)) %>% # to remove FALSE POSITIVE
+    ungroup() %>% 
+    dplyr::filter(.data$toRemove != TRUE)
+  
+  LCS <- CR %>% 
+    group_by(SR_cited) %>% 
+    count(name="LCS")
+  
+  
+  M <- M %>% 
+    left_join(LCS, by=c("SR" = "SR_cited")) %>% 
+    mutate(LCS = ifelse(is.na(.data$LCS),0,.data$LCS))
+  
   histData <- M %>%
     select(.data$SR_FULL, .data$TI,.data$DE,.data$ID,.data$DI, .data$PY, .data$LCS, .data$TC) %>%
     rename(
@@ -240,33 +344,30 @@ scopus <- function(M, min.citations, sep, network, verbose){
       GCS = .data$TC
     ) %>%
     arrange(.data$Year) %>%
-    dplyr::filter(.data$GCS>=min.citations) %>% 
     as.data.frame()
   
+  names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
   
-  if (isTRUE(network)) {
-    ## Network matrix
-    df <- lapply(seq_along(L), function(i) {
-      l <-
-        data.frame(
-          ref = L[[i]],
-          paper = rep(papers[i], length(L[[i]][, 1]))
-        )
-    })
-    df <- (do.call(rbind, df))
+  if (isTRUE(network)){
     
-    A <- outer(df$ref.start, nCum, "-")
-    A[A < 0] <- NA
-    df$CITINGn <- unlist(apply(A, 1, which.min))
-    df$CITING <- M$SR[df$CITINGn]
-    df$CITED <- M$SR[df$paper]
-    df <- df %>% 
-      dplyr::filter(.data$CITING %in% histData$Paper)
+    CRadd <- data.frame(SR_citing=unique(M$SR), SR_cited=unique(M$SR), value=1)
     
-    NetMatrix <-
-      (as_adjacency_matrix(graph_from_data_frame(df[, c(6, 5)], directed = T)))
-  } else{
-    NetMatrix = NULL
+    WLCR <- CR %>%
+      select(SR_citing, SR_cited) %>% 
+      mutate(value = 1) %>% 
+      bind_rows(CRadd) %>% 
+      distinct() %>% 
+      pivot_wider(names_from = "SR_cited", values_from = "value", values_fill = 0) %>% 
+      dplyr::filter(.data$SR_citing %in% CRadd$SR_cited)
+    
+    SRrow <- WLCR$SR_citing
+    SRcol <- colnames(WLCR)[-1]
+    
+    WLCR <- as.matrix(WLCR %>% select(-1))
+    row.names(WLCR) <- SRrow
+    colnames(WLCR) <- SRcol
+  } else {
+    WLCR = NULL
   }
   
   if (isTRUE(verbose)) {
@@ -277,7 +378,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
   
   results <-
     list(
-      NetMatrix = NetMatrix,
+      NetMatrix = WLCR,
       histData = histData,
       M = M,
       LCS = M$LCS
@@ -308,9 +409,13 @@ openalex <- function(M, min.citations=min.citations, sep=sep, network=network, v
   names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
   
   if (isTRUE(network)){
+    CRadd <- data.frame(id_oa=unique(M$id_oa), ref=unique(M$id_oa), value=1)
     WLCR <- CR %>%
       mutate(value = 1) %>% 
-      pivot_wider(names_from = "ref", values_from = "value", values_fill = 0) 
+      bind_rows(CRadd) %>%
+      distinct() %>% 
+      pivot_wider(names_from = "ref", values_from = "value", values_fill = 0) %>% 
+      dplyr::filter(.data$id_oa %in% CRadd$ref)
     
     SRrow <- WLCR %>% select(.data$id_oa) %>% 
       left_join(M %>% 
@@ -325,6 +430,7 @@ openalex <- function(M, min.citations=min.citations, sep=sep, network=network, v
     WLCR <- as.matrix(WLCR %>% select(-1))
     row.names(WLCR) <- SRrow$SR
     colnames(WLCR) <- SR_col$SR
+    WLCR <- WLCR[colnames(WLCR),colnames(WLCR)]
   } else {
     WLCR = NULL
   }
@@ -364,9 +470,14 @@ lens <- function(M, min.citations=min.citations, sep=sep, network=network, verbo
   names(histData) <- c("Paper","Title","Author_Keywords","KeywordsPlus", "DOI","Year","LCS","GCS")
   
   if (isTRUE(network)){
+    
+    CRadd <- data.frame(UT=unique(M$UT), ref=unique(M$UT), value=1)
     WLCR <- CR %>%
       mutate(value = 1) %>% 
-      pivot_wider(names_from = "ref", values_from = "value", values_fill = 0) 
+      bind_rows(CRadd) %>%
+      distinct() %>% 
+      pivot_wider(names_from = "ref", values_from = "value", values_fill = 0) %>% 
+      dplyr::filter(.data$UT %in% CRadd$ref)
     
     SRrow <- WLCR %>% select(.data$UT) %>% 
       left_join(M %>% 
@@ -381,6 +492,8 @@ lens <- function(M, min.citations=min.citations, sep=sep, network=network, verbo
     WLCR <- as.matrix(WLCR %>% select(-1))
     row.names(WLCR) <- SRrow$SR
     colnames(WLCR) <- SR_col$SR
+    WLCR <- WLCR[colnames(WLCR),colnames(WLCR)]
+
   } else {
     WLCR = NULL
   }

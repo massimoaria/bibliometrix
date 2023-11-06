@@ -58,8 +58,9 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, remove.isolates =
   ## selecting the first n vertices or all if smaller
   s=sort(LCS,decreasing = TRUE)[min(n, length(LCS))]
   ind=which(LCS>=s)
-  NET=NET[ind,ind]
-  LCS=LCS[ind]
+  #NET=NET[a,names(ind)]
+  NET <- NET[names(ind),names(ind)]
+  LCS <- LCS[ind]
   
   # Create igraph object
   bsk.network <- graph_from_adjacency_matrix(NET, mode = c("directed"),weighted = NULL)

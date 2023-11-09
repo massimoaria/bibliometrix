@@ -129,10 +129,10 @@ notifications <- function(){
   if (isTRUE(is_online())){
     ## add check to avoid blocked app when internet connection is to slow
     envir <- environment()
-    setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
-    on.exit({
-      setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-    })
+    # setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
+    # on.exit({
+    #   setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+    # })
     tryCatch({
       eval(expr=suppressWarnings(notifOnline <- read.csv(location, header=TRUE, sep=",")), envir = envir)
     }, error = function(ex) {notifOnLine <- NULL}
@@ -196,19 +196,23 @@ notifications <- function(){
   return(notifTot)
 }
 
-is_online <- function(){
-  ## add check to avoid blocked app when internet connection is to slow
-  envir <- environment()
-  setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
-  on.exit({
-    setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-  })
-  tryCatch({
-    eval(expr=suppressWarnings(resp <- curl::has_internet()), envir = envir)
-  }, error = function(ex) {resp <- FALSE}
-  )
-  return(resp)
+is_online <- function(timeout=3){
+  RCurl::url.exists("www.bibliometrixs.org", timeout=timeout)
 }
+
+# is_online <- function(){
+#   ## add check to avoid blocked app when internet connection is to slow
+#   envir <- environment()
+#   setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
+#   on.exit({
+#     setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+#   })
+#   tryCatch({
+#     eval(expr=suppressWarnings(resp <- curl::has_internet()), envir = envir)
+#   }, error = function(ex) {resp <- FALSE}
+#   )
+#   return(resp)
+# }
 
 initial <- function(values){
   values$results <- list("NA")

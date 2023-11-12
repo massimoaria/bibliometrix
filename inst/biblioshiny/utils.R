@@ -73,11 +73,14 @@ plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=
 
 freqPlot <- function(xx,x,y, textLaby,textLabx, title, values){
   
-  
   xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
   yl <- c(1,1+length(unique(xx[,y]))*0.125)
   
   Text <- paste(textLaby,": ",xx[,y],"\n",textLabx, ": ",xx[,x])
+  
+  if (title=="Most Local Cited References" & values$M$DB[1]=="SCOPUS"){
+    xx[,y] <- gsub("^(.+?)\\.,.*\\((\\d{4})\\)$", paste0("\\1","., ", "\\2"), xx[,y])
+  }
   
   g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
     geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +

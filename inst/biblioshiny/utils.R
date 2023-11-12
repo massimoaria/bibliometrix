@@ -73,11 +73,14 @@ plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=
 
 freqPlot <- function(xx,x,y, textLaby,textLabx, title, values){
   
-  
   xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
   yl <- c(1,1+length(unique(xx[,y]))*0.125)
   
   Text <- paste(textLaby,": ",xx[,y],"\n",textLabx, ": ",xx[,x])
+  
+  if (title=="Most Local Cited References" & values$M$DB[1]=="SCOPUS"){
+    xx[,y] <- gsub("^(.+?)\\.,.*\\((\\d{4})\\)$", paste0("\\1","., ", "\\2"), xx[,y])
+  }
   
   g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
     geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +
@@ -129,10 +132,10 @@ notifications <- function(){
   if (isTRUE(is_online())){
     ## add check to avoid blocked app when internet connection is to slow
     envir <- environment()
-    setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
-    on.exit({
-      setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-    })
+    # setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
+    # on.exit({
+    #   setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+    # })
     tryCatch({
       eval(expr=suppressWarnings(notifOnline <- read.csv(location, header=TRUE, sep=",")), envir = envir)
     }, error = function(ex) {notifOnLine <- NULL}
@@ -196,19 +199,23 @@ notifications <- function(){
   return(notifTot)
 }
 
-is_online <- function(){
-  ## add check to avoid blocked app when internet connection is to slow
-  envir <- environment()
-  setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
-  on.exit({
-    setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-  })
-  tryCatch({
-    eval(expr=suppressWarnings(resp <- curl::has_internet()), envir = envir)
-  }, error = function(ex) {resp <- FALSE}
-  )
-  return(resp)
+is_online <- function(timeout=3){
+  RCurl::url.exists("www.bibliometrixs.org", timeout=timeout)
 }
+
+# is_online <- function(){
+#   ## add check to avoid blocked app when internet connection is to slow
+#   envir <- environment()
+#   setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
+#   on.exit({
+#     setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+#   })
+#   tryCatch({
+#     eval(expr=suppressWarnings(resp <- curl::has_internet()), envir = envir)
+#   }, error = function(ex) {resp <- FALSE}
+#   )
+#   return(resp)
+# }
 
 initial <- function(values){
   values$results <- list("NA")

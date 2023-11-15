@@ -20,6 +20,9 @@ libraries <- function(){
     if (!require(RCurl, quietly=TRUE)){install.packages("RCurl")}
     if (!require(openxlsx, quietly=TRUE)){install.packages("openxlsx"); require(openxlsx, quietly=TRUE)}
     if (!require(shinyWidgets, quietly=TRUE)){install.packages("shinyWidgets"); require(shinyWidgets, quietly=TRUE)}
+    
+    ## Currently "webshot2" 0.1.1 generates empty screenshots on windows 10 for graphics created with visnetwork.
+    ## This workaround installs the previous version 0.1.0 to temporarily fix the problem.
     if (!require(webshot2,quietly=TRUE)){
       install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz", repos = NULL, type = "source")
     }else{
@@ -30,11 +33,14 @@ libraries <- function(){
         install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz", repos = NULL, type = "source")
       }
     }
+    ##
+    
     if (!(require(chromote, quietly=TRUE))){install.packages("chromote"); require(chromote, quietly=TRUE)}
     
     ### workaround for webshot2 on shinyapps.io
     if (!(require(curl, quietly=TRUE))){install.packages("curl"); require(curl, quietly=TRUE)}
     if (!(require(pagedown, quietly=TRUE))){install.packages("pagedown"); require(pagedown, quietly=TRUE)}
+    ##
     require(Matrix, quietly = TRUE)
     require(dimensionsR, quietly = TRUE)
     require(pubmedR, quietly = TRUE)

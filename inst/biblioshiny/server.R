@@ -30,7 +30,7 @@ server <- function(input, output,session){
       HTML("Chrome or a Chromium-based browser is not installed on your computer.<br>
 If you do not have either of these browsers installed, Biblioshiny will be unable to export graphs.<br>
 To ensure the functionality of Biblioshiny,
-           please download Chrome by <a href='https://www.google.com/intl/it_it/chrome/' target='_blank' > <b>clicking here</b></a>."),
+           please download Chrome by <a href='https://www.google.com/chrome/' target='_blank' > <b>clicking here</b></a>."),
       footer = modalButton("Dismiss"),
       easyClose = TRUE
     ))

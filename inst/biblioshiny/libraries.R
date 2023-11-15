@@ -20,7 +20,16 @@ libraries <- function(){
     if (!require(RCurl, quietly=TRUE)){install.packages("RCurl")}
     if (!require(openxlsx, quietly=TRUE)){install.packages("openxlsx"); require(openxlsx, quietly=TRUE)}
     if (!require(shinyWidgets, quietly=TRUE)){install.packages("shinyWidgets"); require(shinyWidgets, quietly=TRUE)}
-    if (!require(webshot2,quietly=TRUE)){install.packages("webshot2")}
+    if (!require(webshot2,quietly=TRUE)){
+      install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz", repos = NULL, type = "source")
+    }else{
+      pkgs <- installed.packages()[, "Version"]
+      vers <- pkgs["webshot2"]
+      if (vers!="0.1.0"){
+        detach("package:webshot2", unload = TRUE, force=TRUE)
+        install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz", repos = NULL, type = "source")
+      }
+    }
     if (!(require(chromote, quietly=TRUE))){install.packages("chromote"); require(chromote, quietly=TRUE)}
     
     ### workaround for webshot2 on shinyapps.io

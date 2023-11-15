@@ -1915,13 +1915,15 @@ screenSh <- function(p, zoom = 2, type="vis"){
 
 screenShot <- function(p, filename, type){
   switch(Sys.info()[['sysname']],
-         Windows= {home <- Sys.getenv('R_USER')},
+         Windows= {home <- Sys.getenv('R_USER')
+         home <- gsub("/Documents","",home)
+         },
          Linux  = {home <- Sys.getenv('HOME')},
          Darwin = {home <- Sys.getenv('HOME')})
   
   # setting up the main directory
-  filename <- paste0(file.path(home,"downloads/"),filename)
-  
+  #filename <- paste0(file.path(home,"downloads/"),filename)
+  filename <- paste0(file.path(home,"downloads"),"/",filename)
   plot2png(p, filename, zoom = 2, type=type, tmpdir = tempdir())
   
 }

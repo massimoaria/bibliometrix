@@ -3372,7 +3372,7 @@ To ensure the functionality of Biblioshiny,
   output$wordTable <- DT::renderDT({
     WordCloud()
     
-    DT::datatable(values$Words, rownames = FALSE,
+    DT::datatable(values$Words, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),
@@ -3398,7 +3398,7 @@ To ensure the functionality of Biblioshiny,
   output$treeTable <- DT::renderDT({
     WordsT <- TreeMap()
     
-    DT::datatable(values$WordsT, rownames = FALSE,
+    DT::datatable(values$WordsT, rownames = FALSE, extensions = c("Buttons"),
                   options = list(pageLength = 10, dom = 'Bfrtip',
                                  buttons = list('pageLength',
                                                 list(extend = 'copy'),

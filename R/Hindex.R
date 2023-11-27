@@ -85,7 +85,7 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
   
   H <- df %>% 
     group_by(.data$AUs) %>% 
-    summarize(#Element = .data$AUs[1],
+    reframe(#Element = .data$AUs[1],
       h_index = h_calc(.data$TC),
       g_index = g_calc(.data$TC),
       PY_start = min(.data$PY),

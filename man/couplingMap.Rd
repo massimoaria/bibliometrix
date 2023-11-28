@@ -39,7 +39,7 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 It can be \code{impact.measure = c("local", "global")}.\\
 With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while 
-using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
+using \code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
 
 \item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
 

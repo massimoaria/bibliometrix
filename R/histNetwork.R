@@ -324,7 +324,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
     dplyr::filter(.data$toRemove != TRUE)
   
   LCS <- CR %>% 
-    group_by(SR_cited) %>% 
+    group_by(.data$SR_cited) %>% 
     count(name="LCS")
   
   
@@ -353,7 +353,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
     CRadd <- data.frame(SR_citing=unique(M$SR), SR_cited=unique(M$SR), value=1)
     
     WLCR <- CR %>%
-      select(SR_citing, SR_cited) %>% 
+      select(.data$SR_citing, .data$SR_cited) %>% 
       mutate(value = 1) %>% 
       bind_rows(CRadd) %>% 
       distinct() %>% 

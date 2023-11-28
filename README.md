@@ -120,23 +120,23 @@ Load `bibliometrix`
 
 ``` r
 library('bibliometrix')
-#> To cite bibliometrix in publications, please use:
+#> Please note that our software is open source and available for use, distributed under the MIT license.
+#> When it is used in a publication, we ask that authors properly cite the following reference:
 #> 
 #> Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, 
-#>                                  Journal of Informetrics, 11(4), pp 959-975, Elsevier.
-#>                         
+#>                         Journal of Informetrics, 11(4), pp 959-975, Elsevier.
 #> 
-#> https://www.bibliometrix.org
-#> 
+#> Failure to properly cite the software is considered a violation of the license.
 #>                         
 #> For information and bug reports:
+#>                         - Take a look at https://www.bibliometrix.org
 #>                         - Send an email to info@bibliometrix.org   
 #>                         - Write a post on https://github.com/massimoaria/bibliometrix/issues
 #>                         
-#> Help us to keep Bibliometrix free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)
+#> Help us to keep Bibliometrix and Biblioshiny free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)
 #> 
 #>                         
-#> To start with the shiny web-interface, please digit:
+#> To start with the Biblioshiny app, please digit:
 #> biblioshiny()
 ```
 
@@ -197,23 +197,22 @@ The argument *M* is a bibliographic data frame obtained by
 com <- missingData(M)
 
 com$mandatoryTags
-#>    tag                description missing_counts missing_pct     status
-#> 1   AU                     Author              0        0.00  Excellent
-#> 2   DT              Document Type              0        0.00  Excellent
-#> 3   SO                    Journal              0        0.00  Excellent
-#> 4   LA                   Language              0        0.00  Excellent
-#> 5   NR Number of Cited References              0        0.00  Excellent
-#> 6   WC         Science Categories              0        0.00  Excellent
-#> 7   TI                      Title              0        0.00  Excellent
-#> 8   TC             Total Citation              0        0.00  Excellent
-#> 9   CR           Cited References              2        0.22       Good
-#> 10  AB                   Abstract              7        0.78       Good
-#> 11  PY           Publication Year              9        1.00       Good
-#> 12  RP       Corresponding Author             10        1.11       Good
-#> 13  C1                Affiliation             21        2.34       Good
-#> 14  DI                        DOI             36        4.01       Good
-#> 15  DE                   Keywords             79        8.80       Good
-#> 16  ID              Keywords Plus             97       10.80 Acceptable
+#>    tag          description missing_counts missing_pct     status
+#> 1   AU               Author              0        0.00  Excellent
+#> 2   DT        Document Type              0        0.00  Excellent
+#> 3   SO              Journal              0        0.00  Excellent
+#> 4   LA             Language              0        0.00  Excellent
+#> 5   WC   Science Categories              0        0.00  Excellent
+#> 6   TI                Title              0        0.00  Excellent
+#> 7   TC       Total Citation              0        0.00  Excellent
+#> 8   CR     Cited References              2        0.22       Good
+#> 9   AB             Abstract              7        0.78       Good
+#> 10  PY     Publication Year              9        1.00       Good
+#> 11  RP Corresponding Author             10        1.11       Good
+#> 12  C1          Affiliation             21        2.34       Good
+#> 13  DI                  DOI             36        4.01       Good
+#> 14  DE             Keywords             79        8.80       Good
+#> 15  ID        Keywords Plus             97       10.80 Acceptable
 ```
 
 **missingData** returns a list containing two data frame. The first one,

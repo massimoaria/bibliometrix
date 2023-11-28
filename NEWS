@@ -1,6 +1,7 @@
-bibliometrix v4.1.4 (Release date: )
+bibliometrix v4.1.4 (Release date: 2023-11-29)
 
 Changes:
+* Biblioshiny: After the data quality check, the menus of the analyses that cannot be performed are hidden
 * Start to adding support to OpenAlex data
 * Improvements in historiograph: 
    - Improved Scopus algorithm to match local citations
@@ -8,6 +9,8 @@ Changes:
    - Added Lens.org algorithm to match local citations
 * Improved pajek export in biblioshiny
 * Computational speed improvements
+* Solved issue with igraph 1.6.0 release canddate 
+* Solved issue with Matrix package
 
 bibliometrix v4.1.2 (Release date: 2023-03-06)
 

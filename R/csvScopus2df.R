@@ -29,6 +29,10 @@ csvScopus2df <- function(file){
   DATA$AU=gsub("\\.", "", DATA$AU)
   DATA$AU=gsub(",", ";", DATA$AU)
   
+  ### store raw affiliation format to extract link among authors and affiliations
+  DATA$C1raw <- DATA$C1
+  ###
+  
   # Affiliation
   if (!("C1" %in% names(DATA))){DATA$C1 <- NA}else{
     DATA$C1 <- unlist(lapply(strsplit(DATA$C1,";"), function(l){

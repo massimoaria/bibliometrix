@@ -18,7 +18,7 @@
 #' @param impact.measure is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 #' It can be \code{impact.measure = c("local", "global")}.\\
 #' With \code{impact.measure = "local"}, \link{normalizeCitationScore} calculates elements impact using the Normalized Local Citation Score while 
-#' using code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact. 
+#' using \code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact. 
 #' @return a dataframe.
 #'
 #' 

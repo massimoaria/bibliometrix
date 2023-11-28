@@ -64,6 +64,10 @@ Please, take a look at the vignettes:
   df <- cbind(df1,df2)
   rm(df1,df2)
   
+  ### store raw affiliation format to extract link among authors and affiliations
+  df$C1raw <- df$C1
+  ###
+  
   df$DB <- "ISI"
   
   # Authors

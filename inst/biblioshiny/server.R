@@ -5187,7 +5187,7 @@ To ensure the functionality of Biblioshiny,
       graph2Pajek(values$colnet$graph, filename=myfile)
       # print(files)
       # print(dir())
-      zip:zip(file,files)
+      zip::zip(file,files)
     },
     contentType = "zip"
   )

@@ -200,7 +200,7 @@ notifications <- function(){
 }
 
 is_online <- function(timeout=3){
-  RCurl::url.exists("www.bibliometrixs.org", timeout=timeout)
+  RCurl::url.exists("www.bibliometrix.org", timeout=timeout)
 }
 
 # is_online <- function(){

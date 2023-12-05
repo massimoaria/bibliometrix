@@ -1,7 +1,7 @@
 ### packages for biblishiny()
 libraries <- function(){
   if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix)}
-  #if (!(require(badger, quietly=TRUE))){install.packages("badger"); require(badger, quietly=TRUE)} 
+  if (!(require(zip, quietly=TRUE))){install.packages("zip")} 
   suppressPackageStartupMessages({
     if (!(require(shiny, quietly=TRUE))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
     if (!(require(igraph, quietly=TRUE))){install.packages("igraph"); require(igraph, quietly=TRUE)} 

@@ -233,7 +233,7 @@ To ensure the functionality of Biblioshiny,
           switch(ext,
                  ###  WoS ZIP Files
                  zip = {
-                   D <-  unzip(inFile$datapath)
+                   D <-  utils::unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(D,
@@ -255,7 +255,7 @@ To ensure the functionality of Biblioshiny,
           switch(ext,
                  ###  Scopus ZIP Files
                  zip = {
-                   D <- unzip(inFile$datapath)
+                   D <- utils::unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(D,
@@ -288,7 +288,7 @@ To ensure the functionality of Biblioshiny,
           switch(ext,
                  ###  Lens.org ZIP Files
                  zip = {
-                   D <-  unzip(inFile$datapath)
+                   D <-  utils::unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(D,
@@ -310,7 +310,7 @@ To ensure the functionality of Biblioshiny,
           switch(ext,
                  ###  Cochrane ZIP Files
                  zip = {
-                   D <- unzip(inFile$datapath)
+                   D <- utils::unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(D,
@@ -332,7 +332,7 @@ To ensure the functionality of Biblioshiny,
           switch(ext,
                  ###  Pubmed ZIP Files
                  zip = {
-                   D <- unzip(inFile$datapath)
+                   D <- utils::unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <- convert2df(D,
@@ -354,7 +354,7 @@ To ensure the functionality of Biblioshiny,
           switch(ext,
                  ###  Dimensions ZIP Files
                  zip = {
-                   D = unzip(inFile$datapath)
+                   D = utils::unzip(inFile$datapath)
                    withProgress(message = 'Conversion in progress',
                                 value = 0, {
                                   M <-
@@ -3996,7 +3996,7 @@ To ensure the functionality of Biblioshiny,
       png(filename = files[2],  height = values$h, width = values$h*2, units="in", res = values$dpi)
           plot(values$CS$graph_dendogram)
       dev.off()
-      zip(file,files)
+      zip::zip(file,files)
     },
     contentType = "zip"
   )
@@ -4408,7 +4408,7 @@ To ensure the functionality of Biblioshiny,
       #   download = TRUE,
       #   server_dir = NULL
       # )
-      zip(file,files)
+      zip::zip(file,files)
     },
     contentType = "zip"
   )

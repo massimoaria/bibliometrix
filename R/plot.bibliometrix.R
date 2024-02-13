@@ -183,6 +183,7 @@ plot.bibliometrix<-function(x, ...){
   row.names(Table2)=Table2$Year}
   
   xcoord <- c(max(Table2$Year)-0.02-diff(range(Table2$Year))*0.15, max(Table2$Year)-0.02)+1
+  Table2$MeanTCperYear[is.nan(Table2$MeanTCperYear)] <- 0
   ycoord <- c(min(Table2$MeanTCperYear),min(Table2$MeanTCperYear)+diff(range(Table2$MeanTCperYear))*0.15)
   
   g=ggplot(Table2, aes(x = .data$Year, y = .data$MeanTCperYear)) +

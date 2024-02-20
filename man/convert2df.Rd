@@ -16,11 +16,12 @@ c)\tab 'dimensions' \tab Digital Science Dimensions (in csv '.csv' or excel '.xl
 d)\tab 'lens' \tab Lens.org (in csv '.csv');\cr
 e)\tab 'pubmed' \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
 f)\tab 'dimensions' \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package;\cr
-g)\tab 'openalex' \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
+g)\tab 'openalex' \tab OpenAlex .csv file;\cr
+h)\tab 'openalex_api' \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
 
 \item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{dbsource = c('cochrane','dimensions','generic','isi','openalex', 'pubmed','scopus','wos', 'lens')} . Default is \code{dbsource = "isi"}.}
 
-\item{format}{is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed')}. Default is \code{format = "plaintext"}.}
+\item{format}{is a character indicating the SCOPUS, Clarivate Analytics WoS, and other databases export file format. \code{format} can be \code{c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed')}. Default is \code{format = "plaintext"}.}
 }
 \value{
 a data frame with cases corresponding to articles and variables to Field Tags in the original export file.

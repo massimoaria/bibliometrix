@@ -254,7 +254,8 @@ body <- dashboardBody(
                                    "Web of Science (WoS/WoK)" = "isi",
                                    "Scopus" = "scopus",
                                    "Dimensions" = "dimensions",
-                                   "OpenAlex (via openalexR)" = "openalex",
+                                   "Openalex" ="openalex",
+                                   "OpenAlex API (via openalexR)" = "openalex_api",
                                    "Lens.org" = "lens",
                                    "PubMed" = "pubmed",
                                    "Cochrane Library" = "cochrane"

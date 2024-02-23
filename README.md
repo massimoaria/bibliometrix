@@ -148,10 +148,11 @@ The export file can be read and converted using by R using the function
 **convert2df**(*file*, *dbsource*, *format*)
 
 The argument *file* is a character vector containing the name of export
-files downloaded from SCOPUS, Clarivate Analytics WOS, Digital Science
-Dimensions, PubMed or Cochrane CDSR website. *file* can also contains
-the name of a json/xlm object download using Digital Science Dimenions
-or PubMed APIs (through the packages *dimensionsR* and *pubmedR*.
+files downloaded from SCOPUS, Clarivate Analytics WoS, OpenAlex, Digital
+Science Dimensions, PubMed or Cochrane CDSR website. *file* can also
+contains the name of a json/xlm object download using OpenAlex, Digital
+Science Dimenions or PubMed APIs (through the packages *openalexR*,
+*dimensionsR* and *pubmedR*.
 
 es. file \<- c(“file1.txt”,“file2.txt”, …)
 
@@ -262,9 +263,9 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #>  Sources (Journals, Books, etc)        281 
 #>  Documents                             898 
 #>  Annual Growth Rate %                  0 
-#>  Document Average Age                  8.19 
+#>  Document Average Age                  9.19 
 #>  Average citations per doc             37.12 
-#>  Average citations per year per doc    3.926 
+#>  Average citations per year per doc    3.454 
 #>  References                            43935 
 #>  
 #> DOCUMENT TYPES                     
@@ -349,16 +350,16 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #> Top manuscripts per citations
 #> 
 #>                                  Paper                                     DOI   TC TCperYear   NTC
-#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    180.08 15.64
-#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     93.78 17.17
-#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     33.35  3.76
-#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     44.71  9.82
-#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     31.61  5.67
-#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     16.83  2.66
-#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     22.06  3.48
-#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     14.00  2.15
-#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.95  1.81
-#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     13.68  2.40
+#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    166.23 15.64
+#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     84.40 17.17
+#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     31.76  3.76
+#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     41.73  9.82
+#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     29.95  5.67
+#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     16.12  2.66
+#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     20.76  3.48
+#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     13.44  2.15
+#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.75  1.81
+#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     13.09  2.40
 #> 
 #> 
 #> Corresponding Author's Countries

@@ -195,95 +195,6 @@ wos <- function(M, min.citations, sep, network, verbose){
   return(results)
 }
 
-# scopus <- function(M, min.citations, sep, network, verbose){
-#   
-#   if (isTRUE(verbose)) {
-#     cat("\nSCOPUS DB: Searching local citations (LCS) by document titles (TI) and DOIs...\n")
-#   }
-#   
-#   if (!("SR_FULL" %in% names(M))) {
-#     M = metaTagExtraction(M, Field = "SR")
-#   }
-#   
-#   M$nCITING <- 1:nrow(M)
-#   papers <- M$nCITING[M$TC >= min.citations]
-#   
-#   TIpost <-
-#     paste(gsub("[[:punct:]]", "", M$TI[papers]), " ", M$PY[papers], " ", sep = "")
-#   
-#   CR <- gsub("[[:punct:]]", "", M$CR)
-#   n <- nchar(CR)
-#   n[is.na(n)] <- 2
-#   n <- n + 1
-#   nCum <- c(1, cumsum(n[-length(n)]))
-#   CR <- paste(CR, collapse = " ")
-#   
-#   #L <- str_locate_all(CR, TIpost)
-#   L <- stringi::stri_locate_all_regex(CR,TIpost, omit_no_match = TRUE)
-#   
-#   LCS <- lengths(L) / 2
-#   
-#   M$LCS <- 0
-#   M$LCS[papers] <- LCS
-#   
-# 
-#   ### HistData
-#   histData <- M %>%
-#     select(.data$SR_FULL, .data$TI,.data$DE,.data$ID,.data$DI, .data$PY, .data$LCS, .data$TC) %>%
-#     rename(
-#       Paper = .data$SR_FULL,
-#       Title = .data$TI,
-#       Author_Keywords = .data$DE,
-#       KeywordsPlus = .data$ID,
-#       DOI = .data$DI,
-#       Year = .data$PY,
-#       GCS = .data$TC
-#     ) %>%
-#     arrange(.data$Year) %>%
-#     dplyr::filter(.data$GCS>=min.citations) %>% 
-#     as.data.frame()
-#   
-#   
-#   if (isTRUE(network)) {
-#     ## Network matrix
-#     df <- lapply(seq_along(L), function(i) {
-#       l <-
-#         data.frame(
-#           ref = L[[i]],
-#           paper = rep(papers[i], length(L[[i]][, 1]))
-#         )
-#     })
-#     df <- (do.call(rbind, df))
-#     
-#     A <- outer(df$ref.start, nCum, "-")
-#     A[A < 0] <- NA
-#     df$CITINGn <- unlist(apply(A, 1, which.min))
-#     df$CITING <- M$SR[df$CITINGn]
-#     df$CITED <- M$SR[df$paper]
-#     df <- df %>% 
-#       dplyr::filter(.data$CITING %in% histData$Paper)
-#     
-#     NetMatrix <-
-#       (as_adjacency_matrix(graph_from_data_frame(df[, c(6, 5)], directed = T)))
-#   } else{
-#     NetMatrix = NULL
-#   }
-#   
-#   if (isTRUE(verbose)) {
-#     cat("\nFound",
-#         length(M$LCS[M$LCS > 0]),
-#         "documents with no empty Local Citations (LCS)\n")
-#   }
-#   
-#   results <-
-#     list(
-#       NetMatrix = NetMatrix,
-#       histData = histData,
-#       M = M,
-#       LCS = M$LCS
-#     )
-# }
-
 # New algorithm for Scopus
 # Local citation matching is based on First Author, Year and PP
 scopus <- function(M, min.citations, sep, network, verbose){
@@ -387,7 +298,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
 
 openalex <- function(M, min.citations=min.citations, sep=sep, network=network, verbose=verbose){
   
-  M$CR[is.na(M$CR)] <- "none"
+  M$CR[is.na(M$CR) | M$CR==""] <- "none"
   ids <- M$id_oa
   CR <- strsplit(M$CR, ";")
   CR <- data.frame(id_oa = rep(M$id_oa,lengths(CR)), ref = unlist(CR)) %>% 
@@ -420,7 +331,7 @@ openalex <- function(M, min.citations=min.citations, sep=sep, network=network, v
     SRrow <- WLCR %>% select(.data$id_oa) %>% 
       left_join(M %>% 
                   select(.data$id_oa, .data$SR), 
-                by="id_oa")
+                by="id_oa") 
     
     SR_col <- data.frame(id_oa = colnames(WLCR)[-1]) %>% 
       left_join(M %>% 

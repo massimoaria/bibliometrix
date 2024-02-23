@@ -281,7 +281,15 @@ To ensure the functionality of Biblioshiny,
                                 })
                  })
         },
-        openalex = {
+        openalex={
+          withProgress(message = 'Conversion in progress',
+                         value = 0, {
+                           M <- convert2df(inFile$datapath,
+                                           dbsource = input$dbsource,
+                                           format = "csv")
+                         })
+        },
+        openalex_api = {
           M <- smart_load(inFile$datapath)
         },
         lens = {

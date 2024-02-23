@@ -12,9 +12,11 @@
 #' d)\tab 'lens' \tab Lens.org (in csv '.csv');\cr
 #' e)\tab 'pubmed' \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
 #' f)\tab 'dimensions' \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package;\cr
-#' g)\tab 'openalex' \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}
+#' g)\tab 'openalex' \tab OpenAlex .csv file;\cr
+#' h)\tab 'openalex_api' \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}
 #' @param dbsource is a character indicating the bibliographic database. \code{dbsource} can be \code{dbsource = c('cochrane','dimensions','generic','isi','openalex', 'pubmed','scopus','wos', 'lens')} . Default is \code{dbsource = "isi"}.
-#' @param format is a character indicating the format of the SCOPUS and Clarivate Analytics WoS export file. \code{format} can be \code{c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed')}. Default is \code{format = "plaintext"}.
+#' @param format is a character indicating the SCOPUS, Clarivate Analytics WoS, and other databases export file format. \code{format} can be \code{c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed')}. Default is \code{format = "plaintext"}.
+#' @param remove.duplicates is logical. If TRUE, the function will remove duplicated items checking by DOI and database ID.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
 #' 
 #' I.e We have three files downlaod from Web of Science in plaintext format, file will be:
@@ -57,10 +59,10 @@
 #' 
 #' @export
 
-convert2df<-function(file,dbsource="wos",format="plaintext"){
+convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=TRUE){
 
   allowed_formats <- c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed') 
-  allowed_db <- c('cochrane','dimensions','generic','isi','openalex', 'pubmed','scopus','wos', 'lens')
+  allowed_db <- c('cochrane','dimensions','generic','isi','openalex', 'openalex_api','pubmed','scopus','wos', 'lens')
   
   cat("\nConverting your",dbsource,"collection into a bibliographic dataframe\n\n")
   if (length(setdiff(dbsource,allowed_db))>0){
@@ -147,7 +149,10 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
              })
       
     },
-    openalex = {
+    openalex={
+      M <- csvOA2df(file)
+    },
+    openalex_api = {
       if (!"bibliometrixDB" %in% class(file)){
         M <- openalexR::oa2bibliometrix(file)
       } else {
@@ -168,11 +173,11 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
     M$CR <- trim.leading(trimES(gsub("\\[,||\\[||\\]|| \\.\\. || \\. ","",M$CR)))  # remove foreign characters from CR (i.e. Chinese, Russian characters)
   }
   
-  if (dbsource!="cochrane"){M$AU=gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
+  if (dbsource!="cochrane"){M$AU <- gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
   
   cat("Done!\n\n")
   
-  if (!(dbsource %in% c("pubmed", "lens", "openalex"))) {
+  if (!(dbsource %in% c("pubmed", "lens", "openalex_api"))) {
     ## AU_UN field creation
     if ("C1" %in% names(M)) {
       cat("\nGenerating affiliation field tag AU_UN from C1:  ")
@@ -204,10 +209,37 @@ convert2df<-function(file,dbsource="wos",format="plaintext"){
   }
   
   ### SR field creation
+  if (isTRUE(remove.duplicates)){
+    switch(dbsource,
+           isi={
+             id_field <- "UT"
+           },
+           scopus={
+             id_field <- "UT"
+           },
+           openalex={
+             id_field <- "id_oa"
+           },
+           openalex_api={
+             id_field <- "id_oa"
+           },
+           dimneisons={
+             id_field <- "UT"
+           },
+           pubmed={
+             id_field <- "PMID"
+           },
+           lens={
+             id_field <- "UT"
+           },
+           {
+             id_field <- "TI"
+           })
+    d <- duplicated(M[id_field]) 
+    if (sum(d)>0) cat("\nRemoved ",sum(d),"duplicated documents\n")
+    M <- M[!d,]
+    }
   suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
-  d <- duplicated(M$SR)
-  if (sum(d)>0) cat("\nRemoved ",sum(d),"duplicated documents\n")
-  M <- M[!d,]
   row.names(M) <- M$SR
   
   ### bibliometrix>DB class

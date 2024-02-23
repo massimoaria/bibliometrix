@@ -54,12 +54,13 @@ csvLens2df <- function(file){
 
   # Iso Source Titles
   DATA$SO[DATA$SO==""] <- DATA$Publisher[DATA$SO==""] 
-  DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
-  DATA$J9 <- gsub("\\.","",DATA$JI)
+  # DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
+  # DATA$J9 <- gsub("\\.","",DATA$JI)
+  DATA$JI <- DATA$J9 <- DATA$SO
   DATA$ID <- DATA$DE
   DI <- DATA$DI
   URL <- DATA$URL
-  DATA <- data.frame(lapply(DATA,toUpper))
+  DATA <- data.frame(lapply(DATA,toupper))
   DATA$DI <- DI
   DATA$URL <- URL
   DATA$AU_CO <- "NA"

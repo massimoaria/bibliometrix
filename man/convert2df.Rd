@@ -4,7 +4,12 @@
 \alias{convert2df}
 \title{Import and Convert bibliographic export files and API objects.}
 \usage{
-convert2df(file, dbsource = "wos", format = "plaintext")
+convert2df(
+  file,
+  dbsource = "wos",
+  format = "plaintext",
+  remove.duplicates = TRUE
+)
 }
 \arguments{
 \item{file}{a character array containing a sequence of filenames coming from WoS, Scopus, Dimensions, Lens.org, and Pubmed. Alternatively, \code{file} can be 
@@ -22,6 +27,8 @@ h)\tab 'openalex_api' \tab a data frame object returned by openalexR package, co
 \item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{dbsource = c('cochrane','dimensions','generic','isi','openalex', 'pubmed','scopus','wos', 'lens')} . Default is \code{dbsource = "isi"}.}
 
 \item{format}{is a character indicating the SCOPUS, Clarivate Analytics WoS, and other databases export file format. \code{format} can be \code{c('api', 'bibtex', 'csv', 'endnote','excel','plaintext', 'pubmed')}. Default is \code{format = "plaintext"}.}
+
+\item{remove.duplicates}{is logical. If TRUE, the function will remove duplicated items checking by DOI and database ID.}
 }
 \value{
 a data frame with cases corresponding to articles and variables to Field Tags in the original export file.

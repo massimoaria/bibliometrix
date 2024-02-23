@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr"))
+utils::globalVariables(c("all_of", "corr", "DI", "id_oa","RP","UN","AU_ID"))
 
 csvOA2df <- function(file){
   options(readr.num_columns = 0)
@@ -49,24 +49,24 @@ csvOA2df <- function(file){
   UN <- strsplit(DATA$C1,";")
   corresp <- strsplit(DATA$authorships_is_corresponding,";")
   df_UN <- data.frame(UN=unlist(UN), id_oa=rep(DATA$id_oa,lengths(UN))) %>% 
-    group_by(.data$id_oa) %>% 
+    group_by(id_oa) %>% 
     mutate(n=row_number())
   df_COR <- data.frame(corr=unlist(corresp), id_oa=rep(DATA$id_oa,lengths(corresp))) %>% 
-    group_by(.data$id_oa) %>% 
+    group_by(id_oa) %>% 
     mutate(n=row_number())
   df_UN <- df_UN %>% 
     left_join(df_COR, by=(c("id_oa","n"))) 
   AU <- strsplit(DATA$AU,";")
   AU_df <- data.frame(RP = unlist(AU), AU_ID=unlist(strsplit(DATA$AU_ID,";")), id_oa=rep(DATA$id_oa,lengths(AU))) %>% 
-    group_by(.data$id_oa) %>% 
+    group_by(id_oa) %>% 
     mutate(n=row_number()) %>% 
     left_join(df_UN %>% select("UN","id_oa", "corr", "n"),
               by = c("id_oa","n")) %>% 
     dplyr::filter(corr == "true") %>% 
-    mutate(RP = paste(.data$RP,.data$UN, sep=", ")) %>% 
+    mutate(RP = paste(RP,UN, sep=", ")) %>% 
     ungroup() %>% 
     select("RP", "AU_ID") %>% 
-    distinct(.data$AU_ID, .keep_all = TRUE)
+    distinct(AU_ID, .keep_all = TRUE)
   DATA <- DATA %>% 
     left_join(AU_df, by = c("corresponding_author_ids" = "AU_ID"))
     
@@ -78,7 +78,9 @@ csvOA2df <- function(file){
   label <- names(ind)[ind==FALSE & !is.na(ind)]
 
   DATA <- DATA %>% 
-    mutate(across(all_of(label), toupper))
+    mutate(across(all_of(label), toupper),
+           DI = gsub("https://doi.org/","",DI),
+           DI = ifelse(DI == "null",NA,DI)) 
   
   return(DATA)
 }

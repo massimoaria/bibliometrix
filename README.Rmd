@@ -145,7 +145,7 @@ The export file can be read and converted using by R using the function *convert
 
 **convert2df**(*file*, *dbsource*, *format*)
 
-The argument *file* is a character vector containing the name of export files downloaded from SCOPUS, Clarivate Analytics WOS, Digital Science Dimensions, PubMed or Cochrane CDSR website. *file* can also contains the name of a json/xlm object download using  Digital Science Dimenions or PubMed APIs (through the packages *dimensionsR* and *pubmedR*.
+The argument *file* is a character vector containing the name of export files downloaded from SCOPUS, Clarivate Analytics WoS, OpenAlex, Digital Science Dimensions, PubMed or Cochrane CDSR website. *file* can also contains the name of a json/xlm object download using OpenAlex, Digital Science Dimenions or PubMed APIs (through the packages *openalexR*, *dimensionsR* and *pubmedR*.
 
 es. file <- c("file1.txt","file2.txt", ...)
 

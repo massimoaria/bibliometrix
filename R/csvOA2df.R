@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr", "DI", "id_oa","RP","UN","AU_ID"))
+utils::globalVariables(c("all_of", "corr", "DI", "id_oa","RP","UN","AU_ID","corresponding_author_ids"))
 
 csvOA2df <- function(file){
   options(readr.num_columns = 0)
@@ -46,6 +46,8 @@ csvOA2df <- function(file){
   DATA$DB <- "OPENALEX"
   
   ## corresponding author
+  DATA <- DATA %>% 
+    mutate(AU1_ID = gsub(";.*", "", corresponding_author_ids))
   UN <- strsplit(DATA$C1,";")
   corresp <- strsplit(DATA$authorships_is_corresponding,";")
   df_UN <- data.frame(UN=unlist(UN), id_oa=rep(DATA$id_oa,lengths(UN))) %>% 
@@ -57,7 +59,16 @@ csvOA2df <- function(file){
   df_UN <- df_UN %>% 
     left_join(df_COR, by=(c("id_oa","n"))) 
   AU <- strsplit(DATA$AU,";")
-  AU_df <- data.frame(RP = unlist(AU), AU_ID=unlist(strsplit(DATA$AU_ID,";")), id_oa=rep(DATA$id_oa,lengths(AU))) %>% 
+  AU_ID <- strsplit(DATA$AU_ID,";")
+  AU_df <- data.frame(RP = unlist(AU), id_oa=rep(DATA$id_oa,lengths(AU))) %>% 
+    group_by(id_oa) %>% 
+    mutate(n=row_number())
+  AU_ID_df <- data.frame(AU_ID=unlist(AU_ID), id_oa=rep(DATA$id_oa,lengths(AU_ID))) %>% 
+    group_by(id_oa) %>% 
+    mutate(n=row_number())
+  AU_df <- AU_df %>% 
+    left_join(AU_ID_df, by=c("id_oa","n")) %>% 
+    select(-"n") %>% 
     group_by(id_oa) %>% 
     mutate(n=row_number()) %>% 
     left_join(df_UN %>% select("UN","id_oa", "corr", "n"),
@@ -68,7 +79,8 @@ csvOA2df <- function(file){
     select("RP", "AU_ID") %>% 
     distinct(AU_ID, .keep_all = TRUE)
   DATA <- DATA %>% 
-    left_join(AU_df, by = c("corresponding_author_ids" = "AU_ID"))
+    mutate(AU1_ID = gsub(";.*", "", corresponding_author_ids)) %>% 
+    left_join(AU_df, by = c("AU1_ID" = "AU_ID"))
     
   
   # move all char strings to Upper

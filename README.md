@@ -86,7 +86,7 @@ bibliometrix website <https://www.bibliometrix.org/>
 
 ## How to cite bibliometrix
 
-If you use this package for your research, we must cite it.
+If you use this package for your research, you must cite it.
 
 To cite bibliometrix in publications, please use:
 

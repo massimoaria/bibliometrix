@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
-Version: 4.0.0
+Version: 4.1.5
 Authors@R: c(
     person(given = "Massimo",
            family = "Aria",
@@ -24,7 +24,7 @@ URL: https://www.bibliometrix.org, https://github.com/massimoaria/bibliometrix, 
 BugReports: https://github.com/massimoaria/bibliometrix/issues
 LazyData: true
 Encoding: UTF-8
-Depends: R (>= 4.2.0)
+Depends: R (>= 3.3.0)
 Imports: stats,
      grDevices,
 		 bibliometrixData,

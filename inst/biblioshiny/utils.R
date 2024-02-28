@@ -823,8 +823,8 @@ CAmap <- function(input, values){
                                 cluster=values$CS$km.res$cluster)
              })
       
-      WData$Dim.1=round(WData$Dim.1,2)
-      WData$Dim.2=round(WData$Dim.2,2)
+      WData$Dim1=round(WData$Dim1,2)
+      WData$Dim2=round(WData$Dim2,2)
       values$CS$WData <- WData
       
     }else{emptyPlot("Selected field is not included in your data collection")
@@ -1645,23 +1645,22 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
   
   switch(method,
          CA={
-           contrib = rowSums(CS$res$col$contrib %>% as.data.frame())/2
-           wordCoord <- CS$res$col$coord[,1:2] %>%
+           contrib = rowSums(CS$coord$contrib %>% as.data.frame())/2
+           wordCoord <- CS$coord$coord[,1:2] %>%
              data.frame() %>%
-             mutate(label = row.names(CS$res$col$coord),
+             mutate(label = row.names(CS$coord$coord),
                     contrib = contrib) %>% 
              select(c(3,1,2,4))
            xlabel <- paste0("Dim 1 (",round(CS$res$eigCorr$perc[1],2),"%)")
            ylabel <- paste0("Dim 2 (",round(CS$res$eigCorr$perc[2],2),"%)")
          },
          MCA={
-           contrib =rowSums(CS$res$var$contrib)/2
-           wordCoord <- CS$res$var$coord[,1:2] %>%
+           contrib = rowSums(CS$coord$contrib %>% as.data.frame())/2
+           wordCoord <- CS$coord$coord[,1:2] %>%
              data.frame() %>%
-             mutate(label = row.names(CS$res$var$coord),
+             mutate(label = row.names(CS$coord$coord),
                     contrib = contrib) %>% 
-             select(c(3,1,2,4)) %>% 
-             filter(substr(label,nchar(label)-1,nchar(label))=="_1") 
+             select(c(3,1,2,4))
            xlabel <- paste0("Dim 1 (",round(CS$res$eigCorr$perc[1],2),"%)")
            ylabel <- paste0("Dim 2 (",round(CS$res$eigCorr$perc[2],2),"%)")
          },
@@ -1725,7 +1724,7 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
              Dim2 = Dim2+dotSize*0.01)
     if (max(CS$hull_data$clust)>1){
       hull_df <- CS$hull_data %>% dplyr::filter(.data$clust==i)
-      fig <- fig %>% add_polygons(x = hull_df$Dim.1, y=hull_df$Dim.2, inherit = FALSE, showlegend = FALSE,
+      fig <- fig %>% add_polygons(x = hull_df$Dim1, y=hull_df$Dim2, inherit = FALSE, showlegend = FALSE,
                                   color = I(hull_df$color[1]), opacity=0.3, line=list(width=2),
                                   text=paste0("Cluster ",i), hoverinfo = 'text', hoveron="points")
     }

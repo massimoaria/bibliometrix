@@ -16,6 +16,7 @@
 #' @import stringi
 #' @import tidytext
 #' @import openalexR
+#' @import ca
 #' @importFrom dplyr %>%
 #' @importFrom dplyr across
 #' @importFrom dplyr row_number
@@ -92,9 +93,9 @@
 #' @importFrom rscopus author_search
 #' @importFrom rscopus get_complete_author_info
 # @importFrom RColorBrewer brewer.pal
-#' @importFrom FactoMineR MCA
-#' @importFrom FactoMineR CA
-#' @importFrom FactoMineR PCA
+# @importFrom FactoMineR MCA
+# @importFrom FactoMineR CA
+# @importFrom FactoMineR PCA
 # @importFrom factoextra get_mca_var
 # @importFrom factoextra get_mca_ind
 # @importFrom factoextra get_ca_row

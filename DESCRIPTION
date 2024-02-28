@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
-Version: 4.1.4
+Version: 4.0.0
 Authors@R: c(
     person(given = "Massimo",
            family = "Aria",
@@ -31,7 +31,7 @@ Imports: stats,
 		 dimensionsR, 
 		 dplyr,
      DT,
-		 FactoMineR,
+		 ca,
 		 forcats,
 		 ggplot2,
 		 ggrepel,

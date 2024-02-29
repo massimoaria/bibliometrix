@@ -2,7 +2,7 @@
 #'
 #' \code{networkPlot} Create a network plot with separated communities.
 #'
-#' The function \code{\link{splitCommunities}} splits communitites in separated subnetworks from a bibliographic network plot previously created by \code{\link{networkPlot}}.
+#' The function \code{\link{splitCommunities}} splits communities in separated subnetworks from a bibliographic network plot previously created by \code{\link{networkPlot}}.
 #' 
 #' @param graph is a network plot obtained by the function \code{\link{networkPlot}}. 
 #' @param n is an integer. It indicates the number of vertices to plot for each community.

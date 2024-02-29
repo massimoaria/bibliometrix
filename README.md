@@ -77,7 +77,7 @@ It supports scholars in easy use of the main features of bibliometrix:
 
   - Intellectual Structure
 
-  - Social Strucutre
+  - Social Structure
 
 ### How to use biblioshiny
 
@@ -86,7 +86,7 @@ bibliometrix website <https://www.bibliometrix.org/>
 
 ## How to cite bibliometrix
 
-If you use this package for your research, we must cite it.
+If you use this package for your research, you must cite it.
 
 To cite bibliometrix in publications, please use:
 
@@ -151,7 +151,7 @@ The argument *file* is a character vector containing the name of export
 files downloaded from SCOPUS, Clarivate Analytics WoS, OpenAlex, Digital
 Science Dimensions, PubMed or Cochrane CDSR website. *file* can also
 contains the name of a json/xlm object download using OpenAlex, Digital
-Science Dimenions or PubMed APIs (through the packages *openalexR*,
+Science Dimensions or PubMed APIs (through the packages *openalexR*,
 *dimensionsR* and *pubmedR*.
 
 es. file \<- c(“file1.txt”,“file2.txt”, …)
@@ -707,7 +707,7 @@ research and data science on 30 years of Social Indicators Research,
 
 Aria M., Alterisio A., Scandurra A, Pinelli C., D’Aniello B, (2021) The
 scholar’s best friend: research trends in dog cognitive and behavioural
-studies, A*nimal Cognition*.
+studies, *Animal Cognition*.
 (<https://doi.org/10.1007/s10071-020-01448-2>)
 
 Cuccurullo, C., Aria, M., & Sarto, F. (2016). Foundations and trends in

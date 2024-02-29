@@ -22,7 +22,7 @@ utils::globalVariables(c("label"))
 #' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param method is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
 #'  \code{method="MCA"} for Multiple Correspondence Analysis or \code{method="MDS"} for Metric Multidimensional Scaling. The default is \code{method="MCA"}
-#' @param minDegree is an integer. It indicates the minimum occurrences of terms to analize and plot. The default value is 2.
+#' @param minDegree is an integer. It indicates the minimum occurrences of terms to analyze and plot. The default value is 2.
 #' @param clust is an integer or a character. If clust="auto", the number of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.
 #' @param k.max is an integer. It indicates the maximum number of cluster to keep. The default value is 5. The max value is 20.
 #' @param stemming is logical. If TRUE the Porter's Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.

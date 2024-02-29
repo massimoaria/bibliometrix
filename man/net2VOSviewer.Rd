@@ -9,7 +9,7 @@ net2VOSviewer(net, vos.path = NULL)
 \arguments{
 \item{net}{is an object created by networkPlot function.}
 
-\item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
+\item{vos.path}{is a character indicating the full path where VOSviewer.jar is located.}
 }
 \value{
 It write a .net file that can be open in VOSviewer

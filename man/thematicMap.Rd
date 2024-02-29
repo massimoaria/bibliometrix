@@ -67,7 +67,7 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 }
 \details{
 \code{thematicMap} starts from a co-occurrence keyword network to plot in a 
-two-dimesional map the typological themes of a domain.\cr\cr
+two-dimensional map the typological themes of a domain.\cr\cr
 
 Reference:\cr
 Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 

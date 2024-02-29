@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{is the object for which plots are desired.}
 
-\item{...}{is a geenric param for plot functions.}
+\item{...}{is a generic param for plot functions.}
 }
 \value{
 The function \code{plot} draws a dendrogram.

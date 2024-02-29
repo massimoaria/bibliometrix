@@ -48,7 +48,7 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 
 \item{quanti.supp}{is a vector indicating the indexes of the quantitative supplementary variables. It is used only for CA and MCA.}
 
-\item{minDegree}{is an integer. It indicates the minimum occurrences of terms to analize and plot. The default value is 2.}
+\item{minDegree}{is an integer. It indicates the minimum occurrences of terms to analyze and plot. The default value is 2.}
 
 \item{clust}{is an integer or a character. If clust="auto", the number of cluster is chosen automatically, otherwise clust can be an integer between 2 and 8.}
 

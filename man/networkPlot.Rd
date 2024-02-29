@@ -71,7 +71,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.}
 
-\item{vos.path}{is a character indicating the full path whre VOSviewer.jar is located.}
+\item{vos.path}{is a character indicating the full path where VOSviewer.jar is located.}
 
 \item{size}{is integer. It defines the size of each vertex. Default is \code{size=3}.}
 

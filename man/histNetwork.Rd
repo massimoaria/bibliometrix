@@ -10,14 +10,14 @@ histNetwork(M, min.citations, sep = ";", network = TRUE, verbose = TRUE)
 \item{M}{is a bibliographic data frame obtained by the converting function
 \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex, Lens.org and Clarivate
-Analitics Web of Science file.}
+Analytics Web of Science file.}
 
 \item{min.citations}{DEPRECATED. New algorithm does not use this parameters. It will be remove in the next version of bibliometrix.}
 
 \item{sep}{is the field separator character. This character separates strings
 in CR column of the data frame. The default is \code{sep = ";"}.}
 
-\item{network}{is logical. If TRUE, fuction calculates and returns also the direct citation network. If FALSE,
+\item{network}{is logical. If TRUE, function calculates and returns also the direct citation network. If FALSE,
 the function returns only the local citation table.}
 
 \item{verbose}{is logical. If TRUE, results are printed on screen.}

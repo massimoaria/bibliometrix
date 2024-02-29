@@ -7,7 +7,7 @@
 #' 
 #' 
 #' @param net is an object created by networkPlot function.
-#' @param vos.path is a character indicating the full path whre VOSviewer.jar is located.
+#' @param vos.path is a character indicating the full path where VOSviewer.jar is located.
 #' @return It write a .net file that can be open in VOSviewer 
 #' 
 #' @examples

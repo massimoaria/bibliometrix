@@ -6,11 +6,11 @@
 #' @param M is a bibliographic data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to
 #'   manuscripts and variables to Field Tag in the original SCOPUS, OpenAlex, Lens.org and Clarivate
-#'   Analitics Web of Science file.
+#'   Analytics Web of Science file.
 #' @param min.citations DEPRECATED. New algorithm does not use this parameters. It will be remove in the next version of bibliometrix. 
 #' @param sep is the field separator character. This character separates strings
 #'   in CR column of the data frame. The default is \code{sep = ";"}.
-#' @param network is logical. If TRUE, fuction calculates and returns also the direct citation network. If FALSE,
+#' @param network is logical. If TRUE, function calculates and returns also the direct citation network. If FALSE,
 #' the function returns only the local citation table.
 #' @param verbose is logical. If TRUE, results are printed on screen.
 #' @return \code{histNetwork} returns an object of \code{class} "list"

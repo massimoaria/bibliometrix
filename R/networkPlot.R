@@ -20,7 +20,7 @@
 #' \code{type="kamada"}\tab   \tab  Kamada-Kawai layout}
 #'  
 #' @param Title is a character indicating the plot title. 
-#' @param vos.path is a character indicating the full path whre VOSviewer.jar is located.
+#' @param vos.path is a character indicating the full path where VOSviewer.jar is located.
 #' @param size is integer. It defines the size of each vertex. Default is \code{size=3}. 
 #' @param size.cex is logical. If TRUE the size of each vertex is proportional to its degree.  
 #' @param noloops is logical. If TRUE loops in the network are deleted.

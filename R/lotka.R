@@ -14,7 +14,7 @@
 #' \code{C}   \tab   \tab Constant coefficient\cr
 #' \code{R2} \tab   \tab Goodness of Fit\cr
 #' \code{fitted} \tab     \tab Fitted Values\cr
-#' \code{p.value} \tab     \tab Pvalue of two-sample Kolmogorov-Smirnov test between the empirical and the theorical Lotka's Law distribution (with Beta=2)\cr
+#' \code{p.value} \tab     \tab Pvalue of two-sample Kolmogorov-Smirnov test between the empirical and the theoretical Lotka's Law distribution (with Beta=2)\cr
 #' \code{AuthorProd}    \tab   \tab Authors' Productivity frequency table}
 #'
 #' @examples

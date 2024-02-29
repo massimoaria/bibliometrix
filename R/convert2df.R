@@ -19,7 +19,7 @@
 #' @param remove.duplicates is logical. If TRUE, the function will remove duplicated items checking by DOI and database ID.
 #' @return a data frame with cases corresponding to articles and variables to Field Tags in the original export file.
 #' 
-#' I.e We have three files downlaod from Web of Science in plaintext format, file will be:
+#' I.e We have three files download from Web of Science in plaintext format, file will be:
 #' 
 #' file <- c("filename1.txt", "filename2.txt", "filename3.txt") 
 #' 

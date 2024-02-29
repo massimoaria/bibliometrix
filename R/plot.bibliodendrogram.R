@@ -2,7 +2,7 @@
 #'
 #' \code{plot} method for class '\code{bibliodendrogram}'
 #' @param x is the object for which plots are desired.
-#' @param ... is a geenric param for plot functions.
+#' @param ... is a generic param for plot functions.
 #' @return The function \code{plot} draws a dendrogram. 
 #' 
 #'

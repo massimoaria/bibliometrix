@@ -186,7 +186,7 @@ Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research on perfor
 \concept{co-citations}
 \concept{network}
 \concept{co-authors}
-\concept{co-occurences}
+\concept{co-occurrences}
 \concept{collaboration}
 \concept{co-word analysis}
 

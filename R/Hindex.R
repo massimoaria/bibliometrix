@@ -59,13 +59,13 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
   
   switch(field,
          author={
-           AU=M$AU
-           AU=trimES(gsub(","," ",AU))
+           AU <- M$AU
+           AU <- trimES(gsub(","," ",AU))
            listAU <- strsplit(AU, split=sep)
            l <- lengths(listAU)
            index= rep(row.names(M), l)
            df <- M[index,]
-           df$AUs <- unlist(listAU)
+           df$AUs <- trimws(unlist(listAU))
          },
          source={
            df <- M

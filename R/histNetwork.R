@@ -218,7 +218,7 @@ scopus <- function(M, min.citations, sep, network, verbose){
   
   M_merge <- M %>% 
     select(.data$AU,.data$PY,.data$Page.start, .data$Page.end, .data$PP, .data$SR) %>% 
-    mutate(AU = gsub(";.*$", "", .data$AU),
+    mutate(AU = trimws(gsub("\\.", "", gsub("\\. ", "", gsub("^(.*?),.*$", "\\1", .data$SR)))),
            Page.start = as.numeric(.data$Page.start),
            Page.end = as.numeric(.data$Page.end),
            PP = ifelse(!is.na(.data$Page.start), paste0(.data$Page.start,"-",.data$Page.end), NA),
@@ -232,6 +232,8 @@ scopus <- function(M, min.citations, sep, network, verbose){
     group_by(.data$PY,.data$AU) %>% 
     mutate(toRemove = ifelse(!is.na(.data$PP.y) & .data$PP.x!=.data$PP.y, TRUE,FALSE)) %>% # to remove FALSE POSITIVE
     ungroup() %>% 
+    dplyr::filter(.data$toRemove != TRUE) %>% 
+    mutate(toRemove = ifelse(!is.na(.data$PP.x) & is.na(.data$PP.y),TRUE,FALSE)) %>% 
     dplyr::filter(.data$toRemove != TRUE)
   
   LCS <- CR %>% 

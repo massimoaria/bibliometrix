@@ -92,11 +92,17 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
       switch(format,
              bibtex = {
                D <- importFiles(file)
-               M <- bib2df(D, dbsource = "isi")
+               M <- bib2df(D, dbsource = "isi") 
+               # %>% 
+               #   rename(AU_IN = .data$AU,
+               #          AU = .data$AF)
              },
              plaintext = {
                D <- importFiles(file)
-               M <- isi2df(D)
+               M <- isi2df(D) 
+               # %>% 
+               #   rename(AU_IN = .data$AU,
+               #          AU = .data$AF)
              })
     },
     ## db SCOPUS
@@ -105,9 +111,17 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
              bibtex = {
                D <- importFiles(file)
                M <- bib2df(D, dbsource = "scopus")
+               M <- M 
+               # %>% 
+               #   rename(AU_IN = .data$AU,
+               #          AU = .data$AF)
              },
              csv = {
-               M <- csvScopus2df(file)
+               M <- csvScopus2df(file) 
+               # %>% 
+               #   rename(AU_IN = .data$AU,
+               #          AU = .data$AF)
+               
              })
     },
     ## db GENERIC BIBTEX

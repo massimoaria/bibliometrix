@@ -1,3 +1,7 @@
+utils::globalVariables(c("group","MNLCS","name", "pagerank_centrality",
+                         "MNLCS2", "impact", "freq", "centrality", "color",
+                         "words", "rcentrality", "rimpact", "label", "Cluster",
+                         "w"))
 #' Coupling Analysis
 #'
 #' It performs a coupling network analysis and plots community detection results on a bi-dimensional map (Coupling Map).
@@ -102,33 +106,33 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   
   DC <- cbind(D,C[,-1])
   DC$name <- DC[,1] 
-  df_lab <- DC %>% group_by(.data$group) %>%
-    mutate(MNLCS2 = replace(.data$MNLCS,.data$MNLCS<1,NA),  ## remove NCS<1
-           MNLCS = round(.data$MNLCS,2),
-           name = tolower(.data$name),
-           freq = length(.data$MNLCS))  %>%
-    arrange(desc(.data$MNLCS), .by_group = TRUE)
+  df_lab <- DC %>% group_by(group) %>%
+    mutate(MNLCS2 = replace(MNLCS,MNLCS<1,NA),  ## remove NCS<1
+           MNLCS = round(MNLCS,2),
+           name = tolower(name),
+           freq = length(MNLCS))  %>%
+    arrange(desc(MNLCS), .by_group = TRUE)
   
   df <- df_lab %>%
-    mutate(centrality = mean(.data$pagerank_centrality),
-           impact = mean(.data$MNLCS2,na.rm=TRUE),
-           impact = replace(.data$impact, is.na(.data$impact),0)) %>%
-    top_n(.data$MNLCS, n=10) %>%
-    summarize(freq = .data$freq[1],
-              centrality = .data$centrality[1]*100,
-              impact = .data$impact[1],
-              label_cluster = .data$group[1],
-              color = .data$color[1],
-              label = tolower(paste(.data$name[1:min(n.labels,length(.data$name))],collapse = "\n")),
-              words = tolower(paste(.data$name,.data$MNLCS,collapse = "\n"))) %>%
-    mutate(rcentrality = rank(.data$centrality), 
-           words = unlist(lapply(.data$words, function(l){
+    mutate(centrality = mean(pagerank_centrality),
+           impact = mean(MNLCS2,na.rm=TRUE),
+           impact = replace(impact, is.na(impact),0)) %>%
+    top_n(MNLCS, n=10) %>%
+    summarize(freq = freq[1],
+              centrality = centrality[1]*100,
+              impact = impact[1],
+              label_cluster = group[1],
+              color = color[1],
+              label = tolower(paste(name[1:min(n.labels,length(name))],collapse = "\n")),
+              words = tolower(paste(name,MNLCS,collapse = "\n"))) %>%
+    mutate(rcentrality = rank(centrality), 
+           words = unlist(lapply(words, function(l){
                         l <- unlist(strsplit(l,"\\\n"))
                         l <- l[1:(min(length(l),10))]
                         l <- paste0(l,collapse="\n")  
                         })),
-           rimpact = rank(.data$impact)) %>%
-    arrange(.data$group) %>% as.data.frame()
+           rimpact = rank(impact)) %>%
+    arrange(group) %>% as.data.frame()
   
   row.names(df) <- df$label
   
@@ -137,7 +141,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   df <- df[df$freq>=minfreq,]
   
   df_lab<- df_lab %>% 
-    dplyr::filter(.data$group %in% df$group)
+    dplyr::filter(group %in% df$group)
   
   rangex <- max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
   rangey <- max(c(meandens-min(df$rimpact),max(df$rimpact)-meandens))
@@ -163,12 +167,12 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
   x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.5
   y <- c(min(df$rimpact),min(df$rimpact)+diff(range(df$rimpact))*0.125)
   
-  g <- ggplot(df, aes(x=.data$rcentrality, y=.data$rimpact, text=(.data$words))) +
-    geom_point(group="NA",aes(size=log(as.numeric(.data$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
+  g <- ggplot(df, aes(x=rcentrality, y=rimpact, text=(words))) +
+    geom_point(group="NA",aes(size=log(as.numeric(freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
   if (size>0){
     if (isTRUE(repel)){
-      g=g+geom_label_repel(aes(group="NA",label=ifelse(.data$freq>1,unlist(tolower(.data$label)),'')),size=3*(1+size),angle=0)}else{
-        g=g+geom_text(aes(group="NA",label=ifelse(.data$freq>1,unlist(tolower(.data$label)),'')),size=3*(1+size),angle=0)
+      g=g+geom_label_repel(aes(group="NA",label=ifelse(freq>1,unlist(tolower(label)),'')),size=3*(1+size),angle=0)}else{
+        g=g+geom_text(aes(group="NA",label=ifelse(freq>1,unlist(tolower(label)),'')),size=3*(1+size),angle=0)
       }
   }
   
@@ -193,7 +197,7 @@ couplingMap <- function(M, analysis = "documents", field="CR", n=500, label.term
 
   
   row.names(df)=NULL
-  df <- df %>% rename(items = .data$words)
+  df <- df %>% rename(items = words)
   
   params <- list(analysis = analysis,
                  field=field, 
@@ -335,21 +339,11 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams){
   tab_global <- data.frame(label=names(tab_global),tot=as.numeric(tab_global), n=nrow(M))
   
   df <- df %>% 
-    group_by(.data$Cluster) %>% 
+    group_by(Cluster) %>% 
     do(w = best_lab(.data,tab_global, n.labels, term)) %>% 
-    unnest(.data$w) %>% 
+    unnest(w) %>% 
     as.data.frame()
   
-  # for (i in 1:length(clusters)){
-  #   ind <- which(df$Cluster == clusters[i])
-  #   tab <- round((tableTag(df[ind,], term)[1:n.labels])/length(ind),1)
-  #   tab <- data.frame(label=names(tab), value=as.numeric(tab))
-  #   tab <- tab %>% 
-  #     left_join(tab_global, by = "label") %>% 
-  #     mutate(freq = .data$value/.data$tot*100) 
-  #   
-  #   w[i]=tolower(paste(tab$label," ",round(tab$freq,1),"%",sep="", collapse="\n"))
-  # }
   return(df$w)
   
 }

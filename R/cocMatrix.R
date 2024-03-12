@@ -1,3 +1,4 @@
+utils::globalVariables(c("item","SR"))
 #' Bibliographic bipartite network matrices
 #'
 #' \code{cocMatrix} computes occurrences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis.
@@ -105,11 +106,11 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
     
     TERMS <- TERMS %>% 
       anti_join(data.frame(item=trimws(toupper(remove.terms))), by="item") %>% 
-      mutate(item = trimws(.data$item))
+      mutate(item = trimws(item))
     
       TERMS <- TERMS %>% 
-        group_by(.data$SR) %>%
-        summarize(item = paste(.data$item, collapse=";"))
+        group_by(SR) %>%
+        summarize(item = paste(item, collapse=";"))
       
       M <- M %>% 
         left_join(TERMS, by="SR")

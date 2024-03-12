@@ -1,3 +1,5 @@
+utils::globalVariables(c("Paper","Tag","content","cont"))
+
 bib2df<-function(D, dbsource = "isi"){
   
   #D <- D[nchar(D)>1]  
@@ -44,10 +46,10 @@ bib2df<-function(D, dbsource = "isi"){
   DATA <- data.frame(Tag = substr(D,1,ind+1), content = substr(D,ind+2,nchar(D)), Paper=numPapers)
   DATA$content <- gsub("\\}|\\},|\\{","",DATA$content)
   #DATA$content <- gsub("\\{","",DATA$content)
-  df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
-    summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
-    arrange(.data$Tag, .data$Paper) %>%
-    pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
+  df <- DATA %>% group_by(Paper, Tag) %>%
+    summarise(cont=paste(content, collapse="---",sep="")) %>%
+    arrange(Tag, Paper) %>%
+    pivot_wider(names_from =Tag,values_from = cont) %>%
     ungroup()
   
   df <- as.data.frame(df)

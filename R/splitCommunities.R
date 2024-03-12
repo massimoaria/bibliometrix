@@ -1,3 +1,4 @@
+utils::globalVariables(c("group", "size"))
 #' Splitting Network communities
 #'
 #' \code{networkPlot} Create a network plot with separated communities.
@@ -35,12 +36,12 @@ df <- data.frame(label = V(graph)$name, size = V(graph)$deg, group = V(graph)$co
 
 if (!is.null(n)){
   labels <- df %>%
-    group_by(.data$group) %>%
-    top_n(n = n, wt = .data$size) %>%
+    group_by(group) %>%
+    top_n(n = n, wt = size) %>%
     as.data.frame()}
 else{
   labels <- df %>%
-    group_by(.data$group) %>%
+    group_by(group) %>%
     as.data.frame()
 }
 

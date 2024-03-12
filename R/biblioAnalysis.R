@@ -1,3 +1,5 @@
+utils::globalVariables(c("PY","TC"))
+
 #' Bibliometric Analysis
 #'
 #' It performs a bibliometric analysis of a dataset imported from SCOPUS and Clarivate Analytics Web of Science databases.
@@ -113,11 +115,11 @@ if ("TC" %in% Tags){
   TCperYear=TC/(CurrentYear-PY+1)
   if (!("DI" %in% names(M))) M$DI <- ""
   MostCitedPapers <- data.frame(M$SR,M$DI,TC,TCperYear,PY) %>%
-    group_by(.data$PY) %>%
-    mutate(NTC = .data$TC/mean(.data$TC)) %>%
+    group_by(PY) %>%
+    mutate(NTC = TC/mean(TC)) %>%
     ungroup() %>% 
-    select(-.data$PY) %>%
-    arrange(desc(.data$TC)) %>%
+    select(-PY) %>%
+    arrange(desc(TC)) %>%
     as.data.frame()
 
   names(MostCitedPapers)=c("Paper         ","DOI","TC","TCperYear","NTC")

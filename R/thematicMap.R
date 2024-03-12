@@ -1,4 +1,10 @@
-globalVariables(".")
+utils::globalVariables(c("sC", "groups", "words", "words1", "eij", "groups.x",
+                         "groups.y", "color", "freq", "cluster_label", "words2",
+                         "groups2", "ext","n", "centrality", "density", "rcentrality",
+                         "rdensity", "name_full", "Cluster", "Color", "Occurrences",
+                         "pagerank_centrality", "terms","p_c", "p_w", "Cluster_Label",
+                         "SR", "pagerank", "weigth", "p", "Assigned_cluster", "TC",
+                         "PY", "DI", "AU", "TI", "SO", "TCpY", "NTC", ".", "wordlist"))
 #' Create a thematic map
 #'
 #' It creates a thematic map based on co-word network analysis and clustering.
@@ -123,40 +129,40 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
    
   ## new code using tidyvverse
   df_lab <- df_lab %>% 
-    dplyr::filter(.data$sC>=minfreq) %>% 
-    group_by(.data$groups) %>% 
-    mutate(freq = sum(.data$sC),
-           cluster_label = .data$words[which.max(.data$sC)]) 
+    dplyr::filter(sC>=minfreq) %>% 
+    group_by(groups) %>% 
+    mutate(freq = sum(sC),
+           cluster_label = words[which.max(sC)]) 
   
   sEij <- triu(sEij)
-  df_lab_top <- df_lab %>% select(.data$words,.data$groups)
+  df_lab_top <- df_lab %>% select(words,groups)
   
   sEij_df <- as.matrix(sEij) %>% 
     data.frame() %>% 
     rename_with(~ row.names(sEij), .cols = colnames(.)) %>% 
     mutate(words1 = row.names(sEij)) %>% 
-    pivot_longer(cols=!.data$words1, names_to = "words2", values_to = "eij") %>% 
-    dplyr::filter(.data$eij>0) %>% 
+    pivot_longer(cols=!words1, names_to = "words2", values_to = "eij") %>% 
+    dplyr::filter(eij>0) %>% 
     left_join(df_lab_top, by=c("words1" = "words")) %>% 
     left_join(df_lab_top, by=c("words2" = "words")) %>% 
-    rename(groups =.data$groups.x,
-           groups2 =.data$groups.y)
+    rename(groups =groups.x,
+           groups2 =groups.y)
     
-  df_lab_top <- df_lab %>% select(.data$groups, .data$cluster_label,.data$color, .data$freq) %>% slice_head(n=1)
+  df_lab_top <- df_lab %>% select(groups, cluster_label,color, freq) %>% slice_head(n=1)
   
   df <- sEij_df %>% 
-    dplyr::filter(.data$words1 %in% unique(df_lab$words) & .data$words2 %in% unique(df_lab$words)) %>% 
-    group_by(.data$groups) %>% 
-    mutate(ext = as.numeric(.data$groups!=.data$groups2)) %>% 
-    summarize(n=length(unique(.data$words1)),
-              centrality = sum(.data$eij*.data$ext),
-              density = sum((.data$eij*(1-.data$ext))/.data$n)*100
+    dplyr::filter(words1 %in% unique(df_lab$words) & words2 %in% unique(df_lab$words)) %>% 
+    group_by(groups) %>% 
+    mutate(ext = as.numeric(groups!=groups2)) %>% 
+    summarize(n=length(unique(words1)),
+              centrality = sum(eij*ext),
+              density = sum((eij*(1-ext))/n)*100
               ) %>% 
-    mutate(rcentrality=rank(.data$centrality),
-      rdensity=rank(.data$density)
+    mutate(rcentrality=rank(centrality),
+      rdensity=rank(density)
     ) %>% 
     left_join(., df_lab_top, by = "groups") %>% 
-    rename(label = .data$cluster_label)
+    rename(label = cluster_label)
   
   
   meandens=mean(df$rdensity)
@@ -164,14 +170,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   rangex=max(c(meancentr-min(df$rcentrality),max(df$rcentrality)-meancentr))
   rangey=max(c(meandens-min(df$rdensity),max(df$rdensity)-meandens))
   
-  df <- df_lab %>% group_by(.data$groups) %>% #dplyr::filter(.data$sC>1) %>% 
-    arrange(-.data$sC, .by_group = TRUE) %>% 
-    dplyr::slice_max(n=10, .data$sC, with_ties=FALSE) %>%
-    summarise(wordlist = paste(.data$words,.data$sC,collapse="\n"),
-              name_full = paste(.data$words[1:min(n.labels,n())], collapse="\n")) %>% 
+  df <- df_lab %>% group_by(groups) %>% #dplyr::filter(sC>1) %>% 
+    arrange(-sC, .by_group = TRUE) %>% 
+    dplyr::slice_max(n=10, sC, with_ties=FALSE) %>%
+    summarise(wordlist = paste(words,sC,collapse="\n"),
+              name_full = paste(words[1:min(n.labels,n())], collapse="\n")) %>% 
     right_join(., df, by = "groups") %>% 
-    rename(name = .data$label,
-      words = .data$wordlist)
+    rename(name = label,
+      words = wordlist)
 
   xlimits=c(meancentr-(rangex*1.2),meancentr+rangex*1.2)
   ylimits=c(meandens-(rangey*1.2),meandens+rangey*1.2)
@@ -190,12 +196,12 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.6
   y <- c(min(df$rdensity),min(df$rdensity)+diff(range(df$rdensity))*0.125)
 
-  g=ggplot(df, aes(x=.data$rcentrality, y=.data$rdensity, text=c(.data$words))) +
-    geom_point(group="NA",aes(size=log(as.numeric(.data$freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
+  g=ggplot(df, aes(x=rcentrality, y=rdensity, text=c(words))) +
+    geom_point(group="NA",aes(size=log(as.numeric(freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
   if (size>0){
     if (isTRUE(repel)){
-      g=g+geom_label_repel(aes(group="NA",label=ifelse(.data$freq>1,unlist(tolower(.data$name_full)),'')),size=3*(1+size),angle=0)}else{
-      g=g+geom_text(aes(group="NA",label=ifelse(.data$freq>1,unlist(tolower(.data$name_full)),'')),size=3*(1+size),angle=0)
+      g=g+geom_label_repel(aes(group="NA",label=ifelse(freq>1,unlist(tolower(name_full)),'')),size=3*(1+size),angle=0)}else{
+      g=g+geom_text(aes(group="NA",label=ifelse(freq>1,unlist(tolower(name_full)),'')),size=3*(1+size),angle=0)
     }
   }
   
@@ -220,14 +226,14 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   names(df_lab)=c("Occurrences", "Words", "Cluster", "Color","Cluster_Label", "Cluster_Frequency")
   
   df_lab <- df_lab %>% 
-    arrange(.data$Cluster) %>% 
-    dplyr::filter(!is.na(.data$Color)) %>% 
+    arrange(Cluster) %>% 
+    dplyr::filter(!is.na(Color)) %>% 
     data.frame() %>% 
-    mutate(Cluster = as.numeric(factor(.data$Cluster)))
+    mutate(Cluster = as.numeric(factor(Cluster)))
 
   ## Add centrality measure to words
   cluster_res <- Net$cluster_res %>% 
-    dplyr::select(!.data$cluster)
+    dplyr::select(!cluster)
   
   df_lab <- df_lab %>% 
     dplyr::left_join(cluster_res, by=c("Words" = "vertex"))
@@ -292,46 +298,46 @@ clusterAssignment <- function(M, words, field, remove.terms, synonyms, threshold
 ### stop integration in M  
   
   words <- words %>% 
-    mutate(p_w = 1/.data$Occurrences) %>% 
-    group_by(.data$Cluster) %>% 
-    rename(p_c = .data$pagerank_centrality)
-    #mutate(p_c = 1/length(.data$Cluster))
+    mutate(p_w = 1/Occurrences) %>% 
+    group_by(Cluster) %>% 
+    rename(p_c = pagerank_centrality)
+    #mutate(p_c = 1/length(Cluster))
 
   TERMS <- allField %>% 
-    mutate(terms = .data$terms %>% tolower()) %>% 
+    mutate(terms = terms %>% tolower()) %>% 
     left_join(words, by = c("terms" = "Words"))
   
   TERMS <- TERMS %>% 
-    group_by(.data$SR) %>% 
-    mutate(pagerank = sum(.data$p_c,na.rm = T)) %>% 
-    group_by(.data$SR, .data$Cluster_Label) %>% 
-    summarize(weigth = sum(.data$p_w),
-              pagerank = max(.data$pagerank, na.rm=TRUE)) %>% 
-    mutate(p = .data$weigth/sum(.data$weigth, na.rm=T)) %>% 
-    drop_na(.data$Cluster_Label) %>% 
+    group_by(SR) %>% 
+    mutate(pagerank = sum(p_c,na.rm = T)) %>% 
+    group_by(SR, Cluster_Label) %>% 
+    summarize(weigth = sum(p_w),
+              pagerank = max(pagerank, na.rm=TRUE)) %>% 
+    mutate(p = weigth/sum(weigth, na.rm=T)) %>% 
+    drop_na(Cluster_Label) %>% 
     ungroup()
   
   TERMS <- TERMS %>% 
-    select(-.data$weigth) %>% 
-    group_by(.data$SR)
+    select(-weigth) %>% 
+    group_by(SR)
   
   ## Assign docs to cluser with p_max>=threshold
   TERMS_Max <- TERMS %>% 
-    dplyr::filter(.data$p>=threshold) %>% 
-    group_by(.data$SR) %>% 
-    slice_max(order_by = .data$p, n=1) %>% 
-    summarize(Assigned_cluster = paste(.data$Cluster_Label, collapse = ";"))
+    dplyr::filter(p>=threshold) %>% 
+    group_by(SR) %>% 
+    slice_max(order_by = p, n=1) %>% 
+    summarize(Assigned_cluster = paste(Cluster_Label, collapse = ";"))
   
   ### doc pagerank centrality for the assigned cluster 
   TERMS_pagerank <- TERMS %>% 
-    select(!.data$p) %>%
+    select(!p) %>%
     left_join(TERMS_Max, by="SR") %>% 
-    dplyr::filter(.data$Cluster_Label==.data$Assigned_cluster) %>% 
-    select(.data$SR,.data$pagerank)
+    dplyr::filter(Cluster_Label==Assigned_cluster) %>% 
+    select(SR,pagerank)
 
   TERMS <- TERMS %>% 
-    select(!.data$pagerank) %>% 
-    pivot_wider(names_from = .data$Cluster_Label, values_from = .data$p) %>% 
+    select(!pagerank) %>% 
+    pivot_wider(names_from = Cluster_Label, values_from = p) %>% 
     left_join(TERMS_Max, by = "SR") %>% 
     left_join(TERMS_pagerank, by="SR")
   
@@ -340,15 +346,15 @@ clusterAssignment <- function(M, words, field, remove.terms, synonyms, threshold
   year <- as.numeric(substr(Sys.time(),1,4))+1
   
   TERMS <- M %>% 
-    mutate(TCpY =.data$TC/(year-.data$PY)) %>% 
-    group_by(.data$PY) %>% 
-    mutate(NTC = .data$TC/mean(.data$TC, na.rm=TRUE)) %>% 
+    mutate(TCpY =TC/(year-PY)) %>% 
+    group_by(PY) %>% 
+    mutate(NTC = TC/mean(TC, na.rm=TRUE)) %>% 
     ungroup() %>% 
-    select(.data$DI, .data$AU, .data$TI, .data$SO, .data$PY,.data$TC, .data$TCpY, .data$NTC,.data$SR) %>% 
+    select(DI, AU, TI, SO, PY,TC, TCpY, NTC,SR) %>% 
     left_join(TERMS, by = "SR") %>% 
     mutate_if(is.numeric, ~replace_na(., 0)) %>% 
-    group_by(.data$Assigned_cluster) %>% 
-    arrange(desc(.data$TC), .by_group = TRUE)
+    group_by(Assigned_cluster) %>% 
+    arrange(desc(TC), .by_group = TRUE)
   
   
   return(TERMS)

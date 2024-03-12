@@ -1,3 +1,4 @@
+utils::globalVariables(c("SR", "text", "ngram"))
 #' Term extraction tool from textual fields of a manuscript
 #'
 #' It extracts terms from a text field (abstract, title, author's keywords, etc.) of a bibliographic data frame.
@@ -93,7 +94,7 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
 
   # remove all special characters (except "-" becoming "_")
   TERMS <- M %>% 
-    select(.data$SR,!!Field)
+    select(SR,!!Field)
   
   names(TERMS) <- c("SR","text")
   
@@ -109,15 +110,15 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
   } else {
   
   TERMS <- TERMS %>%
-    mutate(text = tolower(gsub("[^[:alnum:][:blank:]\\-]", "", .data$text)),
-           text = gsub("-", "__",.data$text))
+    mutate(text = tolower(gsub("[^[:alnum:][:blank:]\\-]", "", text)),
+           text = gsub("-", "__",text))
   }
 
   
   # remove numbers
   if (remove.numbers==TRUE){
     TERMS <- TERMS %>%
-      mutate(text = gsub("[[:digit:]]","",.data$text))
+      mutate(text = gsub("[[:digit:]]","",text))
     }
   
   # keep terms in the vector keep.terms
@@ -131,7 +132,7 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
     }
     for (i in 1:length(keep.terms)){
       TERMS <- TERMS %>%
-        mutate(text = gsub(keep.terms[i],kt[i],.data$text))
+        mutate(text = gsub(keep.terms[i],kt[i],text))
     }
   }
 
@@ -142,14 +143,9 @@ termExtraction <- function(M, Field="TI", ngrams = 1, stemming=FALSE, language="
                              stemming=stemming, language=language, synonyms = synonyms, Field = Field)
   
   TERMS <- TERMS %>%
-    dplyr::filter(!(.data$ngram %in% paste(rep("NA",ngrams),sep="",collapse=" "))) %>% 
-    group_by(.data$SR) %>%
-    summarize(text = paste(.data$ngram, collapse=";"))
-  
-  # if (Field %in% c("ID","DE")){
-  #   TERMS <- TERMS %>% 
-  #     mutate(text = gsub("_", " ", .data$text))
-  # }
+    dplyr::filter(!(ngram %in% paste(rep("NA",ngrams),sep="",collapse=" "))) %>% 
+    group_by(SR) %>%
+    summarize(text = paste(ngram, collapse=";"))
   
   # assign the vector to the bibliographic data frame
   col_name <- paste(Field,"_TM",sep="")
@@ -196,7 +192,7 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
   ngrams$ngram[ind] <- trimws(substr(ngrams$ngram[ind],3,nchar(ngrams$ngram[ind])))
   
     ngrams <- ngrams %>%  
-    separate(.data$ngram, paste("word",1:nword,sep=""), sep = " ")
+    separate(ngram, paste("word",1:nword,sep=""), sep = " ")
   
   
   
@@ -215,8 +211,8 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
     #filter(if_all(starts_with("word"), ~ !str_detect(.x, "\\d"))) %>%
     ngrams <- ngrams %>% 
       unite(ngram, paste("word",1:nword,sep=""), sep = " ") %>%
-      dplyr::filter(!.data$ngram %in% custom_stopngrams) %>%
-      mutate(ngram = toupper(.data$ngram))
+      dplyr::filter(!ngram %in% custom_stopngrams) %>%
+      mutate(ngram = toupper(ngram))
 
     # Merge synonyms in the vector synonyms
     if (length(synonyms)>0 & is.character(synonyms)){

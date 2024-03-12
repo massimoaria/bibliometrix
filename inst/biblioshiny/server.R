@@ -1044,10 +1044,10 @@ To ensure the functionality of Biblioshiny,
   output$sliderTCpY <- renderUI({
     Y <- as.numeric(substr(Sys.time(),1,4))
     values$Morig <- values$Morig %>% 
-      mutate(Age = Y - .data$PY+1,
-             TCpY = round(.data$TC/Age,2)) %>% 
-      group_by(.data$PY) %>% 
-      mutate(NTC = .data$TC/mean(.data$TC, na.rm=T)) %>% 
+      mutate(Age = Y - PY+1,
+             TCpY = round(TC/Age,2)) %>% 
+      group_by(PY) %>% 
+      mutate(NTC = TC/mean(TC, na.rm=T)) %>% 
       as.data.frame()
     sliderInput("sliderTCpY", "Average Citations per Year", min = floor(min(values$Morig$TCpY, na.rm=T)),
                 max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
@@ -1269,7 +1269,7 @@ To ensure the functionality of Biblioshiny,
     x <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.125, max(Y$Year)-0.02)+1
     y <- c(min(Y$Freq),min(Y$Freq)+diff(range(Y$Freq))*0.125)
     
-    g=ggplot2::ggplot(Y, aes(x = .data$Year, y = .data$Freq, text=paste("Year: ",.data$Year,"\nN .of Documents: ",.data$Freq))) +
+    g=ggplot2::ggplot(Y, aes(x = Year, y = Freq, text=paste("Year: ",Year,"\nN .of Documents: ",Freq))) +
       geom_line(aes(group="NA")) +
       #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
@@ -1351,7 +1351,7 @@ To ensure the functionality of Biblioshiny,
       group_by(PY) %>% 
       summarize(MeanTCperArt=round(mean(TC, na.rm=TRUE),2),
                 N =n()) %>% 
-      mutate(MeanTCperYear = round(MeanTCperArt/(current_year-.data$PY),2),
+      mutate(MeanTCperYear = round(MeanTCperArt/(current_year-PY),2),
              CitableYears = current_year-PY) %>% 
       rename(Year = PY) %>% 
       drop_na()
@@ -1361,9 +1361,9 @@ To ensure the functionality of Biblioshiny,
     x <- c(max(Table2$Year)-0.02-diff(range(Table2$Year))*0.125, max(Table2$Year)-0.02)+1
     y <- c(min(Table2$MeanTCperYear),min(Table2$MeanTCperYear)+diff(range(Table2$MeanTCperYear))*0.125)
     
-    g <- ggplot(Table2, aes(x = .data$Year, y =.data$MeanTCperYear,text=paste("Year: ",.data$Year,"\nAverage Citations per Year: ",round(.data$MeanTCperYear,1)))) +
-      geom_line(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group)) +
-      #geom_area(aes(x = .data$Year, y = .data$MeanTCperYear, group=.data$group),fill = 'grey90', alpha = .5) +
+    g <- ggplot(Table2, aes(x = Year, y =MeanTCperYear,text=paste("Year: ",Year,"\nAverage Citations per Year: ",round(MeanTCperYear,1)))) +
+      geom_line(aes(x = Year, y = MeanTCperYear, group=group)) +
+      #geom_area(aes(x = Year, y = MeanTCperYear, group=group),fill = 'grey90', alpha = .5) +
       labs(x = 'Year'
            , y = 'Citations'
            , title = "Average Citations per Year")+
@@ -2217,10 +2217,10 @@ To ensure the functionality of Biblioshiny,
     x <- c(max(AuProd$N.Articles)-0.02-diff(range(AuProd$N.Articles))*0.125, max(AuProd$N.Articles)-0.02)+1
     y <- c(min(AuProd$Freq*100),min(AuProd$Freq*100)+diff(range(AuProd$Freq*100))*0.125)
     
-    g=ggplot2::ggplot(AuProd, aes(x = .data$N.Articles, y = .data$Freq*100, text=paste("N.Articles: ",.data$N.Articles,"\n% of production: ",round(.data$Freq*100,1)))) +
+    g=ggplot2::ggplot(AuProd, aes(x = N.Articles, y = Freq*100, text=paste("N.Articles: ",N.Articles,"\n% of production: ",round(Freq*100,1)))) +
       geom_line(aes(group="NA")) +
       #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
-      geom_line(data=AuProd, aes(y=.data$Theoretical*100, group="NA"),linetype = "dashed",color="black",alpha=0.8)+
+      geom_line(data=AuProd, aes(y=Theoretical*100, group="NA"),linetype = "dashed",color="black",alpha=0.8)+
       xlim(0,max(AuProd$N.Articles)+1)+
       labs(x = 'Documents written'
            , y = '% of Authors'
@@ -2466,7 +2466,7 @@ To ensure the functionality of Biblioshiny,
     
     k=input$MostRelCountriesK
     xx <- values$TABCo %>% slice_head(n=k) %>% 
-      select(.data$Country,.data$SCP,.data$MCP)
+      select(Country,SCP,MCP)
     xx=xx[order(-(xx$SCP+xx$MCP)),]
     xx1=cbind(xx[,1:2],rep("SCP",k))
     names(xx1)=c("Country","Freq","Collaboration")
@@ -2475,13 +2475,13 @@ To ensure the functionality of Biblioshiny,
     xx=rbind(xx2,xx1)
     xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
     
-    xx2 <- xx %>% dplyr::group_by(.data$Country) %>%
-      dplyr::summarize(Freq = sum(.data$Freq))
+    xx2 <- xx %>% dplyr::group_by(Country) %>%
+      dplyr::summarize(Freq = sum(Freq))
     
     x <- c(0.5,0.5+length(levels(xx2$Country))*0.125)+1
     y <- c(max(xx2$Freq)-0.02-diff(range(xx2$Freq))*0.125,max(xx2$Freq)-0.02)
     
-    g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=.data$Country, y=.data$Freq,fill=.data$Collaboration, text=paste("Country: ",.data$Country,"\nN.of Documents: ",.data$Freq))) +
+    g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=Country, y=Freq,fill=Collaboration, text=paste("Country: ",Country,"\nN.of Documents: ",Freq))) +
                          geom_bar(aes(group="NA"),stat="identity")+
                          scale_x_discrete(limits = rev(levels(xx$Country)))+
                          scale_fill_discrete(name="Collaboration",
@@ -2881,10 +2881,10 @@ To ensure the functionality of Biblioshiny,
                  value = 0, {
                    TAB <-localCitations(values$M, fast.search=FALSE, sep = input$LocCitSep)$Paper
                    TAB <- TAB %>%
-                     group_by(.data$Year) %>%
-                     mutate(Ratio = .data$LCS/.data$GCS*100,
-                            NLCS = .data$LCS/mean(.data$LCS),
-                            NGCS = .data$GCS/mean(.data$GCS)) %>%
+                     group_by(Year) %>%
+                     mutate(Ratio = LCS/GCS*100,
+                            NLCS = LCS/mean(LCS),
+                            NGCS = GCS/mean(GCS)) %>%
                      ungroup() %>%
                      as.data.frame()
                  })
@@ -2970,7 +2970,7 @@ To ensure the functionality of Biblioshiny,
     CR <- citations(values$M,sep=input$CitRefsSep)$Cited
     TAB <- data.frame(names(CR),as.numeric(CR))
     names(TAB) <- c("Cited References", "Citations")
-    values$TABCitRef <- TAB %>% filter(.data$`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
+    values$TABCitRef <- TAB %>% filter(`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
     
     xx=values$TABCitRef
     if (input$MostCitRefsK>dim(xx)[1]){
@@ -3508,7 +3508,7 @@ To ensure the functionality of Biblioshiny,
     x <- c(max(values$DF$Year)-0.02-diff(range(values$SO$Year))*0.20, max(values$DF$Year)-0.02)-1
     y <- c(min(values$DF$Freq),min(values$DF$Freq)+diff(range(values$DF$Freq))*0.20)
     
-    g <- ggplot(values$DF, aes(x=.data$Year,y=.data$Freq, group=.data$Term, color=.data$Term, text = Text))+
+    g <- ggplot(values$DF, aes(x=Year,y=Freq, group=Term, color=Term, text = Text))+
       geom_line()+
       labs(x = 'Year'
            , y = laby
@@ -4173,8 +4173,8 @@ To ensure the functionality of Biblioshiny,
     values$d <- event_data("plotly_click")
     coord <- values$d[c("x","y")]
     color <- values$TM$clusters_orig %>% 
-      filter(.data$rcentrality==coord$x,.data$rdensity==coord$y) %>% 
-      select(.data$color) %>% as.character()
+      filter(rcentrality==coord$x,rdensity==coord$y) %>% 
+      select(color) %>% as.character()
     g <- values$TM$subgraphs[[color]]
     values$plotClust <- igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
     values$plotClust 

@@ -1,3 +1,6 @@
+utils::globalVariables(c("AU", "n", "TC", "PY", "AU.x", "year", "Author",
+                       "TCpY", "freq"))
+
 #' Top-Authors' Productivity over Time
 #'
 #' It calculates and plots the author production (in terms of number of publications) over the time. 
@@ -33,9 +36,9 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   nAU <- lengths(listAU)
   df <- data.frame(AU=trimws(unlist(listAU)), SR=rep(M$SR,nAU)) 
   AU <- df %>% 
-    group_by(.data$AU) %>% 
+    group_by(AU) %>% 
     count() %>% 
-    arrange(desc(.data$n)) %>% 
+    arrange(desc(n)) %>% 
     ungroup() 
   k <- min(k,nrow(AU))
   AU <- AU %>% 
@@ -44,19 +47,19 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   df <- df %>% 
     right_join(AU, by = "AU") %>%
     left_join(M, by = "SR") %>% 
-    select(.data$AU.x,.data$PY, .data$TI, .data$SO, .data$DI, .data$TC) %>% 
-    mutate(TCpY = .data$TC/(Y-.data$PY+1)) %>%
-    group_by(.data$AU.x) %>% 
-    mutate(n = length(.data$AU.x)) %>% 
+    select("AU.x","PY","TI","SO","DI","TC") %>% 
+    mutate(TCpY = TC/(Y-PY+1)) %>%
+    group_by(AU.x) %>% 
+    mutate(n = length(AU.x)) %>% 
     ungroup() %>% 
-    rename(Author = .data$AU.x,
-           year = .data$PY,
-           DOI = .data$DI) %>% 
-    arrange(desc(.data$n), desc(.data$year)) %>% 
-    select(-.data$n)
+    rename(Author = AU.x,
+           year = PY,
+           DOI = DI) %>% 
+    arrange(desc(n), desc(year)) %>% 
+    select(-n)
   
-  df2 <- dplyr::group_by(df, .data$Author,.data$year) %>%
-    dplyr::summarise(freq=length(.data$year),TC=sum(.data$TC),TCpY=sum(.data$TCpY)) %>% 
+  df2 <- dplyr::group_by(df, Author,year) %>%
+    dplyr::summarise(freq=length(year),TC=sum(TC),TCpY=sum(TCpY)) %>% 
     as.data.frame()
   
   df2$Author <- factor(df2$Author,levels=AU$AU[1:k])
@@ -67,8 +70,8 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
   data("logo",envir=environment())
   logo <- grid::rasterGrob(logo,interpolate = TRUE)
   
-  g <- ggplot(df2, aes(x=.data$Author, y=.data$year, text = paste("Author: ", .data$Author,"\nYear: ",.data$year ,"\nN. of Articles: ",.data$freq ,"\nTotal Citations per Year: ", round(.data$TCpY,2))))+
-    geom_point(aes(alpha=.data$TCpY,size = .data$freq), color="dodgerblue4")+ 
+  g <- ggplot(df2, aes(x=Author, y=year, text = paste("Author: ", Author,"\nYear: ",year ,"\nN. of Articles: ",freq ,"\nTotal Citations per Year: ", round(TCpY,2))))+
+    geom_point(aes(alpha=TCpY,size = freq), color="dodgerblue4")+ 
     scale_size(range=c(2,6))+
     scale_alpha(range=c(0.3,1))+
     scale_y_continuous(breaks = seq(min(df2$year),max(df2$year), by=2))+
@@ -94,7 +97,7 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
     labs(title="Authors' Production over Time", 
          x="Author",
          y="Year")+
-    geom_line(data=df2,aes(x = .data$Author, y = .data$year, group=.data$Author),size=1.0, color="firebrick4", alpha=0.3 )+
+    geom_line(data=df2,aes(x = Author, y = year, group=Author),size=1.0, color="firebrick4", alpha=0.3 )+
     scale_x_discrete(limits = rev(levels(df2$Author)))+
     coord_flip() +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 

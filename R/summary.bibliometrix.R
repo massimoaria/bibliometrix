@@ -1,3 +1,4 @@
+utils::globalVariables(c("Country", "TotalCitation", "TC"))
 #' Summarizing bibliometric analysis results
 #'
 #' \code{summary} method for class '\code{bibliometrix}'
@@ -186,9 +187,9 @@ summary.bibliometrix<-function(object, ...){
 
   Co2 <- data.frame(Country=object$CO,TotalCitation=object$TotalCitation)
   Co2 <- Co2[!is.na(Co2[,1]),]
-  AC <- Co2 %>% group_by(.data$Country) %>% 
-    summarise("TC"=sum(.data$TotalCitation),"Average Article Citations"=sum(.data$TotalCitation)/length(.data$TotalCitation)) %>%
-    arrange(-.data$TC) #%>% as.data.frame(.data)
+  AC <- Co2 %>% group_by(Country) %>% 
+    summarise("TC"=sum(TotalCitation),"Average Article Citations"=sum(TotalCitation)/length(TotalCitation)) %>%
+    arrange(-TC) #%>% as.data.frame(.data)
   
   AC <- as.data.frame(AC)
   

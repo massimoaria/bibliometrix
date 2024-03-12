@@ -1,3 +1,4 @@
+utils::globalVariables(c("level"))
 #' Three Fields Plot
 #'
 #' Visualize the main items of three fields (e.g. authors, keywords, journals), and how they are related through a Sankey diagram.
@@ -102,9 +103,9 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
   Kx <- length(table(Nodes$group))
   Ky <- nrow(Nodes)
   Nodes <-Nodes %>% 
-    #mutate(coordX=factor(.data$group, labels = seq(from= 0, to= 1, by= 1/(Kx-0.8)))) %>%  # before: seq(from= 0, to= 1, by= 1/(Kx-1))
+    #mutate(coordX=factor(group, labels = seq(from= 0, to= 1, by= 1/(Kx-0.8)))) %>%  # before: seq(from= 0, to= 1, by= 1/(Kx-1))
     mutate(
-      coordX=rep(seq(from= 0, to= 1, by= 1/(Kx-0.8)),as.numeric(table(.data$level))),
+      coordX=rep(seq(from= 0, to= 1, by= 1/(Kx-0.8)),as.numeric(table(level))),
       coordY= rep(0.1, Ky))
   
   colornodes <- c("#9E0142", "#D53E4F", "#F46D43", "#FDAE61", "#FEE08B", "#E6F598", "#ABDDA4", "#66C2A5", "#3288BD", "#5E4FA2")         

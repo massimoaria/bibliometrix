@@ -1,3 +1,4 @@
+utils::globalVariables(c("item", "freq","year_q1", "year_med", "year_q3"))
 #' Field Tag distribution by Year
 #'
 #' It calculates the median year for each item of a field tag. 
@@ -55,7 +56,7 @@ fieldByYear <- function(M,
   trend_med <- as_tibble(t(trend_med)) %>% 
     rename("year_q1"='25%', "year_med"='50%', "year_q3"='75%') %>%  
     mutate(item=rownames(t(trend_med)), freq=n) %>% 
-    relocate(c(.data$item,.data$freq), .data$year_q1)
+    relocate(c(item,freq), year_q1)
 
   # if timespan is null, timespan is set to the whole period
   if (is.null(timespan) | length(timespan)!=2){
@@ -63,14 +64,14 @@ fieldByYear <- function(M,
   }
   
   df <- trend_med %>%
-    mutate(item = tolower(.data$item)) %>%
-    group_by(.data$year_med) %>%
-    arrange(desc(.data$freq), .data$item) %>%
-    arrange(desc(.data$year_med)) %>%   
+    mutate(item = tolower(item)) %>%
+    group_by(year_med) %>%
+    arrange(desc(freq), item) %>%
+    arrange(desc(year_med)) %>%   
     dplyr::slice_head(n=n.items) %>% 
-    dplyr::filter(.data$freq >= min.freq) %>%
-    dplyr::filter(between(.data$year_med, timespan[1],timespan[2])) %>%
-    mutate(item = fct_reorder(.data$item, .data$freq))
+    dplyr::filter(freq >= min.freq) %>%
+    dplyr::filter(between(year_med, timespan[1],timespan[2])) %>%
+    mutate(item = fct_reorder(item, freq))
   
   data("logo",envir=environment())
   logo <- grid::rasterGrob(logo,interpolate = TRUE)
@@ -80,10 +81,10 @@ fieldByYear <- function(M,
   x <- c(0+0.5,0.05+length(levels(df$item))*0.125)+1
   y <- c(yrange[2]-0.02-diff(yrange)*0.125,yrange[2]-0.02)
   
-  g <- ggplot(df, aes(x=.data$item, y=.data$year_med, 
-                      text = paste("Term: ", .data$item,"\nYear: ",
-                                   .data$year_med ,"\nTerm frequency: ",.data$freq )))+
-    geom_point(aes(size = .data$freq), alpha=0.6, color="dodgerblue4")+ 
+  g <- ggplot(df, aes(x=item, y=year_med, 
+                      text = paste("Term: ", item,"\nYear: ",
+                                   year_med ,"\nTerm frequency: ",freq )))+
+    geom_point(aes(size = freq), alpha=0.6, color="dodgerblue4")+ 
     scale_size(range=c(2,6))+
     #scale_alpha(range=c(0.3,1))+
     scale_y_continuous(breaks = seq(min(df$year_q1),max(df$year_q3), by=2))+
@@ -105,15 +106,15 @@ fieldByYear <- function(M,
  
    if (!isTRUE(dynamic.plot)){
     g <- g+geom_vline(xintercept=nrow(df)-(which(c(diff(df$year_med))==-1)-0.5), color="grey70",alpha=0.6, linetype=6)+
-      geom_point(aes(y=.data$year_q1), alpha=0.6, size = 3, color="royalblue4", shape="|")+
-      geom_point(aes(y=.data$year_q3), alpha=0.6, size = 3, color="royalblue4", shape="|")
+      geom_point(aes(y=year_q1), alpha=0.6, size = 3, color="royalblue4", shape="|")+
+      geom_point(aes(y=year_q3), alpha=0.6, size = 3, color="royalblue4", shape="|")
   }
   
  g <- g+
     labs(title="Trend Topics", 
          x="Term",
          y="Year")+
-    geom_segment(data=df, aes(x = .data$item, y = .data$year_q1, xend = .data$item, yend = .data$year_q3), size=1.0, color="royalblue4", alpha=0.3) +
+    geom_segment(data=df, aes(x = item, y = year_q1, xend = item, yend = year_q3), size=1.0, color="royalblue4", alpha=0.3) +
     coord_flip() 
   
   if (isTRUE(graph)) {

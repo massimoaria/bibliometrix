@@ -1,3 +1,4 @@
+utils::globalVariables(c("Paper", "Tag", "content", "cont"))
 pubmed2df<-function(D){
   
   D <- D[nchar(D)>0]  # remove empty rows
@@ -15,10 +16,10 @@ pubmed2df<-function(D){
   
   DATA <- data.frame(Tag = substr(D,1,4), content = substr(D,7,nchar(D)), Paper=numPapers)
   DATA$Tag <- gsub(" ","",DATA$Tag)
-  df <- DATA %>% group_by(.data$Paper, .data$Tag) %>%
-    summarise(cont=paste(.data$content, collapse="---",sep="")) %>%
-    arrange(.data$Tag, .data$Paper) %>%
-    pivot_wider(names_from =  .data$Tag,values_from = .data$cont) %>%
+  df <- DATA %>% group_by(Paper, Tag) %>%
+    summarise(cont=paste(content, collapse="---",sep="")) %>%
+    arrange(Tag, Paper) %>%
+    pivot_wider(names_from =  Tag,values_from = cont) %>%
     ungroup()
   df <- as.data.frame(df)
   

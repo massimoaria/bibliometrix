@@ -1,3 +1,5 @@
+utils::globalVariables(c("PY", "LCS", "TC", "SR", "NGCS", "NLCS", "Author",
+                         "year", "SO"))
 #' Calculate the normalized citation score metric
 #'
 #' It calculates the normalized citation score for documents, authors and sources using both global and local citations.
@@ -48,10 +50,10 @@ normalizeCitationScore <- function(M,field="documents", impact.measure = "local"
   }
   
   M <- M %>% 
-    group_by(.data$PY) %>%
-    mutate(LCS = replace(.data$LCS, .data$LCS==0, 1),
-           NGCS = .data$TC/mean(.data$TC,na.rm=TRUE),
-           NLCS = .data$LCS/mean(.data$LCS,na.rm=TRUE)) %>%
+    group_by(PY) %>%
+    mutate(LCS = replace(LCS, LCS==0, 1),
+           NGCS = TC/mean(TC,na.rm=TRUE),
+           NLCS = LCS/mean(LCS,na.rm=TRUE)) %>%
     ungroup() %>% as.data.frame()
   
   
@@ -59,12 +61,12 @@ normalizeCitationScore <- function(M,field="documents", impact.measure = "local"
          documents={
            #### Documents Impact by Normalized Local Citations ####
            NCS <- M %>%
-             select(.data$SR, .data$PY, .data$NGCS, .data$NLCS, .data$TC, .data$LCS) %>%
-             rename(MNGCS = .data$NGCS,
-                    MNLCS = .data$NLCS,
-                    LC = .data$LCS
+             select(SR, PY, NGCS, NLCS, TC, LCS) %>%
+             rename(MNGCS = NGCS,
+                    MNLCS = NLCS,
+                    LC = LCS
              ) %>% 
-             rename(documents=.data$SR) %>% as.data.frame()
+             rename(documents=SR) %>% as.data.frame()
          },
          authors={
            #### Authors Impact by Normalized Local Citations ####
@@ -83,26 +85,26 @@ normalizeCitationScore <- function(M,field="documents", impact.measure = "local"
            df=df[-1,]
            
            NCS <- df  %>%
-             group_by(.data$Author) %>%
-             summarize(NP = length(.data$year),
-                       MNGCS = mean(.data$NGCS,na.rm=TRUE),
-                       MNLCS = mean(.data$NLCS,na.rm=TRUE),
-                       TC = mean(.data$TC,na.rm=TRUE),
-                       LC = mean(.data$LCS,na.rm=TRUE) 
+             group_by(Author) %>%
+             summarize(NP = length(year),
+                       MNGCS = mean(NGCS,na.rm=TRUE),
+                       MNLCS = mean(NLCS,na.rm=TRUE),
+                       TC = mean(TC,na.rm=TRUE),
+                       LC = mean(LCS,na.rm=TRUE) 
              ) %>% 
-             rename(authors=.data$Author) %>% as.data.frame()
+             rename(authors=Author) %>% as.data.frame()
          },
          sources={
            #### Source Impact by Normalized Local Citations ####
            NCS <- M %>% 
-             group_by(.data$SO) %>%
-             summarize(NP = length(.data$PY),
-                       MNGCS = mean(.data$NGCS,na.rm=TRUE),
-                       MNLCS = mean(.data$NLCS,na.rm=TRUE),
-                       TC = mean(.data$TC,na.rm=TRUE),
-                       LC = mean(.data$LCS,na.rm=TRUE)
+             group_by(SO) %>%
+             summarize(NP = length(PY),
+                       MNGCS = mean(NGCS,na.rm=TRUE),
+                       MNLCS = mean(NLCS,na.rm=TRUE),
+                       TC = mean(TC,na.rm=TRUE),
+                       LC = mean(LCS,na.rm=TRUE)
              ) %>%
-             rename(sources=.data$SO) %>% as.data.frame()
+             rename(sources=SO) %>% as.data.frame()
          })
   
   if (impact.measure == "global"){

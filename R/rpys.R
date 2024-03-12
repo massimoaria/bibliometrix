@@ -1,4 +1,7 @@
-##' Reference Publication Year Spectroscopy
+utils::globalVariables(c("Year", "diffMedian", "Citations", "citedYears",
+                         "Reference", "citingYears", "benchmark", "status", "citations",
+                         "Freq", "diffMedian5"))
+#' Reference Publication Year Spectroscopy
 #'
 #' \code{rpys} computes a Reference Publication Year Spectroscopy for detecting 
 #' the Historical Roots of Research Fields.
@@ -46,35 +49,35 @@ rpys <- function(M, sep=";", timespan=NULL, graph=T){
   Fi<-(unlist(Fi))
   
   df <- data.frame(Reference=Fi, citingYears=citingYears) %>% 
-    mutate(Reference = refCleaning(.data$Reference, db=M$DB[1]))
+    mutate(Reference = refCleaning(Reference, db=M$DB[1]))
   df$citedYears <- as.numeric(yearExtract(df$Reference, db=M$DB[1]))
   
   df <- df %>% 
-    dplyr::filter(!is.na(.data$Reference) & .data$citedYears>1700 & .data$citedYears<=as.numeric(substr(Sys.Date(),1,4))) %>% 
-    group_by(.data$citedYears,.data$citingYears, .data$Reference) %>% 
+    dplyr::filter(!is.na(Reference) & citedYears>1700 & citedYears<=as.numeric(substr(Sys.Date(),1,4))) %>% 
+    group_by(citedYears,citingYears, Reference) %>% 
     summarize(citations = n()) %>% 
-    group_by(.data$citedYears,.data$citingYears) %>% 
-    mutate(benchmark = mean(.data$citations,na.rm=T),
-           status = sign(.data$citations-.data$benchmark)) %>% 
+    group_by(citedYears,citingYears) %>% 
+    mutate(benchmark = mean(citations,na.rm=T),
+           status = sign(citations-benchmark)) %>% 
     ungroup() %>% 
-    arrange(.data$citedYears,.data$Reference,.data$citingYears) 
+    arrange(citedYears,Reference,citingYears) 
 
   
   
   CR <- df %>% 
-    group_by(.data$citedYears,.data$Reference) %>% 
-    select(-.data$citingYears, -.data$status) %>% 
-    summarize(Freq = sum(.data$citations))
+    group_by(citedYears,Reference) %>% 
+    select(-citingYears, -status) %>% 
+    summarize(Freq = sum(citations))
 
 RPYS <- CR %>% 
-  select(-.data$Reference) %>% 
-  group_by(.data$citedYears) %>% 
-  summarize(n = sum(.data$Freq, na.rm=TRUE))
+  select(-Reference) %>% 
+  group_by(citedYears) %>% 
+  summarize(n = sum(Freq, na.rm=TRUE))
   
 yearSeq <- RPYS$citedYears
 missingYears <- setdiff(seq(min(yearSeq),max(yearSeq)), yearSeq)
 RPYS[(nrow(RPYS)+1):(nrow(RPYS)+length(missingYears)),] <- rbind(cbind(missingYears,rep(0,length(missingYears))))
-RPYS <- RPYS %>% arrange(.data$citedYears)
+RPYS <- RPYS %>% arrange(citedYears)
 
 
 ## calculating running median
@@ -91,13 +94,13 @@ RPYS$diffMedian <- RPYS$n-Median
 
 if (length(timespan)==2){
   RPYS <- RPYS %>% 
-    dplyr::filter(.data$citedYears>=min(timespan) & 
-                    .data$citedYears<=max(timespan))
+    dplyr::filter(citedYears>=min(timespan) & 
+                    citedYears<=max(timespan))
 }
 names(RPYS) <- c("Year", "Citations", "diffMedian5")
 
 RPYS <- RPYS %>% 
-  mutate(diffMedian = ifelse(.data$diffMedian5>0,.data$diffMedian5,0))
+  mutate(diffMedian = ifelse(diffMedian5>0,diffMedian5,0))
 
 data("logo",envir=environment())
 logo <- grid::rasterGrob(logo,interpolate = TRUE)
@@ -107,11 +110,11 @@ y <- c(min(c(RPYS$Citations,RPYS$diffMedian)),min(c(RPYS$Citations,RPYS$diffMedi
 
 
 
-g=ggplot(RPYS, aes(x=.data$Year ,y=.data$Citations,text=paste("Year: ",.data$Year,"\nN. of References: ",.data$Citations)))+
+g=ggplot(RPYS, aes(x=Year ,y=Citations,text=paste("Year: ",Year,"\nN. of References: ",Citations)))+
   geom_line(aes(group="NA")) +
   #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
   #geom_hline(aes(yintercept=0, color = 'grey'))+
-  geom_line(aes(x=.data$Year,y=.data$diffMedian, color="firebrick", group="NA"))+
+  geom_line(aes(x=Year,y=diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'
        , y = 'Cited References'
        , title = "Reference Publication Year Spectroscopy",
@@ -135,11 +138,11 @@ g=ggplot(RPYS, aes(x=.data$Year ,y=.data$Citations,text=paste("Year: ",.data$Yea
     if (isTRUE(graph)){plot(g)}
     CR$Reference <- reduceRefs(CR$Reference)
     CR <- CR %>% 
-      rename(Year = .data$citedYears) %>% 
+      rename(Year = citedYears) %>% 
       ungroup()
     result=list(spectroscopy=g, 
                 rpysTable=RPYS, 
-                CR=CR %>% mutate(Year = as.character(.data$Year)), 
+                CR=CR %>% mutate(Year = as.character(Year)), 
                 df=df)
     return(result)
 }

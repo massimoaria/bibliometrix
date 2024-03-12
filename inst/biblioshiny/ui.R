@@ -261,6 +261,15 @@ body <- dashboardBody(
                                    "Cochrane Library" = "cochrane"
                                  ),
                                  selected = "isi"
+                               ),
+                               selectInput(
+                                 "authorName",
+                                 label = "Author Name format",
+                                 choices = c(
+                                   "Fullname (if available)" = "AF",
+                                   "Surname and Initials" = "AU"
+                                 ),
+                                 selected = "AU"
                                )
                              ),
                              conditionalPanel(

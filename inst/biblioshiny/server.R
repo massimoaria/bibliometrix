@@ -239,6 +239,11 @@ To ensure the functionality of Biblioshiny,
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
                                                   format = format(D))
+                                  if (input$authorName=="AF"){
+                                    M <- M %>% 
+                                      rename(AU_IN = .data$AU,
+                                             AU = .data$AF)
+                                  }
                                 })
                  },
                  ### WoS Txt/Bib Files
@@ -248,6 +253,11 @@ To ensure the functionality of Biblioshiny,
                                   M <- convert2df(inFile$datapath,
                                                   dbsource = input$dbsource,
                                                   format = format(inFile$datapath))
+                                  if (input$authorName=="AF"){
+                                    M <- M %>% 
+                                      rename(AU_IN = .data$AU,
+                                             AU = .data$AF)
+                                  }
                                 })
                  })
         },
@@ -261,6 +271,11 @@ To ensure the functionality of Biblioshiny,
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
                                                   format = format(D))
+                                  if (input$authorName=="AF"){
+                                    M <- M %>% 
+                                      rename(AU_IN = .data$AU,
+                                             AU = .data$AF)
+                                  }
                                 })
                  },
                  ### Scopus CSV/Bib Files
@@ -270,6 +285,11 @@ To ensure the functionality of Biblioshiny,
                                   M <- convert2df(inFile$datapath,
                                                   dbsource = input$dbsource,
                                                   format = "csv")
+                                  if (input$authorName=="AF"){
+                                    M <- M %>% 
+                                      rename(AU_IN = .data$AU,
+                                             AU = .data$AF)
+                                  }
                                 })
                  },
                  bib = {
@@ -278,6 +298,11 @@ To ensure the functionality of Biblioshiny,
                                   M <- convert2df(inFile$datapath,
                                                   dbsource = input$dbsource,
                                                   format = "bibtex")
+                                  if (input$authorName=="AF"){
+                                    M <- M %>% 
+                                      rename(AU_IN = .data$AU,
+                                             AU = .data$AF)
+                                  }
                                 })
                  })
         },

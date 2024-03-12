@@ -1,4 +1,5 @@
-utils::globalVariables(c("label"))
+utils::globalVariables(c("clust","Dim1","Dim2","label","id","shape",
+                         "color", "contrib","dim1","dim2","nomi", "TC"))
 #' Creating and plotting conceptual structure map of a scientific field
 #'
 #' The function \code{conceptualStructure} creates a conceptual structure map of 
@@ -195,8 +196,8 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   km.res$data=df
   km.res$cluster=cutree(km.res,k=clust)
   km.res$data.clust=data.frame(km.res$data,clust=km.res$cluster)
-  centers<- km.res$data.clust %>% group_by(.data$clust) %>% 
-    summarise("Dim1"=mean(.data$Dim1),"Dim2"=mean(.data$Dim2)) %>% 
+  centers<- km.res$data.clust %>% group_by(clust) %>% 
+    summarise("Dim1"=mean(Dim1),"Dim2"=mean(Dim2)) %>% 
     as.data.frame()
   
   km.res$centers=centers[,c(2,3,1)]
@@ -208,30 +209,30 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     mutate(shape = "1",
            label = row.names(.)) %>% 
     bind_rows(km.res$centers %>% mutate(shape = "0", label="")) %>% 
-    mutate(color = colorlist()[.data$clust])
+    mutate(color = colorlist()[clust])
   
   hull_data <- 
     df_clust %>%
-    group_by(.data$clust) %>% 
-    slice(chull(.data$Dim1, .data$Dim2))
+    group_by(clust) %>% 
+    slice(chull(Dim1, Dim2))
   
   hull_data <- hull_data %>%
     bind_rows(
       hull_data %>% group_by(clust) %>% slice_head(n=1)
     ) %>%
     mutate(id = row_number()) %>%
-    arrange(.data$clust,.data$id)
+    arrange(clust,id)
   
   size <- labelsize
   
-  b <- ggplot(df_clust, aes(x=.data$Dim1, y=.data$Dim2, shape=.data$shape, color=.data$color)) +
+  b <- ggplot(df_clust, aes(x=Dim1, y=Dim2, shape=shape, color=color)) +
     geom_point() + 
     geom_polygon(data = hull_data,
-                 aes(fill = .data$color,
-                     colour = .data$color),
+                 aes(fill = color,
+                     colour = color),
                  alpha = 0.3,
                  show.legend = FALSE) +
-    ggrepel::geom_text_repel(aes(label=.data$label)) +
+    ggrepel::geom_text_repel(aes(label=label)) +
     theme_minimal()+
     labs(title= paste("Conceptual Structure Map - method: ",method,collapse="",sep="")) +
     geom_hline(yintercept=0, linetype="dashed", color = adjustcolor("grey40",alpha.f = 0.7))+
@@ -282,8 +283,8 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     A$contrib <- docCoord$contrib
     A <- A %>%
       mutate(names=row.names(A)) %>%
-      group_by(.data$color) %>%
-      top_n(n=documents,wt=.data$contrib) %>%
+      group_by(color) %>%
+      top_n(n=documents,wt=contrib) %>%
       select(!"contrib")%>%
       as.data.frame() 
     
@@ -302,7 +303,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     rangex=c(min(df_all[,1]),max(df_all[,1]))
     rangey=c(min(df_all[,2]),max(df_all[,2]))
 
-    b_doc <- ggplot(aes(x=.data$dim1,y=.data$dim2,label=.data$nomi),data=A)+
+    b_doc <- ggplot(aes(x=dim1,y=dim2,label=nomi),data=A)+
       geom_point(size = 2, color = A$color)+
       labs(title= "Factorial map of the documents with the highest contributes") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 
@@ -347,8 +348,8 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     B$TC <- docCoord$TC
     B <- B %>%
       mutate(names=row.names(B)) %>%
-      group_by(.data$color) %>%
-      top_n(n=documents, wt=.data$TC) %>%
+      group_by(color) %>%
+      top_n(n=documents, wt=TC) %>%
       select(!"TC")%>%
       as.data.frame() 
     
@@ -363,7 +364,7 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
     rangex=c(min(df_all_TC[,1]),max(df_all_TC[,1]))
     rangey=c(min(df_all_TC[,2]),max(df_all_TC[,2]))
     
-    b_doc_TC=ggplot(aes(x=.data$dim1,y=.data$dim2,label=.data$nomi),data=B)+
+    b_doc_TC=ggplot(aes(x=dim1,y=dim2,label=nomi),data=B)+
       geom_point(size = 2, color = B$color)+
       labs(title= "Factorial map of the most cited documents") +
       geom_label_repel(box.padding = unit(0.5, "lines"),size=(log(labelsize*3)), fontface = "bold", 

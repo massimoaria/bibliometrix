@@ -1,6 +1,4 @@
-# utils::globalVariables("where")
-# utils::globalVariables("any_of")
-# utils::globalVariables("if_all")
+utils::globalVariables(c("X1","X2","tag","orig"))
 
 csvScopus2df <- function(file){
   options(readr.num_columns = 0)
@@ -93,12 +91,12 @@ labelling <- function(DATA){
           c("Document Type","DT"),
           c("Source","DB"),
           c("EID","UT"))) %>% 
-    rename(orig = .data$X1,
-           tag = .data$X2)
+    rename(orig = X1,
+           tag = X2)
   
   label <- data.frame(orig=names(DATA)) %>% 
     left_join(df_tag,by = "orig") %>% 
-    mutate(tag = ifelse(is.na(.data$tag),.data$orig,.data$tag))
+    mutate(tag = ifelse(is.na(tag),orig,tag))
   
   names(DATA) <- label$tag
   

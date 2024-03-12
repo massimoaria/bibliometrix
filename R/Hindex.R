@@ -1,3 +1,4 @@
+utils::globalVariables(c("TC","AUs", "PY", "h_index", "PY_start", "Element"))
 #' h-index calculation
 #'
 #' It calculates the authors' h-index and its variants.
@@ -50,7 +51,7 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
   #elements=paste("\\\b",elements,"\\\b",sep="")
   M$TC <- as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
-  M <- M %>% dplyr::filter(!is.na(.data$TC) | !is.na(.data$TC))
+  M <- M %>% dplyr::filter(!is.na(TC) | !is.na(TC))
   #M <- M[M$TC>0,]
   
   Today=as.numeric(substr(Sys.time(),1,4))
@@ -84,25 +85,25 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
   }
   
   H <- df %>% 
-    group_by(.data$AUs) %>% 
-    reframe(#Element = .data$AUs[1],
-      h_index = h_calc(.data$TC),
-      g_index = g_calc(.data$TC),
-      PY_start = min(.data$PY),
-      TC = sum(.data$TC),
-      NP = length(.data$AUs)) %>%
+    group_by(AUs) %>% 
+    reframe(
+      h_index = h_calc(TC),
+      g_index = g_calc(TC),
+      PY_start = min(PY),
+      TC = sum(TC),
+      NP = length(AUs)) %>%
     mutate(
-      m_index = .data$h_index / (Today -.data$PY_start+1)
+      m_index = h_index / (Today -PY_start+1)
     ) %>%
-    rename(Element = .data$AUs) %>%
+    rename(Element = AUs) %>%
     as.data.frame()
   
   if (!is.null(elements)){
     H <- H %>%
-      dplyr::filter(.data$Element %in% elements) %>%
+      dplyr::filter(Element %in% elements) %>%
       dplyr::select("Element","h_index","g_index","m_index","TC","NP","PY_start")
     
-    df <- df %>% dplyr::filter(.data$AUs %in% elements)
+    df <- df %>% dplyr::filter(AUs %in% elements)
   }
   
   #H <- H[c("Element","h_index","g_index","m_index","TC","NP","PY_start")]     

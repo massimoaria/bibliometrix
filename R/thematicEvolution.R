@@ -1,3 +1,7 @@
+utils::globalVariables(c("params", "Cluster_Label", "Occurrences", "Words",
+                         "Cluster_Label.y","Cluster_Label.x", "min", "tot",
+                         "len.x", "len.y","Occurrences.x", "Occurrences.y", "tot.x",
+                         "tot.y", "Cluster.x", "Cluster.y", "Occ","name", "group"))
 #' Perform a Thematic Evolution Analysis
 #'
 #' It performs a Thematic Evolution Analysis based on co-word network analysis and clustering.
@@ -57,7 +61,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
     resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, ngrams=ngrams,
                         stemming = stemming, size = size, n.labels = n.labels, 
                         repel = repel, remove.terms = remove.terms, synonyms = synonyms, cluster=cluster)
-    resk$params <- resk$params %>% dplyr::filter(.data$params!="minfreq")
+    resk$params <- resk$params %>% dplyr::filter(params!="minfreq")
     res[[k]] <-  resk
     net[[k]] <-  resk$net
   }
@@ -83,23 +87,23 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
                                "--", Y[k], sep = "")
     res2$clusters$label <-  paste(res2$clusters$name, "--", 
                                 Y[k], sep = "")
-    cluster1 <- res1$words %>% group_by(.data$Cluster_Label) %>% 
-      mutate(len = length(.data$Words), tot = sum(.data$Occurrences))
-    cluster2 <- res2$words %>% group_by(.data$Cluster_Label) %>% 
-      mutate(len = length(.data$Words), tot = sum(.data$Occurrences))
+    cluster1 <- res1$words %>% group_by(Cluster_Label) %>% 
+      mutate(len = length(Words), tot = sum(Occurrences))
+    cluster2 <- res2$words %>% group_by(Cluster_Label) %>% 
+      mutate(len = length(Words), tot = sum(Occurrences))
     A <- inner_join(cluster1, cluster2, by = "Words") %>% 
-      group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
-      rowwise() %>% mutate(min = min(.data$Occurrences.x, 
-                                     .data$Occurrences.y), Occ = sum(.data$Occurrences.x), 
-                           tot = min(.data$tot.x, .data$tot.y)) %>% ungroup()
-    B <- A %>% group_by(.data$Cluster_Label.x, .data$Cluster_Label.y) %>% 
-      summarise(CL1 = .data$Cluster.x[1], CL2 = .data$Cluster.y[1], 
-                Words = paste0(.data$Words, collapse = ";", sep = ""), 
-                sum = sum(.data$min), Inc_Weighted = sum(.data$min)/min(.data$tot), 
-                Inc_index = length(.data$Words)/min(.data$len.x, 
-                                                    .data$len.y), Occ = .data$Occ[1], Tot = .data$tot[1], 
-                Stability = length(.data$Words)/(.data$len.x[1] + 
-                                                   .data$len.y[1] - length(.data$Words))) %>% 
+      group_by(Cluster_Label.x, Cluster_Label.y) %>% 
+      rowwise() %>% mutate(min = min(Occurrences.x, 
+                                     Occurrences.y), Occ = sum(Occurrences.x), 
+                           tot = min(tot.x, tot.y)) %>% ungroup()
+    B <- A %>% group_by(Cluster_Label.x, Cluster_Label.y) %>% 
+      summarise(CL1 = Cluster.x[1], CL2 = Cluster.y[1], 
+                Words = paste0(Words, collapse = ";", sep = ""), 
+                sum = sum(min), Inc_Weighted = sum(min)/min(tot), 
+                Inc_index = length(Words)/min(len.x, 
+                                                    len.y), Occ = Occ[1], Tot = tot[1], 
+                Stability = length(Words)/(len.x[1] + 
+                                                   len.y[1] - length(Words))) %>% 
       data.frame()
     incMatrix[[k - 1]] <-  B
   }
@@ -130,9 +134,9 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
   edges$to <-  as.numeric(edges$to)
   
   ###for colors
-  nodes <-nodes %>% mutate(label=.data$name) %>% 
+  nodes <-nodes %>% mutate(label=name) %>% 
     separate(sep = "--", col = "name", into = c("name", "group")) %>% 
-    mutate(slice=factor(.data$group,labels =1:K))
+    mutate(slice=factor(group,labels =1:K))
   Nodes<-data.frame()
   for (i in 1:K) {
     Nodes<-rbind(Nodes,left_join(subset(nodes,nodes$slice==i), res[[i]]$clusters[c("color","name")], by="name"))

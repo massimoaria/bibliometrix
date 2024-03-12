@@ -1,3 +1,4 @@
+utils::globalVariables(c("Rank","SO","Freq"))
 #' Bradford's law 
 #'
 #' It estimates and draws the Bradford's law source distribution.
@@ -47,7 +48,7 @@ bradford<-function(M){
   data("logo",envir=environment())
   logo <- grid::rasterGrob(logo,interpolate = TRUE)
   
-  g=ggplot2::ggplot(df, aes(x = log(.data$Rank), y = .data$Freq, text=paste("Source: ",.data$SO,"\nN. of Documents: ",.data$Freq))) +
+  g=ggplot2::ggplot(df, aes(x = log(Rank), y = Freq, text=paste("Source: ",SO,"\nN. of Documents: ",Freq))) +
     geom_line(aes(group="NA")) +
     #geom_area(aes(group="NA"),fill = "gray90", alpha = 0.5) +
     annotate("rect", xmin=0, xmax=log(df$Rank[a]), ymin=0, ymax=max(df$Freq), alpha=0.2)+

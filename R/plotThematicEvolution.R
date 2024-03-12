@@ -1,3 +1,4 @@
+utils::globalVariables(c("group"))
 #' Plot a Thematic Evolution Analysis
 #'
 #' It plot a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
@@ -34,7 +35,7 @@ plotThematicEvolution <- function (Nodes, Edges, measure = "inclusion", min.flow
   Ky <- nrow(Nodes)
   Nodes <-Nodes %>% 
     mutate(
-      coordX=rep(seq(from= 0, to= 1, by= 1/(Kx-0.8)),as.numeric(table(.data$group))),
+      coordX=rep(seq(from= 0, to= 1, by= 1/(Kx-0.8)),as.numeric(table(group))),
       coordY= rep(0.1, Ky)
       )
   

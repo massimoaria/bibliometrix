@@ -1,3 +1,4 @@
+utils::globalVariables(c("degree"))
 #' Plotting Bibliographic networks
 #'
 #' \code{networkPlot} plots a bibliographic network.
@@ -131,8 +132,8 @@ networkPlot <-
     #deg <- igraph::degree_distribution(bsk.network, cumulative=T, mode="all")
     deg <- degree(bsk.network, mode = "all")
     deg.dist <- data.frame(node=V(bsk.network)$name, degree=deg) %>% 
-      arrange(desc(.data$degree)) %>% 
-      mutate(degree = .data$degree/max(.data$degree))
+      arrange(desc(degree)) %>% 
+      mutate(degree = degree/max(degree))
     
     
     # Compute node degrees (#links) and use that to set node size:

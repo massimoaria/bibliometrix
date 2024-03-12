@@ -1,3 +1,8 @@
+utils::globalVariables(c("from", "to", "color", "from_name", "from_title", "from_keywords",
+                         "from_keywordsplus", "from_id","from_size", "from_years",
+                         "to_name", "to_title", "to_keywords", "from2", "x", "y", "color.x",
+                         "to_keywordsplus", "to_id","to_size", "to_years", "color.y",
+                         "Title", "DOI","LCS","GCS","xend","yend","text", "color_v", "id"))
 #' Plotting historical co-citation network
 #'
 #' \code{histPlot} plots a historical co-citation network.
@@ -152,27 +157,17 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, remove.isolates =
   layout_m$x <- layout_m$years
   layout_m$y <- (diff(range(layout_m$x))/diff(range(layout_m$y)))*layout_m$y
 
-  ################
-  # df_net <- dataFromIgraph(bsk.network, layout=as.matrix(layout_m[c("x","y")]), niter=50000, arrow.gap=0)
-  # df_net$color <- "slategray1"
-  # df_net <- left_join(df_net,layout_m[c("name","color")], by = "name") %>% 
-  #   rename(
-  #     color = .data$color.x,
-  #     color_v =.data$color.y
-  #   )
-  # #names(df_net)[10:11] <- c("color", "color_v")
-  
   df_net <- igraph::as_long_data_frame(bsk.network) 
   df_net$color <- "slategray1"
     
   ID <- setdiff(df_net$to,df_net$from)
   
   df_from <- df_net %>%   
-    select(.data$from,.data$to,.data$color,.data$from_name, .data$from_title, .data$from_keywords, .data$from_keywordsplus, .data$from_id, .data$from_size, .data$from_years)
+    select(from,to,color,from_name, from_title, from_keywords, from_keywordsplus, from_id, from_size, from_years)
   
-  df_to <- df_net %>% dplyr::filter(.data$to %in% ID) %>% 
-    mutate(from2=.data$to) %>% 
-    select(.data$from2,.data$to,.data$color,.data$to_name, .data$to_title, .data$to_keywords, .data$to_keywordsplus, .data$to_id, .data$to_size, .data$to_years)
+  df_to <- df_net %>% dplyr::filter(to %in% ID) %>% 
+    mutate(from2=to) %>% 
+    select(from2,to,color,to_name, to_title, to_keywords, to_keywordsplus, to_id, to_size, to_years)
   
   df_to <- df_to[!duplicated(df_to$to),]
   
@@ -184,19 +179,19 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, remove.isolates =
   df_net <- rbind(df_from,df_to)
   
   layout_norm <- layout_m %>% 
-    mutate(x = (.data$x-min(.data$x))/(max(.data$x)-min(.data$x)),
-           y = (.data$y-min(.data$y))/(max(.data$y)-min(.data$y)))
+    mutate(x = (x-min(x))/(max(x)-min(x)),
+           y = (y-min(y))/(max(y)-min(y)))
   df_net <- left_join(df_net,layout_norm[c("name","color","x","y")], by = c("name" ="name")) %>% 
     rename(
-      color = .data$color.x,
-      color_v =.data$color.y
+      color = color.x,
+      color_v =color.y
     ) 
   
   df_coord <- layout_norm %>%
     mutate(to=row_number()) %>% 
-    select(.data$to,.data$x,.data$y) %>% 
-    rename(xend=.data$x,
-           yend=.data$y)
+    select(to,x,y) %>% 
+    rename(xend=x,
+           yend=y)
   
   df_net <- df_net %>% 
     left_join(df_coord, by="to") 
@@ -215,15 +210,15 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, remove.isolates =
   }))
   
   df_net <- df_net %>%
-    mutate(text = paste(tolower(.data$Title), "doi: ",
-                        .data$DOI, "\nLCS: ",
-                        .data$LCS, "    GCS: ",
-                        .data$GCS, sep=""))
+    mutate(text = paste(tolower(Title), "doi: ",
+                        DOI, "\nLCS: ",
+                        LCS, "    GCS: ",
+                        GCS, sep=""))
   
-  g <- ggplot(df_net, aes(x = .data$x, y = .data$y, xend = .data$xend, yend = .data$yend, text=.data$text)) +
+  g <- ggplot(df_net, aes(x = x, y = y, xend = xend, yend = yend, text=text)) +
     geom_network_edges(color = "grey", size=0.4, alpha=0.4) +
-    geom_network_nodes(aes(color = .data$color_v), size = size, alpha=0.5) +
-    geom_text(aes(label=.data$id, color=.data$color_v),  size=labelsize,
+    geom_network_nodes(aes(color = color_v), size = size, alpha=0.5) +
+    geom_text(aes(label=id, color=color_v),  size=labelsize,
               nudge_x = 0,
               nudge_y = 0.02,
               check_overlap = FALSE,alpha=0.7)+

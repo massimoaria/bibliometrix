@@ -229,7 +229,12 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
              id_field <- "UT"
            },
            scopus={
-             id_field <- "UT"
+             if (format=="csv"){
+               id_field <- "UT"
+             } else {
+               id_field <- "TI"
+             }
+             
            },
            openalex={
              id_field <- "id_oa"

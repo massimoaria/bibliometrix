@@ -1,5 +1,69 @@
 ### COMMON FUNCTIONS ####
 
+authorNameFormat <- function(M, format){
+  if (format=="AF" & "AF" %in% names(M)){
+    M <- M %>% 
+      rename(AU_IN = .data$AU,
+             AU = .data$AF)
+  }
+  return(M)
+}
+
+split_text_numbers <- function(input_str, UT) {
+  # Split the string into components based on "; "
+  components <- unlist(strsplit(input_str, "; ", fixed = TRUE))
+  
+  # Initialize two vectors to store the separated parts
+  texts <- character(length(components))
+  numbers <- numeric(length(components))
+  
+  # Iterate through each component to separate text and numbers
+  for (i in seq_along(components)) {
+    # Extract the text using regex, matching everything up to " ("
+    texts[i] <- gsub("\\s\\(.*$", "", components[i])
+    
+    # Extract the numbers using regex, matching digits inside parentheses
+    numbers[i] <- as.numeric(gsub(".*\\((\\d+)\\).*", "\\1", components[i]))
+  }
+  
+  # Return a list with texts and numbers separated
+  data.frame(Texts = texts, Numbers = numbers, UT=UT)
+}
+
+
+AuthorNameMerge <- function(M){
+  
+  df_list <- list()
+  for (i in 1:nrow(M)){
+    if(nchar(M$AU[i])>0){
+      df_list[[i]] <- split_text_numbers(M$AU[i],M$UT[i])
+    }
+  }
+  
+  df <- do.call(rbind,df_list)
+  
+  AU <- df %>% 
+    group_by(.data$Numbers, .data$Texts) %>% 
+    count() %>% 
+    group_by(.data$Numbers) %>%
+    arrange(desc(.data$n)) %>% 
+    mutate(AU = .data$Texts[1]) %>% 
+    select(-"n", - "Texts") %>% 
+    ungroup() %>% 
+    distinct()
+  
+  df <- df %>% 
+    left_join(AU, by = "Numbers") %>% 
+    group_by(UT) %>% 
+    summarize(AU = paste0(AU,collapse=";"),
+              AU_ID = paste0(.data$Numbers, collapse=";"))
+  
+  M <- M %>% 
+    rename(AU_original = .data$AU) %>% 
+    left_join(df, by="UT")
+  return(M)
+}
+
 getFileNameExtension <- function (fn) {
   # remove a path
   splitted    <- strsplit(x=fn, split='/')[[1]]   

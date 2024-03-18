@@ -9,6 +9,9 @@ server <- function(input, output,session){
   ## suppress warnings
   options(warn = -1)
   
+  Chrome_url <- pagedown::find_chrome() 
+  Sys.setenv (CHROMOTE_CHROME = Chrome_url)
+  
   ## chrome configuration for shinyapps server
   #message(curl::curl_version()) # check curl is installed
   if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
@@ -24,7 +27,7 @@ server <- function(input, output,session){
   ## end configuration
   
   ## Check if Chrome browser is installed on the computer
-  if(is.null(chromote::find_chrome())){
+  if(is.null(pagedown::find_chrome())){
     showModal(modalDialog(
       title = strong("Warning message!"),
       HTML("Chrome or a Chromium-based browser is not installed on your computer.<br>

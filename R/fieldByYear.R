@@ -101,7 +101,7 @@ fieldByYear <- function(M,
           ,axis.title.x = element_text(hjust = .95)
           ,axis.text.x = element_text(face="bold", angle = 90)#, size=labelsize)
           ,axis.text.y = element_text(face="bold",)
-          ,axis.line.x = element_line(color="black", size=0.5)
+          ,axis.line.x = element_line(color="black", linewidth=0.5)
     ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
  
    if (!isTRUE(dynamic.plot)){

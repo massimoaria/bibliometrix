@@ -229,7 +229,7 @@ histPlot<-function(histResults, n=20, size = 5, labelsize = 5, remove.isolates =
           axis.line.y = element_blank(), axis.text.y = element_blank(),axis.ticks.y=element_blank(),
           axis.title.y = element_blank(), axis.title.x = element_blank(),
           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(),
-          panel.grid.major.x = element_line(adjustcolor(col="grey", alpha.f = 0.2), linetype = 2, size = 0.5),
+          panel.grid.major.x = element_line(adjustcolor(col="grey", alpha.f = 0.2), linetype = 2, linewidth = 0.5),
           panel.grid.minor.x = element_blank(), 
           axis.text.x=element_text(face="bold", angle = 90, size=labelsize+4)) +
     labs(title = "Historical Direct Citation Network") 

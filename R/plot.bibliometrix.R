@@ -59,8 +59,8 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.y = element_text(vjust = 1, angle = 90)
           ,axis.title.x = element_text(hjust = 0)
           ,axis.text.x = element_text(size=10)
-          ,axis.line.x = element_line(color="black",size=0.5)
-          ,axis.line.y = element_line(color="black",size=0.5)
+          ,axis.line.x = element_line(color="black",linewidth=0.5)
+          ,axis.line.y = element_line(color="black",linewidth=0.5)
     ) +
     annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) +
     coord_flip()
@@ -104,8 +104,8 @@ plot.bibliometrix<-function(x, ...){
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0)
             ,axis.text.x = element_text(size=10)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
+            ,axis.line.x = element_line(color="black",linewidth=0.5)
+            ,axis.line.y = element_line(color="black",linewidth=0.5)
       ) +
       annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) + 
       coord_flip()) 
@@ -149,8 +149,8 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.y = element_text(vjust = 1, angle = 90)
           ,axis.title.x = element_text(hjust = 0)
           ,axis.text.x = element_text(size=10, angle = 90)
-          ,axis.line.x = element_line(color="black",size=0.5)
-          ,axis.line.y = element_line(color="black",size=0.5)
+          ,axis.line.x = element_line(color="black",linewidth=0.5)
+          ,axis.line.y = element_line(color="black",linewidth=0.5)
     ) + annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) 
   
   plot(g)
@@ -204,8 +204,8 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.y = element_text(vjust = 1, angle = 90)
           ,axis.title.x = element_text(hjust = 0)
           ,axis.text.x = element_text(size=10, angle = 90)
-          ,axis.line.x = element_line(color="black",size=0.5)
-          ,axis.line.y = element_line(color="black",size=0.5)
+          ,axis.line.x = element_line(color="black",linewidth=0.5)
+          ,axis.line.y = element_line(color="black",linewidth=0.5)
     ) + annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) 
   
   plot(g)
@@ -234,8 +234,8 @@ plot.bibliometrix<-function(x, ...){
           ,axis.title.y = element_text(vjust = 1, angle = 90)
           ,axis.title.x = element_text(hjust = 0)
           ,axis.text.x = element_text(size=10, angle = 90)
-          ,axis.line.x = element_line(color="black",size=0.5)
-          ,axis.line.y = element_line(color="black",size=0.5)
+          ,axis.line.x = element_line(color="black",linewidth=0.5)
+          ,axis.line.y = element_line(color="black",linewidth=0.5)
     )  + annotation_custom(logo, xmin = xcoord[1], xmax = xcoord[2], ymin = ycoord[1], ymax = ycoord[2]) 
   plot(g)
   graphs$AverTotCitperYear=g

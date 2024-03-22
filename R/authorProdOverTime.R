@@ -77,11 +77,8 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
     scale_y_continuous(breaks = seq(min(df2$year),max(df2$year), by=2))+
     guides(size = guide_legend(order = 1, "N.Articles"), alpha = guide_legend(order = 2, "TC per Year"))+
     theme(legend.position = 'right'
-          #,aspect.ratio = 1
           ,text = element_text(color = "#444444")
           ,panel.background = element_rect(fill = '#FFFFFF')
-          #,panel.grid.minor = element_line(color = 'grey95')
-          #,panel.grid.major = element_line(color = 'grey95')
           ,plot.title = element_text(size = 24)
           ,axis.title = element_text(size = 14, color = '#555555')
           ,axis.title.y = element_text(vjust = 1, angle = 90)#, face="bold")
@@ -89,9 +86,9 @@ authorProdOverTime <- function(M,k=10, graph=TRUE){
           ,axis.text.x = element_text(face="bold", angle = 90)
           ,axis.text.y = element_text(face="bold")
           #,axis.line.x = element_line(color="black", size=1)
-          ,axis.line.x = element_line(color="grey50", size=0.5)
+          ,axis.line.x = element_line(color="grey50", linewidth=0.5)
           ,panel.grid.major.x = element_blank() 
-          ,panel.grid.major.y = element_line( size=.2, color="grey90" ) 
+          ,panel.grid.major.y = element_line( linewidth=.2, color="grey90" ) 
     )+
     #coord_fixed(ratio = 2/1) +
     labs(title="Authors' Production over Time", 

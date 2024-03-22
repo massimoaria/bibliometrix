@@ -1288,8 +1288,8 @@ To ensure the functionality of Biblioshiny,
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
             ,axis.text.x = element_text(vjust = 1, angle = 90)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
+            ,axis.line.x = element_line(color="black",linewidth=0.5)
+            ,axis.line.y = element_line(color="black",linewidth=0.5)
       ) +
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ASPplot <- g
@@ -1379,8 +1379,8 @@ To ensure the functionality of Biblioshiny,
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
+            ,axis.line.x = element_line(color="black",linewidth=0.5)
+            ,axis.line.y = element_line(color="black",linewidth=0.5)
       ) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$ACpYplot <- g
@@ -1793,8 +1793,8 @@ To ensure the functionality of Biblioshiny,
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
             ,axis.text.x = element_text(size=10, angle = 90)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
+            ,axis.line.x = element_line(color="black",linewidth=0.5)
+            ,axis.line.y = element_line(color="black",linewidth=0.5)
       ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     
     values$SDplot <- g
@@ -2236,8 +2236,8 @@ To ensure the functionality of Biblioshiny,
             ,axis.title = element_text(size = 14, color = '#555555')
             ,axis.title.y = element_text(vjust = 1, angle = 0)
             ,axis.title.x = element_text(hjust = 0)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
+            ,axis.line.x = element_line(color="black",linewidth=0.5)
+            ,axis.line.y = element_line(color="black",linewidth=0.5)
       ) +
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     values$LLplot <- g
@@ -2499,7 +2499,7 @@ To ensure the functionality of Biblioshiny,
                                ,axis.title = element_text(size = 14, color = '#555555')
                                ,axis.title.y = element_text(vjust = 1, angle = 0)
                                ,axis.title.x = element_text(hjust = 0)
-                               ,axis.line.x = element_line(color="black",size=0.5)
+                               ,axis.line.x = element_line(color="black",linewidth=0.5)
                          ) +
                          coord_flip()) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
@@ -3536,8 +3536,8 @@ To ensure the functionality of Biblioshiny,
             ,axis.title.y = element_text(vjust = 1, angle = 90)
             ,axis.title.x = element_text(hjust = 0.95, angle = 0)
             ,axis.text.x = element_text(size=10, angle = 90)
-            ,axis.line.x = element_line(color="black",size=0.5)
-            ,axis.line.y = element_line(color="black",size=0.5)
+            ,axis.line.x = element_line(color="black",linewidth=0.5)
+            ,axis.line.y = element_line(color="black",linewidth=0.5)
       ) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
     

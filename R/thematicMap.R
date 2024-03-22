@@ -216,8 +216,8 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
                                          vjust=annotations$vjustvar,label=annotations$words, color=adjustcolor("gray20", alpha.f=0.5),size=3*(1+size))+
       theme(axis.text.x=element_blank(),
             panel.background = element_rect(fill = '#FFFFFF'),
-            axis.line.x = element_line(color="black",size=0.5),
-            axis.line.y = element_line(color="black",size=0.5),
+            axis.line.x = element_line(color="black",linewidth=0.5),
+            axis.line.y = element_line(color="black",linewidth=0.5),
             axis.ticks.x=element_blank(),
             axis.text.y=element_blank(),
             axis.ticks.y=element_blank()

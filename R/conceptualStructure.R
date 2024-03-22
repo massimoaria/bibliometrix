@@ -319,8 +319,8 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
         plot.title=element_text(size=labelsize+1,face="bold"),
         panel.background = element_rect(fill = "white", colour = "white"),
         #panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
-        axis.line.x = element_line(color="black",size=0.5),
-        axis.line.y = element_line(color="black",size=0.5),
+        axis.line.x = element_line(color="black",linewidth=0.5),
+        axis.line.y = element_line(color="black",linewidth=0.5),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
       
@@ -382,8 +382,8 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
         plot.title=element_text(size=labelsize+1,face="bold"),
         panel.background = element_rect(fill = "white", colour = "white"),
         #panel.grid.major = element_line(size = 0.3, linetype = 'dashed', colour = adjustcolor("gray60",alpha.f = 0.7)),
-        axis.line.x = element_line(color="black",size=0.5),
-        axis.line.y = element_line(color="black",size=0.5),
+        axis.line.x = element_line(color="black",linewidth=0.5),
+        axis.line.y = element_line(color="black",linewidth=0.5),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
       

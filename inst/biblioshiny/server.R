@@ -3508,7 +3508,7 @@ To ensure the functionality of Biblioshiny,
     
     Text <- paste(values$DF$Term," (",values$DF$Year,") ",values$DF$Freq, sep="")
     
-    x <- c(max(values$DF$Year)-0.02-diff(range(values$SO$Year))*0.20, max(values$DF$Year)-0.02)-1
+    x <- c(max(values$DF$Year)-0.02-diff(range(values$DF$Year))*0.20, max(values$DF$Year)-0.02)-1
     y <- c(min(values$DF$Freq),min(values$DF$Freq)+diff(range(values$DF$Freq))*0.20)
     
     g <- ggplot(values$DF, aes(x=Year,y=Freq, group=Term, color=Term, text = Text))+

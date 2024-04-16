@@ -2982,7 +2982,7 @@ To ensure the functionality of Biblioshiny,
     
     xx=xx[1:k,]
     
-    g <- freqPlot(xx,x=2,y=1, textLaby = "References", textLabx = "Local Citations", title = "Most Local Cited References", values)
+    g <- freqPlot(xx,x=2,y=1, textLaby = "References", textLabx = "Local Citations", title = "Most Local Cited References", values, string.max=70)
     
     values$MLCRplot <- g
     return(g)

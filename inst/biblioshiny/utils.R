@@ -135,7 +135,7 @@ plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=
   return(gg)
 }
 
-freqPlot <- function(xx,x,y, textLaby,textLabx, title, values){
+freqPlot <- function(xx,x,y, textLaby,textLabx, title, values, string.max=70){
   
   xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
   yl <- c(1,1+length(unique(xx[,y]))*0.125)
@@ -145,6 +145,8 @@ freqPlot <- function(xx,x,y, textLaby,textLabx, title, values){
   if (title=="Most Local Cited References" & values$M$DB[1]=="SCOPUS"){
     xx[,y] <- gsub("^(.+?)\\.,.*\\((\\d{4})\\)$", paste0("\\1","., ", "\\2"), xx[,y])
   }
+  
+  xx[,y] <- substr(xx[,y],1,string.max)
   
   g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
     geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +
@@ -1732,6 +1734,11 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
            contrib = size
            xlabel <- "Dim 1"
            ylabel <- "Dim 2"
+           wordCoord <- CS$WData %>%
+             data.frame() %>%
+             select(1:3) %>% 
+             mutate(contrib = contrib/2) %>% 
+             rename(label = "word") 
          })
   
   dimContrLabel <- paste0("Contrib",c(dimX,dimY))
@@ -1783,9 +1790,16 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
                         paper_bgcolor = "rgba(0, 0, 0, 0)")
   
   for (i in seq_len(max(wordCoord$groups))){
-    w <- wordCoord %>% dplyr::filter(groups == i) %>%
-      mutate(Dim1 = Dim1+dotSize*0.005,
-             Dim2 = Dim2+dotSize*0.01)
+    if (method=="MDS"){
+      w <- wordCoord %>% dplyr::filter(groups == i) %>%
+        mutate(Dim1 = Dim1+0.005,
+               Dim2 = Dim2+0.005)
+    } else {
+      w <- wordCoord %>% dplyr::filter(groups == i) %>%
+        mutate(Dim1 = Dim1+dotSize*0.005,
+               Dim2 = Dim2+dotSize*0.01)
+    }
+    
     if (max(CS$hull_data$clust)>1){
       hull_df <- CS$hull_data %>% dplyr::filter(clust==i)
       fig <- fig %>% add_polygons(x = hull_df$Dim1, y=hull_df$Dim2, inherit = FALSE, showlegend = FALSE,

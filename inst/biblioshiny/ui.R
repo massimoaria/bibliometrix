@@ -2350,7 +2350,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TreeMapStopPreview"))
+                                                  #h5(htmlOutput("TreeMapStopPreview"))
                                  ),
                                  selectInput("TreeMapSynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -2373,7 +2373,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TreeMapSynPreview"))
+                                                  #h5(htmlOutput("TreeMapSynPreview"))
                                  )
                              ),
                              right = TRUE, animate = TRUE, circle = TRUE,
@@ -2466,7 +2466,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("WDStopPreview"))
+                                                  #h5(htmlOutput("WDStopPreview"))
                                  ),
                                  selectInput("WDSynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -2489,7 +2489,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("WDSynPreview"))
+                                                  #h5(htmlOutput("WDSynPreview"))
                                  )),
                              br(),
                              box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
@@ -2598,7 +2598,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TTStopPreview"))
+                                                  #h5(htmlOutput("TTStopPreview"))
                                  ),
                                  selectInput("TTSynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -2621,7 +2621,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TTSynPreview"))
+                                                 # h5(htmlOutput("TTSynPreview"))
                                  )),
                              br(),
                              box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
@@ -2854,7 +2854,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("COCStopPreview"))
+                                                  #h5(htmlOutput("COCStopPreview"))
                                  ),
                                  selectInput("COCSynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -2877,7 +2877,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("COCSynPreview"))
+                                                  #h5(htmlOutput("COCSynPreview"))
                                  )),
                              br(),
                              box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 
@@ -3146,7 +3146,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TMStopPreview"))
+                                                  #h5(htmlOutput("TMStopPreview"))
                                  ),
                                  selectInput("TMapSynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -3169,7 +3169,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TMapSynPreview"))
+                                                 # h5(htmlOutput("TMapSynPreview"))
                                  )),
                              br(),
                              box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
@@ -3305,7 +3305,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TEStopPreview"))
+                                                  #h5(htmlOutput("TEStopPreview"))
                                  ),
                                  selectInput("TESynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -3328,7 +3328,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("TESynPreview"))
+                                                  #h5(htmlOutput("TESynPreview"))
                                  )),
                              br(),
                              box(title = p(strong("Parameters"),style='font-size:16px;color:black;'), 
@@ -3572,7 +3572,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("CSStopPreview"))
+                                                  #h5(htmlOutput("CSStopPreview"))
                                  ),
                                  selectInput("FASynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -3595,7 +3595,7 @@ body <- dashboardBody(
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
                                                               selected = ","),
-                                                  h5(htmlOutput("FASynPreview"))
+                                                  #h5(htmlOutput("FASynPreview"))
                                  )),
                              br(),
                              box(title = p(strong("Method Parameters"),style='font-size:16px;color:black;'), 

@@ -2641,20 +2641,43 @@ To ensure the functionality of Biblioshiny,
   ## Words ----
   ### Most Frequent Words ----
   
-  output$stopwordList <- renderDT({
-    DTformat(values$MRWremove.terms, nrow=10, filename="Stopword_List", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
-             size='70%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-  })
-  
   observeEvent(input$MostRelWordsStop,{
     values$MRWremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$MostRelWordsStop, sep=input$MostRelWordsSep)))
+    values$GenericSL <- values$MRWremove.terms
     popUpGeneric(title="Stopword list", 
-                 type="success", 
+                 type=NULL, 
                  color=c("#1d8fe1"),
                  subtitle=DTOutput("stopwordList"),
                  btn_labels="OK")
     
+  })
+  
+  observeEvent(input$MRWSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$MRWSyn, sep=input$MRWSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+      }))
+    values$MRWsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$MRWsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
+  output$stopwordList <- renderDT({
+    DTformat(values$GenericSL, nrow=Inf, filename="Stopword_List", pagelength=FALSE, left=1, right=NULL, numeric=NULL, dom="none", 
+             size='90%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, 
+             selection=FALSE, scrollY=TRUE)
+  })
+  
+  output$synonymList <- renderDT({
+    DTformat(values$GenericSYN, nrow=Inf, filename="Stopword_List", pagelength=FALSE, left=1, right=NULL, numeric=NULL, dom="none", 
+             size='90%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, 
+             selection=FALSE, scrollY=TRUE)
   })
   
   MFWords <- eventReactive(input$applyMFWords,{
@@ -2673,9 +2696,10 @@ To ensure the functionality of Biblioshiny,
     
     ### load file with synonyms
     if (input$MRWSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$MRWSyn, sep=input$MRWSynSep))
+      synonyms <- values$MRWsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$MRWsyn.terms <- synonyms
+    #values$MRWsyn.terms <- synonyms
     ### end of block
     
     WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
@@ -2701,22 +2725,6 @@ To ensure the functionality of Biblioshiny,
     
     values$MRWplot <- g
     return(g)
-  })
-  
-  output$MostRelWordsStopPreview <-  renderUI({
-    if (!is.null(values$MRWremove.terms) | exists("values$MRWremove.terms")){
-      strPreview(values$MRWremove.terms, input$MostRelWordsSep)  
-    }else{
-      strPreview(" ", input$MostRelWordsSep)
-    }
-  })
-  
-  output$MRWSynPreview <-  renderUI({
-    if (!is.null(values$MRWsyn.terms) | exists("values$MRWsyn.terms")){
-      strSynPreview(values$MRWsyn.terms)  
-    }else{
-      strSynPreview(" ; ")
-    }
   })
   
   output$MRWplot.save <- downloadHandler(
@@ -2757,6 +2765,33 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### WordCloud ----  
+  observeEvent(input$WCStop,{
+    values$WCremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$WCStop, sep=input$WCSep)))
+    values$GenericSL <- values$WCremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+
+  observeEvent(input$WCSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$WCSyn, sep=input$WCSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$WCsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$WCsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+
   WordCloud <- eventReactive(input$applyWordCloud,{
     if (input$summaryTerms %in% c("TI","AB")){
       ngrams <- as.numeric(input$summaryTermsngrams)
@@ -2766,20 +2801,21 @@ To ensure the functionality of Biblioshiny,
     
     ### load file with terms to remove
     if (input$WCStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$WCStop, sep=input$WCSep))
+      remove.terms <- trimws(values$WCremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$WCremove.terms <- remove.terms
+    #values$WCremove.terms <- remove.terms
     ### end of block
     
     ### load file with synonyms
     if (input$WCSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$WCSyn, sep=input$WCSynSep))
+      synonyms <- values$WCsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
+      print(synonyms)
     }else{synonyms <- NULL}
-    values$WCsyn.terms <- synonyms
+    #values$WCsyn.terms <- synonyms
     ### end of block
-    print(values$WCsyn.terms )
     
-    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams, remove.terms = remove.terms, synonyms = values$WCsyn.terms)
+    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
     
     W=resW$W
     values$Words <- resW$Words
@@ -2814,6 +2850,33 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### TreeMap ----  
+  observeEvent(input$TreeMapStop,{
+    values$TreeMapremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TreeMapStop, sep=input$TreeMapSep)))
+    values$GenericSL <- values$TreeMapremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$TreeMapSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$TreeMapSyn, sep=input$TreeMapSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$TreeMapsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$TreeMapsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
   TreeMap <- eventReactive(input$applyTreeMap,{
     if (input$treeTerms %in% c("TI","AB")){
       ngrams <- as.numeric(input$treeTermsngrams)
@@ -2822,15 +2885,16 @@ To ensure the functionality of Biblioshiny,
     }
     ### load file with terms to remove
     if (input$TreeMapStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$TreeMapStop, sep=input$TreeMapSep))
+      remove.terms <- trimws(values$TreeMapremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$TreeMapremove.terms <- remove.terms
+    #values$TreeMapremove.terms <- remove.terms
     ### end of block
     ### load file with synonyms
     if (input$TreeMapSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$TreeMapSyn, sep=input$TreeMapSynSep))
+      synonyms <- values$TreeMapsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$TreeMapsyn.terms <- synonyms
+    #values$TreeMapsyn.terms <- synonyms
     ### end of block
     
     resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity", ngrams=ngrams, remove.terms=remove.terms, synonyms = synonyms)
@@ -2864,21 +2928,6 @@ To ensure the functionality of Biblioshiny,
     values$TreeMap
   })
   
-  output$TreeMapStopPreview <-  renderUI({
-    if (!is.null(values$TreeMapremove.terms) | exists("values$TreeMapremove.terms")){
-      strPreview(values$TreeMapremove.terms, input$TreeMapSep)  
-    }else{
-      strPreview(" ", input$TreeMapSep)
-    }
-  })
-  
-  output$TreeMapSynPreview <-  renderUI({
-    if (!is.null(values$TreeMapsyn.terms) | exists("values$TreeMapsyn.terms")){
-      strSynPreview(values$TreeMapsyn.terms)  
-    }else{
-      strSynPreview(" ")
-    }
-  })
   
   output$wordTable <- DT::renderDT({
     WordCloud()
@@ -2911,6 +2960,33 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### Words' Frequency over Time ----   
+  observeEvent(input$WDStop,{
+    values$WDremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$WDStop, sep=input$WDSep)))
+    values$GenericSL <- values$WDremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$WDSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$WDSyn, sep=input$WDSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$WDsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$WDsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
   WDynamics <- eventReactive(input$applyWD,{
     if (input$cumTerms=="Cum"){
       cdf=TRUE
@@ -2921,16 +2997,17 @@ To ensure the functionality of Biblioshiny,
     
     ### load file with terms to remove
     if (input$WDStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$WDStop, sep=input$WDSep))
+      remove.terms <- trimws(values$WDremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$WDremove.terms <- remove.terms
+    #values$WDremove.terms <- remove.terms
     ### end of block
     
     ### load file with synonyms
     if (input$WDSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$WDSyn, sep=input$WDSynSep))
+      synonyms <- values$WDsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$WDsyn.terms <- synonyms
+    #values$WDsyn.terms <- synonyms
     ### end of block
     
     switch(input$growthTerms,
@@ -2999,22 +3076,6 @@ To ensure the functionality of Biblioshiny,
     return(g)
   })
   
-  output$WDStopPreview <-  renderUI({
-    if (!is.null(values$WDremove.terms) | exists("values$WDremove.terms")){
-      strPreview(values$WDremove.terms)  
-    }else{
-      strPreview(" ")
-    }
-  })
-  
-  output$WDSynPreview <-  renderUI({
-    if (!is.null(values$WDsyn.terms) | exists("values$WDsyn.terms")){
-      strSynPreview(values$WDsyn.terms)  
-    }else{
-      strSynPreview(" ")
-    }
-  })
-  
   output$WDplot.save <- downloadHandler(
     filename = function() {
       paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep="")
@@ -3078,6 +3139,34 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### Trend Topics ----
+  
+  observeEvent(input$TTStop,{
+    values$TTremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TTStop, sep=input$TTSep)))
+    values$GenericSL <- values$TTremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$TTSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$TTSyn, sep=input$TTSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$TTsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$TTsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
   output$trendSliderPY <- renderUI({
     
     sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
@@ -3088,16 +3177,17 @@ To ensure the functionality of Biblioshiny,
     
     ### load file with terms to remove
     if (input$TTStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$TTStop, sep=input$TTSep))
+      remove.terms <- trimws(values$TTremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$TTremove.terms <- remove.terms
+    #values$TTremove.terms <- remove.terms
     ### end of block
     
     ### load file with synonyms
     if (input$TTSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$TTSyn, sep=input$TTSynSep))
+      synonyms <- values$TTsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$TTsyn.terms <- synonyms
+    #values$TTsyn.terms <- synonyms
     ### end of block
     
     if (input$trendTerms %in% c("TI","AB")){
@@ -3108,22 +3198,6 @@ To ensure the functionality of Biblioshiny,
                                       n.items = input$trendNItems, remove.terms = remove.terms, synonyms = synonyms, 
                                       dynamic.plot=TRUE, graph = FALSE)
     return(values$trendTopics$graph)
-  })
-  
-  output$TTStopPreview <-  renderUI({
-    if (!is.null(values$TTremove.terms) | exists("values$TTremove.terms")){
-      strPreview(values$TTremove.terms)  
-    }else{
-      strPreview(" ")
-    }
-  })
-  
-  output$TTSynPreview <-  renderUI({
-    if (!is.null(values$TTsyn.terms) | exists("values$TTsyn.terms")){
-      strSynPreview(values$TTsyn.terms)  
-    }else{
-      strSynPreview(" ")
-    }
   })
   
   output$TTplot.save <- downloadHandler(
@@ -3242,6 +3316,33 @@ To ensure the functionality of Biblioshiny,
   # CONCEPTUAL STRUCTURE ----
   ### Network approach ----
   #### Co-occurrences network ----
+  observeEvent(input$COCStop,{
+    values$COCremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep)))
+    values$GenericSL <- values$COCremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$COCSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$COCsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$COCsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
   COCnetwork <- eventReactive(input$applyCoc,{
     
     values <- cocNetwork(input,values)
@@ -3260,22 +3361,6 @@ To ensure the functionality of Biblioshiny,
   output$cocOverlay <- renderPlotly({
     COCnetwork()
     values$cocOverlay
-  })
-  
-  output$COCStopPreview <-  renderUI({
-    if (!is.null(values$COCremove.terms) | exists("values$COCremove.terms")){
-      strPreview(values$COCremove.terms)  
-    }else{
-      strPreview(" ")
-    }
-  })
-  
-  output$COCSynPreview <-  renderUI({
-    if (!is.null(values$COCsyn.terms) | exists("values$COCsyn.terms")){
-      strSynPreview(values$COCsyn.terms)  
-    }else{
-      strSynPreview(" ")
-    }
   })
   
   output$network.coc <- downloadHandler(
@@ -3343,25 +3428,35 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### Correspondence Analysis ----
+  observeEvent(input$CSStop,{
+    values$CSremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep)))
+    values$GenericSL <- values$CSremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$FASyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$FAsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$FAsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
   
   CSfactorial <- eventReactive(input$applyCA,{
     values <- CAmap(input,values)
-  })
-  
-  output$CSStopPreview <-  renderUI({
-    if (!is.null(values$CSremove.terms) | exists("values$CSremove.terms")){
-      strPreview(values$CSremove.terms)  
-    }else{
-      strPreview(" ")
-    }
-  })
-  
-  output$FASynPreview <-  renderUI({
-    if (!is.null(values$FAsyn.terms) | exists("values$FAsyn.terms")){
-      strSynPreview(values$FAsyn.terms)  
-    }else{
-      strSynPreview(" ")
-    }
   })
   
   output$FAplot.save <- downloadHandler(
@@ -3432,6 +3527,33 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### Thematic Map ----
+  observeEvent(input$TMStop,{
+    values$TMremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TMStop, sep=input$TMSep)))
+    values$GenericSL <- values$TMremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$TMapSyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$TMapSyn, sep=input$TMapSynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$TMapsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$TMapsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
   TMAP <- eventReactive(input$applyTM,{
     if (input$TMfield %in% c("TI","AB")){
       ngrams <- as.numeric(input$TMngrams)
@@ -3441,16 +3563,17 @@ To ensure the functionality of Biblioshiny,
     
     ### load file with terms to remove
     if (input$TMStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$TMStop, sep=input$TMSep))
+      remove.terms <- trimws(values$TMremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$TMremove.terms <- remove.terms
+    #values$TMremove.terms <- remove.terms
     ### end of block
     
     ### load file with synonyms
     if (input$TMapSynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$TMapSyn, sep=input$TMapSynSep))
+      synonyms <- values$TMapsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$TMapsyn.terms <- synonyms
+    #values$TMapsyn.terms <- synonyms
     ### end of block
     
     values$TM <- thematicMap(values$M, field=input$TMfield, 
@@ -3526,21 +3649,6 @@ To ensure the functionality of Biblioshiny,
     values$networkTM$VIS
   })
   
-  output$TMStopPreview <-  renderUI({
-    if (!is.null(values$TMremove.terms) | exists("values$TMremove.terms")){
-      strPreview(values$TMremove.terms)  
-    }else{
-      strPreview(" ")
-    }
-  })
-  
-  output$TMapSynPreview <-  renderUI({
-    if (!is.null(values$TMapsyn.terms) | exists("values$TMapsyn.terms")){
-      strSynPreview(values$TMapsyn.terms)
-    }else{
-      strSynPreview(" ")
-    }
-  })
   
   output$TMplot.save <- downloadHandler(
     filename = function() {
@@ -3595,6 +3703,33 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### Thematic Evolution ----
+  observeEvent(input$TEStop,{
+    values$TEremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TEStop, sep=input$TESep)))
+    values$GenericSL <- values$TEremove.terms
+    popUpGeneric(title="Stopword list", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("stopwordList"),
+                 btn_labels="OK")
+    
+  })
+  
+  observeEvent(input$TESyn,{
+    synonyms <- trimws(readSynWordsFile(file=input$TESyn, sep=input$TESynSep))
+    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
+    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
+      paste0(trimws(l[-1]),collapse=";")
+    }))
+    values$TEsyn.terms <- data.frame(term=term, synonyms=synList)
+    values$GenericSYN <- values$TEsyn.terms
+    popUpGeneric(title="Synonym List", 
+                 type=NULL, 
+                 color=c("#1d8fe1"),
+                 subtitle=DTOutput("synonymList"),
+                 btn_labels="OK")
+    
+  })
+  
   output$sliders <- renderUI({
     numSlices <- as.integer(input$numSlices)
     v=quantile(values$M$PY, seq(0,1,by=(1/(numSlices+1))), na.rm=TRUE)
@@ -3613,16 +3748,17 @@ To ensure the functionality of Biblioshiny,
     
     ### load file with terms to remove
     if (input$TEStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$TEStop, sep=input$TESep))
+      remove.terms <- trimws(values$TEremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$TEremove.terms <- remove.terms
+    #values$TEremove.terms <- remove.terms
     ### end of block
     
     ### load file with synonyms
     if (input$TESynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$TESyn, sep=input$TESynSep))
+      synonyms <- values$TEsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$TEsyn.terms <- synonyms
+    #values$TEsyn.terms <- synonyms
     ### end of block
     
     values$yearSlices <- as.numeric()
@@ -3658,22 +3794,6 @@ To ensure the functionality of Biblioshiny,
   output$TEPlot <- plotly::renderPlotly({
     TEMAP()
     values$TEplot
-  })
-  
-  output$TEStopPreview <-  renderUI({
-    if (!is.null(values$TEremove.terms) | exists("values$TEremove.terms")){
-      strPreview(values$TEremove.terms)  
-    }else{
-      strPreview(" ")
-    }
-  })
-  
-  output$TESynPreview <-  renderUI({
-    if (!is.null(values$TEsyn.terms) | exists("values$TEsyn.terms")){
-      strSynPreview(values$TEsyn.terms)  
-    }else{
-      strSynPreview(" ")
-    }
   })
   
   output$TEplot.save <- downloadHandler(

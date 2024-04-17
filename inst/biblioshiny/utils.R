@@ -2,7 +2,7 @@
 
 # DATA TABLE FORMAT ----
 DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='85%', filter="top",
-                     columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE){
+                     columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE, scrollY=FALSE){
   
   if ("text" %in% names(df)){
     df <- df %>%
@@ -53,8 +53,10 @@ DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, 
   
   if (isTRUE(dom)){
     dom <- "Brtip"
-  } else{
+  } else if (dom==FALSE){
     dom <- "Bt"
+  } else {
+    dom <- "t"
   }
   
   if (nchar(title)>0){
@@ -80,10 +82,15 @@ DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, 
                        extensions = extensions,
                        filter = filter,
                        options = list(
+                         headerCallback = DT::JS(
+                           "function(thead) {",
+                           "  $(thead).css('font-size', '1em');",
+                           "}"
+                         ),
                          colReorder = TRUE,
                          fixedHeader = TRUE,
                          pageLength = nrow,
-                         autoWidth = TRUE, scrollX = scrollX,
+                         autoWidth = TRUE, scrollX = scrollX,scrollY=scrollY,
                          dom = dom,
                          buttons = buttons,
                          select = select,
@@ -975,15 +982,16 @@ CAmap <- function(input, values){
     
     ### load file with terms to remove
     if (input$CSStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep))
+      remove.terms <- trimws(values$CSremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$CSremove.terms <- remove.terms
+    #values$CSremove.terms <- remove.terms
     ### end of block
     ### load file with synonyms
     if (input$FASynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
+      synonyms <- values$FAsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$FAsyn.terms <- synonyms
+    #values$FAsyn.terms <- synonyms
     ### end of block
     
     tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
@@ -1097,15 +1105,16 @@ cocNetwork <- function(input,values){
   
   ### load file with terms to remove
   if (input$COCStopFile=="Y"){
-    remove.terms <- trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep))
+    remove.terms <- trimws(values$COCremove.terms$stopword)
   }else{remove.terms <- NULL}
-  values$COCremove.terms <- remove.terms
+  #values$COCremove.terms <- remove.terms
   ### end of block
   ### load file with synonyms
   if (input$COCSynFile=="Y"){
-    synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
+    synonyms <- values$COCsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    synonyms <- synonyms$term
   }else{synonyms <- NULL}
-  values$COCsyn.terms <- synonyms
+  #values$COCsyn.terms <- synonyms
   ### end of block
   
   if ((input$field %in% names(values$M))){

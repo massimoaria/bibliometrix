@@ -1,5 +1,138 @@
 ### COMMON FUNCTIONS ####
 
+# DATA TABLE FORMAT ----
+DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='85%', filter="top",
+                     columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE){
+  
+  if ("text" %in% names(df)){
+    df <- df %>%
+      mutate(text = gsub("<|>","",text))
+  }
+  
+  if (length(columnShort)>0){
+    columnDefs = list(list(
+      className = 'dt-center', targets = 0:(length(names(df)) - 1)),
+      list(
+        targets = columnShort-1,
+        render = JS(
+          "function(data, type, row, meta) {",
+          "return type === 'display' && data.length > 500 ?",
+          "'<span title=\"' + data + '\">' + data.substr(0, 500) + '...</span>' : data;",
+          "}")
+      ))
+  } else{
+    columnDefs = list(list(
+      className = 'dt-center', targets = 0:(length(names(df)) - 1)
+    ))
+  }
+  if (isTRUE(button)){
+    if (isTRUE(pagelength)){
+      buttons = list(
+        list(extend = 'pageLength'),
+        list(extend = 'excel',
+             filename = paste0(filename,"_tall_",Sys.Date()),
+             title = " ",
+             header = TRUE,
+             exportOptions = list(
+               modifier = list(page = "all")
+             ))
+      )
+    } else{
+      buttons = list(
+        list(extend = 'excel',
+             filename = paste0(filename,"_tall_",Sys.Date()),
+             title = " ",
+             header = TRUE,
+             exportOptions = list(
+               modifier = list(page = "all")
+             )))
+    }
+  } else{
+    buttons = list(list(extend = 'pageLength'))
+  }
+  
+  if (isTRUE(dom)){
+    dom <- "Brtip"
+  } else{
+    dom <- "Bt"
+  }
+  
+  if (nchar(title)>0){
+    caption = htmltools::tags$caption( style = 'caption-side: top; text-align: center; color:black;  font-size:140% ;',title)
+  } else {
+    caption = htmltools::tags$caption( style = 'caption-side: top; text-align: center; color:black;  font-size:140% ;',"")
+  }
+  
+  if (isTRUE(selection)){
+    extensions = c("Buttons", "Select", "ColReorder", "FixedHeader")
+    buttons <- c(buttons, c('selectAll', 'selectNone'))
+    select <- list(style='multiple', items='row', selected = 1:nrow(df))
+    #selection = list(mode = 'multiple', selected = 1:nrow(df), target = 'row')
+  } else {
+    extensions = c("Buttons", "ColReorder", "FixedHeader")
+    select <- NULL
+    #selection = "none"
+  }
+  
+  tab <- DT::datatable(df, escape = escape,rownames = FALSE,
+                       caption = caption,
+                       selection= "none",
+                       extensions = extensions,
+                       filter = filter,
+                       options = list(
+                         colReorder = TRUE,
+                         fixedHeader = TRUE,
+                         pageLength = nrow,
+                         autoWidth = TRUE, scrollX = scrollX,
+                         dom = dom,
+                         buttons = buttons,
+                         select = select,
+                         lengthMenu = list(c(10, 25, 50, -1),
+                                           c('10 rows', '25 rows', '50 rows', 'Show all')),
+                         columnDefs = columnDefs
+                       ),
+                       class = 'cell-border compact stripe'
+  ) %>%
+    DT::formatStyle(
+      names(df),
+      backgroundColor = 'white',
+      textAlign = 'center',
+      fontSize = size
+    )
+  
+  ## left aligning
+  
+  if (!is.null(left)){
+    tab <- tab %>%
+      DT::formatStyle(
+        names(df)[left],
+        backgroundColor = 'white',
+        textAlign = 'left',
+        fontSize = size
+      )
+  }
+  
+  # right aligning
+  if (!is.null(right)){
+    tab <- tab %>%
+      DT::formatStyle(
+        names(df)[right],
+        backgroundColor = 'white',
+        textAlign = 'right',
+        fontSize = size
+      )
+  }
+  
+  # numeric round
+  if (!is.null(numeric)){
+    tab <- tab %>%
+      formatRound(names(df)[c(numeric)], digits=round)
+  }
+  
+  tab
+}
+
+
 authorNameFormat <- function(M, format){
   if (format=="AF" & "AF" %in% names(M)){
     M <- M %>% 
@@ -2081,6 +2214,31 @@ dfLabel <- function(){
             "TE_Period_1","TE_Period_2", "TE_Period_3","TE_Period_4","TE_Period_5","Factorial Analysis", "Co-citation Network", "Historiograph", "Collaboration Network", "Countries Collaboration World Map")
   data.frame(short=short,long=long)
 }
+
+## Generic PopUp
+popUpGeneric <- function(title=NULL, type="success", color=c("#1d8fe1","#913333","#FFA800"),
+                         subtitle="",
+                         btn_labels="OK", size="40%"){
+  showButton = TRUE
+  timer = NA
+  show_alert(
+    title = title,
+    text = subtitle,
+    type = type,
+    size=size,
+    closeOnEsc = TRUE,
+    closeOnClickOutside = TRUE,
+    html = FALSE,
+    showConfirmButton = showButton,
+    showCancelButton = FALSE,
+    btn_labels = btn_labels,
+    btn_colors = color,
+    timer = timer,
+    imageUrl = "",
+    animation = TRUE
+  )
+}
+
 
 ## Ad to Report PopUp
 popUp <- function(title=NULL, type="success", btn_labels="OK"){

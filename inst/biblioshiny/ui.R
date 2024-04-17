@@ -289,6 +289,9 @@ data("customTheme",envir=environment())
 ### Body Content ----
 body <- dashboardBody(
   customTheme,
+  ## workaround to solve visualization issues in Data Table
+  tags$head(tags$style(HTML( '.has-feedback .form-control { padding-right: 0px;}' ))),
+  ###
   tags$head(
     tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"),
     tags$style(".fa-envelope-open {font-size: 20px}"), 
@@ -2065,8 +2068,8 @@ body <- dashboardBody(
                                                               choices = c('Comma ","' = ",",
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
-                                                              selected = ","),
-                                                  h5(htmlOutput("MostRelWordsStopPreview"))
+                                                              selected = ",")
+                                                  #,h5(htmlOutput("MostRelWordsStopPreview"))
                                  ),
                                  selectInput("MRWSynFile", "Load a list of synonyms",
                                              choices = c("Yes" = "Y",
@@ -2088,8 +2091,8 @@ body <- dashboardBody(
                                                               choices = c('Comma ","' = ",",
                                                                           'Semicolon ";"' = ";",
                                                                           'Tab '= "\t"),
-                                                              selected = ","),
-                                                  h5(htmlOutput("MRWSynPreview"))
+                                                              selected = ",")
+                                                  #,h5(htmlOutput("MRWSynPreview"))
                                  )),
                              right = TRUE, animate = TRUE, circle = TRUE,
                              style = "gradient",

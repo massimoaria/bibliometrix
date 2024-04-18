@@ -1,3 +1,17 @@
+bibliometrix v4.2.0 (Release date: 2024-04-18)
+
+Features:
+* Added the support to OpenAlex database both using export files and API
+* Added the function net2Pajek to export network objects as Pajek files
+
+Changes:
+* Biblioshiny: Added an info page about supported databases and suggested format files
+* Biblioshiny: In Conceptual Structure methods, added an algorithm to automatically hide overlapping labels 
+* Biblioshiny: Added a popup window which shows the stopword list and the synonym list when uploaded
+* Removed depencence from factominer package
+* Many code and graphical improvements
+
+
 bibliometrix v4.1.4 (Release date: 2023-11-29)
 
 Changes:

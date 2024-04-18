@@ -95,7 +95,7 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
     mutate(
       m_index = h_index / (Today -PY_start+1)
     ) %>%
-    rename(Element = AUs) %>%
+    rename(Element = AUs) %>% 
     as.data.frame()
   
   if (!is.null(elements)){
@@ -104,7 +104,11 @@ Hindex <- function(M, field="author", elements=NULL, sep = ";",years=Inf){
       dplyr::select("Element","h_index","g_index","m_index","TC","NP","PY_start")
     
     df <- df %>% dplyr::filter(AUs %in% elements)
+  } else {
+    H <- H %>%
+      dplyr::select("Element","h_index","g_index","m_index","TC","NP","PY_start")
   }
+  
   
   #H <- H[c("Element","h_index","g_index","m_index","TC","NP","PY_start")]     
   

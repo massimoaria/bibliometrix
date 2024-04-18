@@ -1528,7 +1528,7 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$SourceHindexTable <- DT::renderDT({
-    DTformat(values$H , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=TRUE, 
+    DTformat(values$H , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=TRUE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1834,7 +1834,7 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$AuthorHindexTable <- DT::renderDT({
-    DTformat(values$H , nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=TRUE, 
+    DTformat(values$H , nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=TRUE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })

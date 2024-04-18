@@ -1,5 +1,145 @@
 ### COMMON FUNCTIONS ####
 
+# DATA TABLE FORMAT ----
+DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='85%', filter="top",
+                     columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE, scrollY=FALSE){
+  
+  if ("text" %in% names(df)){
+    df <- df %>%
+      mutate(text = gsub("<|>","",text))
+  }
+  
+  if (length(columnShort)>0){
+    columnDefs = list(list(
+      className = 'dt-center', targets = 0:(length(names(df)) - 1)),
+      list(
+        targets = columnShort-1,
+        render = JS(
+          "function(data, type, row, meta) {",
+          "return type === 'display' && data.length > 500 ?",
+          "'<span title=\"' + data + '\">' + data.substr(0, 500) + '...</span>' : data;",
+          "}")
+      ))
+  } else{
+    columnDefs = list(list(
+      className = 'dt-center', targets = 0:(length(names(df)) - 1)
+    ))
+  }
+  if (isTRUE(button)){
+    if (isTRUE(pagelength)){
+      buttons = list(
+        list(extend = 'pageLength'),
+        list(extend = 'excel',
+             filename = paste0(filename,"_tall_",Sys.Date()),
+             title = " ",
+             header = TRUE,
+             exportOptions = list(
+               modifier = list(page = "all")
+             ))
+      )
+    } else{
+      buttons = list(
+        list(extend = 'excel',
+             filename = paste0(filename,"_tall_",Sys.Date()),
+             title = " ",
+             header = TRUE,
+             exportOptions = list(
+               modifier = list(page = "all")
+             )))
+    }
+  } else{
+    buttons = list(list(extend = 'pageLength'))
+  }
+  
+  if (isTRUE(dom)){
+    dom <- "Brtip"
+  } else if (dom==FALSE){
+    dom <- "Bt"
+  } else {
+    dom <- "t"
+  }
+  
+  if (nchar(title)>0){
+    caption = htmltools::tags$caption( style = 'caption-side: top; text-align: center; color:black;  font-size:140% ;',title)
+  } else {
+    caption = htmltools::tags$caption( style = 'caption-side: top; text-align: center; color:black;  font-size:140% ;',"")
+  }
+  
+  if (isTRUE(selection)){
+    extensions = c("Buttons", "Select", "ColReorder", "FixedHeader")
+    buttons <- c(buttons, c('selectAll', 'selectNone'))
+    select <- list(style='multiple', items='row', selected = 1:nrow(df))
+    #selection = list(mode = 'multiple', selected = 1:nrow(df), target = 'row')
+  } else {
+    extensions = c("Buttons", "ColReorder", "FixedHeader")
+    select <- NULL
+    #selection = "none"
+  }
+  
+  tab <- DT::datatable(df, escape = escape,rownames = FALSE,
+                       caption = caption,
+                       selection= "none",
+                       extensions = extensions,
+                       filter = filter,
+                       options = list(
+                         headerCallback = DT::JS(
+                           "function(thead) {",
+                           "  $(thead).css('font-size', '1em');",
+                           "}"
+                         ),
+                         colReorder = TRUE,
+                         fixedHeader = TRUE,
+                         pageLength = nrow,
+                         autoWidth = TRUE, scrollX = scrollX,scrollY=scrollY,
+                         dom = dom,
+                         buttons = buttons,
+                         select = select,
+                         lengthMenu = list(c(10, 25, 50, -1),
+                                           c('10 rows', '25 rows', '50 rows', 'Show all')),
+                         columnDefs = columnDefs
+                       ),
+                       class = 'cell-border compact stripe'
+  ) %>%
+    DT::formatStyle(
+      names(df),
+      backgroundColor = 'white',
+      textAlign = 'center',
+      fontSize = size
+    )
+  
+  ## left aligning
+  
+  if (!is.null(left)){
+    tab <- tab %>%
+      DT::formatStyle(
+        names(df)[left],
+        backgroundColor = 'white',
+        textAlign = 'left',
+        fontSize = size
+      )
+  }
+  
+  # right aligning
+  if (!is.null(right)){
+    tab <- tab %>%
+      DT::formatStyle(
+        names(df)[right],
+        backgroundColor = 'white',
+        textAlign = 'right',
+        fontSize = size
+      )
+  }
+  
+  # numeric round
+  if (!is.null(numeric)){
+    tab <- tab %>%
+      formatRound(names(df)[c(numeric)], digits=round)
+  }
+  
+  tab
+}
+
+
 authorNameFormat <- function(M, format){
   if (format=="AF" & "AF" %in% names(M)){
     M <- M %>% 
@@ -135,7 +275,7 @@ plot.ly <- function(g, flip=FALSE, side="r", aspectratio=1, size=0.15,data.type=
   return(gg)
 }
 
-freqPlot <- function(xx,x,y, textLaby,textLabx, title, values){
+freqPlot <- function(xx,x,y, textLaby,textLabx, title, values, string.max=70){
   
   xl <- c(max(xx[,x])-0.02-diff(range(xx[,x]))*0.125, max(xx[,x])-0.02)+1
   yl <- c(1,1+length(unique(xx[,y]))*0.125)
@@ -145,6 +285,8 @@ freqPlot <- function(xx,x,y, textLaby,textLabx, title, values){
   if (title=="Most Local Cited References" & values$M$DB[1]=="SCOPUS"){
     xx[,y] <- gsub("^(.+?)\\.,.*\\((\\d{4})\\)$", paste0("\\1","., ", "\\2"), xx[,y])
   }
+  
+  xx[,y] <- substr(xx[,y],1,string.max)
   
   g <- ggplot(xx, aes(x =xx[,x], y = xx[,y], label = xx[,x], text=Text)) +
     geom_segment(aes(x = 0, y = xx[,y], xend = xx[,x], yend = xx[,y]), color = "grey50") +
@@ -840,15 +982,16 @@ CAmap <- function(input, values){
     
     ### load file with terms to remove
     if (input$CSStopFile=="Y"){
-      remove.terms <- trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep))
+      remove.terms <- trimws(values$CSremove.terms$stopword)
     }else{remove.terms <- NULL}
-    values$CSremove.terms <- remove.terms
+    #values$CSremove.terms <- remove.terms
     ### end of block
     ### load file with synonyms
     if (input$FASynFile=="Y"){
-      synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
+      synonyms <- values$FAsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+      synonyms <- synonyms$term
     }else{synonyms <- NULL}
-    values$FAsyn.terms <- synonyms
+    #values$FAsyn.terms <- synonyms
     ### end of block
     
     tab=tableTag(values$M,input$CSfield, ngrams=ngrams)
@@ -962,15 +1105,16 @@ cocNetwork <- function(input,values){
   
   ### load file with terms to remove
   if (input$COCStopFile=="Y"){
-    remove.terms <- trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep))
+    remove.terms <- trimws(values$COCremove.terms$stopword)
   }else{remove.terms <- NULL}
-  values$COCremove.terms <- remove.terms
+  #values$COCremove.terms <- remove.terms
   ### end of block
   ### load file with synonyms
   if (input$COCSynFile=="Y"){
-    synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
+    synonyms <- values$COCsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    synonyms <- synonyms$term
   }else{synonyms <- NULL}
-  values$COCsyn.terms <- synonyms
+  #values$COCsyn.terms <- synonyms
   ### end of block
   
   if ((input$field %in% names(values$M))){
@@ -1732,6 +1876,11 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
            contrib = size
            xlabel <- "Dim 1"
            ylabel <- "Dim 2"
+           wordCoord <- CS$WData %>%
+             data.frame() %>%
+             select(1:3) %>% 
+             mutate(contrib = contrib/2) %>% 
+             rename(label = "word") 
          })
   
   dimContrLabel <- paste0("Contrib",c(dimX,dimY))
@@ -1783,9 +1932,16 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
                         paper_bgcolor = "rgba(0, 0, 0, 0)")
   
   for (i in seq_len(max(wordCoord$groups))){
-    w <- wordCoord %>% dplyr::filter(groups == i) %>%
-      mutate(Dim1 = Dim1+dotSize*0.005,
-             Dim2 = Dim2+dotSize*0.01)
+    if (method=="MDS"){
+      w <- wordCoord %>% dplyr::filter(groups == i) %>%
+        mutate(Dim1 = Dim1+0.005,
+               Dim2 = Dim2+0.005)
+    } else {
+      w <- wordCoord %>% dplyr::filter(groups == i) %>%
+        mutate(Dim1 = Dim1+dotSize*0.005,
+               Dim2 = Dim2+dotSize*0.01)
+    }
+    
     if (max(CS$hull_data$clust)>1){
       hull_df <- CS$hull_data %>% dplyr::filter(clust==i)
       fig <- fig %>% add_polygons(x = hull_df$Dim1, y=hull_df$Dim2, inherit = FALSE, showlegend = FALSE,
@@ -2067,6 +2223,31 @@ dfLabel <- function(){
             "TE_Period_1","TE_Period_2", "TE_Period_3","TE_Period_4","TE_Period_5","Factorial Analysis", "Co-citation Network", "Historiograph", "Collaboration Network", "Countries Collaboration World Map")
   data.frame(short=short,long=long)
 }
+
+## Generic PopUp
+popUpGeneric <- function(title=NULL, type="success", color=c("#1d8fe1","#913333","#FFA800"),
+                         subtitle="",
+                         btn_labels="OK", size="40%"){
+  showButton = TRUE
+  timer = NA
+  show_alert(
+    title = title,
+    text = subtitle,
+    type = type,
+    size=size,
+    closeOnEsc = TRUE,
+    closeOnClickOutside = TRUE,
+    html = FALSE,
+    showConfirmButton = showButton,
+    showCancelButton = FALSE,
+    btn_labels = btn_labels,
+    btn_colors = color,
+    timer = timer,
+    imageUrl = "",
+    animation = TRUE
+  )
+}
+
 
 ## Ad to Report PopUp
 popUp <- function(title=NULL, type="success", btn_labels="OK"){

@@ -208,6 +208,10 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
     }
   }
   
+  # remove double ;
+  M <- M%>% 
+    mutate_if(is.character, ~gsub(";;",";",.x))
+  
   ### SR field creation
   if (isTRUE(remove.duplicates)){
     switch(dbsource,
@@ -246,6 +250,8 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
     }
   suppressWarnings(M <- metaTagExtraction(M, Field="SR"))
   row.names(M) <- M$SR
+  
+ 
   
   ### bibliometrix>DB class
   class(M) <- c("bibliometrixDB", "data.frame")

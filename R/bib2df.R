@@ -121,7 +121,7 @@ Please, take a look at the vignettes:
   df <- postprocessing(df, dbsource)
   
   df <- df[!names(df) %in% c("Paper", "paper")]
-  
+
   return(df)
 }
 

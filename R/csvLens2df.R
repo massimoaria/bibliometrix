@@ -23,9 +23,9 @@ csvLens2df <- function(file){
   ## Post-Processing
 
   # column re-labelling
-  DATA <- relabelling(DATA)
+  DATA <- relabelling_lens(DATA)
   
-  DATA$TC <- as.numeric(DATA$TC)
+  if ("TC" %in% names(DATA)) DATA$TC <- as.numeric(DATA$TC)
   
   # Authors' names cleaning (surname and initials)
   DATA$AF <- DATA$AU
@@ -71,7 +71,7 @@ csvLens2df <- function(file){
 
 
 
-relabelling <- function(DATA){
+relabelling_lens <- function(DATA){
   ## column re-labelling
   label <- names(DATA)
   label <- gsub("Source Title","SO",label)

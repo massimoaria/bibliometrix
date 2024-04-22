@@ -165,46 +165,6 @@ To ensure the functionality of Biblioshiny,
   })
   
   ## Load Menu ----
-  format <- function(obj){
-    ext<- sub('.*\\.', '', obj[1])
-    switch(ext,
-           txt ={
-             format <- "plaintext"
-           },
-           csv ={
-             format <- "csv"
-           },
-           bib ={
-             format <- "bibtex"
-           },
-           ciw ={
-             format <- "endnote"
-           },
-           xlsx={
-             format <- "excel"
-           }
-    )
-    return(format)
-  }
-  
-  ## smart_load function ----
-  smart_load <- function(file){
-    var <- load(file)
-    n <- length(var)
-    if (!"M" %in% var){
-      if (n == 1) {
-        eval(parse(text = paste0("M <- ", var)))
-      } else {
-        stop("I could not find bibliometrixDB object in your data file: ", file)
-      }
-    }
-    rm(list = var[var != "M"])
-    if ( ("M" %in% ls()) & inherits(M, "bibliometrixDB") ){
-      return(M)
-    } else {
-      stop("Please make sure your RData/Rda file contains a bibliometrixDB object (M).")
-    }
-  }
   
   DATAloading<- eventReactive(input$applyLoad,{
     # input$file1 will be NULL initially. After the user selects

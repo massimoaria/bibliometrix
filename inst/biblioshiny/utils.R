@@ -1,5 +1,47 @@
 ### COMMON FUNCTIONS ####
 
+# LOAD FUNCTIONS -----
+format <- function(obj){
+  ext<- sub('.*\\.', '', obj[1])
+  switch(ext,
+         txt ={
+           format <- "plaintext"
+         },
+         csv ={
+           format <- "csv"
+         },
+         bib ={
+           format <- "bibtex"
+         },
+         ciw ={
+           format <- "endnote"
+         },
+         xlsx={
+           format <- "excel"
+         }
+  )
+  return(format)
+}
+
+## smart_load function ----
+smart_load <- function(file){
+  var <- load(file)
+  n <- length(var)
+  if (!"M" %in% var){
+    if (n == 1) {
+      eval(parse(text = paste0("M <- ", var)))
+    } else {
+      stop("I could not find bibliometrixDB object in your data file: ", file)
+    }
+  }
+  rm(list = var[var != "M"])
+  if ( ("M" %in% ls()) & inherits(M, "bibliometrixDB") ){
+    return(M)
+  } else {
+    stop("Please make sure your RData/Rda file contains a bibliometrixDB object (M).")
+  }
+}
+
 # DATA TABLE FORMAT ----
 DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='85%', filter="top",
                      columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE, scrollY=FALSE){

@@ -201,7 +201,7 @@ To ensure the functionality of Biblioshiny,
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = format(D))
+                                                  format = formatDB(D))
                                   M <- authorNameFormat(M, input$authorName)
                                 })
                  },
@@ -211,7 +211,7 @@ To ensure the functionality of Biblioshiny,
                                 value = 0, {
                                   M <- convert2df(inFile$datapath,
                                                   dbsource = input$dbsource,
-                                                  format = format(inFile$datapath))
+                                                  format = formatDB(inFile$datapath))
                                   M <- authorNameFormat(M, input$authorName)
                                 })
                  })
@@ -225,9 +225,9 @@ To ensure the functionality of Biblioshiny,
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = format(D))
+                                                  format = formatDB(D))
                                   M <- authorNameFormat(M, input$authorName)
-                                  if (format(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
+                                  if (formatDB(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
                                 })
                  },
                  ### Scopus CSV/Bib Files
@@ -271,7 +271,7 @@ To ensure the functionality of Biblioshiny,
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = format(D))
+                                                  format = formatDB(D))
                                 })
                  },
                  ### Lens.org CSV Files
@@ -280,7 +280,7 @@ To ensure the functionality of Biblioshiny,
                                 value = 0, {
                                   M <- convert2df(inFile$datapath,
                                                   dbsource = input$dbsource,
-                                                  format = format(inFile$datapath))
+                                                  format = formatDB(inFile$datapath))
                                 })
                  })
         },
@@ -293,7 +293,7 @@ To ensure the functionality of Biblioshiny,
                                 value = 0, {
                                   M <- convert2df(D,
                                                   dbsource = input$dbsource,
-                                                  format = format(D))
+                                                  format = formatDB(D))
                                 })
                  },
                  ### Cochrane txt files
@@ -338,7 +338,7 @@ To ensure the functionality of Biblioshiny,
                                   M <-
                                     convert2df(D,
                                                dbsource = input$dbsource,
-                                               format = format(D))
+                                               format = formatDB(D))
                                 })
                  },
                  ### Dimensions Xlsx/csv Files
@@ -1350,7 +1350,7 @@ To ensure the functionality of Biblioshiny,
     g <- MRSources()
     
     TAB <- values$TABSo %>% drop_na()
-    DTformat(TAB , nrow=10, filename="Most_Relevant_Sources", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB , nrow=10, filename="Most_Relevant_Sources", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1409,7 +1409,7 @@ To ensure the functionality of Biblioshiny,
     
     g <- MLCSources()
     TAB <- values$TABSoCit
-    DTformat(TAB , nrow=10, filename="Most_Cited_Sources", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB , nrow=10, filename="Most_Cited_Sources", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1444,7 +1444,7 @@ To ensure the functionality of Biblioshiny,
   )
   
   output$bradfordTable <- DT::renderDT({
-    DTformat(values$bradford$table , nrow=10, filename="Bradford_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(values$bradford$table , nrow=10, filename="Bradford_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1487,7 +1487,7 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$SourceHindexTable <- DT::renderDT({
-    DTformat(values$H , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=TRUE, 
+    DTformat(values$H , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1612,7 +1612,7 @@ To ensure the functionality of Biblioshiny,
     
     g <- SOGrowth()
     soData=values$PYSO
-    DTformat(soData , nrow=10, filename="Source_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(soData , nrow=10, filename="Source_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1688,7 +1688,7 @@ To ensure the functionality of Biblioshiny,
   output$MostRelAuthorsTable <- DT::renderDT({
     
     TAB <- values$TABAu
-    DTformat(TAB , nrow=10, filename="Most_Relevant_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=TRUE, 
+    DTformat(TAB , nrow=10, filename="Most_Relevant_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1749,7 +1749,7 @@ To ensure the functionality of Biblioshiny,
   output$MostCitAuthorsTable <- DT::renderDT({
     
     TAB <- values$TABAuCit
-    DTformat(TAB , nrow=10, filename="Most_Local_Cited_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB , nrow=10, filename="Most_Local_Cited_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1793,7 +1793,7 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$AuthorHindexTable <- DT::renderDT({
-    DTformat(values$H , nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=TRUE, 
+    DTformat(values$H , nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1835,7 +1835,7 @@ To ensure the functionality of Biblioshiny,
     AUoverTime()
     
     TAB <- values$AUProdOverTime$dfAU
-    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=5, dom=TRUE, 
+    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=5, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
     # DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
@@ -1866,7 +1866,7 @@ To ensure the functionality of Biblioshiny,
     AUoverTime()
     TAB <- values$AUProdOverTime$dfPapersAU
     TAB$DOI=paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time_Docs", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=TRUE, 
+    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time_Docs", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
     })
@@ -1931,7 +1931,7 @@ To ensure the functionality of Biblioshiny,
   
   output$lotkaTable <- DT::renderDT({
     names(values$lotka$AuthorProd)=c("Documents written","N. of Authors","Proportion of Authors")
-    DTformat(values$lotka$AuthorProd, nrow=10, filename="Lotka_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=TRUE, 
+    DTformat(values$lotka$AuthorProd, nrow=10, filename="Lotka_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -1995,7 +1995,7 @@ To ensure the functionality of Biblioshiny,
     g <- MRAffiliations()
     
     TAB <- values$TABAff
-    DTformat(TAB, nrow=10, filename="Most_Relevant_Affiliations", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Relevant_Affiliations", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2062,7 +2062,7 @@ To ensure the functionality of Biblioshiny,
     
     AFFGrowth()
     afftimeData=values$AffOverTime
-    DTformat(afftimeDATA, nrow=10, filename="Affiliation_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(afftimeDATA, nrow=10, filename="Affiliation_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2147,7 +2147,7 @@ To ensure the functionality of Biblioshiny,
     g <- CAUCountries()
     
     TAB <- values$TABCo
-    DTformat(TAB, nrow=10, filename="Most_Relevant_Countries_By_Corresponding_Author", pagelength=TRUE, left=NULL, right=NULL, numeric=5:6, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Relevant_Countries_By_Corresponding_Author", pagelength=TRUE, left=NULL, right=NULL, numeric=5:6, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2184,7 +2184,7 @@ To ensure the functionality of Biblioshiny,
   output$countryProdTable <- DT::renderDT({
     
     TAB <- values$mapworld$tab
-    DTformat(TAB, nrow=10, filename="Country_Production", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Country_Production", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2254,7 +2254,7 @@ To ensure the functionality of Biblioshiny,
     
     COGrowth()
     cotimeData=values$CountryOverTime
-    DTformat(cotimeData, nrow=10, filename="Countries_Production_Over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(cotimeData, nrow=10, filename="Countries_Production_Over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2320,7 +2320,7 @@ To ensure the functionality of Biblioshiny,
   output$MostCitCountriesTable <- DT::renderDT({
     g <- MCCountries()
     TAB <- values$TABCitCo
-    DTformat(TAB, nrow=10, filename="Most_Cited_Countries", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Cited_Countries", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2385,7 +2385,7 @@ To ensure the functionality of Biblioshiny,
     g <- MGCDocuments()
     TAB <- values$TABGlobDoc
     TAB$DOI<- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    DTformat(TAB, nrow=10, filename="Most_Global_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Global_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2455,7 +2455,7 @@ To ensure the functionality of Biblioshiny,
     TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     
     names(TAB)[4:8] <- c("Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
-    DTformat(TAB, nrow=10, filename="Most_Local_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=6:8, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Local_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=6:8, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2518,7 +2518,7 @@ To ensure the functionality of Biblioshiny,
     
     TAB=TAB[,c(3,1,2)]
     names(TAB)[1]="Google Scholar"
-    DTformat(TAB, nrow=10, filename="Most_Local_Cited_References", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Local_Cited_References", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2566,7 +2566,7 @@ To ensure the functionality of Biblioshiny,
   output$rpysTable <- DT::renderDT({
     RPYS()
     rpysData=values$res$rpysTable
-    DTformat(rpysData, nrow=10, filename="RPYS", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(rpysData, nrow=10, filename="RPYS", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2579,7 +2579,7 @@ To ensure the functionality of Biblioshiny,
     crData=crData[order(-as.numeric(crData$Year),-crData$Freq),]
     names(crData)=c("Year", "Reference", "Local Citations", "Google link")
     crData <- crData[,c(1,4,2,3)] 
-    DTformat(crData, nrow=10, filename="RPYS_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(crData, nrow=10, filename="RPYS_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2705,7 +2705,7 @@ To ensure the functionality of Biblioshiny,
     g <- MFWords()
     
     TAB <- values$TABWord
-    DTformat(TAB, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(TAB, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2890,14 +2890,14 @@ To ensure the functionality of Biblioshiny,
   
   output$wordTable <- DT::renderDT({
     WordCloud()
-    DTformat(values$Words, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(values$Words, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
   
   output$treeTable <- DT::renderDT({
     WordsT <- TreeMap()
-    DTformat(values$WordsT, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(values$WordsT, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   },height = 600, width = 900)
@@ -3079,7 +3079,7 @@ To ensure the functionality of Biblioshiny,
   output$kwGrowthtable <- DT::renderDT({
     g <- WDynamics()
     kwData <- values$KW
-    DTformat(kwData, nrow=10, filename="Word_Dynamics", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(kwData, nrow=10, filename="Word_Dynamics", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3177,7 +3177,7 @@ To ensure the functionality of Biblioshiny,
   output$trendTopicsTable <- DT::renderDT({
     TrendTopics()
     tpData=values$trendTopics$df_graph
-    DTformat(tpData, nrow=10, filename="Stopword_List", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+    DTformat(tpData, nrow=10, filename="Stopword_List", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3241,7 +3241,7 @@ To ensure the functionality of Biblioshiny,
     CMMAP()
     #cmData=values$CM$data[,c(2,1,3,5)]
     cmData <- values$CM$data
-    DTformat(cmData, nrow=10, filename="CouplingMap", pagelength=TRUE, left=NULL, right=NULL, numeric=2, dom=TRUE, 
+    DTformat(cmData, nrow=10, filename="CouplingMap", pagelength=TRUE, left=NULL, right=NULL, numeric=2, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3250,7 +3250,7 @@ To ensure the functionality of Biblioshiny,
     CMMAP()
     #cmData=values$CM$clusters[,c(7,1:4,6)]
     cmData <- values$CM$clusters
-    DTformat(cmData, nrow=10, filename="CouplingMap_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=TRUE, 
+    DTformat(cmData, nrow=10, filename="CouplingMap_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3355,7 +3355,7 @@ To ensure the functionality of Biblioshiny,
     COCnetwork()
     cocData=values$cocnet$cluster_res
     names(cocData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
-    DTformat(cocData, nrow=10, filename="CoWord_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=3:5, dom=TRUE, 
+    DTformat(cocData, nrow=10, filename="CoWord_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=3:5, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3458,7 +3458,7 @@ To ensure the functionality of Biblioshiny,
   output$CSTableW <- DT::renderDT({
     CSfactorial()
     WData <- values$CS$WData
-    DTformat(WData, nrow=10, filename="CoWord_Factorial_Analysis_Words_By_Cluster", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
+    DTformat(WData, nrow=10, filename="CoWord_Factorial_Analysis_Words_By_Cluster", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3466,7 +3466,7 @@ To ensure the functionality of Biblioshiny,
   output$CSTableD <- DT::renderDT({
     CSfactorial()
     CSData <- values$CS$CSData
-    DTformat(CSData, nrow=10, filename="CoWord_Factorial_Analysis_Articles_By_Cluster", pagelength=TRUE, left=NULL, right=NULL, numeric=2:4, dom=TRUE, 
+    DTformat(CSData, nrow=10, filename="CoWord_Factorial_Analysis_Articles_By_Cluster", pagelength=TRUE, left=NULL, right=NULL, numeric=2:4, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -3622,7 +3622,7 @@ To ensure the functionality of Biblioshiny,
   output$TMTable <- DT::renderDT({
     TMAP()
     tmData=values$TM$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=TRUE, 
+    DTformat(tmData, nrow=10, filename="Thematic_Map_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=FALSE, 
              size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })

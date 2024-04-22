@@ -1,7 +1,7 @@
 ### COMMON FUNCTIONS ####
 
 # LOAD FUNCTIONS -----
-format <- function(obj){
+formatDB <- function(obj){
   ext<- sub('.*\\.', '', obj[1])
   switch(ext,
          txt ={
@@ -96,7 +96,7 @@ DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, 
   if (isTRUE(dom)){
     dom <- "Brtip"
   } else if (dom==FALSE){
-    dom <- "Bt"
+    dom <- "Bftp"
   } else {
     dom <- "t"
   }

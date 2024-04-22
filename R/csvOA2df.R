@@ -23,7 +23,7 @@ csvOA2df <- function(file){
   ## Post-Processing
   
   # column re-labelling
-  DATA <- relabelling(DATA)
+  DATA <- relabelling_OA(DATA)
   
   # recode as numeric
   DATA$TC <- as.numeric(DATA$TC)
@@ -97,7 +97,7 @@ csvOA2df <- function(file){
   return(DATA)
 }
 
-relabelling <- function(DATA){
+relabelling_OA <- function(DATA){
   ## column re-labelling
   label <- names(DATA)
   label[label %in% "id"] <- "id_oa"

@@ -267,7 +267,7 @@ To ensure the functionality of Biblioshiny,
                                                   dbsource = input$dbsource,
                                                   format = format(D))
                                   M <- authorNameFormat(M, input$authorName)
-                                  if (format(D)=="csv") M <- AuthorNameMerge(M)
+                                  if (format(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
                                 })
                  },
                  ### Scopus CSV/Bib Files
@@ -278,7 +278,7 @@ To ensure the functionality of Biblioshiny,
                                                   dbsource = input$dbsource,
                                                   format = "csv")
                                   M <- authorNameFormat(M, input$authorName)
-                                  M <- AuthorNameMerge(M)
+                                  if (input$authorName=="AF") M <- AuthorNameMerge(M)
                                 })
                  },
                  bib = {
@@ -288,7 +288,6 @@ To ensure the functionality of Biblioshiny,
                                                   dbsource = input$dbsource,
                                                   format = "bibtex")
                                   M <- authorNameFormat(M, input$authorName)
-                                  #M <- AuthorNameMerge(M)
                                 })
                  })
         },

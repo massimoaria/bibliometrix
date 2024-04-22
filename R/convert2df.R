@@ -209,7 +209,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
   }
   
   # remove double ;
-  M <- M%>% 
+  M <- M %>% 
     mutate_if(is.character, ~gsub(";;",";",.x))
   
   ### SR field creation

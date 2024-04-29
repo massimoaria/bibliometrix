@@ -2061,8 +2061,8 @@ To ensure the functionality of Biblioshiny,
   output$AffOverTimeTable <- DT::renderDT({
     
     AFFGrowth()
-    afftimeData=values$AffOverTime
-    DTformat(afftimeDATA, nrow=10, filename="Affiliation_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
+    afftimeData <- values$AffOverTime
+    DTformat(afftimeData, nrow=10, filename="Affiliation_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -2351,6 +2351,7 @@ To ensure the functionality of Biblioshiny,
       xx <- values$TABGlobDoc %>% select(1,3)
       lab="Global Citations"} else {
         xx <- values$TABGlobDoc %>% select(1,4)
+        xx[,2] <- round(xx[,2],1)
         lab="Global Citations per Year"
       }
     
@@ -3416,6 +3417,8 @@ To ensure the functionality of Biblioshiny,
   
   CSfactorial <- eventReactive(input$applyCA,{
     values <- CAmap(input,values)
+    values$plotCS <- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
+    values$dendCS <- dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
   })
   
   output$FAplot.save <- downloadHandler(
@@ -3445,13 +3448,14 @@ To ensure the functionality of Biblioshiny,
     CSfactorial()
     #CS=values$CS
     #save(CS,file="provaCS.rdata")
-    values$plotCS <- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
+    values$plotCS #<- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
   })
   
 
   output$CSPlot4 <- renderVisNetwork({
     CSfactorial()
-      dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
+      #dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
+      values$dendCS
       #values$CS$graph_dendogram)
   })
   
@@ -3736,7 +3740,7 @@ To ensure the functionality of Biblioshiny,
       validate(
         need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
       )
-      for (i in 1:length(values$yearSlices)){
+      for (i in 1:(length(values$yearSlices)+1)){
         values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[,-c(4,6)]
         values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[,c(9,5:8,11)]
         names(values$nexus$TM[[i]]$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
@@ -4149,7 +4153,7 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$histTable <- DT::renderDT({
-    
+    g <- Hist()
     Data <- values$histResults$histData
     DTformat(Data, nrow=10, filename="Historiograph_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
              size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 

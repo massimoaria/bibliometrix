@@ -711,7 +711,8 @@ descriptive <- function(values,type){
            TAB <- countryCollab(values$M)
            TAB <- TAB %>% 
              mutate(Freq = Articles/sum(Articles)) %>% 
-             mutate(MCP_Ratio = MCP/Articles)
+             mutate(MCP_Ratio = MCP/Articles) %>% 
+             drop_na(Country)
          },
          "tab6"={
            if (!"AU1_CO" %in% names(values$M)){
@@ -1084,6 +1085,7 @@ CAmap <- function(input, values){
     values$CS=list("NA")
     
   }
+  return(values)
 }
 
 historiograph <- function(input,values){

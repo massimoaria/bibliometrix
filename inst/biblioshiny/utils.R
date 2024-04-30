@@ -2152,19 +2152,6 @@ addGgplotsWb <- function(list_plot, wb, sheetname, col, width=10, height=7, dpi=
   return(wb)
 }
 
-# screenSh <- function(selector){
-#   fileName <- tempfile(pattern = "figureImage",
-#                        tmpdir = "",
-#                        fileext = "") %>% substr(.,2,nchar(.))
-#   if (is.null(selector)){
-#     shinyscreenshot::screenshot(filename=fileName, download=FALSE, server_dir = tempdir())
-#   } else {
-#     shinyscreenshot::screenshot(selector=selector, filename=fileName, download=FALSE, server_dir = tempdir())
-#   }
-#   file <- paste(tempdir(),"/",fileName,".png",sep="")
-#   return(file)
-# }
-
 screenSh <- function(p, zoom = 2, type="vis"){
   tmpdir = tempdir()
   fileName <- tempfile(pattern = "figureImage",
@@ -2186,7 +2173,12 @@ screenShot <- function(p, filename, type){
   
   # setting up the main directory
   #filename <- paste0(file.path(home,"downloads/"),filename)
-  filename <- paste0(file.path(home,"downloads"),"/",filename)
+  if ("downloads" %in% tolower(dir(home))){
+    filename <- paste0(file.path(home,"downloads"),"/",filename)
+  } else {
+    filename <- paste0(home,"/",filename)
+  }
+  
   plot2png(p, filename, zoom = 2, type=type, tmpdir = tempdir())
   
 }
@@ -2202,6 +2194,9 @@ plot2png <- function(p, filename, zoom = 2, type="vis", tmpdir){
            htmlwidgets::saveWidget(p, file=html_name)
          })
   webshot2::webshot(url = html_name, zoom = zoom, file = filename)#, verbose=FALSE)
+  popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
+               subtitle=paste0("Plot was saved in the following path: ",filename),
+               btn_labels="OK", size="40%")
 }
 
 addScreenWb <- function(df, wb, width=14, height=8, dpi=75){

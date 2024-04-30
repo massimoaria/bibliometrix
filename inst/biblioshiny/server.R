@@ -3376,7 +3376,7 @@ To ensure the functionality of Biblioshiny,
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+16, width=10, height=7, dpi=75)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, res$sheetname, col=res$col+16, width=10, height=7, dpi=75)
       #values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
       values$fileCOC <- screenSh(values$COCnetwork$VIS, zoom = 2, type="vis")
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOC,res$col))
@@ -4121,7 +4121,7 @@ To ensure the functionality of Biblioshiny,
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=75)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, res$sheetname, col=res$col+15, width=12, height=8, dpi=75)
       #values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
       values$fileCOCIT <- screenSh(values$COCITnetwork$VIS, zoom = 2, type="vis")
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOCIT,res$col))
@@ -4252,7 +4252,7 @@ To ensure the functionality of Biblioshiny,
       list_df <- list(values$colnet$params, values$colnet$cluster_res)
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, sheetname, col=res$col+15, width=12, height=8, dpi=75)
+      values$wb <- addGgplotsWb(list_plot, wb=res$wb, res$sheetname, col=res$col+15, width=12, height=8, dpi=75)
       #values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
       values$fileCOL <- screenSh(values$COLnetwork$VIS, zoom = 2, type="vis")
       values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOL,res$col))

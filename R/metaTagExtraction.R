@@ -407,6 +407,9 @@ AU_UN<-function(M,sep){
   M$AU_UN=AFFL
   if (M$DB[1] %in% c("ISI", "OPENALEX") & "C3" %in% names(M)){
     M$AU_UN[!is.na(M$C3) & M$C3!=""] <- M$C3[!is.na(M$C3) & M$C3!=""]
+    M$AU_UN <- unlist(lapply(strsplit(M$AU_UN,sep),function(l){
+      l <- paste(trim(l), collapse = sep)
+    }))
   }
   M$AU_UN=gsub("\\\\&","AND",M$AU_UN)
   M$AU_UN=gsub("\\&","AND",M$AU_UN)

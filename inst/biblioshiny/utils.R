@@ -72,7 +72,7 @@ DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, 
       buttons = list(
         list(extend = 'pageLength'),
         list(extend = 'excel',
-             filename = paste0(filename,"_tall_",Sys.Date()),
+             filename = paste0(filename,"_bibliometrix_",Sys.Date()),
              title = " ",
              header = TRUE,
              exportOptions = list(
@@ -82,7 +82,7 @@ DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, 
     } else{
       buttons = list(
         list(extend = 'excel',
-             filename = paste0(filename,"_tall_",Sys.Date()),
+             filename = paste0(filename,"_bibliometrix_",Sys.Date()),
              title = " ",
              header = TRUE,
              exportOptions = list(

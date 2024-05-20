@@ -1,6 +1,8 @@
 .Rproj.user
 .Rhistory
 .RData
+.Renviron
+.gitignore
 *.csv
 *.xlsx
 .txt

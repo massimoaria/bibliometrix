@@ -1487,14 +1487,14 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$SourceHindexTable <- DT::renderDT({
-    DTformat(values$H , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
+    DTformat(values$H %>% rename(Source = Element) , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
   
   observeEvent(input$reportSI,{
     if(!is.null(values$H)){
-      list_df <- list(values$H)
+      list_df <- list(values$H %>% rename(Source = Element))
       list_plot <- list(values$SIplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceLocImpact", wb=values$wb)
       values$wb <- wb
@@ -1793,14 +1793,14 @@ To ensure the functionality of Biblioshiny,
   })
   
   output$AuthorHindexTable <- DT::renderDT({
-    DTformat(values$H , nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
+    DTformat(values$H %>% rename(Author = Element), nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
   
   observeEvent(input$reportAI,{
     if(!is.null(values$H)){
-      list_df <- list(values$H)
+      list_df <- list(values$H %>% rename(Author = Element))
       list_plot <- list(values$AIplot)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorLocImpact", wb=values$wb)
       values$wb <- wb
@@ -1838,36 +1838,14 @@ To ensure the functionality of Biblioshiny,
     DTformat(TAB , nrow=10, filename="Author_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=5, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
-    # DT::datatable(TAB, rownames = FALSE, extensions = c("Buttons"),
-    #               options = list(pageLength = 10, dom = 'Bfrtip',
-    #                              buttons = list('pageLength',
-    #                                             list(extend = 'copy'),
-    #                                             list(extend = 'csv',
-    #                                                  filename = 'Author_Production_Over_Time',
-    #                                                  title = " ",
-    #                                                  header = TRUE),
-    #                                             list(extend = 'excel',
-    #                                                  filename = 'Author_Production_Over_Time',
-    #                                                  title = " ",
-    #                                                  header = TRUE),
-    #                                             list(extend = 'pdf',
-    #                                                  filename = 'Author_Production_Over_Time',
-    #                                                  title = " ",
-    #                                                  header = TRUE),
-    #                                             list(extend = 'print')),
-    #                              lengthMenu = list(c(10,25,50,-1),c('10 rows', '25 rows', '50 rows','Show all')),
-    #                              columnDefs = list(list(className = 'dt-center', targets = 0:(length(names(TAB))-1)))), 
-    #               class = 'cell-border compact stripe') %>%
-    #   formatStyle(names(TAB),  backgroundColor = 'white',textAlign = 'center', fontSize = '110%') %>%
-    #   formatRound(names(TAB)[dim(TAB)[2]], 3)
   })
   
   output$TopAuthorsProdTablePapers <- DT::renderDT({
     AUoverTime()
     TAB <- values$AUProdOverTime$dfPapersAU
     TAB$DOI=paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time_Docs", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
+    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time_Docs", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=TRUE, 
+             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
     })
   
@@ -2123,7 +2101,13 @@ To ensure the functionality of Biblioshiny,
                          ) +
                          coord_flip()) + 
       annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
-    
+    values$TABCo <- values$TABCo %>% 
+      mutate(Freq = Freq*100,
+             MCP_Ratio = MCP_Ratio*100) %>% 
+      rename("Articles %" = Freq,
+             "MCP %" = MCP_Ratio) %>% 
+      select(Country, "Articles %", Frequency, SCP, MCP, "MCP %")
+      
     values$MRCOplot <- g
     return(g)
   }) 
@@ -2147,8 +2131,8 @@ To ensure the functionality of Biblioshiny,
     g <- CAUCountries()
     
     TAB <- values$TABCo
-    DTformat(TAB, nrow=10, filename="Most_Relevant_Countries_By_Corresponding_Author", pagelength=TRUE, left=NULL, right=NULL, numeric=5:6, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
+    DTformat(TAB, nrow=10, filename="Most_Relevant_Countries_By_Corresponding_Author", pagelength=TRUE, left=NULL, right=NULL, numeric=c(3,6), dom=FALSE, 
+             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=1, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
   
@@ -2183,7 +2167,7 @@ To ensure the functionality of Biblioshiny,
   
   output$countryProdTable <- DT::renderDT({
     
-    TAB <- values$mapworld$tab
+    TAB <- values$mapworld$tab %>% rename(Country = region)
     DTformat(TAB, nrow=10, filename="Country_Production", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
@@ -2580,8 +2564,8 @@ To ensure the functionality of Biblioshiny,
     crData=crData[order(-as.numeric(crData$Year),-crData$Freq),]
     names(crData)=c("Year", "Reference", "Local Citations", "Google link")
     crData <- crData[,c(1,4,2,3)] 
-    DTformat(crData, nrow=10, filename="RPYS_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
+    DTformat(crData, nrow=10, filename="RPYS_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
   
@@ -3177,7 +3161,12 @@ To ensure the functionality of Biblioshiny,
   
   output$trendTopicsTable <- DT::renderDT({
     TrendTopics()
-    tpData=values$trendTopics$df_graph
+    tpData=values$trendTopics$df_graph %>% 
+      rename(Term = item,
+             Frequency = freq,
+             "Year (Q1)" = year_q1,
+             "Year (Median)" = year_med,
+             "Year (Q3)" = year_q3)
     DTformat(tpData, nrow=10, filename="Stopword_List", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
@@ -3185,7 +3174,12 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$reportTT,{
     if(!is.null(values$trendTopics$df_graph)){
-      list_df <- list(values$trendTopics$df_graph)
+      list_df <- list(values$trendTopics$df_graph %>% 
+                        rename(Term = item,
+                               Frequency = freq,
+                               "Year (Q1)" = year_q1,
+                               "Year (Median)" = year_med,
+                               "Year (Q3)" = year_q3))
       list_plot <- list(values$trendTopics$graph)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "TrendTopics", wb=values$wb)
       values$wb <- wb

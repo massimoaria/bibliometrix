@@ -2106,7 +2106,7 @@ To ensure the functionality of Biblioshiny,
              MCP_Ratio = MCP_Ratio*100) %>% 
       rename("Articles %" = Freq,
              "MCP %" = MCP_Ratio) %>% 
-      select(Country, "Articles %", Frequency, SCP, MCP, "MCP %")
+      select(Country, "Articles","Articles %", SCP, MCP, "MCP %")
       
     values$MRCOplot <- g
     return(g)

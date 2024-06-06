@@ -43,7 +43,7 @@ export_bttn <- list(
 
 ## load content of Info page
 info <- helpContent()$info
-
+pubs <- helpContent()$publications
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(title = mytitle,
                                               titleWidth = 300,
@@ -119,7 +119,9 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
   sidebarMenu(
     id="sidebarmenu",
     menuItem("biblioshiny",tabName = "biblioshinyy",icon = fa_i(name="house-user")),
-    menuItem("Info", tabName ="info", icon = fa_i(name="circle-info")),
+    menuItem("Info", tabName ="info", icon = fa_i(name="circle-info"),
+             menuSubItem("Supported Files", tabName = "supFiles",icon = fa_i(name="circle-info")),
+             menuSubItem("Team's Publications", tabName = "pubs",icon = fa_i(name="circle-info"))),
     menuItem("Data",tabName = "uploadData",icon = fa_i(name = "file-import"),
              menuSubItem("Load Data", tabName = "loadData",icon = icon("chevron-right",lib = "glyphicon")),
              menuSubItem("Gathering Data", tabName = "gathData",icon = icon("chevron-right",lib = "glyphicon"))),
@@ -206,13 +208,23 @@ body <- dashboardBody(
               )
             )
     ),
-    tabItem("info",
+    tabItem("supFiles",
             fluidPage(
               fluidRow(
                 column(1),
                 column(10,
                        HTML(info),
                        div(img(src = "table_DBformats.jpg", height = "70%",width = "70%"), style="text-align: center;")
+                ),
+                column(1)
+              )
+            )),
+    tabItem("pubs",
+            fluidPage(
+              fluidRow(
+                column(1),
+                column(10,
+                       HTML(pubs)
                 ),
                 column(1)
               )

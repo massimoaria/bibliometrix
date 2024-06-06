@@ -42,8 +42,35 @@ csvOA2df <- function(file){
   DATA$id_oa <- gsub("https://openalex.org/","",DATA$id_oa)
   DATA$JI <- DATA$J9 <- gsub("https://openalex.org/","",DATA$SO_ID)
   DATA$corresponding_author_ids <- gsub("https://openalex.org/","",DATA$corresponding_author_ids)
-  DATA$C1 <- gsub("https://", "", DATA$C1)
   DATA$DB <- "OPENALEX"
+  
+  # affilitation string
+  AFF <- DATA %>% 
+    select(id_oa, starts_with("authorships_raw_affiliation_strings_")) 
+  
+  colId <- c(-1,parse_number(colnames(AFF)[-1]))
+  
+  DATA <- AFF[order(colId)] %>% 
+    unite(., C1, starts_with("authorships_raw_affiliation_strings_"), sep=";") %>% 
+    mutate(C1 = gsub("NA","",C1),
+           C1 = TrimMult(C1,char=";")) %>% 
+    bind_cols(DATA %>% 
+                select(-"id_oa", -starts_with("authorships_raw_affiliation_strings_")))
+  
+  DATA$C1 <- gsub("https://", "", DATA$C1)
+  
+  # country string
+  CO <- DATA %>% 
+    select(id_oa, starts_with("authorships_countries_")) 
+  
+  colId <- c(-1,parse_number(colnames(CO)[-1]))
+  
+  DATA <- CO[order(colId)] %>% 
+    unite(., AU_CO, starts_with("authorships_countries_"), sep=";") %>% 
+    mutate(AU_CO = gsub("NA","",AU_CO),
+           AU_CO = TrimMult(AU_CO,char=";")) %>% 
+    bind_cols(DATA %>% 
+                select(-"id_oa", -starts_with("authorships_countries_")))
   
   ## corresponding author
   DATA <- DATA %>% 
@@ -128,7 +155,7 @@ relabelling_OA <- function(DATA){
   label[label %in% "referenced_works_count"] <- "NR"
   label[label %in% "language"] <- "LA"
   label[label %in% "authorships_author_position"] <- "AU_POSITION"
-  label[label %in% "authorships_raw_affiliation_string"] <- "C1"
+  #label[label %in% "authorships_raw_affiliation_string"] <- "C1"
   label[label %in% "doi"] <- "DI"
   names(DATA) <- label
   return(DATA)

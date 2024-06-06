@@ -160,3 +160,8 @@ relabelling_OA <- function(DATA){
   names(DATA) <- label
   return(DATA)
 }
+
+TrimMult <- function(x, char=" ") {
+  return(gsub(paste0("^", char, "*|(?<=", char, ")", char, "|", char, "*$"),
+              "", x, perl=T))
+}

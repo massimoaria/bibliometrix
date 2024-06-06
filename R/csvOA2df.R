@@ -36,7 +36,7 @@ csvOA2df <- function(file){
   
   DATA$AF <- DATA$AU
   DATA$ID <- DATA$DE
-  DATA$AB=""
+  if (!"AB" %in% names(DATA)) DATA$AB=""
   DATA$CR <- gsub("https://openalex.org/","",DATA$CR)
   DATA$AU_ID <- gsub("https://openalex.org/","",DATA$AU_ID)
   DATA$id_oa <- gsub("https://openalex.org/","",DATA$id_oa)
@@ -146,7 +146,8 @@ relabelling_OA <- function(DATA){
   label[label %in% "biblio_issue"] <- "IS"
   label[label %in% "biblio_volume"] <- "VL"
   label[label %in% "referenced_works" ] <- "CR"
-  label[label %in% "keywords_keyword"] <- "DE"
+  label[label %in% "keywords_display_name"] <- "DE"
+  label[label %in% "abstract"] <- "AB"
   label[label %in% "concepts_display_name"] <- "CONCEPTS"
   label[label %in% "topics_display_name"] <- "TOPICS"
   label[label %in% "sustainable_development_goals_display_name"] <- "SDG"

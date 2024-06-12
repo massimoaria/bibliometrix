@@ -2,27 +2,29 @@
 % Please edit documentation in R/mergeDbSources.R
 \name{mergeDbSources}
 \alias{mergeDbSources}
-\title{Merge bibliographic data frames from SCOPUS and WoS}
+\title{Merge bibliographic data frames from supported bibliogtraphic DBs}
 \usage{
-mergeDbSources(..., remove.duplicated = TRUE)
+mergeDbSources(..., remove.duplicated = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{...}{are the bibliographic data frames to merge.}
 
 \item{remove.duplicated}{is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.}
+
+\item{verbose}{is logical.  If TRUE, information on duplicate documents is printed on the screen.}
 }
 \value{
 the value returned from \code{mergeDbSources} is a bibliographic data frame.
 }
 \description{
-Merge bibliographic data frames from different databases (WoS and SCOPUS) into a single one.
+Merge bibliographic data frames from different databases (WoS,SCOPUS, Lens, Openalex, etc-) into a single one.
 }
 \details{
 bibliographic data frames are obtained by the converting function \code{\link{convert2df}}. 
 The function merges data frames identifying common tag fields and duplicated records.
 }
 \examples{
- 
+
 data(isiCollection, package = "bibliometrixData")
 
 data(scopusCollection, package = "bibliometrixData")

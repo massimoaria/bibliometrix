@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr", "DI", "id_oa","RP","UN","AU_ID","corresponding_author_ids"))
+utils::globalVariables(c("all_of", "corr", "DI", "C1","id_oa","RP","UN","AU_ID","corresponding_author_ids"))
 
 csvOA2df <- function(file){
   options(readr.num_columns = 0)

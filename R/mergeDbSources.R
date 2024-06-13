@@ -1,3 +1,4 @@
+utils::globalVariables(c("num"))
 #' Merge bibliographic data frames from supported bibliogtraphic DBs  
 #'
 #' Merge bibliographic data frames from different databases (WoS,SCOPUS, Lens, Openalex, etc-) into a single one.
@@ -33,28 +34,23 @@
 mergeDbSources <- function(...,remove.duplicated=TRUE, verbose=TRUE){
 
   index <- NULL
-  L <- list(...)
+
+  mc <- match.call(expand.dots = TRUE)
   
-  M <- dplyr::bind_rows(L)
+  if (length(mc)>3){
+      M <- dplyr::bind_rows(list(...))
+    }else{
+      M <- dplyr::bind_rows(...)
+    }
   
-  ## author data cleaning
-  if ("AU" %in% names(M)){
-    M$AU <- gsub(","," ",M$AU)
-    AUlist <- strsplit(M$AU,";")
-    AU <- lapply(AUlist,function(l){
-      l <- trim(l)
-      name <- strsplit(l," ")
-      lastname <- unlist(lapply(name,function(ln){ln[1]}))
-      firstname <- lapply(name,function(ln){
-        f <- paste(substr(ln[-1],1,1),collapse=" ")
-        })
-      AU <- paste(lastname,unlist(firstname),sep=" ",collapse=";")
-      return(AU)
-    })
-    M$AU <- unlist(AU)
-    
-  }
-  # M=M[-1,]
+   dbLabels <- data.frame(DB = toupper(c("isi","scopus","openalex","lens","dimensions","pubmed","cochrane")),
+                          num = c(1,2,3,4,5,6,7))
+   # order by db
+   M <- M %>% 
+     left_join(dbLabels, by = "DB") %>% 
+     arrange(num) %>% 
+     select(-num)
+  
   
   if (isTRUE(remove.duplicated)){
     # remove by DOI
@@ -75,6 +71,24 @@ mergeDbSources <- function(...,remove.duplicated=TRUE, verbose=TRUE){
   
   if (length(unique(M$DB))>1){
     M$DB <- "ISI"
+    
+    ## author data cleaning
+    if ("AU" %in% names(M)){
+      M$AU <- gsub(","," ",M$AU)
+      AUlist <- strsplit(M$AU,";")
+      AU <- lapply(AUlist,function(l){
+        l <- trim(l)
+        name <- strsplit(l," ")
+        lastname <- unlist(lapply(name,function(ln){ln[1]}))
+        firstname <- lapply(name,function(ln){
+          f <- paste(substr(ln[-1],1,1),collapse=" ")
+        })
+        AU <- paste(lastname,unlist(firstname),sep=" ",collapse=";")
+        return(AU)
+      })
+      M$AU <- unlist(AU)
+      
+    }
   }
   
   M <- metaTagExtraction(M, "SR")

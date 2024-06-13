@@ -42,6 +42,41 @@ smart_load <- function(file){
   }
 }
 
+
+## merge collections ----
+merge_files <- function(files){
+  
+  #files <- list.files(path=path, pattern = paste0(".",ext,"$"), recursive = subfolder)
+  #if (is.null(files)) return(data.frame(doc_id=NA,text=NA, folder=NA))
+  
+  if ("datapath" %in% names(files)){
+    #doc_id <- files$name
+    file <- files$datapath
+    ext <- unlist(lapply(file, getFileNameExtension))
+  }
+  
+  Mfile <- list()
+  for (i in 1:length(file)){
+    extF <- ext[i]
+    filename <- file[i]
+    
+    switch(extF,
+           xlsx={
+             Mfile[[i]] <- readxl::read_excel(filename, col_types = "text") %>% as.data.frame()
+             Mfile[[i]]$PY <- as.numeric(Mfile[[i]]$PY)
+             Mfile[[i]]$TC <- as.numeric(Mfile[[i]]$TC)
+           },
+           rdata={
+             Mfile[[i]] <- smart_load(filename)
+           })
+  }
+  
+  M <- mergeDbSources(Mfile, remove.duplicated = T)
+  
+  return(M)
+}
+
+
 # DATA TABLE FORMAT ----
 DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='85%', filter="top",
                      columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE, scrollY=FALSE){

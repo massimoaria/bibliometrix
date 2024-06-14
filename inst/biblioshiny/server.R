@@ -472,6 +472,7 @@ To ensure the functionality of Biblioshiny,
     
     values$M <- M
     values$Morig = M
+    values$nMerge <- attr(M,"nMerge")
     values$Histfield = "NA"
     values$results = list("NA")
     if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
@@ -582,10 +583,22 @@ To ensure the functionality of Biblioshiny,
   
   output$missingTitle <- renderUI({
     ndocs <- nrow(values$M)
-    txt1 <- paste0("Completeness of bibliographic metadata - ", strong(ndocs)," documents from ", strong(firstup(values$M$DB[1])))
+    if ("DB_Original" %in% names(values$M)){
+      DB <- paste0(length(unique(values$M$DB_Original))," DBs")
+      txt1 <- paste0("Completeness of metadata -- ", strong(ndocs)," docs merged from ", DB)
+      txt2 <- paste0("Original size ",strong(values$nMerge), " docs -- Deleted ", strong(values$nMerge-ndocs), " duplicated docs")
+    } else {
+      DB <- firstup(values$M$DB[1])
+      txt1 <- paste0("Completeness of metadata -- ", strong(ndocs)," docs from ", strong(DB))
+      txt2 <- ""
+    }
+    
+    
     tagList(
       div(
         h3(HTML(txt1)),
+        br(),
+        h4(HTML(txt2)),
         style="text-align:center")
     )
   })

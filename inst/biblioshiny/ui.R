@@ -123,9 +123,9 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
              menuSubItem("Supported Files", tabName = "supFiles",icon = fa_i(name="circle-info")),
              menuSubItem("Team's Publications", tabName = "pubs",icon = fa_i(name="circle-info"))),
     menuItem("Data",tabName = "uploadData",icon = fa_i(name = "file-import"),
-             menuSubItem("Load Data", tabName = "loadData",icon = icon("chevron-right",lib = "glyphicon")),
+             menuSubItem("Import or Load", tabName = "loadData",icon = icon("chevron-right",lib = "glyphicon")),
              menuSubItem("API", tabName = "gathData",icon = icon("chevron-right",lib = "glyphicon")),
-             menuSubItem("Merge Data", tabName = "mergeData",icon = icon("chevron-right",lib = "glyphicon"))
+             menuSubItem("Merge Collections", tabName = "mergeData",icon = icon("chevron-right",lib = "glyphicon"))
              ),
     menuItemOutput ("rest_of_sidebar")
   ),
@@ -496,7 +496,7 @@ body <- dashboardBody(
                            box(
                              width = "100%",
                              h3(strong("Load Collections")),
-                             helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix")
+                             helpText(em("Merge collections in Excel or R format coming from different DBs")
                                  ),
                                fileInput(
                                  "fileMerge",

@@ -49,7 +49,9 @@ mergeDbSources <- function(...,remove.duplicated=TRUE, verbose=TRUE){
    M <- M %>% 
      left_join(dbLabels, by = "DB") %>% 
      arrange(num) %>% 
-     select(-num)
+     select(-num) %>% 
+     rename("CR_raw" = "CR") %>% 
+     mutate(CR = "NA")
   
   
   if (isTRUE(remove.duplicated)){
@@ -70,6 +72,7 @@ mergeDbSources <- function(...,remove.duplicated=TRUE, verbose=TRUE){
   }
   
   if (length(unique(M$DB))>1){
+    M$DB_Original <- M$DB
     M$DB <- "ISI"
     
     ## author data cleaning

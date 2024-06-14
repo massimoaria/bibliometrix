@@ -1,3 +1,16 @@
+bibliometrix v4.2.4 (Release date: 2024-06-20)
+
+Features:
+* Improved the function mergeDbSources()
+  Now it's possible to merge collection from all supported databases
+* Added the submenu "Merge Collections" in biblioshiny
+  Through the new submenu "Merge Collections", it's possible to merge collections from different DBs directly in Biblioshiny
+
+bibliometrix v4.2.3 (Release date: 2024-05-27)
+
+Changes:
+* Major fixes in bibliometrix functions
+
 bibliometrix v4.2.2 (Release date: 2024-05-23)
 
 Changes:

@@ -42,6 +42,45 @@ smart_load <- function(file){
   }
 }
 
+
+## merge collections ----
+merge_files <- function(files){
+  
+  ## load xlsx or rdata bibliometrix files
+  if ("datapath" %in% names(files)){
+    file <- files$datapath
+    ext <- unlist(lapply(file, getFileNameExtension))
+  }
+  
+  Mfile <- list()
+  n <- 0
+  for (i in 1:length(file)){
+    extF <- ext[i]
+    filename <- file[i]
+    print(filename)
+    
+    switch(extF,
+           xlsx={
+             Mfile[[i]] <- readxl::read_excel(filename, col_types = "text") %>% as.data.frame()
+             Mfile[[i]]$PY <- as.numeric(Mfile[[i]]$PY)
+             Mfile[[i]]$TC <- as.numeric(Mfile[[i]]$TC)
+           },
+           rdata={
+             Mfile[[i]] <- smart_load(filename)
+           })
+    n <- n+nrow(Mfile[[i]])
+  }
+  
+  # merge bibliometrix files
+  M <- mergeDbSources(Mfile, remove.duplicated = T)
+  
+  # save original size as attribute
+  attr(M,"nMerge") <- n
+
+  return(M)
+}
+
+
 # DATA TABLE FORMAT ----
 DTformat <- function(df, nrow=10, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='85%', filter="top",
                      columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=FALSE, scrollY=FALSE){
@@ -2417,15 +2456,17 @@ overlayPlotly <- function(VIS){
 
 menuList <- function(values){
   
-  TC <- ISI <- MLCS <- AFF <- MCC <- DB_TC <- DB_CR <- CR <- FALSE
+  TC <- ISI <- MLCS <- MLCA <- AFF <- MCC <- DB_TC <- DB_CR <- CR <- FALSE
   if (!"TC" %in% values$missTags) TC <- TRUE
   if ("ISI" %in% values$M$DB[1] & !"CR" %in% values$missTags) MLCS <- TRUE
+  if ("ISI" %in% values$M$DB[1] & !"CR" %in% values$missTags) MLCA <- TRUE
   if ("ISI" %in% values$M$DB[1]) ISI <- TRUE
   if (!"C1" %in% values$missTags) AFF <- TRUE
   if (!"CR" %in% values$missTags) CR <- TRUE
   if (!"TC" %in% values$missTags & !"C1" %in% values$missTags) MCC <- TRUE
   if( sum(c("SCOPUS","ISI") %in% values$M$DB[1])>0) DB_CR <- TRUE
   if( sum(c("SCOPUS","ISI","OPENALEX","LENS") %in% values$M$DB[1])>0) DB_TC <- TRUE
+  
   
  # out <- list(TC,ISI,MLCS,AFF,MCC,DB_TC,DB_CR,CR)
   out <- NULL
@@ -2460,7 +2501,7 @@ menuList <- function(values){
     menuItem("Authors", tabName = "authors",icon = fa_i(name="user"),startExpanded = FALSE,
              "Authors",
              menuSubItem("Most Relevant Authors", tabName = "mostRelAuthors",icon = icon("chevron-right", lib = "glyphicon")),
-             if (isTRUE(ISI)){
+             if (isTRUE(MLCA)){
                menuSubItem("Most Local Cited Authors",tabName = "mostLocalCitedAuthors",icon = icon("chevron-right", lib = "glyphicon"))
              },
              menuSubItem("Authors' Production over Time",tabName = "authorsProdOverTime",icon = icon("chevron-right", lib = "glyphicon")),

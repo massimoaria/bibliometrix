@@ -123,8 +123,10 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
              menuSubItem("Supported Files", tabName = "supFiles",icon = fa_i(name="circle-info")),
              menuSubItem("Team's Publications", tabName = "pubs",icon = fa_i(name="circle-info"))),
     menuItem("Data",tabName = "uploadData",icon = fa_i(name = "file-import"),
-             menuSubItem("Load Data", tabName = "loadData",icon = icon("chevron-right",lib = "glyphicon")),
-             menuSubItem("Gathering Data", tabName = "gathData",icon = icon("chevron-right",lib = "glyphicon"))),
+             menuSubItem("Import or Load", tabName = "loadData",icon = icon("chevron-right",lib = "glyphicon")),
+             menuSubItem("API", tabName = "gathData",icon = icon("chevron-right",lib = "glyphicon")),
+             menuSubItem("Merge Collections", tabName = "mergeData",icon = icon("chevron-right",lib = "glyphicon"))
+             ),
     menuItemOutput ("rest_of_sidebar")
   ),
   textOutput("res"), width = 300
@@ -466,6 +468,81 @@ body <- dashboardBody(
                 )
               )
             )
+    ),
+    ##### merge Data ----
+    tabItem("mergeData",
+            fluidPage(
+              fluidRow(
+                div(
+                  tags$head(tags$style(
+                    HTML(
+                      "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                                  background-color: #9c4242 !important;
+                                  }
+                                  "
+                    )
+                  )),
+                  tags$style(
+                    HTML(
+                      ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  color: #000000 !important;
+                  }"
+                    )
+                  ),
+                  column(9,
+                         shinycssloaders::withSpinner(DT::DTOutput("contentsMerge"))),
+                  column(3, 
+                         fluidRow(
+                           box(
+                             width = "100%",
+                             h3(strong("Load Collections")),
+                             helpText(em("Merge collections in Excel or R format coming from different DBs")
+                                 ),
+                               fileInput(
+                                 "fileMerge",
+                                 "Select collection files",
+                                 multiple = TRUE,
+                                 accept = c(
+                                   ".xlsx",
+                                   ".rdata"
+                                 )
+                               )
+                             ),
+                             fluidRow(column(12,
+                                             div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                                                                  align = "center",
+                                                                  width="100%",
+                                                                  actionBttn(inputId = "applyMerge", label = strong("Start"),
+                                                                             width = "100%", style = "pill", color = "primary",
+                                                                             icon = icon(name ="play", lib="glyphicon")))))
+                             ),
+                             tags$hr(),
+                             h3(strong(
+                               "Export collection"
+                             )),
+                             selectInput(
+                               'save_fileMerge',
+                               'Save as:',
+                               choices = c(
+                                 ' ' = 'null',
+                                 'Excel' = 'xlsx',
+                                 'R Data Format' = 'RData'
+                               ),
+                               selected = 'null'
+                             ),
+                             conditionalPanel(condition = "input.save_fileMerge != 'null'",
+                                              fluidRow(column(12,
+                                                              div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                                                                  align = "center",
+                                                                  width="100%",
+                                                                  downloadBttn(outputId = "collection.saveMerge", label = strong("Export"),
+                                                                               #width = "100%", 
+                                                                               style = "pill", color = "primary"))))
+                             ) 
+                           )
+                         )
+                  )
+                )
     ),
     #### Filters ----
     tabItem("filters",

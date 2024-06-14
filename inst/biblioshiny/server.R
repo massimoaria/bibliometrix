@@ -56,6 +56,7 @@ To ensure the functionality of Biblioshiny,
   values$logo <- logo
   values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
   values$out <- NULL
+  values$loadMenu <- NA
   
   ### setting values
   values$dpi <- 300
@@ -161,7 +162,18 @@ To ensure the functionality of Biblioshiny,
   })
   
   observeEvent(values$missTags, {
-    updateTabItems(session, "sidebarmenu", "loadData")
+    switch(values$loadMenu,
+           "load"={
+             updateTabItems(session, "sidebarmenu", "loadData")
+           },
+           "merge"={
+             updateTabItems(session, "sidebarmenu", "mergeData")
+           })
+    values$loadMenu <- NA
+  })
+
+  observeEvent(input$applyMerge, {
+    updateTabItems(session, "sidebarmenu", "mergeData")
   })
   
   ## Load Menu ----
@@ -418,11 +430,59 @@ To ensure the functionality of Biblioshiny,
     values$Histfield = "NA"
     values$results = list("NA")
     if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
-    if (ncol(values$M)>1){showModal(missingModal(session))}
+    if (ncol(values$M)>1){
+      values$loadMenu <- "load"
+      showModal(missingModal(session))}
   })
   
   output$contents <- DT::renderDT({
     DATAloading()   
+    MData = as.data.frame(apply(values$M, 2, function(x) {
+      substring(x, 1, 150)
+    }))
+    MData$DOI <-
+      paste0(
+        '<a href=\"https://doi.org/',
+        MData$DI,
+        '\" target=\"_blank\">',
+        MData$DI,
+        '</a>'
+      )
+    nome = c("DOI", names(MData)[-length(names(MData))])
+    MData = MData[nome]
+    DTformat(MData, nrow=3, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
+             columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=TRUE)
+  })
+  
+  
+  ## Merge Menu ----
+  DATAmerging<- eventReactive(input$applyMerge,{
+    
+    inFile <- input$fileMerge
+    
+    if (!is.null(inFile)){
+      M <- merge_files(inFile)
+    } else if (is.null(inFile)) {return(NULL)}
+    
+    values = initial(values)
+    ## remove not useful columns
+    ind <- which(substr(names(M),1,2)=="X.")
+    if (length(ind)>0) M <- M[,-ind]
+    ##
+    
+    values$M <- M
+    values$Morig = M
+    values$nMerge <- attr(M,"nMerge")
+    values$Histfield = "NA"
+    values$results = list("NA")
+    if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
+    if (ncol(values$M)>1){
+      values$loadMenu <- "merge"
+      showModal(missingModal(session))}
+  })
+  
+  output$contentsMerge <- DT::renderDT({
+    DATAmerging()   
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
     }))
@@ -523,10 +583,22 @@ To ensure the functionality of Biblioshiny,
   
   output$missingTitle <- renderUI({
     ndocs <- nrow(values$M)
-    txt1 <- paste0("Completeness of bibliographic metadata - ", strong(ndocs)," documents from ", strong(firstup(values$M$DB[1])))
+    if ("DB_Original" %in% names(values$M)){
+      DB <- paste0(length(unique(values$M$DB_Original))," DBs")
+      txt1 <- paste0("Completeness of metadata -- ", strong(ndocs)," docs merged from ", DB)
+      txt2 <- paste0("Original size ",strong(values$nMerge), " docs -- Deleted ", strong(values$nMerge-ndocs), " duplicated docs")
+    } else {
+      DB <- firstup(values$M$DB[1])
+      txt1 <- paste0("Completeness of metadata -- ", strong(ndocs)," docs from ", strong(DB))
+      txt2 <- ""
+    }
+    
+    
     tagList(
       div(
         h3(HTML(txt1)),
+        br(),
+        h4(HTML(txt2)),
         style="text-align:center")
     )
   })
@@ -616,6 +688,53 @@ To ensure the functionality of Biblioshiny,
       }
     },
     contentType = input$save_file
+  )
+  
+  output$collection.saveMerge <- downloadHandler(
+    filename = function() {
+      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_fileMerge, sep="")
+    },
+    content <- function(file) {
+      tr <- FALSE
+      if ("CR" %in% names(values$M)) tr <- (sum(nchar(values$M$CR)>32767, na.rm=TRUE))>0
+      
+      if (tr & input$save_file=="xlsx"){
+        show_alert(
+          text = tags$span(
+            tags$h4("Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
+                    style = "color: firebrick;"),
+            tags$br(),
+            tags$h4("Data in the column CR could be truncated.",
+                    style = "color: firebrick;")
+          ),
+          #text = "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).\nData in the column CR could be truncated",
+          title = "Please save the collection using the 'RData' format",
+          type = "warning",
+          width =  "50%", ##NEW ----
+          closeOnEsc = TRUE,
+          closeOnClickOutside = TRUE,
+          html = FALSE,
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          btn_labels = "OK",
+          btn_colors = "#913333",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
+        )
+        suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
+      } else {
+        switch(input$save_fileMerge,
+               xlsx={
+                 suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
+                 },
+               RData={
+                 M=values$M
+                 save(M, file=file)
+               })
+      }
+    },
+    contentType = input$save_fileMerge
   )
   
   output$collection.save_api <- downloadHandler(

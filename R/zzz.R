@@ -18,6 +18,7 @@
 #' @import openalexR
 #' @import ca
 #' @importFrom dplyr %>%
+#' @importFrom dplyr bind_cols
 #' @importFrom dplyr across
 #' @importFrom dplyr row_number
 #' @importFrom dplyr tibble

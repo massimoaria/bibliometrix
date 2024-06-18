@@ -108,12 +108,16 @@ logo <- grid::rasterGrob(logo,interpolate = TRUE)
 x <- c(min(RPYS$Year),min(RPYS$Year)+diff(range(RPYS$Year))*0.125)+1
 y <- c(min(c(RPYS$Citations,RPYS$diffMedian)),min(c(RPYS$Citations,RPYS$diffMedian))+diff(range(c(RPYS$Citations,RPYS$diffMedian)))*0.125)*1.05
 
+RPYS <- RPYS %>% 
+  left_join(CR %>% 
+              group_by(citedYears) %>% 
+              slice_max(order_by = Freq, n=3, with_ties = FALSE) %>% 
+              summarize(References = paste(firstup(Reference),collapse="\n")), 
+            by=c("Year" = "citedYears"))
 
 
-g=ggplot(RPYS, aes(x=Year ,y=Citations,text=paste("Year: ",Year,"\nN. of References: ",Citations)))+
+g=ggplot(RPYS, aes(x=Year ,y=Citations,text=paste("Year: ",Year," - Total Citations: ",Citations,"\nTop 3 References:\n",References)))+
   geom_line(aes(group="NA")) +
-  #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
-  #geom_hline(aes(yintercept=0, color = 'grey'))+
   geom_line(aes(x=Year,y=diffMedian, color="firebrick", group="NA"))+
   labs(x = 'Year'
        , y = 'Cited References'
@@ -131,8 +135,8 @@ g=ggplot(RPYS, aes(x=Year ,y=Citations,text=paste("Year: ",Year,"\nN. of Referen
         ,axis.title.y = element_text(vjust = 1, angle = 90)
         ,axis.title.x = element_text(hjust = 0.95, angle = 0)
         ,axis.text.x = element_text(size=8,angle = 90)
-        ,axis.line.x = element_line(color="black", size=0.5)
-        ,axis.line.y = element_line(color="black", size=0.5)
+        ,axis.line.x = element_line(color="black", linewidth=0.5)
+        ,axis.line.y = element_line(color="black", linewidth=0.5)
   ) + annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
 
     if (isTRUE(graph)){plot(g)}
@@ -141,7 +145,7 @@ g=ggplot(RPYS, aes(x=Year ,y=Citations,text=paste("Year: ",Year,"\nN. of Referen
       rename(Year = citedYears) %>% 
       ungroup()
     result=list(spectroscopy=g, 
-                rpysTable=RPYS, 
+                rpysTable=RPYS %>% select(-References), 
                 CR=CR %>% mutate(Year = as.character(Year)), 
                 df=df)
     return(result)

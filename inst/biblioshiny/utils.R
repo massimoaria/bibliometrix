@@ -297,7 +297,7 @@ getFileNameExtension <- function (fn) {
   ext
 }
 
-#Initial to upper case
+# Initial to upper case
 firstup <- function(x) {
   x <- tolower(x)
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
@@ -2232,6 +2232,7 @@ plot2png <- function(p, filename, zoom = 2, type="vis", tmpdir){
            htmlwidgets::saveWidget(p, file=html_name)
          })
   webshot2::webshot(url = html_name, zoom = zoom, file = filename)#, verbose=FALSE)
+  
   popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
                subtitle=paste0("Plot was saved in the following path: ",filename),
                btn_labels="OK", size="40%")

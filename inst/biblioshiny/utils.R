@@ -57,7 +57,6 @@ merge_files <- function(files){
   for (i in 1:length(file)){
     extF <- ext[i]
     filename <- file[i]
-    print(filename)
     
     switch(extF,
            xlsx={

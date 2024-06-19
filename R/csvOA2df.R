@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr", "DI", "C1","id_oa","RP","UN","AU_ID","corresponding_author_ids"))
+utils::globalVariables(c("all_of", "corr", "DI", "C1","id_oa","RP","UN","AU_ID","corresponding_author_ids", "References"))
 
 csvOA2df <- function(file){
   options(readr.num_columns = 0)
@@ -58,7 +58,7 @@ csvOA2df <- function(file){
       bind_cols(DATA %>% 
                   select(-"id_oa", -starts_with("authorships_raw_affiliation_strings_")))
   } else {
-    AFF <- lapply(str_extract_all(DATA$authorships.raw_affiliation_strings, "\\[([^\\]]+)\\]"), function(l){
+    AFF <- lapply(stri_extract_all_regex(DATA$authorships.raw_affiliation_strings, "\\[([^\\]]+)\\]"), function(l){
       gsub("\\['|'\\]","",l)
     })
     
@@ -86,7 +86,7 @@ csvOA2df <- function(file){
     bind_cols(DATA %>% 
                 select(-"id_oa", -starts_with("authorships_countries_")))
   } else {
-    CO <- lapply(str_extract_all(DATA$authorships.countries, "\\[([^\\]]+)\\]"), function(l){
+    CO <- lapply(stri_extract_all_regex(DATA$authorships.countries, "\\[([^\\]]+)\\]"), function(l){
       gsub("\\['|'\\]","",l)
     })
     

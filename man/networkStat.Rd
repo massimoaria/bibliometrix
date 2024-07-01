@@ -18,7 +18,7 @@ networkStat(object, stat = "network", type = "degree")
 It is a list containing the following elements:
 \tabular{lll}{
 \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
-\code{network} \tab  \tab a \code{\link{communities}} a list with the main statistics of the network\cr
+\code{network} \tab  \tab a \code{communities} a list with the main statistics of the network\cr
 \code{vertex} \tab  \tab a data frame with the main measures of centrality and prestige of vertices.\cr}
 }
 \description{

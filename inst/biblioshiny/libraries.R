@@ -24,15 +24,17 @@ libraries <- function(){
     ## Currently "webshot2" 0.1.1 generates empty screenshots on windows 10 for graphics created with visnetwork.
     ## This workaround installs the previous version 0.1.0 to temporarily fix the problem.
     if (!require(webshot2,quietly=TRUE)){
-      install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz", 
-                       repos = NULL, type = "source", c("Depends", "Imports"))
+      install.packages("webshot2")
+      detach("package:webshot2", unload = TRUE, force=TRUE)
+      install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz",
+                       repos = NULL, type = "source", dependencies=c("Depends", "Imports"))
     }else{
       pkgs <- installed.packages()[, "Version"]
       vers <- pkgs["webshot2"]
       if (vers!="0.1.0"){
         detach("package:webshot2", unload = TRUE, force=TRUE)
-        install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz", 
-                         repos = NULL, type = "source", c("Depends", "Imports"))
+        install.packages("https://cran.r-project.org/src/contrib/Archive/webshot2/webshot2_0.1.0.tar.gz",
+                         repos = NULL, type = "source", dependencies=c("Depends", "Imports"))
       }
     }
     ##

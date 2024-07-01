@@ -42,7 +42,7 @@ Default is \code{network = "authors"}.}
 \item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 }
 \value{
-It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{\link{Matrix}}.
+It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{Matrix}.
 }
 \description{
 \code{biblioNetwork} creates different bibliographic networks from a bibliographic data frame.

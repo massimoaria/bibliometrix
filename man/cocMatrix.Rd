@@ -35,7 +35,7 @@ articles and variables to Field Tag in the original WoS or SCOPUS file.}
 \item{type}{indicates the output format of co-occurrences: \tabular{lll}{
 \code{type = "matrix"} \tab   \tab produces an object of class
 \code{matrix}\cr \code{type = "sparse"} \tab   \tab produces an object of
-class \code{dgMatrix} of the package \code{\link{Matrix}}. "sparse"
+class \code{dgMatrix} of the package \code{Matrix}. "sparse"
 argument generates a compact representation of the matrix.}}
 
 \item{n}{is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.}

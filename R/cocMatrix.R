@@ -29,7 +29,7 @@ utils::globalVariables(c("item","SR"))
 #' @param type indicates the output format of co-occurrences: \tabular{lll}{
 #'   \code{type = "matrix"} \tab   \tab produces an object of class
 #'   \code{matrix}\cr \code{type = "sparse"} \tab   \tab produces an object of
-#'   class \code{dgMatrix} of the package \code{\link{Matrix}}. "sparse"
+#'   class \code{dgMatrix} of the package \code{Matrix}. "sparse"
 #'   argument generates a compact representation of the matrix.}
 #' @param n is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.
 #' @param sep is the field separator character. This character separates strings in each 

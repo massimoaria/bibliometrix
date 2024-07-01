@@ -45,7 +45,7 @@
 #' @param shortlabel is logical. IF TRUE, reference labels are stored in a short format. Default is \code{shortlabel=TRUE}.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
-#' @return It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{\link{Matrix}}.
+#' @return It is a squared network matrix. It is an object of class \code{dgMatrix} of the package \code{Matrix}.
 #' @examples
 #' # EXAMPLE 1: Authors collaboration network
 #'

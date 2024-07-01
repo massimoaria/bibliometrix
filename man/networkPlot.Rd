@@ -102,7 +102,7 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 It is a list containing the following elements:
 \tabular{lll}{
 \code{graph} \tab  \tab a network object of the class \code{igraph}\cr
-\code{cluster_obj} \tab  \tab a \code{\link{communities}} object of the package \code{igraph}\cr
+\code{cluster_obj} \tab  \tab a \code{communities} object of the package \code{igraph}\cr
 \code{cluster_res} \tab  \tab a data frame with main results of clustering procedure.\cr}
 }
 \description{

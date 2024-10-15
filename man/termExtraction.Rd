@@ -38,7 +38,7 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 
 \item{remove.numbers}{is logical. If TRUE all numbers are deleted from the documents before term extraction. The default is \code{remove.numbers = TRUE}.}
 
-\item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
+\item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the corpus after term extraction. The default is \code{remove.terms = NULL}.}
 
 \item{keep.terms}{is a character vector. It contains a list of compound words "formed by two or more terms" to keep in their original form in the term extraction process. The default is \code{keep.terms = NULL}.}
 

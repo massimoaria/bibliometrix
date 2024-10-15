@@ -17,7 +17,7 @@ utils::globalVariables(c("SR", "text", "ngram"))
 #' @param stemming is logical. If TRUE the Porter Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.
 #' @param language is a character. It is the language of textual contents ("english", "german","italian","french","spanish"). The default is \code{language="english"}.
 #' @param remove.numbers is logical. If TRUE all numbers are deleted from the documents before term extraction. The default is \code{remove.numbers = TRUE}.
-#' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
+#' @param remove.terms is a character vector. It contains a list of additional terms to delete from the corpus after term extraction. The default is \code{remove.terms = NULL}.
 #' @param keep.terms is a character vector. It contains a list of compound words "formed by two or more terms" to keep in their original form in the term extraction process. The default is \code{keep.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param verbose is logical. If TRUE the function prints the most frequent terms extracted from documents. The default is \code{verbose=TRUE}.

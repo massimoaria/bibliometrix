@@ -43,6 +43,7 @@ Imports: stats,
 		 openalexR,
 		 openxlsx,
 		 pubmedR,
+		 purrr,
 		 readr,
 		 readxl,
 	   rscopus,
@@ -59,6 +60,6 @@ Suggests:
     shinycssloaders,
     visNetwork,
     wordcloud2
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 NeedsCompilation: no
 Config/testthat/edition: 3

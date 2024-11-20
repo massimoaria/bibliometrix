@@ -4,7 +4,7 @@
 \alias{threeFieldsPlot}
 \title{Three Fields Plot}
 \usage{
-threeFieldsPlot(M, fields = c("AU", "DE", "SO"), n = c(20, 20, 20))
+threeFieldsPlot(M, fields = c("DE", "AU", "SO"), n = c(20, 20, 20))
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.

@@ -17,6 +17,9 @@
 #' @import tidytext
 #' @import openalexR
 #' @import ca
+#' @importFrom purrr map2_dfr
+#' @importFrom purrr map_df
+#' @importFrom purrr map_chr
 #' @importFrom dplyr %>%
 #' @importFrom dplyr bind_cols
 #' @importFrom dplyr across
@@ -42,6 +45,7 @@
 #' @importFrom dplyr mutate
 #' @importFrom dplyr mutate_at
 #' @importFrom dplyr mutate_if
+#' @importFrom dplyr mutate_all
 #' @importFrom dplyr ungroup
 #' @importFrom dplyr rename
 #' @importFrom dplyr rename_with

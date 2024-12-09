@@ -18,6 +18,7 @@
 #' @import openalexR
 #' @import ca
 #' @importFrom purrr map2_dfr
+#' @importFrom purrr map_dfr
 #' @importFrom purrr map_df
 #' @importFrom purrr map_chr
 #' @importFrom dplyr %>%

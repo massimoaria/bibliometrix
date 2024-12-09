@@ -147,11 +147,12 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
       M <- csvOA2df(file)
     },
     openalex_api = {
-      if (!"bibliometrixDB" %in% class(file)){
-        M <- openalexR::oa2bibliometrix(file)
-      } else {
-        M <- file
-      }
+      M <- apiOA2df(file)
+# if (!"bibliometrixDB" %in% class(file)) {
+#   M <- openalexR::oa2bibliometrix(file)
+# } else {
+#   M <- file
+# }
     }
   )
   if ("PY" %in% names(M)){M$PY=as.numeric(M$PY)} else {M$PY <- NA}
@@ -167,7 +168,7 @@ convert2df<-function(file,dbsource="wos",format="plaintext", remove.duplicates=T
     M$CR <- trim.leading(trimES(gsub("\\[,||\\[||\\]|| \\.\\. || \\. ","",M$CR)))  # remove foreign characters from CR (i.e. Chinese, Russian characters)
   }
   
-  if (dbsource!="cochrane"){M$AU <- gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
+  if (dbsource %in% c("cochrane","openalex_api")){M$AU <- gsub(intToUtf8(8217),intToUtf8(39),M$AU)}
   
   cat("Done!\n\n")
   

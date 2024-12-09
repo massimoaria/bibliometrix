@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr", "DI", "C1","id_oa","RP","UN","AU_ID","corresponding_author_ids", "References"))
+utils::globalVariables(c("all_of", "corr", "DI", "C1","id_oa","RP","UN","AU_ID","corresponding_author_ids", "References","mutate_all"))
 
 csvOA2df <- function(file){
   options(readr.num_columns = 0)
@@ -25,9 +25,11 @@ csvOA2df <- function(file){
   # column re-labelling
   DATA <- relabelling_OA(DATA)
   
+  DATA <- DATA %>% distinct(id_oa, .keep_all=TRUE)
+  
   # recode as numeric
-  DATA$TC <- as.numeric(DATA$TC)
-  DATA$PY <- as.numeric(DATA$PY)
+  #DATA$TC <- as.numeric(DATA$TC)
+  #DATA$PY <- as.numeric(DATA$PY)
   #DATA$relevance_score <- as.numeric(DATA$relevance_score)
   
   # replace | with ;
@@ -35,7 +37,7 @@ csvOA2df <- function(file){
     mutate(across(where(is.character), ~ stringi::stri_replace_all_regex(.,"\\|",";")))
   
   DATA$AF <- DATA$AU
-  DATA$ID <- DATA$DE
+  #DATA$ID <- DATA$DE
   if (!"AB" %in% names(DATA)) DATA$AB=""
   DATA$CR <- gsub("https://openalex.org/","",DATA$CR)
   DATA$AU_ID <- gsub("https://openalex.org/","",DATA$AU_ID)
@@ -44,105 +46,16 @@ csvOA2df <- function(file){
   DATA$corresponding_author_ids <- gsub("https://openalex.org/","",DATA$corresponding_author_ids)
   DATA$DB <- "OPENALEX"
   
-  # affilitation string
-  AFF <- DATA %>% 
-    select(id_oa, starts_with("authorships_raw_affiliation_strings_")) 
-  
-  if(ncol(AFF)>1){
-    colId <- c(-1,parse_number(colnames(AFF)[-1]))
-    
-    DATA <- AFF[order(colId)] %>% 
-      unite(., C1, starts_with("authorships_raw_affiliation_strings_"), sep=";") %>% 
-      mutate(C1 = gsub("NA","",C1),
-             C1 = TrimMult(C1,char=";")) %>% 
-      bind_cols(DATA %>% 
-                  select(-"id_oa", -starts_with("authorships_raw_affiliation_strings_")))
-  } else {
-    AFF <- lapply(stri_extract_all_regex(DATA$authorships.raw_affiliation_strings, "\\[([^\\]]+)\\]"), function(l){
-      gsub("\\['|'\\]","",l)
-    })
-    
-    AFF <- data.frame(id_oa=rep(DATA$id_oa, lengths(AFF)), C1 = unlist(AFF)) %>% 
-      group_by(id_oa) %>% 
-      summarize(C1 = paste(C1,collapse=";")) 
-    DATA <- DATA %>% 
-      left_join(AFF, by = "id_oa")
-    DATA$C1[is.na(DATA$C1)] <- ""
-  }
+  # affiliation string November 2024
+  DATA <- extract_collapsed_affiliations(DATA$authorships.affiliations, DATA$id_oa) %>% 
+    right_join(DATA, by="id_oa")
 
-  DATA$C1 <- gsub("https://", "", DATA$C1)
-  
-  # country string
-  CO <- DATA %>% 
-    select(id_oa, starts_with("authorships_countries_")) 
-  
-  if(ncol(CO)>1){
-  colId <- c(-1,parse_number(colnames(CO)[-1]))
-  
-  DATA <- CO[order(colId)] %>% 
-    unite(., AU_CO, starts_with("authorships_countries_"), sep=";") %>% 
-    mutate(AU_CO = gsub("NA","",AU_CO),
-           AU_CO = TrimMult(AU_CO,char=";")) %>% 
-    bind_cols(DATA %>% 
-                select(-"id_oa", -starts_with("authorships_countries_")))
-  } else {
-    CO <- lapply(stri_extract_all_regex(DATA$authorships.countries, "\\[([^\\]]+)\\]"), function(l){
-      gsub("\\['|'\\]","",l)
-    })
-    
-    CO <- data.frame(id_oa=rep(DATA$id_oa, lengths(CO)), AU_CO = unlist(CO)) %>% 
-      group_by(id_oa) %>% 
-      summarize(AU_CO = gsub("'","",paste(AU_CO,collapse=";")))
-    DATA <- DATA %>% 
-      left_join(CO, by = "id_oa")
-    DATA$AU_CO[is.na(DATA$AU_CO)] <- ""
-  }
-  
-  
   ## corresponding author
-  DATA <- DATA %>% 
-    mutate(AU1_ID = gsub(";.*", "", corresponding_author_ids))
-  UN <- strsplit(DATA$C1,";")
-  if ("authorships_is_corresponding" %in% names(DATA)){
-    corresp <- strsplit(tolower(DATA$authorships_is_corresponding),";")
-  } else {
-    corresp <- strsplit(tolower(DATA$authorships.is_corresponding),";")
-  }
   
+  CORR_INFO <- replace_corresponding_info(DATA[, c("corresponding_author_ids", "corresponding_institution_ids", "AU", "AU_ID", "C1", "C1_ID", "AU_CO")]) %>% 
+    select("RP", "AU1_CO","corresponding_author_name")
   
-  
-  df_UN <- data.frame(UN=unlist(UN), id_oa=rep(DATA$id_oa,lengths(UN))) %>% 
-    group_by(id_oa) %>% 
-    mutate(n=row_number())
-  df_COR <- data.frame(corr=unlist(corresp), id_oa=rep(DATA$id_oa,lengths(corresp))) %>% 
-    group_by(id_oa) %>% 
-    mutate(n=row_number())
-  df_UN <- df_UN %>% 
-    left_join(df_COR, by=(c("id_oa","n"))) 
-  AU <- strsplit(DATA$AU,";")
-  AU_ID <- strsplit(DATA$AU_ID,";")
-  AU_df <- data.frame(RP = unlist(AU), id_oa=rep(DATA$id_oa,lengths(AU))) %>% 
-    group_by(id_oa) %>% 
-    mutate(n=row_number())
-  AU_ID_df <- data.frame(AU_ID=unlist(AU_ID), id_oa=rep(DATA$id_oa,lengths(AU_ID))) %>% 
-    group_by(id_oa) %>% 
-    mutate(n=row_number())
-  AU_df <- AU_df %>% 
-    left_join(AU_ID_df, by=c("id_oa","n")) %>% 
-    select(-"n") %>% 
-    group_by(id_oa) %>% 
-    mutate(n=row_number()) %>% 
-    left_join(df_UN %>% select("UN","id_oa", "corr", "n"),
-              by = c("id_oa","n")) %>% 
-    dplyr::filter(corr == "true") %>% 
-    mutate(RP = paste(RP,UN, sep=", ")) %>% 
-    ungroup() %>% 
-    select("RP", "AU_ID") %>% 
-    distinct(AU_ID, .keep_all = TRUE)
-  DATA <- DATA %>% 
-    mutate(AU1_ID = gsub(";.*", "", corresponding_author_ids)) %>% 
-    left_join(AU_df, by = c("AU1_ID" = "AU_ID"))
-    
+  DATA <- bind_cols(DATA, CORR_INFO)
   
   # move all char strings to Upper
   ind <- apply(DATA,2,function(x){
@@ -155,48 +68,54 @@ csvOA2df <- function(file){
            DI = gsub("https://doi.org/","",DI),
            DI = ifelse(DI == "null",NA,DI)) 
   DATA$SO <- toupper(DATA$SO)
+  DATA$SO[DATA$SO=="NAN"] <- NA
+  DATA$C1 <- toupper(DATA$C1)
+  DATA$RP <- toupper(DATA$RP)
+  DATA$AU_CO <- toupper(DATA$AU_CO)
+  DATA$AU1_CO <- toupper(DATA$AU1_CO)
   
-  return(DATA)
+  return(DATA %>% as.data.frame())
 }
 
 relabelling_OA <- function(DATA){
   ## column re-labelling
   label <- names(DATA)
   label[label %in% "id"] <- "id_oa"
-  label[label %in% "display_name"] <- "TI"
-  label[label %in% "primary_location_display_name"] <- "SO"
-  label[label %in% "locations.source.display_name"] <- "SO"
-  label[label %in% "primary_location_id"] <- "SO_ID"
-  label[label %in% "locations.source.id"] <- "SO_ID"
-  label[label %in% "primary_location_host_organization"] <- "PU"
-  label[label %in% "primary_location_issns"] <- "ISSN"
-  label[label %in% "primary_location_issn_l"] <- "ISSN_I"
-  label[label %in% "primary_location_landing_page_url"] <- "URL"
-  label[label %in% "primary_location_pdf_url"] <- "URL_PDF"
-  label[label %in% "author_ids"] <- "AU_ID"
+  label[label %in% "title"] <- "TI"
+  label[label %in% "primary_location.source.display_name"] <- "SO"
+  #label[label %in% "locations.source.display_name"] <- "SO"
+  label[label %in% "primary_location.source.id"] <- "SO_ID"
+  #label[label %in% "locations.source.id"] <- "SO_ID"
+  label[label %in% "primary_location.source.host_organization_name"] <- "PU"
+  label[label %in% "primary_location.source.issn"] <- "ISSN"
+  label[label %in% "primary_location.source.issn_l"] <- "ISSN_I"
+  label[label %in% "primary_location.landing_page_url"] <- "URL"
+  label[label %in% "primary_location.pdf_url"] <- "URL_PDF"
+  #label[label %in% "author_ids"] <- "AU_ID"
   label[label %in% "authorships.author.id"] <- "AU_ID"
-  label[label %in% "author_names"] <- "AU"
+  label[label %in% "authorships.countries"] <- "AU_CO"
+  #label[label %in% "author_names"] <- "AU"
   label[label %in% "authorships.author.display_name"] <- "AU"
-  label[label %in% "author_orcids"] <- "OI"
-  label[label %in% "author_institution_names"] <- "C3"
+  label[label %in% "authorships.author.orcid"] <- "OI"
+  #label[label %in% "author_institution_names"] <- "C3"
   label[label %in% "cited_by_count"] <- "TC"
   label[label %in% "publication_year"] <- "PY"
   label[label %in% "type"] <- "DT"
-  label[label %in% "biblio_issue"] <- "IS"
-  label[label %in% "biblio_volume"] <- "VL"
+  label[label %in% "biblio.issue"] <- "IS"
+  label[label %in% "biblio.volume"] <- "VL"
   label[label %in% "referenced_works" ] <- "CR"
-  label[label %in% "keywords_display_name"] <- "DE"
+  #label[label %in% "keywords_display_name"] <- "DE"
   label[label %in% "keywords.display_name"] <- "DE"
   label[label %in% "abstract"] <- "AB"
-  label[label %in% "concepts_display_name"] <- "CONCEPTS"
-  label[label %in% "topics_display_name"] <- "TOPICS"
-  label[label %in% "sustainable_development_goals_display_name"] <- "SDG"
-  label[label %in% "primary_topic_field_display_name"] <- "SC"
-  label[label %in% "mesh_descriptor_name"] <- "MESH"
+  label[label %in% "concepts.display_name"] <- "ID"
+  label[label %in% "topics.display_name"] <- "TOPICS"
+  label[label %in% "sustainable_development_goals.display_name"] <- "SDG"
+  label[label %in% "topics.field.display_name"] <- "WC"
+  label[label %in% "mesh.descriptor_name"] <- "MESH"
   label[label %in% "referenced_works_count"] <- "NR"
   label[label %in% "language"] <- "LA"
-  label[label %in% "authorships_author_position"] <- "AU_POSITION"
-  #label[label %in% "authorships_raw_affiliation_string"] <- "C1"
+  label[label %in% "authorships.author_position"] <- "AU_POSITION"
+  #label[label %in% "authorships.countries"] <- "C1"
   label[label %in% "doi"] <- "DI"
   names(DATA) <- label
   return(DATA)
@@ -205,4 +124,104 @@ relabelling_OA <- function(DATA){
 TrimMult <- function(x, char=" ") {
   return(gsub(paste0("^", char, "*|(?<=", char, ")", char, "|", char, "*$"),
               "", x, perl=T))
+}
+
+# Funzione aggiornata per estrarre affiliazioni, includere i paesi e rimuovere i caratteri `"`
+extract_collapsed_affiliations <- function(affiliations, id_oa) {
+  map2_dfr(affiliations, id_oa, ~ {
+    # Rimuovi `{}`, `;`, e `'`, quindi dividi per `raw_affiliation_string: `
+    affil_split <- stringr::str_split(stringr::str_replace_all(.x, "\\{|\\}|\\'|;", ""), "raw_affiliation_string: ")[[1]]
+    
+    # Rimuovi stringhe vuote e processa ciascun elemento per ottenere nome, ID e paese
+    affil_df <- map_df(affil_split[affil_split != ""], function(affil) {
+      # Estrai il nome completo dell'affiliazione
+      affiliation_name <- stringr::str_trim(stringr::str_extract(affil, "^.*?(?=, institution_ids|$)"))
+      
+      # Estrai `institution_ids` e rimuovi il prefisso `https://openalex.org/`
+      institution_ids <- stringr::str_extract(affil, "(?<=institution_ids: \\[)[^\\]]+") %>%
+        stringr::str_replace_all("https://openalex.org/", "")
+      
+      # Estrai il paese come ultima parola dopo l'ultima virgola della stringa
+      #country <- stringr::str_trim(stringr::str_extract(affiliation_name, "(?<=, )[^,]+$"))
+      
+      tibble(
+        article_id = .y,  # Assegna l'ID dell'articolo a ogni riga
+        affiliation_name = ifelse(is.na(affiliation_name) || affiliation_name == "", NA, affiliation_name),
+        institution_ids = ifelse(is.na(institution_ids) || institution_ids == "", NA, institution_ids)#,
+        #countries = ifelse(is.na(country) || country == "", NA, country)
+      )
+    })
+    
+    # Collassa tutte le affiliazioni, gli ID istituzionali e i paesi in singole stringhe separate da `;`
+    df <- tibble(
+      id_oa = .y,  # Includi l'ID dell'articolo
+      C1 = ifelse(nrow(affil_df) == 0, NA, paste(affil_df$affiliation_name, collapse = "; ")),
+      C1_ID = ifelse(nrow(affil_df) == 0, NA, paste(affil_df$institution_ids, collapse = "; "))#,
+      #AU_CO = ifelse(nrow(affil_df) == 0, NA, paste(affil_df$countries[!is.na(affil_df$countries)], collapse = "; "))
+    )
+    
+    # Rimozione dei caratteri `"` da tutte le colonne
+    df <- df %>% mutate_all(~ stringr::str_replace_all(., "\"", ""))
+  })
+}
+
+# Funzione aggiornata per sostituire corresponding_author_ids e corresponding_institution_ids con nome e affiliazione
+replace_corresponding_info <- function(data) {
+  data$corresponding_author_ids <- unlist(lapply(strsplit(data$corresponding_author_ids,";"),function(l) l[1]))
+  data %>%
+    rowwise() %>%
+    mutate(
+      # Trova il nome dell'autore corrispondente
+      corresponding_author_name = ifelse(
+        !is.na(corresponding_author_ids) && corresponding_author_ids != "",
+        {
+          # Ottieni la lista di autori e ID
+          author_names <- stringr::str_split(AU, ";")[[1]]
+          author_ids <- stringr::str_split(AU_ID, ";")[[1]]
+          # Trova l'indice dell'ID autore corrispondente
+          matching_index <- which(author_ids == corresponding_author_ids,"")
+          if (length(matching_index) > 0) author_names[matching_index] else NA_character_
+        },
+        NA_character_
+      ),
+      
+      # Trova l'affiliazione dell'autore corrispondente
+      corresponding_author_affiliation = ifelse(
+        !is.na(corresponding_institution_ids) && corresponding_institution_ids != "",
+        {
+          # Ottieni la lista di affiliazioni e ID
+          institution_names <- stringr::str_split(C1, ";")[[1]]
+          institution_ids <- stringr::str_split(C1_ID, ";")[[1]] %>% stringr::str_trim()
+          # Rimuovi il prefisso dell'ID istituzionale per la corrispondenza
+          corresponding_ids <- stringr::str_split(corresponding_institution_ids, ";")[[1]] %>%
+            stringr::str_replace_all("https://openalex.org/", "")
+          # Trova le affiliazioni corrispondenti e uniscile
+          matching_affiliations <- institution_names[institution_ids %in% corresponding_ids]
+          if (length(matching_affiliations) > 0) paste(matching_affiliations, collapse = "; ") else NA_character_
+        },
+        NA_character_
+      ),
+      
+      # Trova la nazione dell'autore corrispondente
+      corresponding_author_country = ifelse(
+        !is.na(corresponding_author_ids) && corresponding_author_ids != "",
+        {
+          # Ottieni la lista delle nazioni e degli ID
+          author_countries <- stringr::str_split(AU_CO, ";")[[1]]
+          author_ids <- stringr::str_split(AU_ID, ";")[[1]]
+          # Trova l'indice dell'ID autore corrispondente
+          matching_index <- which(author_ids == corresponding_author_ids)
+          if (length(matching_index) > 0) author_countries[matching_index] else NA_character_
+        },
+        NA_character_
+      )
+    ) %>%
+    # Rimuove le colonne originali degli ID e rinomina
+    select(-corresponding_author_ids, -corresponding_institution_ids) %>%
+    rename(
+      corresponding_author_name = corresponding_author_name,
+      RP = corresponding_author_affiliation,
+      AU1_CO = corresponding_author_country
+    ) %>%
+    ungroup()
 }

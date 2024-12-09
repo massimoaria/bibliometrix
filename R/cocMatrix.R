@@ -170,6 +170,7 @@ cocMatrix<-function(M, Field = "AU", type = "sparse", n=NULL, sep = ";",binary=T
   uniqueField <- names(tabField)			     
   # select n items
   if (!is.null(n)) {
+    if ("NA" %in% uniqueField[1:n]) n <- n+1
     uniqueField <- uniqueField[1:n]
   } else if (isTRUE(short)){
     uniqueField <- names(tabField[tabField>1])  # remove items with frequency<2

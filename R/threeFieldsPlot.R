@@ -20,7 +20,7 @@ utils::globalVariables(c("level"))
 #'
 #' @export
 #' 
-threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
+threeFieldsPlot <- function(M, fields=c("DE","AU","SO"),n=c(20,20,20)){
   
   if ("CR_SO" %in% fields){
     M=metaTagExtraction(M,"CR_SO")
@@ -43,6 +43,13 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
   ind=which(fields %in% "CR")
   if (length(ind)>0) Binary[ind]=TRUE
   
+  ### Document x Attribute matrix Field MIDDLE
+  WM=cocMatrix(M,fields[2], binary=Binary[2],n=n[2])
+  n2=min(n[2],ncol(WM))
+  TopM <- colnames(WM)
+  
+  docInd <- which(Matrix::rowSums(WM[,TopM])>0)
+  
   ### Document x Attribute matrix Field LEFT
   WL=cocMatrix(M,fields[1], binary=Binary[1], n=n[1])
   n1=min(n[1],ncol(WL))
@@ -50,12 +57,7 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
   TopL <- colnames(WL)
   #WL=WL[,TopL]
   
-  ### Document x Attribute matrix Field MIDDLE
-  WM=cocMatrix(M,fields[2], binary=Binary[2],n=n[2])
-  n2=min(n[2],ncol(WM))
-  #TopM=names(sort(Matrix::colSums(WM),decreasing = TRUE))[1:n2]
-  TopM <- colnames(WM)
-  #WM=WM[,TopM]
+
   
   ### Document x Attribute matrix Field RIGHT
   WR=cocMatrix(M,fields[3], binary=Binary[3],n=n[3])
@@ -65,8 +67,8 @@ threeFieldsPlot <- function(M, fields=c("AU","DE","SO"),n=c(20,20,20)){
   #WR=WR[,TopR]
   
   ### Co-Occurrence Matrices
-  LM=Matrix::crossprod(WL,WM)
-  MR=Matrix::crossprod(WM,WR)
+  LM=Matrix::crossprod(WL[docInd,],WM[docInd,])
+  MR=Matrix::crossprod(WM[docInd,],WR[docInd,])
 
   row.names(LM)=1:n1
   colnames(LM)=row.names(MR)=(n1+1):(n2+n1)

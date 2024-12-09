@@ -339,7 +339,7 @@ body <- dashboardBody(
                                                                              icon = icon(name ="play", lib="glyphicon")))))
                              ),
                              tags$hr(),
-                             uiOutput("textLog"),
+                             uiOutput("textLog2"),
                              tags$hr(),
                              h3(strong(
                                "Export collection"

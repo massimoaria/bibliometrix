@@ -272,7 +272,9 @@ To ensure the functionality of Biblioshiny,
                          })
         },
         openalex_api = {
-          M <- smart_load(inFile$datapath)
+          M <- convert2df(inFile$datapath,
+            dbsource = input$dbsource,
+            format = "api")
         },
         lens = {
           switch(ext,
@@ -753,7 +755,7 @@ To ensure the functionality of Biblioshiny,
     contentType = input$save_file_api
   )
   
-  output$textLog <- renderUI({  
+  output$textLog2 <- renderUI({  
     k=dim(values$M)[1]
     if (k==1){k=0}
     log=paste("Number of Documents ",k)

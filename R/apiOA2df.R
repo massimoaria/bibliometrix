@@ -78,6 +78,8 @@ apiOA2df <- function(file){
   df <- df |>
   select(-"AU_CO") |> 
   left_join(CO, by="id_oa")
+  
+  df$id_oa <- gsub("https://openalex.org/","",df$id_oa)
 
   df <- df |> as.data.frame()
   return(df)

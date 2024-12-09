@@ -51,6 +51,7 @@ Imports: stats,
 		 SnowballC,
 		 stringdist,
 		 stringi,
+		 stringr,
 		 tidyr,
 		 tidytext
 Suggests: 

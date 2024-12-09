@@ -98,18 +98,6 @@
 #' @importFrom rscopus author_df_orig
 #' @importFrom rscopus author_search
 #' @importFrom rscopus get_complete_author_info
-# @importFrom RColorBrewer brewer.pal
-# @importFrom FactoMineR MCA
-# @importFrom FactoMineR CA
-# @importFrom FactoMineR PCA
-# @importFrom factoextra get_mca_var
-# @importFrom factoextra get_mca_ind
-# @importFrom factoextra get_ca_row
-# @importFrom factoextra get_ca_col
-# @importFrom factoextra fviz_nbclust
-# @importFrom factoextra fviz_cluster
-# @importFrom factoextra fviz_dend
-# @importFrom factoextra hcut
 #' @importFrom igraph as_long_data_frame
 #' @importFrom igraph get.edgelist
 #' @importFrom igraph graph_from_data_frame
@@ -270,9 +258,9 @@
 #' @importFrom Matrix updown
 #' @importFrom Matrix which
 #' @importFrom Matrix writeMM
-# #' @importFrom stringr str_locate_all
-# #' @importFrom stringr str_extract_all
-# #' @importFrom stringr str_replace_all
+#' @importFrom stringr str_locate_all
+#' @importFrom stringr str_extract_all
+#' @importFrom stringr str_replace_all
 #' @importFrom graphics barplot
 #' @importFrom graphics legend
 #' @importFrom graphics lines

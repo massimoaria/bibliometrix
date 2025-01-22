@@ -12,8 +12,8 @@ convert2df(
 )
 }
 \arguments{
-\item{file}{a character array containing a sequence of filenames coming from WoS, Scopus, Dimensions, Lens.org, and Pubmed. Alternatively, \code{file} can be 
-an object resulting from an API query fetched from Dimensions, PubMed or OpenAlex databases: 
+\item{file}{a character array containing a sequence of filenames coming from WoS, Scopus, Dimensions, Lens.org, OpenAlex and Pubmed. Alternatively, \code{file} can be 
+an object resulting from an API query fetched from Dimensions, and PubMed databases: 
 \tabular{lll}{
 a)\tab 'wos' \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
 b)\tab 'scopus' \tab SCOPUS (exclusively in bibtex format '.bib');\cr
@@ -22,7 +22,7 @@ d)\tab 'lens' \tab Lens.org (in csv '.csv');\cr
 e)\tab 'pubmed' \tab an object of the class \code{pubmedR (package pubmedR)} containing a collection obtained from a query performed with pubmedR package;\cr
 f)\tab 'dimensions' \tab an object of the class \code{dimensionsR (package dimensionsR)} containing a collection obtained from a query performed with dimensionsR package;\cr
 g)\tab 'openalex' \tab OpenAlex .csv file;\cr
-h)\tab 'openalex_api' \tab a data frame object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
+h)\tab 'openalex_api' \tab the filename and path to a list object returned by openalexR package, containing a collection of works resulting from a query fetched from OpenAlex database.}}
 
 \item{dbsource}{is a character indicating the bibliographic database. \code{dbsource} can be \code{dbsource = c('cochrane','dimensions','generic','isi','openalex', 'pubmed','scopus','wos', 'lens')} . Default is \code{dbsource = "isi"}.}
 

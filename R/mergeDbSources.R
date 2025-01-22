@@ -56,7 +56,8 @@ mergeDbSources <- function(...,remove.duplicated=TRUE, verbose=TRUE){
   
   if (isTRUE(remove.duplicated)){
     # remove by DOI
-    if ("DI" %in% names(M)){
+    if ("DI" %in% names(M)){ 
+      M$DI[M$DI == ""] <- NA
       index <- which(duplicated(M$DI) & !is.na(M$DI))
       if (length(index)>0) M <- M[-index,]
     }

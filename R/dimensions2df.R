@@ -7,11 +7,11 @@ dimensions2df <- function(file, format = "csv") {
            
            for (i in 1:length(file)){
              #D <- rio::import(file[i], quote = '"',dec = ".",skip=1)
-             
-             D <- read_csv(file[i], na=character(), quote='"', skip=1, trim_ws = FALSE, progress = show_progress()) %>%
-               mutate(across(where(is.numeric), as.character)) %>% 
-               mutate(across(where(is.character), \(x) tidyr::replace_na(x,"")))
-             D <- as.data.frame(D)
+            
+             D <- read_csv(file[i], na = character(), quote = '"', trim_ws = FALSE, progress = show_progress(), show_col_types = FALSE) %>%
+                mutate(across(where(is.numeric), as.character)) %>%
+                mutate(across(where(is.character), function(x) tidyr::replace_na(x, ""))) %>%
+                as.data.frame()
              
              
              if (i>1){

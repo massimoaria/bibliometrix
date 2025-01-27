@@ -5,10 +5,9 @@ csvLens2df <- function(file){
   
   ## import all files in a single data frame
   for (i in 1:length(file)){
-    #D <- read.csv(file[i], quote='"', check.names = F, stringsAsFactors = F) #fileEncoding = "UTF-8-BOM")
-    D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress()) %>%
-      mutate(across(where(is.numeric), as.character)) %>% 
-      mutate(across(where(is.character), \(x) tidyr::replace_na(x,""))) %>% 
+    D <- read_csv(file[i], na = character(), quote = '"', trim_ws = FALSE, progress = show_progress(), show_col_types = FALSE) %>%
+      mutate(across(where(is.numeric), as.character)) %>%
+      mutate(across(where(is.character), function(x) tidyr::replace_na(x, ""))) %>%
       as.data.frame()
 
     if (i>1){

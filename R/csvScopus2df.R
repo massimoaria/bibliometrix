@@ -8,8 +8,8 @@ csvScopus2df <- function(file){
     D <- read_csv(file[i], na=character(), quote='"', trim_ws = FALSE, progress = show_progress(),
                   col_types = cols(.default = col_character())) %>%  # Introduced to remove cols parsing errors
       #mutate(across(!where(is.numeric), as.character)) %>%   # not yet necessary with the inclusion of previuos line
-      mutate(across(where(is.character), \(x) tidyr::replace_na(x,""))) %>% as.data.frame()
-    
+      mutate(across(where(is.character), function(x) tidyr::replace_na(x, ""))) %>% as.data.frame()
+  
     if (i>1){
       l <- intersect(l,names(D))
       DATA <- rbind(DATA[l],D[l])

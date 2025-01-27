@@ -68,20 +68,20 @@ apiOA2df <- function(file){
   ## transform Country code in names
   CO <- strsplit(df$AU_CO,";")
   CO <- data.frame(Alpha2 = trimws(unlist(CO)), id_oa=rep(df$id_oa,lengths(CO)))
-  CO <- CO |> 
-  left_join(openalexR::countrycode |> select("Alpha2", "Country"), by="Alpha2") |> 
-  mutate(Country = toupper(Country)) |> 
-  group_by(id_oa) |> 
+  CO <- CO %>% 
+  left_join(openalexR::countrycode %>% select("Alpha2", "Country"), by="Alpha2") %>% 
+  mutate(Country = toupper(Country)) %>% 
+  group_by(id_oa) %>% 
   summarize(
     AU_CO = paste0(Country, collapse=";")
   )
-  df <- df |>
-  select(-"AU_CO") |> 
+  df <- df %>%
+  select(-"AU_CO") %>% 
   left_join(CO, by="id_oa")
   
   df$id_oa <- gsub("https://openalex.org/","",df$id_oa)
 
-  df <- df |> as.data.frame()
+  df <- df %>% as.data.frame()
   return(df)
 }
 

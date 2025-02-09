@@ -2231,7 +2231,7 @@ plot2png <- function(p, filename, zoom = 2, type="vis", tmpdir){
          plotly={
            htmlwidgets::saveWidget(p, file=html_name)
          })
-  webshot2::webshot(url = html_name, zoom = zoom, file = filename)#, verbose=FALSE)
+  biblioShot(url = html_name, zoom = zoom, file = filename)#, verbose=FALSE)
   
   popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
                subtitle=paste0("Plot was saved in the following path: ",filename),

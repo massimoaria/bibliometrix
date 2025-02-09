@@ -1,5 +1,7 @@
 source("utils.R", local=TRUE)
 source("libraries.R", local=TRUE)
+source("biblioShot.R", local=TRUE)
+
 suppressMessages(libraries())
 
 #### SERVER ####
@@ -42,6 +44,8 @@ To ensure the functionality of Biblioshiny,
       footer = modalButton("Dismiss"),
       easyClose = TRUE
     ))
+  } else {
+    Sys.setenv (CHROMOTE_CHROME = Chrome_url)
   }
   
   ## file upload max size

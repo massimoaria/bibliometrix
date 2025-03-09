@@ -54,18 +54,18 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
   K <-  length(list_df)
   S <-  net <-  res <-  list()
   Y <-  NULL
-  pdf(file = NULL) ## to improve adding graph=FALSE in thematicMap
+  #pdf(file = NULL) ## to improve adding graph=FALSE in thematicMap
   for (k in 1:K) {
     Mk <-  list_df[[k]]
     Y[k] <-  paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")
     resk <- thematicMap(Mk, field = field, n = n, minfreq = minFreq, ngrams=ngrams,
                         stemming = stemming, size = size, n.labels = n.labels, 
-                        repel = repel, remove.terms = remove.terms, synonyms = synonyms, cluster=cluster)
+                        repel = repel, remove.terms = remove.terms, synonyms = synonyms, cluster=cluster, subgraphs = FALSE)
     resk$params <- resk$params %>% dplyr::filter(params!="minfreq")
     res[[k]] <-  resk
     net[[k]] <-  resk$net
   }
-  dev.off()
+  #dev.off()
   par(mfrow = c(1, (K - 1)))
   if (K < 2) {
     print("Error")

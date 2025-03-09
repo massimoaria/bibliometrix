@@ -1451,7 +1451,7 @@ savenetwork <- function(con, VIS){
     visNetwork::visSave(con)
 }
 
-igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, edgesize=5){
+igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, edgesize=5, noOverlap=TRUE){
   
   LABEL=igraph::V(g)$name
   
@@ -1515,14 +1515,19 @@ igraph2vis<-function(g,curved,labelsize,opacity,type,shape, net, shadow=TRUE, ed
     }else{
         vn$nodes$font.color <- adjustcolor("black", alpha.f = 0)
     }
+   ## avoid label overlaps 
+    if (noOverlap){
+
+      threshold <- 0.05
+      ymax <- diff(range(coords[,2]))
+      xmax <- diff(range(coords[,1]))
+      threshold2 <- threshold*mean(xmax,ymax)
+      w <- data.frame(x=coords[,1],y=coords[,2],labelToPlot=vn$nodes$label, dotSize=size, row.names = vn$nodes$label)
+      labelToRemove <- avoidNetOverlaps(w, threshold = threshold2)
+    } else {
+      labelToRemove <- ""
+    }
     
-    ## avoid label overlaps
-    threshold <- 0.05
-    ymax <- diff(range(coords[,2]))
-    xmax <- diff(range(coords[,1]))
-    threshold2 <- threshold*mean(xmax,ymax)
-    w <- data.frame(x=coords[,1],y=coords[,2],labelToPlot=vn$nodes$label, dotSize=size, row.names = vn$nodes$label)
-    labelToRemove <- avoidNetOverlaps(w, threshold = threshold2)
     vn$nodes <- vn$nodes %>% 
       mutate(label = ifelse(label %in% labelToRemove, "",label),
              title = id)

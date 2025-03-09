@@ -3432,7 +3432,7 @@ To ensure the functionality of Biblioshiny,
     values <- cocNetwork(input,values)
     values$COCnetwork<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                               shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize)
+                               shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize, noOverlap=input$noOverlap)
     values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocnet)
   })
@@ -3732,7 +3732,7 @@ To ensure the functionality of Biblioshiny,
     TMAP()
     values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
                                  labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape, net=values$TM$net)
+                                 shape=input$coc.shape, net=values$TM$net, noOverlap=input$noOverlapTM)
     values$networkTM$VIS
   })
   
@@ -3964,7 +3964,7 @@ To ensure the functionality of Biblioshiny,
     k=1
     values$network1<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]])
+                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
     values$network1$VIS
   })
   
@@ -3973,7 +3973,7 @@ To ensure the functionality of Biblioshiny,
     k=2
     values$network2<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]])
+                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
     values$network2$VIS
   })
   
@@ -3982,7 +3982,7 @@ To ensure the functionality of Biblioshiny,
     k=3
     values$network3<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]])
+                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
     values$network3$VIS
   })
   
@@ -3991,7 +3991,7 @@ To ensure the functionality of Biblioshiny,
     k=4
     values$network4<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]])
+                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
     values$network4$VIS
   })
   
@@ -4000,7 +4000,7 @@ To ensure the functionality of Biblioshiny,
     k=5
     values$network5<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]])
+                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
     values$network5$VIS
   })
   

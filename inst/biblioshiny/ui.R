@@ -2766,6 +2766,13 @@ body <- dashboardBody(
                                                                       "Trigrams" = "3"),
                                                           selected = 1)),
                              br(),
+                             materialSwitch(
+                               inputId = "noOverlap",
+                               label = "Avoid Label Overlap",
+                               value = TRUE,
+                               status = "primary"
+                             ),
+                             br(),
                              box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                  collapsible = TRUE, width = 15,
                                  solidHeader = FALSE, collapsed = TRUE,
@@ -3058,6 +3065,13 @@ body <- dashboardBody(
                                                        "No" = FALSE),
                                            selected = FALSE)),
                              br(),
+                             materialSwitch(
+                               inputId = "noOverlapTM",
+                               label = "Avoid Label Overlap",
+                               value = TRUE,
+                               status = "primary"
+                             ),
+                             br(),
                              box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                  collapsible = TRUE, width = 15,
                                  solidHeader = FALSE, collapsed = TRUE,
@@ -3216,6 +3230,13 @@ body <- dashboardBody(
                                                                       "Bigrams" = "2",
                                                                       "Trigrams" = "3"),
                                                           selected = 1)),
+                             br(),
+                             materialSwitch(
+                               inputId = "noOverlapTE",
+                               label = "Avoid Label Overlap",
+                               value = TRUE,
+                               status = "primary"
+                             ),
                              br(),
                              box(title = p(strong("Text Editing"),style='font-size:16px;color:black;'), 
                                  collapsible = TRUE, width = 15,

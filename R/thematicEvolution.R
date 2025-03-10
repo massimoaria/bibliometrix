@@ -142,6 +142,16 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
     Nodes<-rbind(Nodes,left_join(subset(nodes,nodes$slice==i), res[[i]]$clusters[c("color","name")], by="name"))
   }
   ################ 
+  # Preparing data for plot
+  Nodes$id <- 0:(nrow(Nodes)-1)
+  Nodes <- Nodes %>% left_join(
+    rbind(INC[, -c(1, 2)] %>% select(CL1,sum) %>% rename(label=CL1),
+          INC[, -c(1, 2)] %>% select(CL2,sum)%>% rename(label=CL2)) %>% 
+      group_by(label) %>% reframe(sum=max(sum)), by="label"
+  )
+  Nodes <- Nodes %>% group_by(slice) %>% 
+    mutate(sum=sum/sum(sum,na.rm=T)) %>% ungroup()
+  ###############
   
   params <- list(field = field, 
                  years = years, 

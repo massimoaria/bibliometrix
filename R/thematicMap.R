@@ -64,20 +64,18 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   switch(field,
          ID={
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
-           TERMS=tolower(M$ID)
+           TERMS <- tolower(M$ID)
          },
          DE={
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
-           TERMS=tolower(M$DE)
+           TERMS <- tolower(M$DE)
          },
          TI={
-           #if(!("TI_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="TI",verbose=FALSE, stemming = input$stemming)}
            M=termExtraction(M,Field="TI", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms, synonyms = synonyms)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")
            
          },
          AB={
-           #if(!("AB_TM" %in% names(values$M))){values$M=termExtraction(values$M,Field="AB",verbose=FALSE, stemming = input$stemming)}
            M=termExtraction(M,Field="AB", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms, synonyms = synonyms)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "abstracts", n = n, sep = ";")
            

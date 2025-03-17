@@ -1,4 +1,5 @@
-utils::globalVariables(c("group"))
+utils::globalVariables(c("group", "CL1", "CL2", "value", "visEdges", "visIgraphLayout", "visNetwork", "visOptions",
+                         "visPhysics"))
 #' Plot Thematic Evolution Network
 #'
 #' Visualizes the thematic evolution of clusters over time using a temporal network layout.
@@ -99,9 +100,10 @@ plotThematicEvolution <- function(Nodes,
   # 5. Prepare edges
   edges_vis <- Edges %>%
     mutate(width = !!sym(edge_weight_var) * edge_scale,
-           value = !!sym(edge_weight_var),
-           color = "#D3D3D3") %>% 
+           value = !!sym(edge_weight_var)) %>%
     dplyr::filter(value>=min.flow)
+  
+  edges_vis$color <- lapply(1:nrow(edges_vis), function(i) list(color = "#D3D3D3", highlight = "#35343370", hover = "#35343370"))
   
   ## layout
   coords = as.matrix(Nodes %>% select(x,y))
@@ -113,7 +115,9 @@ plotThematicEvolution <- function(Nodes,
     visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>% 
     #visOptions(highlightNearest = TRUE, nodesIdSelection = FALSE) %>%
     visPhysics(enabled = FALSE) %>%
-    visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=max(as.numeric(unique_slices))), nodesIdSelection = T) %>%
+    visOptions(highlightNearest = list(enabled = TRUE, hover = TRUE, degree = 1, 
+        algorithm = "all", hideColor = "rgba(200, 200, 200, 0.90)"), nodesIdSelection = FALSE) %>%
+    #visNetwork::visOptions(highlightNearest =list(enabled = T, hover = T, degree=max(as.numeric(unique_slices))), nodesIdSelection = T) %>%
     visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
     visNetwork::visOptions(manipulation = FALSE, height ="100%", width = "100%")
   

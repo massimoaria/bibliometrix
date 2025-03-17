@@ -9,8 +9,8 @@ plotThematicEvolution(
   Edges,
   min.flow = 0,
   measure = "weighted",
-  node_shape = "dot",
-  label_size = 15,
+  node_shape = "box",
+  label_size = 5,
   edge_scale = 10,
   node_scale = 30
 )

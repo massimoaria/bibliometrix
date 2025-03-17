@@ -17,6 +17,7 @@
 #' @import tidytext
 #' @import openalexR
 #' @import ca
+#' @import visNetwork
 #' @importFrom purrr map2_dfr
 #' @importFrom purrr map_dfr
 #' @importFrom purrr map_df

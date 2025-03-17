@@ -66,7 +66,7 @@ thematicEvolution <- function(M, field = "ID", years, n = 250, minFreq = 2, size
     net[[k]] <-  resk$net
   }
   #dev.off()
-  par(mfrow = c(1, (K - 1)))
+  #par(mfrow = c(1, (K - 1)))
   if (K < 2) {
     print("Error")
     return()

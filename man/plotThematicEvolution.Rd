@@ -2,24 +2,44 @@
 % Please edit documentation in R/plotThematicEvolution.R
 \name{plotThematicEvolution}
 \alias{plotThematicEvolution}
-\title{Plot a Thematic Evolution Analysis}
+\title{Plot Thematic Evolution Network}
 \usage{
-plotThematicEvolution(Nodes, Edges, measure = "inclusion", min.flow = 0)
+plotThematicEvolution(
+  Nodes,
+  Edges,
+  min.flow = 0,
+  measure = "weighted",
+  node_shape = "box",
+  label_size = 5,
+  edge_scale = 10,
+  node_scale = 30
+)
 }
 \arguments{
 \item{Nodes}{is a list of nodes obtained by \code{\link{thematicEvolution}} function.}
 
 \item{Edges}{is a list of edges obtained by \code{\link{thematicEvolution}} function.}
 
-\item{measure}{is a character. It can be \code{measure=("inclusion","stability", "weighted")}.}
+\item{min.flow}{Numeric. Minimum threshold for edge weight (i.e., flow) to be included in the network visualization. Default is `0`.}
 
-\item{min.flow}{is numerical. It indicates the minimum value of measure to plot a flow.}
+\item{measure}{Character. The method to define edge weight: `"inclusion"`, `"stability"`, or `"weighted"` (default is `"weighted"`).}
+
+\item{node_shape}{Character. Shape of the nodes in the network. Options are `"dot"` (default), `"box"`, `"circle"`, or `"ellipse"`.}
+
+\item{label_size}{Numeric. Font size of the node labels. Default is `15`.}
+
+\item{edge_scale}{Numeric. Scaling factor for edge width. Default is `10`.}
+
+\item{node_scale}{Numeric. Scaling factor for node size. Default is `30`.}
 }
 \value{
-a sankeyPlot
+A `visNetwork` object displaying a time-structured thematic evolution network.
 }
 \description{
-It plot a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
+Visualizes the thematic evolution of clusters over time using a temporal network layout.
+Nodes are positioned along the x-axis according to time slices and vertically to minimize overlap.
+Edges represent links between themes across time periods, with customizable weights and styles.
+Nodes and Edges objects are the results of a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
 }
 \examples{
 

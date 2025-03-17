@@ -1111,24 +1111,31 @@ To ensure the functionality of Biblioshiny,
   DTfiltered <- eventReactive(input$applyFilter,{
     M <- values$Morig
     B <- bradford(M)$table
-    M <- subset(M, M$PY>=input$sliderPY[1] & M$PY<=input$sliderPY[2])
-    M <- subset(M, M$TCpY>=input$sliderTCpY[1] & M$TCpY<=input$sliderTCpY[2])
-    M <- subset(M, M$DT %in% input$selectType)
-    M <- subset(M, M$LA %in% input$selectLA)
+    M <- M %>%
+      dplyr::filter(PY >= input$sliderPY[1], PY <= input$sliderPY[2]) %>%
+      dplyr::filter(TCpY >= input$sliderTCpY[1], TCpY <= input$sliderTCpY[2]) %>%
+      dplyr::filter(DT %in% input$selectType) %>%
+      dplyr::filter(LA %in% input$selectLA)
+    
     switch(input$bradfordSources,
            "core"={
-             SO=B$SO[B$Zone %in% "Zone 1"]
+             so <- B$SO[B$Zone %in% "Zone 1"]
            },
            "zone2"={
-             SO=B$SO[B$Zone %in% c("Zone 1", "Zone 2")]
+             so <- B$SO[B$Zone %in% c("Zone 1", "Zone 2")]
            },
-           "all"={SO=B$SO})
-    M=M[M$SO %in% SO,]
+           "all"={so <- B$SO})
+    M <- M %>%
+      filter(SO %in% so)
+    
     values<-initial(values)
     row.names(M) <- M$SR
     class(M) <- c("bibliometrixDB", "data.frame")
-    values$M=M
-    Mdisp=as.data.frame(apply(values$M,2,function(x){substring(x,1,150)}))    
+    values$M <- M
+    Mdisp <- values$M %>%
+      mutate(across(everything(), ~ substring(., 1, 150))) %>%
+      as.data.frame()
+    
     if (dim(Mdisp)[1]>0){
       DTformat(Mdisp, nrow=3, filename="Filtered_DataTable", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
                columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
@@ -3873,14 +3880,18 @@ To ensure the functionality of Biblioshiny,
         names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR")
       }
       values$nexus$Data <- values$nexus$Data[values$nexus$Data$Inc_index>0,-c(4,8)]
-      values$TEplot <- plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE)
+      values$TEplot <- plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE, label_size = input$sizeTE*20)
     }
     
   })
   
-  output$TEPlot <- plotly::renderPlotly({
+  output$TEPlot <- visNetwork::renderVisNetwork({
     TEMAP()
     values$TEplot
+  })
+  
+  session$onFlushed(function() {
+    shinyjs::runjs("$('#TEPlot').trigger('resize');")
   })
   
   output$TEplot.save <- downloadHandler(
@@ -3901,7 +3912,7 @@ To ensure the functionality of Biblioshiny,
         files <- c(fileName,files)
       }
       plot2png(values$TEplot, filename= filenameTE, 
-               zoom = 2, type="plotly", tmpdir=tmpdir)
+               zoom = 2, type="vis", tmpdir=tmpdir)
       # screenshot(
       #   filename = paste("ThematicEvolution_", Sys.Date(), ".png", sep=""),
       #   id = "TEPlot",

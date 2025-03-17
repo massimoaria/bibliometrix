@@ -1937,15 +1937,16 @@ dend2vis <- function(hc, labelsize, nclusters=1, community=FALSE){
 
 ## Factorial Analysis dynamic plots
 ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.10, labelsize=16, size=5){
-  
+  LABEL <- CS$WData$word
   switch(method,
          CA={
            contrib = rowSums(CS$coord$contrib %>% as.data.frame())/2
            wordCoord <- CS$coord$coord[,1:2] %>%
              data.frame() %>%
-             mutate(label = row.names(CS$coord$coord),
+             mutate(label = LABEL,
                     contrib = contrib) %>% 
              select(c(3,1,2,4))
+           row.names(wordCoord) <- LABEL
            xlabel <- paste0("Dim 1 (",round(CS$res$eigCorr$perc[1],2),"%)")
            ylabel <- paste0("Dim 2 (",round(CS$res$eigCorr$perc[2],2),"%)")
          },
@@ -1953,9 +1954,10 @@ ca2plotly <- function(CS, method="MCA", dimX = 1, dimY = 2, topWordPlot = Inf, t
            contrib = rowSums(CS$coord$contrib %>% as.data.frame())/2
            wordCoord <- CS$coord$coord[,1:2] %>%
              data.frame() %>%
-             mutate(label = row.names(CS$coord$coord),
+             mutate(label = LABEL,
                     contrib = contrib) %>% 
              select(c(3,1,2,4))
+           row.names(wordCoord) <- LABEL
            xlabel <- paste0("Dim 1 (",round(CS$res$eigCorr$perc[1],2),"%)")
            ylabel <- paste0("Dim 2 (",round(CS$res$eigCorr$perc[2],2),"%)")
          },

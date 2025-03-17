@@ -3353,7 +3353,7 @@ body <- dashboardBody(
                             tabPanel("Thematic Evolution", 
                                      tabsetPanel(type="tabs",
                                                  tabPanel("Map",
-                                                          shinycssloaders::withSpinner(plotlyOutput(outputId = "TEPlot", height = "75vh"))
+                                                          shinycssloaders::withSpinner(visNetworkOutput(outputId = "TEPlot", height = "75vh", width = "100%"))
                                                  ),
                                                  tabPanel("Table",
                                                           shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))

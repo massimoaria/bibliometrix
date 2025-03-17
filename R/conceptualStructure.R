@@ -77,8 +77,8 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   #   names(SUPP)=names(M)[quanti.supp]
   #   row.names(SUPP)=tolower(row.names(M))
   # }
-  binary=FALSE
-  if (method=="MCA"){binary=TRUE}
+  binary <- FALSE
+  if (method=="MCA"){binary <- TRUE}
   
   switch(field,
          ID={
@@ -153,41 +153,28 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
   )
   
   
-  colnames(CW)=tolower(colnames(CW))
-  rownames(CW)=tolower(rownames(CW))
+  colnames(CW) <- label <- tolower(colnames(CW))
+  rownames(CW) <- tolower(rownames(CW))
   p=dim(CW)[2] 
   quali=NULL
   quanti=NULL
-  # Perform Multiple Correspondence Analysis (MCA)
-  # if (!is.null(quali.supp)){
-  #   ind=which(row.names(QSUPP) %in% row.names(CW))
-  #   QSUPP=as.data.frame(QSUPP[ind,])
-  #   CW=cbind(CW,QSUPP)
-  #   quali=(p+1):dim(CW)[2]
-  #   names(CW)[quali]=names(M)[quali.supp]
-  # }
-  # if (!is.null(quanti.supp)){
-  #   ind=which(row.names(SUPP) %in% row.names(CW))
-  #   SUPP=as.data.frame(SUPP[ind,])
-  #   CW=cbind(CW,SUPP)
-  #   quanti=(p+1+length(quali)):dim(CW)[2]
-  #   names(CW)[quanti]=names(M)[quanti.supp]
-  # }
   
   results <- factorial(CW,method=method,quanti=quanti,quali=quali)
   res.mca <- results$res.mca
   df <- results$df
+  row.names(df) <- label
+  # row.names(df) <- gsub("\\."," ",row.names(df))
   docCoord <- results$docCoord
   df_quali <- results$df_quali
   df_quanti <- results$df_quanti
   
   ### Total Citations of documents
-  if ("TC" %in% names(M) & method!="MDS"){docCoord$TC=as.numeric(M[toupper(rownames(docCoord)),"TC"])}
+  if ("TC" %in% names(M) & method!="MDS"){docCoord$TC <- as.numeric(M[toupper(rownames(docCoord)),"TC"])}
   
   
   # Selection of optimal number of clusters (gap statistics)
   #a=fviz_nbclust((df), kmeans, method = "gap_stat",k.max=k.max)['data']$data$y
-  km.res=hclust(dist(df),method="average")
+  km.res <- hclust(dist(df),method="average")
   
   if (clust=="auto"){
       clust=min((length(km.res$height)-which.max(diff(km.res$height))+1),k.max)
@@ -430,7 +417,6 @@ conceptualStructure<-function(M,field="ID", ngrams=1, method="MCA", quali.supp=N
 factorial<-function(X,method,quanti=NULL,quali=NULL){
   df_quali=data.frame()
   df_quanti=data.frame()
-  
   switch(method,
          ### CORRESPONDENCE ANALYSIS ###
          CA={

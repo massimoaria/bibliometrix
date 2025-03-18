@@ -25,15 +25,17 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams=1, remove.terms=NULL, syno
   M <- M[!duplicated(M$SR),]
   
   if (Tag %in% c("AB","TI")){
-    M=termExtraction(M,Field=Tag,stemming=F,verbose=FALSE, ngrams = ngrams, remove.terms=remove.terms, synonyms=synonyms)
-    i=which(names(M)==paste(Tag,"_TM",sep=""))
-  }else{i<-which(names(M)==Tag)}
+    M <- termExtraction(M,Field=Tag,stemming=F,verbose=FALSE, ngrams = ngrams, remove.terms=remove.terms, synonyms=synonyms)
+    i <- which(names(M)==paste(Tag,"_TM",sep=""))
+    remove.terms <- NULL
+    synonyms <- NULL
+  } else{i<-which(names(M)==Tag)}
   
   if (Tag=="C1"){
-    M$C1=gsub("\\[.+?]","",M$C1) 
+    M$C1 <- gsub("\\[.+?]","",M$C1) 
   }
   
-  Tab<-unlist(strsplit(as.character(M %>% dplyr::pull(i)),sep))
+  Tab <- unlist(strsplit(as.character(M %>% dplyr::pull(i)),sep))
   
   ### inserted to remove punct and extra spaces ####
   Tab <- trimws(gsub("\\s+|\\.|\\,"," ",Tab))

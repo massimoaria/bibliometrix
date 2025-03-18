@@ -2783,11 +2783,11 @@ To ensure the functionality of Biblioshiny,
     #values$MRWsyn.terms <- synonyms
     ### end of block
     
-    WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
+    WR <- wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
     
-    TAB=data.frame(names(WR),as.numeric(WR))
-    names(TAB)=c("Words", "Occurrences")
-    values$TABWord=TAB
+    TAB <- data.frame(names(WR),as.numeric(WR))
+    names(TAB) <- c("Words", "Occurrences")
+    values$TABWord <- TAB
     
     xx=values$TABWord
     if (input$MostRelWordsN>dim(xx)[1]){
@@ -3304,7 +3304,7 @@ To ensure the functionality of Biblioshiny,
              "Year (Q1)" = year_q1,
              "Year (Median)" = year_med,
              "Year (Q3)" = year_q3)
-    DTformat(tpData, nrow=10, filename="Stopword_List", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
+    DTformat(tpData, nrow=10, filename="TrendTopic", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })

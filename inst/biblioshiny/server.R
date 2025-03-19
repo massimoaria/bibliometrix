@@ -4598,17 +4598,7 @@ To ensure the functionality of Biblioshiny,
                handlerExpr = {
                  req(input$tallFields)
     values$tallDf <- tallExport(values$M, input$tallFields, input$tallMetadata, values$metadataCol)
-    output$tallBttn2 <- renderUI({
-      if (require("tall", quietly = TRUE)){
-        div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
-            align = "center",
-            width="100%",
-            br(),
-            actionBttn(inputId = "launchTall", label = strong("Launch TALL"),
-                       width = "100%", style = "pill", color = "primary",
-                       icon = icon(name ="play", lib="glyphicon")))
-      }
-    })
+    
   })
   
   output$tallTable <- renderDT({
@@ -4623,9 +4613,6 @@ To ensure the functionality of Biblioshiny,
     },
     content <- function(file) {
       write.csv(values$tallDf, file=file, row.names = FALSE)
-      # popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
-      #              subtitle=paste0("File was saved in the following path: ",filenameTall),
-      #              btn_labels="OK", size="40%")
     },
     contentType = "csv"
   )
@@ -4641,9 +4628,20 @@ To ensure the functionality of Biblioshiny,
                                     width = "100%", style = "pill", color = "danger",
                                     icon = icon(name ="cloud-download", lib="glyphicon"))
                      )
-                 })
+                   })
+                   output$tallBttn2 <- renderUI("")
                  } else {
-                  output$tallBttn1 <- renderUI("")
+                   output$tallBttn1 <- renderUI("")
+                   output$tallBttn2 <- renderUI({
+                     if (require("tall", quietly = TRUE)){
+                       div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                           align = "center",
+                           width="100%",
+                           actionBttn(inputId = "launchTall", label = strong("Launch TALL"),
+                                      width = "100%", style = "pill", color = "primary",
+                                      icon = icon(name ="play", lib="glyphicon")))
+                     }
+                   })
                  }
   })
   
@@ -4651,6 +4649,9 @@ To ensure the functionality of Biblioshiny,
   observeEvent(eventExpr = {input$installTall},
                handlerExpr = {
                  pak::pkg_install("tall")
+                 popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
+                              subtitle="TALL has been successfully installed",
+                              btn_labels="OK", size="40%")
                  if (suppressMessages(require("tall", quietly = TRUE))) values$TALLmissing <- FALSE
                })
 

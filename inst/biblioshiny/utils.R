@@ -548,7 +548,7 @@ tallExport <- function(M, tallFields, tallMetadata, metadataCol){
   if ("Author's Keywords" %in% tallFields){
     if (!"DE_raw" %in% names(M)){
       M <- M %>%
-        mutate(DE_raw = sapply(TI, capitalize_after_dot, USE.NAMES = FALSE))
+        mutate(DE_raw = sapply(DE, capitalize_after_dot, USE.NAMES = FALSE))
     }
     corpus <- c(corpus,"DE_raw")
   }

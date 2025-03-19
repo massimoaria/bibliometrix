@@ -67,6 +67,16 @@ To ensure the functionality of Biblioshiny,
   values$out <- NULL
   values$loadMenu <- NA
   
+  ### column to export in TALL
+  if (!require("tall", quietly = TRUE)) {
+      values$TALLmissing <- TRUE
+    } else {
+      values$TALLmissing <- FALSE  
+    }
+  values$corpusCol <- c("Title" = "TI","Abstract"="AB", "Author's Keywords"="DE")
+  values$metadataCol <- c("Publication Year" = "PY","Document Type"="DT", "DOI"="DI", "Open Access"="OA", "Language"="LA", "First Author"= "AU1")
+  
+  
   ### setting values
   values$dpi <- 300
   values$h <- 7
@@ -2783,11 +2793,11 @@ To ensure the functionality of Biblioshiny,
     #values$MRWsyn.terms <- synonyms
     ### end of block
     
-    WR=wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
+    WR <- wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
     
-    TAB=data.frame(names(WR),as.numeric(WR))
-    names(TAB)=c("Words", "Occurrences")
-    values$TABWord=TAB
+    TAB <- data.frame(names(WR),as.numeric(WR))
+    names(TAB) <- c("Words", "Occurrences")
+    values$TABWord <- TAB
     
     xx=values$TABWord
     if (input$MostRelWordsN>dim(xx)[1]){
@@ -3304,7 +3314,7 @@ To ensure the functionality of Biblioshiny,
              "Year (Q1)" = year_q1,
              "Year (Median)" = year_med,
              "Year (Q3)" = year_q3)
-    DTformat(tpData, nrow=10, filename="Stopword_List", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
+    DTformat(tpData, nrow=10, filename="TrendTopic", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })
@@ -4565,8 +4575,92 @@ To ensure the functionality of Biblioshiny,
     screenShot(values$COLnetwork$VIS, filename=filename, type="vis")
   })
   
+  ## TALL EXPORT ----
+  observe({
+    req(values$M)
+    ind <- which(values$corpusCol %in% names(values$M))
+    corpusCol <- values$corpusCol[ind]
+    updateMultiInput(session, 'tallFields',
+                     selected = character(0),
+                     choices = names(corpusCol))
+  })
   
-  ### settings ----
+  observe({
+    req(values$M)
+    ind <- which(values$metadataCol %in% names(values$M))
+    metadataCol <- values$metadataCol[ind]
+    updateMultiInput(session, 'tallMetadata',
+                     selected = character(0),
+                     choices = names(metadataCol))
+  })
+  
+  observeEvent(eventExpr = {input$tallRun},
+               handlerExpr = {
+                 req(input$tallFields)
+    values$tallDf <- tallExport(values$M, input$tallFields, input$tallMetadata, values$metadataCol)
+    
+  })
+  
+  output$tallTable <- renderDT({
+    req(values$tallDf)
+      DTformat(values$tallDf, nrow=3, filename="tallDf", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, size='70%', filter="none",
+               columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
+  })
+  
+  output$tall.save <- downloadHandler(
+    filename = function() {
+      paste("tallFile-", Sys.Date(), ".csv", sep="")
+    },
+    content <- function(file) {
+      write.csv(values$tallDf, file=file, row.names = FALSE)
+    },
+    contentType = "csv"
+  )
+  
+  observeEvent(eventExpr = {values$TALLmissing},
+               handlerExpr = {
+                 if (values$TALLmissing){
+                   output$tallBttn1 <- renderUI({
+                     div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                         align = "center",
+                         width="100%",
+                         actionBttn(inputId = "installTall", label = strong("Install TALL"),
+                                    width = "100%", style = "pill", color = "danger",
+                                    icon = icon(name ="cloud-download", lib="glyphicon"))
+                     )
+                   })
+                   output$tallBttn2 <- renderUI("")
+                 } else {
+                   output$tallBttn1 <- renderUI("")
+                   output$tallBttn2 <- renderUI({
+                     if (require("tall", quietly = TRUE)){
+                       div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
+                           align = "center",
+                           width="100%",
+                           actionBttn(inputId = "launchTall", label = strong("Launch TALL"),
+                                      width = "100%", style = "pill", color = "primary",
+                                      icon = icon(name ="play", lib="glyphicon")))
+                     }
+                   })
+                 }
+  })
+  
+  
+  observeEvent(eventExpr = {input$installTall},
+               handlerExpr = {
+                 pak::pkg_install("tall")
+                 popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
+                              subtitle="TALL has been successfully installed",
+                              btn_labels="OK", size="40%")
+                 if (suppressMessages(require("tall", quietly = TRUE))) values$TALLmissing <- FALSE
+               })
+
+  observeEvent(eventExpr = {input$launchTall},
+               handlerExpr = {
+                 system('Rscript -e "tall::tall()"')
+               })
+  
+  ## SETTING ----
   observeEvent(input$dpi, {
     values$dpi <- as.numeric(input$dpi)
   })

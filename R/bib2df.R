@@ -200,6 +200,9 @@ postprocessing <-function(DATA,dbsource){
   # Toupper
   DI <- DATA$DI
   URL <- DATA$url
+  AB <- DATA$AB
+  TI <- DATA$TI
+  DE <- DATA$DE
   DATA <- data.frame(lapply(DATA,toupper),stringsAsFactors = FALSE)
   if ("JI" %in% names(DATA)){
     DATA$J9 <- gsub("\\.","",DATA$JI)
@@ -208,6 +211,9 @@ postprocessing <-function(DATA,dbsource){
   }
   DATA$DI <- DI
   DATA$url <- URL
+  DATA$AB_raw <- AB
+  DATA$TI_raw <- TI
+  DATA$DE_raw <- DE
   return(DATA)
 }
 

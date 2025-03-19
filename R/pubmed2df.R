@@ -66,8 +66,13 @@ Please, take a look at the vignettes:
   
   # remove * char from keywords
   df$DE <- df$ID <- gsub("\\*","",df$DE)
+  AB <- df$AB
+  TI <- df$TI
+  DE <- df$DE
   df <- data.frame(lapply(df,toupper))
-  
+  df$AB_raw <- AB
+  df$TI_raw <- TI
+  df$DE_raw <- DE
   # add sep ; to affiliations
   df$C1 <- gsub("\\.",".;",df$C1)
   df$RP <- NA

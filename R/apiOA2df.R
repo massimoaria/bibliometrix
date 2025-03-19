@@ -53,7 +53,9 @@ apiOA2df <- function(file){
     sum(regexpr("https://",x)>-1, na.rm = TRUE)>0
   })
   label <- names(ind)[ind==FALSE & !is.na(ind)]
-  
+  AB <- df$AB
+  TI <- df$TI
+  DE <- df$DE
   if ("DI" %in% names(df)){
     df <- df %>% 
       mutate(across(all_of(label), toupper),
@@ -64,6 +66,9 @@ apiOA2df <- function(file){
       mutate(across(all_of(label), toupper))
   }
   df$DB <- "OPENALEX"
+  df$AB_raw <- AB
+  df$TI_raw <- TI
+  df$DE_raw <- DE
 
   ## transform Country code in names
   CO <- strsplit(df$AU_CO,";")

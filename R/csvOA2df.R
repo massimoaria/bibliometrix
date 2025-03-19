@@ -67,6 +67,9 @@ csvOA2df <- function(file){
   })
   label <- names(ind)[ind==FALSE & !is.na(ind)]
 
+  AB <- DATA$AB
+  TI <- DATA$TI
+  DE <- DATA$DE
   DATA <- DATA %>% 
     mutate(across(all_of(label), toupper),
            DI = gsub("https://doi.org/","",DI),
@@ -77,6 +80,9 @@ csvOA2df <- function(file){
   DATA$RP <- toupper(DATA$RP)
   DATA$AU_CO <- toupper(DATA$AU_CO)
   DATA$AU1_CO <- toupper(DATA$AU1_CO)
+  DATA$AB_raw <- AB
+  DATA$TI_raw <- TI
+  DATA$DE_raw <- DE
   
   return(DATA %>% as.data.frame())
 }

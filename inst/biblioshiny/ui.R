@@ -4142,8 +4142,7 @@ body <- dashboardBody(
                             tabPanel("Density", 
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "colOverlay", height = "75vh"))),
                             tabPanel("Table", 
-                                     shinycssloaders::withSpinner(DT::DTOutput(
-                                       outputId = "colTable"))),
+                                     shinycssloaders::withSpinner(DT::DTOutput(outputId = "colTable"))),
                             tabPanel("Degree Plot", 
                                      shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh")))
                 )
@@ -4297,6 +4296,101 @@ body <- dashboardBody(
               
             )
     ),
+    #### TALL Export ----
+    tabItem("tall",
+            fluidPage(
+              fluidRow(
+                h3(strong("TALL - Text Analysis for All"), align="center"),
+                br()
+              ),
+              fluidRow(
+                column(8,
+                       fluidRow(
+                         column(4,
+                                div(img(src = "tall_logo.jpg", height = "90%",width = "90%"), style="text-align: center;")
+                                ),
+                         column(8,
+                                HTML(
+                                  "<div style='text-align: center;'>
+    <p style='font-size: 16px;max-width: 1400px; margin: auto; text-align: justify;'>
+    <strong>Biblioshiny</strong> now includes a dedicated export tool that allows you to prepare and extract textual data (Titles, Abstracts, and Keywords) from your bibliographic collection in a format ready to be used in TALL.
+    <br><br>
+      <strong>TALL</strong> is a user-friendly R Shiny application designed to support researchers in performing textual data analysis without requiring advanced programming skills. 
+    <br><br>
+      <strong>TALL</strong> offers a comprehensive workflow for data cleaning, pre-processing, statistical analysis, and visualization of textual data, by combining state-of-the-art text analysis techniques into an R Shiny app.
+    <br><br>
+      <strong>TALL</strong> includes a wide set of methodologies specifically tailored for various text analysis tasks. It aims to address the needs of researchers without extensive programming skills, providing a versatile and general-purpose tool for analyzing textual data. With TALL, researchers can leverage a wide range of text analysis techniques without the burden of extensive programming knowledge, enabling them to extract valuable insights from textual data in a more efficient and accessible manner.
+    <br><br>
+      Learn more at: <a href='https://www.tall-app.com' target='_blank'>www.tall-app.com</a>
+        </p>
+        </div>"
+                                ))
+                       ),
+                       fluidRow(
+                         shinycssloaders::withSpinner(DT::DTOutput(outputId = "tallTable"))
+                       )
+                ),
+                column(4,
+                       fluidRow(
+                         box(
+                           width = 12,
+                           div(h3(strong(em("Export a corpus for TALL"))), style="margin-top:-57px"),
+                           hr(),
+                           helpText(h4("Select textual metadata:")),
+                           multiInput(
+                             inputId = "tallFields",
+                             label = NULL,
+                             choiceNames = "",
+                             choiceValues = "",
+                             width = "100%"
+                           ),
+                           hr(),
+                           helpText(h4("Select additional metadata:")),
+                           multiInput(
+                             inputId = "tallMetadata",
+                             label = NULL,
+                             choiceNames = "",
+                             choiceValues = "",
+                             width = "100%"
+                           ),
+                           hr(),
+                           div(
+                             fluidRow(
+                               column(6,
+                                      div(style=style_bttn, align = "center",
+                                          title = t_run,
+                                          #column(1, 
+                                                 do.call("actionBttn", c(run_bttn, list(
+                                                   inputId = "tallRun")
+                                                 ))
+                                          )
+                                      ),
+                               column(6,
+                                      div(style=style_bttn, align = "center",
+                                          title = t_export,
+                                                 do.call("downloadBttn", c(export_bttn, list(
+                                                   outputId = "tall.save")
+                                                 ))
+                                          )
+                                      )
+                              ), style="margin-top:-15px"),
+                           hr(),
+                           helpText("Select at least one textual field to export, click 'Play' to generate the dataset, then save and import it into TALL.", style='font-size: 16px'),
+                           uiOutput("tallBttn1"),
+                           uiOutput("tallBttn2")
+                           # fluidRow(
+                           #   # column(6,
+                           #   #        uiOutput("tallBttn1")),
+                           #   # column(6,
+                           #   #        uiOutput("tallBttn2"))
+                           # )
+                          )
+                       )
+                )
+                )
+            )
+    ),
+    
     #### Settings ----
     tabItem("settings",
             fluidPage(

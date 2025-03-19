@@ -518,8 +518,61 @@ initial <- function(values){
   values$citShortlabel <- "NA"
   values$S <- list("NA")
   values$GR <- "NA"
+  ### column to export in TALL
+  values$corpusCol <- c("Title" = "TI","Abstract"="AB", "Author's Keywords"="DE")
+  values$metadataCol <- c("Publication Year" = "PY","Document Type"="DT", "DOI"="DI", "Open Access"="OA", "Language"="LA", "First Author"= "AU1")
   
   return(values)
+}
+
+### TALL Export functions ----
+tallExport <- function(M, tallFields, tallMetadata, metadataCol){
+  corpus <- NULL
+  ## Corpus Fields ##
+  if ("Abstract" %in% tallFields){
+    if (!"AB_raw" %in% names(M)){
+      M <- M %>%
+        mutate(AB_raw = sapply(AB, capitalize_after_dot, USE.NAMES = FALSE))
+    }
+    corpus <- c(corpus,"AB_raw")
+  }
+  
+  if ("Title" %in% tallFields){
+    if (!"TI_raw" %in% names(M)){
+      M <- M %>%
+        mutate(TI_raw = sapply(TI, capitalize_after_dot, USE.NAMES = FALSE))
+    }
+    corpus <- c(corpus,"TI_raw")
+  }
+  
+  if ("Author's Keywords" %in% tallFields){
+    if (!"DE_raw" %in% names(M)){
+      M <- M %>%
+        mutate(DE_raw = sapply(TI, capitalize_after_dot, USE.NAMES = FALSE))
+    }
+    corpus <- c(corpus,"DE_raw")
+  }
+  
+  corpus <- c(corpus, as.character(metadataCol[tallMetadata]))
+  
+  M <- M %>% select(SR, any_of(corpus)) %>% 
+    rename(doc_id = SR)
+  names(M) <- gsub("_raw","",names(M))
+  
+  return(M)
+}
+
+capitalize_after_dot <- function(text) {
+  # Tutto minuscolo
+  text <- tolower(text)
+  
+  # Prima lettera della stringa maiuscola
+  text <- paste0(toupper(substr(text, 1, 1)), substr(text, 2, nchar(text)))
+  
+  # Maiuscola dopo punto (o ! o ?) + spazio
+  text <- gsub("([\\.\\!\\?]\\s*)([a-z])", "\\1\\U\\2", text, perl = TRUE)
+  
+  return(text)
 }
 
 
@@ -2606,6 +2659,8 @@ menuList <- function(values){
     )
   
   L[[length(L)+1]] <- menuItem("Report",tabName = "report",icon = fa_i(name ="list-alt"))
+  
+  L[[length(L)+1]] <- menuItem("TALL Export",tabName = "tall", icon = icon("text-size", lib = "glyphicon"))
   
   L[[length(L)+1]] <- menuItem("Settings",tabName = "settings",icon = fa_i(name ="sliders"))
   

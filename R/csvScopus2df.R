@@ -46,7 +46,13 @@ csvScopus2df <- function(file){
  
   DI <- DATA$DI
   URL <- DATA$URL
+  AB <- DATA$AB
+  TI <- DATA$TI
+  DE <- DATA$DE
   DATA <- data.frame(lapply(DATA,toupper))
+  DATA$AB_raw <- AB
+  DATA$TI_raw <- TI
+  DATA$DE_raw <- DE
   DATA$DI <- DI
   DATA$URL <- URL
   return(DATA)

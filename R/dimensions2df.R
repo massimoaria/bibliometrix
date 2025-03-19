@@ -240,8 +240,15 @@ postprocessingDim <- function(DATA) {
   #DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
   DATA$J9 <- gsub("\\.","",DATA$JI)
   ####
+  AB <- DATA$AB
+  TI <- DATA$TI
+  DE <- DATA$DE
   
   DATA <- data.frame(lapply(DATA, toupper), stringsAsFactors = FALSE)
+  
+  DATA$AB_raw <- AB
+  DATA$TI_raw <- TI
+  DATA$DE_raw <- DE
   
   DATA$PY <- as.numeric(DATA$PY)
   

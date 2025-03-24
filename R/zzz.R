@@ -278,11 +278,12 @@
 #' @importFrom SnowballC getStemLanguages
 # @importFrom rio import
 .onAttach<-function(...){
-  packageStartupMessage("Please note that our software is open source and available for use, distributed under the MIT license.\nWhen it is used in a publication, we ask that authors properly cite the following reference:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, 
+
+  packageStartupMessage("Please note that our software is open source and available for use, distributed under the MIT license.\nWhen it is used in a publication, we ask that authors properly cite the following reference:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis,
                         Journal of Informetrics, 11(4), pp 959-975, Elsevier.\n\nFailure to properly cite the software is considered a violation of the license.
                         \nFor information and bug reports:
                         - Take a look at https://www.bibliometrix.org
-                        - Send an email to info@bibliometrix.org   
+                        - Send an email to info@bibliometrix.org
                         - Write a post on https://github.com/massimoaria/bibliometrix/issues
                         \nHelp us to keep Bibliometrix and Biblioshiny free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)\n
                         \nTo start with the Biblioshiny app, please digit:
@@ -290,157 +291,6 @@ biblioshiny()\n")
 }
 
 
-# ### extract data from igraph class object
-# ### Credits to François Briatte. Function is a fork of the package ggnetwork
-# dataFromIgraph <- function(
-#     model,
-#     data = NULL,
-#     layout = igraph::nicely(),
-#     arrow.gap = ifelse(igraph::is.directed(model), 0.025, 0),
-#     by = NULL,
-#     scale = TRUE,
-#     stringsAsFactors = getOption("stringsAsFactors"),
-#     ...
-# ) {
-#   # node placement
-#   if (inherits(layout, "matrix") && identical(dim(layout), c(igraph::gorder(model), 2L))) {
-#     nodes <- layout[, 1:2 ]
-#   } else if (inherits(layout, "matrix")) {
-#     stop("layout matrix dimensions do not match network size")
-#   } else {
-#     nodes <- igraph::layout_(model, layout, ...)
-#   }
-#   
-#   format_igraph(
-#     model = model,
-#     nodes = nodes,
-#     weights = "none",
-#     arrow.gap = arrow.gap,
-#     by = by,
-#     scale = scale,
-#     stringsAsFactors = stringsAsFactors,
-#     .list_vertex_attributes_fun = igraph::list.vertex.attributes,
-#     .get_vertex_attributes_fun = igraph::get.vertex.attribute,
-#     .list_edges_attributes_fun = igraph::list.edge.attributes,
-#     .get_edges_attributes_fun = igraph::get.edge.attribute,
-#     .as_edges_list_fun = igraph::as_edgelist
-#   )
-# }
-# 
-# ### Credits to François Briatte. Function is a fork of the package ggnetwork
-# format_igraph <- function(
-#     model,
-#     nodes = NULL,
-#     weights = NULL,
-#     arrow.gap = ifelse(network::is.directed(model), 0.025, 0),
-#     by = NULL,
-#     scale = TRUE,
-#     stringsAsFactors = getOption("stringsAsFactors"),
-#     .list_vertex_attributes_fun = NULL,
-#     .get_vertex_attributes_fun = NULL,
-#     .list_edges_attributes_fun = NULL,
-#     .get_edges_attributes_fun = NULL,
-#     .as_edges_list_fun = NULL
-# ) {
-#   # store coordinates
-#   nodes <- data.frame(nodes)
-#   colnames(nodes) <- c("x", "y")
-#   
-#   # rescale coordinates
-#   if (scale) {
-#     nodes$x <- scale_data(nodes$x)
-#     nodes$y <- scale_data(nodes$y)
-#   }
-#   
-#   # import vertex attributes
-#   if (length(.list_vertex_attributes_fun(model)) > 0) {
-#     nodes <- cbind.data.frame(
-#       nodes,
-#       sapply(
-#         X = .list_vertex_attributes_fun(model),
-#         Y = model,
-#         FUN = function(X, Y) .get_vertex_attributes_fun(Y, X),
-#         simplify = FALSE
-#       ),
-#       stringsAsFactors = stringsAsFactors
-#     )
-#   }
-#   
-#   # edge list
-#   if (inherits(model, "igraph")) {
-#     edges <- .as_edges_list_fun(model, names = FALSE)
-#   } else {
-#     edges <- .as_edges_list_fun(model, attrname = weights)
-#   }
-#   
-#   # edge list (if there are duplicated rows)
-#   if (nrow(edges[, 1:2, drop = FALSE]) > nrow(unique(edges[, 1:2, drop = FALSE]))) {
-#     warning("duplicated edges detected")
-#   }
-#   
-#   edges <- data.frame(nodes[edges[, 1], c("x", "y")], nodes[edges[, 2], c("x", "y")])
-#   colnames(edges) <- c("x", "y", "xend", "yend")
-#   
-#   # arrow gap (thanks to @heike and @ethen8181 for their work on this issue)
-#   if (arrow.gap > 0) {
-#     x.length <- edges$xend - edges$x
-#     y.length <- edges$yend - edges$y
-#     arrow.gap <- arrow.gap / sqrt(x.length^2 + y.length^2)
-#     edges$xend <- edges$x + (1 - arrow.gap) * x.length
-#     edges$yend <- edges$y + (1 - arrow.gap) * y.length
-#   }
-#   
-#   # import edge attributes
-#   if (length(.list_edges_attributes_fun(model)) > 0) {
-#     edges <- cbind.data.frame(
-#       edges,
-#       sapply(
-#         X = .list_edges_attributes_fun(model),
-#         Y = model,
-#         FUN = function(X, Y) .get_edges_attributes_fun(Y, X),
-#         simplify = FALSE
-#       ),
-#       stringsAsFactors = stringsAsFactors
-#     )
-#   }
-#   
-#   if (nrow(edges) > 0) {
-#     # drop "na" columns created by 'network' methods
-#     # this is to ensure consistency with 'igraph' methods
-#     if ("na" %in% colnames(nodes)) nodes$na <- NULL
-#     if ("na" %in% colnames(edges)) edges$na <- NULL
-#     
-#     # merge edges and nodes data
-#     edges <- merge(nodes, edges, by = c("x", "y"), all = TRUE)
-#     
-#     # add missing columns to nodes data
-#     nodes$xend <- nodes$x
-#     nodes$yend <- nodes$y
-#     # names(nodes) <- names(edges)[1:ncol(nodes)] # columns are already named from 'nodes' and 'edges'
-#     
-#     # make nodes data of identical dimensions to edges data
-#     nodes[, setdiff(names(edges), names(nodes))] <- NA
-#     
-#     # panelize nodes (for temporal networks)
-#     if (!is.null(by)) {
-#       nodes <- lapply(sort(unique(edges[, by])), function(x) {
-#         y <- nodes
-#         y[, by] <- x
-#         y
-#       })
-#       nodes <- do.call(rbind, nodes)
-#     }
-#     
-#     return(unique(rbind(edges[!is.na(edges$xend), ], nodes)))
-#   } else {
-#     # add missing columns to nodes data
-#     nodes$xend <- nodes$x
-#     nodes$yend <- nodes$y
-#     return(nodes)
-#   }
-# }
-# 
-# 
 # ### scale coordinates
 # ### Credits to François Briatte. Function is a fork of the package ggnetwork
 scale_data <- function(x, scale = diff(range(x))) {

@@ -588,3 +588,51 @@ firstup <- function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
   x
 }
+
+adjust_positions_oblique <- function(df, xvar = "rcentrality", yvar = "rdensity",
+                                     min_dist = 0.5, max_iter = 100, step_factor = 0.5, jitter_strength = 0.1) {
+  df_adj <- df
+  
+  for (iter in 1:max_iter) {
+    moved <- FALSE
+    for (i in 1:(nrow(df_adj) - 1)) {
+      for (j in (i + 1):nrow(df_adj)) {
+        xi <- df_adj[[xvar]][i]
+        yi <- df_adj[[yvar]][i]
+        xj <- df_adj[[xvar]][j]
+        yj <- df_adj[[yvar]][j]
+        
+        dx <- xi - xj
+        dy <- yi - yj
+        dist <- sqrt(dx^2 + dy^2)
+        
+        # Se perfettamente sovrapposti, applica jitter obliquo casuale
+        if (dist == 0) {
+          jitter_angle <- runif(1, 0, 2 * pi)
+          offset <- jitter_strength
+          
+          df_adj[[xvar]][i] <- xi + cos(jitter_angle) * offset
+          df_adj[[yvar]][i] <- yi + sin(jitter_angle) * offset
+          df_adj[[xvar]][j] <- xj - cos(jitter_angle) * offset
+          df_adj[[yvar]][j] <- yj - sin(jitter_angle) * offset
+          
+          moved <- TRUE
+          
+        } else if (dist < min_dist) {
+          angle <- atan2(dy, dx)
+          offset <- (min_dist - dist) * step_factor
+          
+          df_adj[[xvar]][i] <- xi + cos(angle) * offset
+          df_adj[[yvar]][i] <- yi + sin(angle) * offset
+          df_adj[[xvar]][j] <- xj - cos(angle) * offset
+          df_adj[[yvar]][j] <- yj - sin(angle) * offset
+          
+          moved <- TRUE
+        }
+      }
+    }
+    if (!moved) break
+  }
+  
+  return(df_adj)
+}

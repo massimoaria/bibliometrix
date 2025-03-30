@@ -1,7 +1,7 @@
-#' Author local citations 
+#' Author local citations
 #'
 #' It calculates local citations (LCS) of authors and documents of a bibliographic collection.
-#' 
+#'
 #' Local citations measure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection.
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
@@ -11,47 +11,47 @@
 #' @param verbose is a logical.  If TRUE, results are printed on screen.
 #' @return an object of \code{class} "list" containing author local citations and document local citations.
 #'
-#' 
+#'
 #' @examples
-#'  
+#'
 #' data(scientometrics, package = "bibliometrixData")
-#' 
+#'
 #' CR <- localCitations(scientometrics, sep = ";")
 #'
-#' CR$Authors[1:10,]
-#' CR$Papers[1:10,]
+#' CR$Authors[1:10, ]
+#' CR$Papers[1:10, ]
 #'
 #' @seealso \code{\link{citations}} function for citation frequency distribution.
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis.
 #' @seealso \code{\link{summary}} to obtain a summary of the results.
 #' @seealso \code{\link{plot}} to draw some useful plots of the results.
-#' 
+#'
 #' @export
 
-localCitations <- function(M, fast.search=FALSE, sep = ";", verbose = FALSE){
-  
+localCitations <- function(M, fast.search = FALSE, sep = ";", verbose = FALSE) {
   M$TC[is.na(M$TC)] <- 0
-  if (isTRUE(fast.search)){
-    loccit=quantile(as.numeric(M$TC),0.75, na.rm = TRUE)
-  } else {loccit=1}
-  
-  H=histNetwork(M, min.citations = loccit, sep=sep, network=FALSE, verbose = verbose)
-  LCS=H$histData 
-  M=H$M
-  rm(H)
-  AU=strsplit(M$AU,split=";")
-  n=lengths(AU)
-  
-  df=data.frame(AU=unlist(AU),LCS=rep(M$LCS,n))
-  AU=aggregate(df$LCS,by=list(df$AU),FUN="sum")
-  names(AU)=c("Author", "LocalCitations" )
-  AU=AU[order(-AU$LocalCitations),]
-  
-  if ("SR" %in% names(M)){
-    LCS=data.frame(Paper=M$SR,DOI=M$DI,Year=M$PY,LCS=M$LCS,GCS=M$TC)
-    LCS=LCS[order(-LCS$LCS),]
+  if (isTRUE(fast.search)) {
+    loccit <- quantile(as.numeric(M$TC), 0.75, na.rm = TRUE)
+  } else {
+    loccit <- 1
   }
-  CR=list(Authors=AU,Papers=LCS, M=M)
+
+  H <- histNetwork(M, min.citations = loccit, sep = sep, network = FALSE, verbose = verbose)
+  LCS <- H$histData
+  M <- H$M
+  rm(H)
+  AU <- strsplit(M$AU, split = ";")
+  n <- lengths(AU)
+
+  df <- data.frame(AU = unlist(AU), LCS = rep(M$LCS, n))
+  AU <- aggregate(df$LCS, by = list(df$AU), FUN = "sum")
+  names(AU) <- c("Author", "LocalCitations")
+  AU <- AU[order(-AU$LocalCitations), ]
+
+  if ("SR" %in% names(M)) {
+    LCS <- data.frame(Paper = M$SR, DOI = M$DI, Year = M$PY, LCS = M$LCS, GCS = M$TC)
+    LCS <- LCS[order(-LCS$LCS), ]
+  }
+  CR <- list(Authors = AU, Papers = LCS, M = M)
   return(CR)
-  
 }

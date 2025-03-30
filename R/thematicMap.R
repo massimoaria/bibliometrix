@@ -273,7 +273,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
 return(results)
 }
 
-# Probability calculation fro cluster assignment
+# Probability calculation for cluster assignment
 clusterAssignment <- function(M, words, field, remove.terms, synonyms, threshold){
 
   #### integrate stopwords and synonyms in M original field  

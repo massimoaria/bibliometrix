@@ -12,8 +12,8 @@
 #' char <- c("Alfred  BJ", "Mary    Beth", "John      John")
 #' char
 #' trimES(char)
-#' 
+#'
 #' @export
-trimES <- function( x ) {
+trimES <- function(x) {
   gsub("\\s+", " ", x)
 }

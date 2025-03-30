@@ -12,8 +12,8 @@
 #' char <- c("  Alfred", "Mary", " John")
 #' char
 #' trim(char)
-#' 
+#'
 #' @export
-trim <- function( x ) {
+trim <- function(x) {
   gsub("(^[[:space:]]+|[[:space:]]+$)", "", x)
 }

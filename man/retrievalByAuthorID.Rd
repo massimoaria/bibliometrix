@@ -7,7 +7,7 @@
 retrievalByAuthorID(id, api_key, remove.duplicated = TRUE, country = TRUE)
 }
 \arguments{
-\item{id}{is a vector of characters containing the author's SCOPUS IDs. 
+\item{id}{is a vector of characters containing the author's SCOPUS IDs.
 SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.}
 
 \item{api_key}{is a character. It contains the Elsvier API key. Information about how to obtain an API Key \href{https://dev.elsevier.com/sc_apis.html}{Elsevier API website}}
@@ -17,7 +17,7 @@ SCOPUS IDs con be obtained using the function \code{\link{idByAuthor}}.}
 \item{country}{is logical. If TRUE authors' country information will be downloaded from SCOPUS.}
 }
 \value{
-a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify. 
+a list containing two objects: (i) M which is a data frame with cases corresponding to articles and variables to main Field Tags named using the standard ISI WoS Field Tag codify.
 M includes the entire bibliographic collection downloaded from SCOPUS.
 The main field tags are:
 
@@ -37,8 +37,8 @@ The main field tags are:
 \code{DB}\tab   \tab Database\cr}
 (ii) authorDocuments which is a list containing a bibliographic data frame for each author.
 
-LIMITATIONS: 
-Currently, SCOPUS API does not allow to download document references. 
+LIMITATIONS:
+Currently, SCOPUS API does not allow to download document references.
 As consequence, it is not possible to perform co-citation analysis (the field CR is empty).
 }
 \description{
@@ -59,12 +59,12 @@ Uses SCOPUS API search to get information about documents on a set of authors us
 #
 
 ## extract the IDs
-# 
+#
 # id <- authorsID[,3]
 #
 
 ## create the bibliographic collection
-# 
+#
 # res <- retrievalByAuthorID(id, api_key)
 #
 # M <- res$M  # the entire bibliographic data frame

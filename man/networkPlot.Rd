@@ -36,7 +36,7 @@ networkPlot(
 \arguments{
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
 
-\item{normalize}{is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard, 
+\item{normalize}{is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard,
 Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.}
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
@@ -45,7 +45,7 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{Title}{is a character indicating the plot title.}
 
-\item{type}{is a character object. It indicates the network map layout: 
+\item{type}{is a character object. It indicates the network map layout:
 
 \tabular{lll}{
 \code{type="auto"}\tab   \tab Automatic layout selection\cr
@@ -85,9 +85,9 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{remove.isolates}{is logical. If TRUE isolates vertices are not plotted.}
 
-\item{weighted}{This argument specifies whether to create a weighted graph from an adjacency matrix. 
-If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices. 
-If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute 
+\item{weighted}{This argument specifies whether to create a weighted graph from an adjacency matrix.
+If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices.
+If it is a character constant then for every non-zero matrix entry an edge is created and the value of the entry is added as an edge attribute
 named by the weighted argument. If it is TRUE then a weighted graph is created and the name of the edge attribute will be weight.}
 
 \item{edgesize}{is an integer. It indicates the network edge size.}
@@ -116,10 +116,12 @@ The function \code{\link{networkPlot}} can plot a bibliographic network previous
 
 data(management, package = "bibliometrixData")
 
-NetMatrix <- biblioNetwork(management, analysis = "co-occurrences", 
-network = "keywords", sep = ";")
+NetMatrix <- biblioNetwork(management,
+  analysis = "co-occurrences",
+  network = "keywords", sep = ";"
+)
 
-net <- networkPlot(NetMatrix, n = 30, type = "auto", Title = "Co-occurrence Network",labelsize=1) 
+net <- networkPlot(NetMatrix, n = 30, type = "auto", Title = "Co-occurrence Network", labelsize = 1)
 
 }
 \seealso{

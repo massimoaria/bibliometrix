@@ -31,7 +31,7 @@ Lotka, A. J. (1926). The frequency distribution of scientific productivity. Jour
 \examples{
 data(scientometrics, package = "bibliometrixData")
 results <- biblioAnalysis(scientometrics)
-L=lotka(results)
+L <- lotka(results)
 L
 
 }

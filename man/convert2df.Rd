@@ -12,8 +12,8 @@ convert2df(
 )
 }
 \arguments{
-\item{file}{a character array containing a sequence of filenames coming from WoS, Scopus, Dimensions, Lens.org, OpenAlex and Pubmed. Alternatively, \code{file} can be 
-an object resulting from an API query fetched from Dimensions, and PubMed databases: 
+\item{file}{a character array containing a sequence of filenames coming from WoS, Scopus, Dimensions, Lens.org, OpenAlex and Pubmed. Alternatively, \code{file} can be
+an object resulting from an API query fetched from Dimensions, and PubMed databases:
 \tabular{lll}{
 a)\tab 'wos' \tab Clarivate Analytics WoS (in plaintext '.txt', Endnote Desktop '.ciw', or bibtex formats '.bib');\cr
 b)\tab 'scopus' \tab SCOPUS (exclusively in bibtex format '.bib');\cr
@@ -35,7 +35,7 @@ a data frame with cases corresponding to articles and variables to Field Tags in
 
 I.e We have three files download from Web of Science in plaintext format, file will be:
 
-file <- c("filename1.txt", "filename2.txt", "filename3.txt") 
+file <- c("filename1.txt", "filename2.txt", "filename3.txt")
 
 data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify. The main field tags are:
 
@@ -60,7 +60,7 @@ data frame columns are named using the standard Clarivate Analytics WoS Field Ta
 for a complete list of field tags see: \href{https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}
 }
 \description{
-It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, Lens.org, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML 
+It converts a SCOPUS, Clarivate Analytics WoS, Dimensions, Lens.org, PubMed and COCHRANE Database export files or pubmedR and dimensionsR JSON/XML
 objects into a data frame, with cases corresponding to articles and variables to Field Tags as used in WoS.
 }
 \examples{
@@ -69,10 +69,9 @@ objects into a data frame, with cases corresponding to articles and variables to
 # Import and convert a Web of Science collection form an export file in plaintext format:
 
 \dontrun{
-files <- 'https://www.bibliometrix.org/datasets/wos_plaintext.txt'
+files <- "https://www.bibliometrix.org/datasets/wos_plaintext.txt"
 
-M <- convert2df(file = files, dbsource = 'wos', format = "plaintext")
+M <- convert2df(file = files, dbsource = "wos", format = "plaintext")
 }
-
 
 }

@@ -11,10 +11,10 @@ duplicatedMatching(M, Field = "TI", exact = FALSE, tol = 0.95)
 
 \item{Field}{is a character object. It indicates one of the field tags used to identify duplicated records. Field can be equal to one of these tags: TI (title), AB (abstract), UT (manuscript ID).}
 
-\item{exact}{is logical. If exact = TRUE the function searches duplicates using exact matching. If exact=FALSE, 
+\item{exact}{is logical. If exact = TRUE the function searches duplicates using exact matching. If exact=FALSE,
 the function uses the restricted Damerau-Levenshtein distance to find duplicated documents.}
 
-\item{tol}{is a numeric value giving the minimum relative similarity to match two manuscripts. Default value is \code{tol = 0.95}. 
+\item{tol}{is a numeric value giving the minimum relative similarity to match two manuscripts. Default value is \code{tol = 0.95}.
 To use the restricted Damerau-Levenshtein distance, exact argument has to be set as FALSE.}
 }
 \value{
@@ -24,22 +24,21 @@ the value returned from \code{duplicatedMatching} is a data frame without duplic
 Search duplicated records in a dataframe.
 }
 \details{
-A bibliographic data frame is obtained by the converting function \code{\link{convert2df}}. 
+A bibliographic data frame is obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.
-The function identifies duplicated records in a bibliographic data frame and deletes them. 
-Duplicate entries are identified through the restricted Damerau-Levenshtein distance. 
+The function identifies duplicated records in a bibliographic data frame and deletes them.
+Duplicate entries are identified through the restricted Damerau-Levenshtein distance.
 Two manuscripts that have a relative similarity measure greater than \code{tol} argument are stored in the output data frame only once.
 }
 \examples{
- 
+
 data(scientometrics, package = "bibliometrixData")
 
-M=rbind(scientometrics[1:20,],scientometrics[10:30,])
+M <- rbind(scientometrics[1:20, ], scientometrics[10:30, ])
 
-newM <- duplicatedMatching(M, Field = "TI", exact=FALSE, tol = 0.95)
+newM <- duplicatedMatching(M, Field = "TI", exact = FALSE, tol = 0.95)
 
 dim(newM)
-
 
 }
 \seealso{

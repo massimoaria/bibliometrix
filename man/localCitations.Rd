@@ -26,13 +26,13 @@ It calculates local citations (LCS) of authors and documents of a bibliographic 
 Local citations measure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection.
 }
 \examples{
- 
+
 data(scientometrics, package = "bibliometrixData")
 
 CR <- localCitations(scientometrics, sep = ";")
 
-CR$Authors[1:10,]
-CR$Papers[1:10,]
+CR$Authors[1:10, ]
+CR$Papers[1:10, ]
 
 }
 \seealso{

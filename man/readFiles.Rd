@@ -20,7 +20,7 @@ The function readFiled is deprecated. You can import and convert your export fil
 
 # largechar <- readFiles('filename1.txt','filename2.txt','filename3.txt')
 
-# filename1.txt, filename2.txt and filename3.txt are ISI or SCOPUS Export file 
+# filename1.txt, filename2.txt and filename3.txt are ISI or SCOPUS Export file
 # in plain text or bibtex format.
 
 # D <- readFiles('https://www.bibliometrix.org/datasets/bibliometrics_articles.txt')

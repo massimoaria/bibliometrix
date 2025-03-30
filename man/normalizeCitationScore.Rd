@@ -13,7 +13,7 @@ normalizeCitationScore(M, field = "documents", impact.measure = "local")
 
 \item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 It can be \code{impact.measure = c("local", "global")}.\\
-With \code{impact.measure = "local"}, \link{normalizeCitationScore} calculates elements impact using the Normalized Local Citation Score while 
+With \code{impact.measure = "local"}, \link{normalizeCitationScore} calculates elements impact using the Normalized Local Citation Score while
 using \code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
 }
 \value{
@@ -23,8 +23,8 @@ a dataframe.
 It calculates the normalized citation score for documents, authors and sources using both global and local citations.
 }
 \details{
-The document Normalized Citation Score (NCS) of a document is calculated by dividing the actual count of citing items by the expected 
-citation rate for documents with the same year of publication. 
+The document Normalized Citation Score (NCS) of a document is calculated by dividing the actual count of citing items by the expected
+citation rate for documents with the same year of publication.
 
 The MNCS of a set of documents, for example the collected works of an individual, or published on a journal, is the average of the NCS values for all the documents in the set.
 
@@ -33,7 +33,6 @@ The NGCS is the NCS calculated using the global citations (total citations that 
 The NLCS is the NCS calculated using the local citations (total citations that a document received from a set of documents included in the same collection).
 }
 \examples{
-
 \dontrun{
 data(management, package = "bibliometrixData")
 NCS <- normalizeCitationScore(management, field = "authors", impact.measure = "local")

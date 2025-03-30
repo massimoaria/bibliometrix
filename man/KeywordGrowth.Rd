@@ -40,7 +40,7 @@ It calculates yearly occurrences of top keywords/terms.
 \examples{
 
 data(scientometrics, package = "bibliometrixData")
-topKW=KeywordGrowth(scientometrics, Tag = "ID", sep = ";", top=5, cdf=TRUE)
+topKW <- KeywordGrowth(scientometrics, Tag = "ID", sep = ";", top = 5, cdf = TRUE)
 topKW
 
 # Plotting results
@@ -48,8 +48,8 @@ topKW
 install.packages("reshape2")
 library(reshape2)
 library(ggplot2)
-DF=melt(topKW, id='Year')
-ggplot(DF,aes(Year,value, group=variable, color=variable))+geom_line
+DF <- melt(topKW, id = "Year")
+ggplot(DF, aes(Year, value, group = variable, color = variable)) + geom_line
 }
 
 }

@@ -33,12 +33,12 @@ couplingMap(
 \item{label.term}{is a character. It indicates which content metadata have to use for cluster labeling. It can be \code{label.term = c("ID","DE","TI","AB")}.
 If \code{label.term = NULL} cluster items will be use for labeling.}
 
-\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{impact.measure}{is a character. It indicates the impact measure used to rank cluster elements (documents, authors or sources).
 It can be \code{impact.measure = c("local", "global")}.\\
-With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while 
+With \code{impact.measure = "local"}, \link{couplingMap} calculates elements impact using the Normalized Local Citation Score while
 using \code{impact.measure = "global"}, the function uses the Normalized Global Citation Score to measure elements impact.}
 
 \item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
@@ -69,21 +69,22 @@ a list containing:
 It performs a coupling network analysis and plots community detection results on a bi-dimensional map (Coupling Map).
 }
 \details{
-The analysis can be performed on three different units: documents, authors or sources and 
-the coupling strength can be measured using the classical approach (coupled by references) 
-or a novel approach based on unit contents (keywords or terms from titles and abstracts) 
+The analysis can be performed on three different units: documents, authors or sources and
+the coupling strength can be measured using the classical approach (coupled by references)
+or a novel approach based on unit contents (keywords or terms from titles and abstracts)
 
-The x-axis measures the cluster centrality (by Callon's Centrality index) while the y-axis measures the cluster impact 
-by Mean Normalized Local Citation Score (MNLCS). 
-The Normalized Local Citation Score (NLCS) of a document is calculated 
+The x-axis measures the cluster centrality (by Callon's Centrality index) while the y-axis measures the cluster impact
+by Mean Normalized Local Citation Score (MNLCS).
+The Normalized Local Citation Score (NLCS) of a document is calculated
 by dividing the actual count of local citing items by the expected citation rate for documents with the same year of publication.
 }
 \examples{
-
 \dontrun{
 data(management, package = "bibliometrixData")
-res <- couplingMap(management, analysis = "authors", field = "CR", n = 250, impact.measure="local", 
-                   minfreq = 3, size = 0.5, repel = TRUE)
+res <- couplingMap(management,
+  analysis = "authors", field = "CR", n = 250, impact.measure = "local",
+  minfreq = 3, size = 0.5, repel = TRUE
+)
 plot(res$map)
 }
 

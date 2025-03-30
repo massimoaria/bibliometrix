@@ -10,7 +10,7 @@ metaTagExtraction(M, Field = "CR_AU", sep = ";", aff.disamb = TRUE)
 \item{M}{is a data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to articles and variables to Field Tag in the original WoS or SCOPUS file.}
 
-\item{Field}{is a character object. New tag extracted from aggregated data is specified by this string. 
+\item{Field}{is a character object. New tag extracted from aggregated data is specified by this string.
 Field can be equal to one of these tags:
 \tabular{lll}{
 \code{"CR_AU"}\tab   \tab First Author of each cited reference\cr
@@ -22,7 +22,7 @@ Field can be equal to one of these tags:
 
 \item{sep}{is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.}
 
-\item{aff.disamb}{is a logical. If TRUE and Field="AU_UN", then a disambiguation algorithm is used to identify and match scientific affiliations 
+\item{aff.disamb}{is a logical. If TRUE and Field="AU_UN", then a disambiguation algorithm is used to identify and match scientific affiliations
 (univ, research centers, etc.). The default is \code{aff.disamb=TRUE}.}
 }
 \value{
@@ -39,13 +39,13 @@ scientometrics <- metaTagExtraction(scientometrics, Field = "CR_AU", sep = ";")
 unlist(strsplit(scientometrics$CR_AU[1], ";"))
 
 
-#Example 2: Source for each cited reference
+# Example 2: Source for each cited reference
 
 data(scientometrics)
 scientometrics <- metaTagExtraction(scientometrics, Field = "CR_SO", sep = ";")
 unlist(strsplit(scientometrics$CR_SO[1], ";"))
 
-#Example 3: Affiliation country for co-authors
+# Example 3: Affiliation country for co-authors
 
 data(scientometrics)
 scientometrics <- metaTagExtraction(scientometrics, Field = "AU_CO", sep = ";")

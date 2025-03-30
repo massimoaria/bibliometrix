@@ -31,7 +31,7 @@ It calculates the authors' dominance ranking from an object of the class '\code{
 \examples{
 data(scientometrics, package = "bibliometrixData")
 results <- biblioAnalysis(scientometrics)
-DF=dominance(results)
+DF <- dominance(results)
 DF
 
 }

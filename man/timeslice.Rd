@@ -21,7 +21,7 @@ the value returned from \code{split} is a list containing the data frames for ea
 Divide a bibliographic data frame into time slice
 }
 \examples{
- 
+
 data(scientometrics, package = "bibliometrixData")
 
 list_df <- timeslice(scientometrics, breaks = c(1995, 2005))

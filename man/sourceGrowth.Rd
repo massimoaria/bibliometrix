@@ -23,7 +23,7 @@ It calculates yearly published documents of the top sources.
 \examples{
 
 data(scientometrics, package = "bibliometrixData")
-topSO=sourceGrowth(scientometrics, top=1, cdf=TRUE)
+topSO <- sourceGrowth(scientometrics, top = 1, cdf = TRUE)
 topSO
 
 # Plotting results
@@ -31,8 +31,9 @@ topSO
 install.packages("reshape2")
 library(reshape2)
 library(ggplot2)
-DF=melt(topSO, id='Year')
-ggplot(DF,aes(Year,value, group=variable, color=variable))+geom_line()
+DF <- melt(topSO, id = "Year")
+ggplot(DF, aes(Year, value, group = variable, color = variable)) +
+  geom_line()
 }
 
 }

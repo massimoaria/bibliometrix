@@ -23,22 +23,22 @@ a list containing the spectroscopy (class ggplot2) and three dataframes with the
 per year, the list of the cited references for each year, and the reference list with citations recorded year by year, respectively.
 }
 \description{
-\code{rpys} computes a Reference Publication Year Spectroscopy for detecting 
+\code{rpys} computes a Reference Publication Year Spectroscopy for detecting
 the Historical Roots of Research Fields.
 The method was introduced by Marx et al., 2014.\cr\cr
 }
 \details{
 Reference:\cr
-Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014). 
-Detecting the historical roots of research fields by reference publication 
-year spectroscopy (RPYS). Journal of the Association for Information Science and Technology, 
+Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014).
+Detecting the historical roots of research fields by reference publication
+year spectroscopy (RPYS). Journal of the Association for Information Science and Technology,
 65(4), 751-764.\cr\cr
 }
 \examples{
 
 
 data(scientometrics, package = "bibliometrixData")
-res <- rpys(scientometrics, sep=";", graph = TRUE)
+res <- rpys(scientometrics, sep = ";", graph = TRUE)
 
 }
 \seealso{

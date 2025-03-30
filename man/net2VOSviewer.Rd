@@ -22,16 +22,16 @@ The function \code{\link{networkPlot}} can plot a bibliographic network previous
 The network map can be plotted using internal R routines or using \href{https://www.vosviewer.com/}{VOSviewer} by Nees Jan van Eck and Ludo Waltman.
 }
 \examples{
-# EXAMPLE 
+# EXAMPLE
 
 # VOSviewer.jar have to be present in the working folder
 
 # data(scientometrics, package = "bibliometrixData")
 
-# NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
+# NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation",
 # network = "references", sep = ";")
 
-# net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
+# net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5)
 
 # net2VOSviewer(net)
 

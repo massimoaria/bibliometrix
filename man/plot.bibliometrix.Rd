@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{is the object for which plots are desired.}
 
-\item{...}{can accept two arguments:\cr 
+\item{...}{can accept two arguments:\cr
 \code{k} is an integer, used for plot formatting (number of objects). Default value is 10.\cr
 \code{pause} is a logical, used to allow pause in screen scrolling of results. Default value is \code{pause = FALSE}.}
 }

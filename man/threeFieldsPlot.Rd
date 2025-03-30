@@ -10,10 +10,10 @@ threeFieldsPlot(M, fields = c("DE", "AU", "SO"), n = c(20, 20, 20))
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
 It is a data matrix with cases corresponding to manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Analytics WoS file.}
 
-\item{fields}{is a character vector. It indicates the fields to analyze using the standard WoS field tags. 
+\item{fields}{is a character vector. It indicates the fields to analyze using the standard WoS field tags.
 Default is \code{fields = c("AU","DE", "SO")}.}
 
-\item{n}{is a integer vector. It indicates how many items to plot, for each of the three fields. 
+\item{n}{is a integer vector. It indicates how many items to plot, for each of the three fields.
 Default is \code{n = c(20, 20, 20)}}
 }
 \value{
@@ -24,8 +24,8 @@ Visualize the main items of three fields (e.g. authors, keywords, journals), and
 }
 \examples{
 
-#data(scientometrics, package = "bibliometrixData")
+# data(scientometrics, package = "bibliometrixData")
 
-#threeFieldsPlot(scientometrics, fields=c("DE","AU","CR"),n=c(20,20,20))
+# threeFieldsPlot(scientometrics, fields=c("DE","AU","CR"),n=c(20,20,20))
 
 }

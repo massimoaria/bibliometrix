@@ -42,14 +42,13 @@ Edges represent links between themes across time periods, with customizable weig
 Nodes and Edges objects are the results of a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
 }
 \examples{
-
 \dontrun{
 data(managemeent, package = "bibliometrixData")
-years=c(2004,2015)
+years <- c(2004, 2015)
 
-nexus <- thematicEvolution(management,field="ID",years=years,n=100,minFreq=2)
+nexus <- thematicEvolution(management, field = "ID", years = years, n = 100, minFreq = 2)
 
-plotThematicEvolution(nexus$Nodes,nexus$Edges)
+plotThematicEvolution(nexus$Nodes, nexus$Edges)
 }
 
 }

@@ -20,7 +20,7 @@ the value returned from \code{mergeDbSources} is a bibliographic data frame.
 Merge bibliographic data frames from different databases (WoS,SCOPUS, Lens, Openalex, etc-) into a single one.
 }
 \details{
-bibliographic data frames are obtained by the converting function \code{\link{convert2df}}. 
+bibliographic data frames are obtained by the converting function \code{\link{convert2df}}.
 The function merges data frames identifying common tag fields and duplicated records.
 }
 \examples{
@@ -29,10 +29,9 @@ data(isiCollection, package = "bibliometrixData")
 
 data(scopusCollection, package = "bibliometrixData")
 
-M <- mergeDbSources(isiCollection, scopusCollection, remove.duplicated=TRUE)
+M <- mergeDbSources(isiCollection, scopusCollection, remove.duplicated = TRUE)
 
 dim(M)
-
 
 }
 \seealso{

@@ -14,6 +14,6 @@ A data frame with 199 rows and 4 variables:
 }
 \description{
 Data frame containing a normalized index of countries.\cr
-Data are used by \code{\link{biblioAnalysis}} function 
+Data are used by \code{\link{biblioAnalysis}} function
 to extract Country Field of Cited References and Authors.
 }

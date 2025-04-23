@@ -25,7 +25,7 @@ It calculates and plots the author production (in terms of number of publication
 }
 \examples{
 data(scientometrics, package = "bibliometrixData")
-res <- authorProdOverTime(scientometrics, k=10)
+res <- authorProdOverTime(scientometrics, k = 10)
 print(res$dfAU)
 plot(res$graph)
 

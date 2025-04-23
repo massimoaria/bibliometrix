@@ -68,7 +68,7 @@ To ensure the functionality of Biblioshiny,
   values$loadMenu <- NA
   
   ### column to export in TALL
-  if (!require("tall", quietly = TRUE)) {
+  if (suppressPackageStartupMessages(!require("tall", quietly = TRUE))) {
       values$TALLmissing <- TRUE
     } else {
       values$TALLmissing <- FALSE  

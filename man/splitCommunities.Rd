@@ -25,11 +25,15 @@ The function \code{\link{splitCommunities}} splits communities in separated subn
 
 data(management, package = "bibliometrixData")
 
-NetMatrix <- biblioNetwork(management, analysis = "co-occurrences", 
-network = "keywords", sep = ";")
+NetMatrix <- biblioNetwork(management,
+  analysis = "co-occurrences",
+  network = "keywords", sep = ";"
+)
 
-net <- networkPlot(NetMatrix, n = 30, type = "auto", 
-               Title = "Co-occurrence Network",labelsize=1, verbose=FALSE) 
+net <- networkPlot(NetMatrix,
+  n = 30, type = "auto",
+  Title = "Co-occurrence Network", labelsize = 1, verbose = FALSE
+)
 
 graph <- splitCommunities(net$graph, n = 30)
 

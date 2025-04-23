@@ -194,16 +194,20 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
   x <- c(max(df$rcentrality)-0.02-diff(range(df$rcentrality))*0.125, max(df$rcentrality)-0.02)+0.6
   y <- c(min(df$rdensity),min(df$rdensity)+diff(range(df$rdensity))*0.125)
 
-  g=ggplot(df, aes(x=rcentrality, y=rdensity, text=c(words))) +
+  if (!isTRUE(repel)) df <- adjust_positions_oblique(df, xvar = "rcentrality", yvar = "rdensity", min_dist = 1)
+  
+  g <- ggplot(df, aes(x=rcentrality, y=rdensity, text=c(words))) +
     geom_point(group="NA",aes(size=log(as.numeric(freq))),shape=20,col=adjustcolor(df$color,alpha.f=0.5))     # Use hollow circles
   if (size>0){
     if (isTRUE(repel)){
-      g=g+geom_label_repel(aes(group="NA",label=ifelse(freq>1,unlist(tolower(name_full)),'')),size=3*(1+size),angle=0)}else{
-      g=g+geom_text(aes(group="NA",label=ifelse(freq>1,unlist(tolower(name_full)),'')),size=3*(1+size),angle=0)
+      g <- g+geom_label_repel(aes(group="NA",label=ifelse(freq>1,unlist(tolower(name_full)),'')),size=3*(1+size),angle=0)
+      }else{
+        g <- g+geom_text(aes(group="NA",label=ifelse(freq>1,unlist(tolower(name_full)),'')),
+                         color = adjustcolor("black",alpha.f=0.7), size=3*(1+size),angle=0)
     }
   }
   
-    g=g+geom_hline(yintercept = meandens,linetype=2, color=adjustcolor("black",alpha.f=0.7)) +
+    g <- g+geom_hline(yintercept = meandens,linetype=2, color=adjustcolor("black",alpha.f=0.7)) +
     geom_vline(xintercept = meancentr,linetype=2, color=adjustcolor("black",alpha.f=0.7)) + 
       theme(legend.position="none") +
     scale_radius(range=c(5*(1+size), 30*(1+size)))+
@@ -269,7 +273,7 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
 return(results)
 }
 
-# Probability calculation fro cluster assignment
+# Probability calculation for cluster assignment
 clusterAssignment <- function(M, words, field, remove.terms, synonyms, threshold){
 
   #### integrate stopwords and synonyms in M original field  

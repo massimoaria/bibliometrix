@@ -26,7 +26,7 @@ It associates authors' keywords to keywords plus.
 
 data(scientometrics, package = "bibliometrixData")
 
-KWlist <- keywordAssoc(scientometrics, sep = ";",n = 10, excludeKW = NA)
+KWlist <- keywordAssoc(scientometrics, sep = ";", n = 10, excludeKW = NA)
 
 # list of first 10 Keywords plus
 names(KWlist)

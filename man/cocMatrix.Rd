@@ -40,7 +40,7 @@ argument generates a compact representation of the matrix.}}
 
 \item{n}{is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.}
 
-\item{sep}{is the field separator character. This character separates strings in each 
+\item{sep}{is the field separator character. This character separates strings in each
 column of the data frame. The default is \code{sep = ";"}.}
 
 \item{binary}{is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency.}
@@ -60,7 +60,7 @@ a bipartite network matrix with cases corresponding to manuscripts and variables
 }
 \details{
 This occurrence matrix represents a bipartite network which can be transformed into a collection of bibliographic
-networks such as coupling, co-citation, etc.. 
+networks such as coupling, co-citation, etc..
 
 The function follows the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 

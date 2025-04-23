@@ -28,17 +28,17 @@ conceptualStructure(
 articles and variables to Field Tag in the original ISI or SCOPUS file.}
 
 \item{field}{is a character object. It indicates one of the field tags of the
-standard ISI WoS Field Tag codify. 
+standard ISI WoS Field Tag codify.
 field can be equal to one of these tags:
-\tabular{lll}{ 
-\code{ID}\tab   \tab Keywords Plus associated by ISI or SCOPUS database\cr 
-\code{DE}\tab   \tab Author's keywords\cr 
+\tabular{lll}{
+\code{ID}\tab   \tab Keywords Plus associated by ISI or SCOPUS database\cr
+\code{DE}\tab   \tab Author's keywords\cr
 \code{ID_TM}\tab   \tab Keywords Plus stemmed through the Porter's stemming algorithm\cr
 \code{DE_TM}\tab   \tab Author's Keywords stemmed through the Porter's stemming algorithm\cr
 \code{TI}\tab   \tab Terms extracted from titles\cr
 \code{AB}\tab   \tab Terms extracted from abstracts}}
 
-\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from texts. 
+\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from texts.
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{method}{is a character object. It indicates the factorial method used to create the factorial map. Use \code{method="CA"} for Correspondence Analysis,
@@ -78,8 +78,8 @@ graph_documents_Contrib \tab      \tab Factorial map of the documents with the h
 graph_docuemnts_TC \tab      \tab Factorial map of the most cited documents (class "ggplot2")}
 }
 \description{
-The function \code{conceptualStructure} creates a conceptual structure map of 
-a scientific field performing Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA) or Metric Multidimensional Scaling (MDS) and Clustering 
+The function \code{conceptualStructure} creates a conceptual structure map of
+a scientific field performing Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA) or Metric Multidimensional Scaling (MDS) and Clustering
 of a bipartite network of terms extracted from keyword, title or abstract fields.
 }
 \examples{
@@ -87,12 +87,14 @@ of a bipartite network of terms extracted from keyword, title or abstract fields
 
 data(scientometrics, package = "bibliometrixData")
 
-CS <- conceptualStructure(scientometrics, field="ID", method="CA", 
-             stemming=FALSE, minDegree=3, k.max = 5)
+CS <- conceptualStructure(scientometrics,
+  field = "ID", method = "CA",
+  stemming = FALSE, minDegree = 3, k.max = 5
+)
 
 }
 \seealso{
-\code{\link{termExtraction}} to extract terms from a textual field (abstract, title, 
+\code{\link{termExtraction}} to extract terms from a textual field (abstract, title,
 author's keywords, etc.) of a bibliographic data frame.
 
 \code{\link{biblioNetwork}} to compute a bibliographic network.

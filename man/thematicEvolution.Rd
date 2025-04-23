@@ -33,7 +33,7 @@ thematicEvolution(
 
 \item{size}{is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).}
 
-\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{stemming}{is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).}
@@ -62,16 +62,15 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 \code{\link{thematicEvolution}} starts from two or more thematic maps created by \code{\link{thematicMap}} function.\cr\cr
 
 Reference:\cr
-Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 
+Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying,
 and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 }
 \examples{
-
 \dontrun{
-data(managemeent, package = "bibliometrixData")
-years=c(2004,2015)
+data(management, package = "bibliometrixData")
+years <- c(2004, 2015)
 
-nexus <- thematicEvolution(management,field="ID",years=years,n=100,minFreq=2)
+nexus <- thematicEvolution(management, field = "ID", years = years, n = 100, minFreq = 2)
 }
 
 }

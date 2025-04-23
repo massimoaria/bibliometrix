@@ -21,11 +21,11 @@ The function \code{summary} computes and returns on display several statistics b
 \examples{
 
 # to run the example, please remove # from the beginning of the following lines
-#data(scientometrics, package = "bibliometrixData")
+# data(scientometrics, package = "bibliometrixData")
 
-#NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
+# NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration",
 #                   network = "authors", sep = ";")
-#netstat <- networkStat(NetMatrix, stat = "all", type = "degree")
-#summary(netstat)
+# netstat <- networkStat(NetMatrix, stat = "all", type = "degree")
+# summary(netstat)
 
 }

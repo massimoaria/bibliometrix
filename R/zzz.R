@@ -1,6 +1,6 @@
-#utils::globalVariables("where")
-#utils::globalVariables("any_of")
-#utils::globalVariables("if_all")
+# utils::globalVariables("where")
+# utils::globalVariables("any_of")
+# utils::globalVariables("if_all")
 
 #' @import stats
 #' @import dimensionsR
@@ -277,12 +277,12 @@
 #' @importFrom SnowballC wordStem
 #' @importFrom SnowballC getStemLanguages
 # @importFrom rio import
-.onAttach<-function(...){
-  packageStartupMessage("Please note that our software is open source and available for use, distributed under the MIT license.\nWhen it is used in a publication, we ask that authors properly cite the following reference:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, 
+.onAttach <- function(...) {
+  packageStartupMessage("Please note that our software is open source and available for use, distributed under the MIT license.\nWhen it is used in a publication, we ask that authors properly cite the following reference:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis,
                         Journal of Informetrics, 11(4), pp 959-975, Elsevier.\n\nFailure to properly cite the software is considered a violation of the license.
                         \nFor information and bug reports:
                         - Take a look at https://www.bibliometrix.org
-                        - Send an email to info@bibliometrix.org   
+                        - Send an email to info@bibliometrix.org
                         - Write a post on https://github.com/massimoaria/bibliometrix/issues
                         \nHelp us to keep Bibliometrix and Biblioshiny free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)\n
                         \nTo start with the Biblioshiny app, please digit:
@@ -290,157 +290,6 @@ biblioshiny()\n")
 }
 
 
-# ### extract data from igraph class object
-# ### Credits to François Briatte. Function is a fork of the package ggnetwork
-# dataFromIgraph <- function(
-#     model,
-#     data = NULL,
-#     layout = igraph::nicely(),
-#     arrow.gap = ifelse(igraph::is.directed(model), 0.025, 0),
-#     by = NULL,
-#     scale = TRUE,
-#     stringsAsFactors = getOption("stringsAsFactors"),
-#     ...
-# ) {
-#   # node placement
-#   if (inherits(layout, "matrix") && identical(dim(layout), c(igraph::gorder(model), 2L))) {
-#     nodes <- layout[, 1:2 ]
-#   } else if (inherits(layout, "matrix")) {
-#     stop("layout matrix dimensions do not match network size")
-#   } else {
-#     nodes <- igraph::layout_(model, layout, ...)
-#   }
-#   
-#   format_igraph(
-#     model = model,
-#     nodes = nodes,
-#     weights = "none",
-#     arrow.gap = arrow.gap,
-#     by = by,
-#     scale = scale,
-#     stringsAsFactors = stringsAsFactors,
-#     .list_vertex_attributes_fun = igraph::list.vertex.attributes,
-#     .get_vertex_attributes_fun = igraph::get.vertex.attribute,
-#     .list_edges_attributes_fun = igraph::list.edge.attributes,
-#     .get_edges_attributes_fun = igraph::get.edge.attribute,
-#     .as_edges_list_fun = igraph::as_edgelist
-#   )
-# }
-# 
-# ### Credits to François Briatte. Function is a fork of the package ggnetwork
-# format_igraph <- function(
-#     model,
-#     nodes = NULL,
-#     weights = NULL,
-#     arrow.gap = ifelse(network::is.directed(model), 0.025, 0),
-#     by = NULL,
-#     scale = TRUE,
-#     stringsAsFactors = getOption("stringsAsFactors"),
-#     .list_vertex_attributes_fun = NULL,
-#     .get_vertex_attributes_fun = NULL,
-#     .list_edges_attributes_fun = NULL,
-#     .get_edges_attributes_fun = NULL,
-#     .as_edges_list_fun = NULL
-# ) {
-#   # store coordinates
-#   nodes <- data.frame(nodes)
-#   colnames(nodes) <- c("x", "y")
-#   
-#   # rescale coordinates
-#   if (scale) {
-#     nodes$x <- scale_data(nodes$x)
-#     nodes$y <- scale_data(nodes$y)
-#   }
-#   
-#   # import vertex attributes
-#   if (length(.list_vertex_attributes_fun(model)) > 0) {
-#     nodes <- cbind.data.frame(
-#       nodes,
-#       sapply(
-#         X = .list_vertex_attributes_fun(model),
-#         Y = model,
-#         FUN = function(X, Y) .get_vertex_attributes_fun(Y, X),
-#         simplify = FALSE
-#       ),
-#       stringsAsFactors = stringsAsFactors
-#     )
-#   }
-#   
-#   # edge list
-#   if (inherits(model, "igraph")) {
-#     edges <- .as_edges_list_fun(model, names = FALSE)
-#   } else {
-#     edges <- .as_edges_list_fun(model, attrname = weights)
-#   }
-#   
-#   # edge list (if there are duplicated rows)
-#   if (nrow(edges[, 1:2, drop = FALSE]) > nrow(unique(edges[, 1:2, drop = FALSE]))) {
-#     warning("duplicated edges detected")
-#   }
-#   
-#   edges <- data.frame(nodes[edges[, 1], c("x", "y")], nodes[edges[, 2], c("x", "y")])
-#   colnames(edges) <- c("x", "y", "xend", "yend")
-#   
-#   # arrow gap (thanks to @heike and @ethen8181 for their work on this issue)
-#   if (arrow.gap > 0) {
-#     x.length <- edges$xend - edges$x
-#     y.length <- edges$yend - edges$y
-#     arrow.gap <- arrow.gap / sqrt(x.length^2 + y.length^2)
-#     edges$xend <- edges$x + (1 - arrow.gap) * x.length
-#     edges$yend <- edges$y + (1 - arrow.gap) * y.length
-#   }
-#   
-#   # import edge attributes
-#   if (length(.list_edges_attributes_fun(model)) > 0) {
-#     edges <- cbind.data.frame(
-#       edges,
-#       sapply(
-#         X = .list_edges_attributes_fun(model),
-#         Y = model,
-#         FUN = function(X, Y) .get_edges_attributes_fun(Y, X),
-#         simplify = FALSE
-#       ),
-#       stringsAsFactors = stringsAsFactors
-#     )
-#   }
-#   
-#   if (nrow(edges) > 0) {
-#     # drop "na" columns created by 'network' methods
-#     # this is to ensure consistency with 'igraph' methods
-#     if ("na" %in% colnames(nodes)) nodes$na <- NULL
-#     if ("na" %in% colnames(edges)) edges$na <- NULL
-#     
-#     # merge edges and nodes data
-#     edges <- merge(nodes, edges, by = c("x", "y"), all = TRUE)
-#     
-#     # add missing columns to nodes data
-#     nodes$xend <- nodes$x
-#     nodes$yend <- nodes$y
-#     # names(nodes) <- names(edges)[1:ncol(nodes)] # columns are already named from 'nodes' and 'edges'
-#     
-#     # make nodes data of identical dimensions to edges data
-#     nodes[, setdiff(names(edges), names(nodes))] <- NA
-#     
-#     # panelize nodes (for temporal networks)
-#     if (!is.null(by)) {
-#       nodes <- lapply(sort(unique(edges[, by])), function(x) {
-#         y <- nodes
-#         y[, by] <- x
-#         y
-#       })
-#       nodes <- do.call(rbind, nodes)
-#     }
-#     
-#     return(unique(rbind(edges[!is.na(edges$xend), ], nodes)))
-#   } else {
-#     # add missing columns to nodes data
-#     nodes$xend <- nodes$x
-#     nodes$yend <- nodes$y
-#     return(nodes)
-#   }
-# }
-# 
-# 
 # ### scale coordinates
 # ### Credits to François Briatte. Function is a fork of the package ggnetwork
 scale_data <- function(x, scale = diff(range(x))) {
@@ -466,8 +315,7 @@ geom_network_edges <- function(
     na.rm = FALSE,
     show.legend = NA,
     inherit.aes = TRUE,
-    ...
-) {
+    ...) {
   if (!curvature) {
     geom <- ggplot2::GeomSegment
     params <- list(arrow = arrow, na.rm = na.rm, ...)
@@ -503,8 +351,7 @@ geom_network_nodes <- function(
     na.rm = FALSE,
     show.legend = NA,
     inherit.aes = TRUE,
-    ...
-) {
+    ...) {
   ggplot2::layer(
     data = data,
     mapping = mapping,
@@ -519,47 +366,46 @@ geom_network_nodes <- function(
     )
   )
 }
-# 
+#
 # ### Credits to François Briatte. Function is a fork of the package ggnetwork
 StatEdges <- ggplot2::ggproto("StatEdges", ggplot2::Stat,
-                              compute_layer = function(data, scales, params) {
-                                unique(subset(data, !(x == xend & y == yend)))
-                              }
+  compute_layer = function(data, scales, params) {
+    unique(subset(data, !(x == xend & y == yend)))
+  }
 )
 
 ### Credits to François Briatte. Function is a fork of the package ggnetwork
 StatNodes <- ggplot2::ggproto("StatNodes", ggplot2::Stat,
-                              compute_layer = function(data, scales, params) {
-                                if (all(c("xend", "yend") %in% names(data))) {
-                                  unique(subset(data, select = c(-xend, -yend)))
-                                } else {
-                                  unique(data)
-                                }
-                              }
+  compute_layer = function(data, scales, params) {
+    if (all(c("xend", "yend") %in% names(data))) {
+      unique(subset(data, select = c(-xend, -yend)))
+    } else {
+      unique(data)
+    }
+  }
 )
 
 ### Credits to Patrick Barks. Function is a fork of the package Abbrev
 AbbrevTerm <- function(x, check = TRUE) {
-  
   if (check == FALSE) {
     out <- x
   } else {
     # check for invalid x
-    if(length(x) > 1) {
-      stop('Please provide a single string (length(x) should equal 1)')
-    } else if (grepl('[[:space:]]', x)) {
-      warning('The provided string contains spaces. This function is only designed to abbreviate a single word.')
+    if (length(x) > 1) {
+      stop("Please provide a single string (length(x) should equal 1)")
+    } else if (grepl("[[:space:]]", x)) {
+      warning("The provided string contains spaces. This function is only designed to abbreviate a single word.")
     }
-    
+
     # check whether x is title case
     ch1 <- substr(x, 1, 1)
     is_title <- ch1 == toupper(ch1)
-    
+
     # check for whole word match
     # TODO: find way to deal with multiple whole word matches (e.g. w/ and w/o diacritics)
     int_whole_match <- stringi::stri_cmp_equiv(x, ltwa_singles$WORD, strength = 1)
     ind_whole_match <- which(int_whole_match == TRUE)
-    
+
     if (length(ind_whole_match > 0)) {
       # if whole-word match is found, return corresponding abbrev (if no abbrev,
       #  return original x)
@@ -571,7 +417,7 @@ AbbrevTerm <- function(x, check = TRUE) {
       # TODO: give preference to matches with higher strength
       lgl_prefix <- stringi::stri_startswith_coll(x, ltwa_prefix$WORD, strength = 1)
       ind_prefix <- which(lgl_prefix == TRUE)
-      
+
       # choose abbrev based on number of matching prefixes (0, 1, or 2+)
       if (length(ind_prefix) == 0) {
         # if no matching prefixes, return original x
@@ -586,18 +432,18 @@ AbbrevTerm <- function(x, check = TRUE) {
         out <- ltwa_prefix$ABBREVIATIONS[ind_prefix]
       }
     }
-    
+
     # if x contains only latin chars, remove any diacritics from abbrev
-    if (stringi::stri_trans_general(x, 'Latin-ASCII') == x) {
-      out <- stringi::stri_trans_general(out, 'Latin-ASCII')
+    if (stringi::stri_trans_general(x, "Latin-ASCII") == x) {
+      out <- stringi::stri_trans_general(out, "Latin-ASCII")
     }
-    
+
     # if x is title case, convert out to title case
     if (is_title == TRUE) {
       out <- ToTitleCase(out)
     }
   }
-  
+
   # return
   return(out)
 }
@@ -606,99 +452,98 @@ AbbrevTerm <- function(x, check = TRUE) {
 ### Credits to Patrick Barks. Function is a fork of the package Abbrev
 AbbrevTitle <- function(x) {
   ind <- rank(-nchar(ltwa_phrase$WORD), ties.method = "last")
-  ltwa_phrase[ind,] <- ltwa_phrase
+  ltwa_phrase[ind, ] <- ltwa_phrase
 
   # check for invalid x
-  if(length(x) > 1) {
-    stop('Please provide a single string (length(x) should equal 1)')
+  if (length(x) > 1) {
+    stop("Please provide a single string (length(x) should equal 1)")
   }
-  
+
   # remove parentheses and punctuation, and split string into vector of
   #  individual words/terms
-  x <- gsub('[[:space:]]\\(.+\\)|\\,|\\.', '', x)
-  xv <- unlist(strsplit(x, ' '))
-  
+  x <- gsub("[[:space:]]\\(.+\\)|\\,|\\.", "", x)
+  xv <- unlist(strsplit(x, " "))
+
   # if title contains only one word, return that word
   if (length(xv) == 1) {
     out <- ToTitleCase(xv)
   } else {
     # otherwise... check for matching multi-word phrases
-    
+
     # vector to track which elements of xv already abbreviated
     xv_which_abb <- logical(length(xv))
-    
+
     # search for multi-word matches (e.g. South Pacific)
     lgl_phrase <- sapply(ltwa_phrase$WORD, function(y) grepl(y, tolower(x)), USE.NAMES = FALSE)
     ind_phrase <- which(lgl_phrase)
-    
+
     # if any matching multi-word phrases
     if (length(ind_phrase) > 0) {
-      
       for (i in 1:length(ind_phrase)) {
-        match_phrase <- unlist(strsplit(ltwa_phrase$WORD[ind_phrase[i]], '[[:space:]]'))
+        match_phrase <- unlist(strsplit(ltwa_phrase$WORD[ind_phrase[i]], "[[:space:]]"))
         match_abb <- ltwa_phrase$ABBREVIATIONS[ind_phrase[i]]
         ind_match <- sapply(match_phrase, function(y) grep(y, tolower(xv)), USE.NAMES = FALSE) # should only find sequential matches
-        if (length(ind_match[[1]])>0){
-        ind <- ind_match[[1]]:(ind_match[[1]]+length(ind_match)-1)
-        xv[ind[1]] <- match_abb
-        xv <- c(xv[-ind[-1]])
-        xv_which_abb[ind[1]] <- TRUE
-        xv_which_abb <- c(xv_which_abb[-ind[-1]])
+        if (length(ind_match[[1]]) > 0) {
+          ind <- ind_match[[1]]:(ind_match[[1]] + length(ind_match) - 1)
+          xv[ind[1]] <- match_abb
+          xv <- c(xv[-ind[-1]])
+          xv_which_abb[ind[1]] <- TRUE
+          xv_which_abb <- c(xv_which_abb[-ind[-1]])
         }
       }
     }
-    
+
     # if title fully matches multi-word phrase(s), return
     if (all(xv_which_abb == TRUE)) {
       out <- xv
     } else {
       # otherwise... deal with prepositions, articles, and conjunctions
-      
+
       # remove prepositions not at beginning of word
       ind_rem_prep <- c(FALSE, mapply(CheckPrep, USE.NAMES = F, x = xv[-1], check = !xv_which_abb[-1]))
       xv <- xv[!ind_rem_prep]
       xv_which_abb <- xv_which_abb[!ind_rem_prep]
-      
+
       # remove articles and conjunctions
       ind_rem_artcon <- mapply(CheckArtCon, USE.NAMES = F, x = xv, check = !xv_which_abb)
       xv <- xv[!ind_rem_artcon]
       xv_which_abb <- xv_which_abb[!ind_rem_artcon]
-      
+
       # remove d' and l', if followed by character
       xv <- gsub("^d'(?=[[:alpha:]])|^l'(?=[[:alpha:]])", "", xv, ignore.case = TRUE, perl = TRUE)
-      
+
       # if title fully matches multi-word phrase(s) (minus articles/conjunctions), return
       if (all(xv_which_abb == TRUE)) {
         out <- xv
       } else {
         # otherwise... check for hyphenated words
-      
+
         # check for hyphenated words
-        ind_dash <- grep('[[:alpha:]]-[[:alpha:]]', xv)
+        ind_dash <- grep("[[:alpha:]]-[[:alpha:]]", xv)
         if (length(ind_dash) > 0) {
           # if hyphens, split hyphenated strings into vectors
-          xv <- unlist(strsplit(xv, '-'))
-          
+          xv <- unlist(strsplit(xv, "-"))
+
           # update xv_which_abb based on hyphens
-          for(i in length(ind_dash):1) {
+          for (i in length(ind_dash):1) {
             xv_which_abb <- append(xv_which_abb, FALSE, ind_dash[i])
           }
         }
-        
+
         # abbreviate all words in title (excluding multi-word phrases)
         abbrev_full <- mapply(AbbrevTerm, x = xv, check = !xv_which_abb, USE.NAMES = F)
-        
+
         # add dashes back in, if applicable
         if (length(ind_dash) > 0) {
-          for(i in 1:length(ind_dash)) {
+          for (i in 1:length(ind_dash)) {
             dashed_terms <- abbrev_full[c(ind_dash[i], ind_dash[i] + 1)]
-            abbrev_full[ind_dash[i]] <- paste(dashed_terms, collapse = '-')
+            abbrev_full[ind_dash[i]] <- paste(dashed_terms, collapse = "-")
             abbrev_full <- abbrev_full[-(ind_dash[i] + 1)]
           }
         }
-        
+
         # collapse title to vector
-        out <- paste(abbrev_full, collapse = ' ')
+        out <- paste(abbrev_full, collapse = " ")
       }
     }
   }
@@ -710,7 +555,7 @@ ToTitleCase <- function(x) {
 }
 
 CheckPrep <- function(x, check) {
-  if(check == TRUE) {
+  if (check == TRUE) {
     return(ifelse(tolower(x) %in% df_prep$word, TRUE, FALSE))
   } else {
     return(FALSE)
@@ -718,7 +563,7 @@ CheckPrep <- function(x, check) {
 }
 
 CheckArtCon <- function(x, check) {
-  if(check == TRUE) {
+  if (check == TRUE) {
     return(ifelse(tolower(x) %in% df_artcon$word, TRUE, FALSE))
   } else {
     return(FALSE)
@@ -726,15 +571,64 @@ CheckArtCon <- function(x, check) {
 }
 
 # color palette
-colorlist <- function(){
-  c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999","#66C2A5","#FC8D62","#8DA0CB","#E78AC3","#A6D854","#FFD92F"
-             ,"#B3B3B3","#A6CEE3","#1F78B4","#B2DF8A","#33A02C","#FB9A99","#E31A1C","#FDBF6F","#FF7F00","#CAB2D6","#6A3D9A","#B15928","#8DD3C7","#BEBADA"
-             ,"#FB8072","#80B1D3","#FDB462","#B3DE69","#D9D9D9","#BC80BD","#CCEBC5")
+colorlist <- function() {
+  c(
+    "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#A65628", "#F781BF", "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F",
+    "#B3B3B3", "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#B15928", "#8DD3C7", "#BEBADA",
+    "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#D9D9D9", "#BC80BD", "#CCEBC5"
+  )
 }
 
-#Initial to upper case
+# Initial to upper case
 firstup <- function(x) {
   x <- tolower(x)
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
   x
+}
+
+adjust_positions_oblique <- function(df, xvar = "rcentrality", yvar = "rdensity",
+                                     min_dist = 0.5, max_iter = 100, step_factor = 0.5, jitter_strength = 0.1) {
+  df_adj <- df
+
+  for (iter in 1:max_iter) {
+    moved <- FALSE
+    for (i in 1:(nrow(df_adj) - 1)) {
+      for (j in (i + 1):nrow(df_adj)) {
+        xi <- df_adj[[xvar]][i]
+        yi <- df_adj[[yvar]][i]
+        xj <- df_adj[[xvar]][j]
+        yj <- df_adj[[yvar]][j]
+
+        dx <- xi - xj
+        dy <- yi - yj
+        dist <- sqrt(dx^2 + dy^2)
+
+        # Se perfettamente sovrapposti, applica jitter obliquo casuale
+        if (dist == 0) {
+          jitter_angle <- runif(1, 0, 2 * pi)
+          offset <- jitter_strength
+
+          df_adj[[xvar]][i] <- xi + cos(jitter_angle) * offset
+          df_adj[[yvar]][i] <- yi + sin(jitter_angle) * offset
+          df_adj[[xvar]][j] <- xj - cos(jitter_angle) * offset
+          df_adj[[yvar]][j] <- yj - sin(jitter_angle) * offset
+
+          moved <- TRUE
+        } else if (dist < min_dist) {
+          angle <- atan2(dy, dx)
+          offset <- (min_dist - dist) * step_factor
+
+          df_adj[[xvar]][i] <- xi + cos(angle) * offset
+          df_adj[[yvar]][i] <- yi + sin(angle) * offset
+          df_adj[[xvar]][j] <- xj - cos(angle) * offset
+          df_adj[[yvar]][j] <- yj - sin(angle) * offset
+
+          moved <- TRUE
+        }
+      }
+    }
+    if (!moved) break
+  }
+
+  return(df_adj)
 }

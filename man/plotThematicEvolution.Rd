@@ -9,7 +9,6 @@ plotThematicEvolution(
   Edges,
   min.flow = 0,
   measure = "weighted",
-  node_shape = "box",
   label_size = 5,
   edge_scale = 10,
   node_scale = 30
@@ -23,8 +22,6 @@ plotThematicEvolution(
 \item{min.flow}{Numeric. Minimum threshold for edge weight (i.e., flow) to be included in the network visualization. Default is `0`.}
 
 \item{measure}{Character. The method to define edge weight: `"inclusion"`, `"stability"`, or `"weighted"` (default is `"weighted"`).}
-
-\item{node_shape}{Character. Shape of the nodes in the network. Options are `"dot"` (default), `"box"`, `"circle"`, or `"ellipse"`.}
 
 \item{label_size}{Numeric. Font size of the node labels. Default is `15`.}
 
@@ -42,14 +39,13 @@ Edges represent links between themes across time periods, with customizable weig
 Nodes and Edges objects are the results of a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
 }
 \examples{
-
 \dontrun{
 data(managemeent, package = "bibliometrixData")
-years=c(2004,2015)
+years <- c(2004, 2015)
 
-nexus <- thematicEvolution(management,field="ID",years=years,n=100,minFreq=2)
+nexus <- thematicEvolution(management, field = "ID", years = years, n = 100, minFreq = 2)
 
-plotThematicEvolution(nexus$Nodes,nexus$Edges)
+plotThematicEvolution(nexus$Nodes, nexus$Edges)
 }
 
 }

@@ -21,7 +21,7 @@
 #' @examples
 #' data(scientometrics, package = "bibliometrixData")
 #' results <- biblioAnalysis(scientometrics)
-#' DF=dominance(results)
+#' DF <- dominance(results)
 #' DF
 #'
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis
@@ -29,38 +29,37 @@
 #'
 #' @export
 
-dominance<-function(results, k = 10){
-  
+dominance <- function(results, k = 10) {
   # Author Rank by Dominance Rank  (Kumar & Kumar, 2008)
-  
-  #options(warn=-1)
-  
-  if (!inherits(results, "bibliometrix")){cat('\n argument "results" have to be an object of class "bibliometrix"\n');return(NA)}
-  
-  Nmf=table(results$FirstAuthors[results$nAUperPaper>1])
-  FA=names(Nmf)
-  #FA=gsub(" ", "", FA, fixed = TRUE)  # delete spaces
-  
-  AU=names(results$Authors)
-  
-  
-  Tot=Single=rep(NA,length(FA))
-  for (i in 1:length(FA)){
-    Single[i]=sum(results$FirstAuthors[results$nAUperPaper==1]==FA[i])
-    Tot[i]=results$Authors[FA[i] == AU]
-    
+
+  # options(warn=-1)
+
+  if (!inherits(results, "bibliometrix")) {
+    cat('\n argument "results" have to be an object of class "bibliometrix"\n')
+    return(NA)
   }
-  Dominance=Nmf/(Tot-Single)
-  
-  D=data.frame("Author"=FA,"Dominance Factor"=as.numeric(Dominance),"Articles"=Tot,"Single-Authored"=Single,"Multi-Authored"=Tot-Single,"First-Author"=as.numeric(Nmf))
-  D=D[order(-D[,3]),]
-  D=D[1:k,]
-  D$RankbyArticles=rank(-D$Articles,ties.method="min")
-  D=D[order(-D$Dominance.Factor),]
-  D$RankDF=rank(-D$Dominance.Factor,ties.method="min")
-  names(D)=c("Author","Dominance Factor","Tot Articles","Single-Authored","Multi-Authored","First-Authored","Rank by Articles","Rank by DF")
-  row.names(D)=1:k
+
+  Nmf <- table(results$FirstAuthors[results$nAUperPaper > 1])
+  FA <- names(Nmf)
+  # FA=gsub(" ", "", FA, fixed = TRUE)  # delete spaces
+
+  AU <- names(results$Authors)
+
+
+  Tot <- Single <- rep(NA, length(FA))
+  for (i in 1:length(FA)) {
+    Single[i] <- sum(results$FirstAuthors[results$nAUperPaper == 1] == FA[i])
+    Tot[i] <- results$Authors[FA[i] == AU]
+  }
+  Dominance <- Nmf / (Tot - Single)
+
+  D <- data.frame("Author" = FA, "Dominance Factor" = as.numeric(Dominance), "Articles" = Tot, "Single-Authored" = Single, "Multi-Authored" = Tot - Single, "First-Author" = as.numeric(Nmf))
+  D <- D[order(-D[, 3]), ]
+  D <- D[1:k, ]
+  D$RankbyArticles <- rank(-D$Articles, ties.method = "min")
+  D <- D[order(-D$Dominance.Factor), ]
+  D$RankDF <- rank(-D$Dominance.Factor, ties.method = "min")
+  names(D) <- c("Author", "Dominance Factor", "Tot Articles", "Single-Authored", "Multi-Authored", "First-Authored", "Rank by Articles", "Rank by DF")
+  row.names(D) <- 1:k
   return(D)
 }
-
-

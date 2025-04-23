@@ -35,7 +35,6 @@ the function returns only the local citation table.}
 data frame.
 }
 \examples{
-
 \dontrun{
 data(management, package = "bibliometrixData")
 

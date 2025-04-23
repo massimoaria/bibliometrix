@@ -30,7 +30,7 @@ It calculates the authors' h-index and its variants.
 \examples{
 
 ### EXAMPLE 1: ###
- 
+
 data(scientometrics, package = "bibliometrixData")
 
 authors <- c("SMALL H", "CHEN DZ")
@@ -40,10 +40,10 @@ Hindex(scientometrics, field = "author", elements = authors, sep = ";")$H
 Hindex(scientometrics, field = "source", elements = "SCIENTOMETRICS", sep = ";")$H
 
 ### EXAMPLE 2: Garfield h-index###
- 
+
 data(garfield, package = "bibliometrixData")
 
-indices=Hindex(garfield, field = "author", elements = "GARFIELD E", years=Inf, sep = ";")
+indices <- Hindex(garfield, field = "author", elements = "GARFIELD E", years = Inf, sep = ";")
 
 # h-index, g-index and m-index of Eugene Garfield
 indices$H

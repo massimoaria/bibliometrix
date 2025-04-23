@@ -2,7 +2,7 @@
 #'
 #' \code{biblioNetwork} creates different bibliographic networks from a bibliographic data frame.
 #'
-#' The function \code{\link{biblioNetwork}} can create a collection of bibliographic networks 
+#' The function \code{\link{biblioNetwork}} can create a collection of bibliographic networks
 #' following the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 #' Typical networks output of \code{biblioNetwork} are:\cr\cr
 #' #### Collaboration Networks ############\cr
@@ -51,26 +51,28 @@
 #'
 #' # data(scientometrics, package = "bibliometrixData")
 #'
-#' # NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
+#' # NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration",
 #' # network = "authors", sep = ";")
-#' 
-#' # net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) 
+#'
+#' # net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5)
 #'
 #'
 #' # EXAMPLE 2: Co-citation network
 #'
 #' data(scientometrics, package = "bibliometrixData")
 #'
-#' NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
-#' network = "references", sep = ";")
-#' 
-#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
+#' NetMatrix <- biblioNetwork(scientometrics,
+#'   analysis = "co-citation",
+#'   network = "references", sep = ";"
+#' )
 #'
-#' @seealso \code{\link{convert2df}} to import and convert a SCOPUS and Thomson 
+#' net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation", labelsize = 0.5)
+#'
+#' @seealso \code{\link{convert2df}} to import and convert a SCOPUS and Thomson
 #'   Reuters' ISI Web of Knowledge export file in a data frame.
 #' @seealso \code{\link{cocMatrix}} to compute a co-occurrence matrix.
 #' @seealso \code{\link{biblioAnalysis}} to perform a bibliometric analysis.
-#' 
+#'
 #' @export
 
 biblioNetwork <-
@@ -84,112 +86,103 @@ biblioNetwork <-
            remove.terms = NULL,
            synonyms = NULL) {
     crossprod <- Matrix::crossprod
-    NetMatrix <-  NA
+    NetMatrix <- NA
     if (analysis == "coupling") {
-      switch(
-        network,
+      switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n,sep,short=short)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n,sep,short=short)
+          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep, short = short)
+          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
           CRA <- crossprod(WCR, WA)
           NetMatrix <- crossprod(CRA, CRA)
         },
         references = {
-          WCR <- Matrix::t(cocMatrix(M, Field = "CR", type = "sparse", n,sep,short=short))
+          WCR <- Matrix::t(cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short))
           NetMatrix <- crossprod(WCR, WCR)
         },
         sources = {
-          WSO <- cocMatrix(M, Field = "SO", type = "sparse", n, sep,short=short)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep,short=short)
+          WSO <- cocMatrix(M, Field = "SO", type = "sparse", n, sep, short = short)
+          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
           CRSO <- crossprod(WCR, WSO)
           NetMatrix <- crossprod(CRSO, CRSO)
         },
         countries = {
-          WCO <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep,short=short)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep,short=short)
+          WCO <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep, short = short)
+          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
           CRCO <- crossprod(WCR, WCO)
           NetMatrix <- crossprod(CRCO, CRCO)
         }
       )
     }
-    
+
     if (analysis == "co-occurrences") {
-      switch(
-        network,
+      switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep,short=short)
+          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep, short = short)
         },
         keywords = {
-          WA <- cocMatrix(M, Field = "ID", type = "sparse", n, sep,short=short, remove.terms=remove.terms, synonyms = synonyms)
+          WA <- cocMatrix(M, Field = "ID", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         author_keywords = {
-          WA <- cocMatrix(M, Field = "DE", type = "sparse", n, sep,short=short, remove.terms=remove.terms, synonyms = synonyms)
+          WA <- cocMatrix(M, Field = "DE", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         titles = {
-          WA <- cocMatrix(M, Field = "TI_TM", type = "sparse", n, sep,short=short, remove.terms=remove.terms, synonyms = synonyms)
+          WA <- cocMatrix(M, Field = "TI_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         abstracts = {
-          WA <- cocMatrix(M, Field = "AB_TM", type = "sparse", n, sep,short=short, remove.terms=remove.terms, synonyms = synonyms)
+          WA <- cocMatrix(M, Field = "AB_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         sources = {
-          WA <- cocMatrix(M, Field = "SO", type = "sparse", n, sep,short=short)
+          WA <- cocMatrix(M, Field = "SO", type = "sparse", n, sep, short = short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
-      
     }
-    
-    
-    
+
+
+
     if (analysis == "co-citation") {
-      switch(
-        network,
+      switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "CR_AU", type = "sparse", n, sep,short=short)
+          WA <- cocMatrix(M, Field = "CR_AU", type = "sparse", n, sep, short = short)
         },
         references = {
-          WA <- cocMatrix(M, Field = "CR", type = "sparse", n, sep,short=short)
+          WA <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
         },
         sources = {
-          WA <- cocMatrix(M, Field = "CR_SO", type = "sparse", n, sep,short=short)
+          WA <- cocMatrix(M, Field = "CR_SO", type = "sparse", n, sep, short = short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
-      
     }
-    
+
     if (analysis == "collaboration") {
-      switch(
-        network,
+      switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep,short=short)
-          
+          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep, short = short)
         },
         universities = {
-          WA <- cocMatrix(M, Field = "AU_UN", type = "sparse", n, sep,short=short)
-          
+          WA <- cocMatrix(M, Field = "AU_UN", type = "sparse", n, sep, short = short)
         },
         countries = {
-          WA <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep,short=short)
+          WA <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep, short = short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
-      
     }
-    
-    
+
+
     # delete empty vertices
     NetMatrix <- NetMatrix[nchar(colnames(NetMatrix)) != 0, nchar(colnames(NetMatrix)) != 0]
-    
+
     # short label for scopus references
-    if (network == "references" & M$DB[1]=="SCOPUS") {
+    if (network == "references" & M$DB[1] == "SCOPUS") {
       ind <- which(regexpr("[A-Za-z]", substr(colnames(NetMatrix), 1, 1)) == 1)
       NetMatrix <- NetMatrix[ind, ind]
     }
     if (network == "references" & isTRUE(shortlabel)) {
       LABEL <- labelShort(NetMatrix, db = tolower(M$DB[1]))
       LABEL <- removeDuplicatedlabels(LABEL)
-      colnames(NetMatrix) <- rownames(NetMatrix) <-  LABEL
+      colnames(NetMatrix) <- rownames(NetMatrix) <- LABEL
     }
     # short label for scopus references
     # if (network == "references") {
@@ -200,9 +193,9 @@ biblioNetwork <-
     #     LABEL <- removeDuplicatedlabels(LABEL)
     #     colnames(NetMatrix) <- rownames(NetMatrix) <-  LABEL
     #   }
-    #   
+    #
     # }
-    
+
     # if (analysis != "coupling") {
     #   attr(NetMatrix, "PY") <- attr(WA, "PY")
     # }
@@ -210,35 +203,39 @@ biblioNetwork <-
   }
 
 ### shortlabel
-labelShort <- function(NET,db="isi"){
+labelShort <- function(NET, db = "isi") {
   LABEL <- colnames(NET)
-  YEAR <- suppressWarnings(as.numeric(sub('.*(\\d{4}).*', '\\1', LABEL)))
+  YEAR <- suppressWarnings(as.numeric(sub(".*(\\d{4}).*", "\\1", LABEL)))
   YEAR[is.na(YEAR)] <- ""
   switch(db,
-         isi={
-           AU <- strsplit(LABEL," ")
-           AU <- unlist(lapply(AU, function(l){paste(l[1]," ",l[2],sep="")}))
-           LABEL <- paste0(AU, " ", YEAR, sep="")
-         },
-         scopus={
-           AU <- strsplit(LABEL,"\\. ")
-           AU <- unlist(lapply(AU, function(l){l[1]}))
-           LABEL <- paste0(AU, ". ", YEAR, sep="")
-         })
+    isi = {
+      AU <- strsplit(LABEL, " ")
+      AU <- unlist(lapply(AU, function(l) {
+        paste(l[1], " ", l[2], sep = "")
+      }))
+      LABEL <- paste0(AU, " ", YEAR, sep = "")
+    },
+    scopus = {
+      AU <- strsplit(LABEL, "\\. ")
+      AU <- unlist(lapply(AU, function(l) {
+        l[1]
+      }))
+      LABEL <- paste0(AU, ". ", YEAR, sep = "")
+    }
+  )
 
   return(LABEL)
 }
 
-removeDuplicatedlabels <- function(LABEL){
+removeDuplicatedlabels <- function(LABEL) {
   ## assign an unique name to each label
-  tab <- sort(table(LABEL),decreasing=T)
-  dup <- names(tab[tab>1])
-  for (i in 1:length(dup)){
+  tab <- sort(table(LABEL), decreasing = T)
+  dup <- names(tab[tab > 1])
+  for (i in 1:length(dup)) {
     ind <- which(LABEL %in% dup[i])
-    if (length(ind)>0){
-      LABEL[ind] <- paste0(LABEL[ind],"-",as.character(1:length(ind)),sep="")
+    if (length(ind) > 0) {
+      LABEL[ind] <- paste0(LABEL[ind], "-", as.character(1:length(ind)), sep = "")
     }
   }
   return(LABEL)
 }
-  

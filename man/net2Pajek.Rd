@@ -23,12 +23,14 @@ The function \code{\link{net2Pajek}} save a bibliographic network previously cre
 \dontrun{
 data(management, package = "bibliometrixData")
 
-NetMatrix <- biblioNetwork(management, analysis = "co-occurrences", 
-network = "keywords", sep = ";")
+NetMatrix <- biblioNetwork(management,
+  analysis = "co-occurrences",
+  network = "keywords", sep = ";"
+)
 
-net <- networkPlot(NetMatrix, n = 30, type = "auto", Title = "Co-occurrence Network",labelsize=1) 
+net <- networkPlot(NetMatrix, n = 30, type = "auto", Title = "Co-occurrence Network", labelsize = 1)
 
-net2Pajek(net, filename="pajekfiles", path=NULL)
+net2Pajek(net, filename = "pajekfiles", path = NULL)
 }
 }
 \seealso{

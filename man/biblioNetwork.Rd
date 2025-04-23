@@ -48,7 +48,7 @@ It is a squared network matrix. It is an object of class \code{dgMatrix} of the 
 \code{biblioNetwork} creates different bibliographic networks from a bibliographic data frame.
 }
 \details{
-The function \code{\link{biblioNetwork}} can create a collection of bibliographic networks 
+The function \code{\link{biblioNetwork}} can create a collection of bibliographic networks
 following the approach proposed by Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017).\cr\cr
 Typical networks output of \code{biblioNetwork} are:\cr\cr
 #### Collaboration Networks ############\cr
@@ -81,24 +81,26 @@ Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive sci
 
 # data(scientometrics, package = "bibliometrixData")
 
-# NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration", 
+# NetMatrix <- biblioNetwork(scientometrics, analysis = "collaboration",
 # network = "authors", sep = ";")
 
-# net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5) 
+# net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Collaboration",labelsize=0.5)
 
 
 # EXAMPLE 2: Co-citation network
 
 data(scientometrics, package = "bibliometrixData")
 
-NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
-network = "references", sep = ";")
+NetMatrix <- biblioNetwork(scientometrics,
+  analysis = "co-citation",
+  network = "references", sep = ";"
+)
 
-net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation",labelsize=0.5) 
+net <- networkPlot(NetMatrix, n = 30, type = "kamada", Title = "Co-Citation", labelsize = 0.5)
 
 }
 \seealso{
-\code{\link{convert2df}} to import and convert a SCOPUS and Thomson 
+\code{\link{convert2df}} to import and convert a SCOPUS and Thomson
   Reuters' ISI Web of Knowledge export file in a data frame.
 
 \code{\link{cocMatrix}} to compute a co-occurrence matrix.

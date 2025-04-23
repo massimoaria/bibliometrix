@@ -36,7 +36,7 @@ is a network matrix obtained by the function \code{\link{histNetwork}}.}
 
 \item{title_as_label}{is a logical. DEPRECATED}
 
-\item{label}{is a character. It indicates which label type to use as node id in the historiograph. It can be \code{label=c("short", "title", "keywords", "keywordsplus")}. 
+\item{label}{is a character. It indicates which label type to use as node id in the historiograph. It can be \code{label=c("short", "title", "keywords", "keywordsplus")}.
 Default is \code{label = "short"}.}
 
 \item{verbose}{is logical. If TRUE, results and plots are printed on screen.}
@@ -57,7 +57,7 @@ data(management, package = "bibliometrixData")
 
 histResults <- histNetwork(management, sep = ";")
 
-net <- histPlot(histResults, n=20, labelsize = 5)
+net <- histPlot(histResults, n = 20, labelsize = 5)
 }
 
 }

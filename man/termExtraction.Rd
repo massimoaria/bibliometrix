@@ -29,7 +29,7 @@ It is a data matrix with cases corresponding to articles and variables to Field 
 \code{"DE"}\tab   \tab Manuscript author's keywords}
 The default is \code{Field = "TI"}.}
 
-\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from texts. 
+\item{ngrams}{is an integer between 1 and 3. It indicates the type of n-gram to extract from texts.
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{stemming}{is logical. If TRUE the Porter Stemming algorithm is applied to all extracted terms. The default is \code{stemming = FALSE}.}
@@ -58,24 +58,28 @@ It extracts terms from a text field (abstract, title, author's keywords, etc.) o
 data(scientometrics, package = "bibliometrixData")
 
 # vector of compound words
-keep.terms <- c("co-citation analysis","bibliographic coupling")
+keep.terms <- c("co-citation analysis", "bibliographic coupling")
 
 # term extraction
-scientometrics <- termExtraction(scientometrics, Field = "TI", ngrams = 1,
-remove.numbers=TRUE, remove.terms=NULL, keep.terms=keep.terms, verbose=TRUE)
+scientometrics <- termExtraction(scientometrics,
+  Field = "TI", ngrams = 1,
+  remove.numbers = TRUE, remove.terms = NULL, keep.terms = keep.terms, verbose = TRUE
+)
 
 # terms extracted from the first 10 titles
 scientometrics$TI_TM[1:10]
 
 
-#Example 2: Term extraction from abstracts
+# Example 2: Term extraction from abstracts
 
 data(scientometrics)
 
 # term extraction
-scientometrics <- termExtraction(scientometrics, Field = "AB", ngrams = 2, 
- stemming=TRUE,language="english",
- remove.numbers=TRUE, remove.terms=NULL, keep.terms=NULL, verbose=TRUE)
+scientometrics <- termExtraction(scientometrics,
+  Field = "AB", ngrams = 2,
+  stemming = TRUE, language = "english",
+  remove.numbers = TRUE, remove.terms = NULL, keep.terms = NULL, verbose = TRUE
+)
 
 # terms extracted from the first abstract
 scientometrics$AB_TM[1]
@@ -84,13 +88,14 @@ scientometrics$AB_TM[1]
 
 data(scientometrics)
 
-# vector of synonyms 
+# vector of synonyms
 synonyms <- c("citation; citation analysis", "h-index; index; impact factor")
 
 # term extraction
-scientometrics <- termExtraction(scientometrics, Field = "ID", ngrams = 1,
-synonyms=synonyms, verbose=TRUE)
-
+scientometrics <- termExtraction(scientometrics,
+  Field = "ID", ngrams = 1,
+  synonyms = synonyms, verbose = TRUE
+)
 
 }
 \seealso{

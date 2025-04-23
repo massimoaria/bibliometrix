@@ -9,7 +9,7 @@ networkStat(object, stat = "network", type = "degree")
 \arguments{
 \item{object}{is a network matrix obtained by the function \code{\link{biblioNetwork}} or an graph object of the class \code{igraph}.}
 
-\item{stat}{is a character. It indicates which statistics are to be calculated. \code{stat = "network"} calculates the statistics related to the network; 
+\item{stat}{is a character. It indicates which statistics are to be calculated. \code{stat = "network"} calculates the statistics related to the network;
 \code{stat = "all"} calculates the statistics related to the network and the individual nodes that compose it. Default value is \code{stat = "network"}.}
 
 \item{type}{is a character. It indicates which centrality index is calculated. type values can be c("degree", "closeness", "betweenness","eigenvector","pagerank","hub","authority", "all"). Default is "degree".}
@@ -33,7 +33,7 @@ The function \code{\link{networkStat}} can calculate the main network statistics
 # to run the example, please remove # from the beginning of the following lines
 # data(scientometrics, package = "bibliometrixData")
 
-# NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation", 
+# NetMatrix <- biblioNetwork(scientometrics, analysis = "co-citation",
 #      network = "references", sep = ";")
 
 # netstat <- networkStat(NetMatrix, stat = "all", type = "degree")

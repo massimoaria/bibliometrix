@@ -1,9 +1,9 @@
-utils::globalVariables(c("corresponding_institution_ids","corresponding_author_name","corresponding_author_affiliation","corresponding_author_country","C1_ID"))
+utils::globalVariables(c("corresponding_institution_ids", "corresponding_author_name", "corresponding_author_affiliation", "corresponding_author_country", "C1_ID"))
 
 
-importOAFiles <- function(file){
+importOAFiles <- function(file) {
   objName <- load(file)
-  if (!isTRUE(inherits(eval(parse(text = objName)),c("list")))){
+  if (!isTRUE(inherits(eval(parse(text = objName)), c("list")))) {
     message("the rdata file does not contain a valid object!\nopenalexR API requests have to be exported as 'list'.\nPlease set argument output='list' when use oafetch.\n
 
     ## Example ##
@@ -16,7 +16,7 @@ importOAFiles <- function(file){
     ")
     return(NA)
   }
-  if (length(objName)!=1){
+  if (length(objName) != 1) {
     message("the rdata file contains more than an object!")
     return(NA)
   }
@@ -25,44 +25,44 @@ importOAFiles <- function(file){
 
 
 # Function to apply the extraction to the whole list of items.
-apiOA2df <- function(file){
-  
+apiOA2df <- function(file) {
   DATA <- importOAFiles(file)
 
-  if (inherits(DATA,"list")){
+  if (inherits(DATA, "list")) {
     type <- "list"
-  } else if (inherits(DATA,"data.frame")){
-    type <-  "data.frame"
+  } else if (inherits(DATA, "data.frame")) {
+    type <- "data.frame"
   }
 
   switch(type,
-         "list"={
-           df <- purrr::map_dfr(DATA, extract_all_metadata)
-           df <- relabelling_OA_API(df)
-         },
-         "data.frame"={
-           
-         }
-         )
-  
+    "list" = {
+      df <- purrr::map_dfr(DATA, extract_all_metadata)
+      df <- relabelling_OA_API(df)
+    },
+    "data.frame" = {
+
+    }
+  )
+
   df$AF <- df$AU
   df$AU_UN <- df$C3 <- df$C1
-  
+
   # move all char strings to Upper
-  ind <- apply(df,2,function(x){
-    sum(regexpr("https://",x)>-1, na.rm = TRUE)>0
+  ind <- apply(df, 2, function(x) {
+    sum(regexpr("https://", x) > -1, na.rm = TRUE) > 0
   })
-  label <- names(ind)[ind==FALSE & !is.na(ind)]
+  label <- names(ind)[ind == FALSE & !is.na(ind)]
   AB <- df$AB
   TI <- df$TI
   DE <- df$DE
-  if ("DI" %in% names(df)){
-    df <- df %>% 
+  if ("DI" %in% names(df)) {
+    df <- df %>%
       mutate(across(all_of(label), toupper),
-             DI = gsub("https://doi.org/","",DI),
-             DI = ifelse(DI == "null",NA,DI)) 
+        DI = gsub("https://doi.org/", "", DI),
+        DI = ifelse(DI == "null", NA, DI)
+      )
   } else {
-    df <- df %>% 
+    df <- df %>%
       mutate(across(all_of(label), toupper))
   }
   df$DB <- "OPENALEX"
@@ -71,26 +71,40 @@ apiOA2df <- function(file){
   df$DE_raw <- DE
 
   ## transform Country code in names
-  CO <- strsplit(df$AU_CO,";")
-  CO <- data.frame(Alpha2 = trimws(unlist(CO)), id_oa=rep(df$id_oa,lengths(CO)))
-  CO <- CO %>% 
-  left_join(openalexR::countrycode %>% select("Alpha2", "Country"), by="Alpha2") %>% 
-  mutate(Country = toupper(Country)) %>% 
-  group_by(id_oa) %>% 
-  summarize(
-    AU_CO = paste0(Country, collapse=";")
-  )
+  CO <- strsplit(df$AU_CO, ";")
+  CO <- data.frame(Alpha2 = trimws(unlist(CO)), id_oa = rep(df$id_oa, lengths(CO)))
+  CO <- CO %>%
+    left_join(openalexR::countrycode %>% select("Alpha2", "Country"), by = "Alpha2") %>%
+    mutate(Country = toupper(Country)) %>%
+    group_by(id_oa) %>%
+    summarize(
+      AU_CO = paste0(Country, collapse = ";")
+    )
   df <- df %>%
-  select(-"AU_CO") %>% 
-  left_join(CO, by="id_oa")
+    select(-"AU_CO") %>%
+    left_join(CO, by = "id_oa")
   
-  df$id_oa <- gsub("https://openalex.org/","",df$id_oa)
+  ## transform Corresponding Country code in names
+  CO <- strsplit(df$AU1_CO, ";")
+  CO <- data.frame(Alpha2 = trimws(unlist(CO)), id_oa = rep(df$id_oa, lengths(CO)))
+  CO <- CO %>%
+    left_join(openalexR::countrycode %>% select("Alpha2", "Country"), by = "Alpha2") %>%
+    mutate(Country = toupper(Country)) %>%
+    group_by(id_oa) %>%
+    summarize(
+      AU1_CO = paste0(Country, collapse = ";")
+    )
+  df <- df %>%
+    select(-"AU1_CO") %>%
+    left_join(CO, by = "id_oa")
+
+  df$id_oa <- gsub("https://openalex.org/", "", df$id_oa)
 
   df <- df %>% as.data.frame()
   return(df)
 }
 
-relabelling_OA_API <- function(DATA){
+relabelling_OA_API <- function(DATA) {
   ## column re-labelling
   label <- names(DATA)
   label[label %in% "id"] <- "id_oa"
@@ -112,13 +126,13 @@ relabelling_OA_API <- function(DATA){
   label[label %in% "journal_name"] <- "SO"
   label[label %in% "issn"] <- "IS"
   label[label %in% "abstract"] <- "AB"
-  label[label %in% "cited_references" ] <- "CR"
+  label[label %in% "cited_references"] <- "CR"
   label[label %in% "keywords"] <- "DE"
   label[label %in% "concepts"] <- "ID"
   label[label %in% "oa_url"] <- "URL"
   label[label %in% "sdg_display_name"] <- "SDG"
   label[label %in% "mesh_terms"] <- "MESH"
- 
+
   names(DATA) <- label
   return(DATA)
 }
@@ -149,30 +163,30 @@ extract_authors <- function(article) {
     map_df(authors, ~ tibble(
       # Remove the prefix from the author ID
       author_id = if (!is.null(.x$author$id)) gsub("https://openalex.org/", "", .x$author$id) else NA,
-      
+
       # Author's name
       name = if (!is.null(.x$author$display_name)) .x$author$display_name else NA,
-      
+
       # ORCID (if available)
       orcid = if (!is.null(.x$author$orcid)) .x$author$orcid else NA,
-      
+
       # Author's position
       position = if (!is.null(.x$author_position)) .x$author_position else NA,
-      
+
       # Affiliations: Names of institutions
       institutions = if (!is.null(.x$institutions) && length(.x$institutions) > 0) {
         paste(map_chr(.x$institutions, "display_name", .default = NA), collapse = "; ")
       } else {
         NA
       },
-      
+
       # Affiliations: Institution IDs (removing prefix)
       institution_ids = if (!is.null(.x$institutions) && length(.x$institutions) > 0) {
         paste(map_chr(.x$institutions, ~ gsub("https://openalex.org/", "", .x$id), .default = NA), collapse = "; ")
       } else {
         NA
       },
-      
+
       # Countries of affiliations
       countries = if (!is.null(.x$countries) && length(.x$countries) > 0) {
         paste(.x$countries, collapse = "; ")
@@ -204,7 +218,7 @@ compress_author_affiliation_info <- function(authors_info) {
       return(paste(na.omit(x), collapse = "; "))
     }
   }
-  
+
   # Check for the existence of columns before concatenating
   compressed_info <- tibble(
     author_id = if ("author_id" %in% names(authors_info)) concat_non_na(authors_info$author_id) else NA,
@@ -215,14 +229,14 @@ compress_author_affiliation_info <- function(authors_info) {
     institution_ids = if ("institution_ids" %in% names(authors_info)) concat_non_na(authors_info$institution_ids) else NA,
     countries = if ("countries" %in% names(authors_info)) concat_non_na(authors_info$countries) else NA
   )
-  
+
   return(compressed_info)
 }
 
 # Extract journal information
 extract_journal_info <- function(article) {
   primary_loc <- article$primary_location
-  
+
   if (!is.null(primary_loc$source)) {
     journal_name <- primary_loc$source$display_name
     issn <- primary_loc$source$issn_l
@@ -230,7 +244,7 @@ extract_journal_info <- function(article) {
     journal_name <- NA
     issn <- NA
   }
-  
+
   tibble(
     journal_name = journal_name,
     issn = issn,
@@ -247,7 +261,7 @@ extract_abstracts <- function(article) {
   } else {
     NA
   }
-  
+
   tibble(
     abstract = abstract
   )
@@ -262,7 +276,7 @@ abstract_build <- function(ab) {
   if (is.null(ind)) {
     return("")
   }
-  
+
   paste(w[order(ind)], collapse = " ", sep = "")
 }
 
@@ -275,7 +289,7 @@ extract_cited_references <- function(article) {
   } else {
     cited_references <- NA
   }
-  
+
   tibble(cited_references = cited_references)
 }
 
@@ -292,7 +306,7 @@ extract_grants <- function(article) {
   } else {
     grants_info <- NA
   }
-  
+
   tibble(grants = grants_info)
 }
 
@@ -319,27 +333,6 @@ extract_sdg <- function(article) {
   }
 }
 
-# Extract corresponding author information
-extract_corresponding_info <- function(article, authors_info) {
-  corresponding_authors <- if (!is.null(article$corresponding_author_ids)) {
-    id <- gsub("https://openalex.org/","",article$corresponding_author_ids)
-    paste(authors_info$name[authors_info$author_id %in% id], collapse = ";")
-  } else {
-    NA
-  }
-  
-  corresponding_institutions <- if (!is.null(article$corresponding_institution_ids) & !is.na(corresponding_authors)) {
-    paste(authors_info$institutions[authors_info$author_id %in% id], collapse = ";")
-  } else {
-    NA
-  }
-  
-  tibble(
-    corresponding_authors = corresponding_authors,
-    corresponding_institutions = corresponding_institutions
-  )
-}
-
 # Extract Mesh Terms
 extract_mesh_terms <- function(article) {
   if (!is.null(article$mesh) && length(article$mesh) > 0) {
@@ -349,7 +342,7 @@ extract_mesh_terms <- function(article) {
   } else {
     mesh_terms <- NA
   }
-  
+
   tibble(mesh_terms = mesh_terms)
 }
 
@@ -362,7 +355,7 @@ extract_keywords <- function(article) {
   } else {
     keywords_info <- NA
   }
-  
+
   tibble(keywords = keywords_info)
 }
 
@@ -370,15 +363,17 @@ extract_keywords <- function(article) {
 extract_concepts <- function(article) {
   if (!is.null(article$concepts) && length(article$concepts) > 0) {
     concepts_info <- article$concepts %>%
-      map_chr(~ paste(ifelse(!is.null(.x$display_name), .x$display_name, NA),
-                      "(",
-                      ifelse(!is.null(.x$score), .x$score, NA),
-                      ")")) %>%
+      map_chr(~ paste(
+        ifelse(!is.null(.x$display_name), .x$display_name, NA),
+        "(",
+        ifelse(!is.null(.x$score), .x$score, NA),
+        ")"
+      )) %>%
       paste(collapse = "; ")
   } else {
     concepts_info <- NA
   }
-  
+
   tibble(concepts = concepts_info)
 }
 
@@ -391,7 +386,7 @@ extract_topics <- function(article) {
   } else {
     topics_info <- NA
   }
-  
+
   tibble(topics = topics_info)
 }
 
@@ -404,7 +399,7 @@ extract_additional_info <- function(article) {
   } else {
     NA
   }
-  
+
   tibble(
     yearly_citations = yearly_citations,
     fwci = ifelse(!is.null(article$fwci), article$fwci, NA),
@@ -414,13 +409,61 @@ extract_additional_info <- function(article) {
   )
 }
 
+extract_corresponding_info <- function(authorships) {
+  # Trova se esiste un corresponding author
+  corr_idx <- which(sapply(authorships, function(a) isTRUE(a$is_corresponding)))
+  
+  if (length(corr_idx) > 0) {
+    # Se esiste almeno un corresponding author, prendi il primo
+    selected_author <- authorships[[corr_idx[1]]]
+  } else {
+    # Altrimenti prendi il primo autore
+    first_idx <- which(sapply(authorships, function(a) a$author_position == "first"))
+    selected_author <- authorships[[first_idx[1]]]
+  }
+  
+  # Estrai nome e ID autore
+  display_name <- selected_author$author$display_name
+  id <- selected_author$author$id
+  
+  # Estrai il paese se disponibile
+  if (!is.null(selected_author$countries) && length(selected_author$countries) > 0) {
+    country <- selected_author$countries[[1]]
+  } else if (!is.null(selected_author$institutions) &&
+             length(selected_author$institutions) > 0 &&
+             !is.null(selected_author$institutions[[1]]$country_code)) {
+    country <- selected_author$institutions[[1]]$country_code
+  } else {
+    country <- NA
+  }
+  
+  # Estrai l'affiliazione se disponibile
+  if (!is.null(selected_author$affiliations) &&
+      length(selected_author$affiliations) > 0 &&
+      !is.null(selected_author$affiliations[[1]]$raw_affiliation_string)) {
+    affiliation <- selected_author$affiliations[[1]]$raw_affiliation_string
+  } else {
+    affiliation <- NA
+  }
+  
+  return(tibble(
+    AU_CORR = display_name,
+    AU_CORR_ID = id,
+    AU1_CO = country,
+    AU1_UN = affiliation,
+    RP = affiliation
+  ))
+}
+
+
+
 # Function to combine all extractions
 extract_all_metadata <- function(article) {
   authors_info <- extract_authors(article)
   bind_cols(
     extract_basic_info(article),
     compress_author_affiliation_info(authors_info),
-    extract_corresponding_info(article,authors_info),
+    extract_corresponding_info(article$authorships),
     extract_journal_info(article),
     extract_abstracts(article),
     extract_cited_references(article),
@@ -433,6 +476,4 @@ extract_all_metadata <- function(article) {
     extract_additional_info(article)
   )
 }
-
-
 

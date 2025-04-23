@@ -83,6 +83,20 @@ apiOA2df <- function(file) {
   df <- df %>%
     select(-"AU_CO") %>%
     left_join(CO, by = "id_oa")
+  
+  ## transform Corresponding Country code in names
+  CO <- strsplit(df$AU1_CO, ";")
+  CO <- data.frame(Alpha2 = trimws(unlist(CO)), id_oa = rep(df$id_oa, lengths(CO)))
+  CO <- CO %>%
+    left_join(openalexR::countrycode %>% select("Alpha2", "Country"), by = "Alpha2") %>%
+    mutate(Country = toupper(Country)) %>%
+    group_by(id_oa) %>%
+    summarize(
+      AU1_CO = paste0(Country, collapse = ";")
+    )
+  df <- df %>%
+    select(-"AU1_CO") %>%
+    left_join(CO, by = "id_oa")
 
   df$id_oa <- gsub("https://openalex.org/", "", df$id_oa)
 
@@ -319,27 +333,6 @@ extract_sdg <- function(article) {
   }
 }
 
-# Extract corresponding author information
-extract_corresponding_info <- function(article, authors_info) {
-  corresponding_authors <- if (!is.null(article$corresponding_author_ids)) {
-    id <- gsub("https://openalex.org/", "", article$corresponding_author_ids)
-    paste(authors_info$name[authors_info$author_id %in% id], collapse = ";")
-  } else {
-    NA
-  }
-
-  corresponding_institutions <- if (!is.null(article$corresponding_institution_ids) & !is.na(corresponding_authors)) {
-    paste(authors_info$institutions[authors_info$author_id %in% id], collapse = ";")
-  } else {
-    NA
-  }
-
-  tibble(
-    corresponding_authors = corresponding_authors,
-    corresponding_institutions = corresponding_institutions
-  )
-}
-
 # Extract Mesh Terms
 extract_mesh_terms <- function(article) {
   if (!is.null(article$mesh) && length(article$mesh) > 0) {
@@ -416,13 +409,61 @@ extract_additional_info <- function(article) {
   )
 }
 
+extract_corresponding_info <- function(authorships) {
+  # Trova se esiste un corresponding author
+  corr_idx <- which(sapply(authorships, function(a) isTRUE(a$is_corresponding)))
+  
+  if (length(corr_idx) > 0) {
+    # Se esiste almeno un corresponding author, prendi il primo
+    selected_author <- authorships[[corr_idx[1]]]
+  } else {
+    # Altrimenti prendi il primo autore
+    first_idx <- which(sapply(authorships, function(a) a$author_position == "first"))
+    selected_author <- authorships[[first_idx[1]]]
+  }
+  
+  # Estrai nome e ID autore
+  display_name <- selected_author$author$display_name
+  id <- selected_author$author$id
+  
+  # Estrai il paese se disponibile
+  if (!is.null(selected_author$countries) && length(selected_author$countries) > 0) {
+    country <- selected_author$countries[[1]]
+  } else if (!is.null(selected_author$institutions) &&
+             length(selected_author$institutions) > 0 &&
+             !is.null(selected_author$institutions[[1]]$country_code)) {
+    country <- selected_author$institutions[[1]]$country_code
+  } else {
+    country <- NA
+  }
+  
+  # Estrai l'affiliazione se disponibile
+  if (!is.null(selected_author$affiliations) &&
+      length(selected_author$affiliations) > 0 &&
+      !is.null(selected_author$affiliations[[1]]$raw_affiliation_string)) {
+    affiliation <- selected_author$affiliations[[1]]$raw_affiliation_string
+  } else {
+    affiliation <- NA
+  }
+  
+  return(tibble(
+    AU_CORR = display_name,
+    AU_CORR_ID = id,
+    AU1_CO = country,
+    AU1_UN = affiliation,
+    RP = affiliation
+  ))
+}
+
+
+
 # Function to combine all extractions
 extract_all_metadata <- function(article) {
   authors_info <- extract_authors(article)
   bind_cols(
     extract_basic_info(article),
     compress_author_affiliation_info(authors_info),
-    extract_corresponding_info(article, authors_info),
+    extract_corresponding_info(article$authorships),
     extract_journal_info(article),
     extract_abstracts(article),
     extract_cited_references(article),
@@ -435,3 +476,4 @@ extract_all_metadata <- function(article) {
     extract_additional_info(article)
   )
 }
+

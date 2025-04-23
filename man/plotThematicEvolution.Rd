@@ -9,7 +9,6 @@ plotThematicEvolution(
   Edges,
   min.flow = 0,
   measure = "weighted",
-  node_shape = "box",
   label_size = 5,
   edge_scale = 10,
   node_scale = 30
@@ -23,8 +22,6 @@ plotThematicEvolution(
 \item{min.flow}{Numeric. Minimum threshold for edge weight (i.e., flow) to be included in the network visualization. Default is `0`.}
 
 \item{measure}{Character. The method to define edge weight: `"inclusion"`, `"stability"`, or `"weighted"` (default is `"weighted"`).}
-
-\item{node_shape}{Character. Shape of the nodes in the network. Options are `"dot"` (default), `"box"`, `"circle"`, or `"ellipse"`.}
 
 \item{label_size}{Numeric. Font size of the node labels. Default is `15`.}
 

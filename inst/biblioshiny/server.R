@@ -4197,7 +4197,8 @@ To ensure the functionality of Biblioshiny,
     values <- intellectualStructure(input,values)
     values$COCITnetwork<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
                                labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
-                               shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"))
+                               shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"),
+                               noOverlap=input$citNoOverlap)
     values$cocitOverlay <- overlayPlotly(values$COCITnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocitnet)
   })
@@ -4326,7 +4327,8 @@ To ensure the functionality of Biblioshiny,
     values <- socialStructure(input,values)
     values$COLnetwork<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
                                labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
-                               shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"))
+                               shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"),
+                               noOverlap=input$colNoOverlap)
     values$colOverlay <- overlayPlotly(values$COLnetwork$VIS)
     values$degreePlot <-degreePlot(values$colnet)
     if (is.null(dim(values$colnet$cluster_res))){

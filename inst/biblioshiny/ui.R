@@ -4984,6 +4984,13 @@ body <- dashboardBody(
                   selected = "';'"
                 ),
                 br(),
+                materialSwitch(
+                  inputId = "citNoOverlap",
+                  label = "Avoid Label Overlap",
+                  value = TRUE,
+                  status = "primary"
+                ),
+                br(),
                 box(
                   title = p(strong("Method Parameters"), style = "font-size:16px;color:black;"),
                   collapsible = TRUE, width = 15,
@@ -5426,6 +5433,13 @@ body <- dashboardBody(
                     "Countries" = "COL_CO"
                   ),
                   selected = "COL_AU"
+                ),
+                br(),
+                materialSwitch(
+                  inputId = "colNoOverlap",
+                  label = "Avoid Label Overlap",
+                  value = TRUE,
+                  status = "primary"
                 ),
                 br(),
                 box(

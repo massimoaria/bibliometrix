@@ -1443,10 +1443,9 @@ To ensure the functionality of Biblioshiny,
       sheetname <- "ThreeFieldsPlot"
       ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
       if (length(ind)>0){
-        sheetname <- paste(sheetname,length(ind)+1,sep="")
+        sheetname <- paste(sheetname, "(", length(ind) + 1, ")", sep = "")
       } 
       addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
-      #values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
       values$fileTFP <- screenSh(values$TFP, zoom = 2, type="plotly")
       values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
       popUp(title="Three-Field Plot", type="success")
@@ -2012,36 +2011,10 @@ To ensure the functionality of Biblioshiny,
   ### Lotka Law ----  
   output$lotkaPlot <- renderPlotly({
     
-    values$lotka=lotka(biblioAnalysis(values$M))
-    AuProd=values$lotka$AuthorProd
-    AuProd$Theoretical=10^(log10(values$lotka$C)-2*log10(AuProd[,1]))
-    AuProd$Theoretical=AuProd$Theoretical/sum(AuProd$Theoretical)
+    values$lotka <- lotka(values$M)
     
-    x <- c(max(AuProd$N.Articles)-0.02-diff(range(AuProd$N.Articles))*0.125, max(AuProd$N.Articles)-0.02)+1
-    y <- c(min(AuProd$Freq*100),min(AuProd$Freq*100)+diff(range(AuProd$Freq*100))*0.125)
-    
-    g=ggplot2::ggplot(AuProd, aes(x = N.Articles, y = Freq*100, text=paste("N.Articles: ",N.Articles,"\n% of production: ",round(Freq*100,1)))) +
-      geom_line(aes(group="NA")) +
-      #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
-      geom_line(data=AuProd, aes(y=Theoretical*100, group="NA"),linetype = "dashed",color="black",alpha=0.8)+
-      xlim(0,max(AuProd$N.Articles)+1)+
-      labs(x = 'Documents written'
-           , y = '% of Authors'
-           , title = "Author Productivity through Lotka's Law") +
-      theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#FFFFFF')
-            ,panel.grid.minor = element_line(color = '#EFEFEF')
-            ,panel.grid.major = element_line(color = '#EFEFEF')
-            ,plot.title = element_text(size = 24)
-            ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 0)
-            ,axis.title.x = element_text(hjust = 0)
-            ,axis.line.x = element_line(color="black",linewidth=0.5)
-            ,axis.line.y = element_line(color="black",linewidth=0.5)
-      ) +
-      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
-    values$LLplot <- g
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
+    values$LLplot <- values$lotka$g
+    plot.ly(values$lotka$g_shiny,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
   })
   
   output$LLplot.save <- downloadHandler(
@@ -2055,8 +2028,8 @@ To ensure the functionality of Biblioshiny,
   )
   
   output$lotkaTable <- DT::renderDT({
-    names(values$lotka$AuthorProd)=c("Documents written","N. of Authors","Proportion of Authors")
-    DTformat(values$lotka$AuthorProd, nrow=10, filename="Lotka_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
+
+    DTformat(values$lotka$AuthorProd, nrow=10, filename="Lotka_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=c(3,4), dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
              selection=FALSE)
   })

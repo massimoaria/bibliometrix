@@ -1,6 +1,6 @@
 utils::globalVariables(c(
   "group", "CL1", "CL2", "value", "visEdges", "visIgraphLayout", "visNetwork", "visOptions",
-  "visPhysics"
+  "visPhysics", "title","fixed.x", "fixed.y"
 ))
 #' Plot Thematic Evolution Network
 #'

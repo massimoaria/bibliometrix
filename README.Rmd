@@ -14,23 +14,16 @@ knitr::opts_chunk$set(
 )
 ```
 
+# bibliometrix
 
-bibliometrix
-====================================
+## An R-tool for comprehensive science mapping analysis.
 
-## An R-tool for comprehensive science mapping analysis. 
-
-[![bibliometrix: An R-tool for comprehensive science mapping analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![R-CMD-check](https://github.com/massimoaria/e2tree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml)
-[![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
-[![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
-`r badger::badge_cran_download("bibliometrix", "grand-total")` 
-
-
+[![bibliometrix: An R-tool for comprehensive science mapping analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007) [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![R-CMD-check](https://github.com/massimoaria/e2tree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml) [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix) [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app) `r badger::badge_cran_download("bibliometrix", "grand-total")`
 
 <p align="center">
-<img src="https://www.bibliometrix.org/logo_new.png" width="400"  />
+
+<img src="https://www.bibliometrix.org/logo_new.png" width="400"/>
+
 </p>
 
 ## Overview
@@ -43,12 +36,11 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 
 **bibliometrix** supports scholars in three key phases of analysis:
 
-* Data importing and conversion to R format;
+-   Data importing and conversion to R format;
 
-* Bibliometric analysis of a publication dataset;
+-   Bibliometric analysis of a publication dataset;
 
-* Building and plotting matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
-
+-   Building and plotting matrices for co-citation, coupling, collaboration, and co-word analysis. Matrices are the input data for performing network analysis, multiple correspondence analysis, and any other data reduction techniques.
 
 ## biblioshiny
 
@@ -58,27 +50,25 @@ Bibliometrics is also used in research performance evaluation, especially in uni
 
 It supports scholars in easy use of the main features of bibliometrix:
 
-* Data importing and conversion to data frame collection
+-   Data importing and conversion to data frame collection
 
-* Data filtering
+-   Data filtering
 
-* Analytics and Plots for three different level metrics:
+-   Analytics and Plots for three different level metrics:
 
-    - Sources  
+    -   Sources
 
-    - Authors  
+    -   Authors
 
-    - Documents   
+    -   Documents
 
-* Analysis of three structures of Knowledge (K-structures):  
+-   Analysis of three structures of Knowledge (K-structures):
 
-    - Conceptual Structure  
+    -   Conceptual Structure
 
-    - Intellectual Structure  
+    -   Intellectual Structure
 
-    - Social Structure
-
-
+    -   Social Structure
 
 ### How to use biblioshiny
 
@@ -92,52 +82,42 @@ To cite bibliometrix in publications, please use:
 
 Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for comprehensive science mapping analysis**, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier.
 
-
-
 ## Community
 
-Official website:   https://www.bibliometrix.org
+Official website: https://www.bibliometrix.org
 
-CRAN page:          https://cran.r-project.org/package=bibliometrix
-    
-GitHub repository:  https://github.com/massimoaria/bibliometrix
+CRAN page: https://cran.r-project.org/package=bibliometrix
+
+GitHub repository: https://github.com/massimoaria/bibliometrix
 
 Tutorials
 
-How to use:         https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html
+How to use: https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html
 
-Data importing 
-and converting:     https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html
-
-
+Data importing and converting: https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html
 
 ## Installation
-
 
 Stable version from CRAN
 
 ```{r eval=FALSE, include=FALSE}
-install.packages("bibliometrix")
-```
 
+if (!require("pak", quietly=TRUE)) install.packages("pak")
+pak::pkg_install("bibliometrix")
+```
 
 Developers version from GitHub
 
-
 ```{r eval=FALSE, include=FALSE}
-install.packages("remotes")
-remotes::install_github("massimoaria/bibliometrix")
+if (!require("pak", quietly=TRUE)) install.packages("pak")
+pak::pkg_install("massimoaria/bibliometrix")
 ```
 
 Load `bibliometrix`
 
-
 ```{r echo=TRUE}
 library('bibliometrix')
 ```
-
-
-
 
 ## Data loading and converting
 
@@ -147,8 +127,7 @@ The export file can be read and converted using by R using the function *convert
 
 The argument *file* is a character vector containing the name of export files downloaded from SCOPUS, Clarivate Analytics WoS, OpenAlex, Digital Science Dimensions, PubMed or Cochrane CDSR website. *file* can also contains the name of a json/xlm object download using OpenAlex, Digital Science Dimensions or PubMed APIs (through the packages *openalexR*, *dimensionsR* and *pubmedR*.
 
-es. file <- c("file1.txt","file2.txt", ...)
-
+es. file \<- c("file1.txt","file2.txt", ...)
 
 ```{r Data loading and Converting}
 ## An example from bibliometrix vignettes
@@ -162,8 +141,7 @@ M <- convert2df(file = file, dbsource = "wos", format = "plaintext")
 
 Each manuscript contains several elements, such as authors' names, title, keywords and other information. All these elements constitute the bibliographic attributes of a document, also called metadata.
 
-Data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify [(https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf)](https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf). 
-
+Data frame columns are named using the standard Clarivate Analytics WoS Field Tag codify [(https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf)](https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf).
 
 ## Check completeness of metadata included in the bibliographic data frame
 
@@ -181,29 +159,25 @@ com <- missingData(M)
 com$mandatoryTags
 ```
 
-**missingData** returns a list containing two data frame. The first one, *allTags* includes the results for all metadata in M. The latter, *mandatoryTags*,	reports the results only for the metadata needed to perform analyses with bibliometrix or biblioshiny.
+**missingData** returns a list containing two data frame. The first one, *allTags* includes the results for all metadata in M. The latter, *mandatoryTags*, reports the results only for the metadata needed to perform analyses with bibliometrix or biblioshiny.
 
 The column *status* classifies the percentage of missing value in 5 categories: "Excellent" (0%), "Good" (0.01% to 10.00%), "Acceptable" (from 10.01% to 20.00%), "Poor" (from 20.01% to 50.00%), "Critical" (from 50.01% to 99.99%), "Completely missing" (100%).
-
 
 ## Bibliometric Analysis
 
 The first step is to perform a descriptive analysis of the bibliographic data frame.
 
 The function *biblioAnalysis* calculates main bibliometric measures using this syntax:
- 
+
 ```{r biblioAnalysis}
 results <- biblioAnalysis(M, sep = ";")
 ```
 
 The function *biblioAnalysis* returns an object of class "bibliometrix".
 
+To summarize main results of the bibliometric analysis, use the generic function *summary*. It displays main information about the bibliographic data frame and several tables, such as annual scientific production, top manuscripts per number of citations, most productive authors, most productive countries, total citation per country, most relevant sources (journals) and most relevant keywords.
 
-To summarize main results of the bibliometric analysis, use the generic function *summary*.
-It displays main information about the bibliographic data frame and several tables, such as annual scientific production, top manuscripts per number of citations, most productive authors, most productive countries, total citation per country, most relevant sources (journals) and most relevant keywords.
-
-*summary* accepts two additional arguments. *k* is a formatting value that indicates the number of rows of each table. *pause* is a logical value (TRUE or FALSE) used to allow (or not) pause in screen scrolling.
-Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
+*summary* accepts two additional arguments. *k* is a formatting value that indicates the number of rows of each table. *pause* is a logical value (TRUE or FALSE) used to allow (or not) pause in screen scrolling. Choosing k=10 you decide to see the first 10 Authors, the first 10 sources, etc.
 
 ```{r summary generic function}
 S <- summary(object = results, k = 10, pause = FALSE)
@@ -215,21 +189,15 @@ Some basic plots can be drawn using the generic function plot:
 plot(x = results, k = 10, pause = FALSE)
 ```
 
-
-
-
 ## Bibliographic network matrices
 
 Manuscript's attributes are connected to each other through the manuscript itself: author(s) to journal, keywords to publication date, etc.
 
 These connections of different attributes generate bipartite networks that can be represented as rectangular matrices (Manuscripts x Attributes).
 
-Furthermore, scientific publications regularly contain references to
-other scientific works. This generates a further network, namely, co-citation or coupling network.
+Furthermore, scientific publications regularly contain references to other scientific works. This generates a further network, namely, co-citation or coupling network.
 
 These networks are analyzed in order to capture meaningful properties of the underlying research system, and in particular to determine the influence of bibliometric units such as scholars and journals.
-
-
 
 ### biblioNetwork function
 
@@ -237,21 +205,17 @@ The function *biblioNetwork* calculates, starting from a bibliographic data fram
 
 *biblioNetwork* uses two arguments to define the network to compute:
 
-* *analysis* argument can be "co-citation", "coupling", "collaboration",  or "co-occurrences".
+-   *analysis* argument can be "co-citation", "coupling", "collaboration", or "co-occurrences".
 
-* *network* argument can be "authors", "references", "sources", "countries", "universities", "keywords", "author_keywords", "titles" and "abstracts".
+-   *network* argument can be "authors", "references", "sources", "countries", "universities", "keywords", "author_keywords", "titles" and "abstracts".
 
 i.e. the following code calculates a classical co-citation network:
 
-```
+```         
 NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
 ```
 
-
-
-
 ## Visualizing bibliographic networks
-
 
 All bibliographic networks can be graphically visualized or modeled.
 
@@ -260,8 +224,6 @@ Using the function *networkPlot*, you can plot a network created by *biblioNetwo
 The main argument of *networkPlot* is type. It indicates the network map layout: circle, kamada-kawai, mds, etc.
 
 In the following, we propose some examples.
-
-
 
 ### Country Scientific Collaboration
 
@@ -276,8 +238,6 @@ net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaboration
 
 ```
 
-
-
 ### Co-Citation Network
 
 ```{r Co-citation network, fig.height=7, fig.width=7, warning=FALSE}
@@ -289,8 +249,6 @@ NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", 
 net=networkPlot(NetMatrix, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
 
 ```
-
-
 
 ### Keyword co-occurrences
 
@@ -304,19 +262,15 @@ net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = 
 
 ```
 
-
-
-
-## Co-Word Analysis: The conceptual structure of a field 
+## Co-Word Analysis: The conceptual structure of a field
 
 The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
 
-The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS), Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA). 
+The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS), Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA).
 
 Here, we show an example using the function *conceptualStructure* that performs a CA or MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
 
-*conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts.  In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
-
+*conceptualStructure* includes natural language processing (NLP) routines (see the function *termExtraction*) to extract terms from titles and abstracts. In addition, it implements the Porter's stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
 
 ```{r Co-Word Analysis, fig.height=9, fig.width=9, warning=FALSE}
 
@@ -327,9 +281,6 @@ plot(CS$graph_terms)
 plot(CS$graph_dendogram)
 
 ```
-
-
-
 
 ## Historical Direct Citation Network
 
@@ -347,40 +298,34 @@ net <- histPlot(histResults, n=20, size = FALSE,label="short")
 
 ```
 
-
-
-
 ## Main Authors' references (about bibliometrics)
 
+Aria, M. & Cuccurullo, C. (2017). **bibliometrix: An R-tool for comprehensive science mapping analysis**, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007 (https://doi.org/10.1016/j.joi.2017.08.007)
 
-Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007 (https://doi.org/10.1016/j.joi.2017.08.007)
+M. Aria, C. Cuccurullo, L. D’Aniello, M. Misuraca, M. Spano (2024). **Comparative science mapping: a novel conceptual structure analysis with metadata**, *Scientometrics*. (https:://doi.org/10.1007/s11192-024-05161-6)
 
-Aria, M., Cuccurullo, C., D’Aniello, L., Misuraca, M., & Spano, M. (2022). Thematic Analysis as a New Culturomic Tool: The Social Media Coverage on COVID-19 Pandemic in Italy. *Sustainability*, 14(6), 3643, (https://doi.org/10.3390/su14063643)
+Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024). **openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex**. *The R Journal*, [DOI: 10.32614/RJ-2023-089](https://doi.org/10.32614/RJ-2023-089).
 
-Aria M., Misuraca M., Spano M. (2020) Mapping the evolution of social research and data science on 30 years of Social Indicators Research, *Social Indicators Research*. (DOI: https://doi.org/10.1007/s11205-020-02281-3)
+Aria, M., Cuccurullo, C., D’Aniello, L., Misuraca, M., & Spano, M. (2022). **Thematic Analysis as a New Culturomic Tool: The Social Media Coverage on COVID-19 Pandemic in Italy**. *Sustainability*, 14(6), 3643, (https://doi.org/10.3390/su14063643)
 
-Aria M., Alterisio A., Scandurra A, Pinelli C., D’Aniello B, (2021) The scholar’s best friend: research trends in dog cognitive and behavioural studies, *Animal Cognition*. (https://doi.org/10.1007/s10071-020-01448-2)
+Aria M., Misuraca M., Spano M. (2020) **Mapping the evolution of social research and data science on 30 years of Social Indicators Research**, *Social Indicators Research*. (DOI: https://doi.org/10.1007/s11205-020-02281-3)
 
-Belfiore, A., Cuccurullo, C., & Aria, M. (2022). IoT in healthcare: A scientometric analysis. *Technological Forecasting and Social Change*, 184, 122001. (https://doi.org/10.1016/j.techfore.2022.122001)
+Aria M., Alterisio A., Scandurra A, Pinelli C., D’Aniello B, (2021) **The scholar’s best friend: research trends in dog cognitive and behavioural studies**, *Animal Cognition*. (https://doi.org/10.1007/s10071-020-01448-2)
 
-Belfiore, A., Salatino, A., & Osborne, F. (2022). Characterising Research Areas in the field of AI. *arXiv preprint arXiv:2205.13471*.(https://doi.org/10.48550/arXiv.2205.13471)
+Belfiore, A., Cuccurullo, C., & Aria, M. (2022). **IoT in healthcare: A scientometric analysis**. *Technological Forecasting and Social Change*, 184, 122001. (https://doi.org/10.1016/j.techfore.2022.122001)
 
-Ciavolino, E., Aria, M., Cheah, J. H., & Roldán, J. L. (2022). A tale of PLS structural equation modelling: episode I—a bibliometrix citation analysis. *Social Indicators Research*, 164(3), 1323-1348 (https://doi.org/10.1007/s11205-022-02994-7).
+Belfiore, A., Salatino, A., & Osborne, F. (2022). **Characterising Research Areas in the field of AI**. *arXiv preprint arXiv:2205.13471*.(https://doi.org/10.48550/arXiv.2205.13471)
 
-Cuccurullo, C., Aria, M., & Sarto, F. (2016). Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains, *Scientometrics*, DOI: 10.1007/s11192-016-1948-8 (https://doi.org/10.1007/s11192-016-1948-8)
+Ciavolino, E., Aria, M., Cheah, J. H., & Roldán, J. L. (2022). **A tale of PLS structural equation modelling: episode I—a bibliometrix citation analysis**. *Social Indicators Research*, 164(3), 1323-1348 (https://doi.org/10.1007/s11205-022-02994-7).
 
-Cuccurullo, C., Aria, M., & Sarto, F. (2015). Twenty years of research on performance management in business and public administration domains. Presentation at the *Correspondence Analysis and Related Methods conference (CARME 2015)* in September 2015 (https://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf)
+Cuccurullo, C., Aria, M., & Sarto, F. (2016). **Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains**, *Scientometrics*, DOI: 10.1007/s11192-016-1948-8 (https://doi.org/10.1007/s11192-016-1948-8)
 
-Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research on performance management in business and public administration domains. In *Academy of Management Proceedings* (Vol. 2013, No. 1, p. 14270). Academy of Management (https://doi.org/10.5465/AMBPP.2013.14270abstract)
+Cuccurullo, C., Aria, M., & Sarto, F. (2015). **Twenty years of research on performance management in business and public administration domains**. Presentation at the *Correspondence Analysis and Related Methods conference (CARME 2015)* in September 2015 (https://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf)
 
-D'Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). Academic Health Centers’ configurations, scientific productivity, and impact: insights from the Italian setting. *Health Policy*. (https://doi.org/10.1016/j.healthpol.2022.09.007)
+Cuccurullo, C., Aria, M., & Sarto, F. (2013). **Twenty years of research on performance management in business and public administration domains**. In *Academy of Management Proceedings* (Vol. 2013, No. 1, p. 14270). Academy of Management (https://doi.org/10.5465/AMBPP.2013.14270abstract)
 
-Sarto, F., Cuccurullo, C., & Aria, M. (2014). Exploring healthcare governance literature: systematic review and paths for future research. *Mecosan* (https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en)
+D'Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). **Academic Health Centers’ configurations, scientific productivity, and impact: insights from the Italian setting**. *Health Policy*. (https://doi.org/10.1016/j.healthpol.2022.09.007)
 
-Scarano, A., Aria, M., Mauriello, F., Riccardi, M. R., & Montella, A. (2023). Systematic literature review of 10 years of cyclist safety research. *Accident Analysis & Prevention*, 184, 106996 (https://doi.org/10.1016/j.aap.2023.106996).
+Sarto, F., Cuccurullo, C., & Aria, M. (2014). **Exploring healthcare governance literature: systematic review and paths for future research**. *Mecosan* (https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en)
 
-
-
-
-
-
+Scarano, A., Aria, M., Mauriello, F., Riccardi, M. R., & Montella, A. (2023). **Systematic literature review of 10 years of cyclist safety research**. *Accident Analysis & Prevention*, 184, 106996 (https://doi.org/10.1016/j.aap.2023.106996).

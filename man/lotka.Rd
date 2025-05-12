@@ -4,10 +4,10 @@
 \alias{lotka}
 \title{Lotka's law coefficient estimation}
 \usage{
-lotka(results)
+lotka(M)
 }
 \arguments{
-\item{results}{is an object of the class '\code{bibliometrix}' for which the analysis of the authors' dominance ranking is desired.}
+\item{M}{is an object of the class '\code{bibliometrixDB}'.}
 }
 \value{
 The function \code{lotka} returns a list of summary statistics of the Lotka's law estimation of an object of class \code{bibliometrix}.
@@ -19,7 +19,9 @@ the list contains the following objects:
 \code{R2} \tab   \tab Goodness of Fit\cr
 \code{fitted} \tab     \tab Fitted Values\cr
 \code{p.value} \tab     \tab Pvalue of two-sample Kolmogorov-Smirnov test between the empirical and the theoretical Lotka's Law distribution (with Beta=2)\cr
-\code{AuthorProd}    \tab   \tab Authors' Productivity frequency table}
+\code{AuthorProd}    \tab   \tab Authors' Productivity frequency table\cr
+\code{g}   \tab    \tab Lotka's law plot\cr
+\code{g_shiny}   \tab  \tab Lotka's law plot for biblioshiny}
 }
 \description{
 It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926}).\cr\cr
@@ -29,9 +31,8 @@ Reference:
 Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the Washington academy of sciences, 16(12), 317-323.\cr
 }
 \examples{
-data(scientometrics, package = "bibliometrixData")
-results <- biblioAnalysis(scientometrics)
-L <- lotka(results)
+data(management, package = "bibliometrixData")
+L <- lotka(management)
 L
 
 }

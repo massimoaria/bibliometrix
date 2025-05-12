@@ -3541,7 +3541,7 @@ body <- dashboardBody(
                       "Title terms" = "TI",
                       "Abstract terms" = "AB"
                     ),
-                    selected = "ID"
+                    selected = "DE"
                   ),
                   conditionalPanel(
                     condition = "input.CMlabeling == 'TI' | input.CMlabeling == 'AB'",

@@ -118,12 +118,13 @@ couplingMap <- function(M, analysis = "documents", field = "CR", n = 500, label.
     arrange(desc(MNLCS), .by_group = TRUE)
 
   df <- df_lab %>%
+    group_by(group) %>% 
     mutate(
       centrality = mean(pagerank_centrality),
       impact = mean(MNLCS2, na.rm = TRUE),
       impact = replace(impact, is.na(impact), 0)
     ) %>%
-    top_n(MNLCS, n = 10) %>%
+    slice_max(MNLCS, n = 10) %>%
     summarize(
       freq = freq[1],
       centrality = centrality[1] * 100,
@@ -372,8 +373,13 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams) {
 
 best_lab <- function(d, tab_global, n.labels, term) {
   tab <- tableTag(d, term)
-  tab <- data.frame(label = names(tab), value = as.numeric(tab), stringsAsFactors = FALSE)
-  tab <- tab %>%
+  tab <- tab[!is.na(names(tab)) & names(tab) != ""]
+  
+  if (length(tab) == 0) return(tibble(w = "no_label"))
+  
+  tab1 <- data.frame(label = names(tab), value = as.numeric(tab), stringsAsFactors = FALSE)
+  
+  tab1 <- tab1 %>%
     left_join(tab_global, by = "label") %>%
     mutate(
       conf = round(.data$value / .data$tot * 100, 1),
@@ -382,7 +388,26 @@ best_lab <- function(d, tab_global, n.labels, term) {
     ) %>%
     arrange(desc(.data$relevance)) %>%
     slice(1:n.labels)
-
-  # tolower(paste(tab$label," Supp ",tab$supp,"% - Conf ", tab$conf,"%", sep="", collapse="\n"))
-  tolower(paste(tab$label, " - Conf ", tab$conf, "%", sep = "", collapse = "\n"))
+  
+  tibble(w = tolower(paste(tab1$label, " - Conf ", tab1$conf, "%", sep = "", collapse = "\n")))
 }
+
+
+
+# best_lab <- function(d, tab_global, n.labels, term) {
+#   tab <- tableTag(d, term)
+#   tab1 <- data.frame(label = names(tab), value = as.numeric(tab), stringsAsFactors = FALSE)
+#   print(names(tab1))
+#   tab1 <- tab1 %>%
+#     left_join(tab_global, by = "label") %>%
+#     mutate(
+#       conf = round(.data$value / .data$tot * 100, 1),
+#       supp = round(.data$tot / n * 100, 1),
+#       relevance = round(.data$conf * .data$supp / 100, 1)
+#     ) %>%
+#     arrange(desc(.data$relevance)) %>%
+#     slice(1:n.labels)
+# 
+#   # tolower(paste(tab$label," Supp ",tab$supp,"% - Conf ", tab$conf,"%", sep="", collapse="\n"))
+#   tolower(paste(tab1$label, " - Conf ", tab1$conf, "%", sep = "", collapse = "\n"))
+# }

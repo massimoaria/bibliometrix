@@ -1,3 +1,7 @@
+bibliometrix v4.3.5 (Release date: 2025-05-11)
+* Solved several issues in convert2df()
+* Solved several issues in biblioshiny()
+
 bibliometrix v4.3.3 (Release date: 2025-03-17)
 
 Features:

@@ -18,7 +18,9 @@ downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/m
 [![](http://cranlogs.r-pkg.org/badges/grand-total/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 <p align="center">
-<img src="https://www.bibliometrix.org/logo_new.png" width="400"  />
+
+<img src="https://www.bibliometrix.org/logo_new.png" width="400"/>
+
 </p>
 
 ## Overview
@@ -123,14 +125,14 @@ library('bibliometrix')
 #> Please note that our software is open source and available for use, distributed under the MIT license.
 #> When it is used in a publication, we ask that authors properly cite the following reference:
 #> 
-#> Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, 
+#> Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis,
 #>                         Journal of Informetrics, 11(4), pp 959-975, Elsevier.
 #> 
 #> Failure to properly cite the software is considered a violation of the license.
 #>                         
 #> For information and bug reports:
 #>                         - Take a look at https://www.bibliometrix.org
-#>                         - Send an email to info@bibliometrix.org   
+#>                         - Send an email to info@bibliometrix.org
 #>                         - Write a post on https://github.com/massimoaria/bibliometrix/issues
 #>                         
 #> Help us to keep Bibliometrix and Biblioshiny free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)
@@ -263,9 +265,9 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #>  Sources (Journals, Books, etc)        281 
 #>  Documents                             898 
 #>  Annual Growth Rate %                  0 
-#>  Document Average Age                  9.19 
+#>  Document Average Age                  10.2 
 #>  Average citations per doc             37.12 
-#>  Average citations per year per doc    3.454 
+#>  Average citations per year per doc    3.099 
 #>  References                            43935 
 #>  
 #> DOCUMENT TYPES                     
@@ -350,16 +352,16 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #> Top manuscripts per citations
 #> 
 #>                                  Paper                                     DOI   TC TCperYear   NTC
-#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    166.23 15.64
-#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     84.40 17.17
-#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     31.76  3.76
-#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     41.73  9.82
-#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     29.95  5.67
-#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     16.12  2.66
-#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     20.76  3.48
-#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     13.44  2.15
-#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.75  1.81
-#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     13.09  2.40
+#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    154.36 15.64
+#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     76.73 17.17
+#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     30.32  3.76
+#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     39.12  9.82
+#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     28.45  5.67
+#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     15.48  2.66
+#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     19.61  3.48
+#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     12.92  2.15
+#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.56  1.81
+#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     12.54  2.40
 #> 
 #> 
 #> Corresponding Author's Countries
@@ -681,6 +683,16 @@ Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for
 comprehensive science mapping analysis, *Journal of Informetrics*,
 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
 (<https://doi.org/10.1016/j.joi.2017.08.007>)
+
+M. Aria, C. Cuccurullo, L. D’Aniello, M. Misuraca, M. Spano (2024).
+Comparative science mapping: a novel conceptual structure analysis with
+metadata, Scientometrics.
+(<https:://doi.org/10.1007/s11192-024-05161-6>)
+
+Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024).
+openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.
+*The R Journal*, [DOI:
+10.32614/RJ-2023-089](https://doi.org/10.32614/RJ-2023-089).
 
 Aria, M., Cuccurullo, C., D’Aniello, L., Misuraca, M., & Spano, M.
 (2022). Thematic Analysis as a New Culturomic Tool: The Social Media

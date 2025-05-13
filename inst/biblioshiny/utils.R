@@ -57,7 +57,7 @@ merge_files <- function(files) {
     extF <- ext[i]
     filename <- file[i]
 
-    switch(extF,
+    switch(tolower(extF),
       xlsx = {
         Mfile[[i]] <- readxl::read_excel(filename, col_types = "text") %>% as.data.frame()
         Mfile[[i]]$PY <- as.numeric(Mfile[[i]]$PY)
@@ -2048,10 +2048,10 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
   vn$nodes$fixed.y[nr + 1] <- TRUE
   vn$nodes$shadow[nr + 1] <- FALSE
 
-  coords <- vn$nodes[, c("x", "y")] %>%
-    as.matrix()
-
-  coords[, 2] <- coords[, 2]^(1 / 2)
+  # coords <- vn$nodes[, c("x", "y")] %>%
+  #   as.matrix()
+  # 
+  # coords[, 2] <- coords[, 2]^(1 / 2)
 
   tooltipStyle <- ("position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;
                   font-size:12px;font-color:black;background-color:white;")
@@ -2065,11 +2065,31 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
 
   for (i in 1:nrow(vn$nodes)) vn$nodes$font.color[i] <- adjustcolor(vn$nodes$font.color[i], alpha.f = opacity_font[i])
 
+  ### for the moment logo is not shown
+  vn$nodes <- vn$nodes %>% filter(group!="logo")
+  
+  x <- vn$nodes$x
+  y <- vn$nodes$y
+  vn$nodes$x <- y
+  vn$nodes$y <- x
+  
+  vn$nodes <- assign_horizontal_coords_clusters_adaptive(vn$nodes)
+  
+  vn$nodes <- add_time_axis(vn$nodes)
+  
+  vn$nodes$fixed.x <- FALSE
+  vn$nodes$fixed.y <- TRUE
+  
+  coords <- vn$nodes[, c("x", "y")] %>%
+    as.matrix()
+  
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type = "full", smooth = TRUE, physics = FALSE) %>%
     visNetwork::visNodes(shadow = vn$nodes$shadow, shape = shape, size = vn$nodes$size, font = list(color = vn$nodes$font.color, size = vn$nodes$font.size, vadjust = vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
-    visNetwork::visEdges(smooth = list(type = "horizontal"), arrows = list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>%
+    #visNetwork::visEdges(smooth = list(type = "horizontal"), arrows = list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>%
+    visNetwork::visEdges(smooth = list(enabled = TRUE, type = "dynamic", roundness = 0.6),
+                         arrows = list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>%
     visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag = F, tooltipStyle = tooltipStyle, zoomSpeed = 0.2) %>%
     visNetwork::visOptions(
       highlightNearest = list(enabled = T, hover = T, degree = list(from = 1), algorithm = "hierarchical"), nodesIdSelection = F,
@@ -2077,6 +2097,56 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
     )
 
   return(list(VIS = VIS, vn = vn, type = "historiograph", curved = curved))
+}
+
+## calculate node coordinates in historiograph
+assign_horizontal_coords_clusters_adaptive <- function(nodes_df, spacing_base = 1.0, cluster_spacing = 6) {
+  
+  clusters <- nodes_df %>%
+    count(color, name = "n_cluster") %>%
+    arrange(desc(n_cluster)) %>%
+    mutate(cluster_id = row_number(),
+           cluster_center = (cluster_id - mean(cluster_id)) * cluster_spacing)
+  
+  nodes_df <- nodes_df %>%
+    left_join(clusters, by = "color")
+  
+  nodes_df <- nodes_df %>%
+    group_by(years, color) %>%
+    mutate(
+      n_nodes = n(),
+      spacing = spacing_base * n_nodes,  # USA direttamente il numero di nodi
+      x = cluster_center[1] + spacing[1] * (row_number() - (n() + 1)/2)
+    ) %>%
+    ungroup()
+  
+  return(nodes_df)
+}
+
+# add time axis in historiograph
+
+add_time_axis <- function(nodes_df, offset = 1) {
+  # Crea nodi anno
+  year_nodes <- unique(nodes_df$years) %>%
+    sort() %>%
+    tibble::tibble(year = .) %>%
+    mutate(
+      id = paste0("year_", year),
+      label = as.character(year),
+      x = min(nodes_df$x, na.rm = TRUE) - offset,
+      y = year,
+      shape = "text",
+      size = 1,
+      color = "white",  # invisibile
+      font.color = "#00000070",
+      font.size = 20,
+      shadow = FALSE
+    )
+  
+  # Unisci ai nodi originali
+  nodes_all <- dplyr::bind_rows(nodes_df, year_nodes)
+  
+  return(nodes_all)
 }
 
 

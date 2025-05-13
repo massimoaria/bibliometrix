@@ -2030,23 +2030,22 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
   vn$nodes$shape <- "dot"
   vn$nodes$shadow <- TRUE
 
-  nr <- nrow(vn$nodes)
-  y <- max(vn$nodes$y)
-
-  vn$nodes[nr + 1, c("id", "title", "label", "color", "font.color")] <-
-    c(rep("logo", 3), "black", "white")
-  vn$nodes$x[nr + 1] <- max(vn$nodes$x, na.rm = TRUE) + 1
-  vn$nodes$y[nr + 1] <- y
-  vn$nodes$size[nr + 1] <- vn$nodes$size[nr] * 4
-  vn$nodes$years[nr + 1] <- as.numeric(vn$nodes$x[nr + 1])
-  vn$nodes$font.size[nr + 1] <- vn$nodes$font.size[nr]
-  vn$nodes$group[nr + 1] <- "logo"
-  vn$nodes$shape[nr + 1] <- "image"
-  vn$nodes$image[nr + 1] <- "logo.jpg"
-  vn$nodes$fixed.x <- TRUE
-  vn$nodes$fixed.y <- FALSE
-  vn$nodes$fixed.y[nr + 1] <- TRUE
-  vn$nodes$shadow[nr + 1] <- FALSE
+  # nr <- nrow(vn$nodes)
+  # y <- max(vn$nodes$y)
+  # vn$nodes[nr + 1, c("id", "title", "label", "color", "font.color")] <-
+  #   c(rep("logo", 3), "black", "white")
+  # vn$nodes$x[nr + 1] <- max(vn$nodes$x, na.rm = TRUE) + 1
+  # vn$nodes$y[nr + 1] <- y
+  # vn$nodes$size[nr + 1] <- vn$nodes$size[nr] * 4
+  # vn$nodes$years[nr + 1] <- as.numeric(vn$nodes$x[nr + 1])
+  # vn$nodes$font.size[nr + 1] <- vn$nodes$font.size[nr]
+  # vn$nodes$group[nr + 1] <- "logo"
+  # vn$nodes$shape[nr + 1] <- "image"
+  # vn$nodes$image[nr + 1] <- "logo.jpg"
+  # vn$nodes$fixed.x <- TRUE
+  # vn$nodes$fixed.y <- FALSE
+  # vn$nodes$fixed.y[nr + 1] <- TRUE
+  # vn$nodes$shadow[nr + 1] <- FALSE
 
   # coords <- vn$nodes[, c("x", "y")] %>%
   #   as.matrix()
@@ -2064,9 +2063,6 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
   vn$nodes$size[nrow(vn$nodes)] <- max(5 * nodesize)
 
   for (i in 1:nrow(vn$nodes)) vn$nodes$font.color[i] <- adjustcolor(vn$nodes$font.color[i], alpha.f = opacity_font[i])
-
-  ### for the moment logo is not shown
-  vn$nodes <- vn$nodes %>% filter(group!="logo")
   
   x <- vn$nodes$x
   y <- vn$nodes$y
@@ -2074,21 +2070,20 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
   vn$nodes$y <- x
   
   vn$nodes <- assign_horizontal_coords_clusters_adaptive(vn$nodes)
-  
-  vn$nodes <- add_time_axis(vn$nodes)
-  
+
   vn$nodes$fixed.x <- FALSE
-  vn$nodes$fixed.y <- TRUE
+  vn$nodes$fixed.y <-TRUE
   
   coords <- vn$nodes[, c("x", "y")] %>%
     as.matrix()
+  coords[,2] <- coords[,2]
   
   VIS <-
     visNetwork::visNetwork(nodes = vn$nodes, edges = vn$edges, type = "full", smooth = TRUE, physics = FALSE) %>%
     visNetwork::visNodes(shadow = vn$nodes$shadow, shape = shape, size = vn$nodes$size, font = list(color = vn$nodes$font.color, size = vn$nodes$font.size, vadjust = vn$nodes$font.vadjust)) %>%
     visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
     #visNetwork::visEdges(smooth = list(type = "horizontal"), arrows = list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>%
-    visNetwork::visEdges(smooth = list(enabled = TRUE, type = "dynamic", roundness = 0.6),
+    visNetwork::visEdges(smooth = list(enabled = TRUE, type = "dynamic", roundness = 0.3),
                          arrows = list(to = list(enabled = TRUE, scaleFactor = 0.5))) %>%
     visNetwork::visInteraction(dragNodes = T, navigationButtons = F, hideEdgesOnDrag = F, tooltipStyle = tooltipStyle, zoomSpeed = 0.2) %>%
     visNetwork::visOptions(
@@ -2100,7 +2095,7 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
 }
 
 ## calculate node coordinates in historiograph
-assign_horizontal_coords_clusters_adaptive <- function(nodes_df, spacing_base = 1.0, cluster_spacing = 6) {
+assign_horizontal_coords_clusters_adaptive <- function(nodes_df, spacing_base = 1.0, cluster_spacing = 6, tol=0.15) {
   
   clusters <- nodes_df %>%
     count(color, name = "n_cluster") %>%
@@ -2116,39 +2111,12 @@ assign_horizontal_coords_clusters_adaptive <- function(nodes_df, spacing_base = 
     mutate(
       n_nodes = n(),
       spacing = spacing_base * n_nodes,  # USA direttamente il numero di nodi
-      x = cluster_center[1] + spacing[1] * (row_number() - (n() + 1)/2)
+      x = (cluster_center[1] + spacing[1] * (row_number() - (n() + 1)/2))*runif(1,1-tol,1+tol)
     ) %>%
     ungroup()
   
   return(nodes_df)
 }
-
-# add time axis in historiograph
-
-add_time_axis <- function(nodes_df, offset = 1) {
-  # Crea nodi anno
-  year_nodes <- unique(nodes_df$years) %>%
-    sort() %>%
-    tibble::tibble(year = .) %>%
-    mutate(
-      id = paste0("year_", year),
-      label = as.character(year),
-      x = min(nodes_df$x, na.rm = TRUE) - offset,
-      y = year,
-      shape = "text",
-      size = 1,
-      color = "white",  # invisibile
-      font.color = "#00000070",
-      font.size = 20,
-      shadow = FALSE
-    )
-  
-  # Unisci ai nodi originali
-  nodes_all <- dplyr::bind_rows(nodes_df, year_nodes)
-  
-  return(nodes_all)
-}
-
 
 ## Pajek Export
 graph2Pajek <- function(graph, filename = "my_pajek_network") {

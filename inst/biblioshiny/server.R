@@ -4262,7 +4262,7 @@ To ensure the functionality of Biblioshiny,
   
   output$histPlotVis <- renderVisNetwork({  
     g <- Hist()
-    values$histPlotVis<-hist2vis(values$histPlot,curved=FALSE, 
+    values$histPlotVis<-hist2vis(values$histPlot,curved=TRUE, 
                                  labelsize=input$histlabelsize, 
                                  nodesize=input$histsize,
                                  opacity=0.7,

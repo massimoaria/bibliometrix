@@ -307,22 +307,6 @@ histPlot <- function(histResults, n = 20, size = 5, labelsize = 5, remove.isolat
 }
 
 
-# ### layout function
-# histLayout <- function(NET,bsk.network,Years,edgesize=edgesize){
-#
-#   diag(NET)=0
-#
-#   up=triu(NET)
-#
-#   A=apply(NET,2,function(x){
-#     x[x>0]=sum(x)
-#     return(x)
-#   })
-#    E(bsk.network)$width=log(t(A)[t(A)>0],base=exp(1))*edgesize
-#
-#    return(bsk.network)
-# }
-
 delete.isolates <- function(graph, mode = "all") {
   isolates <- which(degree(graph, mode = mode) == 0) - 1
   delete.vertices(graph, names(isolates))

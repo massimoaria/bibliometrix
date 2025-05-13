@@ -679,77 +679,77 @@ net <- histPlot(histResults, n=20, size = FALSE,label="short")
 
 ## Main Authors’ references (about bibliometrics)
 
-Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for
-comprehensive science mapping analysis, *Journal of Informetrics*,
+Aria, M. & Cuccurullo, C. (2017). **bibliometrix: An R-tool for
+comprehensive science mapping analysis**, *Journal of Informetrics*,
 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
 (<https://doi.org/10.1016/j.joi.2017.08.007>)
 
 M. Aria, C. Cuccurullo, L. D’Aniello, M. Misuraca, M. Spano (2024).
-Comparative science mapping: a novel conceptual structure analysis with
-metadata, Scientometrics.
+**Comparative science mapping: a novel conceptual structure analysis
+with metadata**, *Scientometrics*.
 (<https:://doi.org/10.1007/s11192-024-05161-6>)
 
 Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024).
-openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.
+**openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex**.
 *The R Journal*, [DOI:
 10.32614/RJ-2023-089](https://doi.org/10.32614/RJ-2023-089).
 
 Aria, M., Cuccurullo, C., D’Aniello, L., Misuraca, M., & Spano, M.
-(2022). Thematic Analysis as a New Culturomic Tool: The Social Media
-Coverage on COVID-19 Pandemic in Italy. *Sustainability*, 14(6), 3643,
+(2022). **Thematic Analysis as a New Culturomic Tool: The Social Media
+Coverage on COVID-19 Pandemic in Italy**. *Sustainability*, 14(6), 3643,
 (<https://doi.org/10.3390/su14063643>)
 
-Aria M., Misuraca M., Spano M. (2020) Mapping the evolution of social
-research and data science on 30 years of Social Indicators Research,
+Aria M., Misuraca M., Spano M. (2020) **Mapping the evolution of social
+research and data science on 30 years of Social Indicators Research**,
 *Social Indicators Research*. (DOI:
 <https://doi.org/10.1007/s11205-020-02281-3>)
 
-Aria M., Alterisio A., Scandurra A, Pinelli C., D’Aniello B, (2021) The
-scholar’s best friend: research trends in dog cognitive and behavioural
-studies, *Animal Cognition*.
+Aria M., Alterisio A., Scandurra A, Pinelli C., D’Aniello B, (2021)
+**The scholar’s best friend: research trends in dog cognitive and
+behavioural studies**, *Animal Cognition*.
 (<https://doi.org/10.1007/s10071-020-01448-2>)
 
-Belfiore, A., Cuccurullo, C., & Aria, M. (2022). IoT in healthcare: A
-scientometric analysis. *Technological Forecasting and Social Change*,
+Belfiore, A., Cuccurullo, C., & Aria, M. (2022). **IoT in healthcare: A
+scientometric analysis**. *Technological Forecasting and Social Change*,
 184, 122001. (<https://doi.org/10.1016/j.techfore.2022.122001>)
 
-Belfiore, A., Salatino, A., & Osborne, F. (2022). Characterising
-Research Areas in the field of AI. *arXiv preprint
+Belfiore, A., Salatino, A., & Osborne, F. (2022). **Characterising
+Research Areas in the field of AI**. *arXiv preprint
 arXiv:2205.13471*.(<https://doi.org/10.48550/arXiv.2205.13471>)
 
-Ciavolino, E., Aria, M., Cheah, J. H., & Roldán, J. L. (2022). A tale of
-PLS structural equation modelling: episode I—a bibliometrix citation
-analysis. *Social Indicators Research*, 164(3), 1323-1348
+Ciavolino, E., Aria, M., Cheah, J. H., & Roldán, J. L. (2022). **A tale
+of PLS structural equation modelling: episode I—a bibliometrix citation
+analysis**. *Social Indicators Research*, 164(3), 1323-1348
 (<https://doi.org/10.1007/s11205-022-02994-7>).
 
-Cuccurullo, C., Aria, M., & Sarto, F. (2016). Foundations and trends in
-performance management. A twenty-five years bibliometric analysis in
-business and public administration domains, *Scientometrics*, DOI:
+Cuccurullo, C., Aria, M., & Sarto, F. (2016). **Foundations and trends
+in performance management. A twenty-five years bibliometric analysis in
+business and public administration domains**, *Scientometrics*, DOI:
 10.1007/s11192-016-1948-8 (<https://doi.org/10.1007/s11192-016-1948-8>)
 
-Cuccurullo, C., Aria, M., & Sarto, F. (2015). Twenty years of research
-on performance management in business and public administration domains.
-Presentation at the *Correspondence Analysis and Related Methods
-conference (CARME 2015)* in September 2015
+Cuccurullo, C., Aria, M., & Sarto, F. (2015). **Twenty years of research
+on performance management in business and public administration
+domains**. Presentation at the *Correspondence Analysis and Related
+Methods conference (CARME 2015)* in September 2015
 (<https://www.bibliometrix.org/documents/2015Carme_cuccurulloetal.pdf>)
 
-Cuccurullo, C., Aria, M., & Sarto, F. (2013). Twenty years of research
-on performance management in business and public administration domains.
-In *Academy of Management Proceedings* (Vol. 2013, No. 1, p. 14270).
-Academy of Management
+Cuccurullo, C., Aria, M., & Sarto, F. (2013). **Twenty years of research
+on performance management in business and public administration
+domains**. In *Academy of Management Proceedings* (Vol. 2013, No. 1,
+p. 14270). Academy of Management
 (<https://doi.org/10.5465/AMBPP.2013.14270abstract>)
 
-D’Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). Academic
+D’Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). **Academic
 Health Centers’ configurations, scientific productivity, and impact:
-insights from the Italian setting. *Health Policy*.
+insights from the Italian setting**. *Health Policy*.
 (<https://doi.org/10.1016/j.healthpol.2022.09.007>)
 
-Sarto, F., Cuccurullo, C., & Aria, M. (2014). Exploring healthcare
-governance literature: systematic review and paths for future research.
-*Mecosan*
+Sarto, F., Cuccurullo, C., & Aria, M. (2014). **Exploring healthcare
+governance literature: systematic review and paths for future
+research**. *Mecosan*
 (<https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en>)
 
 Scarano, A., Aria, M., Mauriello, F., Riccardi, M. R., & Montella, A.
-(2023). Systematic literature review of 10 years of cyclist safety
-research. *Accident Analysis & Prevention*, 184, 106996
+(2023). **Systematic literature review of 10 years of cyclist safety
+research**. *Accident Analysis & Prevention*, 184, 106996
 (<https://doi.org/10.1016/j.aap.2023.106996>).

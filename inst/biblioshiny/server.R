@@ -482,6 +482,7 @@ To ensure the functionality of Biblioshiny,
     inFile <- input$fileMerge
     
     if (!is.null(inFile)){
+      #save(inFile,file="prova.rdata")
       M <- merge_files(inFile)
     } else if (is.null(inFile)) {return(NULL)}
     

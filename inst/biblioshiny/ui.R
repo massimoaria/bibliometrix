@@ -5351,7 +5351,7 @@ body <- dashboardBody(
                         label = "Node size",
                         min = 0,
                         max = 20,
-                        value = 4, step = 1
+                        value = 2, step = 1
                       )
                     )
                   )

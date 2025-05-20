@@ -4,6 +4,14 @@ libraries <- function() {
     install.packages("pak")
     require(pak, quietly = TRUE)
   }
+  if (!require(httr2, quietly = TRUE)) {
+    install.packages("httr2")
+    require(httr2, quietly = TRUE)
+  }
+  if (!(require(base64enc))) {
+    pkg_install("base64enc")
+    require(base64enc)
+  }
   if (!(require(bibliometrix))) {
     pkg_install("bibliometrix")
     require(bibliometrix)

@@ -1,6 +1,7 @@
 source("utils.R", local=TRUE)
 source("libraries.R", local=TRUE)
 source("biblioShot.R", local=TRUE)
+source("biblioAI.R", local=TRUE)
 
 suppressMessages(libraries())
 
@@ -107,6 +108,14 @@ To ensure the functionality of Biblioshiny,
   values$ApiOk <- 0
   values$checkControlBar <-FALSE
   
+  ## gemini api
+  home <- homeFolder()
+  path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
+  # check if sub directory exists
+  values$geminiAPI <- load_api_key(path_gemini_key)
+  values$collection_description <- NULL
+  values$gemini_additional <- NULL
+  
   ## NOTIFICATION ITEM ----
   
   output$notificationMenu <- renderMenu({
@@ -195,6 +204,57 @@ To ensure the functionality of Biblioshiny,
     updateTabItems(session, "sidebarmenu", "mergeData")
   })
   
+  
+  ## observe Gemini copy2clipboard button
+  observeEvent(input$copy_btn, {
+    content <- geminiSave(values, input$sidebarmenu, type="clip")
+    copy_to_clipboard(content)
+  })
+  
+  ## observe Gemini Save button
+  observeEvent(input$save_btn, {
+    geminiSave(values, input$sidebarmenu, type="save")
+  })
+  
+  ## observe gemini generate button
+  observeEvent(input$gemini_btn, {
+    values$gemini_additional <- input$gemini_additional ## additional info to Gemini prompt
+    values <- geminiWaitingMessage(values, input$sidebarmenu)
+    values <- geminiGenerate(values, input$sidebarmenu, values$gemini_additional,values$gemini_model_parameters, input)
+  })
+  
+  observeEvent(input$applyLoad,
+               {
+                 output$collection_descriptionUI <- renderUI({
+                   textAreaInput(
+                     inputId = "collection_description",
+                     label = "Brief description about your collection",
+                     placeholder = "Please provide a brief description of your bibliographic collection (e.g., source, type of content, domain) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
+                     value = NULL,
+                     rows = 3,
+                     width = "100%"
+                   )
+                 })
+               })
+  
+  observeEvent(values$M,{
+    updateTextAreaInput(
+      session = getDefaultReactiveDomain(),
+      inputId = "collection_description",
+      label = "Brief description about your collection",
+      value = values$collection_description
+    )
+  })
+  
+  observeEvent(eventExpr = {
+    input$coollection_description},
+    handlerExpr = {
+      if (input$collection_description!="" & nchar(input$collection_description)>1){
+        values$collection_description <- input$collection_description
+      }
+    },ignoreNULL = TRUE)
+  
+  
   ## Load Menu ----
   
   DATAloading<- eventReactive(input$applyLoad,{
@@ -214,6 +274,7 @@ To ensure the functionality of Biblioshiny,
       values$rest_sidebar <- TRUE
       values$missTags <- NULL
       values$menu <- menuList(values)
+      values$collection_description <- "Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020, Source: WoS."
       #showModal(missingModal(session))
       return()
     }
@@ -1284,6 +1345,13 @@ To ensure the functionality of Biblioshiny,
     } else {
       popUp(type="error")
     }
+  })
+  
+  # gemini button for word network
+  output$MainInfoGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$MainInfoGemini, values)
+    
   })
   
   # Annual Production ----
@@ -3438,6 +3506,13 @@ To ensure the functionality of Biblioshiny,
     values$cocOverlay
   })
   
+  # gemini button for word network
+  output$cocGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$cocGemini, values)
+    
+  })
+  
   output$network.coc <- downloadHandler(
     filename = function() {
       paste("Co_occurrence_network-", Sys.Date(), ".zip", sep="")
@@ -3534,6 +3609,13 @@ To ensure the functionality of Biblioshiny,
     values <- CAmap(input,values)
     values$plotCS <- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
     values$dendCS <- dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
+  })
+  
+  # gemini button for correspondence analysis
+  output$CSGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$CSGemini, values)
+    
   })
   
   output$FAplot.save <- downloadHandler(
@@ -3668,14 +3750,21 @@ To ensure the functionality of Biblioshiny,
     values$TM$clusters_orig <- values$TM$clusters
     values$TM$clusters <- values$TM$clusters[,c(9,5:8,11)]
     names(values$TM$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
-    
+    values$TMmap <- plot.ly(values$TM$map, size=0.07, aspectratio = 1.3, customdata=values$TM$clusters$color)
     validate(
       need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
     )
   })
   output$TMPlot <- renderPlotly({
     TMAP()
-    plot.ly(values$TM$map, size=0.07, aspectratio = 1.3, customdata=values$TM$clusters$color)
+    values$TMmap
+  })
+  
+  # gemini button for Thematic Map
+  output$TMGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$TMGemini, values)
+    
   })
   
   ### click cluster networks
@@ -3866,12 +3955,18 @@ To ensure the functionality of Biblioshiny,
       values$nexus$Data <- values$nexus$Data[values$nexus$Data$Inc_index>0,-c(4,8)]
       values$TEplot <- plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE, label_size = input$sizeTE*20)
     }
-    
   })
   
   output$TEPlot <- visNetwork::renderVisNetwork({
     TEMAP()
     values$TEplot
+  })
+  
+  # gemini button for word network
+  output$TEGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$TEGemini, values)
+    
   })
   
   session$onFlushed(function() {
@@ -3897,14 +3992,6 @@ To ensure the functionality of Biblioshiny,
       }
       plot2png(values$TEplot, filename= filenameTE, 
                zoom = 2, type="vis", tmpdir=tmpdir)
-      # screenshot(
-      #   filename = paste("ThematicEvolution_", Sys.Date(), ".png", sep=""),
-      #   id = "TEPlot",
-      #   scale = 1,
-      #   timer = 0,
-      #   download = TRUE,
-      #   server_dir = NULL
-      # )
       zip::zip(file,files)
     },
     contentType = "zip"
@@ -4187,6 +4274,13 @@ To ensure the functionality of Biblioshiny,
     values$cocitOverlay
   })
   
+  # gemini button for co-citation network
+  output$cocitGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$cocitGemini, values)
+    
+  })
+  
   output$network.cocit <- downloadHandler(
     filename = function() {
       paste("Co_citation_network-", Sys.Date(), ".zip", sep="")
@@ -4280,6 +4374,13 @@ To ensure the functionality of Biblioshiny,
              selection=FALSE)
   })
   
+  # gemini button for word network
+  output$histGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$histGemini, values)
+    
+  })
+  
   observeEvent(input$reportHIST,{
     if(!is.null(values$histResults$histData)){
       sheetname <- "Historiograph"
@@ -4321,6 +4422,13 @@ To ensure the functionality of Biblioshiny,
   output$colOverlay <- renderPlotly({
     COLnetwork()
     values$colOverlay
+  })
+  
+  # gemini button for word network
+  output$colGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$colGemini, values)
+    
   })
   
   output$network.col <- downloadHandler(
@@ -4643,6 +4751,34 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$h,{
     values$h <- as.numeric(input$h)
+  })
+  
+  output$apiStatus <- renderUI({
+    if (values$geminiAPI){
+      last <- showGeminiAPI()
+      output$status <- renderText(paste0("✅ API key has been set: ",last))
+    }
+  })
+  
+  observeEvent(input$set_key, {
+    key <- input$api_key
+    last <- setGeminiAPI(key)
+    
+    if (is.na(last)){
+      output$apiStatus <- renderUI({
+        output$status <- renderText(paste0("❌ API key seems tto be not valid"))
+      })
+      values$geminiAPI <- FALSE
+    } else {
+      output$apiStatus <- renderUI({
+        output$status <- renderText(paste0("✅ API key has been set: ",last))
+      })
+      values$geminiAPI <- TRUE
+      home <- homeFolder()
+      path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
+      writeLines(Sys.getenv("GEMINI_API_KEY"), path_gemini_key)
+    }
+    
   })
   
 }

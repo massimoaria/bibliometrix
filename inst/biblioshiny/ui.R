@@ -136,7 +136,8 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       menuSubItem("API", tabName = "gathData", icon = icon("chevron-right", lib = "glyphicon")),
       menuSubItem("Merge Collections", tabName = "mergeData", icon = icon("chevron-right", lib = "glyphicon"))
     ),
-    menuItemOutput("rest_of_sidebar")
+    menuItemOutput("rest_of_sidebar"),
+    menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
   ),
   textOutput("res"),
   width = 300
@@ -284,6 +285,7 @@ body <- dashboardBody(
             ),
             column(
               9,
+              uiOutput("collection_descriptionUI"),
               shinycssloaders::withSpinner(DT::DTOutput("contents"))
             ),
             column(
@@ -710,6 +712,7 @@ body <- dashboardBody(
           )
         ),
         fluidRow(
+          #div(id = "valuebox-container",
           tabsetPanel(
             type = "tabs", id = "maininfo",
             tabPanel(
@@ -745,8 +748,21 @@ body <- dashboardBody(
             tabPanel("Table",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 700)),
               align = "center"
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("MainInfoGeminiUI"))
+                  )
+                )
+              )
             )
           )
+          #) # end div
         )
       )
     ),
@@ -4064,6 +4080,18 @@ body <- dashboardBody(
             tabPanel(
               "Degree Plot",
               shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh"))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("cocGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -4307,6 +4335,18 @@ body <- dashboardBody(
             tabPanel(
               "Documents",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument"))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("TMGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -4670,7 +4710,19 @@ body <- dashboardBody(
                 "Documents",
                 shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument5"))
               )
-            ))
+            )),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("TEGeminiUI"))
+                  )
+                )
+              )
+            )
           )
         )
       )
@@ -4913,6 +4965,18 @@ body <- dashboardBody(
             tabPanel(
               "Articles by Cluster",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD"))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("CSGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -5248,6 +5312,18 @@ body <- dashboardBody(
             tabPanel(
               "Degree Plot",
               shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height = 700))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("cocitGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -5377,6 +5453,18 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("histGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -5711,6 +5799,18 @@ body <- dashboardBody(
             tabPanel(
               "Degree Plot",
               shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh"))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("colGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -6027,7 +6127,18 @@ body <- dashboardBody(
         ), column(
           6
           ### To insert settings for default path, etc.
-        ))
+        )),
+        hr(),
+        h3("BIBLIO AI Api Key"),
+        h4("Set a valid API Key to use BIBLIO AI features powered by Google Gemini."),
+        h5(HTML(
+          'If you don’t have one yet, you can generate it by logging into <a href="https://aistudio.google.com/app/apikey" target="_blank">https://aistudio.google.com/app/apikey</a> with your Google account and creating a new API Key.'
+        )),
+        br(),
+        passwordInput("api_key", "Enter your Gemini API Key:", ""),
+        actionButton("set_key", "Set API Key",style = "color:white;",),
+        br(),
+        uiOutput("apiStatus"),
       )
     )
   )

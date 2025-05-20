@@ -450,17 +450,7 @@ notifications <- function() {
   }
 
   ## check if a file exists on the local machine and load it
-  switch(Sys.info()[["sysname"]],
-    Windows = {
-      home <- Sys.getenv("R_USER")
-    },
-    Linux = {
-      home <- Sys.getenv("HOME")
-    },
-    Darwin = {
-      home <- Sys.getenv("HOME")
-    }
-  )
+  home <- homeFolder()
 
   file <- paste(home, "/biblioshiny_notifications.csv", sep = "")
   fileTrue <- file.exists(file)
@@ -555,6 +545,7 @@ initial <- function(values) {
   values$citShortlabel <- "NA"
   values$S <- list("NA")
   values$GR <- "NA"
+  values$collection_description <- NULL
   ### column to export in TALL
   values$corpusCol <- c("Title" = "TI", "Abstract" = "AB", "Author's Keywords" = "DE")
   values$metadataCol <- c("Publication Year" = "PY", "Document Type" = "DT", "DOI" = "DI", "Open Access" = "OA", "Language" = "LA", "First Author" = "AU1")
@@ -1953,6 +1944,8 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
 
   vn <- visNetwork::toVisNetworkData(net$net)
 
+  vn$nodes$short_label <- LABEL
+  
   if (labeltype != "short") {
     vn$nodes$label <- paste0(vn$nodes$years, ": ", LABEL)
   } else {
@@ -2007,9 +2000,8 @@ hist2vis <- function(net, labelsize = 2, nodesize = 2, curved = FALSE, shape = "
   }))
 
   vn$nodes <- vn$nodes %>%
-    # select(!LCS.y) %>%
-    # rename(LCS = LCS.x) %>%
-    mutate(title = paste("<b>Title</b>: ",
+    mutate(title_orig = title,
+      title = paste("<b>Title</b>: ",
       title,
       "<br><b>DOI</b>: ",
       paste0(
@@ -2555,19 +2547,8 @@ screenSh <- function(p, zoom = 2, type = "vis") {
 }
 
 screenShot <- function(p, filename, type) {
-  switch(Sys.info()[["sysname"]],
-    Windows = {
-      home <- Sys.getenv("R_USER")
-      home <- gsub("/Documents", "", home)
-    },
-    Linux = {
-      home <- Sys.getenv("HOME")
-    },
-    Darwin = {
-      home <- Sys.getenv("HOME")
-    }
-  )
-
+  home <- homeFolder()
+  
   # setting up the main directory
   # filename <- paste0(file.path(home,"downloads/"),filename)
   if ("downloads" %in% tolower(dir(home))) {
@@ -3006,7 +2987,7 @@ menuList <- function(values) {
 
   L[[length(L) + 1]] <- menuItem("TALL Export", tabName = "tall", icon = icon("text-size", lib = "glyphicon"))
 
-  L[[length(L) + 1]] <- menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
+  # L[[length(L) + 1]] <- menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
 
   if (!isTRUE(TC)) {
     out <- c(
@@ -3047,3 +3028,22 @@ menuList <- function(values) {
 
   return(L)
 }
+
+
+# find home folder
+homeFolder <- function() {
+  switch(Sys.info()[["sysname"]],
+         Windows = {
+           home <- Sys.getenv("R_USER")
+         },
+         Linux = {
+           home <- Sys.getenv("HOME")
+         },
+         Darwin = {
+           home <- Sys.getenv("HOME")
+         }
+  )
+  return(home)
+}
+
+

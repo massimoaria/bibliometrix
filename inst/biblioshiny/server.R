@@ -226,7 +226,6 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$applyLoad,
                {
                  output$collection_descriptionUI <- renderUI({
-                   print("initial")
                    textAreaInput(
                      inputId = "collection_description",
                      label = "Brief description about your collection",

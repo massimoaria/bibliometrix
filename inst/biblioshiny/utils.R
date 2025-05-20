@@ -545,6 +545,7 @@ initial <- function(values) {
   values$citShortlabel <- "NA"
   values$S <- list("NA")
   values$GR <- "NA"
+  values$collection_description <- NULL
   ### column to export in TALL
   values$corpusCol <- c("Title" = "TI", "Abstract" = "AB", "Author's Keywords" = "DE")
   values$metadataCol <- c("Publication Year" = "PY", "Document Type" = "DT", "DOI" = "DI", "Open Access" = "OA", "Language" = "LA", "First Author" = "AU1")
@@ -2986,7 +2987,7 @@ menuList <- function(values) {
 
   L[[length(L) + 1]] <- menuItem("TALL Export", tabName = "tall", icon = icon("text-size", lib = "glyphicon"))
 
-  L[[length(L) + 1]] <- menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
+  # L[[length(L) + 1]] <- menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
 
   if (!isTRUE(TC)) {
     out <- c(

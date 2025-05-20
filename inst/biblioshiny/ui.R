@@ -136,7 +136,8 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       menuSubItem("API", tabName = "gathData", icon = icon("chevron-right", lib = "glyphicon")),
       menuSubItem("Merge Collections", tabName = "mergeData", icon = icon("chevron-right", lib = "glyphicon"))
     ),
-    menuItemOutput("rest_of_sidebar")
+    menuItemOutput("rest_of_sidebar"),
+    menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
   ),
   textOutput("res"),
   width = 300

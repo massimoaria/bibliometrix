@@ -576,6 +576,7 @@ body <- dashboardBody(
             ),
             column(
               9,
+              uiOutput("collection_description_mergeUI"),
               shinycssloaders::withSpinner(DT::DTOutput("contentsMerge"))
             ),
             column(
@@ -2506,7 +2507,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))
             ),
             tabPanel(
-              "Table - RPY",
+              "Table - RPYS",
               shinycssloaders::withSpinner(DT::DTOutput(
                 outputId = "rpysTable"
               ))
@@ -2516,6 +2517,18 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(
                 outputId = "crTable"
               ))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("rpysGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -3453,6 +3466,18 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
+            ),
+            tabPanel(
+              "BIBLIO AI",
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("trendTopicsGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )

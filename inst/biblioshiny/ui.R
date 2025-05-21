@@ -45,6 +45,7 @@ export_bttn <- list(
 )
 
 ## load content of Info page
+biblioAI <- helpContent()$biblioAI
 info <- helpContent()$info
 pubs <- helpContent()$publications
 ## Header ----
@@ -127,8 +128,9 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
     menuItem("biblioshiny", tabName = "biblioshinyy", icon = fa_i(name = "house-user")),
     menuItem("Info",
       tabName = "info", icon = fa_i(name = "circle-info"),
-      menuSubItem("Supported Files", tabName = "supFiles", icon = fa_i(name = "circle-info")),
-      menuSubItem("Team's Publications", tabName = "pubs", icon = fa_i(name = "circle-info"))
+      menuSubItem("Biblio AI", tabName = "biblioAI", icon = fa_i(name = "microchip")),
+      menuSubItem("Supported Files", tabName = "supFiles", icon = fa_i(name = "database")),
+      menuSubItem("Team's Publications", tabName = "pubs", icon = fa_i(name = "book"))
     ),
     menuItem("Data",
       tabName = "uploadData", icon = fa_i(name = "file-import"),
@@ -197,7 +199,7 @@ body <- dashboardBody(
           ),
           column(
             12,
-            div(img(src = "logo.jpg", height = "35%", width = "35%"), style = "text-align: center;")
+            div(img(src = "logoAI.jpg", height = "35%", width = "35%"), style = "text-align: center;")
           ),
           column(
             12,
@@ -231,6 +233,19 @@ body <- dashboardBody(
               style = "text-align:center; font-size:19px;"
             ))
           )
+        )
+      )
+    ),
+    tabItem(
+      "biblioAI",
+      fluidPage(
+        fluidRow(
+          column(1),
+          column(
+            10,
+            HTML(biblioAI)
+          ),
+          column(1)
         )
       )
     ),

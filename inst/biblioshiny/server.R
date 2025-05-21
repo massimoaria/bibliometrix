@@ -227,9 +227,9 @@ To ensure the functionality of Biblioshiny,
                {
                  output$collection_descriptionUI <- renderUI({
                    textAreaInput(
-                     inputId = "collection_description",
+                     inputId = "collection_description_merge",
                      label = "Brief description about your collection",
-                     placeholder = "Please provide a brief description of your bibliographic collection (e.g., source, type of content, domain) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
+                     placeholder = "Please provide a brief description of your bibliographic collection (e.g., type of content, domain, research hypotheses, timespan) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
                      value = NULL,
                      rows = 3,
                      width = "100%"
@@ -244,13 +244,27 @@ To ensure the functionality of Biblioshiny,
       label = "Brief description about your collection",
       value = values$collection_description
     )
+    updateTextAreaInput(
+      session = getDefaultReactiveDomain(),
+      inputId = "collection_description_merge",
+      label = "Brief description about your collection",
+      value = values$collection_description
+    )
   })
   
   observeEvent(eventExpr = {
-    input$coollection_description},
+    input$collection_description},
     handlerExpr = {
       if (input$collection_description!="" & nchar(input$collection_description)>1){
         values$collection_description <- input$collection_description
+      }
+    },ignoreNULL = TRUE)
+  
+  observeEvent(eventExpr = {
+    input$collection_description_merge},
+    handlerExpr = {
+      if (input$collection_description_merge!="" & nchar(input$collection_description_merge)>1){
+        values$collection_description <- input$collection_description_merge
       }
     },ignoreNULL = TRUE)
   
@@ -272,10 +286,11 @@ To ensure the functionality of Biblioshiny,
       values$Histfield = "NA"
       values$results = list("NA")
       values$rest_sidebar <- TRUE
+      values$missingdf <- df <- missingData(values$M)$mandatoryTags
       values$missTags <- NULL
       values$menu <- menuList(values)
-      values$collection_description <- "Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020, Source: WoS."
-      #showModal(missingModal(session))
+      values$collection_description <- "Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
+      showModal(missingModal(session))
       return()
     }
     inFile <- input$file1
@@ -582,6 +597,20 @@ To ensure the functionality of Biblioshiny,
     DTformat(MData, nrow=3, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
              columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=TRUE)
   })
+  
+  observeEvent(input$applyMerge,
+               {
+                 output$collection_description_mergeUI <- renderUI({
+                   textAreaInput(
+                     inputId = "collection_description",
+                     label = "Brief description about your collection",
+                     placeholder = "Please provide a brief description of your bibliographic collection (e.g., source, type of content, domain) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
+                     value = NULL,
+                     rows = 3,
+                     width = "100%"
+                   )
+                 })
+               })
   
   ### Missing Data in Metadata ----
   output$missingDataTable <- DT::renderDT({
@@ -2732,6 +2761,13 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
   
+  # gemini button for rpys
+  output$rpysGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$rpysGemini, values)
+    
+  })
+  
   output$rpysPlot <- renderPlotly({
     RPYS()
     plot.ly(values$res$spectroscopy, side="l", aspectratio = 1.3, size=0.10)
@@ -3330,7 +3366,16 @@ To ensure the functionality of Biblioshiny,
     values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
                                       n.items = input$trendNItems, remove.terms = remove.terms, synonyms = synonyms, 
                                       dynamic.plot=TRUE, graph = FALSE)
+    values$trendTopics$params <- data.frame(description=c("Textual field", "N. of words per Year"),
+                                            value=c(field, input$trendNItems))
     return(values$trendTopics$graph)
+  })
+  
+  # gemini button for word network
+  output$trendTopicsGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$trendTopicsGemini, values)
+    
   })
   
   output$TTplot.save <- downloadHandler(
@@ -3742,6 +3787,7 @@ To ensure the functionality of Biblioshiny,
                              stemming=input$TMstemming, size=input$sizeTM, cluster=input$TMCluster,
                              n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms,
                              subgraphs=TRUE)
+    values$TM$doc2clust <- values$TM$documentToClusters %>% select(Assigned_cluster, SR, pagerank) 
     
     values$TM$documentToClusters$DI<- paste0('<a href=\"https://doi.org/',values$TM$documentToClusters$DI,'\" target=\"_blank\">',values$TM$documentToClusters$DI,'</a>')
     names(values$TM$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 

@@ -208,7 +208,7 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
       HTML(content)
     ),
     br(),
-    em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help TALL AI generate a more accurate and meaningful interpretation."),
+    em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help BIBLIO AI generate a more accurate and meaningful interpretation."),
     textAreaInput(
       inputId = "gemini_additional",
       label = NULL,
@@ -235,66 +235,133 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
   )
 }
 
+biblioAiPrompts <- function(values, activeTab){
+  
+  switch(activeTab,
+         "mainInfo"={
+           prompt <- paste0("Provide an interpretation of these statistics summarizing the bibliographic collection. ",
+                            "Focus on key metrics such as the number of documents, sources, authors, and citations, ",
+                            "and discuss what they reveal about the scope, productivity, and impact of the collection. ")
+         },
+         "trendTopic"={
+           prompt <- paste0("Provide an interpretation of this trend topics plot, where each year is associated with the k words that have the highest annual median frequency. ", 
+           "For each word, the light blue line represents the interquartile range (from the first to the third quartile) of its frequency time series, and the central", 
+           "point marks the median value. The size of the bubbles is proportional to the annual frequency, reflecting the relative prominence of each term over time. ")
+         },
+         "ReferenceSpect"={
+           references <- merge_df_to_string(rpysPeaks(values$res, n=10))
+           prompt <- paste0("Provide an interpretation of this Reference Publication Year Spectroscopy (RPYS) plot.", 
+                         " The black line shows the number of cited references by publication year. ",
+                         "The red line represents the deviation from the 5-year median citation frequency, calculated using a non-centered window composed of the five preceding years.",
+                         " This highlights peak years of historical significance. A list of the most cited references is provided for the first ten peak years identified by the red line,",
+                         " along with their citation frequencies: ",
+                         references)
+         },
+         "coOccurenceNetwork" = {
+           prompt <- paste0("Provide an interpretation of this 'word co-occurrence' network.",
+                            " Focus on the structure of the network, the presence of communities (topics), and the relevance of the most connected terms.")
+         },
+         "thematicMap"={
+           docs <- merge_df_to_string(doc2clust(values$TM))
+           prompt <- paste0("Provide an interpretation of this 'strategic map'",
+                            "Here there is the list of three most central articles for each cluster: ",docs,
+                            ". Focus on the structure of the strategic map, the description of clusters and their centrality and density measures, and the description of the articles belonging to them.")
+         },
+         "thematicEvolution"={
+           prompt <- paste0("Provide an interpretation of these plots.", 
+                                                "The first plot illustrates topic evolution across different time periods, showing how thematic areas develop or shift over time. ",
+                                                "The other plots display strategic maps for each period, highlighting the positioning of topics based on centrality and density. ",
+                                                "Focus on identifying emerging, declining, or stable topics and their strategic importance.")
+         },
+         "factorialAnalysis"={
+           prompt <- "Provide an interpretation of this 'factorial map'. Focus on the structure of the map, the presence of clusters, and the relevance of the most contributing terms."
+         },
+         "coCitationNetwork"={
+           prompt <- "Provide an interpretation of this 'co-citation' network. Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms."
+         },
+         "historiograph"={
+           titles <- merge_df_to_string(values$histPlotVis$VIS$x$nodes %>% select(short_label,title_orig))
+           prompt <- paste0("Interpret this historiograph, a temporal citation network built by mapping direct citation links among documents. ",
+                            #" The y-axis represents publication years, and directed edges indicate citations between articles. ",
+                         "Highlight the main citation paths, pivotal works, and any notable temporal trends in knowledge development, looking also to the article titles and their topics.",
+                            "Here there is the list of each paper (node) and its title: ",titles)
+         },
+         "collabNetwork"={
+           prompt <- paste0("Provide an interpretation of this 'collaboration' network", 
+                            ". Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms.")
+         }
+  )
+  if (!activeTab %in% c("mainInfo", "thematicMap", "trendTopic")) prompt <- paste0(prompt, ". Provide also scientific references about the methodological description")
+  return(prompt)
+}
+
 geminiGenerate <- function(values, activeTab, gemini_additional, gemini_model_parameters, input){
   if (gemini_additional!="") {
     desc <- paste0(values$collection_description, gemini_additional, gemini_model_parameters, collapse=". ")
   } else {
     desc <- paste0(values$collection_description, gemini_model_parameters, collapse=". ")
   }
+  prompt <- biblioAiPrompts(values, activeTab)
   switch(activeTab,
          "mainInfo"={
            req(values$TABvb)
            values$MainInfoGemini <- geminiPromptImage(obj=values$TABvb, type="text",
-                                                 prompt="Provide an interpretation of these statistics summarizing the bibliographic collection. 
-                                                 Focus on key metrics such as the number of documents, sources, authors, and citations, and discuss what they reveal about the scope, productivity, and impact of the collection. ",
+                                                 prompt=prompt,
                                                  key=values$geminiAPI, desc=desc)
+         },
+         "trendTopic"={
+           req(values$trendTopics)
+           values$trendTopicsGemini <- geminiPromptImage(obj=values$trendTopics$graph, type="ggplot2",
+                                                 prompt=prompt,
+                                                 key=values$geminiAPI, desc=desc)
+         },
+         "ReferenceSpect"={
+           req(values$res)
+           values$rpysGemini <- geminiPromptImage(obj=values$res$spectroscopy, type="ggplot2",
+                                                         prompt=prompt,
+                                                         key=values$geminiAPI, desc=desc)
          },
          "coOccurenceNetwork" = {
            req(values$COCnetwork)
            values$cocGemini <- geminiPromptImage(obj=values$COCnetwork$VIS, type="vis",
-                                                 prompt="Provide an interpretation of this 'word co-occurrence' network",
+                                                 prompt=prompt,
                                                  key=values$geminiAPI, desc=desc)
          },
          "thematicMap"={
            req(values$TMmap)
            values$TMGemini <- geminiPromptImage(obj=values$TMmap, type="plotly",
-                                                prompt="Provide an interpretation of this 'strategic map'",
+                                                prompt=prompt,
                                                 key=values$geminiAPI, desc=desc)
          },
          "thematicEvolution"={
            req(values$nexus)
            files <- TE2Gemini(values$nexus, values$TEplot)
            values$TEGemini <- geminiPromptImage(obj=files, type="multi",
-                                                prompt="Provide an interpretation of these plots. 
-                                                The first plot illustrates topic evolution across different time periods, showing how thematic areas develop or shift over time. 
-                                                The other plots display strategic maps for each period, highlighting the positioning of topics based on centrality and density. 
-                                                Focus on identifying emerging, declining, or stable topics and their strategic importance.",
+                                                prompt=prompt,
                                                 key=values$geminiAPI, desc=desc)
          },
          "factorialAnalysis"={
            req(values$plotCS)
            values$CSGemini <- geminiPromptImage(obj=values$plotCS, type="plotly",
-                                                prompt="Provide an interpretation of this 'factorial map' obtained by a Multiple Corresppondence Analysis",
+                                                prompt=prompt,
                                                 key=values$geminiAPI, desc=desc)
          },
          "coCitationNetwork"={
            req(values$COCITnetwork)
            values$cocitGemini <- geminiPromptImage(obj=values$COCITnetwork$VIS, type="vis",
-                                                   prompt="Provide an interpretation of this 'co-citation' network",
+                                                   prompt=prompt,
                                                    key=values$geminiAPI, desc=desc)
          },
          "historiograph"={
            req(values$histPlotVis$VIS)
-           titles <- merge_df_to_string(values$histPlotVis$VIS$x$nodes %>% select(short_label,title_orig))
            values$histGemini <- geminiPromptImage(obj=values$histPlotVis$VIS, type="vis",
-                                                  prompt=paste0("Interpret this historiograph, a temporal citation network built by mapping direct citation links among documents. ",
-                                                                "Here there is the list of each paper (node) and its title: ",titles),
+                                                  prompt=prompt,
                                                   key=values$geminiAPI, desc=desc)
          },
          "collabNetwork"={
            req(values$COLnetwork$VIS)
            values$colGemini <- geminiPromptImage(obj=values$COLnetwork$VIS, type="vis",
-                                                 prompt="Provide an interpretation of this 'collaboration' network",
+                                                 prompt=prompt,
                                                  key=values$geminiAPI, desc=desc)
          }
   )
@@ -302,20 +369,43 @@ geminiGenerate <- function(values, activeTab, gemini_additional, gemini_model_pa
 }
 
 geminiParameterPrompt <- function(values, activeTab, input){
-  txt <- paste0("The analysis was performed on the bibliographic database ", values$M$DB[1], " extracted from the original collection. ")
+  if ("DB_Original" %in% names(values$M)) {
+    DB <- unique(values$M$DB_Original)
+    if (length(DB)>1) DB[length(DB)] <- paste0("and ",DB[length(DB)]) 
+    DB <- gsub("ISI","WOS", paste0(DB, collapse=", "))
+    
+    DB <- paste0("databases ",DB, " merged by Bibliometrix R package routines.")
+  } else {
+    if (values$M$DB[1]=="ISI") {DB <- "WOS" } else {DB <- values$M$DB[1]}
+    DB <- paste0("database ",DB,".")
+  }
+  txt <- paste0("The analysis was performed on a collection downloaded from the following bibliographic ", DB)
+  missingTags <- values$missingdf %>% 
+    filter(status %in% "Completely missing") %>% 
+    pull(description)
+  if (length(missingTags)>0){
+    if ("DB_Original" %in% names(values$M)) txt1 <- paste0(" Some metadata fields like ", paste0(missingTags, collapse=", "), " are missing due to limitations in the merging process and non-standard formats across databases.")
+    txt <- paste0(txt, txt1)
+  } 
+
   switch(activeTab,
          "mainInfo"={
            req(values$TABvb)
          },
+         "trendTopic"={
+           req(values$trendTopics)
+           txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$trendTopics$params))
+         },
+         "ReferenceSpect"={
+           req(values$res)
+           },
          "coOccurenceNetwork" = {
            req(values$COCnetwork)
-           txt <- paste0(txt, " Interpret this graph generated with the following parameters: ", merge_df_to_string(values$cocnet$params),
-                         ". Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms.")
+           txt <- paste0(txt, " This graph was generated with the following parameters: ", merge_df_to_string(values$cocnet$params))
          },
          "thematicMap"={
            req(values$TMmap)
-           txt <- paste0(txt, " Interpret this graph generated with the following parameters: ", merge_df_to_string(values$TM$params),
-                         ". Focus on the structure of the strategic map, the presence of clusters, and their centrality and density measures.")
+           txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$TM$params))
          },
          "thematicEvolution"={
            req(values$nexus)
@@ -323,23 +413,18 @@ geminiParameterPrompt <- function(values, activeTab, input){
          },
          "factorialAnalysis"={
            req(values$plotCS)
-           txt <- paste0(txt, " Interpret this graph generated with the following parameters: ", merge_df_to_string(values$CS$params),
-                         ". Focus on the structure of the correspondence analysis map, the presence of clusters, and the relevance of the most contributing terms.")
+           txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$CS$params))
          },
          "coCitationNetwork"={
            req(values$COCITnetwork)
-           txt <- paste0(txt, " Interpret this graph generated with the following parameters: ", merge_df_to_string(values$cocitnet$params),
-                         ". Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms.")
+           txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$cocitnet$params))
          },
          "historiograph"={
            req(values$histPlotVis$VIS)
-           txt <- paste0(txt, " The y-axis represents publication years, and directed edges indicate citations between articles. 
-                         Highlight the main citation paths, pivotal works, and any notable temporal trends in knowledge development, looking also to the article titles and their topics.")
          },
          "collabNetwork"={
            req(values$COLnetwork$VIS)
-           txt <- paste0(txt, " Interpret this graph generated with the following parameters: ", merge_df_to_string(values$colnet$params),
-                         ". Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms.")
+           txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$colnet$params))
          }
   )
   return(txt)
@@ -353,6 +438,14 @@ geminiWaitingMessage <- function(values, activeTab){
          "mainInfo"={
            req(values$TABvb)
            values$MainInfoGemini <- messageTxt
+         },
+         "trendTopic"={
+           req(values$trendTopics)
+           values$trendTopicsGemini <- messageTxt
+         },
+         "ReferenceSpect"={
+           req(values$res)
+           values$rpysGemini <- messageTxt
          },
          "coOccurenceNetwork" = {
            req(values$COCnetwork)
@@ -392,6 +485,14 @@ geminiSave <- function(values, activeTab, type=c("clip","save")){
          "mainInfo"={
            req(values$TABvb)
            gemini <- values$MainInfoGemini
+         },
+         "trendTopic"={
+           req(values$trendTopics)
+           gemini <- values$trendTopicsGemini
+         },
+         "ReferenceSpect"={
+           req(values$res)
+           gemini <- values$rpysGemini
          },
          "coOccurenceNetwork" = {
            req(values$COCnetwork)
@@ -465,6 +566,7 @@ plot2pngGemini <- function(p, filename, zoom = 2, type = "vis") {
   biblioShot(html_name, zoom = zoom, file = filename)
 }
 
+## save all plots of the thematic evolution analysis
 TE2Gemini <- function(nexus, plotTE){
   K <- length(nexus$TM)
   periods <- nexus$Nodes %>% select(group) %>% distinct() %>% pull()
@@ -516,4 +618,33 @@ copy_to_clipboard <- function(x) {
   } else {
     stop("Unrecognized or unsupported operating system.")
   }
+}
+
+# Peaks identification in RPYS
+rpysPeaks <- function(res, n=10){
+  df_peaks <- res$rpysTable %>%
+    arrange(Year) %>%
+    mutate(
+      is_peak = (diffMedian5 > lag(diffMedian5)) & (diffMedian5 > lead(diffMedian5))
+    ) %>%
+    filter(is_peak) %>%
+    arrange(desc(diffMedian5)) %>%
+    slice_head(n = n)  
+  
+  df2 <- res$CR %>% 
+    group_by(Year) %>% 
+    slice_max(Freq, n=3) %>% 
+    filter(Year %in% df_peaks$Year)
+  
+  return(peaks=df2)
+}
+
+# Thematic Map top 3 documents for each cluster
+doc2clust <- function(res, n=3){
+  df <- res$doc2clust %>% 
+    drop_na(Assigned_cluster) %>% 
+    group_by(Assigned_cluster) %>% 
+    slice_max(pagerank, n=n) %>% 
+    mutate(cluster = paste(SR,", pagerank ",round(pagerank,3), sep="")) %>% 
+    select(Assigned_cluster, cluster)
 }

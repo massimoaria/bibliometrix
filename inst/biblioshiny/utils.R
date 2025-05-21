@@ -545,6 +545,7 @@ initial <- function(values) {
   values$citShortlabel <- "NA"
   values$S <- list("NA")
   values$GR <- "NA"
+  values$nMerge <- NULL
   values$collection_description <- NULL
   ### column to export in TALL
   values$corpusCol <- c("Title" = "TI", "Abstract" = "AB", "Author's Keywords" = "DE")

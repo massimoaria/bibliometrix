@@ -423,8 +423,12 @@ geminiParameterPrompt <- function(values, activeTab, input){
     filter(status %in% "Completely missing") %>% 
     pull(description)
   if (length(missingTags)>0){
-    if ("DB_Original" %in% names(values$M)) txt1 <- paste0(" Some metadata fields like ", paste0(missingTags, collapse=", "), " are missing due to limitations in the merging process and non-standard formats across databases.")
+    if ("DB_Original" %in% names(values$M)) {
+      txt1 <- paste0(" Some metadata fields like ", paste0(missingTags, collapse=", "), 
+                                                           " are missing due to limitations in the merging process and 
+                                                           non-standard formats across databases.")
     txt <- paste0(txt, txt1)
+    }
   } 
 
   switch(activeTab,

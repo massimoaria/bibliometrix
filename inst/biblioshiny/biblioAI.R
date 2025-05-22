@@ -158,44 +158,9 @@ load_api_key <- function(path = path_gemini_key) {
   return(FALSE)
 }
 
-## gemini prompt for images
-geminiPromptImage <- function(obj, type="vis", prompt="Explain the topics in this map", key, desc = NULL){
-  if (key){
-    if (!is.null(desc)) prompt <- paste0(prompt,desc,collapse=". ")
-    tmpdir <- tempdir()
-    owd <- setwd(tmpdir)
-    on.exit(setwd(owd))
-    file_path <- paste0(tempfile(),".png",collapse="")
-    switch(type,
-           "vis"={
-             plot2pngGemini(obj, filename=file_path, type="vis")
-           },
-           "plotly"={
-             plot2pngGemini(obj, filename=file_path, type="plotly")
-           },
-           "multi"={ # prompt with multiple image files
-             file_path <- obj
-           },
-           "text"={ # prompt based only on text
-             file_path <- NULL
-            prompt <- paste0(prompt, "this is the list of statistics: ",merge_df_to_string(obj))
-           },
-           "ggplot2"={
-             ggsave(filename = file_path, plot = obj, dpi = 72, height = 7, width = 14, bg = "transparent")
-           })
-    
-    res <- gemini_ai(image = file_path,
-                     prompt = prompt)
-  } else {
-    res <- 'To access this feature, please provide a valid Gemini AI API key. You can obtain your API key by visiting the official <a href="https://aistudio.google.com/" target="_blank">Google AI Studio website</a>.'
-  }
-  
-  return(res)
-}
-
 geminiOutput <- function(title = "", content = "", values){
   if (is.null(content)){
-    content <- "Click the 'Ask BIBLIO AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n
+    content <- "Click the 'Ask Biblio AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n
 This AI-powered feature leverages Google Gemini to help you understand patterns and insights emerging from your contextual analysis.\n\n\n\n\n\n\n"
   }
   box(
@@ -208,18 +173,18 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
       HTML(content)
     ),
     br(),
-    em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help BIBLIO AI generate a more accurate and meaningful interpretation."),
+    em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation."),
     textAreaInput(
       inputId = "gemini_additional",
       label = NULL,
       value = values$gemini_model_parameters,
-      placeholder = "You can provide additional context or details about your analysis to help BIBLIO AI generate a more accurate and meaningful interpretation.",
+      placeholder = "You can provide additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation.",
       rows = 3,
       width = "100%"
     ),
     fluidRow(
       column(4, align = "center",
-             actionButton("gemini_btn", "Ask BIBLIO AI", style = "color: white;",
+             actionButton("gemini_btn", "Ask Biblio AI", style = "color: white;",
                           icon(name = "microchip", lib = "font-awesome"),
                           width = "80%")
       ),
@@ -241,7 +206,41 @@ biblioAiPrompts <- function(values, activeTab){
          "mainInfo"={
            prompt <- paste0("Provide an interpretation of these statistics summarizing the bibliographic collection. ",
                             "Focus on key metrics such as the number of documents, sources, authors, and citations, ",
-                            "and discuss what they reveal about the scope, productivity, and impact of the collection. ")
+                            "and discuss what they reveal about the scope, productivity, and impact of the collection. ",
+                            "This is the list of statistics: ",merge_df_to_string(values$TABvb))
+         },
+         "threeFieldPlot"={
+           prompt <- paste0("Provide an interpretation of this Three-Field Plot. The central field represents the target metadata,",
+                            " while the left and the right fields are the destination metadata. The plot visualizes the connections",
+                            " among these three dimensions by linking the target field witgh the two other metadata.",
+                            " Analyze the structure of the network, and describe how these elements are interconnected.")
+         },
+         "authorsProdOverTime"={
+           docs <- apot2Docs(values$AUProdOverTime, n=3) %>% merge_df_to_string()
+           prompt <- paste0("Provide an interpretation of this 'Authors’ Production Over Time' plot, which displays bibliometric trends",
+                            " for the top authors in the field. For each author, the red horizontal line represents their scientific timeline,",
+                            " indicating the span of their active publishing years. Each bubble corresponds to a publication year: its size reflects",
+                            " the number of articles published that year, while the color intensity represents the total number of citations per year (TC/year).",
+                            " Analyze the evolution of individual authors’ productivity and impact, identifying key periods of activity, citation peaks, ",
+                            "and possible shifts in research influence over time. A list of the most three cited-per-year articles for each author is provided: ", docs)
+         },
+         "correspAuthorCountry"={
+           countries <- merge_df_to_string(country2collab(values$TABCo))
+           prompt <- paste0("Provide an interpretation of this 'Corresponding Author’s Country Collaboration Plot'. The plot displays the number of scientific publications",
+                            " by corresponding authors for each country, distinguishing between Single Country Publications (SCP) and Multiple Country Publications (MCP). ",
+                            "SCP represents articles authored exclusively within one country, while MCP refers to collaborative works involving authors from different countries. ",
+                            "The MCP Ratio, calculated as MCP divided by the total number of publications, indicates the extent of international collaboration. ",
+                            "Focus on identifying the most productive countries, comparing their levels of international collaboration, and discussing the balance between domestic ",
+                            "and global research engagement. A list of the most 20 frequent countries is provided: ", countries)
+         },
+         "mostLocalCitDoc"={
+           docs <- localCit2docs(values$TABLocDoc,n=20) %>% merge_df_to_string()
+           prompt <- paste0("Provide an interpretation of this table reporting the most locally and globally cited articles in the collection. Global Citations (GC) represent the total",
+                            " number of citations a document has received across all records indexed in the bibliographic database, indicating its overall scholarly impact. Local Citations (LC),",
+                            " on the other hand, count the number of citations a document has received within this specific dataset, reflecting its relevance to the focused research field. ",
+                            "Both indicators are normalized by NTC (Normalized Total Citations), which adjusts citation counts relative to the average number of citations for publications from the same year.",
+                            " This normalization allows for fair comparison across time. Focus on identifying articles with strong global influence, local relevance, or both.",
+                            "A list of the most 20 local cited articles is provided: ", docs)
          },
          "trendTopic"={
            prompt <- paste0("Provide an interpretation of this trend topics plot, where each year is associated with the k words that have the highest annual median frequency. ", 
@@ -289,9 +288,20 @@ biblioAiPrompts <- function(values, activeTab){
          "collabNetwork"={
            prompt <- paste0("Provide an interpretation of this 'collaboration' network", 
                             ". Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms.")
+         },
+         "collabWorldMap"={
+           #values$WMGemini
+           prompt <- paste0("Provide an interpretation of this 'Countries’ Collaboration World Map'. The map visualizes international scientific ",
+                            "collaboration by showing, for each country, the total number of articles with at least one contributing author. ",
+                            "The color intensity of each country is proportional to its research output. The connecting lines represent collaborative ",
+                            "links between countries, based on co-authorship across all authors (not only corresponding authors). ",
+                            "Focus on identifying major hubs of scientific production, key international partnerships, and global patterns of collaboration.")
+         },
+         {
+           prompt <- paste0("Provide an interpretation of this plot creted with 'bibliometrix R Package'")
          }
   )
-  if (!activeTab %in% c("mainInfo", "thematicMap", "trendTopic")) prompt <- paste0(prompt, ". Provide also scientific references about the methodological description")
+  #if (!activeTab %in% c("mainInfo", "thematicMap", "trendTopic")) prompt <- paste0(prompt, " Provide also scientific references about the methodological description")
   return(prompt)
 }
 
@@ -305,9 +315,33 @@ geminiGenerate <- function(values, activeTab, gemini_additional, gemini_model_pa
   switch(activeTab,
          "mainInfo"={
            req(values$TABvb)
-           values$MainInfoGemini <- geminiPromptImage(obj=values$TABvb, type="text",
+           values$MainInfoGemini <- geminiPromptImage(obj=NULL, type="text",
                                                  prompt=prompt,
                                                  key=values$geminiAPI, desc=desc)
+         },
+         "threeFieldPlot"={
+           req(values$TFP)
+           values$TFPGemini <- geminiPromptImage(obj=values$TFP, type="plotly",
+                                                 prompt=prompt,
+                                                 key=values$geminiAPI, desc=desc)
+         },
+         "authorsProdOverTime"={
+           req(values$AUProdOverTime)
+           values$ApotGemini <- geminiPromptImage(obj=values$AUProdOverTime$graph, type="ggplot2",
+                                                  prompt=prompt,
+                                                  key=values$geminiAPI, desc=desc)
+         },
+         "correspAuthorCountry"={
+           req(values$TABCo)
+           values$MostRelCountriesGemini <- geminiPromptImage(obj=values$MRCOplot, type="ggplot2",
+                                                              prompt=prompt,
+                                                              key=values$geminiAPI, desc=desc)
+         },
+         "mostLocalCitDoc"={
+           req(values$TABLocDoc)
+           values$MostLocCitDocsGemini <- geminiPromptImage(obj=NULL, type="text",
+                                                         prompt=prompt,
+                                                         key=values$geminiAPI, desc=desc)
          },
          "trendTopic"={
            req(values$trendTopics)
@@ -363,6 +397,11 @@ geminiGenerate <- function(values, activeTab, gemini_additional, gemini_model_pa
            values$colGemini <- geminiPromptImage(obj=values$COLnetwork$VIS, type="vis",
                                                  prompt=prompt,
                                                  key=values$geminiAPI, desc=desc)
+         },
+         "collabWorldMap"={
+           values$WMGemini <- geminiPromptImage(obj=values$WMmap$g, type="ggplot2",
+                                                prompt=prompt,
+                                                key=values$geminiAPI, desc=desc)
          }
   )
   return(values)
@@ -392,9 +431,23 @@ geminiParameterPrompt <- function(values, activeTab, input){
          "mainInfo"={
            req(values$TABvb)
          },
+         "threeFieldPlot"={
+           req(values$TFP)
+           txt <- paste0(txt, " This graph was generated with the following parameters: target field '",
+                         input$CentralField, "', right field '", input$RightField, "', and left field '", input$LeftField, "'.")
+         },
          "trendTopic"={
            req(values$trendTopics)
-           txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$trendTopics$params))
+           txt <- paste0(txt, " This graph was generated with the following parameters: ", merge_df_to_string(values$trendTopics$params))
+         },
+         "authorsProdOverTime"={
+           req(values$AUProdOverTime)
+         },
+         "correspAuthorCountry"={
+           req(values$TABCo)
+         },
+         "mostLocalCitDoc"={
+           req(values$TABLocDoc)
          },
          "ReferenceSpect"={
            req(values$res)
@@ -425,9 +478,46 @@ geminiParameterPrompt <- function(values, activeTab, input){
          "collabNetwork"={
            req(values$COLnetwork$VIS)
            txt <- paste0(txt, "  This graph was generated with the following parameters: ", merge_df_to_string(values$colnet$params))
+         },
+         "collabWorldMap"={
+           req(values$WMmap)
          }
   )
   return(txt)
+}
+
+## gemini prompt for images
+geminiPromptImage <- function(obj, type="vis", prompt="Explain the topics in this map", key, desc = NULL){
+  if (key){
+    if (!is.null(desc)) prompt <- paste0(prompt,desc,collapse=". ")
+    tmpdir <- tempdir()
+    owd <- setwd(tmpdir)
+    on.exit(setwd(owd))
+    file_path <- paste0(tempfile(),".png",collapse="")
+    switch(type,
+           "vis"={
+             plot2pngGemini(obj, filename=file_path, type="vis")
+           },
+           "plotly"={
+             plot2pngGemini(obj, filename=file_path, type="plotly")
+           },
+           "multi"={ # prompt with multiple image files
+             file_path <- obj
+           },
+           "text"={ # prompt based only on text
+             file_path <- NULL
+           },
+           "ggplot2"={
+             ggsave(filename = file_path, plot = obj, dpi = 72, height = 7, width = 14, bg = "transparent")
+           })
+    
+    res <- gemini_ai(image = file_path,
+                     prompt = prompt)
+  } else {
+    res <- 'To access this feature, please provide a valid Gemini AI API key. You can obtain your API key by visiting the official <a href="https://aistudio.google.com/" target="_blank">Google AI Studio website</a>.'
+  }
+  
+  return(res)
 }
 
 geminiWaitingMessage <- function(values, activeTab){
@@ -438,6 +528,22 @@ geminiWaitingMessage <- function(values, activeTab){
          "mainInfo"={
            req(values$TABvb)
            values$MainInfoGemini <- messageTxt
+         },
+         "threeFieldPlot"={
+           req(values$TFP)
+           values$TFPGemini <- messageTxt
+         },
+         "authorsProdOverTime"={
+           req(values$AUProdOverTime)
+           values$ApotGemini <- messageTxt
+         },
+         "correspAuthorCountry"={
+           req(values$TABCo)
+           values$MostRelCountriesGemini  <- messageTxt
+         },
+         "mostLocalCitDoc"={
+           req(values$TABLocDoc)
+           values$MostLocCitDocsGemini <- messageTxt
          },
          "trendTopic"={
            req(values$trendTopics)
@@ -474,6 +580,10 @@ geminiWaitingMessage <- function(values, activeTab){
          "collabNetwork"={
            req(values$COLnetwork$VIS)
            values$colGemini <- messageTxt
+         },
+         "collabWorldMap"={
+           req(values$WMmap)
+           values$WMGemini <- messageTxt
          }
   )
   return(values)
@@ -485,6 +595,22 @@ geminiSave <- function(values, activeTab, type=c("clip","save")){
          "mainInfo"={
            req(values$TABvb)
            gemini <- values$MainInfoGemini
+         },
+         "threeFieldPlot"={
+           req(values$TFP)
+           gemini <- values$TFPGemini
+         },
+         "authorsProdOverTime"={
+           req(values$AUProdOverTime)
+           gemini <- values$ApotGemini
+         },
+         "correspAuthorCountry"={
+           req(values$TABCo)
+           gemini <- values$MostRelCountriesGemini 
+         },
+         "mostLocalCitDoc"={
+           req(values$TABLocDoc)
+           gemini <- values$MostLocCitDocsGemini
          },
          "trendTopic"={
            req(values$trendTopics)
@@ -521,6 +647,10 @@ geminiSave <- function(values, activeTab, type=c("clip","save")){
          "collabNetwork"={
            req(values$COLnetwork$VIS)
            gemini <- values$colGemini
+         },
+         "collabWorldMap"={
+           req(values$WMmap)
+           gemini <- values$WMGemini
          }
   )
   if (type=="save") {
@@ -647,4 +777,30 @@ doc2clust <- function(res, n=3){
     slice_max(pagerank, n=n) %>% 
     mutate(cluster = paste(SR,", pagerank ",round(pagerank,3), sep="")) %>% 
     select(Assigned_cluster, cluster)
+}
+
+# APOT top 3 Documents per author
+apot2Docs <- function(res, n=3){
+  df <- res$dfPapersAU %>% 
+    group_by(Author) %>% 
+    slice_max(TCpY, n=n) %>% 
+    mutate(SR = paste(TI, SO,year, paste0("TCpY ",round(TCpY,1)), sep=", ")) %>% 
+    select(Author,SR)
+}
+
+# Country collaboration table
+country2collab <- function(df, n=20){
+  df <- df %>%
+    slice_max(Articles, n=n) %>% 
+    mutate(SR = paste(paste0("Article ",Articles, sep=", "), paste0("SCP ",SCP, sep=", "),paste0("MCP ",MCP, sep=", "), paste0("MCP % ",round(`MCP %`,1), sep=", "))) %>% 
+    select(Country,SR)
+}
+
+#Local citation table
+localCit2docs <- function(df,n=20){
+  df <- df %>%
+    slice_max(Local.Citations, n=n) %>% 
+    mutate(SR = paste(paste0("LC ",Local.Citations, sep=", "), paste0("GC ",Global.Citations, sep=", "), 
+                      paste0("NLC ",round(Normalized.Local.Citations,2), sep=", "), paste0("NGC ",round(Normalized.Global.Citations,2)), sep="")) %>% 
+    select(Document,SR)
 }

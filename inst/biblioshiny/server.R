@@ -19,7 +19,7 @@ server <- function(input, output,session){
   }
 
   #  Sys.setenv (CHROMOTE_CHROME = Chrome_url)
-
+  
   ## chrome configuration for shinyapps server
 
   if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
@@ -203,7 +203,6 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$applyMerge, {
     updateTabItems(session, "sidebarmenu", "mergeData")
   })
-  
   
   ## observe Gemini copy2clipboard button
   observeEvent(input$copy_btn, {
@@ -1536,6 +1535,13 @@ To ensure the functionality of Biblioshiny,
   })
   
   
+  # gemini button for Three Fields Plot
+  output$TFPGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$TFPGemini, values)
+    
+  })
+  
   observeEvent(input$reportTFP,{
     if (!is.null(values$TFP)){
       sheetname <- "ThreeFieldsPlot"
@@ -2060,6 +2066,13 @@ To ensure the functionality of Biblioshiny,
     values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
   })
   
+  # gemini button for Apot
+  output$ApotGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$ApotGemini, values)
+    
+  })
+  
   output$APOTplot.save <- downloadHandler(
     filename = function() {
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
@@ -2329,6 +2342,13 @@ To ensure the functionality of Biblioshiny,
     values$MRCOplot <- g
     return(g)
   }) 
+  
+  # gemini button for word network
+  output$MostRelCountriesGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$MostRelCountriesGemini, values)
+    
+  })
   
   output$MRCOplot.save <- downloadHandler(
     filename = function() {
@@ -2635,6 +2655,12 @@ To ensure the functionality of Biblioshiny,
     
     values$MLCDplot <- g
     return(g)
+  })
+  
+  # gemini button for word network
+  output$MostLocCitDocsGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$MostLocCitDocsGemini, values)
   })
   
   output$MLCDplot.save <- downloadHandler(
@@ -4543,6 +4569,13 @@ To ensure the functionality of Biblioshiny,
     values$WMmap <- countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min, values)
     values$WMmap$tab <- values$WMmap$tab[,c(1,2,9)]
     names(values$WMmap$tab)=c("From","To","Frequency")
+    
+  })
+  
+  # gemini button for World Map
+  output$WMGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    geminiOutput(title = "", content = values$WMGemini, values)
     
   })
   

@@ -203,11 +203,11 @@ body <- dashboardBody(
           ),
           column(
             12,
-            div(p("For an introduction and live examples, visit the ",
-              em(a("bibliometrix website.",
-                href = "https://www.bibliometrix.org", target = "_blank"
-              )),
-              style = "text-align:center; font-size:18px;"
+            div(h3(em("Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
+            #   em(a("bibliometrix website.",
+            #     href = "https://www.bibliometrix.org", target = "_blank"
+            #   )),
+              ),style = "text-align:center; font-size:24px;"
             )),
             br(),
             hr()
@@ -220,18 +220,24 @@ body <- dashboardBody(
             div(h6("When they are used in a publication, we ask that authors to cite the following reference:",
               style = "text-align:center; font-size:19px;"
             )),
-            br(),
             div(h6("Aria, M., & Cuccurullo, C. (2017).", strong(" bibliometrix: An R-tool for comprehensive"),
-              style = "text-align:center; font-size:19px;"
+              style = "text-align:center; font-size:22px;"
             )),
             div(h6(strong("science mapping analysis."),
               em("Journal of Informetrics"), ", 11(4), 959-975.",
-              style = "text-align:center; font-size:19px;"
+              style = "text-align:center; font-size:22px;"
             )),
             br(),
             div(h6("Failure to properly cite the software is considered a violation of the license.",
               style = "text-align:center; font-size:19px;"
-            ))
+            )),
+            br(),
+            div(p("For an introduction and live examples, visit the ",
+              em(a("bibliometrix website.",
+                href = "https://www.bibliometrix.org", target = "_blank"
+              )),
+              style = "text-align:center; font-size:18px;"
+            )),
           )
         )
       )
@@ -766,7 +772,7 @@ body <- dashboardBody(
               align = "center"
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -924,68 +930,68 @@ body <- dashboardBody(
                   solidHeader = FALSE,
                   fluidRow(
                     column(6, selectInput("CentralField",
-                      label = "Middle Field",
-                      choices = c(
-                        "Authors" = "AU",
-                        "Affiliations" = "AU_UN",
-                        "Countries" = "AU_CO",
-                        "Keywords" = "DE",
-                        "Keywords Plus" = "ID",
-                        "Titles" = "TI_TM",
-                        "Abstract" = "AB_TM",
-                        "Sources" = "SO",
-                        "References" = "CR",
-                        "Cited Sources" = "CR_SO"
-                      ),
-                      selected = "AU"
+                                          label = "Middle Field",
+                                          choices = c(
+                                            "Authors" = "AU",
+                                            "Affiliations" = "AU_UN",
+                                            "Countries" = "AU_CO",
+                                            "Keywords" = "DE",
+                                            "Keywords Plus" = "ID",
+                                            "Titles" = "TI_TM",
+                                            "Abstract" = "AB_TM",
+                                            "Sources" = "SO",
+                                            "References" = "CR",
+                                            "Cited Sources" = "CR_SO"
+                                          ),
+                                          selected = "AU"
                     )),
                     column(6, numericInput("CentralFieldn",
-                      label = ("Number of items"),
-                      min = 1, max = 50, step = 1, value = 20
+                                           label = ("Number of items"),
+                                           min = 1, max = 50, step = 1, value = 20
                     ))
                   ),
                   fluidRow(
                     column(6, selectInput("LeftField",
-                      label = "Left Field",
-                      choices = c(
-                        "Authors" = "AU",
-                        "Affiliations" = "AU_UN",
-                        "Countries" = "AU_CO",
-                        "Keywords" = "DE",
-                        "Keywords Plus" = "ID",
-                        "Titles" = "TI_TM",
-                        "Abstract" = "AB_TM",
-                        "Sources" = "SO",
-                        "References" = "CR",
-                        "Cited Sources" = "CR_SO"
-                      ),
-                      selected = "CR"
+                                          label = "Left Field",
+                                          choices = c(
+                                            "Authors" = "AU",
+                                            "Affiliations" = "AU_UN",
+                                            "Countries" = "AU_CO",
+                                            "Keywords" = "DE",
+                                            "Keywords Plus" = "ID",
+                                            "Titles" = "TI_TM",
+                                            "Abstract" = "AB_TM",
+                                            "Sources" = "SO",
+                                            "References" = "CR",
+                                            "Cited Sources" = "CR_SO"
+                                          ),
+                                          selected = "CR"
                     )),
                     column(6, numericInput("LeftFieldn",
-                      label = ("Number of items"),
-                      min = 1, max = 50, step = 1, value = 20
+                                           label = ("Number of items"),
+                                           min = 1, max = 50, step = 1, value = 20
                     ))
                   ),
                   fluidRow(
                     column(6, selectInput("RightField",
-                      label = "Right Field",
-                      choices = c(
-                        "Authors" = "AU",
-                        "Affiliations" = "AU_UN",
-                        "Countries" = "AU_CO",
-                        "Keywords" = "DE",
-                        "Keywords Plus" = "ID",
-                        "Titles" = "TI_TM",
-                        "Abstract" = "AB_TM",
-                        "Sources" = "SO",
-                        "References" = "CR",
-                        "Cited Sources" = "CR_SO"
-                      ),
-                      selected = "DE"
+                                          label = "Right Field",
+                                          choices = c(
+                                            "Authors" = "AU",
+                                            "Affiliations" = "AU_UN",
+                                            "Countries" = "AU_CO",
+                                            "Keywords" = "DE",
+                                            "Keywords Plus" = "ID",
+                                            "Titles" = "TI_TM",
+                                            "Abstract" = "AB_TM",
+                                            "Sources" = "SO",
+                                            "References" = "CR",
+                                            "Cited Sources" = "CR_SO"
+                                          ),
+                                          selected = "DE"
                     )),
                     column(6, numericInput("RightFieldn",
-                      label = ("Number of items"),
-                      min = 1, max = 50, step = 1, value = 20
+                                           label = ("Number of items"),
+                                           min = 1, max = 50, step = 1, value = 20
                     ))
                   )
                 ),
@@ -1000,7 +1006,24 @@ body <- dashboardBody(
           )
         ),
         fluidRow(
-          shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
+          tabsetPanel(
+            type = "tabs",
+            tabPanel("Plot",
+                     shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
+            ),
+            tabPanel(
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("TFPGeminiUI"))
+                  )
+                )
+              )
+            )
+          )
         )
       )
     ),
@@ -1602,7 +1625,20 @@ body <- dashboardBody(
             tabPanel(
               "Table - Documents",
               shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
+            ),
+            tabPanel(
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("ApotGeminiUI"))
+                  )
+                )
+              )
             )
+            
           )
         )
       )
@@ -1965,6 +2001,18 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
+            ),
+            tabPanel(
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("MostRelCountriesGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -2337,6 +2385,18 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
+            ),
+            tabPanel(
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("MostLocCitDocsGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -2534,7 +2594,7 @@ body <- dashboardBody(
               ))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -3483,7 +3543,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -4122,7 +4182,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh"))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -4377,7 +4437,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument"))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -4752,7 +4812,7 @@ body <- dashboardBody(
               )
             )),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -5007,7 +5067,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD"))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -5354,7 +5414,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height = 700))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -5495,7 +5555,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -5841,7 +5901,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh"))
             ),
             tabPanel(
-              "BIBLIO AI",
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
               fluidPage(
                 fluidRow(
                   column(
@@ -5940,6 +6000,18 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(
                 outputId = "WMTable"
               ))
+            ),
+            tabPanel(
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("WMGeminiUI"))
+                  )
+                )
+              )
             )
           )
         )
@@ -6169,8 +6241,8 @@ body <- dashboardBody(
           ### To insert settings for default path, etc.
         )),
         hr(),
-        h3("BIBLIO AI Api Key"),
-        h4("Set a valid API Key to use BIBLIO AI features powered by Google Gemini."),
+        h3("'Biblio AI' Api Key"),
+        h4("Set a valid API Key to use 'Biblio AI' features powered by Google Gemini."),
         h5(HTML(
           'If you don’t have one yet, you can generate it by logging into <a href="https://aistudio.google.com/app/apikey" target="_blank">https://aistudio.google.com/app/apikey</a> with your Google account and creating a new API Key.'
         )),

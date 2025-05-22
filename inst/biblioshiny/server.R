@@ -206,14 +206,21 @@ To ensure the functionality of Biblioshiny,
   
   ## observe Gemini copy2clipboard button
   observeEvent(input$copy_btn, {
-    content <- geminiSave(values, input$sidebarmenu, type="clip")
+    content <- geminiSave(values, input$sidebarmenu)
     copy_to_clipboard(content)
   })
   
   ## observe Gemini Save button
-  observeEvent(input$save_btn, {
-    geminiSave(values, input$sidebarmenu, type="save")
-  })
+  output$save_btn <- downloadHandler(
+    filename = function() {
+      paste0("BiblioAI_",input$sidebarmenu,".txt")
+    },
+    content <- function(file) {
+      txtOutput <- geminiSave(values, input$sidebarmenu)
+      writeLines(txtOutput, con=file)
+    },
+    contentType = "txt"
+  )
   
   ## observe gemini generate button
   observeEvent(input$gemini_btn, {

@@ -4867,6 +4867,15 @@ To ensure the functionality of Biblioshiny,
     
   })
   
+  observeEvent(input$remove_key, {
+    if (values$geminiAPI){
+      home <- homeFolder()
+      path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
+      file.remove(path_gemini_key)
+      values$geminiAPI <- FALSE
+    }
+  })
+  
 }
 
 

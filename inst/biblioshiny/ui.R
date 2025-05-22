@@ -6244,13 +6244,28 @@ body <- dashboardBody(
         h3("'Biblio AI' Api Key"),
         h4("Set a valid API Key to use 'Biblio AI' features powered by Google Gemini."),
         h5(HTML(
-          'If you don’t have one yet, you can generate it by logging into <a href="https://aistudio.google.com/app/apikey" target="_blank">https://aistudio.google.com/app/apikey</a> with your Google account and creating a new API Key.'
+          'If you don’t have one yet, you can generate it by logging into <a href="https://aistudio.google.com/app/apikey" target="_blank">AI Studio</a> with your Google account and creating a new API Key.'
         )),
         br(),
-        passwordInput("api_key", "Enter your Gemini API Key:", ""),
-        actionButton("set_key", "Set API Key",style = "color:white;",),
-        br(),
+        fluidRow(
+          column(4,
+                 passwordInput("api_key", "Enter your Gemini API Key:", "", width = "100%")
+                 )
+        ),
+        # br(),
         uiOutput("apiStatus"),
+        br(),
+        fluidRow(
+          column(2,
+                 actionButton("set_key", "Set API Key",style = "color:white;", width = "70%")
+                 ),
+          column(2,
+                 actionButton("remove_key", "Remove API Key",style = "color:white;",width = "70%")
+                 )
+        ),
+        
+        
+        
       )
     )
   )

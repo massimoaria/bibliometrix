@@ -76,10 +76,10 @@ gemini_ai <- function(image = NULL,
       }
     )
     
-    # Handle connection-level error
-    if (is.list(resp) && isTRUE(resp$error)) {
-      return(resp$message)
-    }
+    # # Handle connection-level error
+    # if (is.list(resp) && isTRUE(resp$error)) {
+    #   return(resp$message)
+    # }
     
     # Retry on HTTP 503
     if (resp$status_code == 503) {
@@ -104,7 +104,7 @@ gemini_ai <- function(image = NULL,
         parsed <- jsonlite::fromJSON(httr2::resp_body_string(resp))
         parsed$error$message
       }, error = function(e) {
-        "Service unavailable or unexpected error."
+        "Service unavailable or unexpected error. Please check your API key and usage limit."
       })
       
       return(paste0("❌ HTTP ", resp$status_code, ": ", msg))
@@ -193,8 +193,8 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
                           width = "80%")
       ),
       column(4, align = "center",
-             actionButton("save_btn", "Save", style = "color: white;", icon = icon("download"),
-                          width = "80%")
+             downloadButton(outputId = "save_btn", label = "Save", icon = icon("download"),
+                            style = "width: 80%;")
       )
     )
   )
@@ -279,7 +279,7 @@ biblioAiPrompts <- function(values, activeTab){
            prompt <- "Provide an interpretation of this 'co-citation' network. Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms."
          },
          "historiograph"={
-           titles <- merge_df_to_string(values$histPlotVis$VIS$x$nodes %>% select(short_label,title_orig))
+           titles <- hist2docs(values$histPlotVis$VIS$x$nodes) %>% merge_df_to_string()
            prompt <- paste0("Interpret this historiograph, a temporal citation network built by mapping direct citation links among documents. ",
                             #" The y-axis represents publication years, and directed edges indicate citations between articles. ",
                          "Highlight the main citation paths, pivotal works, and any notable temporal trends in knowledge development, looking also to the article titles and their topics.",
@@ -589,76 +589,57 @@ geminiWaitingMessage <- function(values, activeTab){
   return(values)
 }
 
-geminiSave <- function(values, activeTab, type=c("clip","save")){
+geminiSave <- function(values, activeTab){
   
   switch(activeTab,
          "mainInfo"={
-           req(values$TABvb)
            gemini <- values$MainInfoGemini
          },
          "threeFieldPlot"={
-           req(values$TFP)
            gemini <- values$TFPGemini
          },
          "authorsProdOverTime"={
-           req(values$AUProdOverTime)
            gemini <- values$ApotGemini
          },
          "correspAuthorCountry"={
-           req(values$TABCo)
            gemini <- values$MostRelCountriesGemini 
          },
          "mostLocalCitDoc"={
-           req(values$TABLocDoc)
            gemini <- values$MostLocCitDocsGemini
          },
          "trendTopic"={
-           req(values$trendTopics)
            gemini <- values$trendTopicsGemini
          },
          "ReferenceSpect"={
-           req(values$res)
            gemini <- values$rpysGemini
          },
          "coOccurenceNetwork" = {
-           req(values$COCnetwork)
            gemini <- values$cocGemini
          },
          "thematicMap"={
-           req(values$TM)
            gemini <- values$TMGemini
          },
          "thematicEvolution"={
-           req(values$nexus)
            gemini <- values$TEGemini
          },
          "factorialAnalysis"={
-           req(values$plotCS)
            gemini <- values$CSGemini
          },
          "coCitationNetwork"={
-           req(values$COCITnetwork)
            gemini <- values$cocitGemini
          },
          "historiograph"={
-           req(values$histPlotVis$VIS)
            gemini <- values$histGemini
          },
          "collabNetwork"={
-           req(values$COLnetwork$VIS)
            gemini <- values$colGemini
          },
          "collabWorldMap"={
-           req(values$WMmap)
            gemini <- values$WMGemini
          }
   )
-  if (type=="save") {
-    cat(gemini, file=paste0("BiblioAI_",activeTab,".txt"))
-  } else {
-      return(gemini)
-    }
-  
+  if (is.null(gemini)) gemini <- "Click 'Ask Biblio AI' for help. "
+  return(gemini)
 }
 
 
@@ -803,4 +784,11 @@ localCit2docs <- function(df,n=20){
     mutate(SR = paste(paste0("LC ",Local.Citations, sep=", "), paste0("GC ",Global.Citations, sep=", "), 
                       paste0("NLC ",round(Normalized.Local.Citations,2), sep=", "), paste0("NGC ",round(Normalized.Global.Citations,2)), sep="")) %>% 
     select(Document,SR)
+}
+
+# Historiograph doc titles
+hist2docs <- function(df, n=20){
+  df %>% 
+    slice_max(order_by = LCS, n=n) %>% 
+    select(short_label,title_orig)
 }

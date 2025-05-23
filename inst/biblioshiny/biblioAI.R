@@ -1,7 +1,7 @@
 ## gemini AI tools
 gemini_ai <- function(image = NULL,
                       prompt = "Explain these images",
-                      model = "2.0-flash",
+                      model = "2.5-flash",
                       type = "png",
                       retry_503 = 3) {
   
@@ -72,7 +72,8 @@ gemini_ai <- function(image = NULL,
     resp <- tryCatch(
       req_perform(req),
       error = function(e) {
-        return(list(error = TRUE, message = paste("❌ Request failed with error:", e$message)))
+        return(list(status_code=stringr::str_extract(e$message, "(?<=HTTP )\\d+")|> as.numeric(), 
+                    error = TRUE, message = paste("❌ Request failed with error:", e$message)))
       }
     )
     
@@ -80,10 +81,10 @@ gemini_ai <- function(image = NULL,
     # if (is.list(resp) && isTRUE(resp$error)) {
     #   return(resp$message)
     # }
-    
-    # Retry on HTTP 503
-    if (resp$status_code == 503) {
-      if (attempt < retry_503) {
+
+    # Retry on HTTP 503 or 429
+    if (resp$status_code %in% c(429,503)) {
+      if (attempt <= retry_503) {
         message(paste0("⚠️ HTTP 503 (Service Unavailable) - retrying in 2 seconds (attempt ", attempt, "/", retry_503, ")..."))
         Sys.sleep(2)
         next

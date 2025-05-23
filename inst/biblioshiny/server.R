@@ -4878,6 +4878,4 @@ To ensure the functionality of Biblioshiny,
   
 }
 
-
-
 # END ####

@@ -4850,14 +4850,14 @@ To ensure the functionality of Biblioshiny,
     key <- input$api_key
     last <- setGeminiAPI(key)
     
-    if (is.na(last)){
+    if (!last$valid){
       output$apiStatus <- renderUI({
-        output$status <- renderText(paste0("❌ API key seems tto be not valid"))
+        output$status <- renderText(last$message)
       })
       values$geminiAPI <- FALSE
     } else {
       output$apiStatus <- renderUI({
-        output$status <- renderText(paste0("✅ API key has been set: ",last))
+        output$status <- renderText(paste0("✅ API key has been set: ",last$message))
       })
       values$geminiAPI <- TRUE
       home <- homeFolder()
@@ -4873,6 +4873,9 @@ To ensure the functionality of Biblioshiny,
       path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
       file.remove(path_gemini_key)
       values$geminiAPI <- FALSE
+      output$apiStatus <- renderUI({
+        output$status <- renderText(paste0("❌ API key has been removed"))
+      })
     }
   })
   

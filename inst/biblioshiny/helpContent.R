@@ -3,19 +3,24 @@ helpContent <- function(){
     "
   <h3>🧠 Biblio AI: AI-Powered Bibliometric Analysis</h3>
   
-  <p>Starting from version <strong>5.0</strong>, <em>biblioshiny</em> introduces <strong>Biblio AI</strong>, a new suite of features powered by Google’s <strong>Gemini</strong> models. This integration allows users to receive <em>automatic interpretations</em>, <em>critical insights</em>, and <em>narrative summaries</em> of their bibliometric results — directly within the platform.</p>
+  <p>Starting from version <strong>5.0</strong>, <em>Biblioshiny</em> introduces <strong>Biblio AI</strong>, a new suite of features powered by Google’s <strong>Gemini</strong> models. This integration allows users to receive <em>automatic interpretations</em>, <em>critical insights</em>, and <em>narrative summaries</em> of their bibliometric results — directly within the platform.</p>
   <br>
   <h4>✨ What does Biblio AI do?</h4>
-  <p>Biblio AI enhances the core analytical modules of <em>biblioshiny</em> by providing contextual, AI-generated commentary on results:</p>
+  <p>Biblio AI enhances the core analytical modules of <em>Biblioshiny</em> by providing contextual, AI-generated commentary on several results, as:</p>
   <ul>
-  <li><strong>Overview:</strong> Generates high-level summaries of key bibliometric indicators and collection features.</li>
-  <li><strong>RPYS (Reference Publication Year Spectroscopy):</strong> Highlights and interprets historical citation peaks.</li>
-  <li><strong>Trend Topics:</strong> Explains thematic evolution and emerging research trends.</li>
-  <li><strong>Knowledge Structures:</strong> Offers insights into conceptual structures and co-citation/co-occurrence networks.</li>
+    <li><strong>Overview:</strong> High-level summaries of key bibliometric indicators and collection features.</li>
+    <li><strong>Three-Field Plot:</strong> Interpretation of the connections among sources, authors, and keywords.</li>
+    <li><strong>Authors' Production over Time:</strong> Insights on temporal dynamics and productivity patterns of key authors.</li>
+    <li><strong>Corresponding Author's Countries Collaboration:</strong> Discussion of international scientific collaboration patterns.</li>
+    <li><strong>Most Local Cited Documents:</strong> Evaluation of the most influential documents within the dataset.</li>
+    <li><strong>Reference Publication Year Spectroscopy:</strong> Identification and interpretation of historical citation peaks.</li>
+    <li><strong>Trend Topics:</strong> Explanation of thematic evolution and detection of emerging research trends.</li>
+    <li><strong>Knowledge Structures:</strong> Analysis of conceptual maps and networks such as co-citation and co-word analysis.</li>
+    <li><strong>Country Collaboration World Map:</strong> AI-assisted reading of global co-authorship and geographical patterns.</li>
   </ul>
   <p>In each of these sections, users can activate the <strong>Biblio AI</strong> panel to access dynamic text explanations, perfect for use in scientific writing, presentations, or reporting.</p>
   <br>
-  <h4>🔧 How to activate Biblio AI?</h4>
+  <h4>🔧 How to enable Biblio AI?</h4>
   <p>To enable Biblio AI, follow these simple steps:</p>
   <ol>
   <li><strong>Register</strong> at <a href='https://makersuite.google.com/' target='_blank'>Google AI Studio</a> (free access available).</li>

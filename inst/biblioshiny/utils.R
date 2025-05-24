@@ -478,11 +478,12 @@ notifications <- function() {
     },
     # missing the local file. The online one exists.
     AnoB = {
-      notifOnline <- notifOnline %>%
-        dplyr::slice_head(n = 5)
+      # notifOnline <- notifOnline %>%
+      #   dplyr::slice_head(n = 5)
       notifTot <- notifOnline %>%
         filter(action == TRUE) %>%
-        mutate(status = "danger")
+        mutate(status = "danger") %>% 
+        dplyr::slice_head(n = 5)
       notifOnline %>%
         filter(action == TRUE) %>%
         write.csv(file = file, quote = FALSE, row.names = FALSE)

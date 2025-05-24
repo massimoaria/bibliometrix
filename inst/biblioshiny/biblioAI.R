@@ -3,7 +3,8 @@ gemini_ai <- function(image = NULL,
                       prompt = "Explain these images",
                       model = "2.0-flash",
                       type = "png",
-                      retry_503 = 3) {
+                      retry_503 = 3,
+                      api_key=NULL) {
   
   # Default config
   generation_config <- list(
@@ -17,7 +18,7 @@ gemini_ai <- function(image = NULL,
   # Build URL
   model_query <- paste0("gemini-", model, ":generateContent")
   url <- paste0("https://generativelanguage.googleapis.com/v1beta/models/", model_query)
-  api_key <- Sys.getenv("GEMINI_API_KEY")
+  if (is.null(api_key)) api_key <- Sys.getenv("GEMINI_API_KEY")
   
   # Base structure of parts
   parts <- list(list(text = prompt))
@@ -72,7 +73,8 @@ gemini_ai <- function(image = NULL,
     resp <- tryCatch(
       req_perform(req),
       error = function(e) {
-        return(list(error = TRUE, message = paste("❌ Request failed with error:", e$message)))
+        return(list(status_code=stringr::str_extract(e$message, "(?<=HTTP )\\d+")|> as.numeric(), 
+                    error = TRUE, message = paste("❌ Request failed with error:", e$message)))
       }
     )
     
@@ -80,10 +82,10 @@ gemini_ai <- function(image = NULL,
     # if (is.list(resp) && isTRUE(resp$error)) {
     #   return(resp$message)
     # }
-    
-    # Retry on HTTP 503
-    if (resp$status_code == 503) {
-      if (attempt < retry_503) {
+
+    # Retry on HTTP 503 or 429
+    if (resp$status_code %in% c(429,503)) {
+      if (attempt <= retry_503) {
         message(paste0("⚠️ HTTP 503 (Service Unavailable) - retrying in 2 seconds (attempt ", attempt, "/", retry_503, ")..."))
         Sys.sleep(2)
         next
@@ -98,6 +100,17 @@ gemini_ai <- function(image = NULL,
       }
     }
     
+    # HTTP errors
+    # 400 api key not valid
+    if (resp$status_code == 400) {
+      msg <- tryCatch({
+        parsed <- jsonlite::fromJSON(httr2::resp_body_string(resp))
+        parsed$error$message
+      }, error = function(e) {
+        "Please check your API key. It seems to be not valid!"
+      })
+      return(paste0("❌ HTTP ", resp$status_code, ": ", msg))
+    }
     # Other HTTP errors
     if (resp$status_code != 200) {
       msg <- tryCatch({
@@ -118,15 +131,26 @@ gemini_ai <- function(image = NULL,
 }
 
 setGeminiAPI <- function(api_key) {
+  
   # 1. Controllo validità dell'API key
+  apiCheck <- gemini_ai(image = NULL,
+                     prompt = "Hello",
+                     model = "2.0-flash",
+                     type = "png",
+                     retry_503 = 3, api_key=api_key)
+  
+  contains_http_error <- grepl("HTTP\\s*[1-5][0-9]{2}", apiCheck)
+  
+  if (contains_http_error) {
+    return(list(valid=FALSE, message="❌ API key seems be not valid! Please, check it or your connection."))
+  }
+  
   if (is.null(api_key) || !is.character(api_key) || nchar(api_key) == 0) {
-    message("❌ API key must be a non-empty string.")
-    return(NA)
+    return(list(valid=FALSE, message="❌ API key must be a non-empty string."))
   }
   
   if (nchar(api_key) < 10) {
-    message("❌ API key seems too short. Please verify your key.")
-    return(NA)
+    return(list(valid=FALSE, message="❌ API key seems too short. Please verify your key."))
   }
   
   # 2. Mostra solo gli ultimi 4 caratteri per feedback
@@ -136,7 +160,7 @@ setGeminiAPI <- function(api_key) {
   # 3. Imposta la variabile d'ambiente
   Sys.setenv(GEMINI_API_KEY = api_key)
   
-  return(paste0(paste0(rep("*",nchar(api_key)-4), collapse=""),last,collapse=""))
+  return(list(valid=TRUE, message=paste0(paste0(rep("*",nchar(api_key)-4), collapse=""),last,collapse="")))
 }
 
 showGeminiAPI <- function(){

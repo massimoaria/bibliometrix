@@ -5,7 +5,7 @@ libraries <- function() {
     require(pak, quietly = TRUE)
   }
   if (!require(httr2, quietly = TRUE)) {
-    install.packages("httr2")
+    pkg_install("httr2")
     require(httr2, quietly = TRUE)
   }
   if (!(require(base64enc))) {

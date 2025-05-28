@@ -310,7 +310,12 @@ biblioAiPrompts <- function(values, activeTab){
            prompt <- paste0("Interpret this historiograph, a temporal citation network built by mapping direct citation links among documents. ",
                             #" The y-axis represents publication years, and directed edges indicate citations between articles. ",
                          "Highlight the main citation paths, pivotal works, and any notable temporal trends in knowledge development, looking also to the article titles and their topics.",
+                         " Focus on the temporal evolution of each cluster",
                             "Here there is the list of each paper (node) and its title: ",titles)
+           # prompt <- paste0("This historiograph represents a temporal citation network, constructed by mapping direct citation links among documents. Please identify and describe the main clusters",
+           #                  " as research streams evolving over time. For each cluster, provide a label based on the titles of its pivotal documents. Explain the temporal trajectory of each stream,",
+           #                  " highlighting foundational or highly cited works, and discuss any thematic overlaps or transitions between clusters.",
+           #                   "Here there is the list of the first 20 most cited papers and its title: ",titles)
          },
          "collabNetwork"={
            prompt <- paste0("Provide an interpretation of this 'collaboration' network", 

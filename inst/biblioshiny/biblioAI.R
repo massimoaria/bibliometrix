@@ -9,7 +9,7 @@ gemini_ai <- function(image = NULL,
   # Default config
   generation_config <- list(
     temperature = 1,
-    maxOutputTokens = 8192,
+    maxOutputTokens = 16384,#8192,
     topP = 0.95,
     topK = 40,
     seed = 1234
@@ -194,7 +194,7 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
     solidHeader = TRUE,
     div(
       style = "white-space: pre-wrap; background-color:#f9f9f9; padding:15px; border:1px solid #ccc; border-radius:5px; max-height:400px; overflow-y: auto;",
-      HTML(content)
+      HTML(text_to_html(content))
     ),
     br(),
     em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation."),
@@ -225,6 +225,9 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
 }
 
 biblioAiPrompts <- function(values, activeTab){
+  
+  ## ROle definition for Gemini as Biblio AI assistant
+  promptInitial <- "You are Biblio AI, an AI assistant integrated within Biblioshiny. Your task is to support researchers in interpreting and critically discussing the results of their bibliometric analyses, offering insights, contextual explanations, and guidance for data-driven interpretation. "
   
   switch(activeTab,
          "mainInfo"={
@@ -325,6 +328,7 @@ biblioAiPrompts <- function(values, activeTab){
            prompt <- paste0("Provide an interpretation of this plot creted with 'bibliometrix R Package'")
          }
   )
+  prompt <- paste0(promptInitial,prompt)
   #if (!activeTab %in% c("mainInfo", "thematicMap", "trendTopic")) prompt <- paste0(prompt, " Provide also scientific references about the methodological description")
   return(prompt)
 }
@@ -757,6 +761,47 @@ copy_to_clipboard <- function(x) {
   } else {
     stop("Unrecognized or unsupported operating system.")
   }
+}
+
+# convert gemini output to HTML
+text_to_html <- function(input_text) {
+  
+  # Escape HTML special characters
+  escape_html <- function(text) {
+    text <- gsub("&", "&amp;", text)
+    text <- gsub("<", "&lt;", text)
+    text <- gsub(">", "&gt;", text)
+    text
+  }
+  
+  # Convert markdown-style bold (**text**) to <strong>
+  convert_bold <- function(text) {
+    gsub("\\*\\*(.*?)\\*\\*", "<strong>\\1</strong>", text)
+  }
+  
+  # Process each paragraph
+  paragraphs <- unlist(strsplit(input_text, "\n\n"))
+  html_paragraphs <- lapply(paragraphs, function(p) {
+    lines <- unlist(strsplit(p, "\n"))
+    lines <- sapply(lines, escape_html) # escape special characters
+    lines <- sapply(lines, convert_bold) # convert **bold**
+    
+    if (all(grepl("^\\*\\s+", lines))) {
+      # Convert to unordered list
+      lines <- gsub("^\\*\\s+", "", lines)
+      items <- paste0("<li>", lines, "</li>", collapse = "\n")
+      return(paste0("<ul>\n", items, "\n</ul>"))
+    } else {
+      # Regular paragraph
+      return(paste0("<p>", paste(lines, collapse = "<br/>"), "</p>"))
+    }
+  })
+  
+  # Combine all HTML parts
+  html_body <- paste(html_paragraphs, collapse = "\n\n")
+  html <- paste0("<html>\n<body>\n", html_body, "\n</body>\n</html>")
+  html <- gsub("\n","",html)
+  return(html)
 }
 
 # Peaks identification in RPYS

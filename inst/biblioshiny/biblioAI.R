@@ -85,7 +85,7 @@ gemini_ai <- function(image = NULL,
 
     # Retry on HTTP 503 or 429
     if (resp$status_code %in% c(429,503)) {
-      if (attempt <= retry_503) {
+      if (attempt < retry_503) {
         message(paste0("⚠️ HTTP 503 (Service Unavailable) - retrying in 2 seconds (attempt ", attempt, "/", retry_503, ")..."))
         Sys.sleep(2)
         next

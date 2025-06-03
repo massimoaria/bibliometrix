@@ -26,7 +26,7 @@ manuscripts and variables to Field Tag in the original SCOPUS and Clarivate Anal
 Default is \code{analysis = "coupling"}.}
 
 \item{network}{is a character object. It indicates the network typology. The \code{network} argument can be
-\code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"}, \code{"titles"}, or \code{"abstracts"}.
+\code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"},\code{"all_keywords"}, \code{"titles"}, or \code{"abstracts"}.
 Default is \code{network = "authors"}.}
 
 \item{n}{is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.}

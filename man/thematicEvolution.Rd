@@ -23,7 +23,7 @@ thematicEvolution(
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.}
 
-\item{field}{is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","TI","AB"). Default value is \code{field="ID"}.}
+\item{field}{is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","KW_Merged","TI","AB"). Default value is \code{field="ID"}.}
 
 \item{years}{is a numeric vector of one or more unique cut points.}
 

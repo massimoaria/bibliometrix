@@ -937,6 +937,7 @@ body <- dashboardBody(
                                             "Countries" = "AU_CO",
                                             "Keywords" = "DE",
                                             "Keywords Plus" = "ID",
+                                            "All Keywords" = "KW_Merged",
                                             "Titles" = "TI_TM",
                                             "Abstract" = "AB_TM",
                                             "Sources" = "SO",
@@ -959,6 +960,7 @@ body <- dashboardBody(
                                             "Countries" = "AU_CO",
                                             "Keywords" = "DE",
                                             "Keywords Plus" = "ID",
+                                            "All Keywords" = "KW_Merged",
                                             "Titles" = "TI_TM",
                                             "Abstract" = "AB_TM",
                                             "Sources" = "SO",
@@ -981,13 +983,14 @@ body <- dashboardBody(
                                             "Countries" = "AU_CO",
                                             "Keywords" = "DE",
                                             "Keywords Plus" = "ID",
+                                            "All Keywords" = "KW_Merged",
                                             "Titles" = "TI_TM",
                                             "Abstract" = "AB_TM",
                                             "Sources" = "SO",
                                             "References" = "CR",
                                             "Cited Sources" = "CR_SO"
                                           ),
-                                          selected = "DE"
+                                          selected = "KW_Merged"
                     )),
                     column(6, numericInput("RightFieldn",
                                            label = ("Number of items"),
@@ -2658,11 +2661,12 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB",
                     "Subject Categories (WoS)" = "WC"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.MostRelWords == 'AB' |input.MostRelWords == 'TI'",
@@ -2822,11 +2826,12 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB",
                     "Subject Categories (WoS)" = "WC"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.summaryTerms == 'AB' |input.summaryTerms == 'TI'",
@@ -3062,11 +3067,12 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB",
                     "Subject Categories (WoS)" = "WC"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.treeTerms == 'AB' |input.treeTerms == 'TI'",
@@ -3226,10 +3232,11 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
@@ -3405,10 +3412,11 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
@@ -3800,11 +3808,12 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's Keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB",
                     "Subject Categories (WoS)" = "WC"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.field == 'TI' | input.field == 'AB'",
@@ -4247,10 +4256,11 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's Keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
@@ -4502,11 +4512,11 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's Keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
-                    "Abstracts
-                                                           " = "AB"
+                    "Abstracts" = "AB"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.TEfield == 'TI' | input.TEfield == 'AB'",
@@ -4886,10 +4896,11 @@ body <- dashboardBody(
                   choices = c(
                     "Keywords Plus" = "ID",
                     "Author's Keywords" = "DE",
+                    "All Keywords" = "KW_Merged",
                     "Titles" = "TI",
                     "Abstracts" = "AB"
                   ),
-                  selected = "ID"
+                  selected = "KW_Merged"
                 ),
                 conditionalPanel(
                   condition = "input.CSfield == 'TI' | input.CSfield == 'AB'",

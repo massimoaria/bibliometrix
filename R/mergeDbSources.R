@@ -40,6 +40,8 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
   } else {
     M <- dplyr::bind_rows(...)
   }
+  # create KW_Merged field 
+  M <- M %>% mergeKeywords(force=TRUE)
 
   dbLabels <- data.frame(
     DB = toupper(c("isi", "scopus", "openalex", "lens", "dimensions", "pubmed", "cochrane")),

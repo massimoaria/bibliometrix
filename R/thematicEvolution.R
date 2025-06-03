@@ -16,7 +16,7 @@ utils::globalVariables(c(
 #' and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 #'
 #' @param M is a bibliographic data frame obtained by the converting function \code{\link{convert2df}}.
-#' @param field is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","TI","AB"). Default value is \code{field="ID"}.
+#' @param field is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","KW_Merged","TI","AB"). Default value is \code{field="ID"}.
 #' @param years is a numeric vector of one or more unique cut points.
 #' @param n is numerical. It indicates the number of words to use in the network analysis
 #' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.

@@ -106,6 +106,14 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
       CW <- CW[rowSums(CW) > 0, ]
       CW <- CW[, !(colnames(CW) %in% "NA")]
     },
+    KW_Merged = {
+      CW <- cocMatrix(M, Field = "KW_Merged", type = "matrix", sep = ";", binary = binary, remove.terms = remove.terms, synonyms = synonyms)
+      # Define minimum degree (number of occurrences of each Keyword)
+      CW <- CW[, colSums(CW) >= minDegree]
+      # Delete empty rows
+      CW <- CW[rowSums(CW) > 0, ]
+      CW <- CW[, !(colnames(CW) %in% "NA")]
+    },
     ID_TM = {
       M <- termExtraction(M, Field = "ID", remove.numbers = TRUE, stemming = stemming, language = "english", remove.terms = remove.terms, synonyms = synonyms, keep.terms = NULL, verbose = FALSE)
 
@@ -149,7 +157,6 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
       # CW=data.frame(apply(CW,2,factor))
     }
   )
-
 
   colnames(CW) <- label <- tolower(colnames(CW))
   rownames(CW) <- tolower(rownames(CW))

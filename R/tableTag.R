@@ -57,7 +57,7 @@ tableTag <- function(M, Tag = "CR", sep = ";", ngrams = 1, remove.terms = NULL, 
 
   Tab <- sort(table(Tab), decreasing = TRUE)
   # remove terms from ID and DE
-  if ((Tag %in% c("DE", "ID")) & (!is.null(remove.terms))) {
+  if ((Tag %in% c("DE", "ID", "KW_Merged")) & (!is.null(remove.terms))) {
     term <- setdiff(names(Tab), toupper(remove.terms))
     Tab <- Tab[term]
   }

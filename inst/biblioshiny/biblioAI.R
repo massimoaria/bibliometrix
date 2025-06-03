@@ -185,7 +185,7 @@ load_api_key <- function(path = path_gemini_key) {
 geminiOutput <- function(title = "", content = "", values){
   if (is.null(content)){
     content <- "Click the 'Ask Biblio AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n
-This AI-powered feature leverages Google Gemini to help you understand patterns and insights emerging from your contextual analysis.\n\n\n\n\n\n\n"
+This AI-powered feature leverages Google Gemini to help you understand patterns and insights emerging from your contextual analysis.\n  \n  \n \n  \n  \n  \n"
   }
   box(
     title = title,

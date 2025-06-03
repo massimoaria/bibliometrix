@@ -254,7 +254,8 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
   suppressWarnings(M <- metaTagExtraction(M, Field = "SR"))
   row.names(M) <- M$SR
 
-
+  # Create field KW_Merged
+  M <- M %>% mergeKeywords(force = T)
 
   ### bibliometrix>DB class
   class(M) <- c("bibliometrixDB", "data.frame")

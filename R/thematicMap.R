@@ -70,6 +70,10 @@ thematicMap <- function(M, field="ID", n=250, minfreq=5, ngrams=1, stemming=FALS
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "author_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
            TERMS <- tolower(M$DE)
          },
+         KW_Merged={
+           NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "all_keywords", n = n, sep = ";", remove.terms=remove.terms, synonyms = synonyms)
+           TERMS <- tolower(M$KW_Merged)
+         },
          TI={
            M=termExtraction(M,Field="TI", ngrams=ngrams, verbose=FALSE, stemming = stemming, remove.terms=remove.terms, synonyms = synonyms)
            NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "titles", n = n, sep = ";")

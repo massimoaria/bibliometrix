@@ -19,7 +19,7 @@ KeywordGrowth(
 It is a data matrix with cases corresponding to articles and variables to Field Tag in the original WoS or SCOPUS file.}
 
 \item{Tag}{is a character object. It indicates one of the keyword field tags of the
-standard ISI WoS Field Tag codify (ID or DE) or a field tag created by \code{\link{termExtraction}} function (TI_TM, AB_TM, etc.).}
+standard ISI WoS Field Tag codify (ID, DE, KW_Merged) or a field tag created by \code{\link{termExtraction}} function (TI_TM, AB_TM, etc.).}
 
 \item{sep}{is the field separator character. This character separates strings in each keyword column of the data frame. The default is \code{sep = ";"}.}
 

@@ -20,8 +20,9 @@ utils::globalVariables(c("item", "SR"))
 #'   \tabular{lll}{ \code{AU}\tab   \tab Authors\cr \code{SO}\tab   \tab
 #'   Publication Name (or Source)\cr \code{JI}\tab   \tab ISO Source
 #'   Abbreviation\cr \code{DE}\tab   \tab Author Keywords\cr \code{ID}\tab
-#'   \tab Keywords associated by WoS or SCOPUS database \cr \code{CR}\tab   \tab
-#'   Cited References}
+#'   \tab Keywords associated by WoS or SCOPUS database \cr 
+#'   \code{KW_Merged}\tab    \tab All Keywords (merged by DE and ID) \cr
+#'   \code{CR}\tab   \tab Cited References}
 #'
 #'   for a complete list of filed tags see:
 #'   \href{https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf}{Field Tags used in bibliometrix}\cr\cr
@@ -80,12 +81,14 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   # if Field is DE -> WK (Works x Keywords)
   # etc.
   # crossprod <- Matrix::crossprod
+  
   size <- dim(M)
   if (!"LABEL" %in% names(M)) row.names(M) <- M$SR
   RowNames <- row.names(M)
 
+  if (Field == "KW_Merged") M <- M %>% mergeKeywords(force = FALSE)
   ### REMOVE TERMS AND MERGE SYNONYMS
-  if (Field %in% c("ID", "DE", "TI", "TI_TM", "AB", "AB_TM")) {
+  if (Field %in% c("ID", "DE","KW_Merged","TI", "TI_TM", "AB", "AB_TM")) {
     # Crete df with all terms
 
     Fi <- strsplit(M[, Field], sep)

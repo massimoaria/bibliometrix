@@ -37,7 +37,7 @@
 #'   \code{analysis} argument can be \code{"collaboration"}, \code{"coupling"}, \code{"co-occurrences"}  or \code{"co-citation"}.
 #'   Default is \code{analysis = "coupling"}.
 #' @param network is a character object. It indicates the network typology. The \code{network} argument can be
-#' \code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"}, \code{"titles"}, or \code{"abstracts"}.
+#' \code{"authors"}, \code{"references"}, \code{"sources"}, \code{"countries"},\code{"keywords"}, \code{"author_keywords"},\code{"all_keywords"}, \code{"titles"}, or \code{"abstracts"}.
 #' Default is \code{network = "authors"}.
 #' @param n is an integer. It indicates the number of items to select. If \code{N = NULL}, all items are selected.
 #' @param sep is the field separator character. This character separates strings in each column of the data frame. The default is \code{sep = ";"}.
@@ -124,6 +124,9 @@ biblioNetwork <-
         },
         author_keywords = {
           WA <- cocMatrix(M, Field = "DE", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
+        },
+        all_keywords = {
+          WA <- cocMatrix(M, Field = "KW_Merged", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         titles = {
           WA <- cocMatrix(M, Field = "TI_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)

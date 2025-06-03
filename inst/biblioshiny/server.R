@@ -287,6 +287,7 @@ To ensure the functionality of Biblioshiny,
       data(management, package="bibliometrixData")
       values = initial(values)
       row.names(management) <- management$SR
+      management <- management %>% mergeKeywords(force = T)
       values$M <- management
       values$Morig = management
       values$Histfield = "NA"
@@ -512,13 +513,13 @@ To ensure the functionality of Biblioshiny,
              },
              ### RData format
              rdata={
-               M <- smart_load(inFile$datapath)
+               M <- smart_load(inFile$datapath) 
              },
              rda={
-               M <- smart_load(inFile$datapath)
+               M <- smart_load(inFile$datapath) 
              },
              rds={
-               M <- readRDS(inFile$datapath)
+               M <- readRDS(inFile$datapath) 
              })
     } else if (is.null(inFile)) {return(NULL)}
     
@@ -527,7 +528,7 @@ To ensure the functionality of Biblioshiny,
     ind <- which(substr(names(M),1,2)=="X.")
     if (length(ind)>0) M <- M[,-ind]
     ##
-    
+    M <- M %>% mergeKeywords(force = F)
     values$M <- M
     values$Morig = M
     values$Histfield = "NA"
@@ -2919,6 +2920,7 @@ To ensure the functionality of Biblioshiny,
     switch(input$MostRelWords,
            ID={lab="Keywords Plus"},
            DE={lab="Author's Keywords"},
+           KW_Merged={lab="All Keywords"},
            TI={lab="Title's Words"},
            AB={lab="Abstract's Words"},
            WC={lab="Subject Categories"})
@@ -3218,6 +3220,9 @@ To ensure the functionality of Biblioshiny,
            },
            DE={
              KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
+           },
+           KW_Merged={
+             KW=KeywordGrowth(values$M, Tag = "KW_Merged", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
            },
            TI={
              values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)

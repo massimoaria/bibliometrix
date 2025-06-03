@@ -33,6 +33,7 @@ field can be equal to one of these tags:
 \tabular{lll}{
 \code{ID}\tab   \tab Keywords Plus associated by ISI or SCOPUS database\cr
 \code{DE}\tab   \tab Author's keywords\cr
+\code{KW_Merged}\tab   \tab All keywords\cr
 \code{ID_TM}\tab   \tab Keywords Plus stemmed through the Porter's stemming algorithm\cr
 \code{DE_TM}\tab   \tab Author's Keywords stemmed through the Porter's stemming algorithm\cr
 \code{TI}\tab   \tab Terms extracted from titles\cr

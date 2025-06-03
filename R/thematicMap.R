@@ -19,7 +19,7 @@ utils::globalVariables(c("sC", "groups", "words", "words1", "eij", "groups.x",
 #' 
 #' 
 #' @param M is a bibliographic dataframe.
-#' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE", "TI", "AB")}.
+#' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE","KW_Merged","TI", "AB")}.
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param n is an integer. It indicates the number of terms to include in the analysis.
 #' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).

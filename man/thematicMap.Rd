@@ -24,7 +24,7 @@ thematicMap(
 \arguments{
 \item{M}{is a bibliographic dataframe.}
 
-\item{field}{is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE", "TI", "AB")}.
+\item{field}{is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE","KW_Merged","TI", "AB")}.
 \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.}
 
 \item{n}{is an integer. It indicates the number of terms to include in the analysis.}

@@ -163,50 +163,6 @@ body <- dashboardBody(
     tags$style(".fa-comment-dollar {font-size: 20px}"),
     tags$style(".fa-bars {font-size: 20px}"),
     tags$style(".sidebar-toggle {font-size: 15px}"),
-    ## To simulating the typing effect in Biblio AI like chatGPT
-    tags$script(HTML("
-    Shiny.addCustomMessageHandler('type_blocks', function(message) {
-      let container = document.getElementById('typing-box');
-      container.innerHTML = '';  // pulisce la box
-      let blocks = message.blocks;
-      let i = 0;
-
-      function addNextBlock() {
-        if (i < blocks.length) {
-          const wrapper = document.createElement('div');
-          wrapper.innerHTML = blocks[i];  // <- INTERPRETA HTML
-          container.appendChild(wrapper);
-          container.scrollTop = container.scrollHeight;
-          i++;
-          setTimeout(addNextBlock, 200);  // velocità
-        }
-      }
-
-      addNextBlock();
-    });
-  ")),
-  #   tags$script(HTML("
-  #   Shiny.addCustomMessageHandler('type_text', function(message) {
-  #     let container = document.getElementById('typing-box');
-  #     container.innerHTML = '';
-  #     let text = message.text;
-  #     let i = 0;
-  #     function typeChar() {
-  #       if (i < text.length) {
-  #         let char = text.charAt(i);
-  #         if (char === '\\n') {
-  #           container.innerHTML += '<br>';
-  #         } else {
-  #           container.innerHTML += char;
-  #         }
-  #         i++;
-  #         setTimeout(typeChar, 5); // velocità
-  #       }
-  #     }
-  #     typeChar();
-  #   });
-  # ")),
-    ## end block
     tags$script(
       'var dimension = [0, 0];
               $(document).on("shiny:connected", function(e) {
@@ -822,7 +778,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("MainInfoGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("MainInfoGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -1065,7 +1022,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("TFPGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("TFPGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -1680,7 +1638,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("ApotGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("ApotGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -2056,7 +2015,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("MostRelCountriesGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("MostRelCountriesGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -2440,7 +2400,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("MostLocCitDocsGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("MostLocCitDocsGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -2647,7 +2608,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("rpysGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("rpysGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -3601,7 +3563,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("trendTopicsGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("trendTopicsGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -4241,7 +4204,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("cocGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("cocGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -4497,7 +4461,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("TMGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("TMGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -4872,7 +4837,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("TEGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("TEGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -5128,7 +5094,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("CSGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("CSGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -5475,7 +5442,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("cocitGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("cocitGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -5616,7 +5584,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("histGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("histGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -5962,7 +5931,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("colGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("colGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )
@@ -6063,7 +6033,8 @@ body <- dashboardBody(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("WMGeminiUI"))
+                    shinycssloaders::withSpinner(htmlOutput("WMGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
                   )
                 )
               )

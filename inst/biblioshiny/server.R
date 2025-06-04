@@ -49,8 +49,6 @@ To ensure the functionality of Biblioshiny,
     Sys.setenv (CHROMOTE_CHROME = Chrome_url)
   }
   
-  plan(multisession)
-  
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)
@@ -228,11 +226,10 @@ To ensure the functionality of Biblioshiny,
 
   
   ## observe gemini generate button
+  
   observeEvent(input$gemini_btn, {
-    blocks <- c("⌛ Thinking...",rep("\n",5))%>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
     values$gemini_additional <- input$gemini_additional ## additional info to Gemini prompt
-    #values <- geminiWaitingMessage(values, input$sidebarmenu)
+    values <- geminiWaitingMessage(values, input$sidebarmenu)
     values <- geminiGenerate(values, input$sidebarmenu, values$gemini_additional,values$gemini_model_parameters, input)
   })
   
@@ -1394,14 +1391,9 @@ To ensure the functionality of Biblioshiny,
   
   # gemini button for word network
   output$MainInfoGeminiUI <- renderUI({
+    #values <- geminiWaitingMessage(values, input$sidebarmenu)
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
-  })
-  
-  observe({
-    req(values$MainInfoGemini)
-    blocks <-  values$MainInfoGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
+    geminiOutput(title = "", content = values$MainInfoGemini, values)
   })
   
   # Annual Production ----
@@ -1560,15 +1552,9 @@ To ensure the functionality of Biblioshiny,
   # gemini button for Three Fields Plot
   output$TFPGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$TFPGemini, values)
     
   })
-
-observe({
-  req(values$TFPGemini)
-  blocks <-  values$TFPGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-  session$sendCustomMessage("type_blocks", list(blocks = blocks))
-})
   
   observeEvent(input$reportTFP,{
     if (!is.null(values$TFP)){
@@ -2097,16 +2083,10 @@ observe({
   # gemini button for Apot
   output$ApotGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$ApotGemini, values)
     
   })
-  
-  observe({
-    req(values$ApotGemini)
-    blocks <-  values$ApotGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
+
   output$APOTplot.save <- downloadHandler(
     filename = function() {
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
@@ -2380,14 +2360,8 @@ observe({
   # gemini button for word network
   output$MostRelCountriesGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$MostRelCountriesGemini, values)
     
-  })
-  
-  observe({
-    req(values$MostRelCountriesGemini)
-    blocks <-  values$MostRelCountriesGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$MRCOplot.save <- downloadHandler(
@@ -2700,15 +2674,9 @@ observe({
   # gemini button for word network
   output$MostLocCitDocsGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$MostLocCitDocsGemini, values)
   })
-  
-  observe({
-    req(values$MostLocCitDocsGemini)
-    blocks <-  values$MostLocCitDocsGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
+
   output$MLCDplot.save <- downloadHandler(
     filename = function() {
       paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep="")
@@ -2836,16 +2804,10 @@ observe({
   # gemini button for rpys
   output$rpysGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$rpysGemini, values)
     
   })
-  
-  observe({
-    req(values$rpysGemini)
-    blocks <- values$rpysGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
+
   output$rpysPlot <- renderPlotly({
     RPYS()
     plot.ly(values$res$spectroscopy, side="l", aspectratio = 1.3, size=0.10)
@@ -3456,13 +3418,7 @@ observe({
   # gemini button for word network
   output$trendTopicsGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
-  })
-  
-  observe({
-    req(values$trendTopicsGemini)
-    blocks <- values$trendTopicsGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
+    geminiOutput(title = "", content = values$trendTopicsGemini, values)
   })
   
   output$TTplot.save <- downloadHandler(
@@ -3641,13 +3597,7 @@ observe({
   # gemini button for word network
   output$cocGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
-  })
-  
-  observe({
-    req(values$cocGemini)
-    blocks <- values$cocGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
+    geminiOutput(title = "", content = values$cocGemini, values)
   })
   
   output$network.coc <- downloadHandler(
@@ -3751,13 +3701,7 @@ observe({
   # gemini button for correspondence analysis
   output$CSGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
-  })
-  
-  observe({
-    req(values$CSGemini)
-    blocks <- values$CSGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
+    geminiOutput(title = "", content = values$CSGemini, values)
   })
   
   output$FAplot.save <- downloadHandler(
@@ -3906,13 +3850,7 @@ observe({
   # gemini button for Thematic Map
   output$TMGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
-  })
-  
-  observe({
-    req(values$TMGemini)
-    blocks <- values$TMGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
+    geminiOutput(title = "", content = values$TMGemini, values)
   })
   
   ### click cluster networks
@@ -4113,15 +4051,9 @@ observe({
   # gemini button for word network
   output$TEGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$TEGemini, values)
   })
-  
-  observe({
-    req(values$TEGemini)
-    blocks <- values$TEGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
+ 
   session$onFlushed(function() {
     shinyjs::runjs("$('#TEPlot').trigger('resize');")
   })
@@ -4430,13 +4362,7 @@ observe({
   # gemini button for co-citation network
   output$cocitGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
-  })
-  
-  observe({
-    req(values$cocitGemini)
-    blocks <- values$cocitGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
+    geminiOutput(title = "", content = values$cocitGemini, values)
   })
   
   output$network.cocit <- downloadHandler(
@@ -4535,16 +4461,10 @@ observe({
   # gemini button for word network
   output$histGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$histGemini, values)
   })
   
-  observe({
-    req(values$histGemini)
-    blocks <- values$histGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
-  observeEvent(input$reportHIST,{
+ observeEvent(input$reportHIST,{
     if(!is.null(values$histResults$histData)){
       sheetname <- "Historiograph"
       list_df <- list(values$histResults$histData)
@@ -4590,16 +4510,10 @@ observe({
   # gemini button for word network
   output$colGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$colGemini, values)
   })
-  
-  observe({
-    req(values$colGemini)
-    blocks <- values$colGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
-  output$network.col <- downloadHandler(
+
+   output$network.col <- downloadHandler(
     filename = function() {
       paste("Collaboration_network-", Sys.Date(), ".zip", sep="")
     },
@@ -4671,15 +4585,9 @@ observe({
   # gemini button for World Map
   output$WMGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = "", values)
+    geminiOutput(title = "", content = values$WMGemini, values)
   })
-  
-  observe({
-    req(values$WMGemini)
-    blocks <- values$WMGemini[[1]] %>% text_to_html() %>% html_to_blocks()
-    session$sendCustomMessage("type_blocks", list(blocks = blocks))
-  })
-  
+ 
   output$CCplot.save <- downloadHandler(
     filename = function() {
       paste("CountryCollaborationMap-", Sys.Date(), ".png", sep="")

@@ -49,8 +49,6 @@ To ensure the functionality of Biblioshiny,
     Sys.setenv (CHROMOTE_CHROME = Chrome_url)
   }
   
-  plan(multisession)
-  
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)

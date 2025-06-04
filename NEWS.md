@@ -1,3 +1,5 @@
+# bibliometrix (development version)
+
 # bibliometrix v.5.0.1 
 
 Features:

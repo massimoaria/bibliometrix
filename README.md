@@ -19,8 +19,7 @@ downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/m
 
 <p align="center">
 
-<img src="https://www.bibliometrix.org/logo_new.png" width="400"/>
-
+<img src="https://raw.githubusercontent.com/massimoaria/bibliometrix/master/inst/biblioshiny/www/logoAI.jpg" width="400"/>
 </p>
 
 ## Overview

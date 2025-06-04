@@ -2135,9 +2135,7 @@ To ensure the functionality of Biblioshiny,
   
   ### Lotka Law ----  
   output$lotkaPlot <- renderPlotly({
-    
     values$lotka <- lotka(values$M)
-    
     values$LLplot <- values$lotka$g
     plot.ly(values$lotka$g_shiny,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
   })

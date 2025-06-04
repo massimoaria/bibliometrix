@@ -626,6 +626,8 @@ mergeKeywords <- function(M, force = FALSE){
           paste(collapse = "; ")
       }))
   }
+  ### bibliometrix>DB class
+  class(M) <- c("bibliometrixDB", "data.frame")
   return(M)
 }
 

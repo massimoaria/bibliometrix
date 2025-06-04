@@ -183,16 +183,19 @@ load_api_key <- function(path = path_gemini_key) {
 }
 
 geminiOutput <- function(title = "", content = "", values){
+  if (is.null(content)){
+    content <- "Click the 'Ask Biblio AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n
+This AI-powered feature leverages Google Gemini to help you understand patterns and insights emerging from your contextual analysis.\n  \n  \n \n  \n  \n  \n"
+  }
   box(
     title = title,
     width = 12,
     status = "info",
     solidHeader = TRUE,
     div(
-      id = "typing-box",  # Inizialmente vuoto
+      id = "typing-box",
       style = "white-space: pre-wrap; background-color:#f9f9f9; padding:15px; border:1px solid #ccc; border-radius:5px; max-height:400px; overflow-y: auto;",
-      "Click the 'Ask Biblio AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n
-# This AI-powered feature leverages Google Gemini to help you understand patterns and insights emerging from your contextual analysis.\n  \n  \n \n  \n  \n  \n"
+      HTML(text_to_html(content))
     ),
     br(),
     em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation."),
@@ -200,7 +203,7 @@ geminiOutput <- function(title = "", content = "", values){
       inputId = "gemini_additional",
       label = NULL,
       value = values$gemini_model_parameters,
-      placeholder = "You can provide additional context or details about your analysis...",
+      placeholder = "You can provide additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation.",
       rows = 3,
       width = "100%"
     ),
@@ -221,50 +224,6 @@ geminiOutput <- function(title = "", content = "", values){
     )
   )
 }
-
-
-# geminiOutput <- function(title = "", content = "", values){
-#   if (is.null(content)){
-#     content <- "Click the 'Ask Biblio AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n
-# This AI-powered feature leverages Google Gemini to help you understand patterns and insights emerging from your contextual analysis.\n  \n  \n \n  \n  \n  \n"
-#   }
-#   box(
-#     title = title,
-#     width = 12,
-#     status = "info",
-#     solidHeader = TRUE,
-#     div(
-#       id = "typing-box",
-#       style = "white-space: pre-wrap; background-color:#f9f9f9; padding:15px; border:1px solid #ccc; border-radius:5px; max-height:400px; overflow-y: auto;",
-#       HTML(text_to_html(content))
-#     ),
-#     br(),
-#     em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation."),
-#     textAreaInput(
-#       inputId = "gemini_additional",
-#       label = NULL,
-#       value = values$gemini_model_parameters,
-#       placeholder = "You can provide additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation.",
-#       rows = 3,
-#       width = "100%"
-#     ),
-#     fluidRow(
-#       column(4, align = "center",
-#              actionButton("gemini_btn", "Ask Biblio AI", style = "color: white;",
-#                           icon(name = "microchip", lib = "font-awesome"),
-#                           width = "80%")
-#       ),
-#       column(4, align = "center",
-#              actionButton("copy_btn", "Copy", style = "color: white;", icon = icon("clipboard"),
-#                           width = "80%")
-#       ),
-#       column(4, align = "center",
-#              downloadButton(outputId = "save_btn", label = "Save", icon = icon("download"),
-#                             style = "width: 80%;")
-#       )
-#     )
-#   )
-# }
 
 biblioAiPrompts <- function(values, activeTab){
   
@@ -615,7 +574,7 @@ geminiPromptImage <- function(obj, type="vis", prompt="Explain the topics in thi
 
 geminiWaitingMessage <- function(values, activeTab){
   
-  messageTxt <- "\n\nPlease Wait\n\nThinking.....\n\n"
+  messageTxt <- "⌛ Thinking..."
   
   switch(activeTab,
          "mainInfo"={

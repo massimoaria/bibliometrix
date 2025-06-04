@@ -163,6 +163,50 @@ body <- dashboardBody(
     tags$style(".fa-comment-dollar {font-size: 20px}"),
     tags$style(".fa-bars {font-size: 20px}"),
     tags$style(".sidebar-toggle {font-size: 15px}"),
+    ## To simulating the typing effect in Biblio AI like chatGPT
+    tags$script(HTML("
+    Shiny.addCustomMessageHandler('type_blocks', function(message) {
+      let container = document.getElementById('typing-box');
+      container.innerHTML = '';  // pulisce la box
+      let blocks = message.blocks;
+      let i = 0;
+
+      function addNextBlock() {
+        if (i < blocks.length) {
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = blocks[i];  // <- INTERPRETA HTML
+          container.appendChild(wrapper);
+          container.scrollTop = container.scrollHeight;
+          i++;
+          setTimeout(addNextBlock, 200);  // velocità
+        }
+      }
+
+      addNextBlock();
+    });
+  ")),
+  #   tags$script(HTML("
+  #   Shiny.addCustomMessageHandler('type_text', function(message) {
+  #     let container = document.getElementById('typing-box');
+  #     container.innerHTML = '';
+  #     let text = message.text;
+  #     let i = 0;
+  #     function typeChar() {
+  #       if (i < text.length) {
+  #         let char = text.charAt(i);
+  #         if (char === '\\n') {
+  #           container.innerHTML += '<br>';
+  #         } else {
+  #           container.innerHTML += char;
+  #         }
+  #         i++;
+  #         setTimeout(typeChar, 5); // velocità
+  #       }
+  #     }
+  #     typeChar();
+  #   });
+  # ")),
+    ## end block
     tags$script(
       'var dimension = [0, 0];
               $(document).on("shiny:connected", function(e) {

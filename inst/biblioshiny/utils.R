@@ -552,6 +552,13 @@ initial <- function(values) {
   values$corpusCol <- c("Title" = "TI", "Abstract" = "AB", "Author's Keywords" = "DE")
   values$metadataCol <- c("Publication Year" = "PY", "Document Type" = "DT", "DOI" = "DI", "Open Access" = "OA", "Language" = "LA", "First Author" = "AU1")
 
+  # Chrome enviroment variable
+  if (inherits(try(pagedown::find_chrome(), silent=T), "try-error")) {
+    values$Chrome_url <- NULL
+  }else{
+    values$Chrome_url <- pagedown::find_chrome()
+  }
+  
   return(values)
 }
 

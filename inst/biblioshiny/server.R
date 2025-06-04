@@ -12,7 +12,7 @@ server <- function(input, output,session){
   ## suppress warnings
   options(warn = -1)
   
-  if(inherits(try(pagedown::find_chrome(), silent=T), "try-error")) {
+  if (inherits(try(pagedown::find_chrome(), silent=T), "try-error")) {
     Chrome_url <- NULL
   }else{
     Chrome_url <- pagedown::find_chrome()
@@ -49,6 +49,8 @@ To ensure the functionality of Biblioshiny,
     Sys.setenv (CHROMOTE_CHROME = Chrome_url)
   }
   
+  plan(multisession)
+  
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)
@@ -57,6 +59,7 @@ To ensure the functionality of Biblioshiny,
   ## initial values
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
+  values$Chrome_url <- Chrome_url
   values$sidebar <- sidebarMenu()
   values$rest_sidebar <- FALSE
   values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
@@ -222,10 +225,14 @@ To ensure the functionality of Biblioshiny,
     contentType = "txt"
   )
   
+
+  
   ## observe gemini generate button
   observeEvent(input$gemini_btn, {
+    blocks <- c("⌛ Thinking...",rep("\n",5))%>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
     values$gemini_additional <- input$gemini_additional ## additional info to Gemini prompt
-    values <- geminiWaitingMessage(values, input$sidebarmenu)
+    #values <- geminiWaitingMessage(values, input$sidebarmenu)
     values <- geminiGenerate(values, input$sidebarmenu, values$gemini_additional,values$gemini_model_parameters, input)
   })
   
@@ -1388,8 +1395,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$MainInfoGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$MainInfoGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$MainInfoGemini)
+    blocks <-  values$MainInfoGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   # Annual Production ----
@@ -1548,9 +1560,15 @@ To ensure the functionality of Biblioshiny,
   # gemini button for Three Fields Plot
   output$TFPGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$TFPGemini, values)
+    geminiOutput(title = "", content = "", values)
     
   })
+
+observe({
+  req(values$TFPGemini)
+  blocks <-  values$TFPGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+  session$sendCustomMessage("type_blocks", list(blocks = blocks))
+})
   
   observeEvent(input$reportTFP,{
     if (!is.null(values$TFP)){
@@ -2079,8 +2097,14 @@ To ensure the functionality of Biblioshiny,
   # gemini button for Apot
   output$ApotGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$ApotGemini, values)
+    geminiOutput(title = "", content = "", values)
     
+  })
+  
+  observe({
+    req(values$ApotGemini)
+    blocks <-  values$ApotGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$APOTplot.save <- downloadHandler(
@@ -2356,8 +2380,14 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$MostRelCountriesGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$MostRelCountriesGemini, values)
+    geminiOutput(title = "", content = "", values)
     
+  })
+  
+  observe({
+    req(values$MostRelCountriesGemini)
+    blocks <-  values$MostRelCountriesGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$MRCOplot.save <- downloadHandler(
@@ -2670,7 +2700,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$MostLocCitDocsGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$MostLocCitDocsGemini, values)
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$MostLocCitDocsGemini)
+    blocks <-  values$MostLocCitDocsGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$MLCDplot.save <- downloadHandler(
@@ -2800,8 +2836,14 @@ To ensure the functionality of Biblioshiny,
   # gemini button for rpys
   output$rpysGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$rpysGemini, values)
+    geminiOutput(title = "", content = "", values)
     
+  })
+  
+  observe({
+    req(values$rpysGemini)
+    blocks <- values$rpysGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$rpysPlot <- renderPlotly({
@@ -3414,8 +3456,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$trendTopicsGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$trendTopicsGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$trendTopicsGemini)
+    blocks <- values$trendTopicsGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$TTplot.save <- downloadHandler(
@@ -3594,8 +3641,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$cocGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$cocGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$cocGemini)
+    blocks <- values$cocGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$network.coc <- downloadHandler(
@@ -3699,8 +3751,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for correspondence analysis
   output$CSGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$CSGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$CSGemini)
+    blocks <- values$CSGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$FAplot.save <- downloadHandler(
@@ -3849,8 +3906,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for Thematic Map
   output$TMGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$TMGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$TMGemini)
+    blocks <- values$TMGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   ### click cluster networks
@@ -4051,8 +4113,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$TEGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$TEGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$TEGemini)
+    blocks <- values$TEGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   session$onFlushed(function() {
@@ -4363,8 +4430,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for co-citation network
   output$cocitGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$cocitGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$cocitGemini)
+    blocks <- values$cocitGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$network.cocit <- downloadHandler(
@@ -4463,8 +4535,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$histGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$histGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$histGemini)
+    blocks <- values$histGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   observeEvent(input$reportHIST,{
@@ -4513,8 +4590,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for word network
   output$colGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$colGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$colGemini)
+    blocks <- values$colGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$network.col <- downloadHandler(
@@ -4589,8 +4671,13 @@ To ensure the functionality of Biblioshiny,
   # gemini button for World Map
   output$WMGeminiUI <- renderUI({
     values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$WMGemini, values)
-    
+    geminiOutput(title = "", content = "", values)
+  })
+  
+  observe({
+    req(values$WMGemini)
+    blocks <- values$WMGemini[[1]] %>% text_to_html() %>% html_to_blocks()
+    session$sendCustomMessage("type_blocks", list(blocks = blocks))
   })
   
   output$CCplot.save <- downloadHandler(

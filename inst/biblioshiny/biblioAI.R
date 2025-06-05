@@ -3,7 +3,7 @@ gemini_ai <- function(image = NULL,
                       prompt = "Explain these images",
                       model = "2.0-flash",
                       type = "png",
-                      retry_503 = 3,
+                      retry_503 = 5,
                       api_key=NULL) {
   
   # Default config
@@ -94,7 +94,7 @@ gemini_ai <- function(image = NULL,
           paste0(
             "❌ HTTP 503: Service Unavailable.\n",
             "The Google Gemini servers are currently overloaded or under maintenance.\n",
-            "All retry attempts failed (", retry_503, "). Please try again later."
+            "All retry attempts failed (", retry_503, "). Please try again in a few minutes."
           )
         )
       }
@@ -137,7 +137,7 @@ setGeminiAPI <- function(api_key) {
                      prompt = "Hello",
                      model = "2.0-flash",
                      type = "png",
-                     retry_503 = 3, api_key=api_key)
+                     retry_503 = 5, api_key=api_key)
   
   contains_http_error <- grepl("HTTP\\s*[1-5][0-9]{2}", apiCheck)
   
@@ -564,7 +564,8 @@ geminiPromptImage <- function(obj, type="vis", prompt="Explain the topics in thi
            })
     
     res <- gemini_ai(image = file_path,
-                     prompt = prompt)
+                     prompt = prompt,
+                     model =  values$gemini_api_model)
   } else {
     res <- 'To access this feature, please provide a valid Gemini AI API key. You can obtain your API key by visiting the official <a href="https://aistudio.google.com/" target="_blank">Google AI Studio website</a>.'
   }

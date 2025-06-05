@@ -116,6 +116,7 @@ To ensure the functionality of Biblioshiny,
   values$geminiAPI <- load_api_key(path_gemini_key)
   values$collection_description <- NULL
   values$gemini_additional <- NULL
+  values$gemini_api_model <- NULL
   
   ## NOTIFICATION ITEM ----
   
@@ -229,6 +230,7 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$gemini_btn, {
     values$gemini_additional <- input$gemini_additional ## additional info to Gemini prompt
+    values$gemini_api_model <- input$gemini_api_model
     values <- geminiWaitingMessage(values, input$sidebarmenu)
     values <- geminiGenerate(values, input$sidebarmenu, values$gemini_additional,values$gemini_model_parameters, input)
   })

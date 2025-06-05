@@ -6276,17 +6276,29 @@ body <- dashboardBody(
         fluidRow(
           column(4,
                  passwordInput("api_key", "Enter your Gemini API Key:", "", width = "100%")
+                 ),
+          column(2),
+          column(4,
+                 selectInput(
+                   inputId = "gemini_api_model",
+                   label = "Select the Gemini Model",
+                   choices = c(
+                     "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
+                     "Gemini 2.0 Flash" = "2.0-flash"
+                   ),
+                   selected = "2.0-flash"
                  )
+          )
         ),
         # br(),
         uiOutput("apiStatus"),
         br(),
         fluidRow(
           column(2,
-                 actionButton("set_key", "Set API Key",style = "color:white;", width = "70%")
+                 actionButton("set_key", "Set API Key",style = "color:white;", width = "90%")
                  ),
           column(2,
-                 actionButton("remove_key", "Remove API Key",style = "color:white;",width = "70%")
+                 actionButton("remove_key", "Remove API Key",style = "color:white;",width = "90%")
                  )
         ),
         
@@ -6297,15 +6309,6 @@ body <- dashboardBody(
   )
 )
 
-## Control Bar ####
-# controlbar <- shinydashboardPlus::dashboardControlbar(id = "controlbar2",
-#                                                       uiOutput("controlbar"),
-#                                                       skin = "light",
-#                                                       width = 350,
-#                                                       overlay = FALSE,
-#                                                       collapsed = TRUE,
-#                                                       shinyjs::useShinyjs()
-# )
 ## UI ####
 ui <- shinydashboardPlus::dashboardPage(
   # shinyjs::useShinyjs(),

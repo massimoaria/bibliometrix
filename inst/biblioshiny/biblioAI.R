@@ -641,58 +641,6 @@ geminiWaitingMessage <- function(values, activeTab){
   return(values)
 }
 
-geminiContextualOutput <- function(values, activeTab){
-
-    switch(activeTab,
-           "mainInfo"={
-             messageTxt <- values$MainInfoGemini
-           },
-           "threeFieldPlot"={
-             messageTxt <- values$TFPGemini
-           },
-           "authorsProdOverTime"={
-             messageTxt <- values$ApotGemini
-           },
-           "correspAuthorCountry"={
-             messageTxt <- values$MostRelCountriesGemini
-           },
-           "mostLocalCitDoc"={
-             messageTxt <- values$MostLocCitDocsGemini
-           },
-           "trendTopic"={
-             messageTxt <- values$trendTopicsGemini
-           },
-           "ReferenceSpect"={
-             messageTxt <- values$rpysGemini
-           },
-           "coOccurenceNetwork" = {
-             messageTxt <- values$cocGemini
-           },
-           "thematicMap"={
-             messageTxt <- values$TMGemini
-           },
-           "thematicEvolution"={
-             messageTxt <- values$TEGemini
-           },
-           "factorialAnalysis"={
-             messageTxt <- values$CSGemini
-           },
-           "coCitationNetwork"={
-             messageTxt <- values$cocitGemini
-           },
-           "historiograph"={
-             messageTxt <- values$histGemini
-           },
-           "collabNetwork"={
-             messageTxt <- values$colGemini
-           },
-           "collabWorldMap"={
-             messageTxt <- values$WMGemini
-           }
-    )
-    return(messageTxt)
-}
-
 geminiSave <- function(values, activeTab){
   
   switch(activeTab,

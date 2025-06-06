@@ -109,7 +109,7 @@ To ensure the functionality of Biblioshiny,
   values$ApiOk <- 0
   values$checkControlBar <-FALSE
   
-  ## gemini api
+  ## gemini api and model
   home <- homeFolder()
   path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
   # check if sub directory exists
@@ -117,8 +117,10 @@ To ensure the functionality of Biblioshiny,
   values$collection_description <- NULL
   values$gemini_additional <- NULL
   
-  ## NOTIFICATION ITEM ----
+  path_gemini_model <- paste0(home,"/.biblio_gemini_model.txt", collapse="")
+  values$gemini_api_model <- loadGeminiModelChoice(path_gemini_model)
   
+  ## NOTIFICATION ITEM ----
   output$notificationMenu <- renderMenu({
     notifTot <- notifications()
     values$nots <- apply(notifTot, 1, function(row) {
@@ -229,6 +231,7 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$gemini_btn, {
     values$gemini_additional <- input$gemini_additional ## additional info to Gemini prompt
+    #values$gemini_api_model <- input$gemini_api_model
     values <- geminiWaitingMessage(values, input$sidebarmenu)
     values <- geminiGenerate(values, input$sidebarmenu, values$gemini_additional,values$gemini_model_parameters, input)
   })
@@ -4845,6 +4848,65 @@ To ensure the functionality of Biblioshiny,
       output$status <- renderText(paste0("✅ API key has been set: ",last))
     }
   })
+  output$geminiModelChoice <- renderUI({
+    list(
+      selectInput(
+        inputId = "gemini_api_model",
+        label = "Select the Gemini Model",
+        choices = c(
+          "Gemini 2.5 Flash Preview" = "2.5-flash-preview-05-20",
+          "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
+          "Gemini 2.0 Flash" = "2.0-flash",
+          "Gemini 1.5 Flash" = "1.5-flash",
+          "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
+        ),
+        selected = ifelse(is.null(values$gemini_api_model), "2.0-flash", values$gemini_api_model)
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '2.5-flash-preview-05-20'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em("Request per Minutes: 10", tags$br(),
+                    "Requests per Day: 500", tags$br(),
+                    "Latency time: Medium"))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '2.0-flash-lite'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em("Request per Minutes: 30", tags$br(),
+                    "Requests per Day: 1500",tags$br(),
+                    "Latency time: Low"))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '2.0-flash'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em("Request per Minutes: 15", tags$br(),
+                    "Requests per Day: 1500",tags$br(),
+                    "Latency time: Medium"))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '1.5-flash'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em("Request per Minutes: 15", tags$br(),
+                    "Requests per Day: 1500",tags$br(),
+                    "Latency time: Medium"))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '1.5-flash-8b'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em("Request per Minutes: 15", tags$br(),
+                    "Requests per Day: 1500",tags$br(),
+                    "Latency time: Low"))
+      )
+    )
+  })
+  
+  observeEvent(input$gemini_api_model, {
+    if (!is.null(input$gemini_api_model)){
+      saveGeminiModel(model=input$gemini_api_model, file=paste0(homeFolder(),"/.biblio_gemini_model.txt", collapse=""))
+      values$gemini_api_model <- input$gemini_api_model
+    }
+  })
+  
   
   observeEvent(input$set_key, {
     key <- input$api_key

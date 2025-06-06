@@ -182,6 +182,22 @@ load_api_key <- function(path = path_gemini_key) {
   return(FALSE)
 }
 
+loadGeminiModel = function(file){
+  if (file.exists(file)){
+    model <- readLines(file, warn = FALSE)
+  } else {
+    model <- NULL
+  }
+  return(model)
+}
+
+saveGeminiModel = function(model, file){
+  if (file.exists(file)) {
+    file.remove(file)
+  }
+  writeLines(model, file)
+}
+
 geminiOutput <- function(title = "", content = "", values){
   if (is.null(content)){
     content <- "Click the 'Ask Biblio AI' button to analyze the visual outputs and provide an automatic interpretation of your results based on the graphs.\n

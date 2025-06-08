@@ -94,7 +94,7 @@ gemini_ai <- function(image = NULL,
           paste0(
             "❌ HTTP 503: Service Unavailable.\n",
             "The Google Gemini servers are currently overloaded or under maintenance.\n",
-            "All retry attempts failed (", retry_503, "). Please try again in a few minutes."
+            "All retry attempts failed (", retry_503, "). Please try again in a few minutes. Alternatively, consider using a different AI model with lower latency."
           )
         )
       }

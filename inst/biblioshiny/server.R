@@ -4867,7 +4867,7 @@ To ensure the functionality of Biblioshiny,
         helpText(strong("Free Tier Rate Limits:")),
         helpText(em("Request per Minutes: 10", tags$br(),
                     "Requests per Day: 500", tags$br(),
-                    "Latency time: Medium"))
+                    "Latency time: High"))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.0-flash-lite'",

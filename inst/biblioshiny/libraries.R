@@ -1,124 +1,165 @@
 ### packages for biblishiny()
 libraries <- function() {
-  if (!require(pak, quietly = TRUE)) {
+  is_windows <- tolower(Sys.info()[["sysname"]]) == "windows"
+  if (!is_windows & !require(pak, quietly = TRUE)) {
     install.packages("pak")
-    require(pak, quietly = TRUE)
+    if (!require(pak, quietly = TRUE)) return(FALSE)
   }
-  if (!require(httr2, quietly = TRUE)) {
-    pkg_install("httr2")
-    require(httr2, quietly = TRUE)
+  
+  all_ok <- TRUE
+  
+  safe_install <- function(pkg) {
+    success <- require(pkg, character.only = TRUE, quietly = TRUE)
+    if (!success) {
+      if (is_windows) {
+        install.packages(pkg)
+      } else {
+        
+        pak::pkg_install(pkg)
+      }
+      success <- require(pkg, character.only = TRUE, quietly = TRUE)
+    }
+    return(success)
   }
-  if (!(require(base64enc))) {
-    pkg_install("base64enc")
-    require(base64enc)
-  }
-  if (!(require(bibliometrix))) {
-    pkg_install("bibliometrix")
-    require(bibliometrix)
-  }
-  if (!(require(zip, quietly = TRUE))) {
-    pkg_install("zip")
-  }
+
+  pkgs <- c(
+    "httr2", "base64enc", "bibliometrix", "zip", "shiny", "igraph", "DT", 
+    "ggplot2", "shinycssloaders", "wordcloud2", "ggmap", "maps", 
+    "visNetwork", "plotly", "fontawesome", "shinydashboardPlus", 
+    "shinydashboard", "shinyjs", "RCurl", "openxlsx", "shinyWidgets", 
+    "chromote", "curl", "pagedown", "Matrix", "dimensionsR", "pubmedR", 
+    "dplyr", "tidyr", "sparkline", "tidygraph", "ggraph"
+  )
+
   suppressPackageStartupMessages({
-    if (!(require(shiny, quietly = TRUE))) {
-      pkg_install("shiny")
-      require(shiny, quietly = TRUE)
-    }
-    if (!(require(igraph, quietly = TRUE))) {
-      pkg_install("igraph")
-      require(igraph, quietly = TRUE)
-    }
-    if (!(require(DT, quietly = TRUE))) {
-      pkg_install("DT")
-    }
-    require(DT, quietly = TRUE)
-    if (!(require(ggplot2, quietly = TRUE))) {
-      pkg_install("ggplot2")
-      require(ggplot2, quietly = TRUE)
-    }
-    if (!(require(shinycssloaders, quietly = TRUE))) {
-      pkg_install("shinycssloaders")
-    }
-    if (!(require(wordcloud2, quietly = TRUE))) {
-      pkg_install("wordcloud2")
-    }
-    if (!require(ggmap, quietly = TRUE)) {
-      pkg_install("ggmap")
-      require(ggmap, quietly = TRUE)
-    }
-    if (!require(maps, quietly = TRUE)) {
-      pkg_install("maps")
-      require(maps, quietly = TRUE)
-    }
-    if (!require(visNetwork, quietly = TRUE)) {
-      pkg_install("visNetwork")
-      require(visNetwork, quietly = TRUE)
-    }
-    if (!require(plotly, quietly = TRUE)) {
-      pkg_install("plotly")
-      require(plotly, quietly = TRUE)
-    }
-    if (!require(fontawesome, quietly = TRUE)) {
-      pkg_install("fontawesome")
-      require(fontawesome, quietly = TRUE)
-    }
-    if (!require(shinydashboardPlus, quietly = TRUE)) {
-      pkg_install("shinydashboardPlus")
-      require(shinydashboardPlus, quietly = TRUE)
-    }
-    if (!require(shinydashboard, quietly = TRUE)) {
-      pkg_install("shinydashboard")
-      require(shinydashboard, quietly = TRUE)
-    }
-    if (!require(shinyjs, quietly = TRUE)) {
-      pkg_install("shinyjs")
-      require(shinyjs, quietly = TRUE)
-    }
-    if (!require(RCurl, quietly = TRUE)) {
-      pkg_install("RCurl")
-    }
-    if (!require(openxlsx, quietly = TRUE)) {
-      pkg_install("openxlsx")
-      require(openxlsx, quietly = TRUE)
-    }
-    if (!require(shinyWidgets, quietly = TRUE)) {
-      pkg_install("shinyWidgets")
-      require(shinyWidgets, quietly = TRUE)
-    }
-
-    if (!(require(chromote, quietly = TRUE))) {
-      pkg_install("chromote")
-      require(chromote, quietly = TRUE)
-    }
-
-    ### workaround for webshot2 on shinyapps.io
-    if (!(require(curl, quietly = TRUE))) {
-      pkg_install("curl")
-      require(curl, quietly = TRUE)
-    }
-    if (!(require(pagedown, quietly = TRUE))) {
-      pkg_install("pagedown")
-      require(pagedown, quietly = TRUE)
-    }
-    ##
-    require(Matrix, quietly = TRUE)
-    require(dimensionsR, quietly = TRUE)
-    require(pubmedR, quietly = TRUE)
-    require(dplyr, quietly = TRUE)
-    require(tidyr, quietly = TRUE)
-
-    # packages not automatically downloaded by visNetwork
-    if (!require(sparkline, quietly = TRUE)) {
-      pkg_install("sparkline")
-    } # ; require(sparkline, quietly=TRUE)}
-    if (!require(tidygraph, quietly = TRUE)) {
-      pkg_install("tidygraph")
-    } # ; require(tidygraph, quietly=TRUE)}
-    if (!require(ggraph, quietly = TRUE)) {
-      pkg_install("ggraph")
-    } # ; require(tidygraph, quietly=TRUE)}
+    results <- vapply(pkgs, safe_install, logical(1))
+    all_ok <- all(results)
   })
+  
+  return(all_ok)
 }
+
+
+# libraries <- function() {
+#   if (!require(pak, quietly = TRUE)) {
+#     install.packages("pak")
+#     require(pak, quietly = TRUE)
+#   }
+#   if (!require(httr2, quietly = TRUE)) {
+#     pkg_install("httr2")
+#     require(httr2, quietly = TRUE)
+#   }
+#   if (!(require(base64enc))) {
+#     pkg_install("base64enc")
+#     require(base64enc)
+#   }
+#   if (!(require(bibliometrix))) {
+#     pkg_install("bibliometrix")
+#     require(bibliometrix)
+#   }
+#   if (!(require(zip, quietly = TRUE))) {
+#     pkg_install("zip")
+#   }
+#   suppressPackageStartupMessages({
+#     if (!(require(shiny, quietly = TRUE))) {
+#       pkg_install("shiny")
+#       require(shiny, quietly = TRUE)
+#     }
+#     if (!(require(igraph, quietly = TRUE))) {
+#       pkg_install("igraph")
+#       require(igraph, quietly = TRUE)
+#     }
+#     if (!(require(DT, quietly = TRUE))) {
+#       pkg_install("DT")
+#     }
+#     require(DT, quietly = TRUE)
+#     if (!(require(ggplot2, quietly = TRUE))) {
+#       pkg_install("ggplot2")
+#       require(ggplot2, quietly = TRUE)
+#     }
+#     if (!(require(shinycssloaders, quietly = TRUE))) {
+#       pkg_install("shinycssloaders")
+#     }
+#     if (!(require(wordcloud2, quietly = TRUE))) {
+#       pkg_install("wordcloud2")
+#     }
+#     if (!require(ggmap, quietly = TRUE)) {
+#       pkg_install("ggmap")
+#       require(ggmap, quietly = TRUE)
+#     }
+#     if (!require(maps, quietly = TRUE)) {
+#       pkg_install("maps")
+#       require(maps, quietly = TRUE)
+#     }
+#     if (!require(visNetwork, quietly = TRUE)) {
+#       pkg_install("visNetwork")
+#       require(visNetwork, quietly = TRUE)
+#     }
+#     if (!require(plotly, quietly = TRUE)) {
+#       pkg_install("plotly")
+#       require(plotly, quietly = TRUE)
+#     }
+#     if (!require(fontawesome, quietly = TRUE)) {
+#       pkg_install("fontawesome")
+#       require(fontawesome, quietly = TRUE)
+#     }
+#     if (!require(shinydashboardPlus, quietly = TRUE)) {
+#       pkg_install("shinydashboardPlus")
+#       require(shinydashboardPlus, quietly = TRUE)
+#     }
+#     if (!require(shinydashboard, quietly = TRUE)) {
+#       pkg_install("shinydashboard")
+#       require(shinydashboard, quietly = TRUE)
+#     }
+#     if (!require(shinyjs, quietly = TRUE)) {
+#       pkg_install("shinyjs")
+#       require(shinyjs, quietly = TRUE)
+#     }
+#     if (!require(RCurl, quietly = TRUE)) {
+#       pkg_install("RCurl")
+#     }
+#     if (!require(openxlsx, quietly = TRUE)) {
+#       pkg_install("openxlsx")
+#       require(openxlsx, quietly = TRUE)
+#     }
+#     if (!require(shinyWidgets, quietly = TRUE)) {
+#       pkg_install("shinyWidgets")
+#       require(shinyWidgets, quietly = TRUE)
+#     }
+# 
+#     if (!(require(chromote, quietly = TRUE))) {
+#       pkg_install("chromote")
+#       require(chromote, quietly = TRUE)
+#     }
+# 
+#     ### workaround for webshot2 on shinyapps.io
+#     if (!(require(curl, quietly = TRUE))) {
+#       pkg_install("curl")
+#       require(curl, quietly = TRUE)
+#     }
+#     if (!(require(pagedown, quietly = TRUE))) {
+#       pkg_install("pagedown")
+#       require(pagedown, quietly = TRUE)
+#     }
+#     ##
+#     require(Matrix, quietly = TRUE)
+#     require(dimensionsR, quietly = TRUE)
+#     require(pubmedR, quietly = TRUE)
+#     require(dplyr, quietly = TRUE)
+#     require(tidyr, quietly = TRUE)
+# 
+#     # packages not automatically downloaded by visNetwork
+#     if (!require(sparkline, quietly = TRUE)) {
+#       pkg_install("sparkline")
+#     } # ; require(sparkline, quietly=TRUE)}
+#     if (!require(tidygraph, quietly = TRUE)) {
+#       pkg_install("tidygraph")
+#     } # ; require(tidygraph, quietly=TRUE)}
+#     if (!require(ggraph, quietly = TRUE)) {
+#       pkg_install("ggraph")
+#     } # ; require(tidygraph, quietly=TRUE)}
+#   })
+# }
 
 messageItem2 <- function(from, message, icon = shiny::icon("user"), time = NULL,
                          href = NULL, inputId = NULL) {

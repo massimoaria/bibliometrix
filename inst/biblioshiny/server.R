@@ -3,7 +3,10 @@ source("libraries.R", local=TRUE)
 source("biblioShot.R", local=TRUE)
 source("biblioAI.R", local=TRUE)
 
-suppressMessages(libraries())
+suppressMessages(res <- libraries())
+if (!res) {
+  stop("Biblioshiny cannot be loaded, some packages are missing. Please check your internet connection and try again.")
+}
 
 #### SERVER ####
 server <- function(input, output,session){

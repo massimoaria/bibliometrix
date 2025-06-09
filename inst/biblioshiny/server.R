@@ -118,7 +118,7 @@ To ensure the functionality of Biblioshiny,
   values$gemini_additional <- NULL
   
   path_gemini_model <- paste0(home,"/.biblio_gemini_model.txt", collapse="")
-  values$gemini_api_model <- loadGeminiModelChoice(path_gemini_model)
+  values$gemini_api_model <- loadGeminiModel(path_gemini_model)
   
   ## NOTIFICATION ITEM ----
   output$notificationMenu <- renderMenu({

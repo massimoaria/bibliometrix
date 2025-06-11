@@ -199,6 +199,7 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
     }))
   }
 
+  biblioshiny
   if ((dbsource == "pubmed") & (format == "pubmed")) {
     if ("C1" %in% names(M)) {
       cat("\nGenerating affiliation field tag AU_UN from C1:  ")

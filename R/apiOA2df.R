@@ -411,6 +411,15 @@ extract_additional_info <- function(article) {
 
 extract_corresponding_info <- function(authorships) {
   # Trova se esiste un corresponding author
+  if (is.null(authorships) || length(authorships) == 0) {
+    return(tibble(
+      AU_CORR = NA,
+      AU_CORR_ID = NA,
+      AU1_CO = NA,
+      AU1_UN = NA,
+      RP = NA
+    ))
+  }
   corr_idx <- which(sapply(authorships, function(a) isTRUE(a$is_corresponding)))
   
   if (length(corr_idx) > 0) {

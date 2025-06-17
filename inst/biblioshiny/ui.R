@@ -4184,6 +4184,25 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))
             ),
             tabPanel(
+              "Network over Time",
+              br(),
+              fluidRow(
+                column(3, actionButton("start", "▶ Start", width = "90%")),
+                column(3, actionButton("pause", "⏸ Pause / Resume", width = "90%")),
+                column(3, actionButton("reset", "⏹ Reset", width = "90%")),
+                column(1, div(style = "text-align:right;","Speed (ms)")),
+                column(2, selectInput("speed", label = NULL, seq(500,2000, by=500), selected = 1000))
+              ),
+              fluidRow(
+                column(12,
+                       sliderInput("year_slider", "Time", min = 0, max = 0,
+                                   value = 0, step = 1, animate = FALSE, width = "100%",
+                                   ticks = FALSE, round = TRUE, sep="")
+                )
+              ),
+              visNetworkOutput("cocOverTime", height = "65vh")
+            ),
+            tabPanel(
               "Density",
               shinycssloaders::withSpinner(plotlyOutput(outputId = "cocOverlay", height = "75vh"))
             ),

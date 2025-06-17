@@ -3578,6 +3578,84 @@ To ensure the functionality of Biblioshiny,
     
   })
   
+  ## Network over Time ####
+
+  observe({
+    req(values$COCnetwork$VIS)
+    invalidateLater(as.numeric(input$speed), session)
+    isolate({
+      years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+      if (values$playing && !values$paused && values$index < length(years)) {
+        values$index <- values$index + 1
+        yr <- years[values$index]
+        values$current_year <- yr
+        updateSliderInput(session, "year_slider", value = yr, min = min(years), max = max(years))
+      }
+    })
+  })
+  
+  # funzione per creare la rete
+  render_network <- reactive({
+    req(values$COCnetwork$VIS)
+    selected_year <- values$current_year
+    show_nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med <= selected_year)
+    show_edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
+    
+    coords <- show_nodes %>% select(x, y) %>% as.matrix()
+    
+    visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
+      visNetwork::visNodes(shadow = TRUE, shape = "dot", font = list(color = show_nodes$font.color, size = show_nodes$font.size, vadjust = show_nodes$font.vadjust)) %>%
+      visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
+      visNetwork::visEdges(smooth = list(type = "horizontal")) %>%
+      visNetwork::visOptions(highlightNearest = list(enabled = T, hover = T, degree = 1), nodesIdSelection = T) %>%
+      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
+      visNetwork::visOptions(manipulation = FALSE, height = "100%", width = "100%")
+  })
+  
+  # aggiorna rete quando cambia lo slider
+  observeEvent(input$year_slider, {
+    values$current_year <- as.numeric(input$year_slider)
+    output$network <- renderVisNetwork({ render_network() })
+  })
+  
+  # start
+  observeEvent(input$start, {
+    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    values$index <- 0
+    values$playing <- TRUE
+    values$paused <- FALSE
+    values$current_year <- min(years)
+    updateSliderInput(session, "year_slider", value = min(years))
+    output$cocOverTime <- renderVisNetwork({ render_network() })
+  })
+  
+  # pausa
+  observeEvent(input$pause, {
+    values$paused <- !values$paused
+  })
+  
+  # reset
+  observeEvent(input$reset, {
+    values$playing <- FALSE
+    values$paused <- FALSE
+    values$index <- 0
+    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    values$current_year <- min(years)
+    updateSliderInput(session, "year_slider", value = min(years))
+    output$network <- renderVisNetwork({
+      nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med < 0)
+      edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
+      visNetwork(nodes = nodes, edges = edges)
+    })
+  })
+  
+  # output$current_year <- renderText({
+  #   paste("📆 Current Year:", values$current_year)
+  # })
+
+  
+  ### end Network over Time ----
+  
   COCnetwork <- eventReactive(input$applyCoc,{
     
     values <- cocNetwork(input,values)
@@ -3586,6 +3664,12 @@ To ensure the functionality of Biblioshiny,
                                shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize, noOverlap=input$noOverlap)
     values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocnet)
+    ## values for network over time
+    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    values$index = 0
+    values$playing = FALSE
+    values$paused = FALSE
+    values$current_year = min(years)
   })
   
   output$cocPlot <- renderVisNetwork({  

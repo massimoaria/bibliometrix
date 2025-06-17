@@ -1357,6 +1357,32 @@ degreePlot <- function(net) {
   return(p)
 }
 
+# Associate a Year to each Keyword 
+keywords2Years <- function(M, field = "DE", n=100){
+  Y <- KeywordGrowth(M, Tag = field, top=Inf, cdf=FALSE)
+  
+  ## Normalize data and exclude tot from normalization
+  df <- Y %>% rowwise() %>% 
+    mutate(year_freq=sum(c_across(!matches("Year")))) %>% 
+    mutate(across(!matches("Year"), ~ .x / year_freq)) %>% 
+    mutate(across(!matches("Year"), ~ replace_na(.x, 0)))
+  
+  df_long <- df %>%
+    pivot_longer(
+      cols = -c(Year, year_freq),
+      names_to = "Keyword",
+      values_to = "Probability"
+    )
+  
+  df_max_year <- df_long %>%
+    group_by(Keyword) %>%
+    filter(Probability == max(Probability)) %>%
+    slice_max(order_by = year_freq, n = 1, with_ties = FALSE) %>%
+    ungroup() %>% 
+    
+    return(df_max_year)
+}
+
 cocNetwork <- function(input, values) {
   n <- input$Nodes
   label.n <- input$Labels
@@ -1448,18 +1474,27 @@ cocNetwork <- function(input, values) {
       cluster = input$cocCluster, remove.isolates = (input$coc.isolates == "yes"),
       community.repulsion = input$coc.repulsion / 2, verbose = FALSE
     )
+    
+    # Y <- fieldByYear(values$M, field = input$field, graph = FALSE)
+    # g <- values$cocnet$graph
+    # label <- igraph::V(g)$name
+    # ind <- which(tolower(Y$df$item) %in% label)
+    # df <- Y$df[ind, ]
+    # igraph::V(g)$year_med <- df$year_med
+    
+    g <- values$cocnet$graph
+    Y <- keywords2Years(values$M, field= input$field, n = Inf)
+    label <- data.frame(Keyword = igraph::V(g)$name)
+    df <- label %>%
+      left_join(Y %>% mutate(Keyword = tolower(Keyword)), by = "Keyword") %>% 
+      rename(year_med = Year)
+    igraph::V(g)$year_med <- df$year_med
+    
     if (input$cocyears == "Yes") {
-      Y <- fieldByYear(values$M, field = input$field, graph = FALSE)
-      g <- values$cocnet$graph
-      label <- igraph::V(g)$name
-      ind <- which(tolower(Y$df$item) %in% label)
-      df <- Y$df[ind, ]
-
       col <- hcl.colors((diff(range(df$year_med)) + 1) * 10, palette = "Blues 3")
       igraph::V(g)$color <- col[(max(df$year_med) - df$year_med + 1) * 10]
-      igraph::V(g)$year_med <- df$year_med
-      values$cocnet$graph <- g
     }
+    values$cocnet$graph <- g
   } else {
     emptyPlot("Selected field is not included in your data collection")
   }

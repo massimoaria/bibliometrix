@@ -1359,7 +1359,7 @@ degreePlot <- function(net) {
 
 # Associate a Year to each Keyword 
 keywords2Years <- function(M, field = "DE", n=100){
-  Y <- KeywordGrowth(M, Tag = field, top=Inf, cdf=FALSE)
+  suppressMessages(Y <- KeywordGrowth(M, Tag = field, top=Inf, cdf=FALSE))
   
   ## Normalize data and exclude tot from normalization
   df <- Y %>% rowwise() %>% 
@@ -1378,7 +1378,7 @@ keywords2Years <- function(M, field = "DE", n=100){
     group_by(Keyword) %>%
     filter(Probability == max(Probability)) %>%
     slice_max(order_by = year_freq, n = 1, with_ties = FALSE) %>%
-    ungroup() %>% 
+    ungroup()
     
     return(df_max_year)
 }
@@ -1475,13 +1475,6 @@ cocNetwork <- function(input, values) {
       community.repulsion = input$coc.repulsion / 2, verbose = FALSE
     )
     
-    # Y <- fieldByYear(values$M, field = input$field, graph = FALSE)
-    # g <- values$cocnet$graph
-    # label <- igraph::V(g)$name
-    # ind <- which(tolower(Y$df$item) %in% label)
-    # df <- Y$df[ind, ]
-    # igraph::V(g)$year_med <- df$year_med
-    
     g <- values$cocnet$graph
     Y <- keywords2Years(values$M, field= input$field, n = Inf)
     label <- data.frame(Keyword = igraph::V(g)$name)
@@ -1561,6 +1554,25 @@ intellectualStructure <- function(input, values) {
   return(values)
 }
 
+authors2Years <- function(M, field="AU") {
+  WAU <- cocMatrix(M,field)
+  WPY <- cocMatrix(M,"PY")
+  B <- crossprod(WPY,WAU) %>% 
+    as.matrix() %>% 
+    as.data.frame() %>% 
+    rownames_to_column("Year")
+  
+  # create a data frame that startig from B associate at each author the year of the first non zero value
+  C <- B %>% 
+    pivot_longer(-Year, names_to = "Item", values_to = "Value") %>% 
+    filter(Value > 0) %>% 
+    group_by(Item) %>% 
+    summarise(FirstYear = min(Year)) %>% 
+    ungroup()
+  
+  return(C)
+}
+
 socialStructure <- function(input, values) {
   n <- input$colNodes
   label.n <- input$colLabels
@@ -1574,6 +1586,7 @@ socialStructure <- function(input, values) {
       COL_AU = {
         values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")
         values$Title <- "Author Collaboration network"
+        field <- "AU"
       },
       COL_UN = {
         if (!("AU_UN" %in% names(values$M))) {
@@ -1581,6 +1594,7 @@ socialStructure <- function(input, values) {
         }
         values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "universities", n = n, sep = ";")
         values$Title <- "Edu Collaboration network"
+        field <- "AU_UN"
       },
       COL_CO = {
         if (!("AU_CO" %in% names(values$M))) {
@@ -1588,6 +1602,7 @@ socialStructure <- function(input, values) {
         }
         values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", n = n, sep = ";")
         values$Title <- "Country Collaboration network"
+        field <- "AU_CO"
         # values$cluster="none"
       }
     )
@@ -1625,6 +1640,16 @@ socialStructure <- function(input, values) {
     remove.isolates = (input$col.isolates == "yes"), cluster = input$colCluster,
     community.repulsion = input$col.repulsion / 2, verbose = FALSE
   )
+  
+  g <- values$colnet$graph
+  Y <- authors2Years(values$M, field)
+  label <- data.frame(Item = igraph::V(g)$name)
+  df <- label %>%
+    left_join(Y %>% mutate(Item = tolower(Item)), by = "Item") %>% 
+    rename(year_med = FirstYear)
+  igraph::V(g)$year_med <- df$year_med
+  
+  values$colnet$graph <- g
 
   return(values)
 }

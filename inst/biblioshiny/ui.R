@@ -4184,7 +4184,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))
             ),
             tabPanel(
-              "Network over Time",
+              "Longitudinal Network",
               br(),
               fluidRow(
                 column(3, actionButton("start", "▶ Start", width = "90%")),
@@ -4195,7 +4195,7 @@ body <- dashboardBody(
               ),
               fluidRow(
                 column(12,
-                       sliderInput("year_slider", "Time", min = 0, max = 0,
+                       sliderInput("year_slider", "Year", min = 0, max = 0,
                                    value = 0, step = 1, animate = FALSE, width = "100%",
                                    ticks = FALSE, round = TRUE, sep="")
                 )
@@ -5930,6 +5930,25 @@ body <- dashboardBody(
             tabPanel(
               "Network",
               shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))
+            ),
+            tabPanel(
+              "Longitudinal Network",
+              br(),
+              fluidRow(
+                column(3, actionButton("start_col", "▶ Start", width = "90%")),
+                column(3, actionButton("pause_col", "⏸ Pause / Resume", width = "90%")),
+                column(3, actionButton("reset_col", "⏹ Reset", width = "90%")),
+                column(1, div(style = "text-align:right;","Speed (ms)")),
+                column(2, selectInput("speed_col", label = NULL, seq(500,2000, by=500), selected = 1000))
+              ),
+              fluidRow(
+                column(12,
+                       sliderInput("year_slider_col", "Year", min = 0, max = 0,
+                                   value = 0, step = 1, animate = FALSE, width = "100%",
+                                   ticks = FALSE, round = TRUE, sep="")
+                )
+              ),
+              visNetworkOutput("colOverTime", height = "65vh")
             ),
             tabPanel(
               "Density",

@@ -126,7 +126,7 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   }
 
   if (Field %in% names(M)) {
-    Fi <- strsplit(M[, Field], sep)
+    Fi <- strsplit(as.character(M[, Field]), sep)
   } else {
     return(print(paste("Field", Field, "is not a column name of input data frame")))
   }

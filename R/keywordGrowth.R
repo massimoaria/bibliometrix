@@ -62,6 +62,7 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top = 10, cdf = TRUE, remove
   Ymin <- min(A$Y)
   Ymax <- max(A$Y)
   Year <- Ymin:Ymax
+  if (top==Inf) top <- length(unique(A$Tab))
   Tab <- names(sort(table(A$Tab), decreasing = TRUE))[1:top]
 
   words <- matrix(0, length(Year), top + 1)

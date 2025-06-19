@@ -48,6 +48,7 @@ Imports: stats,
 		 readxl,
 	   rscopus,
 		 shiny,
+		 shinycssloaders (>= 1.1.0),
 		 SnowballC,
 		 stringdist,
 		 stringi,
@@ -59,7 +60,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    shinycssloaders,
     wordcloud2
 RoxygenNote: 7.3.2
 NeedsCompilation: no

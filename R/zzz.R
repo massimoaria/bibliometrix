@@ -8,7 +8,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @import bibliometrixData
 #' @import forcats
 #' @import ggrepel
-# @import ggnetwork
+#' @import shinycssloaders
 #' @import pubmedR
 #' @import shiny
 #' @import readr

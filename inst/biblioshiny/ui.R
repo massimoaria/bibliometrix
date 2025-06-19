@@ -4183,24 +4183,24 @@ body <- dashboardBody(
               "Network",
               shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))
             ),
+            
             tabPanel(
-              "Longitudinal Network",
+              "Diachronic Network",
               br(),
               fluidRow(
-                column(3, actionButton("start", "▶ Start", width = "90%")),
-                column(3, actionButton("pause", "⏸ Pause / Resume", width = "90%")),
-                column(3, actionButton("reset", "⏹ Reset", width = "90%")),
+                column(2, actionButton("start_coc", "▶ Start", width = "90%")),
+                column(2, actionButton("pause_coc", "⏸ Pause / Resume", width = "90%")),
+                column(2, actionButton("reset_coc", "⏹ Reset", width = "90%")),
+                column(2, uiOutput("export_cocUI")),
                 column(1, div(style = "text-align:right;","Speed (ms)")),
-                column(2, selectInput("speed", label = NULL, seq(500,2000, by=500), selected = 1000))
+                column(2, selectInput("speed_coc", label = NULL, seq(250,2000, by=250), selected = 500))
               ),
               fluidRow(
-                column(12,
-                       sliderInput("year_slider", "Year", min = 0, max = 0,
-                                   value = 0, step = 1, animate = FALSE, width = "100%",
-                                   ticks = FALSE, round = TRUE, sep="")
-                )
+                column(12, uiOutput("year_slider_cocUI"))
               ),
-              visNetworkOutput("cocOverTime", height = "65vh")
+              fluidRow(column(1, uiOutput("cocYearUI")),
+                       column(11,visNetworkOutput("cocOverTime", height = "65vh")
+                       ))
             ),
             tabPanel(
               "Density",
@@ -5932,23 +5932,22 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))
             ),
             tabPanel(
-              "Longitudinal Network",
+              "Diachronic Network",
               br(),
               fluidRow(
-                column(3, actionButton("start_col", "▶ Start", width = "90%")),
-                column(3, actionButton("pause_col", "⏸ Pause / Resume", width = "90%")),
-                column(3, actionButton("reset_col", "⏹ Reset", width = "90%")),
+                column(2, actionButton("start_col", "▶ Start", width = "90%")),
+                column(2, actionButton("pause_col", "⏸ Pause / Resume", width = "90%")),
+                column(2, actionButton("reset_col", "⏹ Reset", width = "90%")),
+                column(2, uiOutput("export_colUI")),
                 column(1, div(style = "text-align:right;","Speed (ms)")),
-                column(2, selectInput("speed_col", label = NULL, seq(500,2000, by=500), selected = 1000))
+                column(2, selectInput("speed_col", label = NULL, seq(250,2000, by=250), selected = 500))
               ),
               fluidRow(
-                column(12,
-                       sliderInput("year_slider_col", "Year", min = 0, max = 0,
-                                   value = 0, step = 1, animate = FALSE, width = "100%",
-                                   ticks = FALSE, round = TRUE, sep="")
-                )
+                column(12, uiOutput("year_slider_colUI"))
               ),
-              visNetworkOutput("colOverTime", height = "65vh")
+              fluidRow(column(1, uiOutput("colYearUI")),
+                       column(11,visNetworkOutput("colOverTime", height = "65vh")
+                       ))
             ),
             tabPanel(
               "Density",

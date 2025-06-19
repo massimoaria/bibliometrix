@@ -79,6 +79,20 @@ merge_files <- function(files) {
   return(M)
 }
 
+## dynamic watch emoji icons ---
+watchEmoji <- function(i){
+  emoji <- c("🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛")
+  # i is a positive int number, reduce it to an int from 1 to 12 
+  multiple <- floor(i/12)
+  if(multiple>0){
+    i <- i %% (12*multiple)
+    if (i == 0){
+      i <- 12
+    }
+  }
+  emoji[i]
+}
+
 
 # DATA TABLE FORMAT ----
 DTformat <- function(df, nrow = 10, filename = "Table", pagelength = TRUE, left = NULL, right = NULL, numeric = NULL, dom = TRUE, size = "85%", filter = "top",
@@ -1560,7 +1574,7 @@ authors2Years <- function(M, field="AU") {
   B <- crossprod(WPY,WAU) %>% 
     as.matrix() %>% 
     as.data.frame() %>% 
-    rownames_to_column("Year")
+    tibble::rownames_to_column("Year")
   
   # create a data frame that startig from B associate at each author the year of the first non zero value
   C <- B %>% 

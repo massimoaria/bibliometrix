@@ -112,6 +112,14 @@ To ensure the functionality of Biblioshiny,
   values$ApiOk <- 0
   values$checkControlBar <-FALSE
   
+  ## Diachronic networks
+  values$index_coc <- 0
+  values$playing_coc <- TRUE
+  values$paused_coc <- FALSE
+  values$index_col <- 0
+  values$playing_col <- TRUE
+  values$paused_col <- FALSE
+  
   ## gemini api and model
   home <- homeFolder()
   path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
@@ -3587,11 +3595,18 @@ To ensure the functionality of Biblioshiny,
     values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocnet)
     ## values for network over time
-    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
-    values$index = 0
-    values$playing = FALSE
-    values$paused = FALSE
-    values$current_year = min(years)
+    # years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    values$years_coc <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
+    values$index_coc = 0
+    values$playing_coc = FALSE
+    values$paused_coc = FALSE
+    values$current_year_coc = min(values$years_coc)
+    
+    output$year_slider_cocUI <- renderUI({
+      sliderInput("year_slider_coc", "Year", min = min(values$years_coc), max = max(values$years_coc),
+                  value =min(values$years_coc), step = 1, animate = FALSE, width = "100%",
+                  ticks = FALSE, round = TRUE, sep="")
+    })
   })
   
   output$cocPlot <- renderVisNetwork({  
@@ -3607,66 +3622,83 @@ To ensure the functionality of Biblioshiny,
   ## Co-Occurrence Network over Time ####
   observe({
     req(values$COCnetwork$VIS)
-    invalidateLater(as.numeric(input$speed), session)
+    invalidateLater(as.numeric(input$speed_coc), session)
     isolate({
-      years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
-      if (values$playing && !values$paused && values$index < length(years)) {
-        values$index <- values$index + 1
-        yr <- years[values$index]
-        values$current_year <- yr
-        updateSliderInput(session, "year_slider", value = yr, min = min(years), max = max(years))
+      #years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+      # years <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
+      if (values$playing_coc && !values$paused_coc && values$index_coc < length(values$years_coc)) {
+        values$index_coc <- values$index_coc + 1
+        yr <- values$years_coc[values$index_coc]
+        values$current_year_coc <- yr
+        updateSliderInput(session, "year_slider_coc", value = yr, min = min(values$years_coc), max = max(values$years_coc))
       }
     })
   })
   
   # funzione per creare la rete
-  render_network <- reactive({
+  render_network_coc <- reactive({
     req(values$COCnetwork$VIS)
-    selected_year <- values$current_year
-    show_nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med <= selected_year)
+    selected_year <- values$current_year_coc
+    show_nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med <= selected_year) %>% mutate(title = paste(title,year_med, sep=" "))
     show_edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
     
     coords <- show_nodes %>% select(x, y) %>% as.matrix()
     
-    visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
+    values$COCnetworkOverTime <- visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
       visNetwork::visNodes(shadow = TRUE, shape = "dot", font = list(color = show_nodes$font.color, size = show_nodes$font.size, vadjust = show_nodes$font.vadjust)) %>%
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
       visNetwork::visEdges(smooth = list(type = "horizontal")) %>%
       visNetwork::visOptions(highlightNearest = list(enabled = T, hover = T, degree = 1), nodesIdSelection = T) %>%
       visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
       visNetwork::visOptions(manipulation = FALSE, height = "100%", width = "100%")
+    values$COCnetworkOverTime
   })
   
   # aggiorna rete quando cambia lo slider
-  observeEvent(input$year_slider, {
-    values$current_year <- as.numeric(input$year_slider)
-    output$cocOverTime <- renderVisNetwork({ render_network() })
+  observeEvent(input$year_slider_coc, {
+    values$current_year_coc <- as.numeric(input$year_slider_coc)
+    output$cocOverTime <- renderVisNetwork({ render_network_coc() })
   })
   
+  output$cocYearUI <- renderUI({
+    req(values$current_year_coc)
+    h2(paste(watchEmoji(values$current_year_coc), values$current_year_coc), style = "text-align: left; color: #0e4770; font-weight: bold;")
+  })
+
   # start
-  observeEvent(input$start, {
-    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
-    values$index <- 0
-    values$playing <- TRUE
-    values$paused <- FALSE
-    values$current_year <- min(years)
-    updateSliderInput(session, "year_slider", value = min(years))
-    output$cocOverTime <- renderVisNetwork({ render_network() })
+  observeEvent(input$start_coc, {
+    # years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    # years <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
+    values$index_coc <- 0
+    values$playing_coc <- TRUE
+    values$paused_coc <- FALSE
+    values$current_year_coc <- min(values$years_coc)
+    #shinyjs::hide("export_coc")
+    updateSliderInput(session, "year_slider_coc", value = min(values$years_coc))
+    output$cocOverTime <- renderVisNetwork({ render_network_coc() })
   })
   
-  # pausa
-  observeEvent(input$pause, {
-    values$paused <- !values$paused
+  observeEvent(input$pause_coc, {
+    values$paused_coc <- !values$paused_coc
+      # if paused show the button "export_coc" else hide it
+    if (values$paused_coc) {
+      output$export_cocUI <- renderUI({
+        actionButton("export_coc", "⬇ Export", width = "90%")
+      })
+    } else {
+      output$export_cocUI <- renderUI({})
+    }
   })
   
   # reset
-  observeEvent(input$reset, {
-    values$playing <- FALSE
-    values$paused <- FALSE
-    values$index <- 0
-    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
-    values$current_year <- min(years)
-    updateSliderInput(session, "year_slider", value = min(years))
+  observeEvent(input$reset_coc, {
+    values$playing_coc <- FALSE
+    values$paused_coc <- FALSE
+    values$index_coc <- 0
+    # years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    # years <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
+    values$current_year_coc <- min(values$years_coc)
+    updateSliderInput(session, "year_slider_coc", value = min(values$years_coc))
     output$cocOverTime <- renderVisNetwork({
       nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med < 0)
       edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
@@ -3690,13 +3722,9 @@ To ensure the functionality of Biblioshiny,
       tmpdir <- tempdir()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
-      # print(tmpdir)
-      #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
       myfile <- paste("mynetwork-", Sys.Date(), sep="")
       files <- paste0(myfile, c(".net",".vec",".clu"))
       graph2Pajek(values$cocnet$graph, filename=myfile)
-      # print(files)
-      # print(dir())
       zip::zip(file,files)
     },
     contentType = "zip"
@@ -4571,11 +4599,12 @@ To ensure the functionality of Biblioshiny,
                                noOverlap=input$colNoOverlap)
     values$colOverlay <- overlayPlotly(values$COLnetwork$VIS)
     values$degreePlot <-degreePlot(values$colnet)
-    years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
+    # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
+    values$years_col <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
     values$index_col <- 0
     values$playing_col <- FALSE
     values$paused_col <- FALSE
-    values$current_year_col <- min(years)
+    values$current_year_col <- min(values$years_col)
     
     if (is.null(dim(values$colnet$cluster_res))){
       values$colnet$cluster_res <- data.frame(Node=NA, Cluster=NA, Betweenness=NA, 
@@ -4584,6 +4613,12 @@ To ensure the functionality of Biblioshiny,
     }else{
       names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
     }
+    
+    output$year_slider_colUI <- renderUI({
+      sliderInput("year_slider_col", "Year", min = min(values$years_col), max = max(values$years_col),
+                  value =min(values$years_col), step = 1, animate = FALSE, width = "100%",
+                  ticks = FALSE, round = TRUE, sep="")
+    })
     
   })
   output$colPlot <- renderVisNetwork({  
@@ -4601,12 +4636,12 @@ To ensure the functionality of Biblioshiny,
     req(values$COLnetwork$VIS)
     invalidateLater(as.numeric(input$speed_col), session)
     isolate({
-      years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
-      if (values$playing_col && !values$paused_col && values$index_col < length(years)) {
+      # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
+      if (values$playing_col && !values$paused_col && values$index_col < length(values$years_col)) {
         values$index_col <- values$index_col + 1
-        yr <- years[values$index_col]
+        yr <- values$years_col[values$index_col]
         values$current_year_col <- yr
-        updateSliderInput(session, "year_slider_col", value = yr, min = min(years), max = max(years))
+        updateSliderInput(session, "year_slider_col", value = yr, min = min(values$years_col), max = max(values$years_col))
       }
     })
   })
@@ -4615,18 +4650,20 @@ To ensure the functionality of Biblioshiny,
   render_network_col <- reactive({
     req(values$COLnetwork$VIS)
     selected_year_col <- values$current_year_col
-    show_nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med <= selected_year_col)
+    show_nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med <= selected_year_col) %>% mutate(title = paste(title,year_med, sep=" "))
     show_edges <- values$COLnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
     
     coords <- show_nodes %>% select(x, y) %>% as.matrix()
     
-    visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
+    values$COLnetworkOverTime <- visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
       visNetwork::visNodes(shadow = TRUE, shape = "dot", font = list(color = show_nodes$font.color, size = show_nodes$font.size, vadjust = show_nodes$font.vadjust)) %>%
       visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
       visNetwork::visEdges(smooth = list(type = "horizontal")) %>%
       visNetwork::visOptions(highlightNearest = list(enabled = T, hover = T, degree = 1), nodesIdSelection = T) %>%
       visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
       visNetwork::visOptions(manipulation = FALSE, height = "100%", width = "100%")
+    
+    values$COLnetworkOverTime
   })
   
   # aggiorna rete quando cambia lo slider
@@ -4635,20 +4672,32 @@ To ensure the functionality of Biblioshiny,
     output$colOverTime<- renderVisNetwork({ render_network_col() })
   })
   
+  output$colYearUI <- renderUI({
+    req(values$current_year_col)
+    h2(paste(watchEmoji(values$current_year_col), values$current_year_col), style = "text-align: left; color: #0e4770; font-weight: bold;")
+  })
+  
   # start
   observeEvent(input$start_col, {
-    years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
+    # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
     values$index_col <- 0
     values$playing_col <- TRUE
     values$paused_col <- FALSE
-    values$current_year_col <- min(years)
-    updateSliderInput(session, "year_slider_col", value = min(years))
+    values$current_year_col <- min(values$years_col)
+    updateSliderInput(session, "year_slider_col", value = min(values$years_col))
     output$colOverTime <- renderVisNetwork({ render_network_col() })
   })
   
   # pausa
   observeEvent(input$pause_col, {
     values$paused_col <- !values$paused_col
+    if (values$paused_col) {
+      output$export_colUI <- renderUI({
+        actionButton("export_col", "⬇ Export", width = "90%")
+      })
+    } else {
+      output$export_colUI <- renderUI({})
+    }
   })
   
   # reset
@@ -4656,9 +4705,9 @@ To ensure the functionality of Biblioshiny,
     values$playing_col <- FALSE
     values$paused_col <- FALSE
     values$index_col <- 0
-    years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
-    values$current_year_col <- min(years)
-    updateSliderInput(session, "year_slider_col", value = min(years))
+    # years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
+    values$current_year_col <- min(values$years_col)
+    updateSliderInput(session, "year_slider_col", value = min(values$years_col))
     output$colOverTime <- renderVisNetwork({
       nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med < 0)
       edges <- values$COLnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
@@ -4893,6 +4942,11 @@ To ensure the functionality of Biblioshiny,
     screenShot(values$COCnetwork$VIS, filename=filename, type="vis")
   })
   
+  observeEvent(input$export_coc,{
+    filename = paste("Co_occurrenceNetwork-Year-",values$current_year_coc, "__",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$COCnetworkOverTime, filename=filename, type="vis")
+  })
+  
   observeEvent(input$screenCOCIT,{
     filename = paste("Co_citationNetwork-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
     screenShot(values$COCITnetwork$VIS, filename=filename, type="vis")
@@ -4906,6 +4960,11 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$screenCOL,{
     filename = paste("Collaboration_Network-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
     screenShot(values$COLnetwork$VIS, filename=filename, type="vis")
+  })
+  
+  observeEvent(input$export_col,{
+    filename = paste("Collaboration_Network-Year-",values$current_year_col, "__",  gsub(" |:","",Sys.time()), ".png", sep="")
+    screenShot(values$COLnetworkOverTime, filename=filename, type="vis")
   })
   
   ## TALL EXPORT ----

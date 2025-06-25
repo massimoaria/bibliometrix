@@ -292,7 +292,7 @@ biblioAiPrompts <- function(values, activeTab){
            "point marks the median value. The size of the bubbles is proportional to the annual frequency, reflecting the relative prominence of each term over time. ")
          },
          "ReferenceSpect"={
-           references <- merge_df_to_string(rpysPeaks(values$res, n=10))
+           references <- merge_df_to_string(values$res$peaks)
            prompt <- paste0("Provide an interpretation of this Reference Publication Year Spectroscopy (RPYS) plot.", 
                          " The black line shows the number of cited references by publication year. ",
                          "The red line represents the deviation from the 5-year median citation frequency, calculated using a non-centered window composed of the five preceding years.",
@@ -857,23 +857,23 @@ html_to_blocks <- function(raw_html){
 }
 
 # Peaks identification in RPYS
-rpysPeaks <- function(res, n=10){
-  df_peaks <- res$rpysTable %>%
-    arrange(Year) %>%
-    mutate(
-      is_peak = (diffMedian5 > lag(diffMedian5)) & (diffMedian5 > lead(diffMedian5))
-    ) %>%
-    filter(is_peak) %>%
-    arrange(desc(diffMedian5)) %>%
-    slice_head(n = n)  
-  
-  df2 <- res$CR %>% 
-    group_by(Year) %>% 
-    slice_max(Freq, n=3) %>% 
-    filter(Year %in% df_peaks$Year)
-  
-  return(peaks=df2)
-}
+# rpysPeaks <- function(res, n=10){
+#   df_peaks <- res$rpysTable %>%
+#     arrange(Year) %>%
+#     mutate(
+#       is_peak = (diffMedian5 > lag(diffMedian5)) & (diffMedian5 > lead(diffMedian5))
+#     ) %>%
+#     filter(is_peak) %>%
+#     arrange(desc(diffMedian5)) %>%
+#     slice_head(n = n)  
+#   
+#   df2 <- res$CR %>% 
+#     group_by(Year) %>% 
+#     slice_max(Freq, n=3) %>% 
+#     filter(Year %in% df_peaks$Year)
+#   
+#   return(peaks=df2)
+# }
 
 # Thematic Map top 3 documents for each cluster
 doc2clust <- function(res, n=3){
@@ -916,4 +916,23 @@ hist2docs <- function(df, n=20){
   df %>% 
     slice_max(order_by = LCS, n=n) %>% 
     select(short_label,title_orig)
+}
+
+# Top 10 peaks in RPYS
+rpysPeaks <- function(res, n=10){
+  df_peaks <- res$rpysTable %>%
+    arrange(Year) %>%
+    mutate(
+      is_peak = (diffMedian > lag(diffMedian)) & (diffMedian > lead(diffMedian))
+    ) %>%
+    dplyr::filter(is_peak) %>%
+    arrange(desc(diffMedian)) %>%
+    slice_head(n = n)  
+  
+  df2 <- res$CR %>% 
+    group_by(Year) %>% 
+    slice_max(Freq, n=3, with_ties = FALSE) %>% 
+    dplyr::filter(Year %in% df_peaks$Year)
+  
+  return(peaks=df2)
 }

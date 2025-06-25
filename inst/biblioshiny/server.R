@@ -2793,14 +2793,16 @@ To ensure the functionality of Biblioshiny,
   
   ### Reference Spectroscopy ---- 
   RPYS <- eventReactive(input$applyRPYS,{
-    timespan <- c(-Inf,Inf)
+    timespan <- c(max(values$M$PY, na.rm = TRUE)-100, max(values$M$PY, na.rm = TRUE)-3)
     if (!is.na(input$rpysMinYear)){
       timespan[1] <- input$rpysMinYear
     }
     if (!is.na(input$rpysMaxYear)){
       timespan[2] <- input$rpysMaxYear
     }
-    values$res <- rpys(values$M, sep=input$rpysSep, timespan=timespan, graph=FALSE)
+    timespan <- sort(timespan)
+    values$res <- rpys(values$M, sep=input$rpysSep, timespan=timespan, median.window = input$rpysMedianWindow, graph=FALSE)
+    values$res$peaks <- rpysPeaks(values$res, n=10)
   })
   
   output$RSplot.save <- downloadHandler(
@@ -2846,9 +2848,30 @@ To ensure the functionality of Biblioshiny,
              selection=FALSE)
   })
   
+  output$rpysSequence <- DT::renderDT({
+    RPYS()
+    paperClass <- ifelse(input$rpysInfluential=="Not Influent","",input$rpysInfluential)
+    crData <- values$res$Sequences %>% dplyr::filter(regexpr(paperClass,Class)>-1)
+    crData$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',crData$CR,'\" target=\"_blank\">','link','</a>')
+    crData <- crData %>% select(RPY, CR, Freq, link, sequence, Class)
+    names(crData)=c("Year", "Reference", "Local Citations", "Google link","Citation Sequence", "Sequence Type")
+    DTformat(crData, nrow=10, filename="RPYS_InfluentialReferences", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
+             selection=FALSE)
+  })
+  
+  output$rpysPeaks <- DT::renderDT({
+    RPYS()
+    crData <- values$res$peaks
+    names(crData)=c("Year", "Reference", "Local Citations")
+    DTformat(crData, nrow=10, filename="RPYS_Top10Peaks", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
+             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
+             selection=FALSE)
+  })
+  
   observeEvent(input$reportRPYS,{
     if(!is.null(values$res$CR)){
-      list_df <- list(values$res$CR, values$res$rpysTable)
+      list_df <- list(values$res$CR, values$res$rpysTable,values$res$Sequences,values$res$peaksDF)
       list_plot <- list(values$res$spectroscopy)
       wb <- addSheetToReport(list_df,list_plot,sheetname = "RPYS", wb=values$wb)
       values$wb <- wb
@@ -5073,20 +5096,28 @@ To ensure the functionality of Biblioshiny,
         inputId = "gemini_api_model",
         label = "Select the Gemini Model",
         choices = c(
-          "Gemini 2.5 Flash Preview" = "2.5-flash-preview-05-20",
-          "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
+          "Gemini 2.5 Flash" = "2.5-flash",
+          "Gemini 2.5 Flash Lite Preview 06-17" = "2.5-flash-lite-preview-06-17",
           "Gemini 2.0 Flash" = "2.0-flash",
+          "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
           "Gemini 1.5 Flash" = "1.5-flash",
           "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
         ),
         selected = ifelse(is.null(values$gemini_api_model), "2.0-flash", values$gemini_api_model)
       ),
       conditionalPanel(
-        condition = "input.gemini_api_model == '2.5-flash-preview-05-20'",
+        condition = "input.gemini_api_model == '2.5-flash'",
         helpText(strong("Free Tier Rate Limits:")),
         helpText(em("Request per Minutes: 10", tags$br(),
                     "Requests per Day: 500", tags$br(),
                     "Latency time: High"))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '2.5-flash-lite-preview-06-17'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em("Request per Minutes: 15", tags$br(),
+                    "Requests per Day: 500", tags$br(),
+                    "Latency time: Low"))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.0-flash-lite'",

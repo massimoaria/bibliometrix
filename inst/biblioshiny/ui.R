@@ -2540,6 +2540,14 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
+                selectInput("rpysMedianWindow",
+                            label = "Median Window",
+                  choices = c(
+                    "Centered (Marx et al., 2014)" = "centered",
+                    "Backward (bibliometrix)" = "backward"
+                  ),
+                  selected = "centered"
+                ),
                 selectInput(
                   inputId = "rpysSep",
                   label = "Field separator character",
@@ -2599,6 +2607,32 @@ body <- dashboardBody(
               "Table - Cited References",
               shinycssloaders::withSpinner(DT::DTOutput(
                 outputId = "crTable"
+              ))
+            ),
+            tabPanel(
+              "Table - Influential References",
+              fluidRow(column(10),
+                       column(2,
+                              selectInput("rpysInfluential",
+                                            label = "Type",
+                                            choices = c(
+                                              "Constant Performer" = "Constant Performer",
+                                              "Hot Paper" = "Hot Paper" ,
+                                              "Life Cycle" = "Life Cycle",
+                                              "Sleeping Beauty" =  "Sleeping Beauty",
+                                              "Not Influent" = "Not Influent"
+                                            ),
+                                            selected = "Hot Paper"
+                                )
+                       )),
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "rpysSequence"
+              ))
+            ),
+            tabPanel(
+              "Table - Top 10 Peaks",
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "rpysPeaks"
               ))
             ),
             tabPanel(

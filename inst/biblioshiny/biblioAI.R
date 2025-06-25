@@ -293,12 +293,20 @@ biblioAiPrompts <- function(values, activeTab){
          },
          "ReferenceSpect"={
            references <- merge_df_to_string(values$res$peaks)
-           prompt <- paste0("Provide an interpretation of this Reference Publication Year Spectroscopy (RPYS) plot.", 
+           sequenceTop5 <- values$res$Sequences %>% 
+             filter(Class !="") %>% 
+             group_by(Class) %>% 
+             slice_max(Freq,n=5) %>% 
+             rename("Totale Citation" = "Freq")
+           prompt <- paste0("Provide an interpretation of this Reference Publication Year Spectroscopy plot (RPYS, Marx et al. 2014, JAIST).", 
                          " The black line shows the number of cited references by publication year. ",
-                         "The red line represents the deviation from the 5-year median citation frequency, calculated using a non-centered window composed of the five preceding years.",
+                         "The red line represents the deviation from the 5-year median citation frequency.",
                          " This highlights peak years of historical significance. A list of the most cited references is provided for the first ten peak years identified by the red line,",
                          " along with their citation frequencies: ",
-                         references)
+                         references,
+                         "\nIn addition, please highlight which references are the most important according to the following categories: Hot Paper, Life Cycle, Sleeping Beauty,","
+                         and Constant Performer (Thor A. et al. 2018, Identifying single influential publications in a research field: new analysis opportunities of the CRExplorer. Scientometrics).",
+                         " Below is the list of references with their assigned category.", sequenceTop5)
          },
          "coOccurenceNetwork" = {
            prompt <- paste0("Provide an interpretation of this 'word co-occurrence' network.",

@@ -4,7 +4,7 @@ utils::globalVariables(c(
   "Freq", "diffMedian5", "CP", "CR", "Class", "HP", "LC", "RPY", 
   "SB", "Z", "dev_median_t2_t2", "dev_median_t4_t",
   "diffMedian2", "freqO", "freqYC", "is_peak", "lead", "observed",
-  "seq1", "seq2", "seq3", "z_class"
+  "seq1", "seq2", "seq3", "z_class", "everything"
 ))
 #' Reference Publication Year Spectroscopy
 #'
@@ -12,11 +12,14 @@ utils::globalVariables(c(
 #' the Historical Roots of Research Fields.
 #' The method was introduced by Marx et al., 2014.\cr\cr
 #'
-#' Reference:\cr
+#' References:\cr\cr
 #' Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014).
 #' Detecting the historical roots of research fields by reference publication
 #' year spectroscopy (RPYS). Journal of the Association for Information Science and Technology,
 #' 65(4), 751-764.\cr\cr
+#' Thor A., Bornmann L., Mark W. & Mutz R.(2018). 
+#' Identifying single influential publications in a research field: new analysis opportunities of the CRExplorer. 
+#' Scientometrics, 116:591–608 https://doi.org/10.1007/s11192-018-2733-7\cr\cr
 #'
 #' @param M is a data frame obtained by the converting function
 #'   \code{\link{convert2df}}. It is a data matrix with cases corresponding to

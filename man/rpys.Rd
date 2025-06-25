@@ -31,11 +31,14 @@ the Historical Roots of Research Fields.
 The method was introduced by Marx et al., 2014.\cr\cr
 }
 \details{
-Reference:\cr
+References:\cr\cr
 Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014).
 Detecting the historical roots of research fields by reference publication
 year spectroscopy (RPYS). Journal of the Association for Information Science and Technology,
 65(4), 751-764.\cr\cr
+Thor A., Bornmann L., Mark W. & Mutz R.(2018). 
+Identifying single influential publications in a research field: new analysis opportunities of the CRExplorer. 
+Scientometrics, 116:591–608 https://doi.org/10.1007/s11192-018-2733-7\cr\cr
 }
 \examples{
 

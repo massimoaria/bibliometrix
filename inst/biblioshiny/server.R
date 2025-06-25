@@ -3685,7 +3685,7 @@ To ensure the functionality of Biblioshiny,
   
   output$cocYearUI <- renderUI({
     req(values$current_year_coc)
-    h2(paste(watchEmoji(values$current_year_coc), values$current_year_coc), style = "text-align: left; color: #0e4770; font-weight: bold;")
+    h3(paste(watchEmoji(values$current_year_coc), values$current_year_coc), style = "text-align: left; color: #0e4770; font-weight: bold;")
   })
 
   # start
@@ -4697,7 +4697,7 @@ To ensure the functionality of Biblioshiny,
   
   output$colYearUI <- renderUI({
     req(values$current_year_col)
-    h2(paste(watchEmoji(values$current_year_col), values$current_year_col), style = "text-align: left; color: #0e4770; font-weight: bold;")
+    h3(paste(watchEmoji(values$current_year_col), values$current_year_col), style = "text-align: left; color: #0e4770; font-weight: bold;")
   })
   
   # start

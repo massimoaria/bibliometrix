@@ -4773,7 +4773,6 @@ To ensure the functionality of Biblioshiny,
   })   
   
   
-  
   #### save coc network image as html ####
   output$networkCol.fig <- downloadHandler(
     filename = "network.html",

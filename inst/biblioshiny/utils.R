@@ -1600,7 +1600,7 @@ socialStructure <- function(input, values) {
       COL_AU = {
         values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "authors", n = n, sep = ";")
         values$Title <- "Author Collaboration network"
-        field <- "AU"
+        values$fieldCOL <- "AU"
       },
       COL_UN = {
         if (!("AU_UN" %in% names(values$M))) {
@@ -1608,7 +1608,7 @@ socialStructure <- function(input, values) {
         }
         values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "universities", n = n, sep = ";")
         values$Title <- "Edu Collaboration network"
-        field <- "AU_UN"
+        values$fieldCOL  <- "AU_UN"
       },
       COL_CO = {
         if (!("AU_CO" %in% names(values$M))) {
@@ -1616,7 +1616,7 @@ socialStructure <- function(input, values) {
         }
         values$ColNetRefs <- biblioNetwork(values$M, analysis = "collaboration", network = "countries", n = n, sep = ";")
         values$Title <- "Country Collaboration network"
-        field <- "AU_CO"
+        values$fieldCOL  <- "AU_CO"
         # values$cluster="none"
       }
     )
@@ -1656,7 +1656,7 @@ socialStructure <- function(input, values) {
   )
   
   g <- values$colnet$graph
-  Y <- authors2Years(values$M, field)
+  Y <- authors2Years(values$M, values$fieldCOL)
   label <- data.frame(Item = igraph::V(g)$name)
   df <- label %>%
     left_join(Y %>% mutate(Item = tolower(Item)), by = "Item") %>% 

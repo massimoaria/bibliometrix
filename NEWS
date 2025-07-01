@@ -1,3 +1,17 @@
+bibliometrix v.5.1.0 (Release date: )
+
+Features:
+* rpys(): 
+    - Added the possibility to choose between two different median window approaches (centered or backward)
+    - Added the algorithm to identify citation sequences and influencial references ("Hot papers", "Constant Performers", "Life Cycles", and "Sleeping Beauty")
+    - Added these results also in Biblioshiny outputs.
+* Biblioshiny:
+    - Added Animated Diachronic Networks in Conceptual and Social Structures.
+* Biblio AI: 
+    - Improved prompt lists
+    - Added new Gemini models (2.5 Flash and Flash-lite)
+    
+    
 bibliometrix v.5.0.1 (Release date: 2025-06-05)
 
 Features:

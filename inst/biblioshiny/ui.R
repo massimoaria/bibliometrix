@@ -667,51 +667,6 @@ body <- dashboardBody(
       )
     ),
     #### Filters ----
-    # tabItem(
-    #   "filters",
-    #   fluidRow(
-    #     column(9, DT::DTOutput("dataFiltered")),
-    #     column(
-    #       3,
-    #       box(
-    #         width = "100%",
-    #         h3(strong("Filters")),
-    #         br(),
-    #         fluidRow(column(
-    #           12,
-    #           div(
-    #             style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-    #             align = "center",
-    #             width = "100%",
-    #             actionBttn(
-    #               inputId = "applyFilter", label = strong("Apply"),
-    #               width = "100%", style = "pill", color = "primary",
-    #               icon = icon(name = "play", lib = "glyphicon")
-    #             )
-    #           )
-    #         )),
-    #         h5(" "),
-    #         box(h6(htmlOutput("textDim")),
-    #           width = "100%"
-    #         ),
-    #         br(),
-    #         uiOutput("selectLA"),
-    #         uiOutput("sliderPY"),
-    #         uiOutput("selectType"),
-    #         uiOutput("sliderTCpY"),
-    #         selectInput("bradfordSources",
-    #           label = "Source by Bradford Law Zones",
-    #           choices = c(
-    #             "Core Sources" = "core",
-    #             "Core + Zone 2 Sources" = "zone2",
-    #             "All Sources" = "all"
-    #           ),
-    #           selected = "all"
-    #         )
-    #       )
-    #     )
-    #   )
-    # ),
     tabItem(
       "filters",
       fluidRow(
@@ -759,12 +714,17 @@ body <- dashboardBody(
                   selectizeInput("selectLA", "Language", choices = NULL, multiple = TRUE),
                   sliderInput("sliderPY", "Publication Year", min = 1900, max = 2025,
                               value = c(2000, 2025), sep = ""),
-                  selectizeInput("subject_category", "Subject Category", choices = NULL, multiple = TRUE)
+                  # selectizeInput("subject_category", "Subject Category", choices = NULL, multiple = TRUE)
+                  shinyWidgets::multiInput(
+                    inputId = "subject_category",
+                    label = "Subject Category",
+                    choices = character(0),  
+                    selected = NULL)
               )
             ),
             
             fluidRow(
-              box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "info",
+              box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "primary",
                   fileInput("journal_list_upload", "Upload List of Journals"),
                   uiOutput("journal_select_ui"),
                   selectInput("bradfordSources", "Source by Bradford Law Zones",
@@ -778,7 +738,7 @@ body <- dashboardBody(
             ),
             
             fluidRow(
-              box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "warning",
+              box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "primary",
                   selectInput("region", "Region", 
                               choices = c(
                                 "Africa" = "AFRICA",
@@ -791,12 +751,17 @@ body <- dashboardBody(
                                 "Unknown" = "Unknown"),
                               selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown"),
                               multiple = TRUE),
-                  selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
+                  # selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
+                  shinyWidgets::multiInput(
+                    inputId = "country",
+                    label = "Country",
+                    choices = character(0),  
+                    selected = NULL)
               )
             ),
             
             fluidRow(
-              box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "success",
+              box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "primary",
                   sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
                   sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
               )

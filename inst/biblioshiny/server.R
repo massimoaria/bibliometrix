@@ -1216,12 +1216,11 @@ To ensure the functionality of Biblioshiny,
     updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
     updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
     updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
-    
+    # updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
+    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$SC)), selected = sort(unique(values$SCdf$SC)))
     #updateSelectizeInput(session, "region", choices = unique(values$COdf$continent), selected = ) # supponendo sia già calcolato
     CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
-    updateSelectizeInput(session, "country", choices = unique(CO), selected = CO, server = TRUE)
-    
+    updateMultiInput(session, "country", choices = CO, selected = CO)
     updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
     updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
                       max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
@@ -1256,22 +1255,13 @@ To ensure the functionality of Biblioshiny,
     updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
     updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
     updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
+    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$SC)), selected = sort(unique(values$SCdf$SC)))
     
     updateSelectizeInput(session, "region", 
-                         choices = c(
-                           "Africa" = "AFRICA",
-                           "Asia" = "ASIA",
-                           "Europe" = "EUROPE",
-                           "North America" = "NORTH AMERICA",
-                           "South America" = "SOUTH AMERICA",
-                           "Seven Seas"= "SEVEN SEAS (OPEN OCEAN)",
-                           "Oceania" = "OCEANIA",
-                           "Unknown" = "Unknown"), 
                          selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown")) # supponendo sia già calcolato
     CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
-    updateSelectizeInput(session, "country", choices = unique(CO), selected = CO, server = TRUE)
-    
+    updateMultiInput(session, "country", choices = unique(CO), selected = CO)
+    updateSelectInput(session, "bradfordSources",selected = "all")
     updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
     updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
                       max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
@@ -1316,6 +1306,10 @@ To ensure the functionality of Biblioshiny,
     row.names(M) <- M$SR
     class(M) <- c("bibliometrixDB", "data.frame")
     values$M <- M
+  })
+  
+  output$dataFiltered <- DT::renderDT({
+    DTfiltered()
     Mdisp <- values$M %>%
       mutate(across(everything(), ~ substring(., 1, 150))) %>%
       as.data.frame()
@@ -1324,10 +1318,6 @@ To ensure the functionality of Biblioshiny,
       DTformat(Mdisp, nrow=3, filename="Filtered_DataTable", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
                columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
     }else{Mdisp=data.frame(Message="Empty collection", row.names = " ")}
-  })
-  
-  output$dataFiltered <- DT::renderDT({
-    DTfiltered()
   })
   
   # OVERVIEW ----

@@ -129,7 +129,9 @@ To ensure the functionality of Biblioshiny,
   values$gemini_additional <- NULL
   
   path_gemini_model <- paste0(home,"/.biblio_gemini_model.txt", collapse="")
-  values$gemini_api_model <- loadGeminiModel(path_gemini_model)
+  gemini_api_model <- loadGeminiModel(path_gemini_model)
+  values$gemini_api_model <- gemini_api_model[1]
+  values$gemini_output_size <- gemini_api_model[2]
   
   ## NOTIFICATION ITEM ----
   output$notificationMenu <- renderMenu({
@@ -308,6 +310,8 @@ To ensure the functionality of Biblioshiny,
       management <- management %>% mergeKeywords(force = T)
       values$M <- management
       values$Morig = management
+      values$SCdf <- scTable(management)
+      values$COdf <- countryTable(management)
       values$Histfield = "NA"
       values$results = list("NA")
       values$rest_sidebar <- TRUE
@@ -551,6 +555,8 @@ To ensure the functionality of Biblioshiny,
     M <- M %>% mergeKeywords(force = F)
     values$M <- M
     values$Morig = M
+    values$SCdf <- scTable(M)
+    values$COdf <- countryTable(M)
     values$Histfield = "NA"
     values$results = list("NA")
     if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
@@ -597,6 +603,8 @@ To ensure the functionality of Biblioshiny,
     
     values$M <- M
     values$Morig = M
+    values$SCdf <- scTable(M)
+    values$COdf <- countryTable(M)
     values$nMerge <- attr(M,"nMerge")
     values$Histfield = "NA"
     values$results = list("NA")
@@ -1127,6 +1135,8 @@ To ensure the functionality of Biblioshiny,
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
+               values$SCdf <- scTable(M)
+               values$COdf <- countryTable(M)
                if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
                if (ncol(values$M)>1){showModal(missingModal(session))}
                values$Histfield = "NA"
@@ -1185,66 +1195,100 @@ To ensure the functionality of Biblioshiny,
     HTML(paste("<pre class='tab'>",str1, str2, str3, sep = '<br/>'))
   })
   
-  output$selectType <- renderUI({
+  observe({
+    req(values$Morig) # assicurati che i dati siano già caricati
+    if (!"TCpY" %in% names(values$Morig)){
+      values$Morig <- values$Morig %>% 
+        mutate(Age = as.numeric(substr(Sys.time(),1,4)) - PY+1,
+               TCpY = round(TC/Age,2)) %>% 
+        group_by(PY) %>% 
+        mutate(NTC = TC/mean(TC, na.rm=T)) %>% 
+        as.data.frame()
+    }
+
     artType=sort(unique(values$Morig$DT))
-    selectInput("selectType", "Document Type", 
-                choices = artType,
-                selected = artType,
-                multiple =TRUE )
-  })
-  
-  output$selectLA <- renderUI({
     if ("LA" %in% names(values$Morig)){
       LA <- sort(unique(values$Morig$LA))} else {
         values$Morig$LA <- "N.A."
         LA <- "N.A."
       }
-    selectInput("selectLA", "Language", 
-                choices = LA,
-                selected = LA,
-                multiple =TRUE )
+    
+    updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
+    updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
+    updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
+    updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
+    
+    #updateSelectizeInput(session, "region", choices = unique(values$COdf$continent), selected = ) # supponendo sia già calcolato
+    CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
+    updateSelectizeInput(session, "country", choices = unique(CO), selected = CO, server = TRUE)
+    
+    updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
+    updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
+                      max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
+                      value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
   })
-  
-  output$sliderPY <- renderUI({
-    sliderInput("sliderPY", "Publication Year", min = min(values$Morig$PY,na.rm=T),sep="",
-                max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T),max(values$Morig$PY,na.rm=T)))
-  })
-  
-  output$selectSource <- renderUI({
-    SO=sort(unique(values$Morig$SO))
-    selectInput("selectSource", "Source", 
-                choices = SO,
-                selected = SO,
-                multiple = TRUE)
-  })
-  
-  output$sliderTCpY <- renderUI({
-    Y <- as.numeric(substr(Sys.time(),1,4))
-    values$Morig <- values$Morig %>% 
-      mutate(Age = Y - PY+1,
-             TCpY = round(TC/Age,2)) %>% 
-      group_by(PY) %>% 
-      mutate(NTC = TC/mean(TC, na.rm=T)) %>% 
-      as.data.frame()
-    sliderInput("sliderTCpY", "Average Citations per Year", min = floor(min(values$Morig$TCpY, na.rm=T)),
-                max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
-                value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
-  })
+
   
   ## Update filtered data ----
   observeEvent(input$applyFilter, {
     updateTabItems(session, "sidebarmenu", "filters")
   })
   
+  observeEvent(input$resetFilter, {
+    values$M <- values$Morig
+    updateTabItems(session, "sidebarmenu", "filters")
+    if (!"TCpY" %in% names(values$Morig)){
+      values$Morig <- values$Morig %>% 
+        mutate(Age = as.numeric(substr(Sys.time(),1,4)) - PY+1,
+               TCpY = round(TC/Age,2)) %>% 
+        group_by(PY) %>% 
+        mutate(NTC = TC/mean(TC, na.rm=T)) %>% 
+        as.data.frame()
+    }
+    
+    artType=sort(unique(values$Morig$DT))
+    if ("LA" %in% names(values$Morig)){
+      LA <- sort(unique(values$Morig$LA))} else {
+        values$Morig$LA <- "N.A."
+        LA <- "N.A."
+      }
+    
+    updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
+    updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
+    updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
+    updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
+    
+    #updateSelectizeInput(session, "region", choices = unique(values$COdf$continent), selected = ) # supponendo sia già calcolato
+    CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
+    updateSelectizeInput(session, "country", choices = unique(CO), selected = CO, server = TRUE)
+    
+    updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
+    updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
+                      max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
+                      value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
+  })
+  
   DTfiltered <- eventReactive(input$applyFilter,{
     M <- values$Morig
     B <- bradford(M)$table
-    M <- M %>%
-      dplyr::filter(PY >= input$sliderPY[1], PY <= input$sliderPY[2]) %>%
-      dplyr::filter(TCpY >= input$sliderTCpY[1], TCpY <= input$sliderTCpY[2]) %>%
-      dplyr::filter(DT %in% input$selectType) %>%
-      dplyr::filter(LA %in% input$selectLA)
+    # list of documents per subject categories
+    sc <- values$SCdf %>%
+      dplyr::filter(SC %in% input$subject_category) %>%
+      pull(SR) %>% unique()
+    # list of documents per country
+    co <- values$COdf %>%
+      dplyr::filter(CO %in% input$country) %>%
+      pull(SR) %>% unique()
     
+  M <- M %>%
+      dplyr::filter(PY >= input$sliderPY[1], PY <= input$sliderPY[2]) %>% # publication year
+      dplyr::filter(TCpY >= input$sliderTCpY[1], TCpY <= input$sliderTCpY[2]) %>% # average citations per year
+      dplyr::filter(TC >= input$sliderTC[1], TC <= input$sliderTC[2]) %>% # total citations
+      dplyr::filter(DT %in% input$selectType) %>% # document type
+      dplyr::filter(LA %in% input$selectLA) %>% # language
+      dplyr::filter(SR %in% sc) %>% # subject categories
+      dplyr::filter(SR %in% co) # countries
+      
     switch(input$bradfordSources,
            "core"={
              so <- B$SO[B$Zone %in% "Zone 1"]
@@ -1254,7 +1298,9 @@ To ensure the functionality of Biblioshiny,
            },
            "all"={so <- B$SO})
     M <- M %>%
-      filter(SO %in% so)
+      dplyr::filter(SO %in% so)
+    
+    
     
     values<-initial(values)
     row.names(M) <- M$SR
@@ -5089,6 +5135,28 @@ To ensure the functionality of Biblioshiny,
       output$status <- renderText(paste0("✅ API key has been set: ",last))
     }
   })
+  
+  output$geminiOutputSize <- renderUI({
+      list(
+      selectInput(
+        inputId = "gemini_output_size",
+        label = "Max Output (in tokens)",
+        selected = ifelse(is.null(values$gemini_output_size), "medium", values$gemini_output_size),
+        choices = c("Medium" = "medium", "Large" = "large")
+      ),
+      conditionalPanel(
+        condition = "input.gemini_output_size == 'medium'",
+        helpText(strong("Free Tier Output:")),
+        helpText(em("Medium -> 16384 Tokens"))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_output_size == 'large'",
+        helpText(strong("Free Tier Output:")),
+        helpText(em("Large -> 32768 Tokens"))
+      )
+      )
+    })
+  
   output$geminiModelChoice <- renderUI({
     list(
       selectInput(
@@ -5151,8 +5219,17 @@ To ensure the functionality of Biblioshiny,
   
   observeEvent(input$gemini_api_model, {
     if (!is.null(input$gemini_api_model)){
-      saveGeminiModel(model=input$gemini_api_model, file=paste0(homeFolder(),"/.biblio_gemini_model.txt", collapse=""))
+      saveGeminiModel(model=c(input$gemini_api_model,input$gemini_output_model), file=paste0(homeFolder(),"/.biblio_gemini_model.txt", collapse=""))
       values$gemini_api_model <- input$gemini_api_model
+      values$gemini_output_size <- input$gemini_output_size
+    }
+  })
+
+  observeEvent(input$gemini_output_size, {
+    if (!is.null(input$gemini_output_size)){
+      saveGeminiModel(model=c(input$gemini_api_model,input$gemini_output_size), file=paste0(homeFolder(),"/.biblio_gemini_model.txt", collapse=""))
+      values$gemini_api_model <- input$gemini_api_model
+      values$gemini_output_size <- input$gemini_output_size
     }
   })
   

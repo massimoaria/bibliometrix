@@ -4,16 +4,47 @@ gemini_ai <- function(image = NULL,
                       model = "2.0-flash",
                       type = "png",
                       retry_503 = 5,
-                      api_key=NULL) {
+                      api_key=NULL,
+                      outputSize = "medium"){
   
-  # Default config
-  generation_config <- list(
-    temperature = 1,
-    maxOutputTokens = 16384,#8192,
-    topP = 0.95,
-    topK = 40,
-    seed = 1234
+  switch(outputSize,
+         "small" = {
+           generation_config <- list(
+             temperature = 1,
+             maxOutputTokens = 8192,
+             topP = 0.95,
+             topK = 40,
+             seed = 1234
+           )
+         },
+         "medium" = {
+           generation_config <- list(
+             temperature = 1,
+             maxOutputTokens = 16384, #8192,
+             topP = 0.95,
+             topK = 40,
+             seed = 1234
+           )
+         },
+         "large" = {
+           generation_config <- list(
+             temperature = 1,
+             maxOutputTokens = 32768, #8192,
+             topP = 0.95,
+             topK = 40,
+             seed = 1234
+           )
+         }
   )
+  
+  # # Default config
+  # generation_config <- list(
+  #   temperature = 1,
+  #   maxOutputTokens = 16384,#8192,
+  #   topP = 0.95,
+  #   topK = 40,
+  #   seed = 1234
+  # )
   
   # Build URL
   model_query <- paste0("gemini-", model, ":generateContent")
@@ -183,10 +214,14 @@ load_api_key <- function(path = path_gemini_key) {
 }
 
 loadGeminiModel = function(file){
+  # load info about model type and output size
   if (file.exists(file)){
     model <- readLines(file, warn = FALSE)
   } else {
-    model <- NULL
+    model <- c("2.0-flash","medium")
+  }
+  if (length(model== 1)) {
+    model <- c(model,"medium")
   }
   return(model)
 }
@@ -589,7 +624,8 @@ geminiPromptImage <- function(obj, type="vis", prompt="Explain the topics in thi
     
     res <- gemini_ai(image = file_path,
                      prompt = prompt,
-                     model =  values$gemini_api_model)
+                     model =  values$gemini_api_model,
+                     outputSize = values$gemini_output_size)
   } else {
     res <- 'To access this feature, please provide a valid Gemini AI API key. You can obtain your API key by visiting the official <a href="https://aistudio.google.com/" target="_blank">Google AI Studio website</a>.'
   }

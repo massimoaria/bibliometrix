@@ -1,5 +1,54 @@
 ### COMMON FUNCTIONS ####
 
+# FILTER FUNCTIONS ----
+scTable <- function(M){
+  # Function to extract Subject Category (SC) information from metadata
+  if ("SC" %in% names(M)){
+    SC <- strsplit(M$SC, ";")
+    df <- data.frame(SR = rep(M$SR, lengths(SC)), 
+                     SC = unlist(SC), 
+                     stringsAsFactors = FALSE)
+    
+    df$SC <- trimws(df$SC)  # Remove leading and trailing whitespace
+  } else {
+    df <- data.frame(SR = M$SR, SC = "N.A.", stringsAsFactors = FALSE)
+  }
+  
+  return(df)
+}
+
+countryTable <- function(M){
+  # Function to extract country information from metadata
+  if (!("AU_CO" %in% names(M))) { 
+    M <- metaTagExtraction(M, "AU_CO")
+  }
+  
+  CO <- strsplit(M$AU_CO, ";")
+  df <- data.frame(SR=rep(M$SR,lengths(CO)), 
+                   CO=unlist(CO), 
+                   stringsAsFactors = FALSE)
+  
+  df$CO <- gsub("[[:digit:]]", "", df$CO)
+  df$CO <- gsub(".", "", df$CO, fixed=TRUE)
+  df$CO <- gsub(";;", ";", df$CO, fixed = TRUE)
+  df$CO <- gsub("UNITED STATES", "USA", df$CO)
+  df$CO <- gsub("RUSSIAN FEDERATION", "RUSSIA", df$CO)
+  df$CO <- gsub("TAIWAN", "CHINA", df$CO)
+  df$CO <- gsub("ENGLAND", "UNITED KINGDOM", df$CO)
+  df$CO <- gsub("SCOTLAND", "UNITED KINGDOM", df$CO)
+  df$CO <- gsub("WALES", "UNITED KINGDOM", df$CO)
+  df$CO <- gsub("NORTH IRELAND", "UNITED KINGDOM", df$CO)
+  df$CO <- gsub("UK","UNITED KINGDOM", df$CO)
+  #df$CO <- gsub("KOREA", "SOUTH KOREA", df$CO)
+  
+  data("countries", envir = environment()) 
+  
+  df <- df %>% left_join(countries %>% select(countries, continent), by = c("CO" = "countries")) %>%
+    mutate(continent = ifelse(is.na(continent), "Unknown", continent)) %>%
+    mutate(CO = ifelse(CO == "UNKNOWN", "Unknown", CO))
+  
+}
+
 # LOAD FUNCTIONS -----
 formatDB <- function(obj) {
   ext <- sub(".*\\.", "", obj[1])
@@ -436,26 +485,53 @@ reduceRefs <- function(A) {
   return(A)
 }
 
+check_online <- function(host = "8.8.8.8", min_success = 1) {
+  # Use ping command to test connectivity (works on Windows, Linux, Mac)
+  ping_cmd <- if (.Platform$OS.type == "windows") {
+    sprintf("ping -n %d %s", min_success, host)
+  } else {
+    sprintf("ping -c %d %s", min_success, host)
+  }
+  
+  result <- suppressWarnings(system(ping_cmd, intern = TRUE, ignore.stderr = TRUE))
+  
+  success <- any(grepl("time=", result, ignore.case = TRUE))
+  
+  if (success) {
+    # message("✅ Host is reachable.")
+    # Extract average latency (optional)
+    latency_line <- result[grepl("time=", result)]
+    times <- as.numeric(sub(".*time=([0-9.]+).*", "\\1", latency_line))
+    avg_time <- mean(times, na.rm = TRUE)
+    # message(sprintf("📶 Average latency: %.1f ms", avg_time))
+    if (avg_time<200){
+      return(TRUE)
+    } else {return(FALSE)}
+    #return(TRUE)
+  } else {
+    #message(FALSE)
+    return(FALSE)
+  }
+}
+
 notifications <- function() {
   ## check connection and download notifications
-  online <- is_online()
+  #online <- is_online()
+  online <- check_online(host = "www.bibliometrix.org", min_success = 1)
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   notifOnline <- NULL
-  if (isTRUE(is_online())) {
-    ## add check to avoid blocked app when internet connection is to slow
-    envir <- environment()
-    # setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
-    # on.exit({
-    #   setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-    # })
-    tryCatch(
-      {
-        eval(expr = suppressWarnings(notifOnline <- read.csv(location, header = TRUE, sep = ",")), envir = envir)
-      },
-      error = function(ex) {
-        notifOnLine <- NULL
-      }
-    )
+  if (isTRUE(online)) {
+    notifOnline <- read.csv(location, header = TRUE, sep = ",")
+    # ## add check to avoid blocked app when internet connection is to slow
+    # envir <- environment()
+    # tryCatch(
+    #   {
+    #     eval(expr = suppressWarnings(notifOnline <- read.csv(location, header = TRUE, sep = ",")), envir = envir)
+    #   },
+    #   error = function(ex) {
+    #     notifOnLine <- NULL
+    #   }
+    # )
     if (is.null(notifOnline)) {
       online <- FALSE
     } else {
@@ -470,8 +546,6 @@ notifications <- function() {
   fileTrue <- file.exists(file)
   if (isTRUE(fileTrue)) {
     suppressWarnings(notifLocal <- read.csv(file, header = TRUE, sep = ","))
-    # notifLocal <- readLines(file)
-    # linksLocal[nchar(linksLocal)<6] <- NA
   }
 
 
@@ -1686,7 +1760,7 @@ countrycollaboration <- function(M, label, edgesize, min.edges, values) {
   breaks <- as.numeric(cut(CO$Freq, breaks = 10))
   names(breaks) <- breaks
   # breaks=breaks
-  data("countries", envir = environment())
+  data("countries", envir = environment()) 
   names(countries)[1] <- "Tab"
 
   COedges <- dplyr::inner_join(COedges, countries, by = c("V1" = "Tab"))

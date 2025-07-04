@@ -47,14 +47,18 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
     DB = toupper(c("isi", "scopus", "openalex", "lens", "dimensions", "pubmed", "cochrane")),
     num = c(1, 2, 3, 4, 5, 6, 7)
   )
-  # order by db
-  M <- M %>%
-    left_join(dbLabels, by = "DB") %>%
-    arrange(num) %>%
-    select(-num) %>%
-    rename("CR_raw" = "CR") %>%
-    mutate(CR = "NA")
-
+  DB <- unique(M$DB)
+  
+  if (length(DB) >1) {
+    # order by db
+    M <- M %>%
+      left_join(dbLabels, by = "DB") %>%
+      arrange(num) %>%
+      select(-num) %>%
+      rename("CR_raw" = "CR") %>%
+      mutate(CR = "NA")
+  }
+  
 
   if (isTRUE(remove.duplicated)) {
     # remove by DOI

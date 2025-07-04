@@ -11,6 +11,9 @@ Features:
     - Improved prompt lists
     - Added new Gemini models (2.5 Flash and Flash-lite)
     
+Changes:
+* Solved issue in mergeDbSources(). Now when merging files from a single db, the function preserves the cited reference field
+    
     
 bibliometrix v.5.0.1 (Release date: 2025-06-05)
 

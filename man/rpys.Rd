@@ -42,9 +42,10 @@ Scientometrics, 116:591–608 https://doi.org/10.1007/s11192-018-2733-7\cr\cr
 }
 \examples{
 
-
+\dontrun{
 data(management, package = "bibliometrixData")
 res <- rpys(management, sep = ";", graph = TRUE)
+}
 
 }
 \seealso{

@@ -36,9 +36,10 @@ utils::globalVariables(c(
 #'
 #' @examples
 #'
-#'
+#' \dontrun{
 #' data(management, package = "bibliometrixData")
 #' res <- rpys(management, sep = ";", graph = TRUE)
+#' }
 #'
 #' @seealso \code{\link{convert2df}} to import and convert an ISI or SCOPUS
 #'   Export file in a data frame.

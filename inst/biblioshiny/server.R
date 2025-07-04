@@ -1258,7 +1258,17 @@ To ensure the functionality of Biblioshiny,
     updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
     updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
     
-    #updateSelectizeInput(session, "region", choices = unique(values$COdf$continent), selected = ) # supponendo sia già calcolato
+    updateSelectizeInput(session, "region", 
+                         choices = c(
+                           "Africa" = "AFRICA",
+                           "Asia" = "ASIA",
+                           "Europe" = "EUROPE",
+                           "North America" = "NORTH AMERICA",
+                           "South America" = "SOUTH AMERICA",
+                           "Seven Seas"= "SEVEN SEAS (OPEN OCEAN)",
+                           "Oceania" = "OCEANIA",
+                           "Unknown" = "Unknown"), 
+                         selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown")) # supponendo sia già calcolato
     CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
     updateSelectizeInput(session, "country", choices = unique(CO), selected = CO, server = TRUE)
     

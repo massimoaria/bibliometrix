@@ -1188,12 +1188,56 @@ To ensure the functionality of Biblioshiny,
              columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
   }
   
-  output$textDim <-  renderUI({
-    str1=paste("Documents    ",dim(values$M)[1]," of ",dim(values$Morig)[1])
-    str2=paste("Sources      ",length(unique(values$M$SO))," of ", length(unique(values$Morig$SO)))
-    str3=paste("Authors      ",length(unique(unlist(strsplit(values$M$AU,";"))))," of ", length(unique(unlist(strsplit(values$Morig$AU,";")))))
-    HTML(paste("<pre class='tab'>",str1, str2, str3, sep = '<br/>'))
+  # output$textDim <-  renderUI({
+  #   str1=paste("Documents    ",dim(values$M)[1]," of ",dim(values$Morig)[1])
+  #   str2=paste("Sources      ",length(unique(values$M$SO))," of ", length(unique(values$Morig$SO)))
+  #   str3=paste("Authors      ",length(unique(unlist(strsplit(values$M$AU,";"))))," of ", length(unique(unlist(strsplit(values$Morig$AU,";")))))
+  #   HTML(paste("<pre class='tab'>",str1, str2, str3, sep = '<br/>'))
+  # })
+  output$textDim <- renderUI({
+    n_doc_current <- dim(values$M)[1]
+    n_doc_total <- dim(values$Morig)[1]
+    
+    n_sources_current <- length(unique(values$M$SO))
+    n_sources_total <- length(unique(values$Morig$SO))
+    
+    n_authors_current <- length(unique(unlist(strsplit(values$M$AU, ";"))))
+    n_authors_total <- length(unique(unlist(strsplit(values$Morig$AU, ";"))))
+    
+    HTML(paste0(
+      "<div style='
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px 20px;
+      background-color: #ffffff;
+      font-family: monospace;
+      font-size: 15px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      margin-top: 15px;
+    '>",
+      
+      "<div style='display: flex; justify-content: space-between;'>",
+      "<div style='flex: 1; font-weight: bold;'>Documents</div>",
+      "<div style='flex: 1; text-align: right;'>", n_doc_current, " of ", n_doc_total, "</div>",
+      "</div>",
+      
+      "<div style='display: flex; justify-content: space-between; margin-top: 5px;'>",
+      "<div style='flex: 1; font-weight: bold;'>Sources</div>",
+      "<div style='flex: 1; text-align: right;'>", n_sources_current, " of ", n_sources_total, "</div>",
+      "</div>",
+      
+      "<div style='display: flex; justify-content: space-between; margin-top: 5px;'>",
+      "<div style='flex: 1; font-weight: bold;'>Authors</div>",
+      "<div style='flex: 1; text-align: right;'>", n_authors_current, " of ", n_authors_total, "</div>",
+      "</div>",
+      
+      "</div>"
+    ))
   })
+  
+  
   
   observe({
     req(values$Morig) # assicurati che i dati siano già caricati
@@ -1216,17 +1260,18 @@ To ensure the functionality of Biblioshiny,
     updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
     updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
     updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    # updateSelectizeInput(session, "subject_category", choices = unique(values$SCdf$SC), selected = unique(values$SCdf$SC), server = TRUE)
     updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$SC)), selected = sort(unique(values$SCdf$SC)))
-    #updateSelectizeInput(session, "region", choices = unique(values$COdf$continent), selected = ) # supponendo sia già calcolato
-    CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
-    updateMultiInput(session, "country", choices = CO, selected = CO)
     updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
     updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
                       max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
                       value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
   })
 
+  observe({
+    req(values$Morig) # assicurati che i dati siano già caricati
+    CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
+    updateMultiInput(session, "country", choices = CO, selected = CO)
+  })
   
   ## Update filtered data ----
   observeEvent(input$applyFilter, {

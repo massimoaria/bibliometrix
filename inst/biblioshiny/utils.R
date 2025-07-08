@@ -1,6 +1,23 @@
 ### COMMON FUNCTIONS ####
 
 # FILTER FUNCTIONS ----
+read_journal_list <- function(file_path) {
+  ext <- tools::file_ext(file_path)
+  
+  suppressMessages(journals <- switch(tolower(ext),
+                     "csv" = read.csv(file_path, header = FALSE, stringsAsFactors = FALSE)[[1]],
+                     "txt" = readLines(file_path, warn = FALSE),
+                     "xlsx" = {
+                       readxl::read_excel(file_path, col_names = FALSE)[[1]]
+                     },
+                     stop("Unsupported file format. Please upload a .csv, .txt, or .xlsx file.")
+  ))
+  
+  journals <- journals[!is.na(journals)]
+  journals <- toupper(trimws(journals))
+  return(journals)
+}
+
 scTable <- function(M){
   # Function to extract Subject Category (SC) information from metadata
   if ("SC" %in% names(M)){

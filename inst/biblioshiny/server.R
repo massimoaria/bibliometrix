@@ -1188,12 +1188,7 @@ To ensure the functionality of Biblioshiny,
              columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
   }
   
-  # output$textDim <-  renderUI({
-  #   str1=paste("Documents    ",dim(values$M)[1]," of ",dim(values$Morig)[1])
-  #   str2=paste("Sources      ",length(unique(values$M$SO))," of ", length(unique(values$Morig$SO)))
-  #   str3=paste("Authors      ",length(unique(unlist(strsplit(values$M$AU,";"))))," of ", length(unique(unlist(strsplit(values$Morig$AU,";")))))
-  #   HTML(paste("<pre class='tab'>",str1, str2, str3, sep = '<br/>'))
-  # })
+  ### FILTERS MENU ----
   output$textDim <- renderUI({
     n_doc_current <- dim(values$M)[1]
     n_doc_total <- dim(values$Morig)[1]
@@ -1235,6 +1230,39 @@ To ensure the functionality of Biblioshiny,
       
       "</div>"
     ))
+  })
+  
+  observeEvent(input$journal_list_upload, {
+    req(input$journal_list_upload)
+    
+    journals<- read_journal_list(input$journal_list_upload$datapath)
+    values$journal_list <- journals
+    # Prepara il contenuto con scrolling verticale e altezza fissa
+    # content_html <- paste0(
+    #   "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
+    #   paste(stringi::stri_trans_totitle(paste("- <b>",journals,"</b>", sep="")), collapse = "<br>"),
+    #   "</div>"
+    # )
+    journal_list_html <- paste0("<ul style='padding-left: 20px;'>",
+                                paste0("<li>", stringi::stri_trans_totitle(journals), "</li>", collapse = ""),
+                                "</ul>")
+    
+    # Contenitore con altezza fissa e scrolling
+    content_html <- paste0(
+      "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
+      journal_list_html,
+      "</div>"
+    )
+    
+    
+    shinyWidgets::show_alert(
+      title = "Journal List Loaded",
+      text = HTML(content_html),
+      type = "info",
+      html = TRUE,
+      btn_labels = "OK"
+    )
+
   })
   
   
@@ -1281,6 +1309,10 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$resetFilter, {
     values$M <- values$Morig
     updateTabItems(session, "sidebarmenu", "filters")
+    
+    # reset del fileInput
+    shinyjs::reset("journal_list_upload")
+    
     if (!"TCpY" %in% names(values$Morig)){
       values$Morig <- values$Morig %>% 
         mutate(Age = as.numeric(substr(Sys.time(),1,4)) - PY+1,
@@ -1324,6 +1356,11 @@ To ensure the functionality of Biblioshiny,
     co <- values$COdf %>%
       dplyr::filter(CO %in% input$country) %>%
       pull(SR) %>% unique()
+    
+    if (!is.null(values$journal_list)){
+      M <- M %>% 
+        dplyr::filter(SO %in% values$journal_list) # filter by journal list
+    }
     
   M <- M %>%
       dplyr::filter(PY >= input$sliderPY[1], PY <= input$sliderPY[2]) %>% # publication year

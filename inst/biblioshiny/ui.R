@@ -699,7 +699,7 @@ body <- dashboardBody(
                 actionBttn(
                   inputId = "resetFilter", label = strong("Reset"),
                   width = "100%", style = "pill", color = "primary",
-                  icon = icon(name = "play", lib = "glyphicon")
+                  icon = icon(name = "repeat", lib = "glyphicon")
                 )
               )
             )),
@@ -726,7 +726,7 @@ body <- dashboardBody(
             fluidRow(
               box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "primary",
                   fileInput("journal_list_upload", "Upload List of Journals"),
-                  uiOutput("journal_select_ui"),
+                  #uiOutput("journal_select_ui"),
                   selectInput("bradfordSources", "Source by Bradford Law Zones",
                               choices = c(
                                             "Core Sources" = "core",

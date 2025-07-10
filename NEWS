@@ -1,3 +1,21 @@
+bibliometrix v.5.1.0 (Release date: )
+
+Features:
+* rpys(): 
+    - Added the possibility to choose between two different median window approaches (centered or backward)
+    - Added the algorithm to identify citation sequences and influencial references ("Hot papers", "Constant Performers", "Life Cycles", and "Sleeping Beauty")
+    - Added these results also in Biblioshiny outputs.
+* Biblioshiny:
+    - Added Animated Diachronic Networks in Conceptual and Social Structures.
+    - The Filters menu has been completely redesigned. It now follows a J-AU-DOC approach and includes many more filters (such as Countries, Journals, Citations).
+* Biblio AI: 
+    - Improved prompt lists
+    - Added new Gemini models (2.5 Flash and Flash-lite)
+    
+Changes:
+* Solved issue in mergeDbSources(). Now when merging files from a single db, the function preserves the cited reference field
+    
+    
 bibliometrix v.5.0.1 (Release date: 2025-06-05)
 
 Features:

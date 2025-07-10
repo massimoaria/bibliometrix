@@ -678,7 +678,7 @@ body <- dashboardBody(
             h3(strong("Filters")),
             br(),
             fluidRow(column(
-              12,
+              6,
               div(
                 style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
                 align = "center",
@@ -689,24 +689,82 @@ body <- dashboardBody(
                   icon = icon(name = "play", lib = "glyphicon")
                 )
               )
+            ),
+            column(
+              6,
+              div(
+                style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+                align = "center",
+                width = "100%",
+                actionBttn(
+                  inputId = "resetFilter", label = strong("Reset"),
+                  width = "100%", style = "pill", color = "primary",
+                  icon = icon(name = "repeat", lib = "glyphicon")
+                )
+              )
             )),
             h5(" "),
             box(h6(htmlOutput("textDim")),
-              width = "100%"
+                width = "100%"
             ),
             br(),
-            uiOutput("selectLA"),
-            uiOutput("sliderPY"),
-            uiOutput("selectType"),
-            uiOutput("sliderTCpY"),
-            selectInput("bradfordSources",
-              label = "Source by Bradford Law Zones",
-              choices = c(
-                "Core Sources" = "core",
-                "Core + Zone 2 Sources" = "zone2",
-                "All Sources" = "all"
-              ),
-              selected = "all"
+            fluidRow(
+              box(title = "1. General", width = 12, solidHeader = TRUE, status = "primary",
+                  selectizeInput("selectType", "Document Type", choices = NULL, multiple = TRUE),
+                  selectizeInput("selectLA", "Language", choices = NULL, multiple = TRUE),
+                  sliderInput("sliderPY", "Publication Year", min = 1900, max = 2025,
+                              value = c(2000, 2025), sep = ""),
+                  # selectizeInput("subject_category", "Subject Category", choices = NULL, multiple = TRUE)
+                  shinyWidgets::multiInput(
+                    inputId = "subject_category",
+                    label = "Subject Category",
+                    choices = character(0),  
+                    selected = NULL)
+              )
+            ),
+            
+            fluidRow(
+              box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "primary",
+                  fileInput("journal_list_upload", "Upload List of Journals"),
+                  #uiOutput("journal_select_ui"),
+                  selectInput("bradfordSources", "Source by Bradford Law Zones",
+                              choices = c(
+                                            "Core Sources" = "core",
+                                            "Core + Zone 2 Sources" = "zone2",
+                                            "All Sources" = "all"
+                                          ),
+                              selected = "all")
+              )
+            ),
+            
+            fluidRow(
+              box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "primary",
+                  selectInput("region", "Region", 
+                              choices = c(
+                                "Africa" = "AFRICA",
+                                "Asia" = "ASIA",
+                                "Europe" = "EUROPE",
+                                "North America" = "NORTH AMERICA",
+                                "South America" = "SOUTH AMERICA",
+                                "Seven Seas"= "SEVEN SEAS (OPEN OCEAN)",
+                                "Oceania" = "OCEANIA",
+                                "Unknown" = "Unknown"),
+                              selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown"),
+                              multiple = TRUE),
+                  # selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
+                  shinyWidgets::multiInput(
+                    inputId = "country",
+                    label = "Country",
+                    choices = character(0),  
+                    selected = NULL)
+              )
+            ),
+            
+            fluidRow(
+              box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "primary",
+                  sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
+                  sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
+              )
             )
           )
         )
@@ -2540,6 +2598,14 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
+                selectInput("rpysMedianWindow",
+                            label = "Median Window",
+                  choices = c(
+                    "Centered (Marx et al., 2014)" = "centered",
+                    "Backward (bibliometrix)" = "backward"
+                  ),
+                  selected = "centered"
+                ),
                 selectInput(
                   inputId = "rpysSep",
                   label = "Field separator character",
@@ -2599,6 +2665,32 @@ body <- dashboardBody(
               "Table - Cited References",
               shinycssloaders::withSpinner(DT::DTOutput(
                 outputId = "crTable"
+              ))
+            ),
+            tabPanel(
+              "Table - Influential References",
+              fluidRow(column(10),
+                       column(2,
+                              selectInput("rpysInfluential",
+                                            label = "Type",
+                                            choices = c(
+                                              "Constant Performer" = "Constant Performer",
+                                              "Hot Paper" = "Hot Paper" ,
+                                              "Life Cycle" = "Life Cycle",
+                                              "Sleeping Beauty" =  "Sleeping Beauty",
+                                              "Not Influent" = "Not Influent"
+                                            ),
+                                            selected = "Hot Paper"
+                                )
+                       )),
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "rpysSequence"
+              ))
+            ),
+            tabPanel(
+              "Table - Top 10 Peaks",
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "rpysPeaks"
               ))
             ),
             tabPanel(
@@ -4183,24 +4275,24 @@ body <- dashboardBody(
               "Network",
               shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))
             ),
+            
             tabPanel(
-              "Longitudinal Network",
+              "Diachronic Network",
               br(),
               fluidRow(
-                column(3, actionButton("start", "▶ Start", width = "90%")),
-                column(3, actionButton("pause", "⏸ Pause / Resume", width = "90%")),
-                column(3, actionButton("reset", "⏹ Reset", width = "90%")),
+                column(2, actionButton("start_coc", "▶ Start", width = "90%")),
+                column(2, actionButton("pause_coc", "⏸ Pause / Resume", width = "90%")),
+                column(2, actionButton("reset_coc", "⏹ Reset", width = "90%")),
+                column(2, uiOutput("export_cocUI")),
                 column(1, div(style = "text-align:right;","Speed (ms)")),
-                column(2, selectInput("speed", label = NULL, seq(500,2000, by=500), selected = 1000))
+                column(2, selectInput("speed_coc", label = NULL, seq(250,2000, by=250), selected = 500))
               ),
               fluidRow(
-                column(12,
-                       sliderInput("year_slider", "Year", min = 0, max = 0,
-                                   value = 0, step = 1, animate = FALSE, width = "100%",
-                                   ticks = FALSE, round = TRUE, sep="")
-                )
+                column(12, uiOutput("year_slider_cocUI"))
               ),
-              visNetworkOutput("cocOverTime", height = "65vh")
+              fluidRow(column(1, uiOutput("cocYearUI")),
+                       column(11,visNetworkOutput("cocOverTime", height = "65vh")
+                       ))
             ),
             tabPanel(
               "Density",
@@ -5932,23 +6024,22 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))
             ),
             tabPanel(
-              "Longitudinal Network",
+              "Diachronic Network",
               br(),
               fluidRow(
-                column(3, actionButton("start_col", "▶ Start", width = "90%")),
-                column(3, actionButton("pause_col", "⏸ Pause / Resume", width = "90%")),
-                column(3, actionButton("reset_col", "⏹ Reset", width = "90%")),
+                column(2, actionButton("start_col", "▶ Start", width = "90%")),
+                column(2, actionButton("pause_col", "⏸ Pause / Resume", width = "90%")),
+                column(2, actionButton("reset_col", "⏹ Reset", width = "90%")),
+                column(2, uiOutput("export_colUI")),
                 column(1, div(style = "text-align:right;","Speed (ms)")),
-                column(2, selectInput("speed_col", label = NULL, seq(500,2000, by=500), selected = 1000))
+                column(2, selectInput("speed_col", label = NULL, seq(250,2000, by=250), selected = 500))
               ),
               fluidRow(
-                column(12,
-                       sliderInput("year_slider_col", "Year", min = 0, max = 0,
-                                   value = 0, step = 1, animate = FALSE, width = "100%",
-                                   ticks = FALSE, round = TRUE, sep="")
-                )
+                column(12, uiOutput("year_slider_colUI"))
               ),
-              visNetworkOutput("colOverTime", height = "65vh")
+              fluidRow(column(1, uiOutput("colYearUI")),
+                       column(11,visNetworkOutput("colOverTime", height = "65vh")
+                       ))
             ),
             tabPanel(
               "Density",
@@ -6324,10 +6415,13 @@ body <- dashboardBody(
                           actionButton("remove_key", "Remove API Key",style = "color:white;",width = "90%")
                    )
                  )),
-          column(2),
-          column(4,
+          column(1),
+          column(3,
                  uiOutput("geminiModelChoice")#, style = "color: red; font-weight: bold;")
-          )
+          ),
+          column(2,
+                 uiOutput("geminiOutputSize")
+                 )
         )
         # br(),
        )

@@ -29,7 +29,10 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom dplyr tibble
 #' @importFrom dplyr as_tibble
 #' @importFrom dplyr between
-## @importFrom dplyr filter
+#' @importFrom dplyr case_when
+#' @importFrom dplyr if_else
+#' @importFrom dplyr lead
+#' @importFrom dplyr pull
 #' @importFrom dplyr arrange
 #' @importFrom dplyr do
 #' @importFrom dplyr distinct
@@ -72,6 +75,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom plotly plot_ly
 #' @importFrom plotly subplot
 #' @importFrom plotly toRGB
+#' @importFrom tibble rownames_to_column
 # #' @import shinycssloaders
 # #' @import shinythemes
 #' @importFrom openxlsx write.xlsx

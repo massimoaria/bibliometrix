@@ -53,6 +53,7 @@ Imports: stats,
 		 stringdist,
 		 stringi,
 		 stringr,
+		 tibble,
 		 tidyr,
 		 tidytext,
 		 visNetwork

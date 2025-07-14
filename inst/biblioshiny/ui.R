@@ -48,6 +48,8 @@ export_bttn <- list(
 biblioAI <- helpContent()$biblioAI
 info <- helpContent()$info
 pubs <- helpContent()$publications
+filters <- helpContent()$filters
+
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(
   title = mytitle,
@@ -669,105 +671,127 @@ body <- dashboardBody(
     #### Filters ----
     tabItem(
       "filters",
-      fluidRow(
-        column(9, DT::DTOutput("dataFiltered")),
-        column(
-          3,
-          box(
-            width = "100%",
-            h3(strong("Filters")),
-            br(),
-            fluidRow(column(
-              6,
-              div(
-                style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-                align = "center",
-                width = "100%",
-                actionBttn(
-                  inputId = "applyFilter", label = strong("Apply"),
-                  width = "100%", style = "pill", color = "primary",
-                  icon = icon(name = "play", lib = "glyphicon")
-                )
-              )
-            ),
+      fluidPage(
+      tabsetPanel(
+        id = "tabsFilters",
+        type = "tabs",
+        tabPanel(
+          "Filter List",
+          fluidRow(
+            column(9, DT::DTOutput("dataFiltered")),
             column(
-              6,
-              div(
-                style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-                align = "center",
+              3,
+              box(
                 width = "100%",
-                actionBttn(
-                  inputId = "resetFilter", label = strong("Reset"),
-                  width = "100%", style = "pill", color = "primary",
-                  icon = icon(name = "repeat", lib = "glyphicon")
+                h3(strong("Filters")),
+                br(),
+                fluidRow(column(
+                  6,
+                  div(
+                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+                    align = "center",
+                    width = "100%",
+                    actionBttn(
+                      inputId = "applyFilter", label = strong("Apply"),
+                      width = "100%", style = "pill", color = "primary",
+                      icon = icon(name = "play", lib = "glyphicon")
+                    )
+                  )
+                ),
+                column(
+                  6,
+                  div(
+                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+                    align = "center",
+                    width = "100%",
+                    actionBttn(
+                      inputId = "resetFilter", label = strong("Reset"),
+                      width = "100%", style = "pill", color = "primary",
+                      icon = icon(name = "repeat", lib = "glyphicon")
+                    )
+                  )
+                )),
+                h5(" "),
+                box(h6(htmlOutput("textDim")),
+                    width = "100%"
+                ),
+                br(),
+                fluidRow(
+                  box(title = "1. General", width = 12, solidHeader = TRUE, status = "primary",
+                      selectizeInput("selectType", "Document Type", choices = NULL, multiple = TRUE),
+                      selectizeInput("selectLA", "Language", choices = NULL, multiple = TRUE),
+                      sliderInput("sliderPY", "Publication Year", min = 1900, max = 2025,
+                                  value = c(2000, 2025), sep = ""),
+                      shinyWidgets::multiInput(
+                        inputId = "subject_category",
+                        label = "Subject Category",
+                        choices = character(0),  
+                        selected = NULL)
+                  )
+                ),
+                
+                fluidRow(
+                  box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "primary",
+                      fileInput("journal_list_upload", "Upload List of Journals"),
+                      #uiOutput("journal_select_ui"),
+                      selectInput("bradfordSources", "Source by Bradford Law Zones",
+                                  choices = c(
+                                    "Core Sources" = "core",
+                                    "Core + Zone 2 Sources" = "zone2",
+                                    "All Sources" = "all"
+                                  ),
+                                  selected = "all")
+                  )
+                ),
+                
+                fluidRow(
+                  box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "primary",
+                      selectInput("region", "Region", 
+                                  choices = c(
+                                    "Africa" = "AFRICA",
+                                    "Asia" = "ASIA",
+                                    "Europe" = "EUROPE",
+                                    "North America" = "NORTH AMERICA",
+                                    "South America" = "SOUTH AMERICA",
+                                    "Seven Seas"= "SEVEN SEAS (OPEN OCEAN)",
+                                    "Oceania" = "OCEANIA",
+                                    "Unknown" = "Unknown"),
+                                  selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown"),
+                                  multiple = TRUE),
+                      # selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
+                      shinyWidgets::multiInput(
+                        inputId = "country",
+                        label = "Country",
+                        choices = character(0),  
+                        selected = NULL)
+                  )
+                ),
+                
+                fluidRow(
+                  box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "primary",
+                      sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
+                      sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
+                  )
                 )
-              )
-            )),
-            h5(" "),
-            box(h6(htmlOutput("textDim")),
-                width = "100%"
-            ),
-            br(),
-            fluidRow(
-              box(title = "1. General", width = 12, solidHeader = TRUE, status = "primary",
-                  selectizeInput("selectType", "Document Type", choices = NULL, multiple = TRUE),
-                  selectizeInput("selectLA", "Language", choices = NULL, multiple = TRUE),
-                  sliderInput("sliderPY", "Publication Year", min = 1900, max = 2025,
-                              value = c(2000, 2025), sep = ""),
-                  # selectizeInput("subject_category", "Subject Category", choices = NULL, multiple = TRUE)
-                  shinyWidgets::multiInput(
-                    inputId = "subject_category",
-                    label = "Subject Category",
-                    choices = character(0),  
-                    selected = NULL)
-              )
-            ),
-            
-            fluidRow(
-              box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "primary",
-                  fileInput("journal_list_upload", "Upload List of Journals"),
-                  #uiOutput("journal_select_ui"),
-                  selectInput("bradfordSources", "Source by Bradford Law Zones",
-                              choices = c(
-                                            "Core Sources" = "core",
-                                            "Core + Zone 2 Sources" = "zone2",
-                                            "All Sources" = "all"
-                                          ),
-                              selected = "all")
-              )
-            ),
-            
-            fluidRow(
-              box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "primary",
-                  selectInput("region", "Region", 
-                              choices = c(
-                                "Africa" = "AFRICA",
-                                "Asia" = "ASIA",
-                                "Europe" = "EUROPE",
-                                "North America" = "NORTH AMERICA",
-                                "South America" = "SOUTH AMERICA",
-                                "Seven Seas"= "SEVEN SEAS (OPEN OCEAN)",
-                                "Oceania" = "OCEANIA",
-                                "Unknown" = "Unknown"),
-                              selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown"),
-                              multiple = TRUE),
-                  # selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
-                  shinyWidgets::multiInput(
-                    inputId = "country",
-                    label = "Country",
-                    choices = character(0),  
-                    selected = NULL)
-              )
-            ),
-            
-            fluidRow(
-              box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "primary",
-                  sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
-                  sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
               )
             )
           )
+        ),
+      tabPanel(
+        "Info & References",
+        fluidPage(
+          fluidRow(
+            column(1),
+            column(
+              10,
+              br(),
+              HTML(filters)
+            ),
+            column(1)
+          )
         )
+      )
+      )
       )
     ),
     #### Overview ----

@@ -18,23 +18,24 @@ read_journal_list <- function(file_path) {
   return(journals)
 }
 
-scTable <- function(M){
-  # Function to extract Subject Category (SC) information from metadata
-  if ("SC" %in% names(M)){
-    SC <- strsplit(M$SC, ";")
-    df <- data.frame(SR = rep(M$SR, lengths(SC)), 
-                     SC = unlist(SC), 
+wcTable <- function(M){
+  # Function to extract Science Category (WC) information from metadata
+  if ("WC" %in% names(M)){
+    WC <- strsplit(M$WC, ";")
+    df <- data.frame(SR = rep(M$SR, lengths(WC)), 
+                     WC = unlist(WC), 
                      stringsAsFactors = FALSE)
     
-    df$SC <- trimws(df$SC)  # Remove leading and trailing whitespace
+    df$WC <- trimws(df$WC)  # Remove leading and trailing whitespace
   } else {
-    df <- data.frame(SR = M$SR, SC = "N.A.", stringsAsFactors = FALSE)
+    df <- data.frame(SR = M$SR, WC = "N.A.", stringsAsFactors = FALSE)
   }
   
   return(df)
 }
 
 countryTable <- function(M){
+  data("countries", envir = environment()) 
   # Function to extract country information from metadata
   if (!("AU_CO" %in% names(M))) { 
     M <- metaTagExtraction(M, "AU_CO")
@@ -42,7 +43,7 @@ countryTable <- function(M){
   
   CO <- strsplit(M$AU_CO, ";")
   df <- data.frame(SR=rep(M$SR,lengths(CO)), 
-                   CO=unlist(CO), 
+                   CO=trimws(unlist(CO)), 
                    stringsAsFactors = FALSE)
   
   df$CO <- gsub("[[:digit:]]", "", df$CO)
@@ -58,9 +59,10 @@ countryTable <- function(M){
   df$CO <- gsub("UK","UNITED KINGDOM", df$CO)
   #df$CO <- gsub("KOREA", "SOUTH KOREA", df$CO)
   
-  data("countries", envir = environment()) 
+  
   
   df <- df %>% left_join(countries %>% select(countries, continent), by = c("CO" = "countries")) %>%
+    mutate(CO = ifelse(is.na(CO), "Unknown", CO)) %>% 
     mutate(continent = ifelse(is.na(continent), "Unknown", continent)) %>%
     mutate(CO = ifelse(CO == "UNKNOWN", "Unknown", CO))
   

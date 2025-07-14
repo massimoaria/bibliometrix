@@ -101,6 +101,47 @@ helpContent <- function(){
 </ul>
 "
 
+  filters <- "
+  <body>
+  <div class='container'>
+    <h3><strong>📂 Filters Information</strong></h3>
+    
+    <p>This section allows users to refine the document collection by applying multiple filters based on metadata fields available in the dataset. Below is a description of each filter and its usage:</p>
+    
+    <h4><strong>1. General</strong></h4>
+    <ul>
+    <li><strong>Document Type:</strong> Filters documents by type (e.g., Article, Book Chapter, Proceedings Paper). The selected document types are shown automatically; to remove one, simply click on it.</li>
+    <li><strong>Language:</strong> Filters documents based on the language of publication.</li>
+    <li><strong>Publication Year:</strong> Select a range of years using the slider to filter documents published within a specific time interval.</li>
+    <li><strong>Subject Category:</strong> If available, this filter enables selection by subject category (e.g., Business, Education, Engineering). This option appears only if the source database (e.g., Scopus) provides this metadata. If the information is not available, the filter is automatically hidden.</li>
+    </ul>
+    
+    <h4><strong>2. Journal</strong></h4>
+    <ul>
+    <li><strong>Upload List of Journals:</strong> Allows users to upload a custom list of journal titles to restrict the collection accordingly. Accepted file formats: <code>.csv</code>, <code>.txt</code>, and <code>.xlsx</code>. Journal titles must be listed in the first column of the file.</li>
+    <li><strong>Source by Bradford Law Zones:</strong> Enables filtering of journals based on Bradford’s Law.</li>
+    </ul>
+    
+    <h4><strong>3. Author’s Country</strong></h4>
+    <ul>
+    <li><strong>Region and Country:</strong> Enables filtering by geographic region or specific country of the authors. Regions can be quickly selected using predefined buttons (e.g., Europe, Asia), while countries can be selected individually from the list.</li>
+    </ul>
+    
+    <h4><strong>4. Documents</strong></h4>
+    <ul>
+    <li><strong>Total Citations:</strong> Filters documents based on the total number of citations received.</li>
+    <li><strong>Total Citations per Year:</strong> Filters documents by the average number of citations received per year since publication.</li>
+    </ul>
+    
+    <h4><strong>📝 Additional Notes</strong></h4>
+    <ul>
+    <li>Filters with dual-column boxes (e.g., Subject Category, Country) are automatically pre-populated with values representing the structure of the current collection. These selections can be modified by clicking on any item in the right-hand column to remove it.</li>
+    <li>Use the <strong>Apply</strong> button to activate the selected filters and update the collection.</li>
+    <li>Use the <strong>Reset</strong> button to clear all filters and restore the original dataset.</li>
+    </ul>
+    </div>
+    </body>
+  "
   
-  return(list(biblioAI=biblioAI, info=info, publications=publications))
+  return(list(biblioAI=biblioAI, info=info, publications=publications, filters=filters))
 }

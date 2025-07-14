@@ -1,5 +1,55 @@
 ### COMMON FUNCTIONS ####
 
+# Number format abbreviated
+format_abbreviated <- function(x) {
+  if (is.na(x)) return(NA)
+  if (x >= 1e6) {
+    return(paste0(format(round(x / 1e6, 2), nsmall = 2), "M"))
+  } else if (x >= 1e3) {
+    return(paste0(format(round(x / 1e3, 0), nsmall = 0), "K"))
+  } else {
+    return(as.character(x))
+  }
+}
+
+# total package download
+total_downloads <- function(pkg_name="bibliometrix", from="2016-01-01", to=Sys.Date()) {
+  # Function to get total downloads of a package from CRAN logs
+  # Args:
+  #   pkg_name: Name of the package as a string
+  # Returns:
+  #   Total number of downloads as an integer
+  
+  if (!is_online()){
+    return("--")
+  }
+  
+  #today <- Sys.Date()
+  if (!is.character(pkg_name) || length(pkg_name) != 1) {
+    stop("pkg_name must be a single string.")
+  }
+  
+  url <- paste0("https://cranlogs.r-pkg.org/downloads/total/",from,":",to,"/", pkg_name)
+  
+  json_text <- tryCatch({
+    readLines(url, warn = FALSE)
+  }, error = function(e) {
+    stop("Error fetching data from CRAN logs: ", e$message)
+  })
+  
+  # Extract the number manually (not robust)
+  txt <- unlist(strsplit(json_text, ","))
+  txt <- txt[grepl("downloads", txt)]
+  
+  if (length(txt) == 0) {
+    return(0)
+  }
+  
+  downloads <- gsub("[^0-9]", "", txt)
+  
+  return(as.integer(downloads))
+}
+
 # FILTER FUNCTIONS ----
 read_journal_list <- function(file_path) {
   ext <- tools::file_ext(file_path)

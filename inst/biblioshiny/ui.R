@@ -20,6 +20,8 @@ bibliometrixWeb <- "https://www.bibliometrix.org/"
 k_synth <- "https://www.k-synth.unina.it"
 github_aria <- "https://github.com/massimoaria/bibliometrix"
 
+biblioshinyVersion <- substr(packageVersion("bibliometrix"),1,7)
+
 style_opt <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
 style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
 t_report <- "Add Results to the Report"
@@ -54,7 +56,16 @@ filters <- helpContent()$filters
 header <- shinydashboardPlus::dashboardHeader(
   title = mytitle,
   titleWidth = 300,
-  # controlbarIcon = fa_i(name ="bars"),
+  tags$li(class = "dropdown", 
+          tags$a(
+            title = "Total downloads from CRAN",  # ← Tooltip 
+            icon("cloud-arrow-down", lib="font-awesome"),
+            tags$span(
+              HTML(format_abbreviated(total_downloads("bibliometrix"))),
+              style = "margin-left: 5px; font-weight: bold;"
+            )
+          )
+  ),
   dropdownMenuOutput("notificationMenu"),
   dropdownMenu(
     type = "messages",
@@ -78,6 +89,12 @@ header <- shinydashboardPlus::dashboardHeader(
       from = "biblioshiny Tutorial",
       message = "",
       href = slides
+    ),
+    messageItem(
+      icon = icon("info-circle"),
+      from = paste0("Version ", biblioshinyVersion),
+      message = "",
+      href = NULL
     )
   ),
   dropdownMenu(
@@ -169,6 +186,8 @@ body <- dashboardBody(
 "))),
   ###
   tags$head(
+    tags$style(".fa-cloud-arrow-down {font-size: 20px}"),
+    tags$style(".fa-download {font-size: 20px}"),
     tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"),
     tags$style(".fa-envelope-open {font-size: 20px}"),
     tags$style(".fa-cube {font-size: 20px}"),

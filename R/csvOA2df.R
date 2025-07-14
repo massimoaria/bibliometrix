@@ -82,6 +82,9 @@ csvOA2df <- function(file) {
   DATA$RP <- toupper(DATA$RP)
   DATA$AU_CO <- toupper(DATA$AU_CO)
   DATA$AU1_CO <- toupper(DATA$AU1_CO)
+  data("countries", envir = environment()) 
+  DATA$AU_CO <- convert_iso2_to_country(DATA$AU_CO, countries)
+  DATA$AU1_CO <- convert_iso2_to_country(DATA$AU1_CO, countries)
   DATA$AB_raw <- AB
   DATA$TI_raw <- TI
   DATA$DE_raw <- DE
@@ -238,4 +241,22 @@ replace_corresponding_info <- function(data) {
       AU1_CO = corresponding_author_country
     ) %>%
     ungroup()
+}
+
+convert_iso2_to_country <- function(df_column, countries_df) {
+  # Crea una named vector per la conversione
+  iso_to_country <- setNames(countries_df$countries, countries_df$iso2)
+  
+  # Funzione per tradurre un singolo elemento (es: "IT;IT;FR")
+  translate_entry <- function(entry) {
+    if (is.na(entry) || entry == "" || grepl("^;+\\s*$", entry)) return(NA)
+    iso_codes <- unlist(strsplit(entry, ";"))
+    country_names <- iso_to_country[iso_codes]
+    # Rimuove NA e unifica nomi duplicati
+    unique_names <- unique(na.omit(country_names))
+    paste(unique_names, collapse = "; ")
+  }
+  
+  # Applica la funzione a tutta la colonna
+  sapply(df_column, translate_entry)
 }

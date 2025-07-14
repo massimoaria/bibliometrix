@@ -4,10 +4,11 @@
 #' Data are used by \code{\link{biblioAnalysis}} function
 #' to extract Country Field of Cited References and Authors.
 #'
-#' @format A data frame with 199 rows and 4 variables:
+#' @format A data frame with 199 rows and 5 variables:
 #'  \describe{
 #'     \item{countries}{country names}
 #'     \item{continent}{continent names}
+#'     \item{iso2}{country ISO 3166-1 alpha-2 code}
 #'     \item{Longitude}{country centroid longitude}
 #'     \item{Latitude}{country centroid latitude}
 #'     }

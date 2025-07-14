@@ -14,6 +14,7 @@ Features:
     
 Changes:
 * Solved issue in mergeDbSources(). Now when merging files from a single db, the function preserves the cited reference field
+* Added automatic conversion of country ISO2 to country names for OpenAlex data in convert2df()
     
 
 # bibliometrix v.5.0.1 

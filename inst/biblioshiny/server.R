@@ -310,7 +310,7 @@ To ensure the functionality of Biblioshiny,
       management <- management %>% mergeKeywords(force = T)
       values$M <- management
       values$Morig = management
-      values$SCdf <- scTable(management)
+      values$SCdf <- wcTable(management)
       values$COdf <- countryTable(management)
       values$Histfield = "NA"
       values$results = list("NA")
@@ -555,7 +555,7 @@ To ensure the functionality of Biblioshiny,
     M <- M %>% mergeKeywords(force = F)
     values$M <- M
     values$Morig = M
-    values$SCdf <- scTable(M)
+    values$SCdf <- wcTable(M)
     values$COdf <- countryTable(M)
     values$Histfield = "NA"
     values$results = list("NA")
@@ -603,7 +603,7 @@ To ensure the functionality of Biblioshiny,
     
     values$M <- M
     values$Morig = M
-    values$SCdf <- scTable(M)
+    values$SCdf <- wcTable(M)
     values$COdf <- countryTable(M)
     values$nMerge <- attr(M,"nMerge")
     values$Histfield = "NA"
@@ -1135,7 +1135,7 @@ To ensure the functionality of Biblioshiny,
                values$ApiOk <- 1
                values$M <- M
                values$Morig = M
-               values$SCdf <- scTable(M)
+               values$SCdf <- wcTable(M)
                values$COdf <- countryTable(M)
                if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
                if (ncol(values$M)>1){showModal(missingModal(session))}
@@ -1237,12 +1237,6 @@ To ensure the functionality of Biblioshiny,
     
     journals<- read_journal_list(input$journal_list_upload$datapath)
     values$journal_list <- journals
-    # Prepara il contenuto con scrolling verticale e altezza fissa
-    # content_html <- paste0(
-    #   "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
-    #   paste(stringi::stri_trans_totitle(paste("- <b>",journals,"</b>", sep="")), collapse = "<br>"),
-    #   "</div>"
-    # )
     journal_list_html <- paste0("<ul style='padding-left: 20px;'>",
                                 paste0("<li>", stringi::stri_trans_totitle(journals), "</li>", collapse = ""),
                                 "</ul>")
@@ -1288,11 +1282,21 @@ To ensure the functionality of Biblioshiny,
     updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
     updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
     updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$SC)), selected = sort(unique(values$SCdf$SC)))
+    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$WC)), selected = sort(unique(values$SCdf$WC)))
     updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
     updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
                       max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
                       value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
+  })
+  
+  observe({
+    req(values$SCdf)
+    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$WC)), selected = sort(unique(values$SCdf$WC)))
+    if (length(unique(values$SCdf$WC)) == 1){
+      if (unique(values$SCdf$WC) == "N.A.") shinyjs::hide("subject_category")
+  } else{
+      shinyjs::show("subject_category")
+    }
   })
 
   observe({
@@ -1312,6 +1316,7 @@ To ensure the functionality of Biblioshiny,
     
     # reset del fileInput
     shinyjs::reset("journal_list_upload")
+    values$journal_list <- unique(values$Morig$SO)
     
     if (!"TCpY" %in% names(values$Morig)){
       values$Morig <- values$Morig %>% 
@@ -1332,7 +1337,7 @@ To ensure the functionality of Biblioshiny,
     updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
     updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
     updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$SC)), selected = sort(unique(values$SCdf$SC)))
+    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$WC)), selected = sort(unique(values$SCdf$WC)))
     
     updateSelectizeInput(session, "region", 
                          selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown")) # supponendo sia già calcolato
@@ -1349,8 +1354,8 @@ To ensure the functionality of Biblioshiny,
     M <- values$Morig
     B <- bradford(M)$table
     # list of documents per subject categories
-    sc <- values$SCdf %>%
-      dplyr::filter(SC %in% input$subject_category) %>%
+    wc <- values$SCdf %>%
+      dplyr::filter(WC %in% input$subject_category) %>%
       pull(SR) %>% unique()
     # list of documents per country
     co <- values$COdf %>%
@@ -1368,7 +1373,7 @@ To ensure the functionality of Biblioshiny,
       dplyr::filter(TC >= input$sliderTC[1], TC <= input$sliderTC[2]) %>% # total citations
       dplyr::filter(DT %in% input$selectType) %>% # document type
       dplyr::filter(LA %in% input$selectLA) %>% # language
-      dplyr::filter(SR %in% sc) %>% # subject categories
+      dplyr::filter(SR %in% wc) %>% # subject categories
       dplyr::filter(SR %in% co) # countries
       
     switch(input$bradfordSources,

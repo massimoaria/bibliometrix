@@ -464,8 +464,6 @@ extract_corresponding_info <- function(authorships) {
   ))
 }
 
-
-
 # Function to combine all extractions
 extract_all_metadata <- function(article) {
   authors_info <- extract_authors(article)

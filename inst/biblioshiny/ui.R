@@ -1,5 +1,6 @@
 source("libraries.R", local = TRUE)
 source("helpContent.R", local = TRUE)
+source("utils.R", local = TRUE)
 suppressMessages(libraries())
 
 # UI components ----

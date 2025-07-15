@@ -592,15 +592,7 @@ notifications <- function() {
   if (isTRUE(online)) {
     notifOnline <- read.csv(location, header = TRUE, sep = ",")
     # ## add check to avoid blocked app when internet connection is to slow
-    # envir <- environment()
-    # tryCatch(
-    #   {
-    #     eval(expr = suppressWarnings(notifOnline <- read.csv(location, header = TRUE, sep = ",")), envir = envir)
-    #   },
-    #   error = function(ex) {
-    #     notifOnLine <- NULL
-    #   }
-    # )
+
     if (is.null(notifOnline)) {
       online <- FALSE
     } else {
@@ -666,27 +658,12 @@ notifications <- function() {
     }
   )
 
-  # notifTot <- notifTot[1:(min(5,nrow(notifTot))),]
   return(notifTot)
 }
 
 is_online <- function(timeout = 3) {
   RCurl::url.exists("www.bibliometrix.org", timeout = timeout)
 }
-
-# is_online <- function(){
-#   ## add check to avoid blocked app when internet connection is to slow
-#   envir <- environment()
-#   setTimeLimit(cpu = 1, elapsed = 1, transient = TRUE)
-#   on.exit({
-#     setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-#   })
-#   tryCatch({
-#     eval(expr=suppressWarnings(resp <- curl::has_internet()), envir = envir)
-#   }, error = function(ex) {resp <- FALSE}
-#   )
-#   return(resp)
-# }
 
 initial <- function(values) {
   values$results <- list("NA")

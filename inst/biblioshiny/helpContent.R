@@ -116,18 +116,18 @@ helpContent <- function(){
     <li><strong>Subject Category:</strong> If available, this filter enables selection by subject category (e.g., Business, Education, Engineering). This option appears only if the source database (e.g., Scopus) provides this metadata. If the information is not available, the filter is automatically hidden.</li>
     </ul>
     
-    <h4><strong>2. Journal</strong></h4>
+    <h4><strong>2. Journal (J)</strong></h4>
     <ul>
     <li><strong>Upload List of Journals:</strong> Allows users to upload a custom list of journal titles to restrict the collection accordingly. Accepted file formats: <code>.csv</code>, <code>.txt</code>, and <code>.xlsx</code>. Journal titles must be listed in the first column of the file.</li>
     <li><strong>Source by Bradford Law Zones:</strong> Enables filtering of journals based on Bradford’s Law.</li>
     </ul>
     
-    <h4><strong>3. Author’s Country</strong></h4>
+    <h4><strong>3. Author’s Country (AU)</strong></h4>
     <ul>
     <li><strong>Region and Country:</strong> Enables filtering by geographic region or specific country of the authors. Regions can be quickly selected using predefined buttons (e.g., Europe, Asia), while countries can be selected individually from the list.</li>
     </ul>
     
-    <h4><strong>4. Documents</strong></h4>
+    <h4><strong>4. Documents (DOC)</strong></h4>
     <ul>
     <li><strong>Total Citations:</strong> Filters documents based on the total number of citations received.</li>
     <li><strong>Total Citations per Year:</strong> Filters documents by the average number of citations received per year since publication.</li>

@@ -809,7 +809,6 @@ To ensure the functionality of Biblioshiny,
             tags$h4("Data in the column CR could be truncated.",
                     style = "color: firebrick;")
           ),
-          #text = "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).\nData in the column CR could be truncated",
           title = "Please save the collection using the 'RData' format",
           type = "warning",
           width =  "50%", ##NEW ----
@@ -1188,7 +1187,9 @@ To ensure the functionality of Biblioshiny,
              columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
   }
   
-  ### FILTERS MENU ----
+  # FILTERS MENU ----
+  
+  #### Box about Filter Results ----
   output$textDim <- renderUI({
     n_doc_current <- dim(values$M)[1]
     n_doc_total <- dim(values$Morig)[1]
@@ -1200,7 +1201,7 @@ To ensure the functionality of Biblioshiny,
     n_authors_total <- length(unique(unlist(strsplit(values$Morig$AU, ";"))))
     
     HTML(paste0(
-      "<div style='
+      "<div class='fade-in' style='
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 15px 20px;
@@ -1232,16 +1233,26 @@ To ensure the functionality of Biblioshiny,
     ))
   })
   
-  observeEvent(input$journal_list_upload, {
+  #### Journal List Message ----
+  output$journal_list_ui <- renderUI({
     req(input$journal_list_upload)
-    
-    journals<- read_journal_list(input$journal_list_upload$datapath)
-    values$journal_list <- journals
+    div(id = "journal_list_helptext", 
+        helpText("Journal list loaded. Now it will be used to filter the results.", style = "color:#dc3545"),
+        div(align = "center",
+        actionBttn(
+          inputId = "viewJournals", label = strong("View List"),
+          width = "50%", style = "pill", color = "primary", size="s",
+          icon = icon(name = "eye", lib = "font-awesome")
+        )),
+        br()
+        )
+  })
+  
+  observeEvent(input$viewJournals,{
     journal_list_html <- paste0("<ul style='padding-left: 20px;'>",
-                                paste0("<li>", stringi::stri_trans_totitle(journals), "</li>", collapse = ""),
+                                paste0("<li>", stringi::stri_trans_totitle(values$journal_list), "</li>", collapse = ""),
                                 "</ul>")
-    
-    # Contenitore con altezza fissa e scrolling
+
     content_html <- paste0(
       "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
       journal_list_html,
@@ -1256,13 +1267,36 @@ To ensure the functionality of Biblioshiny,
       html = TRUE,
       btn_labels = "OK"
     )
+  })
+  
+  observeEvent(input$journal_list_upload, {
+    req(input$journal_list_upload)
+    
+    journals<- read_journal_list(input$journal_list_upload$datapath)
+    values$journal_list <- journals
+    journal_list_html <- paste0("<ul style='padding-left: 20px;'>",
+                                paste0("<li>", stringi::stri_trans_totitle(journals), "</li>", collapse = ""),
+                                "</ul>")
+    
+    content_html <- paste0(
+      "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
+      journal_list_html,
+      "</div>"
+    )
+    
+    shinyWidgets::show_alert(
+      title = "Journal List Loaded",
+      text = HTML(content_html),
+      type = "info",
+      html = TRUE,
+      btn_labels = "OK"
+    )
 
   })
   
-  
-  
+  #### Update Filter Inputs ----
   observe({
-    req(values$Morig) # assicurati che i dati siano già caricati
+    req(values$Morig) 
     if (!"TCpY" %in% names(values$Morig)){
       values$Morig <- values$Morig %>% 
         mutate(Age = as.numeric(substr(Sys.time(),1,4)) - PY+1,
@@ -1305,17 +1339,20 @@ To ensure the functionality of Biblioshiny,
     updateMultiInput(session, "country", choices = CO, selected = CO)
   })
   
-  ## Update filtered data ----
+  #### Update filtered data ----
   observeEvent(input$applyFilter, {
+    DTfiltered()
     updateTabItems(session, "sidebarmenu", "filters")
   })
   
+  #### Reset Filters ----
   observeEvent(input$resetFilter, {
     values$M <- values$Morig
     updateTabItems(session, "sidebarmenu", "filters")
     
     # reset del fileInput
     shinyjs::reset("journal_list_upload")
+    shinyjs::hide("journal_list_helptext")
     values$journal_list <- unique(values$Morig$SO)
     
     if (!"TCpY" %in% names(values$Morig)){
@@ -1350,6 +1387,7 @@ To ensure the functionality of Biblioshiny,
                       value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
   })
   
+  #### Filter Data Reactive Function ----
   DTfiltered <- eventReactive(input$applyFilter,{
     M <- values$Morig
     B <- bradford(M)$table
@@ -1387,18 +1425,29 @@ To ensure the functionality of Biblioshiny,
     M <- M %>%
       dplyr::filter(SO %in% so)
     
-    
-    
     values<-initial(values)
     row.names(M) <- M$SR
     class(M) <- c("bibliometrixDB", "data.frame")
     values$M <- M
   })
   
+  #### Show Filtered Data Modal ----
+  observeEvent(input$viewDataFilter,{
+    showModal(modalDialog(
+      title = "Filtered Data",
+      size = "l",
+      DT::DTOutput("dataFiltered"),
+      footer = tagList(
+        #downloadButton("collection.save", "Save Filtered Data"),
+        modalButton("Close")
+      )
+    ))
+  })
+  
   output$dataFiltered <- DT::renderDT({
     DTfiltered()
     Mdisp <- values$M %>%
-      mutate(across(everything(), ~ substring(., 1, 150))) %>%
+      select(SR, AU, TI, SO, PY, LA, DT, TC, TCpY, DI) %>%
       as.data.frame()
     
     if (dim(Mdisp)[1]>0){
@@ -1406,6 +1455,7 @@ To ensure the functionality of Biblioshiny,
                columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
     }else{Mdisp=data.frame(Message="Empty collection", row.names = " ")}
   })
+  
   
   # OVERVIEW ----
   ### Main Info ----

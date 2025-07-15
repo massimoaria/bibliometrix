@@ -1,5 +1,6 @@
 source("libraries.R", local = TRUE)
 source("helpContent.R", local = TRUE)
+source("utils.R", local = TRUE)
 suppressMessages(libraries())
 
 # UI components ----
@@ -19,6 +20,8 @@ donation <- "https://www.bibliometrix.org/home/index.php/donation"
 bibliometrixWeb <- "https://www.bibliometrix.org/"
 k_synth <- "https://www.k-synth.unina.it"
 github_aria <- "https://github.com/massimoaria/bibliometrix"
+
+biblioshinyVersion <- substr(packageVersion("bibliometrix"),1,7)
 
 style_opt <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
 style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
@@ -54,7 +57,16 @@ filters <- helpContent()$filters
 header <- shinydashboardPlus::dashboardHeader(
   title = mytitle,
   titleWidth = 300,
-  # controlbarIcon = fa_i(name ="bars"),
+  tags$li(class = "dropdown", 
+          tags$a(
+            title = "Total downloads from CRAN",  # ← Tooltip 
+            icon("cloud-arrow-down", lib="font-awesome"),
+            tags$span(
+              HTML(format_abbreviated(total_downloads("bibliometrix"))),
+              style = "margin-left: 5px; font-weight: bold;"
+            )
+          )
+  ),
   dropdownMenuOutput("notificationMenu"),
   dropdownMenu(
     type = "messages",
@@ -78,6 +90,12 @@ header <- shinydashboardPlus::dashboardHeader(
       from = "biblioshiny Tutorial",
       message = "",
       href = slides
+    ),
+    messageItem(
+      icon = icon("info-circle"),
+      from = paste0("Version ", biblioshinyVersion),
+      message = "",
+      href = NULL
     )
   ),
   dropdownMenu(
@@ -156,8 +174,21 @@ body <- dashboardBody(
   customTheme,
   ## workaround to solve visualization issues in Data Table
   tags$head(tags$style(HTML(".has-feedback .form-control { padding-right: 0px;}"))),
+  ### animation for filter results box
+  tags$head(tags$style(HTML("
+  .fade-in {
+    animation: fadeInAnim 0.8s ease-in-out;
+  }
+
+  @keyframes fadeInAnim {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+"))),
   ###
   tags$head(
+    tags$style(".fa-cloud-arrow-down {font-size: 20px}"),
+    tags$style(".fa-download {font-size: 20px}"),
     tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"),
     tags$style(".fa-envelope-open {font-size: 20px}"),
     tags$style(".fa-cube {font-size: 20px}"),
@@ -678,17 +709,14 @@ body <- dashboardBody(
         tabPanel(
           "Filter List",
           fluidRow(
-            column(9, DT::DTOutput("dataFiltered")),
-            column(
-              3,
-              box(
-                width = "100%",
-                h3(strong("Filters")),
-                br(),
-                fluidRow(column(
-                  6,
+            column(4,
+                   box(h6(htmlOutput("textDim")),
+                       width = "100%"
+                   )),
+                column(
+                  2,
                   div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+                    style = "display: flex; align-items: center; height: 150px;",
                     align = "center",
                     width = "100%",
                     actionBttn(
@@ -699,9 +727,9 @@ body <- dashboardBody(
                   )
                 ),
                 column(
-                  6,
+                  2,
                   div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+                    style = "display: flex; align-items: center; height: 150px;",
                     align = "center",
                     width = "100%",
                     actionBttn(
@@ -710,14 +738,25 @@ body <- dashboardBody(
                       icon = icon(name = "repeat", lib = "glyphicon")
                     )
                   )
-                )),
-                h5(" "),
-                box(h6(htmlOutput("textDim")),
-                    width = "100%"
                 ),
-                br(),
+            column(
+              2,
+              div(
+                style = "display: flex; align-items: center; height: 150px;",
+                align = "center",
+                width = "100%",
+                actionBttn(
+                  inputId = "viewDataFilter", label = strong("Data"),
+                  width = "100%", style = "pill", color = "primary",
+                  icon = icon(name = "table", lib = "font-awesome")
+                )
+              )
+            )
+            ),
+        fluidRow(column(3,
                 fluidRow(
-                  box(title = "1. General", width = 12, solidHeader = TRUE, status = "primary",
+                  box(title = "1. General", width = 12, solidHeader = TRUE, 
+                      status = "primary",
                       selectizeInput("selectType", "Document Type", choices = NULL, multiple = TRUE),
                       selectizeInput("selectLA", "Language", choices = NULL, multiple = TRUE),
                       sliderInput("sliderPY", "Publication Year", min = 1900, max = 2025,
@@ -728,11 +767,12 @@ body <- dashboardBody(
                         choices = character(0),  
                         selected = NULL)
                   )
-                ),
-                
+                )),
+                column(3,
                 fluidRow(
-                  box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "primary",
-                      fileInput("journal_list_upload", "Upload List of Journals"),
+                  box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "success",
+                      fileInput("journal_list_upload", "Upload List of Journals", accept = c(".txt", ".csv",".xlsx")),
+                      uiOutput("journal_list_ui"),
                       #uiOutput("journal_select_ui"),
                       selectInput("bradfordSources", "Source by Bradford Law Zones",
                                   choices = c(
@@ -742,10 +782,10 @@ body <- dashboardBody(
                                   ),
                                   selected = "all")
                   )
-                ),
-                
+                )),
+                column(3,
                 fluidRow(
-                  box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "primary",
+                  box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "warning",
                       selectInput("region", "Region", 
                                   choices = c(
                                     "Africa" = "AFRICA",
@@ -765,17 +805,16 @@ body <- dashboardBody(
                         choices = character(0),  
                         selected = NULL)
                   )
-                ),
-                
+                )),
+                column(3,
                 fluidRow(
-                  box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "primary",
+                  box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "danger",
                       sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
                       sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
                   )
                 )
               )
             )
-          )
         ),
       tabPanel(
         "Info & References",

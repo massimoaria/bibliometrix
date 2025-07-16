@@ -1,5 +1,11 @@
 # bibliometrix (development version)
 
+Features:
+
+Changes:
+* Biblioshiny - Added check and automatic update for imported packages: curl package (>= 6.3.0)
+
+
 # bibliometrix v.5.1.0 (Release date: 2025-07-15)
 
 Features:

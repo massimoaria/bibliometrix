@@ -45,7 +45,7 @@ libraries <- function() {
       if (is_windows) {
         install.packages(pkg)
       } else {
-        pak::pkg_install(pkg)
+        pak::pkg_install(pkg, ask= FALSE)
       }
     }
     

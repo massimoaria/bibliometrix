@@ -1,3 +1,5 @@
+# bibliometrix (development version)
+
 # bibliometrix v.5.1.0 (Release date: 2025-07-15)
 
 Features:

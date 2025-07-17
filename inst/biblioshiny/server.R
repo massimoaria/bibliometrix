@@ -1294,6 +1294,60 @@ To ensure the functionality of Biblioshiny,
 
   })
   
+  #### Journal Ranking list ----
+  observeEvent(input$journal_ranking_upload, {
+    req(input$journal_ranking_upload)
+    # Load the journal ranking data
+    ranking <- read_journal_ranking(input$journal_ranking_upload$datapath)
+    values$journal_ranking <- ranking
+    shinyjs::show("journal_ranking_subset")
+  })
+  
+  output$journal_ranking_ui <- renderUI({
+    req(values$journal_ranking)
+    ranking <- values$journal_ranking %>% select("Ranking") %>% pull() %>% unique()
+    selectInput("journal_ranking_subset", "Select a Ranking Subset",
+                choices = ranking,
+                selected = ranking,
+                multiple = TRUE)
+    
+  })
+  
+  output$journal_ranking_ui_view <- renderUI({
+    req(input$journal_ranking_upload)
+    div(id = "journal_ranking_helptext", 
+        helpText("Journal Ranking list loaded. Now it will be used to filter the results.", style = "color:#dc3545"),
+        div(align = "center",
+            actionBttn(
+              inputId = "viewRankingJournals", label = strong("View Ranking"),
+              width = "50%", style = "pill", color = "primary", size="s",
+              icon = icon(name = "eye", lib = "font-awesome")
+            )),
+        br()
+    )
+  })
+  
+  observeEvent(input$viewRankingJournals,{
+    journal_ranking_html <- paste0("<ul style='padding-left: 20px;'>",
+                                paste0("<li>", values$journal_ranking$Ranking, " -- ", stringi::stri_trans_totitle(values$journal_ranking$SO) ,"</li>", collapse = ""),
+                                "</ul>")
+    
+    content_html <- paste0(
+      "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
+      journal_ranking_html,
+      "</div>"
+    )
+    
+    
+    shinyWidgets::show_alert(
+      title = "Journal Ranking List",
+      text = HTML(content_html),
+      type = "info",
+      html = TRUE,
+      btn_labels = "OK"
+    )
+  })
+  
   #### Update Filter Inputs ----
   observe({
     req(values$Morig) 
@@ -1354,6 +1408,9 @@ To ensure the functionality of Biblioshiny,
     shinyjs::reset("journal_list_upload")
     shinyjs::hide("journal_list_helptext")
     values$journal_list <- unique(values$Morig$SO)
+    shinyjs::reset("journal_ranking_upload")
+    shinyjs::hide("journal_ranking_subset")
+    shinyjs::hide("journal_ranking_helptext")
     
     if (!"TCpY" %in% names(values$Morig)){
       values$Morig <- values$Morig %>% 
@@ -1381,6 +1438,7 @@ To ensure the functionality of Biblioshiny,
     CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
     updateMultiInput(session, "country", choices = unique(CO), selected = CO)
     updateSelectInput(session, "bradfordSources",selected = "all")
+    if (!is.null(values$journal_ranking)) updateSelectInput(session, "journal_raking_subset",selected = values$journal_ranking %>% select("Ranking") %>% pull() %>% unique())
     updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
     updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
                       max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
@@ -1403,6 +1461,14 @@ To ensure the functionality of Biblioshiny,
     if (!is.null(values$journal_list)){
       M <- M %>% 
         dplyr::filter(SO %in% values$journal_list) # filter by journal list
+    }
+    
+    if (inherits(values$journal_ranking,"data.frame")){
+      soR <- values$journal_ranking %>%
+        dplyr::filter(Ranking %in% input$journal_ranking_subset) %>%
+        pull(SO) %>% unique()
+      M <- M %>% 
+        dplyr::filter(SO %in% soR) # filter by journal ranking
     }
     
   M <- M %>%

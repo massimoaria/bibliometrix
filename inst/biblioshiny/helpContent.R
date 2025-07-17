@@ -118,7 +118,8 @@ helpContent <- function(){
     
     <h4><strong>2. Journal (J)</strong></h4>
     <ul>
-    <li><strong>Upload List of Journals:</strong> Allows users to upload a custom list of journal titles to restrict the collection accordingly. Accepted file formats: <code>.csv</code>, <code>.txt</code>, and <code>.xlsx</code>. Journal titles must be listed in the first column of the file.</li>
+    <li><strong>Upload a List of Journals:</strong> Allows users to upload a custom list of journal titles to restrict the collection accordingly. Accepted file formats: <code>.csv</code>, <code>.txt</code>, and <code>.xlsx</code>. Journal titles must be listed in the first column of the file.</li>
+    <li><strong>Upload a Journal Ranking List:</strong> Enables users to filter journals based on a predefined ranking system (e.g., Q1–Q4). The uploaded file must be in <code>.csv</code> or <code>.xlsx</code> format and include <strong>two columns with headers</strong>: the first for the journal titles, and the second for the corresponding ranking category.</li>
     <li><strong>Source by Bradford Law Zones:</strong> Enables filtering of journals based on Bradford’s Law.</li>
     </ul>
     

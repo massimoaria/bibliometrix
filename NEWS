@@ -1,7 +1,7 @@
 bibliometrix v.5.1.1 (Release date:)
 
 Features:
-
+* Biblioshiny - Filters - Added the possibility to upload a journal ranking list and filter publications by a ranking subset
 Changes:
 * Biblioshiny - Added check and automatic update for imported packages: curl package (>= 6.3.0)
 

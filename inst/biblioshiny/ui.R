@@ -62,7 +62,7 @@ header <- shinydashboardPlus::dashboardHeader(
             title = "Total downloads from CRAN",  # ← Tooltip 
             icon("cloud-arrow-down", lib="font-awesome"),
             tags$span(
-              HTML(format_abbreviated(total_downloads("bibliometrix"))),
+              HTML(suppressWarnings(format_abbreviated(total_downloads("bibliometrix")))),
               style = "margin-left: 5px; font-weight: bold;"
             )
           )
@@ -770,10 +770,14 @@ body <- dashboardBody(
                 )),
                 column(3,
                 fluidRow(
-                  box(title = "2. Journal", width = 12, solidHeader = TRUE, status = "success",
-                      fileInput("journal_list_upload", "Upload List of Journals", accept = c(".txt", ".csv",".xlsx")),
+                  box(title = "2. (J) Journal", width = 12, solidHeader = TRUE, status = "success",
+                      fileInput("journal_list_upload", "Upload a List of Journals", accept = c(".txt", ".csv",".xlsx")),
                       uiOutput("journal_list_ui"),
-                      #uiOutput("journal_select_ui"),
+                      br(),
+                      fileInput("journal_ranking_upload", "Upload a Journal Ranking List", accept = c(".csv",".xlsx")),
+                      uiOutput("journal_ranking_ui"),
+                      uiOutput("journal_ranking_ui_view"),
+                      br(),
                       selectInput("bradfordSources", "Source by Bradford Law Zones",
                                   choices = c(
                                     "Core Sources" = "core",
@@ -785,7 +789,7 @@ body <- dashboardBody(
                 )),
                 column(3,
                 fluidRow(
-                  box(title = "3. Author's Country", width = 12, solidHeader = TRUE, status = "warning",
+                  box(title = "3. (AU) Author's Country", width = 12, solidHeader = TRUE, status = "warning",
                       selectInput("region", "Region", 
                                   choices = c(
                                     "Africa" = "AFRICA",
@@ -808,7 +812,7 @@ body <- dashboardBody(
                 )),
                 column(3,
                 fluidRow(
-                  box(title = "4. Documents", width = 12, solidHeader = TRUE, status = "danger",
+                  box(title = "4. (DOC) Documents", width = 12, solidHeader = TRUE, status = "danger",
                       sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
                       sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
                   )

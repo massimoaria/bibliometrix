@@ -1,38 +1,39 @@
 # bibliometrix (development version)
 
 Features:
+* Biblioshiny – Filters: Added the ability to upload a journal ranking list and filter publications based on selected rankings.
 
 Changes:
-* Biblioshiny - Added check and automatic update for imported packages: curl package (>= 6.3.0)
+* Biblioshiny: Introduced automatic checks and updates for required packages, such as curl (version ≥ 6.3.0).
 
 
 # bibliometrix v.5.1.0 (Release date: 2025-07-15)
 
 Features:
 * rpys(): 
-    - Added the possibility to choose between two different median window approaches (centered or backward)
-    - Added the algorithm to identify citation sequences and influencial references ("Hot papers", "Constant Performers", "Life Cycles", and "Sleeping Beauty")
-    - Added these results also in Biblioshiny outputs.
+    - Introduced two options for the median window: centered and backward.
+    - Implemented an algorithm to detect citation sequences and influential references ("Hot Papers", "Constant Performers", "Life Cycles", and "Sleeping Beauties").
+    - These results are now also included in Biblioshiny outputs.
 * Biblioshiny:
-    - Added Animated Diachronic Networks in Conceptual and Social Structures.
-    - The Filters menu has been completely redesigned. It now follows a J-AU-DOC approach and includes many more filters (such as Countries, Journals, Citations).
+    - Added animated diachronic networks to Conceptual and Social Structure analyses.
+    - Completely redesigned the Filters panel using a J-AU-DOC framework, now supporting a broader range of filters (e.g., Countries, Journals, Citations).
 * Biblio AI: 
-    - Improved prompt lists
-    - Added new Gemini models (2.5 Flash and Flash-lite)
+    - Enhanced prompt templates.
+    - Integrated new Gemini models (2.5 Flash and Flash-lite).
     
 Changes:
-* Solved issue in mergeDbSources(). Now when merging files from a single db, the function preserves the cited reference field
-* Added automatic conversion of country ISO2 to country names for OpenAlex data in convert2df()
+* Fixed an issue in mergeDbSources(): the function now preserves the cited references field when merging files from a single database.
+* convert2df() now automatically converts ISO2 country codes to full country names for OpenAlex data.
     
 
 # bibliometrix v.5.0.1 
 
 Features:
-* Added a new function mergeKeywords() to merge DE and ID keywords in a new column 'KW_Merged'
+* Introduced mergeKeywords(), a new function that combines DE and ID keywords into a single field named KW_Merged.
 
 Changes:
-* Solved several issues in biblioshiny()
-* The following functions have been modified to work with merged keywords (field 'KW_Merged'): 
+* Resolved various issues in biblioshiny().
+* Updated the following functions to work with the new KW_Merged field:
   - tableTag()
   - cocMatrix()
   - biblioNetwork()
@@ -45,7 +46,6 @@ Changes:
 # bibliometrix v.5.0.0
 
 Features:
-* Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.
-
+* Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant to support your science mapping analyses.
 Changes:
-* Solved several issues in biblioshiny()
+* Resolved multiple issues in biblioshiny().

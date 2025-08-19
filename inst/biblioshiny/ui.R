@@ -62,7 +62,7 @@ header <- shinydashboardPlus::dashboardHeader(
             title = "Total downloads from CRAN",  # ← Tooltip 
             icon("cloud-arrow-down", lib="font-awesome"),
             tags$span(
-              HTML(format_abbreviated(total_downloads("bibliometrix"))),
+              HTML(suppressWarnings(format_abbreviated(total_downloads("bibliometrix")))),
               style = "margin-left: 5px; font-weight: bold;"
             )
           )

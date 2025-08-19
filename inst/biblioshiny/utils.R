@@ -2,7 +2,7 @@
 
 # Number format abbreviated
 format_abbreviated <- function(x) {
-  if (is.na(x)) return(NA)
+  if (is.na(x)) return("--")
   if (x >= 1e6) {
     return(paste0(format(round(x / 1e6, 2), nsmall = 2), "M"))
   } else if (x >= 1e3) {
@@ -20,8 +20,8 @@ total_downloads <- function(pkg_name="bibliometrix", from="2016-01-01", to=Sys.D
   # Returns:
   #   Total number of downloads as an integer
   
-  if (!is_online()){
-    return("--")
+  if (!is_Online()){
+    return(NA)
   }
   
   #today <- Sys.Date()
@@ -31,18 +31,27 @@ total_downloads <- function(pkg_name="bibliometrix", from="2016-01-01", to=Sys.D
   
   url <- paste0("https://cranlogs.r-pkg.org/downloads/total/",from,":",to,"/", pkg_name)
   
+  if (!is_Online(timeout = 1, url)){
+    return(NA)
+  }
+  
   json_text <- tryCatch({
     readLines(url, warn = FALSE)
   }, error = function(e) {
-    stop("Error fetching data from CRAN logs: ", e$message)
+    return(NA)
   })
+  
+  # Se già nel tryCatch è tornato "NA", esci subito
+  if (identical(json_text, "NA")) {
+    return(NA)
+  }
   
   # Extract the number manually (not robust)
   txt <- unlist(strsplit(json_text, ","))
   txt <- txt[grepl("downloads", txt)]
   
   if (length(txt) == 0) {
-    return(0)
+    return(NA)
   }
   
   downloads <- gsub("[^0-9]", "", txt)
@@ -680,8 +689,8 @@ notifications <- function() {
   return(notifTot)
 }
 
-is_online <- function(timeout = 3) {
-  RCurl::url.exists("www.bibliometrix.org", timeout = timeout)
+is_Online <- function(timeout = 3, url = "https://www.bibliometrix.org") {
+  RCurl::url.exists(url, timeout = timeout)
 }
 
 initial <- function(values) {

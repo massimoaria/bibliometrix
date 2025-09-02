@@ -32,7 +32,7 @@ libraries <- function() {
       if (!is.na(min_ver)) {
         installed_ver <- as.character(packageVersion(pkg))
         if (compareVersion(installed_ver, min_ver) < 0) {
-          message(sprintf("La versione installata di '%s' (%s) è inferiore alla richiesta (%s).", 
+          message(sprintf("The installed version of '%s' (%s) is lower than the required (%s).", 
                           pkg, installed_ver, min_ver))
           need_install <- TRUE
         }
@@ -68,48 +68,6 @@ libraries <- function() {
   
   return(all_ok)
 }
-
-
-# libraries <- function() {
-#   is_windows <- tolower(Sys.info()[["sysname"]]) == "windows"
-#   if (!is_windows & !require(pak, quietly = TRUE)) {
-#     install.packages("pak")
-#     if (!require(pak, quietly = TRUE)) return(FALSE)
-#   }
-#   
-#   all_ok <- TRUE
-#   
-#   safe_install <- function(pkg) {
-#     success <- require(pkg, character.only = TRUE, quietly = TRUE)
-#     if (!success) {
-#       if (is_windows) {
-#         install.packages(pkg)
-#       } else {
-#         
-#         pak::pkg_install(pkg)
-#       }
-#       success <- require(pkg, character.only = TRUE, quietly = TRUE)
-#     }
-#     return(success)
-#   }
-# 
-#   pkgs <- c(
-#     "httr2", "base64enc", "bibliometrix", "zip", "shiny", "igraph", "DT", 
-#     "ggplot2", "wordcloud2", "ggmap", "maps", 
-#     "visNetwork", "plotly", "fontawesome", "shinydashboardPlus", 
-#     "shinydashboard", "shinyjs", "curl (>= 6.3.0)","RCurl", "openxlsx", "shinyWidgets", 
-#     "chromote", "pagedown", "Matrix", "dimensionsR", "pubmedR", 
-#     "dplyr", "tidyr", "sparkline", "tidygraph", "ggraph"
-#   )
-# 
-#   suppressPackageStartupMessages({
-#     results <- vapply(pkgs, safe_install, logical(1))
-#     all_ok <- all(results)
-#   })
-#   
-#   return(all_ok)
-# }
-
 
 messageItem2 <- function(from, message, icon = shiny::icon("user"), time = NULL,
                          href = NULL, inputId = NULL) {

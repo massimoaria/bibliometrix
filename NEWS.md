@@ -1,5 +1,9 @@
 # bibliometrix (development version)
 
+# bibliometrix 5.1.1
+
+# bibliometrix V.5.1.1 (Release date: 2025-09-02)
+
 Features:
 * Biblioshiny – Filters: Added the ability to upload a journal ranking list and filter publications based on selected rankings.
 

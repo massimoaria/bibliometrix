@@ -5367,7 +5367,7 @@ To ensure the functionality of Biblioshiny,
         label = "Select the Gemini Model",
         choices = c(
           "Gemini 2.5 Flash" = "2.5-flash",
-          "Gemini 2.5 Flash Lite Preview 06-17" = "2.5-flash-lite-preview-06-17",
+          "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
           "Gemini 2.0 Flash" = "2.0-flash",
           "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
           "Gemini 1.5 Flash" = "1.5-flash",
@@ -5383,7 +5383,7 @@ To ensure the functionality of Biblioshiny,
                     "Latency time: High"))
       ),
       conditionalPanel(
-        condition = "input.gemini_api_model == '2.5-flash-lite-preview-06-17'",
+        condition = "input.gemini_api_model == '2.5-flash-lite'",
         helpText(strong("Free Tier Rate Limits:")),
         helpText(em("Request per Minutes: 15", tags$br(),
                     "Requests per Day: 500", tags$br(),

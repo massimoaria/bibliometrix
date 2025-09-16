@@ -246,7 +246,8 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
     div(
       id = "typing-box",
       style = "white-space: pre-wrap; background-color:#f9f9f9; padding:15px; border:1px solid #ccc; border-radius:5px; max-height:400px; overflow-y: auto;",
-      HTML(text_to_html(content))
+      #HTML(text_to_html(content))
+      HTML(gemini_to_html(content))
     ),
     br(),
     em("You can modify or enrich the proposed prompt with additional context or details about your analysis to help 'Biblio AI' generate a more accurate and meaningful interpretation."),
@@ -844,80 +845,196 @@ copy_to_clipboard <- function(x) {
   }
 }
 
-# convert gemini output to HTML
-text_to_html <- function(input_text) {
-  input_text <- c(input_text,"\n")
-  # Escape HTML special characters
-  escape_html <- function(text) {
-    text <- gsub("&", "&amp;", text)
-    text <- gsub("<", "&lt;", text)
-    text <- gsub(">", "&gt;", text)
-    text
-  }
+## New function to convert gemini output as HTML blocks
+gemini_to_html <- function(text) {
+  # Remove original leading/trailing whitespace
+  text <- trimws(text)
   
-  # Convert markdown-style bold (**text**) to <strong>
-  convert_bold <- function(text) {
-    gsub("\\*\\*(.*?)\\*\\*", "<strong>\\1</strong>", text)
-  }
+  # Divide text into lines
+  lines <- unlist(strsplit(text, "\n", fixed = TRUE))
   
-  # Process each paragraph
-  paragraphs <- unlist(strsplit(input_text, "\n\n"))
-  html_paragraphs <- lapply(paragraphs, function(p) {
-    lines <- unlist(strsplit(p, "\n"))
-    lines <- sapply(lines, escape_html) # escape special characters
-    lines <- sapply(lines, convert_bold) # convert **bold**
+  # Remove rows
+  lines <- lines[lines != ""]
+  
+  # Initialize HTML output with CSS styles
+  html_lines <- c(
+    "<div style='font-family: Arial, sans-serif; line-height: 1.3; margin: 0 auto; padding: 20px;" # max-width: 800px; '>"
+  )
+  in_list <- FALSE
+  list_type <- ""
+  
+  for (i in 1:length(lines)) {
+    line <- trimws(lines[i])
     
-    if (all(grepl("^\\*\\s+", lines))) {
-      # Convert to unordered list
-      lines <- gsub("^\\*\\s+", "", lines)
-      items <- paste0("<li>", lines, "</li>", collapse = "\n")
-      return(paste0("<ul>\n", items, "\n</ul>"))
-    } else {
-      # Regular paragraph
-      return(paste0("<p>", paste(lines, collapse = "<br/>"), "</p>"))
+    # jump empty lines
+    if (line == "") {
+      next
     }
-  })
+    
+    # Title management (lines enclosed in **)
+    if (stringr::str_detect(line, "^\\*\\*[^*]+\\*\\*$")) {
+      # Chiudi eventuali liste aperte
+      if (in_list) {
+        if (list_type == "ul") {
+          html_lines <- c(html_lines, "</ul>")
+        } else {
+          html_lines <- c(html_lines, "</ol>")
+        }
+        in_list <- FALSE
+      }
+      
+      # Convert titles
+      title_text <- stringr::str_replace_all(line, "^\\*\\*(.+)\\*\\*$", "\\1")
+      html_lines <- c(html_lines, paste0("<h3 style='color: #333; border-bottom: 2px solid #007acc; padding-bottom: 5px; margin-bottom: 10px; margin-top: 20px;'>", title_text, "</h3>"))
+      next
+    }
+    
+    # Managing bulleted lists (starting with *)
+    if (stringr::str_detect(line, "^\\s*\\*\\s+")) {
+      # Se non siamo già in una lista puntata, iniziala
+      if (!in_list || list_type != "ul") {
+        if (in_list && list_type == "ol") {
+          html_lines <- c(html_lines, "</ol>")
+        }
+        html_lines <- c(html_lines, "<ul style='margin-bottom: 10px; margin-top: 5px;'>")
+        in_list <- TRUE
+        list_type <- "ul"
+      }
+      
+      # Remove the asterisk and format the content
+      item_text <- stringr::str_replace(line, "^\\s*\\*\\s+", "")
+      item_text <- format_inline_text(item_text)
+      html_lines <- c(html_lines, paste0("<li style='margin-bottom: 3px;'>", item_text, "</li>"))
+      next
+    }
+    
+    # Managing numbered lists (starting with a number followed by a period)
+    if (stringr::str_detect(line, "^\\s*\\d+\\.\\s+")) {
+      # Se non siamo già in una lista numerata, iniziala
+      if (!in_list || list_type != "ol") {
+        if (in_list && list_type == "ul") {
+          html_lines <- c(html_lines, "</ul>")
+        }
+        html_lines <- c(html_lines, "<ol style='margin-bottom: 10px; margin-top: 5px;'>")
+        in_list <- TRUE
+        list_type <- "ol"
+      }
+      
+      # Remove the number and format the content
+      item_text <- stringr::str_replace(line, "^\\s*\\d+\\.\\s+", "")
+      item_text <- format_inline_text(item_text)
+      html_lines <- c(html_lines, paste0("<li style='margin-bottom: 3px;'>", item_text, "</li>"))
+      next
+    }
+    
+    # If we get here and we're on a list, let's close it.
+    if (in_list) {
+      if (list_type == "ul") {
+        html_lines <- c(html_lines, "</ul>")
+      } else {
+        html_lines <- c(html_lines, "</ol>")
+      }
+      in_list <- FALSE
+    }
+    
+    # Normal paragraph management
+    formatted_line <- format_inline_text(line)
+    html_lines <- c(html_lines, paste0("<p style='margin-bottom: 8px;'>", formatted_line, "</p>"))
+  }
   
-  # Combine all HTML parts
-  html_body <- paste(html_paragraphs, collapse = "\n\n")
-  html <- paste0("<html>\n<body>\n", html_body, "\n</body>\n</html>")
-  html <- gsub("\n","",html)
-  return(html)
+  # Close any lists that remain open
+  if (in_list) {
+    if (list_type == "ul") {
+      html_lines <- c(html_lines, "</ul>")
+    } else {
+      html_lines <- c(html_lines, "</ol>")
+    }
+  }
+  
+  # Close the container div
+  html_lines <- c(html_lines, "</div>")
+  
+  # Merge all rows
+  html_result <- paste(html_lines, collapse = "\n")
+  
+  return(html_result)
 }
 
-# From HTML to text Blocks 
-html_to_blocks <- function(raw_html){
-  html_body <- sub(".*<body[^>]*>", "", raw_html)
-  html_body <- sub("</body>.*", "", html_body)
+# Auxiliary function for formatting inline text
+format_inline_text <- function(text) {
+  # Bold management (**text**)
+  text <- stringr::str_replace_all(text, "\\*\\*([^*]+)\\*\\*", "<strong>\\1</strong>")
   
-  blocks <- stringr::str_split(
-    html_body,
-    "(?=<p|<ul|<ol|<li|<h[1-6]|<blockquote|<pre|<table|<div)",
-    simplify = FALSE
-  )[[1]]
+  # Cursive management (*text*) - only if it is not already in bold
+  text <- stringr::str_replace_all(text, "(?<!\\*)\\*([^*]+)\\*(?!\\*)", "<em>\\1</em>")
   
-  blocks <- trimws(blocks)
-  blocks <- blocks[nzchar(blocks)]
+  # Handling text in quotation marks as inline code (“text”)
+  text <- stringr::str_replace_all(text, '"([^"]+)"', '<code style="background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: \'Courier New\', monospace;">\\1</code>')
+  
+  # Handling parentheses with percentages or numerical values
+  text <- stringr::str_replace_all(text, "\\(([^)]*%[^)]*)\\)", "<span style='color: #007acc; font-weight: bold;'>(\\1)</span>")
+  
+  return(text)
 }
 
-# Peaks identification in RPYS
-# rpysPeaks <- function(res, n=10){
-#   df_peaks <- res$rpysTable %>%
-#     arrange(Year) %>%
-#     mutate(
-#       is_peak = (diffMedian5 > lag(diffMedian5)) & (diffMedian5 > lead(diffMedian5))
-#     ) %>%
-#     filter(is_peak) %>%
-#     arrange(desc(diffMedian5)) %>%
-#     slice_head(n = n)  
+
+# # convert gemini output to HTML
+# text_to_html <- function(input_text) {
+#   input_text <- c(input_text,"\n")
+#   # Escape HTML special characters
+#   escape_html <- function(text) {
+#     text <- gsub("&", "&amp;", text)
+#     text <- gsub("<", "&lt;", text)
+#     text <- gsub(">", "&gt;", text)
+#     text
+#   }
 #   
-#   df2 <- res$CR %>% 
-#     group_by(Year) %>% 
-#     slice_max(Freq, n=3) %>% 
-#     filter(Year %in% df_peaks$Year)
+#   # Convert markdown-style bold (**text**) to <strong>
+#   convert_bold <- function(text) {
+#     gsub("\\*\\*(.*?)\\*\\*", "<strong>\\1</strong>", text)
+#   }
 #   
-#   return(peaks=df2)
+#   # Process each paragraph
+#   paragraphs <- unlist(strsplit(input_text, "\n\n"))
+#   html_paragraphs <- lapply(paragraphs, function(p) {
+#     lines <- unlist(strsplit(p, "\n"))
+#     lines <- sapply(lines, escape_html) # escape special characters
+#     lines <- sapply(lines, convert_bold) # convert **bold**
+#     
+#     if (all(grepl("^\\*\\s+", lines))) {
+#       # Convert to unordered list
+#       lines <- gsub("^\\*\\s+", "", lines)
+#       items <- paste0("<li>", lines, "</li>", collapse = "\n")
+#       return(paste0("<ul>\n", items, "\n</ul>"))
+#     } else {
+#       # Regular paragraph
+#       return(paste0("<p>", paste(lines, collapse = "<br/>"), "</p>"))
+#     }
+#   })
+#   
+#   # Combine all HTML parts
+#   html_body <- paste(html_paragraphs, collapse = "\n\n")
+#   html <- paste0("<html>\n<body>\n", html_body, "\n</body>\n</html>")
+#   html <- gsub("\n","",html)
+#   return(html)
 # }
+# 
+# # From HTML to text Blocks 
+# html_to_blocks <- function(raw_html){
+#   html_body <- sub(".*<body[^>]*>", "", raw_html)
+#   html_body <- sub("</body>.*", "", html_body)
+#   
+#   blocks <- stringr::str_split(
+#     html_body,
+#     "(?=<p|<ul|<ol|<li|<h[1-6]|<blockquote|<pre|<table|<div)",
+#     simplify = FALSE
+#   )[[1]]
+#   
+#   blocks <- trimws(blocks)
+#   blocks <- blocks[nzchar(blocks)]
+# }
+
+
 
 # Thematic Map top 3 documents for each cluster
 doc2clust <- function(res, n=3){

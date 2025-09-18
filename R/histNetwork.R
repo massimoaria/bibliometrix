@@ -3,7 +3,7 @@ utils::globalVariables(c(
   "AU", "Page.start", "Page.end", "PP", "SR", "Included",
   "PP.y", "PP.x", "toRemove", "SR_cited", "LCS", "SR_FULL",
   "TI", "DE", "ID", "DI", "Year", "SR_citing", "ref", "n",
-  "id_oa", "UT", "PY"
+  "id_oa", "UT", "PY","TI_clean","CR_clean","is_match", "cited_SR", "citing_SR"
 ))
 #' Historical co-citation network
 #'
@@ -219,50 +219,19 @@ wos <- function(M, min.citations, sep, network, verbose) {
 }
 
 # New algorithm for Scopus
-# Local citation matching is based on First Author, Year and PP
 scopus <- function(M, min.citations, sep, network, verbose) {
   if (!("SR_FULL" %in% names(M))) {
     M <- metaTagExtraction(M, Field = "SR")
   }
+  
+  CR <- match_citations_fast(
+    titles_df=M %>% select(SR,TI),
+    references_df=M %>% select(SR,CR)
+  )
 
-  CR <- strsplit(M$CR, ";")
-
-  CR <- data.frame(SR_citing = rep(M$SR, lengths(CR)), ref = trimws(unlist(CR)))
-
-  CR$PY <- as.numeric(gsub(".*\\((\\d{4})\\).*", "\\1", CR$ref))
-
-  CR$AU <- trimws(gsub("\\.", "", gsub("\\. ", "", gsub("^(.*?),.*$", "\\1", CR$ref))))
-
-  CR$PP <- gsub(".*PP\\. ([0-9-]+).*", "\\1", CR$ref)
-
-  CR <- CR %>%
-    dplyr::filter(!is.na(PY), (substr(CR$PP, 1, 1) %in% 0:9))
-
-  M_merge <- M %>%
-    select(AU, PY, Page.start, Page.end, PP, SR) %>%
-    mutate(
-      AU = trimws(gsub("\\.", "", gsub("\\. ", "", gsub("^(.*?),.*$", "\\1", SR)))),
-      Page.start = as.numeric(Page.start),
-      Page.end = as.numeric(Page.end),
-      PP = ifelse(!is.na(Page.start), paste0(Page.start, "-", Page.end), NA),
-      Included = TRUE
-    ) %>%
-    rename(SR_cited = SR)
-
-  CR <- CR %>%
-    left_join(M_merge, join_by("PY", "AU"), relationship = "many-to-many") %>%
-    dplyr::filter(!is.na(Included)) %>%
-    group_by(PY, AU) %>%
-    mutate(toRemove = ifelse(!is.na(PP.y) & PP.x != PP.y, TRUE, FALSE)) %>% # to remove FALSE POSITIVE
-    ungroup() %>%
-    dplyr::filter(toRemove != TRUE) %>%
-    mutate(toRemove = ifelse(!is.na(PP.x) & is.na(PP.y), TRUE, FALSE)) %>%
-    dplyr::filter(toRemove != TRUE)
-
-  LCS <- CR %>%
+  LCS <- CR %>% 
     group_by(SR_cited) %>%
     count(name = "LCS")
-
 
   M <- M %>%
     left_join(LCS, by = c("SR" = "SR_cited")) %>%
@@ -458,4 +427,86 @@ lens <- function(M, min.citations = min.citations, sep = sep, network = network,
         replace_na(list(LCS = 0)),
       LCS = M$LCS
     )
+}
+
+# Funzione alternativa più veloce per dataset molto grandi
+# match_citations_fast <- function(titles_df, references_df) {
+#   
+#   # Normalizza
+#   titles_norm <- titles_df %>%
+#     mutate(TI_clean = normalize_text(TI))
+#   
+#   refs_norm <- references_df %>%
+#     mutate(CR_clean = normalize_text(CR))
+#   
+#   # Crea una matrice di matching usando stringdist
+#   results <- expand_grid(
+#     SR_cited = titles_norm$SR,
+#     SR_citing = refs_norm$SR
+#   ) %>%
+#     left_join(titles_norm %>% select(SR, TI_clean), by = c("SR_cited" = "SR")) %>%
+#     left_join(refs_norm %>% select(SR, CR_clean), by = c("SR_citing" = "SR")) %>%
+#     mutate(
+#       is_match = str_detect(CR_clean, fixed(TI_clean))
+#     ) %>%
+#     filter(is_match) %>%
+#     select(SR_cited, SR_citing)
+#   
+#   return(results)
+# }
+# 
+# # Funzione to normalize text
+# normalize_text <- function(text) {
+#   text %>%
+#     str_to_upper() %>%
+#     str_replace_all("[^A-Z0-9\\s]", " ") %>%
+#     str_squish()
+# }
+match_citations_fast <- function(titles_df, references_df) {
+  
+  # Normalizza i titoli
+  titles_norm <- titles_df %>%
+    dplyr::mutate(TI_clean = stringr::str_to_upper(TI) %>%
+                    stringr::str_replace_all("[^A-Z0-9\\s]", " ") %>%
+                    stringr::str_squish())
+  
+  # Normalizza le bibliografie
+  refs_norm <- references_df %>%
+    dplyr::mutate(CR_clean = stringr::str_to_upper(CR) %>%
+                    stringr::str_replace_all("[^A-Z0-9\\s]", " ") %>%
+                    stringr::str_squish())
+  
+  # Crea tutte le possibili combinazioni
+  all_combinations <- tidyr::expand_grid(
+    cited_SR = titles_norm$SR,
+    citing_SR = refs_norm$SR
+  )
+  
+  # Aggiungi i titoli normalizzati
+  all_combinations <- dplyr::left_join(
+    all_combinations, 
+    titles_norm %>% dplyr::select(SR, TI_clean), 
+    by = c("cited_SR" = "SR")
+  )
+  
+  # Aggiungi le bibliografie normalizzate
+  all_combinations <- dplyr::left_join(
+    all_combinations,
+    refs_norm %>% dplyr::select(SR, CR_clean), 
+    by = c("citing_SR" = "SR")
+  )
+  
+  # Trova i match
+  all_combinations$is_match <- stringr::str_detect(
+    all_combinations$CR_clean, 
+    stringr::fixed(all_combinations$TI_clean)
+  )
+  
+  # Filtra solo i match
+  matches <- all_combinations %>%
+    dplyr::filter(is_match) %>%
+    dplyr::select(cited_SR, citing_SR) %>% 
+    rename("SR_cited" = cited_SR, "SR_citing" = citing_SR)
+  
+  return(matches)
 }

@@ -79,6 +79,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 # #' @import shinycssloaders
 # #' @import shinythemes
 #' @importFrom openxlsx write.xlsx
+#' @importFrom tidyr expand_grid
 #' @importFrom tidyr gather
 #' @importFrom tidyr spread
 #' @importFrom tidyr pivot_wider
@@ -263,6 +264,10 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom Matrix updown
 #' @importFrom Matrix which
 #' @importFrom Matrix writeMM
+#' @importFrom stringr str_detect
+#' @importFrom stringr fixed
+#' @importFrom stringr str_to_upper
+#' @importFrom stringr str_squish
 #' @importFrom stringr str_locate_all
 #' @importFrom stringr str_extract_all
 #' @importFrom stringr str_replace_all

@@ -290,6 +290,16 @@ watchEmoji <- function(i) {
   emoji[i]
 }
 
+## RESET MODAL DIALOG INPUTS
+resetModalButtons <- function(session) {
+  session$sendCustomMessage("button_id", "null")
+  session$sendCustomMessage("button_id2", "null")
+  # session$sendCustomMessage("click", "null")
+  # session$sendCustomMessage("click-dend", "null")
+  # runjs("Shiny.setInputValue('plotly_click-A', null);")
+  return(session)
+}
+
 
 # DATA TABLE FORMAT ----
 DTformat <- function(
@@ -311,7 +321,8 @@ DTformat <- function(
   escape = FALSE,
   selection = FALSE,
   scrollX = FALSE,
-  scrollY = FALSE
+  scrollY = FALSE,
+  summary = FALSE
 ) {
   if ("text" %in% names(df)) {
     df <- df %>%
@@ -340,6 +351,23 @@ DTformat <- function(
       targets = 0:(length(names(df)) - 1)
     ))
   }
+  
+  # Summary Button
+  if (summary=="documents" & "Paper" %in% names(df)) {
+    df <- df %>%
+      mutate(Summary = paste0('<button id="custom_btn" onclick="Shiny.onInputChange(\'button_id\', \'', Paper, '\')">▶️</button>')) %>%
+      select(Summary, everything())
+  } else if (summary=="historiograph" & "Paper" %in% names(df)) {
+    df <- df %>%
+      mutate(Summary = paste0('<button id="custom_btn" onclick="Shiny.onInputChange(\'button_id\', \'', SR, '\')">▶️</button>')) %>%
+      select(Summary, everything()) %>% 
+      select(-SR)
+  } else if (summary=="authors" & "Author" %in% names(df)) {
+    df <- df %>%
+      mutate(Bio = paste0('<button id="custom_btn2" onclick="Shiny.onInputChange(\'button_id2\', \'', Author, '\')">▶️</button>')) %>%
+      select(Bio, everything())
+  }
+  
   if (isTRUE(button)) {
     if (isTRUE(pagelength)) {
       buttons <- list(
@@ -583,6 +611,258 @@ strSynPreview <- function(string) {
   )
   HTML(paste("<pre>", "File Preview: ", str1, "</pre>", sep = "<br/>"))
 }
+
+### AUTHOR BIO SKETCH ----
+create_author_bio_card <- function(author_data, 
+                                   width = "100%", 
+                                   show_trends = TRUE, 
+                                   show_topics = TRUE,
+                                   max_topics = 5) {
+  
+  # Extract key information safely
+  author_name <- author_data$display_name[1] %||% "Unknown Author"
+  institution <- author_data$primary_affiliation[1] %||% 
+    author_data$last_known_institutions[[1]]$display_name[1] %||% 
+    "Institution not available"
+  institution_ror <- author_data$primary_affiliation_ror[1] %||% 
+    author_data$last_known_institutions[[1]]$ror[1] %||% NA
+  country <- author_data$primary_affiliation_country[1] %||%
+    author_data$last_known_institutions[[1]]$country_code[1] %||% 
+    "Country not available"
+  
+  works_count <- author_data$works_count[1] %||% 0
+  citations <- author_data$cited_by_count[1] %||% 0
+  h_index <- author_data$h_index[1] %||% 0
+  i10_index <- author_data$i10_index[1] %||% 0
+  mean_citedness <- author_data$`2yr_mean_citedness`[1] %||% 0
+  
+  orcid <- author_data$orcid[1]
+  position_type <- author_data$author_position_type[1] %||% "author"
+  is_corresponding <- author_data$is_corresponding[1] %||% FALSE
+  
+  # Create ORCID link if available
+  orcid_link <- if (!is.null(orcid) && !is.na(orcid)) {
+    tags$a(href = orcid, target = "_blank", 
+           tags$img(src = "ORCID.jpg", 
+                    style = "height: 16px; margin-right: 5px;"),
+           "ORCID Profile",
+           style = "text-decoration: none; color: #338B13;")
+  } else {
+    tags$span("ORCID not available", style = "color: #666;")
+  }
+  
+  # Create OpenAlex link
+  openalex_id <- gsub("https://openalex.org/", "", author_data$id[1])
+  openalex_link <- tags$a(href = paste0("https://openalex.org/", openalex_id), 
+                          target = "_blank",
+                          tags$img(src = "openalex.jpg", 
+                                   style = "height: 16px; margin-right: 5px;"),
+                          "OpenAlex Profile", 
+                          style = "text-decoration: none; color: #E74C3C;")
+  
+  
+  # Format numbers with thousands separator
+  format_number <- function(x) {
+    if (is.null(x) || is.na(x)) return("0")
+    format(x, big.mark = ",", scientific = FALSE)
+  }
+  
+  # Create metrics cards
+  metrics_cards <- fluidRow(
+    column(3,
+           div(class = "metric-card",
+               style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        color: white; padding: 15px; border-radius: 8px; text-align: center;",
+               h4(format_number(works_count), style = "margin: 0; font-size: 24px;"),
+               p("Publications", style = "margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;")
+           )
+    ),
+    column(3,
+           div(class = "metric-card",
+               style = "background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                        color: white; padding: 15px; border-radius: 8px; text-align: center;",
+               h4(format_number(citations), style = "margin: 0; font-size: 24px;"),
+               p("Citations", style = "margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;")
+           )
+    ),
+    column(3,
+           div(class = "metric-card",
+               style = "background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+                        color: white; padding: 15px; border-radius: 8px; text-align: center;",
+               h4(h_index, style = "margin: 0; font-size: 24px;"),
+               p("H-Index", style = "margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;")
+           )
+    ),
+    column(3,
+           div(class = "metric-card",
+               style = "background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); 
+                        color: white; padding: 15px; border-radius: 8px; text-align: center;",
+               h4(round(mean_citedness, 1), style = "margin: 0; font-size: 24px;"),
+               p("2yr Mean Cit.", style = "margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;")
+           )
+    )
+  )
+  
+  # Create publication trend chart if requested
+  trend_chart <- if (show_trends && !is.null(author_data$counts_by_year[[1]])) {
+    counts_data <- author_data$counts_by_year[[1]]
+    recent_data <- counts_data[counts_data$year >= (max(counts_data$year) - 9), ]
+    # Order by year from oldest to newest
+    recent_data <- recent_data[order(recent_data$year), ]
+    
+    tagList(
+      h4("Publication Trends (Last 10 Years)", style = "margin-top: 20px; color: #2C3E50;"),
+      div(style = "height: 200px; background: #f8f9fa; border-radius: 8px; padding: 15px;",
+          # Simple bar chart representation
+          div(style = "display: flex; align-items: end; height: 170px; gap: 3px;",
+              lapply(1:nrow(recent_data), function(i) {
+                height_pct <- (recent_data$works_count[i] / max(recent_data$works_count, na.rm = TRUE)) * 100
+                div(style = paste0("background: linear-gradient(to top, #3498db, #2980b9); 
+                                   height: ", height_pct, "%; 
+                                   width: ", 100/nrow(recent_data) - 1, "%; 
+                                   border-radius: 3px 3px 0 0;
+                                   position: relative;"),
+                    div(style = "position: absolute; bottom: -20px; font-size: 10px; 
+                               width: 100%; text-align: center; color: #666;",
+                        recent_data$year[i]),
+                    div(style = "position: absolute; top: -15px; font-size: 9px; 
+                               width: 100%; text-align: center; color: #333; font-weight: bold;",
+                        recent_data$works_count[i])
+                )
+              })
+          )
+      )
+    )
+  } else NULL
+  
+  # Create research topics section if requested
+  topics_section <- if (show_topics && !is.null(author_data$topics[[1]])) {
+    topics_data <- author_data$topics[[1]]
+    top_topics <- topics_data[topics_data$type == "topic", ][1:min(max_topics, sum(topics_data$type == "topic")), ] %>% 
+      sample_frac(size = 1)
+    
+    # Calculate font sizes based on counts
+    if (nrow(top_topics) > 0) {
+      min_count <- min(top_topics$count, na.rm = TRUE)
+      max_count <- max(top_topics$count, na.rm = TRUE)
+      min_font_size <- 10
+      max_font_size <- 18
+      
+      # Calculate proportional font sizes
+      font_sizes <- if (max_count == min_count) {
+        rep(min_font_size, nrow(top_topics))
+      } else {
+        min_font_size + (top_topics$count - min_count) / (max_count - min_count) * (max_font_size - min_font_size)
+      }
+    }
+    
+    tagList(
+      h4("Main Research Topics", style = "margin-top: 20px; color: #2C3E50;"),
+      div(class = "topics-container",style = "text-align: center;",
+          lapply(1:nrow(top_topics), function(i) {
+            if (!is.na(top_topics$display_name[i]) && !is.na(top_topics$id[i])) {
+              tags$a(
+                href = top_topics$id[i],
+                target = "_blank",
+                class = "topic-badge",
+                style = paste0("display: inline-block; background: ", 
+                               colorlist()[i],
+                               # sample(
+                                 # c("#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6"), 
+                                 # 1),
+                               "; opacity: 0.7; color: white; padding: 5px 10px; margin: 3px; 
+                            border-radius: 15px; font-weight: 500; text-decoration: none;
+                            font-size: ", round(font_sizes[i], 1), "px;"),
+                paste0(top_topics$display_name[i], " (", top_topics$count[i], ")")
+              )
+            }
+          })
+      )
+    )
+  } else NULL
+  
+  institution_link <- tags$a(href = institution_ror, 
+                             target = "_blank",
+                             institution
+                             # ,style = "text-decoration: none; color: #E74C3C;"
+  )
+  
+  # Main card UI
+  div(
+    class = "author-bio-card",
+    style = paste0("width: ", width, "; background: white; 
+                   border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+                   padding: 25px; margin: 15px 0; font-family: 'Segoe UI', Tahoma, sans-serif;"),
+    
+    # Header section
+    div(class = "author-header", style = "border-bottom: 2px solid #ecf0f1; padding-bottom: 20px;",
+        fluidRow(
+          column(8,
+                 h2(author_name, style = "margin: 0 0 10px 0; color: #2C3E50; font-weight: 600;"),
+                 h5(institution_link, style = "margin: 0 0 5px 0; color: #7F8C8D; font-weight: 400;"),
+                 p(paste("📍", country), style = "margin: 0 0 10px 0; color: #95A5A6;")
+                 # div(style = "margin: 10px 0;",
+                 #     if (is_corresponding) {
+                 #       tags$span("✉️ Corresponding Author", 
+                 #                 style = "background: #e8f5e8; color: #27ae60; 
+                 #                         padding: 3px 8px; border-radius: 12px; 
+                 #                         font-size: 12px; margin-right: 10px;")
+                 #     },
+                 #     tags$span(paste("Position:", stringr::str_to_title(position_type)), 
+                 #               style = "background: #e3f2fd; color: #1976d2; 
+                 #                       padding: 3px 8px; border-radius: 12px; font-size: 12px;")
+                 # )
+          ),
+          column(4,
+                 div(style = "text-align: right; padding-top: 10px;",
+                     div(orcid_link, style = "margin-bottom: 8px;"),
+                     div(openalex_link)
+                 )
+          )
+        )
+    ),
+    
+    # Metrics section
+    div(style = "margin: 20px 0;",
+        h4("Bibliometric Indicators", style = "margin-bottom: 15px; color: #2C3E50;"),
+        metrics_cards
+    ),
+    
+    # Additional metrics
+    div(style = "margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;",
+        fluidRow(
+          column(6, 
+                 strong("i10-Index: "), span(i10_index, style = "color: #2980b9;")),
+          column(6, 
+                 strong("OpenAlex ID: "), 
+                 span(openalex_id, style = "color: #666; font-family: monospace; font-size: 12px;"))
+        )
+    ),
+    
+    # Trends and topics
+    trend_chart,
+    topics_section,
+    
+    # Footer with source information
+    div(style = "margin-top: 25px; padding-top: 15px; border-top: 1px solid #ecf0f1; 
+                 font-size: 11px; color: #95A5A6; text-align: center;",
+        paste("Data retrieved from OpenAlex on", 
+              format(author_data$query_timestamp[1], "%Y-%m-%d %H:%M"))
+    )
+  )
+}
+
+# Helper function for safe extraction (null coalescing operator)
+`%||%` <- function(x, y) if (is.null(x) || is.na(x) || length(x) == 0) y else x
+
+# Wrapper function for use in Shiny renderUI
+
+render_author_bio_card <- function(author_data, ...) {
+  renderUI({
+    create_author_bio_card(author_data, ...)
+  })
+}
+
 
 # from igraph to png file
 igraph2PNG <- function(x, filename, width = 10, height = 7, dpi = 75) {
@@ -1860,7 +2140,8 @@ historiograph <- function(input, values) {
   )
   # values$Histfield="done"
   # }
-
+ values$histResults$histData <- values$histResults$histData %>%
+    tibble::rownames_to_column(var="SR")
   # titlelabel <- input$titlelabel
   values$histlog <- (values$histPlot <- histPlot(
     values$histResults,
@@ -1871,6 +2152,7 @@ historiograph <- function(input, values) {
     label = input$titlelabel,
     verbose = FALSE
   ))
+  
   values$histResults$histData$DOI <- paste0(
     '<a href=\"https://doi.org/',
     values$histResults$histData$DOI,
@@ -1878,6 +2160,7 @@ historiograph <- function(input, values) {
     values$histResults$histData$DOI,
     "</a>"
   )
+  
   values$histResults$histData <- values$histResults$histData %>%
     left_join(
       values$histPlot$layout %>%
@@ -1888,7 +2171,8 @@ historiograph <- function(input, values) {
     mutate(cluster = match(color, unique(color))) %>%
     select(!color) %>%
     group_by(cluster) %>%
-    arrange(Year, .by_group = TRUE)
+    arrange(Year, .by_group = TRUE) 
+
   return(values)
 }
 

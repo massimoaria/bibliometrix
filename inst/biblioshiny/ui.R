@@ -185,6 +185,13 @@ body <- dashboardBody(
     to { opacity: 1; transform: scale(1); }
   }
 "))),
+  ## script to open more times the same modal ####
+  tags$script("
+    Shiny.addCustomMessageHandler('button_id', function(value) {
+    Shiny.setInputValue('button_id', value);
+    });
+  "),
+  ## script to get the dimensions of the page ####
   ###
   tags$head(
     tags$style(".fa-cloud-arrow-down {font-size: 20px}"),

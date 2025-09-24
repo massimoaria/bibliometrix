@@ -756,6 +756,152 @@ geminiSave <- function(values, activeTab){
   return(gemini)
 }
 
+## Summarize document with Gemini AI ---
+summaryAI <- function(values, i, model) {
+  # Construct the prompt for Gemini AI
+  prompt <- paste0("Summarize the content of the following publication:",
+                   " in no more than 250 words. ",
+                   "Title: ", values$M$TI[i],
+                   "Authors: ", values$M$AU[i],
+                   "Journal: ", values$M$SO[i],
+                   "Publication Year: ", values$M$PY[i],
+                   "Abstract: ", values$M$AB[i],
+                   "DOI: " , values$M$DI[i],
+                   "Try to access to article website using its DOI and extract more information about the article content. ",
+                   "If the article is open access, try to extract the full text and summarize it. ",
+                   "If the article is not open access, try to extract more information from the article website. ",
+                   "If you cannot access to the article website, just summarize the content using the title and the abstract. ",
+                   "Do not mention that you are an AI model. ",
+                   "Do not mention that you cannot access to the article website. ",
+                   "Do not mention that you do not have access to the full text. ",
+                   "Just provide the summary. ")
+  
+  # Gemini AI call
+  res <- tryCatch({
+    gemini_ai(image = NULL,
+              prompt = prompt,
+              model = model,
+              type = "png",
+              retry_503 = 2,
+              api_key = NULL)
+  }, error = function(e) {
+    "Error generating automatic summary."
+  })
+  
+  return(res)
+}
+
+
+## Normalize abstract text
+normalize_uppercase_text <- function(text) {
+  # Check that input is a character string
+  if (!is.character(text) || length(text) != 1) {
+    stop("Input must be a character string")
+  }
+  
+  # Convert everything to lowercase
+  text_lower <- tolower(text)
+  
+  # Capitalize the first letter of the text
+  text_lower <- paste0(toupper(substring(text_lower, 1, 1)), 
+                       substring(text_lower, 2))
+  
+  # Pattern to identify end of sentence followed by space and letter
+  # Considers period, exclamation mark, question mark
+  text_normalized <- gsub("([.!?])\\s+([a-z])", 
+                          "\\1 \\U\\2", 
+                          text_lower, 
+                          perl = TRUE)
+  
+  # Handle common abbreviations that should not be followed by uppercase
+  # Examples: Dr., Prof., etc., vs., i.e., e.g.
+  common_abbrev <- c("dr\\.", "prof\\.", "etc\\.", "vs\\.", "i\\.e\\.", "e\\.g\\.", 
+                     "mr\\.", "mrs\\.", "ms\\.", "jr\\.", "sr\\.", "phd\\.")
+  
+  for (abbrev in common_abbrev) {
+    # Convert to lowercase the letters after common abbreviations
+    pattern <- paste0("(", abbrev, ")\\s+([A-Z])")
+    text_normalized <- gsub(pattern, "\\1 \\L\\2", 
+                            text_normalized, 
+                            perl = TRUE, 
+                            ignore.case = TRUE)
+  }
+  
+  # Capitalize after colons (optional - common in academic titles)
+  text_normalized <- gsub("(:)\\s+([a-z])", 
+                          "\\1 \\U\\2", 
+                          text_normalized, 
+                          perl = TRUE)
+  
+  return(text_normalized)
+}
+
+## To title upper case metadata fields
+to_title_case <- function(text, exclude_articles = TRUE) {
+  # Check that input is a character string
+  if (!is.character(text) || length(text) != 1) {
+    stop("Input must be a character string")
+  }
+  
+  # Convert everything to lowercase first
+  text_lower <- tolower(text)
+  
+  # Split text into words
+  words <- strsplit(text_lower, "\\s+")[[1]]
+  
+  # Words that typically are not capitalized in titles (articles, prepositions, conjunctions)
+  # Only applied if exclude_articles = TRUE
+  small_words <- c("a", "an", "and", "as", "at", "but", "by", "for", "if", "in", 
+                   "of", "on", "or", "the", "to", "up", "via", "with", "from",
+                   "into", "over", "upon", "down", "off", "out", "per", "than",
+                   "through", "under", "within", "without", "about", "across",
+                   "after", "against", "along", "among", "around", "before",
+                   "behind", "below", "beneath", "beside", "between", "beyond",
+                   "during", "except", "inside", "near", "since", "toward",
+                   "towards", "until", "where", "while")
+  
+  # Function to capitalize first letter of a word and handle hyphenated words
+  capitalize_first <- function(word) {
+    # Check if the word contains hyphens
+    if (grepl("-", word)) {
+      # Split by hyphen and capitalize each part
+      parts <- strsplit(word, "-")[[1]]
+      capitalized_parts <- sapply(parts, function(part) {
+        if (nchar(part) > 0) {
+          paste0(toupper(substring(part, 1, 1)), substring(part, 2))
+        } else {
+          part
+        }
+      })
+      return(paste(capitalized_parts, collapse = "-"))
+    } else {
+      # Normal capitalization for words without hyphens
+      paste0(toupper(substring(word, 1, 1)), substring(word, 2))
+    }
+  }
+  
+  # Apply capitalization logic
+  if (exclude_articles) {
+    # Capitalize all words except articles/prepositions (but always first and last word)
+    capitalized_words <- sapply(seq_along(words), function(i) {
+      word <- words[i]
+      # First word, last word, or words not in the "small words" list
+      if (i == 1 || i == length(words) || !word %in% small_words) {
+        capitalize_first(word)
+      } else {
+        word  # keep lowercase
+      }
+    })
+  } else {
+    # Capitalize all words
+    capitalized_words <- sapply(words, capitalize_first)
+  }
+  
+  # Recombine words
+  result <- paste(capitalized_words, collapse = " ")
+  
+  return(result)
+}
 
 merge_df_to_string <- function(df) {
   # Check if the input has at least two columns
@@ -846,19 +992,19 @@ copy_to_clipboard <- function(x) {
 }
 
 ## New function to convert gemini output as HTML blocks
-gemini_to_html <- function(text) {
+gemini_to_html <- function(text, font_size = "16px") {
   # Remove original leading/trailing whitespace
   text <- trimws(text)
   
   # Divide text into lines
   lines <- unlist(strsplit(text, "\n", fixed = TRUE))
   
-  # Remove rows
+  # Remove empty rows
   lines <- lines[lines != ""]
   
-  # Initialize HTML output with CSS styles
+  # Initialize HTML output with CSS styles including font size
   html_lines <- c(
-    "<div style='font-family: Arial, sans-serif; line-height: 1.3; margin: 0 auto; padding: 20px;" # max-width: 800px; '>"
+    paste0("<div style='font-family: Arial, sans-serif; line-height: 1.3; margin: 0 auto; padding: 20px; font-size: ", font_size, ";'>")
   )
   in_list <- FALSE
   list_type <- ""
@@ -866,14 +1012,14 @@ gemini_to_html <- function(text) {
   for (i in 1:length(lines)) {
     line <- trimws(lines[i])
     
-    # jump empty lines
+    # Jump empty lines
     if (line == "") {
       next
     }
     
     # Title management (lines enclosed in **)
     if (stringr::str_detect(line, "^\\*\\*[^*]+\\*\\*$")) {
-      # Chiudi eventuali liste aperte
+      # Close any open lists
       if (in_list) {
         if (list_type == "ul") {
           html_lines <- c(html_lines, "</ul>")
@@ -891,7 +1037,7 @@ gemini_to_html <- function(text) {
     
     # Managing bulleted lists (starting with *)
     if (stringr::str_detect(line, "^\\s*\\*\\s+")) {
-      # Se non siamo già in una lista puntata, iniziala
+      # If we are not already in a bulleted list, start it
       if (!in_list || list_type != "ul") {
         if (in_list && list_type == "ol") {
           html_lines <- c(html_lines, "</ol>")
@@ -910,7 +1056,7 @@ gemini_to_html <- function(text) {
     
     # Managing numbered lists (starting with a number followed by a period)
     if (stringr::str_detect(line, "^\\s*\\d+\\.\\s+")) {
-      # Se non siamo già in una lista numerata, iniziala
+      # If we are not already in a numbered list, start it
       if (!in_list || list_type != "ol") {
         if (in_list && list_type == "ul") {
           html_lines <- c(html_lines, "</ul>")
@@ -927,7 +1073,7 @@ gemini_to_html <- function(text) {
       next
     }
     
-    # If we get here and we're on a list, let's close it.
+    # If we get here and we're in a list, let's close it
     if (in_list) {
       if (list_type == "ul") {
         html_lines <- c(html_lines, "</ul>")
@@ -954,7 +1100,7 @@ gemini_to_html <- function(text) {
   # Close the container div
   html_lines <- c(html_lines, "</div>")
   
-  # Merge all rows
+  # Merge all lines
   html_result <- paste(html_lines, collapse = "\n")
   
   return(html_result)
@@ -965,10 +1111,10 @@ format_inline_text <- function(text) {
   # Bold management (**text**)
   text <- stringr::str_replace_all(text, "\\*\\*([^*]+)\\*\\*", "<strong>\\1</strong>")
   
-  # Cursive management (*text*) - only if it is not already in bold
+  # Italic management (*text*) - only if it is not already in bold
   text <- stringr::str_replace_all(text, "(?<!\\*)\\*([^*]+)\\*(?!\\*)", "<em>\\1</em>")
   
-  # Handling text in quotation marks as inline code (“text”)
+  # Handling text in quotation marks as inline code ("text")
   text <- stringr::str_replace_all(text, '"([^"]+)"', '<code style="background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: \'Courier New\', monospace;">\\1</code>')
   
   # Handling parentheses with percentages or numerical values
@@ -976,64 +1122,6 @@ format_inline_text <- function(text) {
   
   return(text)
 }
-
-
-# # convert gemini output to HTML
-# text_to_html <- function(input_text) {
-#   input_text <- c(input_text,"\n")
-#   # Escape HTML special characters
-#   escape_html <- function(text) {
-#     text <- gsub("&", "&amp;", text)
-#     text <- gsub("<", "&lt;", text)
-#     text <- gsub(">", "&gt;", text)
-#     text
-#   }
-#   
-#   # Convert markdown-style bold (**text**) to <strong>
-#   convert_bold <- function(text) {
-#     gsub("\\*\\*(.*?)\\*\\*", "<strong>\\1</strong>", text)
-#   }
-#   
-#   # Process each paragraph
-#   paragraphs <- unlist(strsplit(input_text, "\n\n"))
-#   html_paragraphs <- lapply(paragraphs, function(p) {
-#     lines <- unlist(strsplit(p, "\n"))
-#     lines <- sapply(lines, escape_html) # escape special characters
-#     lines <- sapply(lines, convert_bold) # convert **bold**
-#     
-#     if (all(grepl("^\\*\\s+", lines))) {
-#       # Convert to unordered list
-#       lines <- gsub("^\\*\\s+", "", lines)
-#       items <- paste0("<li>", lines, "</li>", collapse = "\n")
-#       return(paste0("<ul>\n", items, "\n</ul>"))
-#     } else {
-#       # Regular paragraph
-#       return(paste0("<p>", paste(lines, collapse = "<br/>"), "</p>"))
-#     }
-#   })
-#   
-#   # Combine all HTML parts
-#   html_body <- paste(html_paragraphs, collapse = "\n\n")
-#   html <- paste0("<html>\n<body>\n", html_body, "\n</body>\n</html>")
-#   html <- gsub("\n","",html)
-#   return(html)
-# }
-# 
-# # From HTML to text Blocks 
-# html_to_blocks <- function(raw_html){
-#   html_body <- sub(".*<body[^>]*>", "", raw_html)
-#   html_body <- sub("</body>.*", "", html_body)
-#   
-#   blocks <- stringr::str_split(
-#     html_body,
-#     "(?=<p|<ul|<ol|<li|<h[1-6]|<blockquote|<pre|<table|<div)",
-#     simplify = FALSE
-#   )[[1]]
-#   
-#   blocks <- trimws(blocks)
-#   blocks <- blocks[nzchar(blocks)]
-# }
-
 
 
 # Thematic Map top 3 documents for each cluster

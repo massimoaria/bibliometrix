@@ -258,7 +258,7 @@ authorBio <- function(author_position = 1,
 
 # Helper function to analyze all authors of an article
 analyze_all_authors <- function(doi, verbose = FALSE) {
-  return(author_bio(doi = doi, return_all_authors = TRUE, verbose = verbose))
+  return(authorBio(doi = doi, return_all_authors = TRUE, verbose = verbose))
 }
 
 #' Get Authors Summary from OpenAlex

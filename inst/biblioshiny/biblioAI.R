@@ -837,20 +837,17 @@ normalize_uppercase_text <- function(text) {
 }
 
 ## To title upper case metadata fields
-to_title_case <- function(text, exclude_articles = TRUE) {
-  # Check that input is a character string
-  if (!is.character(text) || length(text) != 1) {
-    stop("Input must be a character string")
+to_title_case <- function(texts, exclude_articles = TRUE) {
+  
+  # --- Input Validation ---
+  # Check that the input is a character vector. If not, stop and show an error.
+  if (!is.character(texts)) {
+    stop("Input must be a character vector.")
   }
   
-  # Convert everything to lowercase first
-  text_lower <- tolower(text)
-  
-  # Split text into words
-  words <- strsplit(text_lower, "\\s+")[[1]]
-  
-  # Words that typically are not capitalized in titles (articles, prepositions, conjunctions)
-  # Only applied if exclude_articles = TRUE
+  # --- Configuration ---
+  # Define a list of "small words" (articles, prepositions, conjunctions) that
+  # should remain in lowercase unless they are the first or last word in the title.
   small_words <- c("a", "an", "and", "as", "at", "but", "by", "for", "if", "in", 
                    "of", "on", "or", "the", "to", "up", "via", "with", "from",
                    "into", "over", "upon", "down", "off", "out", "per", "than",
@@ -860,48 +857,73 @@ to_title_case <- function(text, exclude_articles = TRUE) {
                    "during", "except", "inside", "near", "since", "toward",
                    "towards", "until", "where", "while")
   
-  # Function to capitalize first letter of a word and handle hyphenated words
+  # --- Helper Function ---
+  # A helper function to capitalize the first letter of a single word.
+  # It also handles hyphenated words (e.g., "state-of-the-art" -> "State-of-the-Art").
   capitalize_first <- function(word) {
-    # Check if the word contains hyphens
+    # Check for hyphens
     if (grepl("-", word)) {
-      # Split by hyphen and capitalize each part
+      # If a hyphen exists, split the word into parts
       parts <- strsplit(word, "-")[[1]]
+      # Capitalize the first letter of each part
       capitalized_parts <- sapply(parts, function(part) {
         if (nchar(part) > 0) {
           paste0(toupper(substring(part, 1, 1)), substring(part, 2))
         } else {
-          part
+          part # Return empty parts as they are
         }
       })
+      # Re-join the parts with a hyphen
       return(paste(capitalized_parts, collapse = "-"))
     } else {
-      # Normal capitalization for words without hyphens
+      # If no hyphen, just capitalize the first letter of the word
       paste0(toupper(substring(word, 1, 1)), substring(word, 2))
     }
   }
   
-  # Apply capitalization logic
-  if (exclude_articles) {
-    # Capitalize all words except articles/prepositions (but always first and last word)
-    capitalized_words <- sapply(seq_along(words), function(i) {
-      word <- words[i]
-      # First word, last word, or words not in the "small words" list
-      if (i == 1 || i == length(words) || !word %in% small_words) {
-        capitalize_first(word)
-      } else {
-        word  # keep lowercase
-      }
-    })
-  } else {
-    # Capitalize all words
-    capitalized_words <- sapply(words, capitalize_first)
-  }
+  # --- Main Processing Logic ---
+  # Use sapply() to apply the title-casing logic to each element of the input vector 'texts'.
+  # 'sapply' iterates over the vector and collects the results into a new vector.
+  # USE.NAMES = FALSE ensures the output is an unnamed vector.
+  result_vector <- sapply(texts, function(single_text) {
+    
+    # Handle edge cases: return NA or empty strings without modification.
+    if (is.na(single_text) || nchar(single_text) == 0) {
+      return(single_text)
+    }
+    
+    # Convert the entire string to lowercase to ensure consistency.
+    text_lower <- tolower(single_text)
+    
+    # Split the string into a vector of words based on whitespace.
+    words <- strsplit(text_lower, "\\s+")[[1]]
+    
+    # Apply capitalization based on the 'exclude_articles' flag.
+    if (exclude_articles) {
+      # If TRUE, apply capitalization selectively.
+      capitalized_words <- sapply(seq_along(words), function(i) {
+        word <- words[i]
+        # Always capitalize the first word, the last word, or any word NOT in the 'small_words' list.
+        if (i == 1 || i == length(words) || !word %in% small_words) {
+          capitalize_first(word)
+        } else {
+          word # Otherwise, keep the small word in lowercase.
+        }
+      })
+    } else {
+      # If FALSE, capitalize every word.
+      capitalized_words <- sapply(words, capitalize_first)
+    }
+    
+    # Recombine the processed words into a single string, separated by spaces.
+    paste(capitalized_words, collapse = " ")
+    
+  }, USE.NAMES = FALSE)
   
-  # Recombine words
-  result <- paste(capitalized_words, collapse = " ")
-  
-  return(result)
+  # Return the final vector of title-cased strings.
+  return(result_vector)
 }
+
 
 merge_df_to_string <- function(df) {
   # Check if the input has at least two columns

@@ -58,6 +58,7 @@ To ensure the functionality of Biblioshiny,
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
   
   ## initial values
+  selected_author <- reactiveVal()
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
   values$Chrome_url <- Chrome_url
@@ -2159,6 +2160,92 @@ To ensure the functionality of Biblioshiny,
   
   # AUTHORS MENU ----
   ## Authors ----
+  
+  ### Author Profile ----
+  observe({
+    req(values$M)
+    if (!is.null(values$M$AU)) {
+      authors <- values$M %>%
+        select(AU,DI) %>% 
+        get_all_authors() 
+      updateSelectizeInput(session, "authorSearch",
+                           choices = c("", authors),
+                           selected = "",
+                           server = TRUE
+      )
+    }
+    
+  })
+  
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$authorPageAReset
+    },
+    handlerExpr = {
+      req(values$M)
+      authors <- values$M %>%
+        select(AU,DI) %>% 
+        get_all_authors() 
+      updateSelectizeInput(session, "authorSearch",
+                           choices = c("", authors),
+                           selected = "",
+                           server = TRUE
+      )
+      output$AuthorBioPageUI <- renderUI({
+        create_empty_author_bio_card()
+      })
+      output$AuthorLocalProfileUI <- renderUI({
+        create_empty_local_author_bio_card()
+      })
+    }
+  )
+  
+  output$AuthorBioPageUI <- renderUI({
+    create_empty_author_bio_card()
+  })
+  
+  output$AuthorLocalProfileUI <- renderUI({
+    create_empty_local_author_bio_card()
+  })
+
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$authorPageApply
+    },
+    handlerExpr = {
+      req(values$M)
+      selected_author <- input$authorSearch
+      authorGlobalProfile <- authorCard(selected_author, values)
+      output$AuthorBioPageUI <- renderUI({
+        authorGlobalProfile
+      })
+      
+      local_author <- values$author_data %>%
+        filter(AUid == selected_author) %>%
+        pull(display_name)
+      
+      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
+        mutate(TI = to_title_case(TI),
+               SO= to_title_case(SO))
+               
+      authorLocalProfile <- create_local_author_bio_card(
+        local_author_data = local_data,
+        selected_author = local_author,
+        max_py = values$M$PY %>% max(na.rm = TRUE),
+        width = "100%",
+        show_trends = TRUE,
+        show_keywords = TRUE,
+        max_keywords = 20,
+        max_works_display = 50
+      )
+      output$AuthorLocalProfileUI <- renderUI({
+        authorLocalProfile
+      })
+    }
+  )
+  
   ### Most Relevant Authors ----
   MRAuthors <- eventReactive(input$applyMRAuthors,{
     res <- descriptive(values,type="tab3")
@@ -2235,18 +2322,15 @@ To ensure the functionality of Biblioshiny,
   })
   
   ### Author BIO Card ----
-  observeEvent(
-    ignoreNULL = TRUE,
-    eventExpr = {
-      input$button_id2
-    },
-    handlerExpr = {
-      if (input$button_id2 != "null") {
-        showModal(modalAuthorBio(session))
-      }
-    }
+  observeEvent(ignoreNULL = TRUE,
+               eventExpr ={input$selected_author},
+               handlerExpr = {
+                 if (input$selected_author != "null") {
+                   showModal(modalAuthorBio(session))
+                 }
+               }
   )
-  
+
   modalAuthorBio <- function(session) {
     ns <- session$ns
     modalDialog(
@@ -2262,42 +2346,21 @@ To ensure the functionality of Biblioshiny,
       ),
     )
   }
-  
+
   observeEvent(input$closeModalAuthorBio, {
-    
     removeModal(session = getDefaultReactiveDomain())
-    # session$sendCustomMessage("click", 'null') # reset input value to plot modal more times
     resetModalButtons(session = getDefaultReactiveDomain())
-    removeUI(
-      selector = "authorBioCard",
-      immediate = TRUE,
-      session = getDefaultReactiveDomain()
-    )
   })
+  
+  authorBioFunc <- eventReactive(ignoreNULL = TRUE,
+                                 eventExpr = {input$selected_author},
+                                 valueExpr = {
+                                   authorCard(input$selected_author, values)
+                                 })
   
   output$authorBioCard <- renderUI({
     ns <- session$ns
-    works_exact <- findAuthorWorks(input$button_id2, values$M, exact_match = TRUE) %>% 
-      filter(!is.na(doi))
-    if (nrow(works_exact) == 0) {
-      showNotification("No works found for this author.", type = "error")
-      return(NULL)
-    }
-    author_position <- works_exact$author_position[1]
-    doi <- works_exact$doi[1]
-    on_line <- check_online(host = "www.bibliometrix.org", min_success = 1)
-    if (on_line){
-      author_data <- authorBio(author_position=author_position, doi=doi)
-      
-        create_author_bio_card(author_data,
-                               width = "100%", 
-                               show_trends = TRUE, 
-                               show_topics = TRUE,
-                               max_topics = 20)
-    } else {
-      HTML("No internet connection. Unable to fetch author data.", type = "error")
-    }
-    
+    authorBioFunc()
   })
   
   ### Most Cited Authors ----  

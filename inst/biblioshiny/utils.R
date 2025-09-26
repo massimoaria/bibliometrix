@@ -355,12 +355,55 @@ DTformat <- function(
   initComplete <- NULL
   # Summary Button
   if (summary=="documents" & "Paper" %in% names(df)) {
+    
     df <- df %>%
-      mutate(Summary = paste0('<button id="custom_btn" onclick="Shiny.onInputChange(\'button_id\', \'', Paper, '\')">▶️</button>')) %>%
+      mutate(Summary = paste0(
+        '<div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">',
+        '<button id="custom_btn" style="',
+        'width: 24px; height: 24px; ',
+        'border-radius: 50%; ',
+        'border: none; ',
+        'background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%); ',
+        'color: white; ',
+        'cursor: pointer; ',
+        'display: flex; ',
+        'align-items: center; ',
+        'justify-content: center; ',
+        'box-shadow: 0 2px 4px rgba(0,0,0,0.2); ',
+        'transition: all 0.3s ease; ',
+        '" ',
+        'onmouseover="this.style.transform=\'scale(1.1)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.3)\';" ',
+        'onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.2)\';" ',
+        'onclick="Shiny.onInputChange(\'button_id\', \'', Paper, '\')">',
+        '<i class="fas fa-search-plus" style="font-size: 14px;"></i>',
+        '</button>',
+        '</div>'
+      )) %>%
       select(Summary, everything())
   } else if (summary=="historiograph" & "Paper" %in% names(df)) {
     df <- df %>%
-      mutate(Summary = paste0('<button id="custom_btn" onclick="Shiny.onInputChange(\'button_id\', \'', SR, '\')">▶️</button>')) %>%
+      mutate(Summary = paste0(
+        '<div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">',
+        '<button id="custom_btn" style="',
+        'width: 32px; height: 32px; ',
+        'border-radius: 50%; ',
+        'border: none; ',
+        'background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%); ',
+        'color: white; ',
+        'cursor: pointer; ',
+        'display: flex; ',
+        'align-items: center; ',
+        'justify-content: center; ',
+        'box-shadow: 0 2px 4px rgba(0,0,0,0.2); ',
+        'transition: all 0.3s ease; ',
+        '" ',
+        'onmouseover="this.style.transform=\'scale(1.1)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.3)\';" ',
+        'onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.2)\';" ',
+        'onclick="Shiny.onInputChange(\'button_id\', \'', SR, '\')">',
+        '<i class="fas fa-search-plus" style="font-size: 14px;"></i>',
+        '</button>',
+        '</div>'
+      )) %>%
       select(Summary, everything()) %>% 
       select(-SR)
   } else if (summary=="authors" & "Author" %in% names(df)) {

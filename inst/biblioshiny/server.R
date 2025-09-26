@@ -3225,7 +3225,7 @@ To ensure the functionality of Biblioshiny,
     g <- MGCDocuments()
     TAB <- values$TABGlobDoc
     TAB$DOI<- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    DTformat(TAB, nrow=10, filename="Most_Global_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=FALSE, 
+    DTformat(TAB, nrow=10, filename="Most_Global_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=5:6, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE, summary="documents")
   })
@@ -3301,8 +3301,7 @@ To ensure the functionality of Biblioshiny,
     TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     
     names(TAB)[c(1,4:8)] <- c("Paper","Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
-    print(names(TAB))
-    DTformat(TAB, nrow=10, filename="Most_Local_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=6:8, dom=FALSE, 
+    DTformat(TAB, nrow=10, filename="Most_Local_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=7:9, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
              selection=FALSE, summary="documents")
   })

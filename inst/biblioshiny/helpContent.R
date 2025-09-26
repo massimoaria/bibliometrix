@@ -144,5 +144,60 @@ helpContent <- function(){
     </body>
   "
   
-  return(list(biblioAI=biblioAI, info=info, publications=publications, filters=filters))
+  authorProfile <- "
+<h3><strong>👤 Author Profile Overview</strong></h3>
+  
+  <p>The Author Profile page provides a <strong>dual-perspective bibliometric overview</strong> of each author included in the collection:</p>
+  <br>
+  <h4><strong>🔹 Global Profile</strong></h4>
+  <p>The <strong>Global Profile</strong> presents the author's complete scientific output, based on metadata retrieved from <a href='https://openalex.org' target='_blank'>OpenAlex</a> via the <code>openalexR</code> R package. This profile includes <em>all publications authored by the researcher</em>, regardless of whether they are part of the current collection.</p>
+
+<p><strong>Main features of the Global Profile include:</strong></p>
+<ul>
+  <li>Total Publications and Citations</li>
+  <li>H-Index and i10-Index</li>
+  <li>2-Year Mean Citation Rate</li>
+  <li>Publication Trends over the last 10 years</li>
+  <li>Main Research Topics extracted from OpenAlex concepts</li>
+</ul>
+
+<p><strong>Data Source:</strong> OpenAlex API (via <code>openalexR</code>)<br>
+<strong>Unique Identifier:</strong> OpenAlex Author ID (e.g., <code>A5014455237</code>)</p>
+<br>
+<h4><strong>🔸 Local Profile</strong></h4>
+<p>The <strong>Local Profile</strong> focuses exclusively on the subset of the author's publications that are included in the <em>user-defined collection</em> currently under analysis in the project.</p>
+  
+  <p><strong>Main features of the Local Profile include:</strong></p>
+  <ul>
+  <li>Number of Publications, Total Citations, and Local H-Index</li>
+  <li>Average Citations per Work</li>
+  <li>Recent Activity: Number of publications in the last 5 years</li>
+  <li>Publication Trends (based only on local data)</li>
+  <li>Main Keywords derived from the local collection</li>
+  <li>List of Publications with full metadata (title, year, journal, DOI, citations)</li>
+  </ul>
+  
+  <p>This local profile helps contextualize the author's role and impact <strong>within the specific research topic or dataset</strong> under investigation.</p>
+<br>
+<h4><strong>🔄 Interpretation and Use</strong></h4>
+<p>The <strong>Global Profile</strong> offers a broad, external view of the author’s overall scholarly influence, while the <strong>Local Profile</strong> highlights their specific relevance <em>within the current study</em>.</p>
+
+<p>This dual visualization is particularly useful for:</p>
+<ul>
+  <li>Identifying influential researchers in the topic area</li>
+  <li>Comparing local vs. global impact</li>
+  <li>Evaluating thematic alignment of authors with the collection's focus</li>
+  </ul>
+  <br>
+  <h4><strong>📚 References</strong></h4>
+  
+  <p><strong>Priem, J. et al. (2022).</strong> <i>OpenAlex: A fully-open index of scholarly works, authors, venues, institutions, and concepts.</i> Retrieved from <a href='https://openalex.org' target='_blank'>https://openalex.org</a></p>
+    
+    <p><strong>Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024).</strong> <i>openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.</i> <strong>R Journal</strong>, 15(4), 167–180. <a href='https://doi.org/10.32614/RJ-2023-089' target='_blank'>https://doi.org/10.32614/RJ-2023-089</a></p>
+      
+      <p><strong>Aria, M. et al. (2023).</strong> <i>openalexR: An R package for programmatic access to OpenAlex metadata.</i> <strong>CRAN</strong>. Retrieved from <a href='https://cran.r-project.org/package=openalexR' target='_blank'>https://cran.r-project.org/package=openalexR</a></p>
+      
+      <p><strong>Hirsch, J.E. (2005).</strong> <i>An index to quantify an individual's scientific research output.</i> <strong>Proceedings of the National Academy of Sciences</strong>, 102(46), 16569–16572. <a href='https://doi.org/10.1073/pnas.0507655102' target='_blank'>https://doi.org/10.1073/pnas.0507655102</a></p>
+"
+  return(list(biblioAI=biblioAI, info=info, publications=publications, filters=filters, authorProfile=authorProfile))
 }

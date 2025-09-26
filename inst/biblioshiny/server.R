@@ -2334,8 +2334,18 @@ To ensure the functionality of Biblioshiny,
   modalAuthorBio <- function(session) {
     ns <- session$ns
     modalDialog(
-      shinycssloaders::withSpinner(uiOutput(ns("authorBioCard")), caption = HTML("<br><strong>Thinking...</strong>"),
-                                   image = "ai_small2.gif", color = "#466fc4"),
+      title = div("Author Profile", style = "text-align: center; margin: 0;"),
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          title = "Global Profile",
+          uiOutput(ns("AuthorBioPageUI2"))
+        ),
+        tabPanel(
+          title = "Local Profile",
+          uiOutput(ns("AuthorLocalProfileUI2"))
+        )
+      ),
       size = "l",
       easyClose = FALSE,
       footer = tagList(
@@ -2352,16 +2362,42 @@ To ensure the functionality of Biblioshiny,
     resetModalButtons(session = getDefaultReactiveDomain())
   })
   
-  authorBioFunc <- eventReactive(ignoreNULL = TRUE,
-                                 eventExpr = {input$selected_author},
-                                 valueExpr = {
-                                   authorCard(input$selected_author, values)
-                                 })
-  
-  output$authorBioCard <- renderUI({
-    ns <- session$ns
-    authorBioFunc()
-  })
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$selected_author
+    },
+    handlerExpr = {
+      req(values$M)
+      selected_author <- input$selected_author
+      authorGlobalProfile <- authorCard(selected_author, values)
+      output$AuthorBioPageUI2 <- renderUI({
+        authorGlobalProfile
+      })
+      
+      local_author <- values$author_data %>%
+        filter(AUid == selected_author) %>%
+        pull(display_name)
+      
+      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
+        mutate(TI = to_title_case(TI),
+               SO= to_title_case(SO))
+      
+      authorLocalProfile <- create_local_author_bio_card(
+        local_author_data = local_data,
+        selected_author = local_author,
+        max_py = values$M$PY %>% max(na.rm = TRUE),
+        width = "100%",
+        show_trends = TRUE,
+        show_keywords = TRUE,
+        max_keywords = 20,
+        max_works_display = 50
+      )
+      output$AuthorLocalProfileUI2 <- renderUI({
+        authorLocalProfile
+      })
+    }
+  )
   
   ### Most Cited Authors ----  
   MLCAuthors <- eventReactive(input$applyMLCAuthors,{

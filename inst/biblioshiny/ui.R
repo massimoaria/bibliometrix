@@ -52,6 +52,7 @@ biblioAI <- helpContent()$biblioAI
 info <- helpContent()$info
 pubs <- helpContent()$publications
 filters <- helpContent()$filters
+authorProfile <- helpContent()$authorProfile
 
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(
@@ -1663,6 +1664,20 @@ body <- dashboardBody(
               div(
                 #style = "height: 550px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
                 shinycssloaders::withSpinner(uiOutput("AuthorLocalProfileUI"))
+              )
+            ), 
+            tabPanel(
+              "Info & References",
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(authorProfile)
+                  ),
+                  column(1)
+                )
               )
             )
           )

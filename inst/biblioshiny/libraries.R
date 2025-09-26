@@ -1,11 +1,5 @@
 # ### packages for biblishiny()
 libraries <- function() {
-  is_windows <- tolower(Sys.info()[["sysname"]]) == "windows"
-  if (!is_windows & !require(pak, quietly = TRUE)) {
-    install.packages("pak")
-    if (!require(pak, quietly = TRUE)) return(FALSE)
-  }
-  
   all_ok <- TRUE
   
   parse_pkg <- function(pkg_str) {
@@ -42,11 +36,7 @@ libraries <- function() {
     }
     
     if (need_install) {
-      if (is_windows) {
-        install.packages(pkg)
-      } else {
-        pak::pkg_install(pkg, ask= FALSE)
-      }
+      install.packages(pkg)
     }
     
     return(require(pkg, character.only = TRUE, quietly = TRUE))

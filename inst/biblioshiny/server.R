@@ -58,6 +58,7 @@ To ensure the functionality of Biblioshiny,
   options(shiny.maxRequestSize=maxUploadSize*1024^2)
   
   ## initial values
+  selected_author <- reactiveVal()
   data("logo",package="bibliometrix",envir=environment())
   values = reactiveValues()
   values$Chrome_url <- Chrome_url
@@ -2159,6 +2160,92 @@ To ensure the functionality of Biblioshiny,
   
   # AUTHORS MENU ----
   ## Authors ----
+  
+  ### Author Profile ----
+  observe({
+    req(values$M)
+    if (!is.null(values$M$AU)) {
+      authors <- values$M %>%
+        select(AU,DI) %>% 
+        get_all_authors() 
+      updateSelectizeInput(session, "authorSearch",
+                           choices = c("", authors),
+                           selected = "",
+                           server = TRUE
+      )
+    }
+    
+  })
+  
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$authorPageAReset
+    },
+    handlerExpr = {
+      req(values$M)
+      authors <- values$M %>%
+        select(AU,DI) %>% 
+        get_all_authors() 
+      updateSelectizeInput(session, "authorSearch",
+                           choices = c("", authors),
+                           selected = "",
+                           server = TRUE
+      )
+      output$AuthorBioPageUI <- renderUI({
+        create_empty_author_bio_card()
+      })
+      output$AuthorLocalProfileUI <- renderUI({
+        create_empty_local_author_bio_card()
+      })
+    }
+  )
+  
+  output$AuthorBioPageUI <- renderUI({
+    create_empty_author_bio_card()
+  })
+  
+  output$AuthorLocalProfileUI <- renderUI({
+    create_empty_local_author_bio_card()
+  })
+
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$authorPageApply
+    },
+    handlerExpr = {
+      req(values$M)
+      selected_author <- input$authorSearch
+      authorGlobalProfile <- authorCard(selected_author, values)
+      output$AuthorBioPageUI <- renderUI({
+        authorGlobalProfile
+      })
+      
+      local_author <- values$author_data %>%
+        filter(AUid == selected_author) %>%
+        pull(display_name)
+      
+      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
+        mutate(TI = to_title_case(TI),
+               SO= to_title_case(SO))
+               
+      authorLocalProfile <- create_local_author_bio_card(
+        local_author_data = local_data,
+        selected_author = local_author,
+        max_py = values$M$PY %>% max(na.rm = TRUE),
+        width = "100%",
+        show_trends = TRUE,
+        show_keywords = TRUE,
+        max_keywords = 20,
+        max_works_display = 50
+      )
+      output$AuthorLocalProfileUI <- renderUI({
+        authorLocalProfile
+      })
+    }
+  )
+  
   ### Most Relevant Authors ----
   MRAuthors <- eventReactive(input$applyMRAuthors,{
     res <- descriptive(values,type="tab3")
@@ -2214,10 +2301,11 @@ To ensure the functionality of Biblioshiny,
   
   output$MostRelAuthorsTable <- DT::renderDT({
     
-    TAB <- values$TABAu
+    TAB <- values$TABAu %>% 
+      rename("Author" = Authors)
     DTformat(TAB , nrow=10, filename="Most_Relevant_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+             selection=FALSE, summary = "authors")
   })
   
   observeEvent(input$reportMRA,{
@@ -2232,6 +2320,84 @@ To ensure the functionality of Biblioshiny,
       popUp(type="error")
     }
   })
+  
+  ### Author BIO Card ----
+  observeEvent(ignoreNULL = TRUE,
+               eventExpr ={input$selected_author},
+               handlerExpr = {
+                 if (input$selected_author != "null") {
+                   showModal(modalAuthorBio(session))
+                 }
+               }
+  )
+
+  modalAuthorBio <- function(session) {
+    ns <- session$ns
+    modalDialog(
+      title = div("Author Profile", style = "text-align: center; margin: 0;"),
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          title = "Global Profile",
+          uiOutput(ns("AuthorBioPageUI2"))
+        ),
+        tabPanel(
+          title = "Local Profile",
+          uiOutput(ns("AuthorLocalProfileUI2"))
+        )
+      ),
+      size = "l",
+      easyClose = FALSE,
+      footer = tagList(
+        actionButton(
+          label = "Close", inputId = "closeModalAuthorBio", style = "color: #ffff;",
+          icon = icon("remove", lib = "glyphicon")
+        )
+      ),
+    )
+  }
+
+  observeEvent(input$closeModalAuthorBio, {
+    removeModal(session = getDefaultReactiveDomain())
+    resetModalButtons(session = getDefaultReactiveDomain())
+  })
+  
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$selected_author
+    },
+    handlerExpr = {
+      req(values$M)
+      selected_author <- input$selected_author
+      authorGlobalProfile <- authorCard(selected_author, values)
+      output$AuthorBioPageUI2 <- renderUI({
+        authorGlobalProfile
+      })
+      
+      local_author <- values$author_data %>%
+        filter(AUid == selected_author) %>%
+        pull(display_name)
+      
+      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
+        mutate(TI = to_title_case(TI),
+               SO= to_title_case(SO))
+      
+      authorLocalProfile <- create_local_author_bio_card(
+        local_author_data = local_data,
+        selected_author = local_author,
+        max_py = values$M$PY %>% max(na.rm = TRUE),
+        width = "100%",
+        show_trends = TRUE,
+        show_keywords = TRUE,
+        max_keywords = 20,
+        max_works_display = 50
+      )
+      output$AuthorLocalProfileUI2 <- renderUI({
+        authorLocalProfile
+      })
+    }
+  )
   
   ### Most Cited Authors ----  
   MLCAuthors <- eventReactive(input$applyMLCAuthors,{
@@ -2837,6 +3003,182 @@ To ensure the functionality of Biblioshiny,
   
   # DOCUMENTS MENU ----
   ## Documents ----
+  
+  ### function to show summary modal
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$button_id
+    },
+    handlerExpr = {
+      if (input$button_id != "null") {
+        showModal(modalDocSummary(session))
+      }
+    }
+  )
+  
+  modalDocSummary <- function(session) {
+    ns <- session$ns
+    modalDialog(
+      shinycssloaders::withSpinner(uiOutput(ns("DocSummary")), caption = HTML("<br><strong>Thinking...</strong>"),
+                                   image = "ai_small2.gif", color = "#466fc4"),
+      #uiOutput(ns("DocSummary")),
+      size = "l",
+      easyClose = FALSE,
+      footer = tagList(
+        actionButton(
+          label = "Close", inputId = "closeModalDocSummary", style = "color: #ffff;",
+          icon = icon("remove", lib = "glyphicon")
+        )
+      ),
+    )
+  }
+  
+  observeEvent(input$closeModalDocSummary, {
+    removeModal(session = getDefaultReactiveDomain())
+    # session$sendCustomMessage("click", 'null') # reset input value to plot modal more times
+    resetModalButtons(session = getDefaultReactiveDomain())
+  })
+  
+  output$DocSummary <- renderUI({
+    if (!is.null(input$button_id)) id <- input$button_id
+    i <- which(values$M$SR == id)
+    
+    # Check if index is valid
+    if (length(i) == 0) return(NULL)
+    
+    res <- summaryAI(values, i=i, model=values$gemini_api_model)
+    
+    # Create HTML card
+    div(
+      class = "document-summary-card",
+      style = "background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
+      
+      # Card header
+      div(
+        style = "border-bottom: 2px solid #007bff; margin-bottom: 15px; padding-bottom: 10px;",
+        h3(
+          style = "color: #007bff; margin: 0; font-size: 1.4em; font-weight: 600;",
+          icon("file-text", class = "fa fa-file-text"),
+          " Document Summary"
+        )
+      ),
+      
+      # Bibliographic information
+      div(
+        class = "bibliographic-info",
+        style = "margin-bottom: 20px;",
+        
+        # Title
+        div(
+          style = "margin-bottom: 12px;",
+          strong("Title:", style = "color: #495057; font-weight: 600;"),
+          br(),
+          span(
+            style = "font-size: 1.3em; color: #212529; line-height: 1.4;",
+            ifelse(is.na(values$M$TI[i]) || values$M$TI[i] == "", "Not available", to_title_case(values$M$TI[i]))
+          )
+        ),
+        
+        # Authors
+        div(
+          style = "margin-bottom: 12px;",
+          strong("Authors:", style = "color: #495057; font-weight: 600;"),
+          br(),
+          span(
+            style = "color: #6c757d; font-style: italic;",
+            ifelse(is.na(values$M$AU[i]) || values$M$AU[i] == "", "Not available", to_title_case(gsub(";","; ",values$M$AU[i])))
+          )
+        ),
+        
+        # Publication info in one row
+        div(
+          style = "display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 12px;",
+          
+          div(
+            strong("Journal:", style = "color: #495057; font-weight: 600;"),
+            br(),
+            span(
+              style = "color: #28a745; font-weight: 500;",
+              ifelse(is.na(values$M$SO[i]) || values$M$SO[i] == "", "N/A",  to_title_case(values$M$SO[i]))
+            )
+          ),
+          
+          div(
+            strong("Year:", style = "color: #495057; font-weight: 600;"),
+            br(),
+            span(
+              style = "color: #ffc107; font-weight: 600;",
+              ifelse(is.na(values$M$PY[i]) || values$M$PY[i] == "", "N/A", values$M$PY[i])
+            )
+          ),
+          
+          div(
+            strong("DOI:", style = "color: #495057; font-weight: 600;"),
+            br(),
+            if (!is.na(values$M$DI[i]) && values$M$DI[i] != "") {
+              a(
+                href = paste0("https://doi.org/", values$M$DI[i]),
+                target = "_blank",
+                style = "color: #dc3545; text-decoration: none; font-weight: 500;",
+                values$M$DI[i],
+                icon("external-link-alt", class = "fa fa-external-link-alt", style = "margin-left: 5px; font-size: 0.8em;")
+              )
+            } else {
+              span(style = "color: #6c757d;", "Not available")
+            }
+          )
+        )
+      ),
+      
+      # Abstract (if available)
+      if (!is.na(values$M$AB[i]) && values$M$AB[i] != "") {
+        div(
+          style = "margin-bottom: 20px; padding: 15px; background-color: #e9ecef; border-radius: 6px; border-left: 4px solid #6c757d;",
+          div(
+            style = "display: flex; align-items: center; margin-bottom: 10px;",
+            strong("Abstract:", style = "color: #495057; font-weight: 600; font-size: 1.05em;"),
+          ),
+          # strong("Abstract:", style = "color: #495057; font-weight: 600; font-size: 1.05em;"),
+          # br(), br(),
+          div(
+            style = "color: #495057; line-height: 1.5; text-align: justify;",
+            HTML(gemini_to_html(normalize_uppercase_text(values$M$AB[i]), font_size = "16px"))
+          )
+        )
+      },
+      
+      # AI Summary
+      div(
+        style = "margin-bottom: 20px; padding: 15px; background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 6px; border-left: 4px solid #007bff;",
+        div(
+          style = "display: flex; align-items: center; margin-bottom: 10px;",
+          icon("robot", class = "fa fa-robot", style = "color: #007bff; margin-right: 8px; font-size: 1.2em;"),
+          strong("Biblio AI-Generated Summary:", style = "color: #007bff; font-weight: 600; font-size: 1.05em;")
+        ),
+        div(
+          style = "color: #495057; line-height: 1.5; text-align: justify;",
+          if (is.null(res) || res == "" || grepl("Error", res, ignore.case = TRUE)) {
+            span(
+              style = "color: #dc3545; font-style: italic;",
+              "Summary not available at the moment. Please try again later."
+            )
+          } else {
+            HTML(gemini_to_html(res, font_size = "16px"))
+          }
+        )
+      ),
+      
+      # Footer with timestamp
+      div(
+        style = "margin-top: 15px; padding-top: 10px; border-top: 1px solid #dee2e6; text-align: right; font-size: 0.85em; color: #6c757d;",
+        icon("clock", class = "fa fa-clock", style = "margin-right: 5px;"),
+        "Generated on: ", format(Sys.time(), "%m/%d/%Y at %H:%M")
+      )
+    )
+  })
+  
+  
   ### Most Global Cited Documents ----
   
   MGCDocuments <- eventReactive(input$applyMGCDocuments,{
@@ -2885,7 +3227,7 @@ To ensure the functionality of Biblioshiny,
     TAB$DOI<- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     DTformat(TAB, nrow=10, filename="Most_Global_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+             selection=FALSE, summary="documents")
   })
   
   observeEvent(input$reportMCD,{
@@ -2958,10 +3300,11 @@ To ensure the functionality of Biblioshiny,
     TAB <- values$TABLocDoc
     TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
     
-    names(TAB)[4:8] <- c("Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
+    names(TAB)[c(1,4:8)] <- c("Paper","Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
+    print(names(TAB))
     DTformat(TAB, nrow=10, filename="Most_Local_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=6:8, dom=FALSE, 
              size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+             selection=FALSE, summary="documents")
   })
   
   observeEvent(input$reportMLCD,{
@@ -4837,7 +5180,7 @@ To ensure the functionality of Biblioshiny,
     Data <- values$histResults$histData
     DTformat(Data, nrow=10, filename="Historiograph_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
              size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+             selection=FALSE, summary="historiograph")
   })
   
   # gemini button for word network

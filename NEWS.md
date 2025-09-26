@@ -1,6 +1,12 @@
 # bibliometrix (development version)
 
-# bibliometrix 5.1.1
+Features:
+* Added Author Bio Card
+* Biblioshiny: Added Article AI-Summary
+
+Changes:
+* #564 [Solved] - Now bibliometrix supports new scopus CSV format (both in importing and local citation analyses)
+
 
 # bibliometrix V.5.1.1 (Release date: 2025-09-02)
 

@@ -52,6 +52,7 @@ biblioAI <- helpContent()$biblioAI
 info <- helpContent()$info
 pubs <- helpContent()$publications
 filters <- helpContent()$filters
+authorProfile <- helpContent()$authorProfile
 
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(
@@ -185,6 +186,32 @@ body <- dashboardBody(
     to { opacity: 1; transform: scale(1); }
   }
 "))),
+  ### css for author link
+  tags$head(
+    tags$style(HTML("
+      .author-link {
+        color: #337ab7;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .author-link:hover {
+        color: #23527c;
+        font-weight: bold;
+      }"
+    ))
+  ),
+  ## script to open more times the same modal ####
+  tags$script("
+    Shiny.addCustomMessageHandler('button_id', function(value) {
+    Shiny.setInputValue('button_id', value);
+    });
+  "),
+  tags$script("
+    Shiny.addCustomMessageHandler('selected_author', function(value) {
+    Shiny.setInputValue('selected_author', value);
+    });
+  "),
+  ## script to get the dimensions of the page ####
   ###
   tags$head(
     tags$style(".fa-cloud-arrow-down {font-size: 20px}"),
@@ -1603,6 +1630,116 @@ body <- dashboardBody(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
             )
+          )
+        )
+      )
+    ),
+    ##### Author Bio Page ----
+    tabItem(
+      tabName = "AuthorPage",
+      fluidPage(
+        fluidRow(
+          column(
+            12,
+            h3(strong("Author Profile"), align = "center")
+          )
+        )
+      ),
+      br(),
+
+      fluidRow(
+        column(
+          9,
+          tabsetPanel(
+            type = "tabs",
+            tabPanel(
+              "Global Profile",
+              div(
+                #style = "height: 550px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
+                shinycssloaders::withSpinner(uiOutput("AuthorBioPageUI"))
+              )
+            ),
+            tabPanel(
+              "Local Profile",
+              div(
+                #style = "height: 550px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
+                shinycssloaders::withSpinner(uiOutput("AuthorLocalProfileUI"))
+              )
+            ), 
+            tabPanel(
+              "Info & References",
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(authorProfile)
+                  ),
+                  column(1)
+                )
+              )
+            )
+          )
+        ),
+        column(
+          3,
+          div(
+            box(
+              width = 12,
+              # div(h3(strong(em("----"))), style = "margin-top:-57px"),
+              # tags$hr(),
+              style = "text-align: left; text-color: #989898",
+              selectizeInput(
+                inputId = "authorSearch",
+                label = h4(strong("Search Auhtor")), choices = NULL
+              ),
+              fluidRow(
+                column(
+                  4,
+                  div(
+                    align = "center",
+                    title = "Apply",
+                    do.call("actionButton", c(list(
+                      label = NULL,
+                      style = "display:block; height: 37px; width: 37px; border-radius: 50%;
+                                      border: 1px; margin-top: 16px;",
+                      icon = icon(name = "play", lib = "glyphicon"),
+                      inputId = "authorPageApply"
+                    )))
+                  )
+                ),
+                column(
+                  4,
+                  div(
+                    align = "center",
+                    title = "Reset",
+                    do.call("actionButton", c(list(
+                      label = NULL,
+                      style = "display:block; height: 37px; width: 37px; border-radius: 50%;
+                                      border: 1px; margin-top: 16px;",
+                      icon = icon(name = "remove", lib = "glyphicon"),
+                      inputId = "authorPageAReset"
+                    )))
+                  )
+                ),
+                column(
+                  4,
+                  # div(
+                  #   align = "center",
+                  #   title = "Export raw text(s) in Excel",
+                  #   do.call("actionButton", c(list(
+                  #     label = NULL,
+                  #     style = "display:block; height: 37px; width: 37px; border-radius: 50%;
+                  #                         border: 1px; margin-top: 16px;",
+                  #     icon = icon(name = "download-alt", lib = "glyphicon"),
+                  #     inputId = "wordsContSave"
+                  #   )))
+                  # )
+                )
+              )
+            ),
+            style = "margin-top:40px"
           )
         )
       )

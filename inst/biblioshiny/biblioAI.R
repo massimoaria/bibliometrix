@@ -759,7 +759,7 @@ geminiSave <- function(values, activeTab){
 ## Summarize document with Gemini AI ---
 summaryAI <- function(values, i, model) {
   # Construct the prompt for Gemini AI
-  prompt <- paste0("Summarize the content of the following publication:",
+  prompt <- paste0("Summarize the content of the following publication",
                    " in no more than 250 words. ",
                    "Title: ", values$M$TI[i],
                    "Authors: ", values$M$AU[i],

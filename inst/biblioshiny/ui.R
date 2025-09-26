@@ -1655,14 +1655,14 @@ body <- dashboardBody(
             tabPanel(
               "Global Profile",
               div(
-                #style = "height: 550px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
+                # style = "height: 700px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
                 shinycssloaders::withSpinner(uiOutput("AuthorBioPageUI"))
               )
             ),
             tabPanel(
               "Local Profile",
               div(
-                #style = "height: 550px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
+                # style = "height: 700px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
                 shinycssloaders::withSpinner(uiOutput("AuthorLocalProfileUI"))
               )
             ), 

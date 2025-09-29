@@ -460,9 +460,9 @@ analyze_scientific_content_enhanced <- function(text,
   
   # Clean and prepare text
   clean_text <- text %>%
-    str_replace_all("\\n+", " ") %>%  # Replace newlines with spaces
-    str_replace_all("\\s+", " ") %>%  # Normalize whitespace
-    str_trim()
+    stringr::str_replace_all("\\n+", " ") %>%  # Replace newlines with spaces
+    stringr::str_replace_all("\\s+", " ") %>%  # Normalize whitespace
+    stringr::str_trim()
   
   # Basic text statistics
   text_stats <- data.frame(
@@ -548,7 +548,7 @@ analyze_scientific_content_enhanced <- function(text,
         individual_citations <- str_split(inner_text, "\\s*;\\s*")[[1]]
         
         for (j in seq_along(individual_citations)) {
-          indiv_cite <- str_trim(individual_citations[j])
+          indiv_cite <- stringr::str_trim(individual_citations[j])
           if (str_detect(indiv_cite, "\\d{4}")) {  # Must contain a year
             parsed_row <- tibble(
               citation_type = "parsed_from_multiple",
@@ -585,7 +585,7 @@ analyze_scientific_content_enhanced <- function(text,
         author_part = str_extract(citation_text, "^[^(]+"),
         year_part = str_extract(citation_text, "\\(\\d{4}[a-z]?\\)"),
         # Create a standardized parenthetical format
-        standardized_citation = paste0("(", str_trim(author_part), ", ", str_replace_all(year_part, "[()]", ""), ")")
+        standardized_citation = paste0("(", stringr::str_trim(author_part), ", ", stringr::str_replace_all(year_part, "[()]", ""), ")")
       )
     
     # Add standardized format to the data
@@ -667,7 +667,7 @@ analyze_scientific_content_enhanced <- function(text,
         words_before,
         citation$citation_text,
         words_after
-      ) %>% str_trim()
+      ) %>% stringr::str_trim()
       
       # Count total words in context
       context_word_count <- n_words_before + n_words_after + 
@@ -738,10 +738,10 @@ analyze_scientific_content_enhanced <- function(text,
   
   ## remove numbers and punctuation for n-grams
   clean_text_filtered<- text %>%
-    str_replace_all("\\n+", " ") %>%
-    str_replace_all("\\d+", " ") %>%
-    str_replace_all("\\s+", " ") %>%
-    str_trim()
+    stringr::str_replace_all("\\n+", " ") %>%
+    stringr::str_replace_all("\\d+", " ") %>%
+    stringr::str_replace_all("\\s+", " ") %>%
+    stringr::str_trim()
   
   if (remove_stopwords){
     word_tokens <- tibble(text = clean_text_filtered) %>% 

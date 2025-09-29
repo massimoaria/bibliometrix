@@ -1,6 +1,7 @@
 source("libraries.R", local = TRUE)
 source("helpContent.R", local = TRUE)
 source("utils.R", local = TRUE)
+source("contentAnalysis.R", local = TRUE)
 suppressMessages(libraries())
 
 # UI components ----
@@ -160,6 +161,9 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       menuSubItem("Merge Collections", tabName = "mergeData", icon = icon("chevron-right", lib = "glyphicon"))
     ),
     menuItemOutput("rest_of_sidebar"),
+    menuItem("Content Analysis", 
+             tabName = "content_analysis",
+             icon = icon("quote-right")),
     menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
   ),
   textOutput("res"),
@@ -6376,6 +6380,10 @@ body <- dashboardBody(
         )
       )
     ),
+    
+    #### Content Analysis ----
+    content_analysis_tab("content_analysis"),
+    
     #### Report ----
     tabItem(
       "report",

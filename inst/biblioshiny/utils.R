@@ -5457,6 +5457,11 @@ menuList <- function(values) {
       }
     )
 
+  # L[[length(L) + 1]] <-
+  #   menuItem("Content Analysis", 
+  #                        tabName = "content_analysis",
+  #                        icon = icon("quote-right"))
+  
   L[[length(L) + 1]] <- menuItem(
     "Report",
     tabName = "report",

@@ -44,7 +44,7 @@ libraries <- function() {
   
   pkgs <- c(
     "httr2", "base64enc", "bibliometrix", "zip", "shiny", "igraph", "DT", 
-    "ggplot2", "wordcloud2", "ggmap", "maps", 
+    "ggplot2", "wordcloud2", "ggmap", "maps", "pdftools (>= 3.6.0)",
     "visNetwork", "plotly", "fontawesome", "shinydashboardPlus", 
     "shinydashboard", "shinyjs", "curl (>= 6.3.0)","RCurl", "openxlsx", "shinyWidgets", 
     "chromote", "pagedown", "Matrix", "dimensionsR", "pubmedR", 

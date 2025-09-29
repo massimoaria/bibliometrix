@@ -2,6 +2,7 @@ source("utils.R", local=TRUE)
 source("libraries.R", local=TRUE)
 source("biblioShot.R", local=TRUE)
 source("biblioAI.R", local=TRUE)
+source("contentAnalysis.R", local = TRUE)
 
 suppressMessages(res <- libraries())
 if (!res) {
@@ -120,6 +121,12 @@ To ensure the functionality of Biblioshiny,
   values$index_col <- 0
   values$playing_col <- TRUE
   values$paused_col <- FALSE
+  
+  ## Content Analysis
+  values$pdf_text = NULL
+  values$analysis_results = NULL
+  values$network_plot = NULL
+  values$analysis_running = FALSE
   
   ## gemini api and model
   home <- homeFolder()
@@ -5293,7 +5300,6 @@ To ensure the functionality of Biblioshiny,
   
   # start
   observeEvent(input$start_col, {
-    # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
     values$index_col <- 0
     values$playing_col <- TRUE
     values$paused_col <- FALSE
@@ -5448,6 +5454,9 @@ To ensure the functionality of Biblioshiny,
       popUp(type="error")
     }
   })
+  
+  # CONTENT ANALYSIS ----
+  content_analysis_server(input, output, session, values)
   
   # REPORT ----
   ### Report Save xlsx ----

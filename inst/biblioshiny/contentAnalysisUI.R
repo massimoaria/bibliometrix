@@ -173,7 +173,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                      column(12,
                             div(class = "box-body",
                                 fluidRow(
-                                  column(8,
+                                  column(6,
                                          div(class = "box box-primary",
                                              h5("Citation Types Distribution", class = "box-title", style = "color: #2E86AB;"),
                                              div(class = "box-header with-border",
@@ -183,7 +183,25 @@ content_analysis_tab <- function(id = "content_analysis") {
                                              )
                                          )
                                   ),
-                                  column(4,
+                                  column(6,
+                                         div(class = "box box-success",
+                                             h5("Citations by Section", class = "box-title", style = "color: #27ae60;"),
+                                             div(class = "box-header with-border",
+                                                 div(class = "box-body",
+                                                     DT::dataTableOutput("citation_sections_table")
+                                                 )
+                                             )
+                                         )
+                                  )
+                                )
+                            )
+                     )
+                   ),
+                   fluidRow(
+                     column(12,
+                            div(class = "box-body",
+                                fluidRow(
+                                  column(12,
                                          div(class = "box box-primary",
                                              div(class = "box-header with-border",
                                                  h5("Text Statistics", style = "color: #2E86AB;")
@@ -289,41 +307,37 @@ content_analysis_tab <- function(id = "content_analysis") {
                                 ),
                                 div(class = "box-body",
                                     fluidRow(
-                                      column(3,
-                                             selectInput("network_layout",
-                                                         "Layout Algorithm:",
-                                                         choices = list(
-                                                           "Force-directed (FR)" = "layout_with_fr",
-                                                           "Kamada-Kawai" = "layout_with_kk", 
-                                                           "Nicely" = "layout_nicely"
-                                                         ),
-                                                         selected = "layout_with_fr",
-                                                         width = "100%"
+                                      column(4,
+                                             numericInput("max_distance_network",
+                                                          label = "Max Distance Between Citations (chars)",
+                                                          value = 800,
+                                                          min = 200,
+                                                          max = 2000,
+                                                          step = 100,
+                                                          width = "100%"
                                              )
                                       ),
-                                      column(3,
-                                             selectInput("network_color",
-                                                         "Color Nodes By:",
-                                                         choices = list(
-                                                           "Citation Type" = "citation_type",
-                                                           "Publication Year" = "year",
-                                                           "Connection Frequency" = "frequency"
-                                                         ),
-                                                         selected = "citation_type",
-                                                         width = "100%"
-                                             )
-                                      ),
-                                      column(3,
+                                      column(4,
                                              checkboxInput("network_physics",
                                                            "Enable Physics Simulation",
                                                            value = FALSE
                                              )
                                       ),
-                                      column(3,
+                                      column(4,
                                              actionButton("update_network",
                                                           "Update Network",
                                                           class = "btn-warning btn-block",
                                                           icon = icon("refresh")
+                                             )
+                                      )
+                                    ),
+                                    fluidRow(
+                                      column(12,
+                                             div(
+                                               style = "margin-top: 15px; padding: 10px; background-color: #f0f8ff; border-radius: 5px;",
+                                               icon("info-circle", style = "color: #3498db;"),
+                                               span(" Nodes are colored by paper section. Legend visible on the right side of the network.",
+                                                    style = "color: #555; font-size: 13px; margin-left: 8px;")
                                              )
                                       )
                                     )
@@ -531,14 +545,9 @@ content_analysis_tab <- function(id = "content_analysis") {
 create_citation_network_basic <- function(citation_analysis_results,
                                           max_distance = 1000,
                                           min_connections = 1,
-                                          layout = "fr",
                                           show_labels = TRUE,
                                           height = "600px",
                                           width = "100%") {
-  
-  # require(visNetwork)
-  # require(dplyr)
-  # require(stringr)
   
   network_data <- citation_analysis_results$network_data
   
@@ -559,13 +568,36 @@ create_citation_network_basic <- function(citation_analysis_results,
   # Get unique citations
   all_citation_texts <- unique(c(network_data_filtered$citation1, network_data_filtered$citation2))
   
+  # Ottieni informazioni sulle sezioni - AGGREGA per citazione
+  citations_with_sections <- citation_analysis_results$citations %>%
+    select(citation_text_clean, section) %>%
+    group_by(citation_text_clean) %>%
+    summarise(
+      sections = paste(unique(section), collapse = ", "),
+      n_sections = n_distinct(section),
+      primary_section = first(section),
+      .groups = "drop"
+    )
+  
   # Create nodes
   nodes <- data.frame(
     id = 1:length(all_citation_texts),
+    citation_text = all_citation_texts,
     label = if (show_labels) str_trunc(all_citation_texts, 25) else "",
-    title = all_citation_texts,
     stringsAsFactors = FALSE
   )
+  
+  # Aggiungi informazioni sulla sezione ai nodi
+  nodes <- nodes %>%
+    left_join(
+      citations_with_sections,
+      by = c("citation_text" = "citation_text_clean")
+    ) %>%
+    mutate(
+      sections = replace_na(sections, "Unknown"),
+      primary_section = replace_na(primary_section, "Unknown"),
+      n_sections = replace_na(n_sections, 1)
+    )
   
   # Calculate connections
   node_connections <- rbind(
@@ -574,7 +606,7 @@ create_citation_network_basic <- function(citation_analysis_results,
   ) %>%
     count(citation, name = "connections")
   
-  nodes$connections <- sapply(nodes$title, function(cite) {
+  nodes$connections <- sapply(nodes$citation_text, function(cite) {
     conn <- node_connections$connections[node_connections$citation == cite]
     if (length(conn) == 0) return(0)
     return(conn[1])
@@ -582,7 +614,7 @@ create_citation_network_basic <- function(citation_analysis_results,
   
   # Filter by connections
   nodes <- nodes[nodes$connections >= min_connections, ]
-  valid_citations <- nodes$title
+  valid_citations <- nodes$citation_text
   network_data_filtered <- network_data_filtered %>%
     filter(citation1 %in% valid_citations & citation2 %in% valid_citations)
   
@@ -594,38 +626,45 @@ create_citation_network_basic <- function(citation_analysis_results,
   # Set node properties
   nodes$size <- pmax(15, pmin(40, 15 + nodes$connections * 3))
   
-  # Simple type extraction
-  get_simple_type <- function(citation_text) {
-    if (str_detect(citation_text, "et\\s+al")) return("Et al.")
-    if (str_detect(citation_text, "&")) return("Multiple authors")
-    if (str_detect(citation_text, "see|e\\.g\\.")) return("Reference")
-    if (str_detect(citation_text, "\\[\\d+\\]")) return("Numbered")
-    if (str_detect(citation_text, "doi\\.org")) return("DOI")
-    return("Standard")
-  }
+  # Assegna colori dinamicamente usando colorlist()
+  unique_sections <- unique(nodes$primary_section)
+  colors <- colorlist()
   
-  nodes$group <- sapply(nodes$title, get_simple_type)
-  
-  # Colors
-  color_map <- c(
-    "Et al." = "#FF6B6B",
-    "Multiple authors" = "#4ECDC4", 
-    "Reference" = "#45B7D1",
-    "Standard" = "#96CEB4",
-    "Numbered" = "#FFEAA7",
-    "DOI" = "#DDA0DD"
+  # Crea mapping sezione -> colore
+  section_colors <- setNames(
+    colors[((seq_along(unique_sections) - 1) %% length(colors)) + 1],
+    unique_sections
   )
   
-  nodes$color <- color_map[nodes$group]
-  nodes$color[is.na(nodes$color)] <- "#CCCCCC"
+  # Assicurati che "Unknown" abbia sempre un colore grigio
+  if ("Unknown" %in% names(section_colors)) {
+    section_colors["Unknown"] <- "#CCCCCC"
+  }
+  
+  nodes$group <- nodes$primary_section
+  nodes$color <- section_colors[nodes$primary_section]
+  
+  # Aggiungi bordo speciale per nodi multi-sezione
+  nodes$borderWidth <- ifelse(nodes$n_sections > 1, 3, 1)
+  nodes$borderWidthSelected <- ifelse(nodes$n_sections > 1, 5, 2)
+  
+  # Crea title con informazioni complete
+  nodes$title <- paste0(
+    nodes$citation_text,
+    "\n<br><b>Section(s):</b> ", nodes$sections,
+    ifelse(nodes$n_sections > 1, 
+           paste0(" (", nodes$n_sections, " sections)"), 
+           ""),
+    "\n<br><b>Connections:</b> ", nodes$connections
+  )
   
   # Create edges
   edges <- data.frame(
     from = sapply(network_data_filtered$citation1, function(cite) {
-      nodes$id[nodes$title == cite][1]
+      nodes$id[nodes$citation_text == cite][1]
     }),
     to = sapply(network_data_filtered$citation2, function(cite) {
-      nodes$id[nodes$title == cite][1]
+      nodes$id[nodes$citation_text == cite][1]
     }),
     distance = abs(network_data_filtered$distance),
     stringsAsFactors = FALSE
@@ -634,38 +673,46 @@ create_citation_network_basic <- function(citation_analysis_results,
   edges <- edges[!is.na(edges$from) & !is.na(edges$to), ]
   
   edges$width <- pmax(1, 8 - (edges$distance / 100))
-  edges$color <- ifelse(edges$distance <= 300, "#FF6B6B", 
-                        ifelse(edges$distance <= 600, "#4ECDC4", "#CCCCCC"))
+  edges$color <- ifelse(edges$distance <= 300, "#FF6F6F", 
+                        ifelse(edges$distance <= 600, "#7FB3D5", "#CCCCCC"))
   edges$title <- paste("Distance:", edges$distance, "characters")
   
-  # Create network
-  network <- visNetwork(nodes, edges, height = height, width = width)
-  
-  # Apply layout
-  if (layout == "fr") {
-    network <- network %>% visIgraphLayout(layout = "layout_with_fr", randomSeed = 123)
-  } else if (layout == "kk") {
-    network <- network %>% visIgraphLayout(layout = "layout_with_kk", randomSeed = 123)
-  } else {
-    network <- network %>% visIgraphLayout(layout = "layout_nicely", randomSeed = 123)
-  }
+  # Create network con layout Fruchterman-Reingold
+  network <- visNetwork(nodes, edges, height = height, width = width) %>%
+    visIgraphLayout(layout = "layout_with_fr", randomSeed = 123)
   
   # Configure options
   network <- network %>%
     visOptions(highlightNearest = TRUE) %>%
     visInteraction(dragNodes = TRUE, dragView = TRUE, zoomView = TRUE) %>%
-    visPhysics(enabled = FALSE)
+    visPhysics(enabled = FALSE) %>%
+    visNodes(
+      borderWidth = 1,
+      borderWidthSelected = 2
+    )
   
   # Add stats
   n_nodes <- nrow(nodes)
   n_edges <- nrow(edges)
   avg_distance <- round(mean(edges$distance), 1)
   
+  # Statistiche per sezione e multi-sezione
+  section_stats <- nodes %>%
+    count(primary_section) %>%
+    arrange(desc(n))
+  
+  multi_section_citations <- nodes %>%
+    filter(n_sections > 1) %>%
+    select(citation_text, sections, n_sections)
+  
   attr(network, "stats") <- list(
     n_nodes = n_nodes,
     n_edges = n_edges,
     avg_distance = avg_distance,
-    max_distance = max_distance
+    max_distance = max_distance,
+    section_distribution = section_stats,
+    multi_section_citations = multi_section_citations,
+    section_colors = section_colors
   )
   
   return(network)
@@ -879,16 +926,9 @@ content_analysis_server <- function(input, output, session, values) {
       if (!is.null(values$analysis_results$network_data) && 
           nrow(values$analysis_results$network_data) > 0) {
         
-        layout_type <- switch(input$network_layout,
-                              "layout_with_fr" = "fr",
-                              "layout_with_kk" = "kk", 
-                              "layout_nicely" = "nicely",
-                              "fr")
-        
         values$network_plot <- create_citation_network_basic(
           values$analysis_results,
           max_distance = input$max_distance,
-          layout = layout_type,
           show_labels = TRUE
         )
       }
@@ -960,7 +1000,17 @@ content_analysis_server <- function(input, output, session, values) {
     } else {
       data.frame(citation_type = character(0), n = numeric(0), percentage = numeric(0))
     }
-  }, options = list(pageLength = 8, dom = 't', ordering = FALSE, searching = FALSE))
+  }, options = list(pageLength = 10, dom = 't', ordering = FALSE, searching = FALSE))
+  
+  # Citation sections table
+  output$citation_sections_table <- DT::renderDataTable({
+    if (!is.null(values$analysis_results) && 
+        !is.null(values$analysis_results$citation_metrics$section_distribution)) {
+      values$analysis_results$citation_metrics$section_distribution %>% filter(n > 0)
+    } else {
+      data.frame(section = character(0), n = numeric(0), percentage = numeric(0))
+    }
+  }, options = list(pageLength = 10, dom = 't', ordering = FALSE, searching = FALSE))
   
   # Frequent words table
   output$frequent_words_table <- DT::renderDataTable({
@@ -1043,7 +1093,6 @@ content_analysis_server <- function(input, output, session, values) {
         nrow(values$analysis_results$citation_contexts) > 0) {
       
       contexts <- values$analysis_results$citation_contexts
-      save(contexts, file="debug_contexts.RData")
       
       # Apply filters
       if (!is.null(input$context_search) && nzchar(input$context_search)) {
@@ -1067,45 +1116,48 @@ content_analysis_server <- function(input, output, session, values) {
         citation_boxes <- lapply(1:min(50, nrow(contexts)), function(i) {
           context <- contexts[i,]
           
-          # Create color based on citation type
-          type_colors <- c(
-            "narrative_etal" = "#FF6B6B",
-            "author_year_etal" = "#4ECDC4",
-            "author_year_basic" = "#45B7D1",
-            "author_year_ampersand" = "#96CEB4",
-            "parsed_from_multiple" = "#FFEAA7",
-            "complex_multiple_citations" = "#DDA0DD",
-            "see_citations" = "#A8E6CF",
-            "multiple_citations_semicolon" = "#FFB3BA",
-            "narrative_single" = "#FFDFBA",
-            "narrative_multiple_authors" = "#BAFFC9"
-          )
+          # # Colori basati sulla sezione del paper
+          section_colors <- colorlist()[1:length(unique(contexts$section))]
+          names(section_colors) <- unique(contexts$section)
           
-          box_color <- type_colors[context$citation_type]
+          
+          # section_colors <- c(
+          #   "Abstract" = "#FF6B6B",
+          #   "Introduction" = "#4ECDC4", 
+          #   "Methods" = "#45B7D1",
+          #   "Results" = "#96CEB4",
+          #   "Discussion" = "#FFEAA7",
+          #   "Conclusion" = "#DDA0DD",
+          #   "Background" = "#A8E6CF",
+          #   "Literature" = "#FFB3BA",
+          #   "Methodology" = "#FFDFBA",
+          #   "Analysis" = "#BAFFC9",
+          #   "Full_text" = "#95A5A6",
+          #   "Unknown" = "#CCCCCC"
+          # )
+          
+          section_name <- if (!is.null(context$section) && !is.na(context$section)) {
+            context$section
+          } else {
+            "Unknown"
+          }
+          
+          box_color <- section_colors[section_name]
           if (is.na(box_color)) box_color <- "#CCCCCC"
           
           # Prepare tooltip text with reference if available
           has_reference <- FALSE
           tooltip_text <- "No reference matched for this citation"
-
-          # Più robusta verifica della presenza di ref_full_text
+          
           if ("ref_full_text" %in% names(context)) {
-            # Estrai il valore
             ref_value <- context[["ref_full_text"]]
             
-            # Debug print (rimuovi dopo il test)
-            cat("Citation", i, "- ref_value class:", class(ref_value), 
-                "- is.na:", is.na(ref_value), 
-                "- value:", substr(as.character(ref_value), 1, 50), "\n")
-            
-            # Controlla se il valore è valido
             if (length(ref_value) > 0 && 
                 !is.na(ref_value) && 
                 is.character(ref_value) &&
                 nzchar(trimws(ref_value))) {
               
               has_reference <- TRUE
-              # Escape HTML special characters
               ref_text <- trimws(ref_value)
               ref_text <- gsub("&", "&amp;", ref_text)
               ref_text <- gsub("<", "&lt;", ref_text)
@@ -1131,7 +1183,7 @@ content_analysis_server <- function(input, output, session, values) {
             div(
               style = "margin-bottom: 10px; font-size: 12px; color: #666;",
               span(paste("Citation", i, "•"), style = "font-weight: bold;"),
-              span(context$citation_type, style = paste0("color: ", box_color, "; font-weight: bold;")),
+              span(section_name, style = paste0("color: ", box_color, "; font-weight: bold; margin-left: 8px;")),
               span(paste("• Position:", context$citation_position_in_text))
             ),
             
@@ -1139,7 +1191,7 @@ content_analysis_server <- function(input, output, session, values) {
             div(
               style = "display: flex; align-items: center; font-family: 'Courier New', monospace;",
               
-              # Words before (left context)
+              # Words before
               div(
                 style = "flex: 1; text-align: right; padding-right: 15px; color: #555; font-size: 14px;",
                 if (nzchar(context$words_before)) {
@@ -1167,7 +1219,7 @@ content_analysis_server <- function(input, output, session, values) {
                 context$citation_text
               ),
               
-              # Words after (right context)
+              # Words after
               div(
                 style = "flex: 1; text-align: left; padding-left: 15px; color: #555; font-size: 14px;",
                 if (nzchar(context$words_after)) {
@@ -1314,16 +1366,9 @@ content_analysis_server <- function(input, output, session, values) {
         nrow(values$analysis_results$network_data) > 0) {
       
       tryCatch({
-        layout_type <- switch(input$network_layout,
-                              "layout_with_fr" = "fr",
-                              "layout_with_kk" = "kk", 
-                              "layout_nicely" = "nicely",
-                              "fr")
-        
         values$network_plot <- create_citation_network_basic(
           values$analysis_results,
-          max_distance = input$max_distance,
-          layout = layout_type,
+          max_distance = input$max_distance_network,
           show_labels = TRUE
         )
         
@@ -1348,13 +1393,25 @@ content_analysis_server <- function(input, output, session, values) {
     if (!is.null(values$network_plot)) {
       stats <- attr(values$network_plot, "stats")
       if (!is.null(stats)) {
+        section_info <- ""
+        if (!is.null(stats$section_distribution)) {
+          section_info <- paste0(
+            "\n\nSection Distribution:\n",
+            paste(
+              stats$section_distribution$section, ": ", 
+              stats$section_distribution$n, 
+              collapse = "\n"
+            )
+          )
+        }
+        
         paste(
           "Nodes:", stats$n_nodes, "\n",
           "Edges:", stats$n_edges, "\n", 
           "Avg. Distance:", stats$avg_distance, "chars\n",
           "Max Distance Filter:", stats$max_distance, "chars\n\n",
-          "Network Density:", round(stats$n_edges / (stats$n_nodes * (stats$n_nodes - 1) / 2), 3), "\n",
-          "Connected Components:", "1"  # Basic assumption for simplicity
+          "Network Density:", round(stats$n_edges / (stats$n_nodes * (stats$n_nodes - 1) / 2), 3),
+          section_info
         )
       } else {
         "Network statistics not available"

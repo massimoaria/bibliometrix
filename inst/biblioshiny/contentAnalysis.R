@@ -31,6 +31,7 @@ analyze_scientific_content_enhanced <- function(text,
   if (is.list(text)) {
     if ("Full_text" %in% names(text)) {
       clean_text <- text$Full_text
+      sections_to_use <- NULL
     } else {
       sections_to_use <- setdiff(names(text), "References")
       clean_text <- paste(text[sections_to_use], collapse = " ")
@@ -295,6 +296,65 @@ analyze_scientific_content_enhanced <- function(text,
   }
   
   # ===========================================
+  # CITATION SECTION MAPPING
+  # ===========================================
+  
+  citation_sections <- tibble()
+  
+  if (is.list(text) && length(text) > 1) {
+    section_names <- setdiff(names(text), c("Full_text", "References"))
+    
+    if (length(section_names) > 0 && nrow(all_citations) > 0) {
+      # Calcola posizioni delle sezioni nel testo completo
+      section_positions <- list()
+      cumulative_pos <- 1
+      
+      for (sect_name in section_names) {
+        sect_text <- text[[sect_name]]
+        sect_length <- nchar(sect_text)
+        
+        section_positions[[sect_name]] <- list(
+          start = cumulative_pos,
+          end = cumulative_pos + sect_length - 1,
+          name = sect_name
+        )
+        
+        cumulative_pos <- cumulative_pos + sect_length + 1  # +1 per lo spazio
+      }
+      
+      # Mappa ogni citazione alla sua sezione
+      for (i in 1:nrow(all_citations)) {
+        cite_pos <- all_citations$start_pos[i]
+        
+        mapped_section <- "Unknown"
+        for (sect_name in section_names) {
+          sect_info <- section_positions[[sect_name]]
+          if (cite_pos >= sect_info$start && cite_pos <= sect_info$end) {
+            mapped_section <- sect_name
+            break
+          }
+        }
+        
+        citation_sections <- bind_rows(
+          citation_sections,
+          tibble(
+            citation_id = all_citations$citation_id[i],
+            section = mapped_section
+          )
+        )
+      }
+      
+      # Aggiungi la sezione ai dati delle citazioni
+      all_citations <- all_citations %>%
+        left_join(citation_sections, by = "citation_id")
+    } else {
+      all_citations$section <- "Full_text"
+    }
+  } else {
+    all_citations$section <- "Full_text"
+  }
+  
+  # ===========================================
   # CITATION ANALYSIS METRICS
   # ===========================================
   
@@ -304,6 +364,18 @@ analyze_scientific_content_enhanced <- function(text,
     citation_metrics$type_distribution <- all_citations %>%
       count(citation_type, sort = TRUE) %>%
       mutate(percentage = round(n / sum(n) * 100, 2))
+    
+    if (!is.null(sections_to_use)){
+      citation_metrics$section_distribution <- all_citations %>%
+        mutate(section = factor(section, levels = sections_to_use)) %>%
+        count(section, sort = FALSE, .drop = FALSE) %>%
+        mutate(percentage = round(n / sum(n) * 100, 2))
+    } else {
+      citation_metrics$section_distribution <- all_citations %>%
+        count(section, sort = TRUE) %>%
+        mutate(percentage = round(n / sum(n) * 100, 2))
+    }
+    
     
     citation_metrics$narrative_ratio <- all_citations %>%
       summarise(
@@ -432,6 +504,7 @@ analyze_scientific_content_enhanced <- function(text,
         citation_text = citation$citation_text,
         citation_text_clean = citation$citation_text_clean,
         citation_type = citation$citation_type,
+        section = citation$section,
         words_before = words_before,
         words_after = words_after,
         full_context = full_context,

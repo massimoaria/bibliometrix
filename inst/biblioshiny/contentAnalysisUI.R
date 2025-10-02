@@ -348,7 +348,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                    
                    # Network Visualization
                    fluidRow(
-                     column(8,
+                     # column(8,
                             div(class = "box box-primary",
                                 div(class = "box-header with-border",
                                     h4("Citation Co-occurrence Network", class = "box-title", style = "color: #2E86AB;"),
@@ -362,13 +362,14 @@ content_analysis_tab <- function(id = "content_analysis") {
                                 ),
                                 div(class = "box-body",
                                     div(
-                                      style = "height: 500px; border: 1px solid #ddd; border-radius: 5px;",
-                                      visNetworkOutput("citation_network", height = "490px")
+                                      style = "height: 600px; border: 1px solid #ddd; border-radius: 5px;",
+                                      visNetworkOutput("citation_network", width = "auto", height = "70vh")
                                     )
                                 )
                             )
                      ),
-                     column(4,
+                   fluidRow(
+                     column(6,
                             div(class = "box box-info",
                                 div(class = "box-header with-border",
                                     h4("Network Information", class = "box-title", style = "color: #3498db;")
@@ -377,6 +378,8 @@ content_analysis_tab <- function(id = "content_analysis") {
                                     verbatimTextOutput("network_info")
                                 )
                             ),
+                     ),
+                     column(6,
                             div(class = "box box-success",
                                 div(class = "box-header with-border",
                                     h4("Strongest Connections", class = "box-title", style = "color: #27ae60;")
@@ -545,9 +548,7 @@ content_analysis_tab <- function(id = "content_analysis") {
 create_citation_network_basic <- function(citation_analysis_results,
                                           max_distance = 1000,
                                           min_connections = 1,
-                                          show_labels = TRUE,
-                                          height = "600px",
-                                          width = "100%") {
+                                          show_labels = TRUE) {
   
   network_data <- citation_analysis_results$network_data
   
@@ -624,7 +625,7 @@ create_citation_network_basic <- function(citation_analysis_results,
   }
   
   # Set node properties
-  nodes$size <- pmax(15, pmin(40, 15 + nodes$connections * 3))
+  nodes$size <- pmax(15, pmin(40, 15 + nodes$connections * 3))/2
   
   # Assegna colori dinamicamente usando colorlist()
   unique_sections <- unique(nodes$primary_section)
@@ -658,6 +659,10 @@ create_citation_network_basic <- function(citation_analysis_results,
     "\n<br><b>Connections:</b> ", nodes$connections
   )
   
+  nodes <- nodes %>% 
+    mutate(font.size = size,
+           font.vadjust = -0.7 * font.size)
+  
   # Create edges
   edges <- data.frame(
     from = sapply(network_data_filtered$citation1, function(cite) {
@@ -677,14 +682,16 @@ create_citation_network_basic <- function(citation_analysis_results,
                         ifelse(edges$distance <= 600, "#7FB3D5", "#CCCCCC"))
   edges$title <- paste("Distance:", edges$distance, "characters")
   
+  
+  
   # Create network con layout Fruchterman-Reingold
-  network <- visNetwork(nodes, edges, height = height, width = width) %>%
-    visIgraphLayout(layout = "layout_with_fr", randomSeed = 123)
+  network <- visNetwork(nodes, edges, type="full", smooth = TRUE, physics = FALSE) %>% #height = height, width = width) %>%
+    visIgraphLayout(layout = "layout_nicely", type = "full")
   
   # Configure options
   network <- network %>%
     visOptions(highlightNearest = TRUE) %>%
-    visInteraction(dragNodes = TRUE, dragView = TRUE, zoomView = TRUE) %>%
+    visInteraction(dragNodes = TRUE, dragView = TRUE, zoomView = TRUE, zoomSpeed = 0.2) %>%
     visPhysics(enabled = FALSE) %>%
     visNodes(
       borderWidth = 1,

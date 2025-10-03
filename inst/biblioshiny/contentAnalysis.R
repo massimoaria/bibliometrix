@@ -662,29 +662,404 @@ print_matching_diagnostics <- function(results) {
 }
 
 
-# ===========================================
-# ESEMPIO DI UTILIZZO
-# ===========================================
+#' Calculate word distribution across text segments or sections
+#'
+#' @param text Character string or list with text sections
+#' @param selected_words Character vector of words/ngrams to track
+#' @param use_sections Logical or "auto". If TRUE, use document sections (if available).
+#'                     If FALSE, create equal-length segments. If "auto", use sections 
+#'                     when available, otherwise segments. (default: "auto")
+#' @param n_segments Integer, number of segments if use_sections=FALSE (default: 10)
+#' @param remove_stopwords Logical, whether to remove stopwords (default: TRUE)
+#' @param language Character, language for stopwords (default: "en")
+#'
+#' @return A tibble with word frequencies by segment/section
+calculate_word_distribution <- function(text,
+                                        selected_words,
+                                        use_sections = "auto",
+                                        n_segments = 10,
+                                        remove_stopwords = TRUE,
+                                        language = "en") {
+  
+  require(tidyverse)
+  require(tidytext)
+  
+  # Normalize selected words to lowercase
+  selected_words <- tolower(selected_words)
+  
+  # Determine maximum n-gram size needed
+  max_ngram <- max(sapply(selected_words, function(w) {
+    length(strsplit(w, "\\s+")[[1]])
+  }))
+  
+  # ===========================================
+  # CHECK IF SECTIONS ARE AVAILABLE
+  # ===========================================
+  
+  sections_available <- FALSE
+  section_names <- character(0)
+  
+  if (is.list(text)) {
+    section_names <- setdiff(names(text), c("Full_text", "References"))
+    sections_available <- length(section_names) > 0
+  }
+  
+  # ===========================================
+  # DETERMINE WHAT TO USE: SECTIONS OR SEGMENTS
+  # ===========================================
+  
+  use_sections_final <- FALSE
+  
+  if (use_sections == "auto") {
+    use_sections_final <- sections_available
+  } else if (is.logical(use_sections)) {
+    if (use_sections && !sections_available) {
+      warning("Sections requested but not available. Using equal-length segments instead.")
+      use_sections_final <- FALSE
+    } else {
+      use_sections_final <- use_sections
+    }
+  } else {
+    stop("use_sections must be TRUE, FALSE, or 'auto'")
+  }
+  
+  # ===========================================
+  # PREPARE SEGMENT TEXTS
+  # ===========================================
+  
+  segment_texts <- list()
+  segment_info <- tibble()
+  
+  if (use_sections_final) {
+    # ===== USE DOCUMENT SECTIONS =====
+    for (i in seq_along(section_names)) {
+      section_name <- section_names[i]
+      section_text <- text[[section_name]]
+      
+      if (!is.null(section_text) && nchar(section_text) > 0) {
+        segment_texts[[i]] <- section_text
+        segment_info <- bind_rows(
+          segment_info,
+          tibble(
+            segment_id = i,
+            segment_name = section_name,
+            segment_type = "section"
+          )
+        )
+      }
+    }
+  } else {
+    # ===== CREATE EQUAL-LENGTH SEGMENTS =====
+    
+    # Extract full text
+    if (is.list(text)) {
+      full_text <- text$Full_text
+    } else {
+      full_text <- text
+    }
+    
+    # Clean text
+    full_text <- full_text %>%
+      str_replace_all("\\n+", " ") %>%
+      str_replace_all("\\s+", " ") %>%
+      str_trim()
+    
+    # Calculate segment boundaries based on character positions
+    total_chars <- nchar(full_text)
+    chars_per_segment <- ceiling(total_chars / n_segments)
+    
+    # Create segments by character position
+    for (i in 1:n_segments) {
+      start_pos <- (i - 1) * chars_per_segment + 1
+      end_pos <- min(i * chars_per_segment, total_chars)
+      segment_texts[[i]] <- substr(full_text, start_pos, end_pos)
+      segment_info <- bind_rows(
+        segment_info,
+        tibble(
+          segment_id = i,
+          segment_name = paste0("Segment ", i),
+          segment_type = "equal_length"
+        )
+      )
+    }
+  }
+  
+  # ===========================================
+  # PROCESS EACH SEGMENT: REMOVE STOPWORDS AND CREATE N-GRAMS
+  # ===========================================
+  
+  if (remove_stopwords) {
+    data(stop_words)
+  }
+  
+  all_ngrams <- tibble()
+  
+  for (i in seq_along(segment_texts)) {
+    segment_text <- segment_texts[[i]]
+    
+    # Step 1: Tokenize into words
+    tokens <- tibble(text = segment_text) %>%
+      unnest_tokens(word, text, token = "words")
+    
+    # Step 2: Remove stopwords if requested
+    if (remove_stopwords) {
+      tokens <- tokens %>%
+        anti_join(stop_words, by = "word")
+    }
+    
+    # Step 3: Reconstruct text without stopwords
+    clean_text <- paste(tokens$word, collapse = " ")
+    
+    # Step 4: Generate n-grams from 1 to max_ngram
+    for (n in 1:max_ngram) {
+      ngrams <- tibble(text = clean_text) %>%
+        unnest_tokens(word, text, token = "ngrams", n = n) %>%
+        filter(!is.na(word)) %>%
+        mutate(
+          segment_id = segment_info$segment_id[i],
+          segment_name = segment_info$segment_name[i],
+          segment_type = segment_info$segment_type[i],
+          ngram_size = n
+        )
+      
+      all_ngrams <- bind_rows(all_ngrams, ngrams)
+    }
+  }
+  
+  # ===========================================
+  # CALCULATE FREQUENCIES FOR SELECTED WORDS
+  # ===========================================
+  
+  # Filter only selected words/ngrams
+  word_counts <- all_ngrams %>%
+    filter(word %in% selected_words) %>%
+    count(segment_id, segment_name, segment_type, word, name = "count")
+  
+  # Calculate total unigrams per segment for relative frequency
+  total_per_segment <- all_ngrams %>%
+    filter(ngram_size == 1) %>%
+    count(segment_id, segment_name, segment_type, name = "total_words")
+  
+  # Join and calculate relative frequency
+  result <- word_counts %>%
+    left_join(total_per_segment, by = c("segment_id", "segment_name", "segment_type")) %>%
+    mutate(
+      relative_frequency = count / total_words,
+      percentage = relative_frequency * 100
+    ) %>%
+    arrange(segment_id, word)
+  
+  # Add metadata as attributes
+  attr(result, "use_sections") <- use_sections_final
+  attr(result, "sections_available") <- sections_available
+  attr(result, "n_segments") <- length(unique(result$segment_id))
+  attr(result, "selected_words") <- selected_words
+  attr(result, "segment_type") <- if (use_sections_final) "section" else "equal_length"
+  
+  return(result)
+}
 
-# Usa la funzione con il tuo oggetto text:
-# risultati <- analyze_scientific_content_enhanced(text = text)
-
-# Visualizza diagnostiche di matching:
-# print_matching_diagnostics(risultati)
-
-# Accedi ai risultati:
-# View(risultati$citation_references_mapping)
-# View(risultati$parsed_references)
-# View(risultati$citation_contexts)
-
-# Filtra solo match ad alta confidenza:
-# high_quality_matches <- risultati$citation_references_mapping %>%
-#   filter(match_confidence %in% c("high", "medium_fuzzy"))
-
-# Statistiche di matching:
-# risultati$summary$match_quality
-
-# Esporta i risultati:
-# write_csv(risultati$citation_references_mapping, "citation_mapping.csv")
-# write_csv(risultati$citation_contexts, "citation_contexts.csv")
-# write_csv(risultati$parsed_references, "parsed_references.csv")
+#' Create interactive word distribution plot
+#'
+#' @param word_distribution_data Tibble returned by calculate_word_distribution()
+#' @param plot_type Character, type of plot: "line" or "area" (default: "line")
+#' @param smooth Logical, whether to apply smoothing to lines (default: FALSE)
+#' @param show_points Logical, whether to show data points on lines (default: TRUE)
+#' @param colors Character vector of colors for words (optional)
+#'
+#' @return A plotly object
+plot_word_distribution <- function(word_distribution_data,
+                                   plot_type = "line",
+                                   smooth = FALSE,
+                                   show_points = TRUE,
+                                   colors = NULL) {
+  
+  # Extract metadata
+  use_sections <- attr(word_distribution_data, "use_sections")
+  segment_type <- attr(word_distribution_data, "segment_type")
+  selected_words <- attr(word_distribution_data, "selected_words")
+  
+  # Prepare data - ensure all words appear in all segments (with 0 if absent)
+  all_segments <- unique(word_distribution_data$segment_id)
+  all_words <- unique(word_distribution_data$word)
+  
+  complete_data <- expand.grid(
+    segment_id = all_segments,
+    word = all_words,
+    stringsAsFactors = FALSE
+  ) %>%
+    left_join(
+      word_distribution_data %>% 
+        select(segment_id, segment_name, word, relative_frequency, count),
+      by = c("segment_id", "word")
+    ) %>%
+    mutate(
+      relative_frequency = replace_na(relative_frequency, 0),
+      count = replace_na(count, 0)
+    )
+  
+  # Get segment names for x-axis
+  segment_labels <- word_distribution_data %>%
+    distinct(segment_id, segment_name) %>%
+    arrange(segment_id)
+  
+  complete_data <- complete_data %>%
+    left_join(segment_labels, by = "segment_id") %>%
+    mutate(
+      segment_name = coalesce(segment_name.x, segment_name.y)
+    ) %>%
+    select(-segment_name.x, -segment_name.y)
+  
+  # Set colors
+  n_words <- length(all_words)
+  if (is.null(colors)) {
+    # Use a color palette
+    if (n_words <= 8) {
+      colors <- RColorBrewer::brewer.pal(max(3, n_words), "Set2")[1:n_words]
+    } else {
+      # Generate colors
+      colors <- scales::hue_pal()(n_words)
+    }
+  }
+  
+  # Create color mapping
+  color_mapping <- setNames(colors, all_words)
+  
+  # Create plotly figure
+  fig <- plot_ly()
+  
+  # Add traces for each word
+  for (i in seq_along(all_words)) {
+    word_i <- all_words[i]
+    word_data <- complete_data %>% 
+      filter(word == word_i) %>%
+      arrange(segment_id)
+    
+    # Prepare hover text
+    hover_text <- paste0(
+      "<b>Word:</b> ", word_i, "<br>",
+      "<b>", if (use_sections) "Section" else "Segment", ":</b> ", 
+      word_data$segment_name, "<br>",
+      "<b>Frequency:</b> ", round(word_data$relative_frequency * 100, 3), "%<br>",
+      "<b>Count:</b> ", word_data$count
+    )
+    
+    if (plot_type == "area") {
+      # Add area trace
+      fig <- fig %>%
+        add_trace(
+          data = word_data,
+          x = ~segment_id,
+          y = ~relative_frequency,
+          type = 'scatter',
+          mode = if (show_points) 'lines+markers' else 'lines',
+          fill = 'tozeroy',
+          fillcolor = paste0(color_mapping[word_i], "4D"),  # Add transparency
+          name = word_i,
+          line = list(color = color_mapping[word_i], width = 2),
+          marker = if (show_points) list(size = 8, color = color_mapping[word_i]) else NULL,
+          text = hover_text,
+          hovertemplate = "%{text}<extra></extra>"
+        )
+    } else {
+      # Add line trace
+      fig <- fig %>%
+        add_trace(
+          data = word_data,
+          x = ~segment_id,
+          y = ~relative_frequency,
+          type = 'scatter',
+          mode = if (show_points) 'lines+markers' else 'lines',
+          name = word_i,
+          line = list(
+            color = color_mapping[word_i], 
+            width = 2.5,
+            shape = if (smooth) 'spline' else 'linear'
+          ),
+          marker = if (show_points) list(
+            size = 8, 
+            color = color_mapping[word_i],
+            line = list(color = 'white', width = 1)
+          ) else NULL,
+          text = hover_text,
+          hovertemplate = "%{text}<extra></extra>"
+        )
+    }
+  }
+  
+  # Prepare x-axis labels
+  x_labels <- if (use_sections) {
+    str_trunc(segment_labels$segment_name, 20)
+  } else {
+    as.character(segment_labels$segment_id)
+  }
+  
+  # Configure layout
+  fig <- fig %>%
+    layout(
+      title = list(
+        text = paste0(
+          "<b>Word Distribution Across Document</b><br>",
+          "<sub>", 
+          if (use_sections) "By Document Section" else paste0("By Segment (", length(all_segments), " equal parts)"),
+          " | Words: ", paste(selected_words, collapse = ", "),
+          "</sub>"
+        ),
+        font = list(size = 16, color = "#2E86AB")
+      ),
+      xaxis = list(
+        title = list(
+          text = if (use_sections) "Document Section" else "Document Segments (chronological)",
+          font = list(size = 12, family = "Arial, sans-serif", color = "#333")
+        ),
+        tickmode = "array",
+        tickvals = segment_labels$segment_id,
+        ticktext = x_labels,
+        tickangle = if (use_sections) -45 else 0,
+        gridcolor = "#e0e0e0",
+        gridwidth = 1,
+        showline = TRUE,
+        linecolor = "#cccccc"
+      ),
+      yaxis = list(
+        title = list(
+          text = "Relative Frequency",
+          font = list(size = 12, family = "Arial, sans-serif", color = "#333")
+        ),
+        tickformat = ".2%",
+        gridcolor = "#e0e0e0",
+        gridwidth = 1,
+        showline = TRUE,
+        linecolor = "#cccccc"
+      ),
+      hovermode = "closest",
+      legend = list(
+        title = list(text = "<b>Words</b>"),
+        orientation = "v",
+        x = 1.02,
+        y = 1,
+        xanchor = "left",
+        bgcolor = "rgba(255, 255, 255, 0.9)",
+        bordercolor = "#cccccc",
+        borderwidth = 1,
+        font = list(size = 11)
+      ),
+      plot_bgcolor = "#fafafa",
+      paper_bgcolor = "white",
+      margin = list(l = 60, r = 120, t = 80, b = 80)
+    ) %>%
+    config(
+      displayModeBar = TRUE,
+      displaylogo = FALSE,
+      modeBarButtonsToRemove = c("select2d", "lasso2d", "autoScale2d"),
+      toImageButtonOptions = list(
+        format = "png",
+        filename = "word_distribution",
+        height = 600,
+        width = 1000,
+        scale = 2
+      )
+    )
+  
+  return(fig)
+}

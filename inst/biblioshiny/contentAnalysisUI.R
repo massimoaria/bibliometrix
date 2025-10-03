@@ -37,7 +37,7 @@ content_analysis_tab <- function(id = "content_analysis") {
              # Results will be shown conditionally
              # Text Preview Panel (shows after extraction, hides after analysis)
              conditionalPanel(
-               condition = "output.text_extracted",# && !output.analysis_completed",
+               condition = "output.text_extracted",
                tabsetPanel(
                  id = "content_tabs",
                  type = "tabs",
@@ -49,7 +49,6 @@ content_analysis_tab <- function(id = "content_analysis") {
                    value = "tab_text",
                    div(class = "box box-info",
                        div(class = "box-header with-border",
-                           # h4("Extracted Text Preview", class = "box-title", style = "color: #3498db;"),
                            div(class = "box-tools pull-right",
                                span(textOutput("text_length_info", inline = TRUE), 
                                     style = "font-size: 12px; color: #666; margin-right: 10px;"),
@@ -71,16 +70,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                ),
                                textOutput("text_preview")
                              )
-                           )#,
-                           # ,conditionalPanel(
-                           #   condition = "!output.preview_visible",
-                           #   div(
-                           #     style = "text-align: center; padding: 20px; color: #666;",
-                           #     icon("eye-slash", style = "font-size: 24px; margin-bottom: 10px;"),
-                           #     br(),
-                           #     "Text preview is hidden. Click 'Show Preview' to view the extracted text."
-                           #   )
-                           # )
+                           )
                        )
                    )
                  ),
@@ -217,6 +207,163 @@ content_analysis_tab <- function(id = "content_analysis") {
                    )
                  ),
                  
+                 # Aggiungi questo nuovo tabPanel DOPO il tab "Network Analysis" nella funzione content_analysis_tab
+                 
+                 tabPanel(
+                   title = "Word Trends",
+                   value = "tab_trends",
+                   
+                   br(),
+                   
+                   # Word Selection and Configuration
+                   fluidRow(
+                     column(12,
+                            div(class = "box box-primary",
+                                div(class = "box-header with-border",
+                                    h4("Word Distribution Analysis", class = "box-title", style = "color: #2E86AB;"),
+                                    div(class = "box-tools pull-right",
+                                        downloadButton("download_word_trends",
+                                                       "Export Data",
+                                                       class = "btn btn-primary btn-sm",
+                                                       icon = icon("download")
+                                        )
+                                    )
+                                ),
+                                div(class = "box-body",
+                                    fluidRow(
+                                      column(4,
+                                             selectizeInput("trend_words",
+                                                            "Select words to track:",
+                                                            choices = NULL,
+                                                            selected = NULL,
+                                                            multiple = TRUE,
+                                                            options = list(
+                                                              placeholder = 'Type or select words...',
+                                                              maxItems = 10,
+                                                              plugins = list('remove_button')
+                                                            )
+                                             ),
+                                             helpText("Select up to 10 words from the most frequent terms in your document.")
+                                      ),
+                                      column(3,
+                                             radioButtons("segmentation_type",
+                                                          "Segmentation:",
+                                                          choices = list(
+                                                            "Auto (use sections if available)" = "auto",
+                                                            "Document sections" = "sections",
+                                                            "Equal-length segments" = "segments"
+                                                          ),
+                                                          selected = "auto"
+                                             )
+                                      ),
+                                      column(2,
+                                             conditionalPanel(
+                                               condition = "input.segmentation_type == 'segments'",
+                                               numericInput("n_segments",
+                                                            "Number of segments:",
+                                                            value = 10,
+                                                            min = 5,
+                                                            max = 20,
+                                                            step = 1
+                                               )
+                                             )
+                                      ),
+                                      column(3,
+                                             radioButtons("trend_plot_type",
+                                                          "Visualization type:",
+                                                          choices = list(
+                                                            "Line chart" = "line",
+                                                            "Area chart" = "area"
+                                                          ),
+                                                          selected = "line"
+                                             ),
+                                             checkboxInput("trend_show_points",
+                                                           "Show data points",
+                                                           value = TRUE
+                                             ),
+                                             checkboxInput("trend_smooth",
+                                                           "Smooth lines",
+                                                           value = FALSE
+                                             )
+                                      )
+                                    ),
+                                    hr(),
+                                    fluidRow(
+                                      column(12,
+                                             actionButton("update_trends",
+                                                          "Update Visualization",
+                                                          icon = icon("refresh"),
+                                                          class = "btn-info",
+                                                          style = "margin-bottom: 10px;"
+                                             ),
+                                             conditionalPanel(
+                                               condition = "input.segmentation_type == 'sections' && !output.sections_available",
+                                               div(
+                                                 style = "background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ffc107;",
+                                                 icon("exclamation-triangle", style = "color: #856404;"),
+                                                 span(" Document sections are not available. The analysis will use equal-length segments instead.",
+                                                      style = "color: #856404; margin-left: 8px;")
+                                               )
+                                             )
+                                      )
+                                    )
+                                )
+                            )
+                     )
+                   ),
+                   
+                   # Visualization
+                   fluidRow(
+                     column(12,
+                            div(class = "box box-success",
+                                div(class = "box-header with-border",
+                                    h4("Word Distribution Over Document", class = "box-title", style = "color: #27ae60;")
+                                ),
+                                div(class = "box-body",
+                                    conditionalPanel(
+                                      condition = "output.trends_available",
+                                      plotlyOutput("word_trends_plot", height = "600px")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "!output.trends_available",
+                                      div(
+                                        style = "text-align: center; padding: 60px; color: #999;",
+                                        icon("chart-line", style = "font-size: 48px; margin-bottom: 20px;"),
+                                        h4("No visualization available", style = "color: #666;"),
+                                        p("Select words from the list above and click 'Update Visualization' to see their distribution across the document.", 
+                                          style = "font-size: 14px;")
+                                      )
+                                    )
+                                )
+                            )
+                     )
+                   ),
+                   
+                   # Statistics Table
+                   fluidRow(
+                     column(12,
+                            div(class = "box box-info",
+                                div(class = "box-header with-border",
+                                    h4("Distribution Statistics", class = "box-title", style = "color: #3498db;")
+                                ),
+                                div(class = "box-body",
+                                    conditionalPanel(
+                                      condition = "output.trends_available",
+                                      DT::dataTableOutput("word_trends_table")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "!output.trends_available",
+                                      div(
+                                        style = "text-align: center; padding: 20px; color: #999;",
+                                        p("Statistics will appear here after visualization is generated.")
+                                      )
+                                    )
+                                )
+                            )
+                     )
+                   )
+                 ),
+                 
                  # ===========================================
                  # TAB 2: IN-CONTEXT CITATION ANALYSIS
                  # ===========================================
@@ -253,7 +400,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                       column(3,
                                              selectInput("context_type_filter",
                                                          "Filter by type:",
-                                                         choices = NULL,  # Will be populated dynamically
+                                                         choices = NULL,
                                                          selected = NULL,
                                                          width = "100%"
                                              )
@@ -281,7 +428,6 @@ content_analysis_tab <- function(id = "content_analysis") {
                                     h4("Citation Contexts Visualization", class = "box-title", style = "color: #27ae60;")
                                 ),
                                 div(class = "box-body",
-                                    # Custom HTML output for citation contexts
                                     uiOutput("citation_contexts_html")
                                 )
                             )
@@ -298,76 +444,33 @@ content_analysis_tab <- function(id = "content_analysis") {
                    
                    br(),
                    
-                   # Network Controls
-                   fluidRow(
-                     column(12,
-                            div(class = "box box-warning",
-                                div(class = "box-header with-border",
-                                    h4("Citation Network Controls", class = "box-title", style = "color: #f39c12;")
-                                ),
-                                div(class = "box-body",
-                                    fluidRow(
-                                      column(4,
-                                             numericInput("max_distance_network",
-                                                          label = "Max Distance Between Citations (chars)",
-                                                          value = 800,
-                                                          min = 200,
-                                                          max = 2000,
-                                                          step = 100,
-                                                          width = "100%"
-                                             )
-                                      ),
-                                      column(4,
-                                             checkboxInput("network_physics",
-                                                           "Enable Physics Simulation",
-                                                           value = FALSE
-                                             )
-                                      ),
-                                      column(4,
-                                             actionButton("update_network",
-                                                          "Update Network",
-                                                          class = "btn-warning btn-block",
-                                                          icon = icon("refresh")
-                                             )
-                                      )
-                                    ),
-                                    fluidRow(
-                                      column(12,
-                                             div(
-                                               style = "margin-top: 15px; padding: 10px; background-color: #f0f8ff; border-radius: 5px;",
-                                               icon("info-circle", style = "color: #3498db;"),
-                                               span(" Nodes are colored by paper section. Legend visible on the right side of the network.",
-                                                    style = "color: #555; font-size: 13px; margin-left: 8px;")
-                                             )
-                                      )
-                                    )
-                                )
-                            )
-                     )
-                   ),
-                   
                    # Network Visualization
                    fluidRow(
-                     # column(8,
-                            div(class = "box box-primary",
-                                div(class = "box-header with-border",
-                                    h4("Citation Co-occurrence Network", class = "box-title", style = "color: #2E86AB;"),
-                                    div(class = "box-tools pull-right",
-                                        downloadButton("download_network",
-                                                       "Export Network",
-                                                       class = "btn btn-primary btn-sm",
-                                                       icon = icon("download")
-                                        )
-                                    )
-                                ),
-                                div(class = "box-body",
-                                    div(
-                                      style = "height: 600px; border: 1px solid #ddd; border-radius: 5px;",
-                                      visNetworkOutput("citation_network", width = "auto", height = "70vh")
-                                    )
-                                )
-                            )
-                     ),
+                     div(class = "box box-primary",
+                         div(class = "box-header with-border",
+                             h4("Citation Co-occurrence Network", class = "box-title", style = "color: #2E86AB;"),
+                             div(class = "box-tools pull-right",
+                                 downloadButton("download_network",
+                                                "Export Network",
+                                                class = "btn btn-primary btn-sm",
+                                                icon = icon("download")
+                                 )
+                             )
+                         ),
+                         div(class = "box-body",
+                             div(
+                               style = "margin-bottom: 15px; padding: 10px; background-color: #f0f8ff; border-radius: 5px;",
+                               icon("info-circle", style = "color: #3498db;"),
+                               span(" Nodes are colored by paper section. Legend visible on the right side of the network.",
+                                    style = "color: #555; font-size: 13px; margin-left: 8px;")
+                             ),
+                             div(
+                               style = "height: 75vh; min-height: 700px; border: 1px solid #ddd; border-radius: 5px;",
+                               visNetworkOutput("citation_network", width = "100%", height = "100%")
+                             )
+                         )
+                     )
+                   ),
                    fluidRow(
                      column(6,
                             div(class = "box box-info",
@@ -377,7 +480,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                 div(class = "box-body",
                                     verbatimTextOutput("network_info")
                                 )
-                            ),
+                            )
                      ),
                      column(6,
                             div(class = "box box-success",
@@ -515,7 +618,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                  div(class = "box-body",
                      actionButton("run_analysis",
                                   "Start",
-                                  icon = icon("chart-line"), # CORREZIONE: icona valida
+                                  icon = icon("chart-line"),
                                   class = "btn-warning btn-block btn-lg",
                                   style = "font-weight: bold; margin-bottom: 10px;"
                      ),
@@ -643,7 +746,13 @@ create_citation_network_basic <- function(citation_analysis_results,
   }
   
   nodes$group <- nodes$primary_section
-  nodes$color <- section_colors[nodes$primary_section]
+  
+  # Aggiungi trasparenza ai colori dei nodi (85% opacità)
+  nodes$color <- sapply(section_colors[nodes$primary_section], function(hex_color) {
+    # Converti hex in rgba con trasparenza
+    rgb_vals <- col2rgb(hex_color)
+    sprintf("rgba(%d, %d, %d, 0.85)", rgb_vals[1], rgb_vals[2], rgb_vals[3])
+  })
   
   # Aggiungi bordo speciale per nodi multi-sezione
   nodes$borderWidth <- ifelse(nodes$n_sections > 1, 3, 1)
@@ -677,15 +786,18 @@ create_citation_network_basic <- function(citation_analysis_results,
   
   edges <- edges[!is.na(edges$from) & !is.na(edges$to), ]
   
-  edges$width <- pmax(1, 8 - (edges$distance / 100))
-  edges$color <- ifelse(edges$distance <= 300, "#FF6F6F", 
-                        ifelse(edges$distance <= 600, "#7FB3D5", "#CCCCCC"))
+  # Riduci lo spessore degli archi e aggiungi trasparenza
+  edges$width <- pmax(0.5, 3 - (edges$distance / 200))
+  
+  # Colori con trasparenza (30% opacità per maggiore trasparenza)
+  edges$color <- ifelse(edges$distance <= 300, "rgba(255, 111, 111, 0.3)", 
+                        ifelse(edges$distance <= 600, "rgba(127, 179, 213, 0.3)", 
+                               "rgba(204, 204, 204, 0.25)"))
+  
   edges$title <- paste("Distance:", edges$distance, "characters")
   
-  
-  
   # Create network con layout Fruchterman-Reingold
-  network <- visNetwork(nodes, edges, type="full", smooth = TRUE, physics = FALSE) %>% #height = height, width = width) %>%
+  network <- visNetwork(nodes, edges, type="full", smooth = TRUE, physics = FALSE) %>%
     visIgraphLayout(layout = "layout_nicely", type = "full")
   
   # Configure options
@@ -732,13 +844,19 @@ create_citation_network_basic <- function(citation_analysis_results,
 #' @param session Shiny session object
 #' @param values Reactive values object
 
+#' Enhanced Server Logic for Content Analysis Tab with 3 Tabs
+#' 
+#' @param input Shiny input object
+#' @param output Shiny output object  
+#' @param session Shiny session object
+#' @param values Reactive values object
+
 content_analysis_server <- function(input, output, session, values) {
   
   # Helper function for null coalescing
   `%||%` <- function(lhs, rhs) {
     if (!is.null(lhs) && length(lhs) > 0) lhs else rhs
   }
-  
   
   # Cartella temporanea per i PDF
   tmpdir <- tempdir()
@@ -760,7 +878,6 @@ content_analysis_server <- function(input, output, session, values) {
     return(preview_visible())
   })
   outputOptions(output, "preview_visible", suspendWhenHidden = FALSE)
-  
   
   # ===========================================
   # PDF UPLOAD AND TEXT EXTRACTION
@@ -813,7 +930,6 @@ content_analysis_server <- function(input, output, session, values) {
   
   # Pulizia alla chiusura della sessione
   onSessionEnded(function() {
-    # Rimuovi i file PDF temporanei creati in questa sessione
     files <- list.files(tmpdir, pattern = "^viewer_.*\\.pdf$", full.names = TRUE)
     file.remove(files)
   })
@@ -866,12 +982,10 @@ content_analysis_server <- function(input, output, session, values) {
   # Text preview output
   output$text_preview <- renderText({
     if (!is.null(values$pdf_text)) {
-      # Show first 3000 characters with smart truncation
       preview_length <- 80000
       full_text <- values$pdf_text
       
       if (nchar(full_text) > preview_length) {
-        # Find a good breaking point (end of sentence or paragraph)
         truncated <- substr(full_text, 1, preview_length)
         last_period <- max(c(
           regexpr("\\. [A-Z]", truncated, perl = TRUE),
@@ -880,7 +994,7 @@ content_analysis_server <- function(input, output, session, values) {
           regexpr("!\n", truncated, perl = TRUE)
         ))
         
-        if (last_period > 100) {  # Only break at sentence if we have enough text
+        if (last_period > 100) {
           truncated <- substr(truncated, 1, last_period)
         }
         
@@ -915,7 +1029,6 @@ content_analysis_server <- function(input, output, session, values) {
                        icon = icon("spinner", class = "fa-spin"))
     
     tryCatch({
-      
       custom_stops <- NULL
       if (!is.null(input$custom_stopwords) && nzchar(input$custom_stopwords)) {
         custom_stops <- trimws(strsplit(input$custom_stopwords, ",")[[1]])
@@ -954,7 +1067,7 @@ content_analysis_server <- function(input, output, session, values) {
       
     }, error = function(e) {
       updateActionButton(session, "run_analysis", 
-                         label = "Start Content Analysis",
+                         label = "Start",
                          icon = icon("play"))
       
       showNotification(
@@ -1024,9 +1137,7 @@ content_analysis_server <- function(input, output, session, values) {
     if (!is.null(values$analysis_results)) {
       values$analysis_results$word_frequencies %>% 
         slice_head(n = 15) %>%
-        select(word, n,)
-      # select(word, n, frequency) %>%
-      # mutate(frequency = round(frequency*100, 1))
+        select(word, n)
     } else {
       data.frame(word = character(0), n = numeric(0))
     }
@@ -1036,10 +1147,8 @@ content_analysis_server <- function(input, output, session, values) {
   output$bigrams_table <- DT::renderDataTable({
     if (!is.null(values$analysis_results) && 
         "2gram" %in% names(values$analysis_results$ngrams)) {
-      #N <- sum(values$analysis_results$word_frequencies$n)
       values$analysis_results$ngrams$`2gram` %>%
         select(ngram, n) %>%
-        #mutate(frequency = round(n*100 / N, 1)) %>%
         slice_head(n = 15)
     } else {
       data.frame(ngram = character(0), n = numeric(0))
@@ -1050,10 +1159,8 @@ content_analysis_server <- function(input, output, session, values) {
   output$trigrams_table <- DT::renderDataTable({
     if (!is.null(values$analysis_results) && 
         "3gram" %in% names(values$analysis_results$ngrams)) {
-      N <- sum(values$analysis_results$word_frequencies$n)
       values$analysis_results$ngrams$`3gram` %>%
         select(ngram, n) %>%
-        #mutate(frequency = round(n*100 / N, 1)) %>%
         slice_head(n = 15)
     } else {
       data.frame(ngram = character(0), n = numeric(0))
@@ -1123,25 +1230,8 @@ content_analysis_server <- function(input, output, session, values) {
         citation_boxes <- lapply(1:min(50, nrow(contexts)), function(i) {
           context <- contexts[i,]
           
-          # # Colori basati sulla sezione del paper
           section_colors <- colorlist()[1:length(unique(contexts$section))]
           names(section_colors) <- unique(contexts$section)
-          
-          
-          # section_colors <- c(
-          #   "Abstract" = "#FF6B6B",
-          #   "Introduction" = "#4ECDC4", 
-          #   "Methods" = "#45B7D1",
-          #   "Results" = "#96CEB4",
-          #   "Discussion" = "#FFEAA7",
-          #   "Conclusion" = "#DDA0DD",
-          #   "Background" = "#A8E6CF",
-          #   "Literature" = "#FFB3BA",
-          #   "Methodology" = "#FFDFBA",
-          #   "Analysis" = "#BAFFC9",
-          #   "Full_text" = "#95A5A6",
-          #   "Unknown" = "#CCCCCC"
-          # )
           
           section_name <- if (!is.null(context$section) && !is.na(context$section)) {
             context$section
@@ -1152,7 +1242,6 @@ content_analysis_server <- function(input, output, session, values) {
           box_color <- section_colors[section_name]
           if (is.na(box_color)) box_color <- "#CCCCCC"
           
-          # Prepare tooltip text with reference if available
           has_reference <- FALSE
           tooltip_text <- "No reference matched for this citation"
           
@@ -1186,7 +1275,6 @@ content_analysis_server <- function(input, output, session, values) {
               "background-color: #fafafa;"
             ),
             
-            # Citation info header
             div(
               style = "margin-bottom: 10px; font-size: 12px; color: #666;",
               span(paste("Citation", i, "•"), style = "font-weight: bold;"),
@@ -1194,11 +1282,9 @@ content_analysis_server <- function(input, output, session, values) {
               span(paste("• Position:", context$citation_position_in_text))
             ),
             
-            # Context visualization
             div(
               style = "display: flex; align-items: center; font-family: 'Courier New', monospace;",
               
-              # Words before
               div(
                 style = "flex: 1; text-align: right; padding-right: 15px; color: #555; font-size: 14px;",
                 if (nzchar(context$words_before)) {
@@ -1208,7 +1294,6 @@ content_analysis_server <- function(input, output, session, values) {
                 }
               ),
               
-              # Citation (center, highlighted) with tooltip
               div(
                 id = citation_id,
                 class = "citation-with-tooltip",
@@ -1226,7 +1311,6 @@ content_analysis_server <- function(input, output, session, values) {
                 context$citation_text
               ),
               
-              # Words after
               div(
                 style = "flex: 1; text-align: left; padding-left: 15px; color: #555; font-size: 14px;",
                 if (nzchar(context$words_after)) {
@@ -1237,7 +1321,6 @@ content_analysis_server <- function(input, output, session, values) {
               )
             ),
             
-            # Additional info
             div(
               style = "margin-top: 10px; font-size: 11px; color: #888;",
               paste("Context words:", context$context_word_count, "•"),
@@ -1262,13 +1345,10 @@ content_analysis_server <- function(input, output, session, values) {
         })
         
         tagList(
-          # JavaScript to initialize Bootstrap tooltips
           tags$script(HTML("
           $(document).ready(function(){
-            // Destroy any existing tooltips first
             $('.citation-with-tooltip').tooltip('dispose');
             
-            // Initialize all tooltips with data-toggle attribute
             $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip({
               container: 'body',
               trigger: 'hover focus',
@@ -1277,7 +1357,6 @@ content_analysis_server <- function(input, output, session, values) {
               boundary: 'window'
             });
             
-            // Reinitialize after a delay to catch dynamically added elements
             setTimeout(function() {
               $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip('dispose');
               $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip({
@@ -1291,7 +1370,6 @@ content_analysis_server <- function(input, output, session, values) {
           });
         ")),
           
-          # Custom CSS for tooltip styling
           tags$style(HTML("
           .tooltip {
             font-family: Arial, sans-serif;
@@ -1363,35 +1441,6 @@ content_analysis_server <- function(input, output, session, values) {
       ) %>%
         visOptions(highlightNearest = FALSE) %>%
         visInteraction(dragNodes = FALSE, dragView = FALSE, zoomView = FALSE)
-    }
-  })
-  
-  # Update network when parameters change
-  observeEvent(input$update_network, {
-    if (!is.null(values$analysis_results) && 
-        !is.null(values$analysis_results$network_data) &&
-        nrow(values$analysis_results$network_data) > 0) {
-      
-      tryCatch({
-        values$network_plot <- create_citation_network_basic(
-          values$analysis_results,
-          max_distance = input$max_distance_network,
-          show_labels = TRUE
-        )
-        
-        showNotification(
-          "Network updated successfully!",
-          type = "message",
-          duration = 2
-        )
-        
-      }, error = function(e) {
-        showNotification(
-          paste("Error updating network:", e$message),
-          type = "error",
-          duration = 3
-        )
-      })
     }
   })
   
@@ -1481,6 +1530,254 @@ content_analysis_server <- function(input, output, session, values) {
   )
   
   # ===========================================
+  # TAB 4: WORD TRENDS ANALYSIS
+  # ===========================================
+  
+  # Populate word choices when analysis is complete
+  observe({
+    if (!is.null(values$analysis_results) && 
+        !is.null(values$analysis_results$word_frequencies) &&
+        nrow(values$analysis_results$word_frequencies) > 0) {
+      
+      # Get top 30 most frequent words
+      top_words <- values$analysis_results$word_frequencies %>%
+        slice_head(n = 30) %>%
+        pull(word)
+      
+      # Get top bigrams if available
+      top_bigrams <- character(0)
+      if (!is.null(values$analysis_results$ngrams) && 
+          "2gram" %in% names(values$analysis_results$ngrams)) {
+        top_bigrams <- values$analysis_results$ngrams$`2gram` %>%
+          slice_head(n = 15) %>%
+          pull(ngram)
+      }
+      
+      # Get top trigrams if available
+      top_trigrams <- character(0)
+      if (!is.null(values$analysis_results$ngrams) && 
+          "3gram" %in% names(values$analysis_results$ngrams)) {
+        top_trigrams <- values$analysis_results$ngrams$`3gram` %>%
+          slice_head(n = 10) %>%
+          pull(ngram)
+      }
+      
+      # Combine all choices with labels
+      all_choices <- c(top_words, top_bigrams, top_trigrams)
+      
+      # Create named list for optgroups
+      choices_list <- list(
+        "Top Words (1-gram)" = top_words
+      )
+      
+      if (length(top_bigrams) > 0) {
+        choices_list[["Top Bigrams (2-gram)"]] <- top_bigrams
+      }
+      
+      if (length(top_trigrams) > 0) {
+        choices_list[["Top Trigrams (3-gram)"]] <- top_trigrams
+      }
+      
+      updateSelectizeInput(session, "trend_words",
+                           choices = choices_list,
+                           selected = NULL,
+                           server = TRUE)
+    }
+  })
+  
+  # Check if sections are available
+  output$sections_available <- reactive({
+    if (!is.null(values$pdf_sections) && length(values$pdf_sections) > 0) {
+      section_names <- setdiff(names(values$pdf_sections), c("Full_text", "References"))
+      return(length(section_names) > 0)
+    }
+    return(FALSE)
+  })
+  outputOptions(output, "sections_available", suspendWhenHidden = FALSE)
+  
+  # Check if trends are available
+  output$trends_available <- reactive({
+    return(!is.null(values$word_trends_data) && nrow(values$word_trends_data) > 0)
+  })
+  outputOptions(output, "trends_available", suspendWhenHidden = FALSE)
+  
+  # Update word trends when button is clicked
+  observeEvent(input$update_trends, {
+    
+    # Validate inputs
+    if (is.null(values$pdf_text) || nchar(values$pdf_text) == 0) {
+      showNotification(
+        "Please extract text from PDF first.",
+        type = "warning",
+        duration = 3
+      )
+      return()
+    }
+    
+    if (is.null(input$trend_words) || length(input$trend_words) == 0) {
+      showNotification(
+        "Please select at least one word to track.",
+        type = "warning",
+        duration = 3
+      )
+      return()
+    }
+    
+    if (length(input$trend_words) > 10) {
+      showNotification(
+        "Maximum 10 words allowed. Please deselect some words.",
+        type = "warning",
+        duration = 3
+      )
+      return()
+    }
+    
+    tryCatch({
+      
+      # Determine use_sections parameter
+      use_sections_param <- switch(input$segmentation_type,
+                                   "auto" = "auto",
+                                   "sections" = TRUE,
+                                   "segments" = FALSE)
+      
+      # Get number of segments
+      n_segs <- if (!is.null(input$n_segments)) input$n_segments else 10
+      
+      # Determine which text to use
+      # If user explicitly chooses segments, use Full_text only
+      # Otherwise, use the sections structure
+      text_input <- if (input$segmentation_type == "segments") {
+        values$pdf_text  # Just the full text as string
+      } else {
+        values$pdf_sections  # List with sections
+      }
+      
+      # Calculate word distribution
+      values$word_trends_data <- calculate_word_distribution(
+        text = text_input,
+        selected_words = input$trend_words,
+        use_sections = use_sections_param,
+        n_segments = n_segs,
+        remove_stopwords = FALSE  # Don't remove stopwords for selected words
+      )
+      
+      # Check if sections were requested but not available
+      sections_used <- attr(values$word_trends_data, "use_sections")
+      if (input$segmentation_type == "sections" && !sections_used) {
+        showNotification(
+          "Sections not available. Using equal-length segments instead.",
+          type = "warning",
+          duration = 4
+        )
+      }
+      
+      showNotification(
+        "Word distribution calculated successfully!",
+        type = "message",
+        duration = 2
+      )
+      
+    }, error = function(e) {
+      showNotification(
+        paste("Error calculating word distribution:", e$message),
+        type = "error",
+        duration = 5
+      )
+    })
+  })
+  
+  # Render word trends plot
+  output$word_trends_plot <- renderPlotly({
+    req(values$word_trends_data)
+    
+    tryCatch({
+      plot_word_distribution(
+        word_distribution_data = values$word_trends_data,
+        plot_type = input$trend_plot_type,
+        smooth = input$trend_smooth,
+        show_points = input$trend_show_points,
+        colors = NULL  # Use automatic colors
+      )
+    }, error = function(e) {
+      showNotification(
+        paste("Error creating plot:", e$message),
+        type = "error",
+        duration = 5
+      )
+      return(NULL)
+    })
+  })
+  
+  # Render word trends statistics table
+  output$word_trends_table <- DT::renderDataTable({
+    req(values$word_trends_data)
+    
+    # Create summary statistics
+    stats_table <- values$word_trends_data %>%
+      group_by(word) %>%
+      summarise(
+        `Total Occurrences` = sum(count),
+        `Avg Frequency` = paste0(round(mean(relative_frequency) * 100, 3), "%"),
+        `Min Frequency` = paste0(round(min(relative_frequency) * 100, 3), "%"),
+        `Max Frequency` = paste0(round(max(relative_frequency) * 100, 3), "%"),
+        `Std Dev` = round(sd(relative_frequency) * 100, 3),
+        `Peak Segment` = segment_name[which.max(relative_frequency)],
+        .groups = "drop"
+      ) %>%
+      arrange(desc(`Total Occurrences`))
+    
+    DT::datatable(
+      stats_table,
+      options = list(
+        pageLength = 10,
+        dom = 'ftip',
+        ordering = TRUE,
+        searching = FALSE,
+        scrollX = TRUE
+      ),
+      rownames = FALSE,
+      class = 'cell-border stripe'
+    ) %>%
+      DT::formatStyle(
+        'word',
+        fontWeight = 'bold',
+        color = '#2E86AB'
+      )
+  })
+  
+  # Download handler for word trends
+  output$download_word_trends <- downloadHandler(
+    filename = function() {
+      paste0("word_trends_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      if (!is.null(values$word_trends_data)) {
+        # Prepare data for export
+        export_data <- values$word_trends_data %>%
+          select(word, segment_id, segment_name, count, 
+                 relative_frequency, percentage, total_words) %>%
+          arrange(word, segment_id)
+        
+        write.csv(export_data, file, row.names = FALSE)
+      } else {
+        write.csv(
+          data.frame(message = "No word trends data available"), 
+          file, 
+          row.names = FALSE
+        )
+      }
+    }
+  )
+  
+  # Reset word trends when analysis is reset
+  observeEvent(input$reset_analysis, {
+    values$word_trends_data <- NULL
+    updateSelectizeInput(session, "trend_words", 
+                         choices = NULL, 
+                         selected = NULL)
+  })
+  
+  # ===========================================
   # RESET FUNCTIONALITY
   # ===========================================
   
@@ -1490,7 +1787,6 @@ content_analysis_server <- function(input, output, session, values) {
     values$network_plot <- NULL
     values$analysis_running <- FALSE
     
-    # Reset preview visibility
     preview_visible(TRUE)
     
     tryCatch({
@@ -1516,23 +1812,17 @@ content_analysis_server <- function(input, output, session, values) {
   # UTILITY FUNCTIONS
   # ===========================================
   
-  # Helper function to check if analysis is valid
   is_analysis_valid <- reactive({
     !is.null(values$analysis_results) && 
       !is.null(values$analysis_results$citations) &&
       nrow(values$analysis_results$citations) > 0
   })
   
-  # Helper function to check if network is valid
   is_network_valid <- reactive({
     !is.null(values$analysis_results) && 
       !is.null(values$analysis_results$network_data) &&
       nrow(values$analysis_results$network_data) > 0
   })
-  
-  # ===========================================
-  # DEBUGGING OUTPUT (hidden by default)
-  # ===========================================
   
   output$debug_info <- renderText({
     if (!is.null(values$analysis_results)) {
@@ -1549,13 +1839,4 @@ content_analysis_server <- function(input, output, session, values) {
   })
   
   outputOptions(output, "debug_info", suspendWhenHidden = FALSE)
-}
-
-# ===========================================
-# HELPER FUNCTION FOR NULL COALESCING
-# ===========================================
-
-# Define null coalescing operator if not available
-`%||%` <- function(lhs, rhs) {
-  if (!is.null(lhs) && length(lhs) > 0) lhs else rhs
 }

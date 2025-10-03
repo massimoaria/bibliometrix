@@ -66,7 +66,7 @@ authorBio <- function(author_position = 1,
                       return_all_authors = FALSE,
                       sleep_time = 1,
                       max_retries = 3,
-                      retry_delay = 2) {
+                      retry_delay = 1) {
   
   # Input validation
   if (is.null(doi) || !is.character(doi) || nchar(trimws(doi)) == 0) {

@@ -34,55 +34,36 @@ content_analysis_tab <- function(id = "content_analysis") {
       # ===========================================
       column(10,
              
-             # Results will be shown conditionally
-             # Text Preview Panel (shows after extraction, hides after analysis)
+             # NUOVO: Bottone per aprire il modal (visibile solo dopo estrazione)
              conditionalPanel(
-               condition = "output.text_extracted",
-               tabsetPanel(
-                 id = "content_tabs",
-                 type = "tabs",
-                 # ===========================================
-                 # TAB: TEXT PREVIEW
-                 # ===========================================
-                 tabPanel(
-                   title = "Extracted Text Preview",
-                   value = "tab_text",
-                   div(class = "box box-info",
-                       div(class = "box-header with-border",
-                           div(class = "box-tools pull-right",
-                               span(textOutput("text_length_info", inline = TRUE), 
-                                    style = "font-size: 12px; color: #666; margin-right: 10px;"),
-                               actionButton("toggle_preview", "Hide Preview", 
-                                            class = "btn btn-xs btn-default")
-                           )
-                       ),
-                       div(class = "box-body",
-                           conditionalPanel(
-                             condition = "output.preview_visible",
-                             div(
-                               style = paste0(
-                                 "max-height: 600px; overflow-y: auto; ",
-                                 "background-color: #f8f9fa; padding: 15px; ",
-                                 "border: 1px solid #e9ecef; border-radius: 4px; ",
-                                 "font-family: 'Consolas', 'Monaco', monospace; ",
-                                 "font-size: 13px; line-height: 1.4; ",
-                                 "white-space: pre-wrap; word-wrap: break-word;"
-                               ),
-                               textOutput("text_preview")
-                             )
-                           )
-                       )
-                   )
+               condition = "output.text_extracted && !output.analysis_completed",
+               div(
+                 style = "margin-bottom: 15px; padding: 10px; background-color: #e8f4f8; border-radius: 5px;",
+                 actionButton(
+                   "open_preview_btn",
+                   "View Extracted Text & PDF Preview",
+                   icon = icon("file-alt"),
+                   class = "btn-info",
+                   onclick = "$('#previewModal').modal('show');"
                  ),
-                 tabPanel(
-                   title = "PDF Preview",
-                   value = "tab_text",
-                   uiOutput("pdf_viewer")
-                 )
+                 span(" Text extracted successfully! Click to view the preview or start the analysis.",
+                      style = "margin-left: 15px; color: #555;")
                )
              ),
              conditionalPanel(
                condition = "output.analysis_completed",
+               
+               # NUOVO: Piccolo bottone per riaprire il preview
+               div(
+                 style = "margin-bottom: 10px; text-align: right;",
+                 actionButton(
+                   "reopen_preview_btn",
+                   "View Original Text",
+                   icon = icon("file-alt"),
+                   class = "btn-default btn-sm",
+                   onclick = "$('#previewModal').modal('show');"
+                 )
+               ),
                tabsetPanel(
                  id = "content_tabs",
                  type = "tabs",
@@ -280,11 +261,11 @@ content_analysis_tab <- function(id = "content_analysis") {
                                              checkboxInput("trend_show_points",
                                                            "Show data points",
                                                            value = TRUE
-                                             ),
-                                             checkboxInput("trend_smooth",
-                                                           "Smooth lines",
-                                                           value = FALSE
                                              )
+                                             # ,checkboxInput("trend_smooth",
+                                             #               "Smooth lines",
+                                             #               value = TRUE
+                                             # )
                                       )
                                     ),
                                     hr(),
@@ -698,9 +679,87 @@ content_analysis_tab <- function(id = "content_analysis") {
                  )
              )
       )
+    ),
+    # Modal per Preview (Bootstrap nativo)
+    tags$div(
+      class = "modal fade",
+      id = "previewModal",
+      tabindex = "-1",
+      role = "dialog",
+      
+      tags$div(
+        class = "modal-dialog modal-lg",
+        role = "document",
+        style = "width: 90%; max-width: 1200px;",
+        
+        tags$div(
+          class = "modal-content",
+          
+          # Header
+          tags$div(
+            class = "modal-header",
+            tags$button(
+              type = "button",
+              class = "close",
+              `data-dismiss` = "modal",
+              `aria-label` = "Close",
+              tags$span(`aria-hidden` = "true", HTML("&times;"))
+            ),
+            tags$h4(class = "modal-title", "Text & PDF Preview")
+          ),
+          
+          # Body
+          tags$div(
+            class = "modal-body",
+            style = "max-height: 75vh; overflow-y: auto;",
+            
+            tabsetPanel(
+              id = "modal_preview_tabs",
+              
+              tabPanel(
+                "Extracted Text",
+                br(),
+                div(
+                  style = "margin-bottom: 10px;",
+                  span(textOutput("text_length_info", inline = TRUE), 
+                       style = "font-size: 12px; color: #666;")
+                ),
+                div(
+                  style = paste0(
+                    "background-color: #f8f9fa; padding: 15px; ",
+                    "border: 1px solid #e9ecef; border-radius: 4px; ",
+                    "font-family: 'Consolas', 'Monaco', monospace; ",
+                    "font-size: 13px; line-height: 1.4; ",
+                    "white-space: pre-wrap; word-wrap: break-word;"
+                  ),
+                  textOutput("text_preview")
+                )
+              ),
+              
+              tabPanel(
+                "PDF Preview",
+                br(),
+                uiOutput("pdf_viewer")
+              )
+            )
+          ),
+          
+          # Footer
+          tags$div(
+            class = "modal-footer",
+            tags$button(
+              type = "button",
+              class = "btn btn-default",
+              `data-dismiss` = "modal",
+              "Close"
+            )
+          )
+        )
+      )
     )
   )
 }
+
 
 create_citation_network_basic <- function(citation_analysis_results,
                                           max_distance = 1000,
@@ -1877,7 +1936,7 @@ content_analysis_server <- function(input, output, session, values) {
       plot_word_distribution(
         word_distribution_data = values$word_trends_data,
         plot_type = input$trend_plot_type,
-        smooth = input$trend_smooth,
+        smooth = TRUE,
         show_points = input$trend_show_points,
         colors = NULL  # Use automatic colors
       )

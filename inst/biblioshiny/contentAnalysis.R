@@ -1,3 +1,103 @@
+#' Map citations to segments or sections
+#'
+#' @param citations_df Dataframe with citations and their positions
+#' @param text Text object (string or list with sections)
+#' @param use_sections Logical or "auto"
+#' @param n_segments Integer, number of segments if not using sections
+#'
+#' @return Citations dataframe with segment/section information
+map_citations_to_segments <- function(citations_df, 
+                                      text, 
+                                      use_sections = "auto",
+                                      n_segments = 10) {
+  
+  # Determine if sections are available
+  sections_available <- FALSE
+  section_names <- character(0)
+  
+  if (is.list(text)) {
+    section_names <- setdiff(names(text), c("Full_text", "References"))
+    sections_available <- length(section_names) > 0
+  }
+  
+  # Determine what to use
+  use_sections_final <- FALSE
+  if (use_sections == "auto") {
+    use_sections_final <- sections_available
+  } else if (is.logical(use_sections)) {
+    if (use_sections && !sections_available) {
+      warning("Sections requested but not available. Using segments instead.")
+      use_sections_final <- FALSE
+    } else {
+      use_sections_final <- use_sections
+    }
+  }
+  
+  # Map citations
+  if (use_sections_final) {
+    # Use existing section mapping logic
+    section_positions <- list()
+    cumulative_pos <- 1
+    
+    for (sect_name in section_names) {
+      sect_text <- text[[sect_name]]
+      sect_length <- nchar(sect_text)
+      
+      section_positions[[sect_name]] <- list(
+        start = cumulative_pos,
+        end = cumulative_pos + sect_length - 1,
+        name = sect_name
+      )
+      
+      cumulative_pos <- cumulative_pos + sect_length + 1
+    }
+    
+    # Map each citation to section
+    citations_df$segment <- NA_character_
+    for (i in 1:nrow(citations_df)) {
+      cite_pos <- citations_df$start_pos[i]
+      
+      for (sect_name in section_names) {
+        sect_info <- section_positions[[sect_name]]
+        if (cite_pos >= sect_info$start && cite_pos <= sect_info$end) {
+          citations_df$segment[i] <- sect_name
+          break
+        }
+      }
+    }
+    
+    citations_df$segment <- ifelse(is.na(citations_df$segment), "Unknown", citations_df$segment)
+    citations_df$segment_type <- "section"
+    
+  } else {
+    # Create equal-length segments based on CITATION POSITIONS, not text length
+    
+    # Find min and max citation positions
+    min_pos <- min(citations_df$start_pos, na.rm = TRUE)
+    max_pos <- max(citations_df$start_pos, na.rm = TRUE)
+    
+    # Calculate segment size based on citation position range
+    position_range <- max_pos - min_pos
+    segment_size <- position_range / n_segments
+    
+    # Assign segment to each citation based on its relative position
+    citations_df$segment <- paste0(
+      "Segment ", 
+      pmin(n_segments, ceiling((citations_df$start_pos - min_pos) / segment_size))
+    )
+    
+    # Handle edge case where citation is at exactly min_pos
+    citations_df$segment <- ifelse(
+      citations_df$start_pos == min_pos,
+      "Segment 1",
+      citations_df$segment
+    )
+    
+    citations_df$segment_type <- "equal_length"
+  }
+  
+  return(citations_df)
+}
 
 #' Enhanced Scientific Article Content Analysis with Comprehensive Citation Extraction
 #'
@@ -9,6 +109,8 @@
 #' @param custom_stopwords Character vector of additional stopwords
 #' @param ngram_range Vector of integers, range for n-gram analysis (default: c(1,3))
 #' @param parse_multiple_citations Logical, parse complex multiple citations (default: TRUE)
+#' @param use_sections_for_citations Logical or "auto", whether to use sections for citation mapping (default: "auto")
+#' @param n_segments_citations Integer, number of segments if not using sections (default: 10)
 #'
 #' @return A list containing enhanced citation analysis results
 analyze_scientific_content_enhanced <- function(text, 
@@ -18,7 +120,9 @@ analyze_scientific_content_enhanced <- function(text,
                                                 language = "en",
                                                 custom_stopwords = NULL,
                                                 ngram_range = c(1, 3),
-                                                parse_multiple_citations = TRUE) {
+                                                parse_multiple_citations = TRUE,
+                                                use_sections_for_citations = "auto",
+                                                n_segments_citations = 10) {
   
   results <- list()
   
@@ -296,62 +400,23 @@ analyze_scientific_content_enhanced <- function(text,
   }
   
   # ===========================================
-  # CITATION SECTION MAPPING
+  # CITATION SECTION/SEGMENT MAPPING
   # ===========================================
   
-  citation_sections <- tibble()
-  
-  if (is.list(text) && length(text) > 1) {
-    section_names <- setdiff(names(text), c("Full_text", "References"))
+  if (nrow(all_citations) > 0) {
+    all_citations <- map_citations_to_segments(
+      citations_df = all_citations,
+      text = if(is.list(text)) text else list(Full_text = text),
+      use_sections = use_sections_for_citations,
+      n_segments = n_segments_citations
+    )
     
-    if (length(section_names) > 0 && nrow(all_citations) > 0) {
-      # Calcola posizioni delle sezioni nel testo completo
-      section_positions <- list()
-      cumulative_pos <- 1
-      
-      for (sect_name in section_names) {
-        sect_text <- text[[sect_name]]
-        sect_length <- nchar(sect_text)
-        
-        section_positions[[sect_name]] <- list(
-          start = cumulative_pos,
-          end = cumulative_pos + sect_length - 1,
-          name = sect_name
-        )
-        
-        cumulative_pos <- cumulative_pos + sect_length + 1  # +1 per lo spazio
-      }
-      
-      # Mappa ogni citazione alla sua sezione
-      for (i in 1:nrow(all_citations)) {
-        cite_pos <- all_citations$start_pos[i]
-        
-        mapped_section <- "Unknown"
-        for (sect_name in section_names) {
-          sect_info <- section_positions[[sect_name]]
-          if (cite_pos >= sect_info$start && cite_pos <= sect_info$end) {
-            mapped_section <- sect_name
-            break
-          }
-        }
-        
-        citation_sections <- bind_rows(
-          citation_sections,
-          tibble(
-            citation_id = all_citations$citation_id[i],
-            section = mapped_section
-          )
-        )
-      }
-      
-      # Aggiungi la sezione ai dati delle citazioni
-      all_citations <- all_citations %>%
-        left_join(citation_sections, by = "citation_id")
-    } else {
-      all_citations$section <- "Full_text"
-    }
+    # Rename 'segment' column to 'section' for backward compatibility
+    all_citations <- all_citations %>%
+      rename(section = segment)
   } else {
     all_citations$section <- "Full_text"
+    all_citations$segment_type <- "unknown"
   }
   
   # ===========================================

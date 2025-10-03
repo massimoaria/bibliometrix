@@ -414,6 +414,60 @@ content_analysis_tab <- function(id = "content_analysis") {
                                                           width = "100%"
                                              )
                                       )
+                                    ),
+                                    fluidRow(
+                                      column(4,
+                                             radioButtons("citation_segmentation",
+                                                          "Group citations by:",
+                                                          choices = list(
+                                                            "Auto (use sections if available)" = "auto",
+                                                            "Document sections" = "sections",
+                                                            "Equal-length segments" = "segments"
+                                                          ),
+                                                          selected = "auto",
+                                                          inline = FALSE
+                                             )
+                                      ),
+                                      column(2,
+                                             conditionalPanel(
+                                               condition = "input.citation_segmentation == 'segments'",
+                                               numericInput("n_segments_citations",
+                                                            "Number of segments:",
+                                                            value = 10,
+                                                            min = 5,
+                                                            max = 20,
+                                                            step = 1
+                                               )
+                                             )
+                                      ),
+                                      column(2,
+                                             br(),
+                                             actionButton("update_citation_grouping",
+                                                          "Update Grouping",
+                                                          icon = icon("refresh"),
+                                                          class = "btn-info btn-sm",
+                                                          style = "margin-top: 5px;"
+                                             )
+                                      ),
+                                      column(4,
+                                             conditionalPanel(
+                                               condition = "input.citation_segmentation == 'sections' && !output.sections_available",
+                                               div(
+                                                 style = "background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 25px; border-left: 4px solid #ffc107;",
+                                                 icon("exclamation-triangle", style = "color: #856404;"),
+                                                 span(" Sections not available. Will use segments.",
+                                                      style = "color: #856404; margin-left: 8px; font-size: 12px;")
+                                               )
+                                             ),
+                                             conditionalPanel(
+                                               condition = "$('html').hasClass('shiny-busy')",
+                                               div(
+                                                 style = "margin-top: 30px;",
+                                                 icon("spinner", class = "fa-spin", style = "color: #3498db;"),
+                                                 span("Updating...", style = "color: #3498db; font-style: italic; margin-left: 5px;")
+                                               )
+                                             )
+                                      )
                                     )
                                 )
                             )
@@ -1034,12 +1088,25 @@ content_analysis_server <- function(input, output, session, values) {
         custom_stops <- trimws(strsplit(input$custom_stopwords, ",")[[1]])
       }
       
+      # Determine citation segmentation
+      use_sections_cit <- switch(
+        input$citation_segmentation %||% "auto",
+        "auto" = "auto",
+        "sections" = TRUE,
+        "segments" = FALSE,
+        "auto"  # default fallback
+      )
+      
+      n_segs_cit <- input$n_segments_citations %||% 10
+      
       values$analysis_results <- analyze_scientific_content_enhanced(
         text = values$pdf_sections,
         window_size = input$window_size,
         parse_multiple_citations = input$parse_multiple,
         remove_stopwords = input$remove_stopwords,
-        custom_stopwords = custom_stops
+        custom_stopwords = custom_stops,
+        use_sections_for_citations = use_sections_cit,
+        n_segments_citations = n_segs_cit
       )
       
       # Create network if we have data
@@ -1186,6 +1253,122 @@ content_analysis_server <- function(input, output, session, values) {
   # ===========================================
   # TAB 2: IN-CONTEXT CITATION ANALYSIS
   # ===========================================
+  
+  # ===========================================
+  # UPDATE CITATION GROUPING (without re-running full analysis)
+  # ===========================================
+  
+  observeEvent(input$update_citation_grouping, {
+    
+    req(values$pdf_text)
+    req(values$analysis_results)
+    
+    tryCatch({
+      
+      # Determine citation segmentation
+      use_sections_cit <- switch(
+        input$citation_segmentation %||% "auto",
+        "auto" = "auto",
+        "sections" = TRUE,
+        "segments" = FALSE,
+        "auto"
+      )
+      
+      n_segs_cit <- input$n_segments_citations %||% 10
+      
+      # Get citations without section column
+      citations_for_mapping <- values$analysis_results$citations %>%
+        select(-section, -segment_type)
+      
+      # Re-map citations to new segments/sections
+      citations_remapped <- map_citations_to_segments(
+        citations_df = citations_for_mapping,
+        text = values$pdf_sections,
+        use_sections = use_sections_cit,
+        n_segments = n_segs_cit
+      )
+      
+      # Update the citations in analysis_results
+      values$analysis_results$citations <- citations_remapped %>%
+        rename(section = segment)
+      
+      # Update citation contexts with new section info
+      if (!is.null(values$analysis_results$citation_contexts)) {
+        # Remove old section column if exists
+        if ("section" %in% names(values$analysis_results$citation_contexts)) {
+          values$analysis_results$citation_contexts <- values$analysis_results$citation_contexts %>%
+            select(-section)
+        }
+        
+        # Add new section mapping
+        values$analysis_results$citation_contexts <- values$analysis_results$citation_contexts %>%
+          left_join(
+            values$analysis_results$citations %>% 
+              select(citation_id, section),
+            by = "citation_id"
+          )
+      }
+      
+      # Update citation metrics - section distribution
+      if (!is.null(values$analysis_results$citation_metrics)) {
+        
+        # Determine expected sections/segments
+        sections_to_use <- NULL
+        
+        if (use_sections_cit == TRUE || 
+            (use_sections_cit == "auto" && 
+             length(setdiff(names(values$pdf_sections), c("Full_text", "References"))) > 0)) {
+          # Using sections
+          sections_to_use <- setdiff(names(values$pdf_sections), c("Full_text", "References"))
+        } else {
+          # Using segments
+          sections_to_use <- paste0("Segment ", 1:n_segs_cit)
+        }
+        
+        # Recalculate section distribution
+        if (!is.null(sections_to_use)) {
+          values$analysis_results$citation_metrics$section_distribution <- 
+            values$analysis_results$citations %>%
+            mutate(section = factor(section, levels = sections_to_use)) %>%
+            count(section, sort = FALSE, .drop = FALSE) %>%
+            mutate(percentage = round(n / sum(n) * 100, 2))
+        } else {
+          values$analysis_results$citation_metrics$section_distribution <- 
+            values$analysis_results$citations %>%
+            count(section, sort = TRUE) %>%
+            mutate(percentage = round(n / sum(n) * 100, 2))
+        }
+      }
+      
+      # Recreate network with new grouping
+      if (!is.null(values$analysis_results$network_data) && 
+          nrow(values$analysis_results$network_data) > 0) {
+        
+        values$network_plot <- create_citation_network_basic(
+          values$analysis_results,
+          max_distance = input$max_distance,
+          show_labels = TRUE
+        )
+      }
+      
+      showNotification(
+        "Citation grouping updated successfully!",
+        type = "message",
+        duration = 2
+      )
+      
+    }, error = function(e) {
+      showNotification(
+        paste("Error updating citation grouping:", e$message),
+        type = "error",
+        duration = 5
+      )
+      
+      # Print error to console for debugging
+      cat("Error in update_citation_grouping:\n")
+      print(e)
+    })
+  })
   
   # Update citation type filter
   observe({

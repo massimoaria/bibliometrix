@@ -3,6 +3,7 @@
 utils::globalVariables(c("matches", "KW_Merged"))
 
 #' @import stats
+#' @import contentanalysis
 #' @import dimensionsR
 #' @import ggplot2
 #' @import bibliometrixData

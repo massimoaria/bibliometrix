@@ -16,13 +16,39 @@ content_analysis_tab <- function(id = "content_analysis") {
     tabName = id,
     
     # Tab header
+    # fluidRow(
+    #   column(12,
+    #          div(class = "page-header",
+    #              h2("Scientific Article Content Analysis", 
+    #                 style = "color: #2E86AB; margin-bottom: 10px;"),
+    #              p("Upload a PDF file and analyze citation patterns, context, and co-occurrence networks.",
+    #                style = "color: #666; font-size: 16px; margin-bottom: 20px;")
+    #          )
+    #   )
+    # ),
+    # Tab header
     fluidRow(
-      column(12,
+      column(8,
              div(class = "page-header",
                  h2("Scientific Article Content Analysis", 
                     style = "color: #2E86AB; margin-bottom: 10px;"),
                  p("Upload a PDF file and analyze citation patterns, context, and co-occurrence networks.",
                    style = "color: #666; font-size: 16px; margin-bottom: 20px;")
+             )
+      ),
+      column(4,
+             div(
+               style = "text-align: right; padding-top: 15px;",
+               conditionalPanel(
+                 condition = "output.analysis_completed",
+                 downloadButton(
+                   "download_all_results",
+                   "Export All Results",
+                   icon = icon("file-excel"),
+                   class = "btn-success",
+                   style = "font-weight: bold;"
+                 )
+               )
              )
       )
     ),
@@ -118,6 +144,87 @@ content_analysis_tab <- function(id = "content_analysis") {
                      )
                    ),
                    
+                   fluidRow(
+                     column(3,
+                            div(class = "info-box bg-purple",
+                                span(class = "info-box-icon", icon("graduation-cap")),
+                                div(class = "info-box-content",
+                                    span("Flesch-Kincaid Grade", class = "info-box-text"),
+                                    span(textOutput("flesch_kincaid_grade", inline = TRUE), class = "info-box-number")
+                                )
+                            )
+                     ),
+                     column(3,
+                            div(class = "info-box bg-blue",
+                                span(class = "info-box-icon", icon("book-reader")),
+                                div(class = "info-box-content",
+                                    span("Reading Ease", class = "info-box-text"),
+                                    span(textOutput("flesch_reading_ease", inline = TRUE), class = "info-box-number")
+                                )
+                            )
+                     ),
+                     column(3,
+                            div(class = "info-box bg-teal",
+                                span(class = "info-box-icon", icon("robot")),
+                                div(class = "info-box-content",
+                                    span("ARI Index", class = "info-box-text"),
+                                    span(textOutput("ari_index", inline = TRUE), class = "info-box-number")
+                                )
+                            )
+                     ),
+                     column(3,
+                            div(class = "info-box bg-maroon",
+                                span(class = "info-box-icon", icon("cloud")),
+                                div(class = "info-box-content",
+                                    span("Gunning Fog Index", class = "info-box-text"),
+                                    span(textOutput("gunning_fog_index", inline = TRUE), class = "info-box-number")
+                                )
+                            )
+                     )
+                   ),
+                   # Readability Indices Details
+                   fluidRow(
+                     column(6,
+                            div(class = "box box-info",
+                                div(class = "box-header with-border",
+                                    h5("Readability Indices", style = "color: #3498db;")
+                                ),
+                                div(class = "box-body",
+                                    conditionalPanel(
+                                      condition = "output.analysis_completed",
+                                      uiOutput("readability_details_html")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "!output.analysis_completed",
+                                      div(
+                                        style = "text-align: center; padding: 20px; color: #999;",
+                                        p("Readability indices will appear here after analysis.")
+                                      )
+                                    )
+                                )
+                            )
+                     ),
+                     column(6,
+                            div(class = "box box-primary",
+                                div(class = "box-header with-border",
+                                    h5("Text Statistics", style = "color: #2E86AB;")
+                                ),
+                                div(class = "box-body",
+                                    conditionalPanel(
+                                      condition = "output.analysis_completed",
+                                      uiOutput("text_stats")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "!output.analysis_completed",
+                                      div(
+                                        style = "text-align: center; padding: 20px; color: #999;",
+                                        p("Text statistics will appear here after analysis.")
+                                      )
+                                    )
+                                )
+                            )
+                     )
+                   ),
                    # Detailed Analysis Tables
                    fluidRow(
                      div(class = "box box-primary",
@@ -161,24 +268,6 @@ content_analysis_tab <- function(id = "content_analysis") {
                                                  div(class = "box-body",
                                                      DT::dataTableOutput("citation_sections_table")
                                                  )
-                                             )
-                                         )
-                                  )
-                                )
-                            )
-                     )
-                   ),
-                   fluidRow(
-                     column(12,
-                            div(class = "box-body",
-                                fluidRow(
-                                  column(12,
-                                         div(class = "box box-primary",
-                                             div(class = "box-header with-border",
-                                                 h5("Text Statistics", style = "color: #2E86AB;")
-                                             ),
-                                             div(class = "box-body",
-                                                 verbatimTextOutput("text_stats")
                                              )
                                          )
                                   )
@@ -760,7 +849,6 @@ content_analysis_tab <- function(id = "content_analysis") {
   )
 }
 
-
 create_citation_network_basic <- function(citation_analysis_results,
                                           max_distance = 1000,
                                           min_connections = 1,
@@ -844,14 +932,15 @@ create_citation_network_basic <- function(citation_analysis_results,
   nodes$size <- pmax(15, pmin(40, 15 + nodes$connections * 3))/2
   
   # Assegna colori dinamicamente usando colorlist()
-  unique_sections <- unique(nodes$primary_section)
-  colors <- colorlist()
-  
-  # Crea mapping sezione -> colore
-  section_colors <- setNames(
-    colors[((seq_along(unique_sections) - 1) %% length(colors)) + 1],
-    unique_sections
-  )
+  # unique_sections <- unique(nodes$primary_section)
+  # colors <- colorlist()
+  # 
+  # # Crea mapping sezione -> colore
+  # section_colors <- setNames(
+  #   colors[((seq_along(unique_sections) - 1) %% length(colors)) + 1],
+  #   unique_sections
+  # )
+  section_colors <- citation_analysis_results$section_colors
   
   # Assicurati che "Unknown" abbia sempre un colore grigio
   if ("Unknown" %in% names(section_colors)) {
@@ -1062,6 +1151,8 @@ content_analysis_server <- function(input, output, session, values) {
       pdf_text <- pdf2txt_auto(input$pdf_file$datapath, n_columns = n_columns)
       values$pdf_text <- pdf_text$Full_text
       values$pdf_sections <- pdf_text[-1]  # All sections except full text
+      pdf_metadata <- unlist(pdftools::pdf_info(input$pdf_file$datapath))
+      values$pdf_doi <- extract_doi_from_pdf(input$pdf_file$datapath)
       
       showNotification(
         "PDF text extracted successfully! Preview available above.",
@@ -1158,14 +1249,25 @@ content_analysis_server <- function(input, output, session, values) {
       
       n_segs_cit <- input$n_segments_citations %||% 10
       
-      values$analysis_results <- analyze_scientific_content_enhanced(
+      values$analysis_results <- analyze_scientific_content(
         text = values$pdf_sections,
+        doi = values$pdf_doi,
         window_size = input$window_size,
         parse_multiple_citations = input$parse_multiple,
         remove_stopwords = input$remove_stopwords,
         custom_stopwords = custom_stops,
         use_sections_for_citations = use_sections_cit,
         n_segments_citations = n_segs_cit
+      )
+      
+      section_colors <- colorlist()[1:length(unique(values$analysis_results$citation_contexts$section))]
+      names(section_colors) <- unique(values$analysis_results$citation_contexts$section)
+      values$analysis_results$section_colors <- section_colors
+      
+      # Calculate readability indices
+      values$readability_indices <- calculate_readability_indices(
+        text = values$pdf_text,
+        detailed = TRUE
       )
       
       # Create network if we have data
@@ -1238,6 +1340,159 @@ content_analysis_server <- function(input, output, session, values) {
     } else { "0.0" }
   })
   
+  # Readability indices outputs
+  output$flesch_kincaid_grade <- renderText({
+    if (!is.null(values$readability_indices)) {
+      format(round(values$readability_indices$flesch_kincaid_grade, 1), nsmall = 1)
+    } else { "0.0" }
+  })
+  
+  output$flesch_reading_ease <- renderText({
+    if (!is.null(values$readability_indices)) {
+      format(round(values$readability_indices$flesch_reading_ease, 1), nsmall = 1)
+    } else { "0.0" }
+  })
+  
+  output$ari_index <- renderText({
+    if (!is.null(values$readability_indices)) {
+      format(round(values$readability_indices$automated_readability_index, 1), nsmall = 1)
+    } else { "0.0" }
+  })
+  
+  output$gunning_fog_index <- renderText({
+    if (!is.null(values$readability_indices)) {
+      format(round(values$readability_indices$gunning_fog_index, 1), nsmall = 1)
+    } else { "0.0" }
+  })
+  
+  # Text Statistics - Matching height with readability
+  # Text Statistics - Matching structure with readability
+  output$text_stats <- renderUI({
+    if (!is.null(values$analysis_results)) {
+      stats <- values$analysis_results$text_analytics$basic_stats
+      
+      # Get additional stats from readability indices
+      syllables_info <- ""
+      complex_info <- ""
+      
+      if (!is.null(values$readability_indices)) {
+        syllables_info <- format(values$readability_indices$n_syllables, big.mark = ",")
+        complex_info <- sprintf("Complex words:      %s (%.1f%%)",
+                                format(values$readability_indices$n_complex_words, big.mark = ","),
+                                values$readability_indices$pct_complex_words)
+      } else {
+        syllables_info <- "N/A"
+        complex_info <- "Complex words:      N/A"
+      }
+      
+      text_content <- sprintf(
+        "TEXT STATISTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔤 Characters:      %s
+📄 Words:           %s
+✏️ Sentences:       %s
+🗣 Syllables:       %s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+%s
+Avg words/sentence: %.1f
+Lexical diversity:  %.3f",
+        format(stats$total_characters, big.mark = ","),
+        format(stats$total_words, big.mark = ","),
+        format(stats$total_sentences, big.mark = ","),
+        syllables_info,
+        complex_info,
+        round(stats$avg_words_per_sentence, 1),
+        round(values$analysis_results$summary$lexical_diversity, 3)
+      )
+      
+      tags$pre(
+        style = "background-color: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; color: #333; margin: 0; min-height: 280px;",
+        text_content
+      )
+    } else {
+      tags$pre(
+        style = "background-color: #f8f9fa; padding: 40px; border-radius: 6px; border: 1px solid #dee2e6; text-align: center; color: #999; margin: 0; min-height: 280px; display: flex; align-items: center; justify-content: center;",
+        "No analysis data available"
+      )
+    }
+  })
+  
+  # Readability Indices - Add min-height
+  output$readability_details_html <- renderUI({
+    if (!is.null(values$readability_indices)) {
+      
+      indices <- values$readability_indices
+      
+      # Helper to get interpretation symbol
+      get_symbol <- function(index_name, value) {
+        switch(index_name,
+               "flesch_kincaid" = if (value <= 12) "✓" else if (value <= 16) "◆" else "▲",
+               "flesch_ease" = if (value >= 60) "✓" else if (value >= 30) "◆" else "▲",
+               "ari" = if (value <= 12) "✓" else if (value <= 16) "◆" else "▲",
+               "gunning" = if (value <= 12) "✓" else if (value <= 16) "◆" else "▲"
+        )
+      }
+      
+      # Helper to get interpretation text
+      get_interp_text <- function(index_name, value) {
+        switch(index_name,
+               "flesch_kincaid" = paste("Grade", round(value)),
+               "flesch_ease" = if (value >= 60) "Easy" else if (value >= 30) "Moderate" else "Difficult",
+               "ari" = paste("Grade", round(value)),
+               "gunning" = if (value <= 12) "Readable" else if (value <= 16) "Difficult" else "Very difficult"
+        )
+      }
+      
+      text_content <- sprintf(
+        "READABILITY INDICES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 Flesch-Kincaid:  %5.1f  %s  %s
+📖 Reading Ease:    %5.1f  %s  %s  
+🤖 ARI Index:       %5.1f  %s  %s
+☁️ Gunning Fog:     %5.1f  %s  %s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Sentences: %s • Words: %s
+Syllables: %s • Complex: %s (%.1f%%)
+Avg sentence length: %.1f words",
+        indices$flesch_kincaid_grade,
+        get_symbol("flesch_kincaid", indices$flesch_kincaid_grade),
+        get_interp_text("flesch_kincaid", indices$flesch_kincaid_grade),
+        indices$flesch_reading_ease,
+        get_symbol("flesch_ease", indices$flesch_reading_ease),
+        get_interp_text("flesch_ease", indices$flesch_reading_ease),
+        indices$automated_readability_index,
+        get_symbol("ari", indices$automated_readability_index),
+        get_interp_text("ari", indices$automated_readability_index),
+        indices$gunning_fog_index,
+        get_symbol("gunning", indices$gunning_fog_index),
+        get_interp_text("gunning", indices$gunning_fog_index),
+        format(indices$n_sentences, big.mark = ","),
+        format(indices$n_words, big.mark = ","),
+        format(indices$n_syllables, big.mark = ","),
+        format(indices$n_complex_words, big.mark = ","),
+        indices$pct_complex_words,
+        indices$avg_sentence_length
+      )
+      
+      tags$pre(
+        style = "background-color: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; color: #333; margin: 0; min-height: 280px;",
+        text_content
+      )
+      
+    } else {
+      tags$pre(
+        style = "background-color: #f8f9fa; padding: 40px; border-radius: 6px; border: 1px solid #dee2e6; text-align: center; color: #999; margin: 0; min-height: 280px; display: flex; align-items: center; justify-content: center;",
+        "No readability data available"
+      )
+    }
+  })
+  
   # Citation types table
   output$citation_types_table <- DT::renderDataTable({
     if (!is.null(values$analysis_results) && 
@@ -1294,20 +1549,20 @@ content_analysis_server <- function(input, output, session, values) {
   }, options = list(pageLength = 15, dom = 't', ordering = FALSE, searching = FALSE))
   
   # Text statistics
-  output$text_stats <- renderText({
-    if (!is.null(values$analysis_results)) {
-      stats <- values$analysis_results$text_analytics$basic_stats
-      paste(
-        "Characters:", format(stats$total_characters, big.mark = ","), "\n",
-        "Words:", format(stats$total_words, big.mark = ","), "\n",
-        "Sentences:", format(stats$total_sentences, big.mark = ","), "\n",
-        "Avg words/sentence:", round(stats$avg_words_per_sentence, 1), "\n",
-        "Lexical diversity:", round(values$analysis_results$summary$lexical_diversity, 3)
-      )
-    } else {
-      "No analysis data available"
-    }
-  })
+  # output$text_stats <- renderText({
+  #   if (!is.null(values$analysis_results)) {
+  #     stats <- values$analysis_results$text_analytics$basic_stats
+  #     paste(
+  #       "Characters:", format(stats$total_characters, big.mark = ","), "\n",
+  #       "Words:", format(stats$total_words, big.mark = ","), "\n",
+  #       "Sentences:", format(stats$total_sentences, big.mark = ","), "\n",
+  #       "Avg words/sentence:", round(stats$avg_words_per_sentence, 1), "\n",
+  #       "Lexical diversity:", round(values$analysis_results$summary$lexical_diversity, 3)
+  #     )
+  #   } else {
+  #     "No analysis data available"
+  #   }
+  # })
   
   # ===========================================
   # TAB 2: IN-CONTEXT CITATION ANALYSIS
@@ -1366,6 +1621,9 @@ content_analysis_server <- function(input, output, session, values) {
               select(citation_id, section),
             by = "citation_id"
           )
+        section_colors <- colorlist()[1:length(unique(values$analysis_results$citation_contexts$section))]
+        names(section_colors) <- unique(values$analysis_results$citation_contexts$section)
+        values$analysis_results$section_colors <- section_colors
       }
       
       # Update citation metrics - section distribution
@@ -1469,11 +1727,13 @@ content_analysis_server <- function(input, output, session, values) {
       
       # Create HTML for each citation context
       if (nrow(contexts) > 0) {
-        citation_boxes <- lapply(1:min(50, nrow(contexts)), function(i) {
+        # citation_boxes <- lapply(1:min(50, nrow(contexts)), function(i) {
+        citation_boxes <- lapply(1:nrow(contexts), function(i) {
           context <- contexts[i,]
           
-          section_colors <- colorlist()[1:length(unique(contexts$section))]
-          names(section_colors) <- unique(contexts$section)
+          # section_colors <- colorlist()[1:length(unique(contexts$section))]
+          # names(section_colors) <- unique(contexts$section)
+          section_colors <- values$analysis_results$section_colors
           
           section_name <- if (!is.null(context$section) && !is.na(context$section)) {
             context$section
@@ -2011,13 +2271,13 @@ content_analysis_server <- function(input, output, session, values) {
     }
   )
   
-  # Reset word trends when analysis is reset
-  observeEvent(input$reset_analysis, {
-    values$word_trends_data <- NULL
-    updateSelectizeInput(session, "trend_words", 
-                         choices = NULL, 
-                         selected = NULL)
-  })
+  # # Reset word trends when analysis is reset
+  # observeEvent(input$reset_analysis, {
+  #   values$word_trends_data <- NULL
+  #   updateSelectizeInput(session, "trend_words", 
+  #                        choices = NULL, 
+  #                        selected = NULL)
+  # })
   
   # ===========================================
   # RESET FUNCTIONALITY
@@ -2028,6 +2288,11 @@ content_analysis_server <- function(input, output, session, values) {
     values$analysis_results <- NULL
     values$network_plot <- NULL
     values$analysis_running <- FALSE
+    values$readability_indices <- NULL
+    values$word_trends_data <- NULL
+    updateSelectizeInput(session, "trend_words", 
+                         choices = NULL, 
+                         selected = NULL)
     
     preview_visible(TRUE)
     
@@ -2049,6 +2314,284 @@ content_analysis_server <- function(input, output, session, values) {
       duration = 3
     )
   })
+  
+  # ===========================================
+  # EXCEL RESULTS DOWNLOAD
+  # ===========================================
+  
+  # Download all results as Excel file
+  output$download_all_results <- downloadHandler(
+    filename = function() {
+      paste0("content_analysis_results_", Sys.Date(), ".xlsx")
+    },
+    content = function(file) {
+      
+      # Verifica che ci siano risultati disponibili
+      if (is.null(values$analysis_results)) {
+        showNotification(
+          "No analysis results available. Please run the analysis first.",
+          type = "error",
+          duration = 5
+        )
+        return()
+      }
+      
+      tryCatch({
+        # Create workbook
+        wb_content <- openxlsx::createWorkbook()
+        
+        # === SHEET 1: SUMMARY STATISTICS ===
+        openxlsx::addWorksheet(wb_content, "Summary_Statistics")
+        
+        summary_data <- data.frame(
+          Metric = c(
+            "Total Words",
+            "Total Citations",
+            "Narrative Citations",
+            "Parenthetical Citations",
+            "Citation Density (per 1000 words)",
+            "Lexical Diversity",
+            "Total Characters",
+            "Total Sentences",
+            "Avg Words per Sentence"
+          ),
+          Value = c(
+            values$analysis_results$summary$total_words_analyzed,
+            values$analysis_results$summary$citations_extracted,
+            values$analysis_results$summary$narrative_citations,
+            values$analysis_results$summary$citations_extracted - values$analysis_results$summary$narrative_citations,
+            round(values$analysis_results$summary$citation_density_per_1000_words, 2),
+            round(values$analysis_results$summary$lexical_diversity, 4),
+            values$analysis_results$text_analytics$basic_stats$total_characters,
+            values$analysis_results$text_analytics$basic_stats$total_sentences,
+            round(values$analysis_results$text_analytics$basic_stats$avg_words_per_sentence, 2)
+          ),
+          stringsAsFactors = FALSE
+        )
+        
+        openxlsx::writeData(wb_content, "Summary_Statistics", summary_data, startRow = 1)
+        openxlsx::addStyle(wb_content, "Summary_Statistics", 
+                           style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#2E86AB", fontColour = "#FFFFFF"),
+                           rows = 1, cols = 1:2, gridExpand = TRUE)
+        openxlsx::setColWidths(wb_content, "Summary_Statistics", cols = 1:2, widths = c(35, 20))
+        
+        # === SHEET 2: READABILITY INDICES ===
+        if (!is.null(values$readability_indices)) {
+          openxlsx::addWorksheet(wb_content, "Readability_Indices")
+          
+          readability_data <- data.frame(
+            Index = c(
+              "Flesch-Kincaid Grade Level",
+              "Flesch Reading Ease",
+              "Automated Readability Index (ARI)",
+              "Gunning Fog Index",
+              "Average Sentence Length (words)",
+              "Number of Sentences",
+              "Number of Words",
+              "Number of Syllables",
+              "Number of Complex Words",
+              "Percentage Complex Words"
+            ),
+            Value = c(
+              round(values$readability_indices$flesch_kincaid_grade, 2),
+              round(values$readability_indices$flesch_reading_ease, 2),
+              round(values$readability_indices$automated_readability_index, 2),
+              round(values$readability_indices$gunning_fog_index, 2),
+              round(values$readability_indices$avg_sentence_length, 2),
+              values$readability_indices$n_sentences,
+              values$readability_indices$n_words,
+              values$readability_indices$n_syllables,
+              values$readability_indices$n_complex_words,
+              paste0(round(values$readability_indices$pct_complex_words, 2), "%")
+            ),
+            stringsAsFactors = FALSE
+          )
+          
+          openxlsx::writeData(wb_content, "Readability_Indices", readability_data, startRow = 1)
+          openxlsx::addStyle(wb_content, "Readability_Indices", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#27ae60", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:2, gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Readability_Indices", cols = 1:2, widths = c(40, 20))
+        }
+        
+        # === SHEET 3: WORD FREQUENCIES ===
+        if (!is.null(values$analysis_results$word_frequencies) && 
+            nrow(values$analysis_results$word_frequencies) > 0) {
+          openxlsx::addWorksheet(wb_content, "Word_Frequencies")
+          
+          top_words <- values$analysis_results$word_frequencies %>%
+            slice_head(n = 50) %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Word_Frequencies", top_words, startRow = 1)
+          openxlsx::addStyle(wb_content, "Word_Frequencies", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#3498db", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(top_words), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Word_Frequencies", cols = 1:ncol(top_words), widths = "auto")
+        }
+        
+        # === SHEET 4: BIGRAMS ===
+        if (!is.null(values$analysis_results$ngrams) && 
+            "2gram" %in% names(values$analysis_results$ngrams)) {
+          openxlsx::addWorksheet(wb_content, "Bigrams")
+          
+          bigrams_data <- values$analysis_results$ngrams$`2gram` %>%
+            slice_head(n = 50) %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Bigrams", bigrams_data, startRow = 1)
+          openxlsx::addStyle(wb_content, "Bigrams", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#9b59b6", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(bigrams_data), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Bigrams", cols = 1:ncol(bigrams_data), widths = "auto")
+        }
+        
+        # === SHEET 5: TRIGRAMS ===
+        if (!is.null(values$analysis_results$ngrams) && 
+            "3gram" %in% names(values$analysis_results$ngrams)) {
+          openxlsx::addWorksheet(wb_content, "Trigrams")
+          
+          trigrams_data <- values$analysis_results$ngrams$`3gram` %>%
+            slice_head(n = 50) %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Trigrams", trigrams_data, startRow = 1)
+          openxlsx::addStyle(wb_content, "Trigrams", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#e67e22", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(trigrams_data), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Trigrams", cols = 1:ncol(trigrams_data), widths = "auto")
+        }
+        
+        # === SHEET 6: CITATION TYPES ===
+        if (!is.null(values$analysis_results$citation_metrics$type_distribution)) {
+          openxlsx::addWorksheet(wb_content, "Citation_Types")
+          
+          types_data <- values$analysis_results$citation_metrics$type_distribution %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Citation_Types", types_data, startRow = 1)
+          openxlsx::addStyle(wb_content, "Citation_Types", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#e74c3c", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(types_data), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Citation_Types", cols = 1:ncol(types_data), widths = "auto")
+        }
+        
+        # === SHEET 7: CITATIONS BY SECTION ===
+        if (!is.null(values$analysis_results$citation_metrics$section_distribution)) {
+          openxlsx::addWorksheet(wb_content, "Citations_by_Section")
+          
+          sections_data <- values$analysis_results$citation_metrics$section_distribution %>%
+            filter(n > 0) %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Citations_by_Section", sections_data, startRow = 1)
+          openxlsx::addStyle(wb_content, "Citations_by_Section", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#16a085", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(sections_data), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Citations_by_Section", cols = 1:ncol(sections_data), widths = "auto")
+        }
+        
+        # === SHEET 8: CITATION CONTEXTS ===
+        if (!is.null(values$analysis_results$citation_contexts) &&
+            nrow(values$analysis_results$citation_contexts) > 0) {
+          openxlsx::addWorksheet(wb_content, "Citation_Contexts")
+          
+          # Seleziona le colonne principali se esistono, altrimenti esporta tutte
+          contexts_cols <- c("citation_id", "citation_text", "section", "citation_type", 
+                             "is_narrative", "words_before", "words_after", "full_context",
+                             "context_word_count", "citation_position_in_text")
+          
+          available_cols <- intersect(contexts_cols, names(values$analysis_results$citation_contexts))
+          
+          if (length(available_cols) > 0) {
+            contexts_export <- values$analysis_results$citation_contexts %>%
+              select(all_of(available_cols)) %>%
+              as.data.frame(stringsAsFactors = FALSE)
+          } else {
+            # Se nessuna colonna specificata esiste, esporta tutte
+            contexts_export <- values$analysis_results$citation_contexts %>%
+              as.data.frame(stringsAsFactors = FALSE)
+          }
+          
+          openxlsx::writeData(wb_content, "Citation_Contexts", contexts_export, startRow = 1)
+          openxlsx::addStyle(wb_content, "Citation_Contexts", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#2E86AB", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(contexts_export), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Citation_Contexts", cols = 1:ncol(contexts_export), widths = "auto")
+        }
+        
+        # === SHEET 9: CITATION NETWORK ===
+        if (!is.null(values$analysis_results$network_data) &&
+            nrow(values$analysis_results$network_data) > 0) {
+          openxlsx::addWorksheet(wb_content, "Citation_Network")
+          
+          # Esporta tutte le colonne disponibili nel network
+          network_export <- values$analysis_results$network_data %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Citation_Network", network_export, startRow = 1)
+          openxlsx::addStyle(wb_content, "Citation_Network", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#8e44ad", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(network_export), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Citation_Network", cols = 1:ncol(network_export), widths = "auto")
+        }
+        
+        # === SHEET 10: WORD TRENDS (if available) ===
+        if (!is.null(values$word_trends_data) && nrow(values$word_trends_data) > 0) {
+          openxlsx::addWorksheet(wb_content, "Word_Trends")
+          
+          trends_export <- values$word_trends_data %>%
+            arrange(word, segment_id) %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Word_Trends", trends_export, startRow = 1)
+          openxlsx::addStyle(wb_content, "Word_Trends", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#27ae60", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(trends_export), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Word_Trends", cols = 1:ncol(trends_export), widths = "auto")
+          
+          # Add summary statistics for word trends
+          openxlsx::addWorksheet(wb_content, "Word_Trends_Summary")
+          
+          trends_summary <- values$word_trends_data %>%
+            group_by(word) %>%
+            summarise(
+              total_occurrences = sum(count),
+              avg_frequency = mean(relative_frequency),
+              min_frequency = min(relative_frequency),
+              max_frequency = max(relative_frequency),
+              std_dev = sd(relative_frequency),
+              peak_segment = segment_name[which.max(relative_frequency)],
+              .groups = "drop"
+            ) %>%
+            arrange(desc(total_occurrences)) %>%
+            as.data.frame(stringsAsFactors = FALSE)
+          
+          openxlsx::writeData(wb_content, "Word_Trends_Summary", trends_summary, startRow = 1)
+          openxlsx::addStyle(wb_content, "Word_Trends_Summary", 
+                             style = openxlsx::createStyle(textDecoration = "bold", fgFill = "#16a085", fontColour = "#FFFFFF"),
+                             rows = 1, cols = 1:ncol(trends_summary), gridExpand = TRUE)
+          openxlsx::setColWidths(wb_content, "Word_Trends_Summary", cols = 1:ncol(trends_summary), widths = "auto")
+        }
+        
+        # Save workbook
+        openxlsx::saveWorkbook(wb_content, file, overwrite = TRUE)
+        
+      }, error = function(e) {
+        # Log detailed error for debugging
+        cat("Error in download_all_results:\n")
+        cat("Error message:", e$message, "\n")
+        cat("Stack trace:\n")
+        print(e)
+        
+        showNotification(
+          paste("Error exporting results:", e$message),
+          type = "error",
+          duration = 8
+        )
+      })
+    }
+  )
   
   # ===========================================
   # UTILITY FUNCTIONS

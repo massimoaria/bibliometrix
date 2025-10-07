@@ -1,10 +1,8 @@
 source("libraries.R", local = TRUE)
 source("helpContent.R", local = TRUE)
 source("utils.R", local = TRUE)
-source("pdf2txt_functions.R", local = TRUE)
-source("referenceMatching.R", local = TRUE)
-source("contentAnalysis.R", local = TRUE)
 source("contentAnalysisUI.R", local = TRUE)
+
 suppressMessages(libraries())
 
 # UI components ----

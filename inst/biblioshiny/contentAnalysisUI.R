@@ -60,34 +60,92 @@ content_analysis_tab <- function(id = "content_analysis") {
       # ===========================================
       column(10,
              
-             # NUOVO: Bottone per aprire il modal (visibile solo dopo estrazione)
+             # NUOVO: Bottone per aprire il modal e campo DOI (visibile solo dopo estrazione)
              conditionalPanel(
                condition = "output.text_extracted && !output.analysis_completed",
                div(
-                 style = "margin-bottom: 15px; padding: 10px; background-color: #e8f4f8; border-radius: 5px;",
-                 actionButton(
-                   "open_preview_btn",
-                   "View Extracted Text & PDF Preview",
-                   icon = icon("file-alt"),
-                   class = "btn-info",
-                   onclick = "$('#previewModal').modal('show');"
+                 style = "margin-bottom: 15px; padding: 15px; background-color: #e8f4f8; border-radius: 5px;",
+                 
+                 # Prima riga: bottone preview e messaggio
+                 fluidRow(
+                   column(12,
+                          actionButton(
+                            "open_preview_btn",
+                            "View Extracted Text & PDF Preview",
+                            icon = icon("file-alt"),
+                            class = "btn-info",
+                            onclick = "$('#previewModal').modal('show');"
+                          ),
+                          span(" Text extracted successfully!",
+                               style = "margin-left: 15px; color: #555; font-weight: 500;")
+                   )
                  ),
-                 span(" Text extracted successfully! Click to view the preview or start the analysis.",
-                      style = "margin-left: 15px; color: #555;")
+                 
+                 # Seconda riga: campo DOI
+                 fluidRow(
+                   style = "margin-top: 15px;",
+                   column(12,
+                          div(
+                            style = "background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #d1e7f0;",
+                            fluidRow(
+                              column(2,
+                                     tags$label(
+                                       "Document DOI:",
+                                       style = "margin-top: 8px; font-weight: bold; color: #2E86AB;"
+                                     )
+                              ),
+                              column(7,
+                                     textInput(
+                                       "pdf_doi_input",
+                                       label = NULL,
+                                       value = "",
+                                       placeholder = "Enter or edit DOI (e.g., 10.1234/example)",
+                                       width = "100%"
+                                     )
+                              ),
+                              column(3,
+                                     div(
+                                       style = "margin-top: 8px;",
+                                       uiOutput("doi_status_icon")
+                                     )
+                              )
+                            ),
+                            helpText(
+                              "The DOI is used to fetch reference details from Crossref. Edit if needed or add manually if not detected.",
+                              style = "margin-bottom: 0px; margin-top: -5px; font-size: 11px; color: #666;"
+                            )
+                          )
+                   )
+                 )
                )
              ),
+             
              conditionalPanel(
                condition = "output.analysis_completed",
                
-               # NUOVO: Piccolo bottone per riaprire il preview
+               # NUOVO: Info dopo l'analisi
                div(
-                 style = "margin-bottom: 10px; text-align: right;",
-                 actionButton(
-                   "reopen_preview_btn",
-                   "View Original Text",
-                   icon = icon("file-alt"),
-                   class = "btn-default btn-sm",
-                   onclick = "$('#previewModal').modal('show');"
+                 style = "margin-bottom: 10px;",
+                 fluidRow(
+                   column(4,
+                          actionButton(
+                            "reopen_preview_btn",
+                            "View Original Text",
+                            icon = icon("file-alt"),
+                            class = "btn-default btn-sm",
+                            onclick = "$('#previewModal').modal('show');"
+                          )
+                   ),
+                   column(8,
+                          div(
+                            style = "text-align: right; padding-top: 5px;",
+                            tags$strong("DOI: ", style = "color: #2E86AB;"),
+                            tags$span(
+                              textOutput("doi_display_after_analysis", inline = TRUE),
+                              style = "font-family: 'Courier New', monospace; color: #555; background-color: #f8f9fa; padding: 4px 8px; border-radius: 3px; border: 1px solid #dee2e6;"
+                            )
+                          )
+                   )
                  )
                ),
                tabsetPanel(
@@ -1069,7 +1127,7 @@ content_analysis_server <- function(input, output, session, values) {
   # Preview visibility reactive value
   preview_visible <- reactiveVal(TRUE)
   
-  # Check if text is extracted (new reactive)
+  # Check if text is extracted
   output$text_extracted <- reactive({
     return(!is.null(values$pdf_text) && nchar(values$pdf_text) > 0)
   })
@@ -1148,14 +1206,34 @@ content_analysis_server <- function(input, output, session, values) {
       } else {
         n_columns <- input$Columns
       }
+      
       pdf_text <- pdf2txt_auto(input$pdf_file$datapath, n_columns = n_columns)
       values$pdf_text <- pdf_text$Full_text
-      values$pdf_sections <- pdf_text[-1]  # All sections except full text
+      values$pdf_sections <- pdf_text[-1]
       pdf_metadata <- unlist(pdftools::pdf_info(input$pdf_file$datapath))
-      values$pdf_doi <- extract_doi_from_pdf(input$pdf_file$datapath)
+      
+      # Extract DOI
+      extracted_doi <- tryCatch({
+        extract_doi_from_pdf(input$pdf_file$datapath)
+      }, error = function(e) {
+        NULL
+      })
+      
+      # Store DOI and update input field
+      if (!is.null(extracted_doi) && !is.na(extracted_doi) && nzchar(trimws(extracted_doi))) {
+        values$pdf_doi <- trimws(extracted_doi)
+        updateTextInput(session, "pdf_doi_input", value = trimws(extracted_doi))
+      } else {
+        values$pdf_doi <- ""
+        updateTextInput(session, "pdf_doi_input", value = "")
+      }
       
       showNotification(
-        "PDF text extracted successfully! Preview available above.",
+        if (!is.null(extracted_doi) && nzchar(trimws(extracted_doi))) {
+          "PDF text extracted successfully! DOI detected and populated."
+        } else {
+          "PDF text extracted successfully! Please enter DOI manually if needed."
+        },
         type = "message",
         duration = 4
       )
@@ -1172,6 +1250,97 @@ content_analysis_server <- function(input, output, session, values) {
       )
     })
   })
+  
+  # Check if DOI was detected automatically
+  output$doi_detected <- reactive({
+    if (!is.null(values$pdf_doi) && nzchar(values$pdf_doi)) {
+      # Check if it's the same as what was automatically extracted
+      extracted_doi <- tryCatch({
+        if (!is.null(input$pdf_file)) {
+          extract_doi_from_pdf(input$pdf_file$datapath)
+        } else {
+          NULL
+        }
+      }, error = function(e) NULL)
+      
+      return(!is.null(extracted_doi) && 
+               nzchar(extracted_doi) && 
+               extracted_doi == input$pdf_doi_input)
+    }
+    return(FALSE)
+  })
+  
+  outputOptions(output, "doi_detected", suspendWhenHidden = FALSE)
+  
+  # Display DOI after analysis
+  output$doi_display_after_analysis <- renderText({
+    doi_value <- values$pdf_doi
+    
+    if (!is.null(doi_value) && !is.na(doi_value) && nzchar(trimws(doi_value))) {
+      return(trimws(doi_value))
+    } else {
+      return("Not available")
+    }
+  })
+  
+  # DOI status icon
+  output$doi_status_icon <- renderUI({
+    
+    # Verifica se il campo DOI ha un valore
+    doi_value <- input$pdf_doi_input
+    
+    if (is.null(doi_value) || !nzchar(trimws(doi_value))) {
+      # Nessun DOI inserito
+      return(
+        tagList(
+          icon("exclamation-triangle", style = "color: #e74c3c; font-size: 18px; margin-right: 5px;"),
+          tags$small("DOI not found", style = "color: #e74c3c; font-weight: bold;")
+        )
+      )
+    }
+    
+    # C'è un DOI, verifica se è stato auto-rilevato
+    auto_detected <- FALSE
+    
+    if (!is.null(input$pdf_file)) {
+      extracted_doi <- tryCatch({
+        extract_doi_from_pdf(input$pdf_file$datapath)
+      }, error = function(e) {
+        NULL
+      })
+      
+      # Verifica se il DOI estratto corrisponde a quello inserito
+      if (!is.null(extracted_doi) && 
+          !is.na(extracted_doi) && 
+          nzchar(trimws(extracted_doi))) {
+        auto_detected <- (trimws(extracted_doi) == trimws(doi_value))
+      }
+    }
+    
+    # Restituisci l'icona appropriata
+    if (auto_detected) {
+      return(
+        tagList(
+          icon("check-circle", style = "color: #27ae60; font-size: 18px; margin-right: 5px;"),
+          tags$small("Auto-detected", style = "color: #27ae60; font-weight: bold;")
+        )
+      )
+    } else {
+      return(
+        tagList(
+          icon("edit", style = "color: #f39c12; font-size: 18px; margin-right: 5px;"),
+          tags$small("Manually entered", style = "color: #f39c12; font-weight: bold;")
+        )
+      )
+    }
+  })
+  
+  # Update DOI value when user edits the field
+  observeEvent(input$pdf_doi_input, {
+    if (!is.null(input$pdf_doi_input)) {
+      values$pdf_doi <- trimws(input$pdf_doi_input)
+    }
+  }, ignoreInit = TRUE)
   
   # Text length information
   output$text_length_info <- renderText({
@@ -2290,6 +2459,7 @@ Avg sentence length: %.1f words",
     values$analysis_running <- FALSE
     values$readability_indices <- NULL
     values$word_trends_data <- NULL
+    values$pdf_doi <- NULL
     updateSelectizeInput(session, "trend_words", 
                          choices = NULL, 
                          selected = NULL)
@@ -2298,6 +2468,7 @@ Avg sentence length: %.1f words",
     
     tryCatch({
       shinyjs::reset("pdf_file")
+      updateTextInput(session, "pdf_doi_input", value = "")
       updateActionButton(session, "run_analysis", 
                          label = "Start",
                          icon = icon("play"))

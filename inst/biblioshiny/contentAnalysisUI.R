@@ -490,7 +490,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                    
                    br(),
                    
-                   # Search and Filter Controls
+                   # Search and Filter Controls - SINGLE ROW
                    fluidRow(
                      column(12,
                             div(class = "box box-primary",
@@ -505,24 +505,16 @@ content_analysis_tab <- function(id = "content_analysis") {
                                     )
                                 ),
                                 div(class = "box-body",
-                                    # Filter controls
+                                    # SINGLE ROW with all controls
                                     fluidRow(
-                                      column(6,
+                                      column(4,
                                              textInput("context_search",
                                                        "Search in contexts:",
                                                        placeholder = "Type to search citations or context...",
                                                        width = "100%"
                                              )
                                       ),
-                                      column(3,
-                                             selectInput("context_type_filter",
-                                                         "Filter by type:",
-                                                         choices = NULL,
-                                                         selected = NULL,
-                                                         width = "100%"
-                                             )
-                                      ),
-                                      column(3,
+                                      column(2,
                                              numericInput("context_min_words",
                                                           "Min context words:",
                                                           value = 10,
@@ -530,10 +522,8 @@ content_analysis_tab <- function(id = "content_analysis") {
                                                           max = 100,
                                                           width = "100%"
                                              )
-                                      )
-                                    ),
-                                    fluidRow(
-                                      column(4,
+                                      ),
+                                      column(2,
                                              radioButtons("citation_segmentation",
                                                           "Group citations by:",
                                                           choices = list(
@@ -562,26 +552,24 @@ content_analysis_tab <- function(id = "content_analysis") {
                                              actionButton("update_citation_grouping",
                                                           "Update Grouping",
                                                           icon = icon("refresh"),
-                                                          class = "btn-info btn-sm",
+                                                          class = "btn-info btn-block",
                                                           style = "margin-top: 5px;"
-                                             )
-                                      ),
-                                      column(4,
+                                             ),
                                              conditionalPanel(
                                                condition = "input.citation_segmentation == 'sections' && !output.sections_available",
                                                div(
-                                                 style = "background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 25px; border-left: 4px solid #ffc107;",
-                                                 icon("exclamation-triangle", style = "color: #856404;"),
-                                                 span(" Sections not available. Will use segments.",
-                                                      style = "color: #856404; margin-left: 8px; font-size: 12px;")
+                                                 style = "background-color: #fff3cd; padding: 5px; border-radius: 3px; margin-top: 8px; border-left: 3px solid #ffc107; font-size: 11px;",
+                                                 icon("exclamation-triangle", style = "color: #856404; font-size: 10px;"),
+                                                 span(" Sections not available",
+                                                      style = "color: #856404; margin-left: 5px;")
                                                )
                                              ),
                                              conditionalPanel(
                                                condition = "$('html').hasClass('shiny-busy')",
                                                div(
-                                                 style = "margin-top: 30px;",
-                                                 icon("spinner", class = "fa-spin", style = "color: #3498db;"),
-                                                 span("Updating...", style = "color: #3498db; font-style: italic; margin-left: 5px;")
+                                                 style = "margin-top: 8px; text-align: center;",
+                                                 icon("spinner", class = "fa-spin", style = "color: #3498db; font-size: 12px;"),
+                                                 span("Updating...", style = "color: #3498db; font-style: italic; margin-left: 3px; font-size: 11px;")
                                                )
                                              )
                                       )
@@ -699,6 +687,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                placeholder = "No file selected",
                                width = "100%"
                      ),
+                     
                      numericInput("Columns",
                                   label = "Number of Columns in PDF",
                                   value = NULL,
@@ -707,8 +696,35 @@ content_analysis_tab <- function(id = "content_analysis") {
                                   step = 1,
                                   width = "100%"
                      ),
-                     helpText("Specify if the PDF has multiple columns (e.g., 2 for typical
-                     academic articles)."),
+                     helpText("Specify if the PDF has multiple columns (e.g., 2 for typical academic articles)."),
+                     
+                     # NUOVO: Citation Type Selection
+                     radioButtons("citation_type_import",
+                                  label = div(
+                                    "Citation Format in PDF:",
+                                    tags$a(
+                                      icon("info-circle"),
+                                      href = "#",
+                                      onclick = "return false;",
+                                      style = "margin-left: 5px; color: #3498db; cursor: help;",
+                                      title = "Choose the citation format used in your document. This helps avoid false positives in citation detection."
+                                    )
+                                  ),
+                                  choices = list(
+                                    "Author-year (Smith, 2020)" = "author_year",
+                                    "Numeric brackets [1]" = "numeric_bracketed", 
+                                    "Numeric superscript¹" = "numeric_superscript",
+                                    "All formats (may have false positives)" = "all"
+                                  ),
+                                  selected = "author_year",
+                                  width = "100%"
+                     ),
+                     helpText(
+                       style = "font-size: 11px; color: #666; margin-top: -8px;",
+                       HTML("<strong>Important:</strong> Select the correct format to improve citation detection accuracy. 
+               For superscript citations, numbers will be converted to [n] format during extraction.")
+                     ),
+                     
                      # File info display
                      conditionalPanel(
                        condition = "output.pdf_uploaded",
@@ -1006,9 +1022,23 @@ content_analysis_server <- function(input, output, session, values) {
         n_columns <- input$Columns
       }
       
-      pdf_text <- pdf2txt_auto(input$pdf_file$datapath, n_columns = n_columns)
+      # Get citation type from input
+      citation_type <- input$citation_type_import
+      if (is.null(citation_type) || citation_type == "") {
+        citation_type <- "author_year"  # default
+      }
+      
+      # Extract text with citation type parameter
+      pdf_text <- pdf2txt_auto(
+        input$pdf_file$datapath, 
+        n_columns = n_columns,
+        citation_type = citation_type
+      )
+      
       values$pdf_text <- pdf_text$Full_text
       values$pdf_sections <- pdf_text[-1]
+      values$citation_type_used <- citation_type  # Store for later use
+      
       pdf_metadata <- unlist(pdftools::pdf_info(input$pdf_file$datapath))
       
       # Extract DOI
@@ -1027,14 +1057,22 @@ content_analysis_server <- function(input, output, session, values) {
         updateTextInput(session, "pdf_doi_input", value = "")
       }
       
+      # Create notification message based on citation type
+      notification_msg <- if (!is.null(extracted_doi) && nzchar(trimws(extracted_doi))) {
+        "PDF text extracted successfully! DOI detected and populated."
+      } else {
+        "PDF text extracted successfully! Please enter DOI manually if needed."
+      }
+      
+      # Add citation type info to notification
+      if (citation_type == "numeric_superscript") {
+        notification_msg <- paste0(notification_msg, " Superscript citations converted to [n] format.")
+      }
+      
       showNotification(
-        if (!is.null(extracted_doi) && nzchar(trimws(extracted_doi))) {
-          "PDF text extracted successfully! DOI detected and populated."
-        } else {
-          "PDF text extracted successfully! Please enter DOI manually if needed."
-        },
+        notification_msg,
         type = "message",
-        duration = 4
+        duration = 5
       )
       
       updateActionButton(session, "run_analysis", 
@@ -1217,9 +1255,20 @@ content_analysis_server <- function(input, output, session, values) {
       
       n_segs_cit <- input$n_segments_citations %||% 10
       
+      # Get citation type (use stored value from extraction or default)
+      citation_type <- values$citation_type_used
+      if (is.null(citation_type) || citation_type == "") {
+        citation_type <- input$citation_type_import
+        if (is.null(citation_type) || citation_type == "") {
+          citation_type <- "author_year"  # ultimate fallback
+        }
+      }
+      
+      # Run analysis with citation type parameter
       values$analysis_results <- analyze_scientific_content(
         text = values$pdf_sections,
         doi = values$pdf_doi,
+        citation_type = citation_type,
         window_size = input$window_size,
         parse_multiple_citations = input$parse_multiple,
         remove_stopwords = input$remove_stopwords,
@@ -1256,9 +1305,14 @@ content_analysis_server <- function(input, output, session, values) {
                          icon = icon("play"))
       
       showNotification(
-        "Content analysis completed successfully!",
+        paste0("Content analysis completed successfully! Citation type: ", 
+               switch(citation_type,
+                      "author_year" = "Author-Year",
+                      "numeric_bracketed" = "Numeric Bracketed",
+                      "numeric_superscript" = "Numeric Superscript",
+                      "all" = "All Formats")),
         type = "message",
-        duration = 3
+        duration = 4
       )
       
     }, error = function(e) {
@@ -1655,19 +1709,6 @@ Avg sentence length: %.1f words",
     })
   })
   
-  # Update citation type filter
-  observe({
-    if (!is.null(values$analysis_results) && 
-        !is.null(values$analysis_results$citation_contexts) &&
-        nrow(values$analysis_results$citation_contexts) > 0) {
-      
-      types <- unique(values$analysis_results$citation_contexts$citation_type)
-      updateSelectInput(session, "context_type_filter",
-                        choices = c("All" = "", types),
-                        selected = "")
-    }
-  })
-  
   # Custom HTML output for citation contexts
   output$citation_contexts_html <- renderUI({
     if (!is.null(values$analysis_results) && 
@@ -1676,17 +1717,14 @@ Avg sentence length: %.1f words",
       
       contexts <- values$analysis_results$citation_contexts
       
-      # Apply filters
+      # Apply filters (REMOVED context_type_filter)
       if (!is.null(input$context_search) && nzchar(input$context_search)) {
         contexts <- contexts %>%
           filter(str_detect(citation_text, regex(input$context_search, ignore_case = TRUE)) |
                    str_detect(full_context, regex(input$context_search, ignore_case = TRUE)))
       }
       
-      if (!is.null(input$context_type_filter) && nzchar(input$context_type_filter)) {
-        contexts <- contexts %>%
-          filter(citation_type == input$context_type_filter)
-      }
+      # REMOVED: type filter code
       
       if (!is.null(input$context_min_words)) {
         contexts <- contexts %>%
@@ -1695,12 +1733,9 @@ Avg sentence length: %.1f words",
       
       # Create HTML for each citation context
       if (nrow(contexts) > 0) {
-        # citation_boxes <- lapply(1:min(50, nrow(contexts)), function(i) {
         citation_boxes <- lapply(1:nrow(contexts), function(i) {
           context <- contexts[i,]
           
-          # section_colors <- colorlist()[1:length(unique(contexts$section))]
-          # names(section_colors) <- unique(contexts$section)
           section_colors <- values$analysis_results$section_colors
           
           section_name <- if (!is.null(context$section) && !is.na(context$section)) {
@@ -1816,9 +1851,19 @@ Avg sentence length: %.1f words",
         
         tagList(
           tags$script(HTML("
-          $(document).ready(function(){
-            $('.citation-with-tooltip').tooltip('dispose');
-            
+        $(document).ready(function(){
+          $('.citation-with-tooltip').tooltip('dispose');
+          
+          $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip({
+            container: 'body',
+            trigger: 'hover focus',
+            delay: { show: 200, hide: 100 },
+            html: true,
+            boundary: 'window'
+          });
+          
+          setTimeout(function() {
+            $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip('dispose');
             $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip({
               container: 'body',
               trigger: 'hover focus',
@@ -1826,53 +1871,43 @@ Avg sentence length: %.1f words",
               html: true,
               boundary: 'window'
             });
-            
-            setTimeout(function() {
-              $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip('dispose');
-              $('.citation-with-tooltip[data-toggle=\"tooltip\"]').tooltip({
-                container: 'body',
-                trigger: 'hover focus',
-                delay: { show: 200, hide: 100 },
-                html: true,
-                boundary: 'window'
-              });
-            }, 800);
-          });
-        ")),
+          }, 800);
+        });
+      ")),
           
           tags$style(HTML("
-          .tooltip {
-            font-family: Arial, sans-serif;
-            pointer-events: none;
-          }
-          .tooltip-inner {
-            max-width: 500px;
-            min-width: 250px;
-            text-align: left;
-            background-color: rgba(0, 0, 0, 0.95);
-            padding: 12px 16px;
-            font-size: 13px;
-            line-height: 1.6;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-          }
-          .tooltip-inner strong {
-            color: #4ECDC4;
-            display: block;
-            margin-bottom: 6px;
-          }
-          .tooltip.show {
-            opacity: 1;
-          }
-          .tooltip.top .tooltip-arrow {
-            border-top-color: rgba(0, 0, 0, 0.95);
-          }
-          .citation-with-tooltip[data-toggle]:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-            transition: all 0.2s ease;
-          }
-        ")),
+        .tooltip {
+          font-family: Arial, sans-serif;
+          pointer-events: none;
+        }
+        .tooltip-inner {
+          max-width: 500px;
+          min-width: 250px;
+          text-align: left;
+          background-color: rgba(0, 0, 0, 0.95);
+          padding: 12px 16px;
+          font-size: 13px;
+          line-height: 1.6;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .tooltip-inner strong {
+          color: #4ECDC4;
+          display: block;
+          margin-bottom: 6px;
+        }
+        .tooltip.show {
+          opacity: 1;
+        }
+        .tooltip.top .tooltip-arrow {
+          border-top-color: rgba(0, 0, 0, 0.95);
+        }
+        .citation-with-tooltip[data-toggle]:hover {
+          opacity: 0.9;
+          transform: scale(1.02);
+          transition: all 0.2s ease;
+        }
+      ")),
           
           citation_boxes
         )
@@ -2239,14 +2274,6 @@ Avg sentence length: %.1f words",
     }
   )
   
-  # # Reset word trends when analysis is reset
-  # observeEvent(input$reset_analysis, {
-  #   values$word_trends_data <- NULL
-  #   updateSelectizeInput(session, "trend_words", 
-  #                        choices = NULL, 
-  #                        selected = NULL)
-  # })
-  
   # ===========================================
   # RESET FUNCTIONALITY
   # ===========================================
@@ -2259,6 +2286,8 @@ Avg sentence length: %.1f words",
     values$readability_indices <- NULL
     values$word_trends_data <- NULL
     values$pdf_doi <- NULL
+    values$citation_type_used <- NULL
+    
     updateSelectizeInput(session, "trend_words", 
                          choices = NULL, 
                          selected = NULL)

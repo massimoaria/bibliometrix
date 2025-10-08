@@ -673,7 +673,7 @@ content_analysis_tab <- function(id = "content_analysis") {
       # LEFT PANEL: CONTROLS (column 2)
       # ===========================================
       column(2,
-             
+
              # PDF Import Card
              div(class = "box box-primary",
                  div(class = "box-header with-border",
@@ -698,10 +698,11 @@ content_analysis_tab <- function(id = "content_analysis") {
                      ),
                      helpText("Specify if the PDF has multiple columns (e.g., 2 for typical academic articles)."),
                      
-                     # NUOVO: Citation Type Selection
+                     # MODIFIED: Citation Type Selection - NO DEFAULT
                      radioButtons("citation_type_import",
                                   label = div(
-                                    "Citation Format in PDF:",
+                                    tags$span("Citation Format in PDF:", style = "color: #d9534f; font-weight: bold;"),
+                                    tags$span(" *", style = "color: #d9534f; font-size: 16px;"),
                                     tags$a(
                                       icon("info-circle"),
                                       href = "#",
@@ -716,14 +717,26 @@ content_analysis_tab <- function(id = "content_analysis") {
                                     "Numeric superscript¹" = "numeric_superscript",
                                     "All formats (may have false positives)" = "all"
                                   ),
-                                  selected = "author_year",
+                                  selected = character(0),  # NO DEFAULT SELECTION
                                   width = "100%"
                      ),
-                     helpText(
-                       style = "font-size: 11px; color: #666; margin-top: -8px;",
-                       HTML("<strong>Important:</strong> Select the correct format to improve citation detection accuracy. 
-               For superscript citations, numbers will be converted to [n] format during extraction.")
+                     
+                     # Warning message when no selection
+                     conditionalPanel(
+                       condition = "!input.citation_type_import || input.citation_type_import == ''",
+                       div(
+                         style = "background-color: #fcf8e3; padding: 8px 12px; border-radius: 4px; border-left: 4px solid #f0ad4e; margin-top: -8px; margin-bottom: 10px;",
+                         icon("exclamation-triangle", style = "color: #8a6d3b;"),
+                         span(" Please select the citation format before extracting text.",
+                              style = "color: #8a6d3b; margin-left: 8px; font-size: 12px; font-weight: 500;")
+                       )
                      ),
+                     
+               #       helpText(
+               #         style = "font-size: 11px; color: #666; margin-top: -8px;",
+               #         HTML("<strong>Important:</strong> Select the correct format to improve citation detection accuracy. 
+               # For superscript citations, numbers will be converted to [n] format during extraction.")
+               #       ),
                      
                      # File info display
                      conditionalPanel(
@@ -1015,6 +1028,20 @@ content_analysis_server <- function(input, output, session, values) {
   observeEvent(input$extract_text, {
     req(input$pdf_file)
     
+    # VALIDATION: Check if citation type is selected
+    if (is.null(input$citation_type_import) || 
+        input$citation_type_import == "" || 
+        length(input$citation_type_import) == 0) {
+      
+      showNotification(
+        HTML("<strong>Citation Format Required</strong><br/>Please select the citation format used in your PDF before extracting text."),
+        type = "warning",
+        duration = 5
+      )
+      
+      return()  # Stop execution
+    }
+    
     tryCatch({
       if (is.na(input$Columns)) {
         n_columns <- NULL
@@ -1024,9 +1051,6 @@ content_analysis_server <- function(input, output, session, values) {
       
       # Get citation type from input
       citation_type <- input$citation_type_import
-      if (is.null(citation_type) || citation_type == "") {
-        citation_type <- "author_year"  # default
-      }
       
       # Extract text with citation type parameter
       pdf_text <- pdf2txt_auto(
@@ -1065,9 +1089,17 @@ content_analysis_server <- function(input, output, session, values) {
       }
       
       # Add citation type info to notification
+      citation_type_label <- switch(citation_type,
+                                    "author_year" = "Author-year",
+                                    "numeric_bracketed" = "Numeric brackets",
+                                    "numeric_superscript" = "Numeric superscript",
+                                    "all" = "All formats")
+      
       if (citation_type == "numeric_superscript") {
         notification_msg <- paste0(notification_msg, " Superscript citations converted to [n] format.")
       }
+      
+      notification_msg <- paste0(notification_msg, " (Citation format: ", citation_type_label, ")")
       
       showNotification(
         notification_msg,
@@ -1086,6 +1118,23 @@ content_analysis_server <- function(input, output, session, values) {
         duration = 5
       )
     })
+  })
+  
+  # Disable/Enable extract button based on citation type selection
+  observe({
+    if (!is.null(input$citation_type_import) && 
+        input$citation_type_import != "" && 
+        length(input$citation_type_import) > 0) {
+      # Citation type selected - ensure button is enabled
+      shinyjs::enable("extract_text")
+      shinyjs::removeCssClass("extract_text", "btn-secondary")
+      shinyjs::addCssClass("extract_text", "btn-info")
+    } else {
+      # No citation type selected - visual feedback but don't disable
+      # (We handle this in the observeEvent instead)
+      shinyjs::removeCssClass("extract_text", "btn-info")
+      shinyjs::addCssClass("extract_text", "btn-secondary")
+    }
   })
   
   # Check if DOI was detected automatically
@@ -2297,6 +2346,8 @@ Avg sentence length: %.1f words",
     tryCatch({
       shinyjs::reset("pdf_file")
       updateTextInput(session, "pdf_doi_input", value = "")
+      # MODIFIED: Reset to no selection
+      updateRadioButtons(session, "citation_type_import", selected = character(0))
       updateActionButton(session, "run_analysis", 
                          label = "Start",
                          icon = icon("play"))

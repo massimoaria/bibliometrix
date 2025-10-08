@@ -16,17 +16,6 @@ content_analysis_tab <- function(id = "content_analysis") {
     tabName = id,
     
     # Tab header
-    # fluidRow(
-    #   column(12,
-    #          div(class = "page-header",
-    #              h2("Scientific Article Content Analysis", 
-    #                 style = "color: #2E86AB; margin-bottom: 10px;"),
-    #              p("Upload a PDF file and analyze citation patterns, context, and co-occurrence networks.",
-    #                style = "color: #666; font-size: 16px; margin-bottom: 20px;")
-    #          )
-    #   )
-    # ),
-    # Tab header
     fluidRow(
       column(8,
              div(class = "page-header",
@@ -94,7 +83,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                        style = "margin-top: 8px; font-weight: bold; color: #2E86AB;"
                                      )
                               ),
-                              column(7,
+                              column(4,
                                      textInput(
                                        "pdf_doi_input",
                                        label = NULL,
@@ -103,7 +92,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                        width = "100%"
                                      )
                               ),
-                              column(3,
+                              column(6,
                                      div(
                                        style = "margin-top: 8px;",
                                        uiOutput("doi_status_icon")
@@ -907,196 +896,6 @@ content_analysis_tab <- function(id = "content_analysis") {
   )
 }
 
-create_citation_network_basic <- function(citation_analysis_results,
-                                          max_distance = 1000,
-                                          min_connections = 1,
-                                          show_labels = TRUE) {
-  
-  network_data <- citation_analysis_results$network_data
-  
-  if (is.null(network_data) || nrow(network_data) == 0) {
-    warning("No citation co-occurrence data found.")
-    return(NULL)
-  }
-  
-  # Filter by distance
-  network_data_filtered <- network_data %>%
-    filter(abs(distance) <= max_distance)
-  
-  if (nrow(network_data_filtered) == 0) {
-    warning("No citation pairs found within the specified maximum distance.")
-    return(NULL)
-  }
-  
-  # Get unique citations
-  all_citation_texts <- unique(c(network_data_filtered$citation1, network_data_filtered$citation2))
-  
-  # Ottieni informazioni sulle sezioni - AGGREGA per citazione
-  citations_with_sections <- citation_analysis_results$citations %>%
-    select(citation_text_clean, section) %>%
-    group_by(citation_text_clean) %>%
-    summarise(
-      sections = paste(unique(section), collapse = ", "),
-      n_sections = n_distinct(section),
-      primary_section = first(section),
-      .groups = "drop"
-    )
-  
-  # Create nodes
-  nodes <- data.frame(
-    id = 1:length(all_citation_texts),
-    citation_text = all_citation_texts,
-    label = if (show_labels) str_trunc(all_citation_texts, 25) else "",
-    stringsAsFactors = FALSE
-  )
-  
-  # Aggiungi informazioni sulla sezione ai nodi
-  nodes <- nodes %>%
-    left_join(
-      citations_with_sections,
-      by = c("citation_text" = "citation_text_clean")
-    ) %>%
-    mutate(
-      sections = replace_na(sections, "Unknown"),
-      primary_section = replace_na(primary_section, "Unknown"),
-      n_sections = replace_na(n_sections, 1)
-    )
-  
-  # Calculate connections
-  node_connections <- rbind(
-    data.frame(citation = network_data_filtered$citation1, stringsAsFactors = FALSE),
-    data.frame(citation = network_data_filtered$citation2, stringsAsFactors = FALSE)
-  ) %>%
-    count(citation, name = "connections")
-  
-  nodes$connections <- sapply(nodes$citation_text, function(cite) {
-    conn <- node_connections$connections[node_connections$citation == cite]
-    if (length(conn) == 0) return(0)
-    return(conn[1])
-  })
-  
-  # Filter by connections
-  nodes <- nodes[nodes$connections >= min_connections, ]
-  valid_citations <- nodes$citation_text
-  network_data_filtered <- network_data_filtered %>%
-    filter(citation1 %in% valid_citations & citation2 %in% valid_citations)
-  
-  if (nrow(network_data_filtered) == 0) {
-    warning("No valid connections after filtering.")
-    return(NULL)
-  }
-  
-  # Set node properties
-  nodes$size <- pmax(15, pmin(40, 15 + nodes$connections * 3))/2
-  
-  # Assegna colori dinamicamente usando colorlist()
-  # unique_sections <- unique(nodes$primary_section)
-  # colors <- colorlist()
-  # 
-  # # Crea mapping sezione -> colore
-  # section_colors <- setNames(
-  #   colors[((seq_along(unique_sections) - 1) %% length(colors)) + 1],
-  #   unique_sections
-  # )
-  section_colors <- citation_analysis_results$section_colors
-  
-  # Assicurati che "Unknown" abbia sempre un colore grigio
-  if ("Unknown" %in% names(section_colors)) {
-    section_colors["Unknown"] <- "#CCCCCC"
-  }
-  
-  nodes$group <- nodes$primary_section
-  
-  # Aggiungi trasparenza ai colori dei nodi (85% opacità)
-  nodes$color <- sapply(section_colors[nodes$primary_section], function(hex_color) {
-    # Converti hex in rgba con trasparenza
-    rgb_vals <- col2rgb(hex_color)
-    sprintf("rgba(%d, %d, %d, 0.85)", rgb_vals[1], rgb_vals[2], rgb_vals[3])
-  })
-  
-  # Aggiungi bordo speciale per nodi multi-sezione
-  nodes$borderWidth <- ifelse(nodes$n_sections > 1, 3, 1)
-  nodes$borderWidthSelected <- ifelse(nodes$n_sections > 1, 5, 2)
-  
-  # Crea title con informazioni complete
-  nodes$title <- paste0(
-    nodes$citation_text,
-    "\n<br><b>Section(s):</b> ", nodes$sections,
-    ifelse(nodes$n_sections > 1, 
-           paste0(" (", nodes$n_sections, " sections)"), 
-           ""),
-    "\n<br><b>Connections:</b> ", nodes$connections
-  )
-  
-  nodes <- nodes %>% 
-    mutate(font.size = size,
-           font.vadjust = -0.7 * font.size)
-  
-  # Create edges
-  edges <- data.frame(
-    from = sapply(network_data_filtered$citation1, function(cite) {
-      nodes$id[nodes$citation_text == cite][1]
-    }),
-    to = sapply(network_data_filtered$citation2, function(cite) {
-      nodes$id[nodes$citation_text == cite][1]
-    }),
-    distance = abs(network_data_filtered$distance),
-    stringsAsFactors = FALSE
-  )
-  
-  edges <- edges[!is.na(edges$from) & !is.na(edges$to), ]
-  
-  # Riduci lo spessore degli archi e aggiungi trasparenza
-  edges$width <- pmax(0.5, 3 - (edges$distance / 200))
-  
-  # Colori con trasparenza (30% opacità per maggiore trasparenza)
-  edges$color <- ifelse(edges$distance <= 300, "rgba(255, 111, 111, 0.3)", 
-                        ifelse(edges$distance <= 600, "rgba(127, 179, 213, 0.3)", 
-                               "rgba(204, 204, 204, 0.25)"))
-  
-  edges$title <- paste("Distance:", edges$distance, "characters")
-  
-  # Create network con layout Fruchterman-Reingold
-  network <- visNetwork(nodes, edges, type="full", smooth = TRUE, physics = FALSE) %>%
-    visIgraphLayout(layout = "layout_nicely", type = "full")
-  
-  # Configure options
-  network <- network %>%
-    visOptions(highlightNearest = TRUE) %>%
-    visInteraction(dragNodes = TRUE, dragView = TRUE, zoomView = TRUE, zoomSpeed = 0.2) %>%
-    visPhysics(enabled = FALSE) %>%
-    visNodes(
-      borderWidth = 1,
-      borderWidthSelected = 2
-    )
-  
-  # Add stats
-  n_nodes <- nrow(nodes)
-  n_edges <- nrow(edges)
-  avg_distance <- round(mean(edges$distance), 1)
-  
-  # Statistiche per sezione e multi-sezione
-  section_stats <- nodes %>%
-    count(primary_section) %>%
-    arrange(desc(n))
-  
-  multi_section_citations <- nodes %>%
-    filter(n_sections > 1) %>%
-    select(citation_text, sections, n_sections)
-  
-  attr(network, "stats") <- list(
-    n_nodes = n_nodes,
-    n_edges = n_edges,
-    avg_distance = avg_distance,
-    max_distance = max_distance,
-    section_distribution = section_stats,
-    multi_section_citations = multi_section_citations,
-    section_colors = section_colors
-  )
-  
-  return(network)
-}
-
 #' Enhanced Server Logic for Content Analysis Tab with 3 Tabs
 #' 
 #' @param input Shiny input object
@@ -1443,7 +1242,7 @@ content_analysis_server <- function(input, output, session, values) {
       if (!is.null(values$analysis_results$network_data) && 
           nrow(values$analysis_results$network_data) > 0) {
         
-        values$network_plot <- create_citation_network_basic(
+        values$network_plot <- create_citation_network(
           values$analysis_results,
           max_distance = input$max_distance,
           show_labels = TRUE
@@ -1830,7 +1629,7 @@ Avg sentence length: %.1f words",
       if (!is.null(values$analysis_results$network_data) && 
           nrow(values$analysis_results$network_data) > 0) {
         
-        values$network_plot <- create_citation_network_basic(
+        values$network_plot <- create_citation_network(
           values$analysis_results,
           max_distance = input$max_distance,
           show_labels = TRUE

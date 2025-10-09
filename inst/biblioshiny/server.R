@@ -1307,6 +1307,10 @@ To ensure the functionality of Biblioshiny,
     req(input$journal_ranking_upload)
     # Load the journal ranking data
     ranking <- read_journal_ranking(input$journal_ranking_upload$datapath)
+    if (!is.null(ranking)){
+      SOnotRanked <- setdiff(values$Morig$SO,ranking$SO)
+      ranking <- bind_rows(ranking, data.frame(SO=SOnotRanked, Ranking="Not Ranked"))
+    }
     values$journal_ranking <- ranking
     shinyjs::show("journal_ranking_subset")
   })
@@ -1417,6 +1421,7 @@ To ensure the functionality of Biblioshiny,
     shinyjs::reset("journal_list_upload")
     shinyjs::hide("journal_list_helptext")
     values$journal_list <- unique(values$Morig$SO)
+    values$journal_ranking <- NULL
     shinyjs::reset("journal_ranking_upload")
     shinyjs::hide("journal_ranking_subset")
     shinyjs::hide("journal_ranking_helptext")

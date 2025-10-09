@@ -1374,6 +1374,7 @@ To ensure the functionality of Biblioshiny,
         values$Morig$LA <- "N.A."
         LA <- "N.A."
       }
+    values$Morig$TCpY <- as.numeric(values$Morig$TCpY)
     
     updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
     updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)

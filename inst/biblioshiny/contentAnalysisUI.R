@@ -676,135 +676,143 @@ content_analysis_tab <- function(id = "content_analysis") {
 
              # PDF Import Card
              div(class = "box box-primary",
-                 div(class = "box-header with-border",
-                     h4("1. Import PDF File", class = "box-title", style = "color: #2E86AB;")
-                 ),
                  div(class = "box-body",
-                     fileInput("pdf_file",
-                               label = "Choose PDF File",
-                               accept = c(".pdf"),
-                               buttonLabel = "Browse...",
-                               placeholder = "No file selected",
-                               width = "100%"
-                     ),
                      
-                     numericInput("Columns",
-                                  label = "Number of Columns in PDF",
-                                  value = NULL,
-                                  min = 1,
-                                  max = 3,
-                                  step = 1,
-                                  width = "100%"
-                     ),
-                     helpText("Specify if the PDF has multiple columns (e.g., 2 for typical academic articles)."),
-                     
-                     # MODIFIED: Citation Type Selection - NO DEFAULT
-                     radioButtons("citation_type_import",
-                                  label = div(
-                                    tags$span("Citation Format in PDF:", style = "color: #d9534f; font-weight: bold;"),
-                                    tags$span(" *", style = "color: #d9534f; font-size: 16px;"),
-                                    tags$a(
-                                      icon("info-circle"),
-                                      href = "#",
-                                      onclick = "return false;",
-                                      style = "margin-left: 5px; color: #3498db; cursor: help;",
-                                      title = "Choose the citation format used in your document. This helps avoid false positives in citation detection."
-                                    )
-                                  ),
-                                  choices = list(
-                                    "Author-year (Smith, 2020)" = "author_year",
-                                    "Numeric brackets [1]" = "numeric_bracketed", 
-                                    "Numeric superscript¹" = "numeric_superscript",
-                                    "All formats (may have false positives)" = "all"
-                                  ),
-                                  selected = character(0),  # NO DEFAULT SELECTION
-                                  width = "100%"
-                     ),
-                     
-                     # Warning message when no selection
-                     conditionalPanel(
-                       condition = "!input.citation_type_import || input.citation_type_import == ''",
-                       div(
-                         style = "background-color: #fcf8e3; padding: 8px 12px; border-radius: 4px; border-left: 4px solid #f0ad4e; margin-top: -8px; margin-bottom: 10px;",
-                         icon("exclamation-triangle", style = "color: #8a6d3b;"),
-                         span(" Please select the citation format before extracting text.",
-                              style = "color: #8a6d3b; margin-left: 8px; font-size: 12px; font-weight: 500;")
+                     tags$details(
+                       id = "pdf_import_details",
+                       open = NA,  # Aperto di default
+                       tags$summary(
+                         "1. Import PDF File ▼", 
+                         style = "font-weight: bold; cursor: pointer; color: #2E86AB; font-size: 16px; padding: 8px 0;"
+                       ),
+                       br(),
+                       
+                       fileInput("pdf_file",
+                                 label = "Choose PDF File",
+                                 accept = c(".pdf"),
+                                 buttonLabel = "Browse...",
+                                 placeholder = "No file selected",
+                                 width = "100%"
+                       ),
+                       
+                       numericInput("Columns",
+                                    label = "Number of Columns in PDF",
+                                    value = NULL,
+                                    min = 1,
+                                    max = 3,
+                                    step = 1,
+                                    width = "100%"
+                       ),
+                       helpText("Specify if the PDF has multiple columns (e.g., 2 for typical academic articles)."),
+                       
+                       # MODIFIED: Citation Type Selection - NO DEFAULT
+                       radioButtons("citation_type_import",
+                                    label = div(
+                                      tags$span("Citation Format in PDF:", style = "color: #d9534f; font-weight: bold;"),
+                                      tags$span(" *", style = "color: #d9534f; font-size: 16px;"),
+                                      tags$a(
+                                        icon("info-circle"),
+                                        href = "#",
+                                        onclick = "return false;",
+                                        style = "margin-left: 5px; color: #3498db; cursor: help;",
+                                        title = "Choose the citation format used in your document. This helps avoid false positives in citation detection."
+                                      )
+                                    ),
+                                    choices = list(
+                                      "Author-year (Smith, 2020)" = "author_year",
+                                      "Numeric brackets [1]" = "numeric_bracketed", 
+                                      "Numeric superscript¹" = "numeric_superscript",
+                                      "All formats (may have false positives)" = "all"
+                                    ),
+                                    selected = character(0),  # NO DEFAULT SELECTION
+                                    width = "100%"
+                       ),
+                       
+                       # Warning message when no selection
+                       conditionalPanel(
+                         condition = "!input.citation_type_import || input.citation_type_import == ''",
+                         div(
+                           style = "background-color: #fcf8e3; padding: 8px 12px; border-radius: 4px; border-left: 4px solid #f0ad4e; margin-top: -8px; margin-bottom: 10px;",
+                           icon("exclamation-triangle", style = "color: #8a6d3b;"),
+                           span(" Please select the citation format before extracting text.",
+                                style = "color: #8a6d3b; margin-left: 8px; font-size: 12px; font-weight: 500;")
+                         )
+                       ),
+                       
+                       # File info display
+                       conditionalPanel(
+                         condition = "output.pdf_uploaded",
+                         div(
+                           style = "background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;",
+                           icon("file-pdf", style = "color: #e74c3c;"),
+                           span(" PDF uploaded successfully!", style = "color: #27ae60; font-weight: bold;"),
+                           br(),
+                           textOutput("pdf_info", inline = TRUE)
+                         )
+                       ),
+                       
+                       br(),
+                       actionButton("extract_text",
+                                    "Extract Text from PDF",
+                                    icon = icon("file-text"),
+                                    class = "btn-info btn-block",
+                                    style = "margin-top: 10px;"
                        )
-                     ),
-                     
-               #       helpText(
-               #         style = "font-size: 11px; color: #666; margin-top: -8px;",
-               #         HTML("<strong>Important:</strong> Select the correct format to improve citation detection accuracy. 
-               # For superscript citations, numbers will be converted to [n] format during extraction.")
-               #       ),
-                     
-                     # File info display
-                     conditionalPanel(
-                       condition = "output.pdf_uploaded",
-                       div(
-                         style = "background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;",
-                         icon("file-pdf", style = "color: #e74c3c;"),
-                         span(" PDF uploaded successfully!", style = "color: #27ae60; font-weight: bold;"),
-                         br(),
-                         textOutput("pdf_info", inline = TRUE)
-                       )
-                     ),
-                     
-                     br(),
-                     actionButton("extract_text",
-                                  "Extract Text from PDF",
-                                  icon = icon("file-text"),
-                                  class = "btn-info btn-block",
-                                  style = "margin-top: 10px;"
                      )
                  )
              ),
              
              # Analysis Parameters Card
              div(class = "box box-success",
-                 div(class = "box-header with-border",
-                     h4("2. Analysis Parameters", class = "box-title", style = "color: #27ae60;")
-                 ),
                  div(class = "box-body",
                      
-                     # Citation context window
-                     numericInput("window_size",
-                                  label = "Context Window Size (words)",
-                                  value = 20,
-                                  min = 5,
-                                  max = 50,
-                                  step = 1,
-                                  width = "100%"
-                     ),
-                     helpText("Number of words before and after each citation to extract."),
-                     
-                     # Maximum distance for network
-                     numericInput("max_distance",
-                                  label = "Max Distance for Network (chars)",
-                                  value = 800,
-                                  min = 200,
-                                  max = 2000,
-                                  step = 100,
-                                  width = "100%"
-                     ),
-                     helpText("Maximum character distance between citations to consider as connected."),
-                     
-                     # Advanced options
                      tags$details(
-                       tags$summary("Advanced Options", style = "font-weight: bold; cursor: pointer;"),
+                       tags$summary(
+                         "2. Analysis Parameters ▼", 
+                         style = "font-weight: bold; cursor: pointer; color: #27ae60; font-size: 16px; padding: 8px 0;"
+                       ),
                        br(),
-                       checkboxInput("parse_multiple",
-                                     "Parse complex multiple citations",
-                                     value = TRUE
+                       
+                       # Citation context window
+                       numericInput("window_size",
+                                    label = "Context Window Size (words)",
+                                    value = 20,
+                                    min = 5,
+                                    max = 50,
+                                    step = 1,
+                                    width = "100%"
                        ),
-                       checkboxInput("remove_stopwords",
-                                     "Remove stopwords from analysis",
-                                     value = TRUE
+                       helpText("Number of words before and after each citation to extract."),
+                       
+                       # Maximum distance for network
+                       numericInput("max_distance",
+                                    label = "Max Distance for Network (chars)",
+                                    value = 800,
+                                    min = 200,
+                                    max = 2000,
+                                    step = 100,
+                                    width = "100%"
                        ),
-                       textInput("custom_stopwords",
-                                 "Custom stopwords (comma-separated)",
-                                 value = "machine, learning, random, forest, model",
-                                 width = "100%"
+                       helpText("Maximum character distance between citations to consider as connected."),
+                       
+                       # Advanced options - APERTO DI DEFAULT
+                       tags$details(
+                         open = NA,
+                         tags$summary("Advanced Options", style = "font-weight: bold; cursor: pointer;"),
+                         br(),
+                         checkboxInput("parse_multiple",
+                                       "Parse complex multiple citations",
+                                       value = TRUE
+                         ),
+                         checkboxInput("remove_stopwords",
+                                       "Remove stopwords from analysis",
+                                       value = TRUE
+                         ),
+                         textInput("custom_stopwords",
+                                   "Custom stopwords (comma-separated)",
+                                   value = "",
+                                   width = "100%"
+                         )
                        )
                      )
                  )
@@ -921,7 +929,21 @@ content_analysis_tab <- function(id = "content_analysis") {
           )
         )
       )
-    )
+    ),
+
+    tags$script(HTML("
+  // Function to open/close the PDF Import box
+  Shiny.addCustomMessageHandler('togglePdfImport', function(message) {
+    var details = document.getElementById('pdf_import_details');
+    if (details) {
+      if (message.action === 'close') {
+        details.removeAttribute('open');
+      } else if (message.action === 'open') {
+        details.setAttribute('open', '');
+      }
+    }
+  });
+"))
   )
 }
 
@@ -1363,6 +1385,9 @@ content_analysis_server <- function(input, output, session, values) {
         type = "message",
         duration = 4
       )
+      
+      # Close the PDF import box
+      session$sendCustomMessage('togglePdfImport', list(action = 'close'))
       
     }, error = function(e) {
       updateActionButton(session, "run_analysis", 
@@ -2363,6 +2388,9 @@ Avg sentence length: %.1f words",
       type = "message",
       duration = 3
     )
+    
+    # Re-open the PDF import box
+    session$sendCustomMessage('togglePdfImport', list(action = 'open'))
   })
   
   # ===========================================

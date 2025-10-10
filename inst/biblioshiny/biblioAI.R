@@ -1,11 +1,20 @@
 ## gemini AI tools
 gemini_ai <- function(image = NULL,
+                      docs = NULL,
                       prompt = "Explain these images",
                       model = "2.0-flash",
-                      type = "png",
+                      image_type = "png",
                       retry_503 = 5,
                       api_key=NULL,
                       outputSize = "medium"){
+  
+  mime_doc_types <- list(
+    pdf = "application/pdf",
+    txt = "text/plain",
+    html = "text/html",
+    csv = "text/csv",
+    rtf = "text/rtf"
+  )
   
   switch(outputSize,
          "small" = {
@@ -34,6 +43,15 @@ gemini_ai <- function(image = NULL,
              topK = 40,
              seed = 1234
            )
+         },
+         "huge" = {
+           generation_config <- list(
+             temperature = 1,
+             maxOutputTokens = 131072, #8192,
+             topP = 0.95,
+             topK = 40,
+             seed = 1234
+           )
          }
   )
   
@@ -57,7 +75,7 @@ gemini_ai <- function(image = NULL,
   # Handle images if provided
   if (!is.null(image)) {
     if (!is.vector(image)) image <- as.vector(image)
-    mime_type <- paste0("image/", type)
+    mime_type <- paste0("image/", image_type)
     
     for (img_path in image) {
       if (!file.exists(img_path)) {
@@ -83,6 +101,43 @@ gemini_ai <- function(image = NULL,
       ))
     }
   }
+  
+  # Handle documents if provided
+  if (!is.null(docs)) {
+    if (!is.vector(docs)) docs <- as.vector(docs)
+    for (doc_path in docs) {
+      if (!file.exists(doc_path)) {
+        return(paste0("❌ Error: Document file does not exist: ", doc_path))
+      }
+      
+      doc_data <- tryCatch(
+        base64enc::base64encode(doc_path),
+        error = function(e) {
+          return(NULL)
+        }
+      )
+      
+      if (is.null(doc_data)) {
+        return(paste0("❌ Failed to encode document: ", doc_path))
+      }
+      
+      doc_type <- tools::file_ext(doc_path) |> tolower()
+      
+      if (doc_type %in% names(mime_doc_types)) {
+        mime_type <- mime_doc_types[[doc_type]]
+      } else {
+        mime_type <- "application/pdf"  # Default to PDF if unknown type
+      }
+      
+      parts <- append(parts, list(
+        list(inline_data = list(
+          mime_type = "application/pdf",
+          data = doc_data
+        ))
+      ))
+    }
+  }
+  
   
   # Assemble request body
   request_body <- list(
@@ -113,7 +168,7 @@ gemini_ai <- function(image = NULL,
     # if (is.list(resp) && isTRUE(resp$error)) {
     #   return(resp$message)
     # }
-
+    
     # Retry on HTTP 503 or 429
     if (resp$status_code %in% c(429,503)) {
       if (attempt < retry_503) {
@@ -161,13 +216,14 @@ gemini_ai <- function(image = NULL,
   }
 }
 
+
 setGeminiAPI <- function(api_key) {
   
   # 1. Controllo validità dell'API key
   apiCheck <- gemini_ai(image = NULL,
                      prompt = "Hello",
                      model = "2.0-flash",
-                     type = "png",
+                     image_type = "png",
                      retry_503 = 5, api_key=api_key)
   
   contains_http_error <- grepl("HTTP\\s*[1-5][0-9]{2}", apiCheck)
@@ -625,6 +681,7 @@ geminiPromptImage <- function(obj, type="vis", prompt="Explain the topics in thi
     
     res <- gemini_ai(image = file_path,
                      prompt = prompt,
+                     image_type = "png",
                      model =  values$gemini_api_model,
                      outputSize = values$gemini_output_size)
   } else {
@@ -781,7 +838,7 @@ summaryAI <- function(values, i, model) {
     gemini_ai(image = NULL,
               prompt = prompt,
               model = model,
-              type = "png",
+              image_type = "png",
               retry_503 = 2,
               api_key = NULL)
   }, error = function(e) {

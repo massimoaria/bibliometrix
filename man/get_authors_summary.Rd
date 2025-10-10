@@ -10,13 +10,6 @@ get_authors_summary(
   sleep_time = 0.2,
   max_retries = 3
 )
-
-get_authors_summary(
-  doi = "10.1016/j.joi.2017.08.007",
-  verbose = FALSE,
-  sleep_time = 0.2,
-  max_retries = 3
-)
 }
 \arguments{
 \item{doi}{Character. DOI of the article}
@@ -38,32 +31,12 @@ A data frame with summary information for all authors including:
     \item openalex_id: OpenAlex author identifier
     \item primary_affiliation: Main institutional affiliation
   }
-
-A data frame with summary information for all authors including:
-  \itemize{
-    \item position: Author position in the paper
-    \item display_name: Author name as it appears in the paper
-    \item author_position_type: Type of position (first, last, middle)
-    \item is_corresponding: Whether the author is a corresponding author
-    \item orcid: ORCID identifier if available
-    \item openalex_id: OpenAlex author identifier
-    \item primary_affiliation: Main institutional affiliation
-  }
 }
 \description{
 Retrieves a quick summary of all authors from a paper without making additional API calls
 for individual author profiles. Useful for getting an overview of the authorship structure.
-
-Retrieves a quick summary of all authors from a paper without making additional API calls
-for individual author profiles. Useful for getting an overview of the authorship structure.
 }
 \examples{
-\dontrun{
-# Get a quick summary of all authors
-summary <- get_authors_summary(doi = "10.1016/j.joi.2017.08.007")
-print(summary)
-}
-
 \dontrun{
 # Get a quick summary of all authors
 summary <- get_authors_summary(doi = "10.1016/j.joi.2017.08.007")

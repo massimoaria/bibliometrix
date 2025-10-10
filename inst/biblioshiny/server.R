@@ -2234,15 +2234,14 @@ To ensure the functionality of Biblioshiny,
       output$AuthorBioPageUI <- renderUI({
         authorGlobalProfile
       })
-      
       local_author <- values$author_data %>%
-        filter(AUid == selected_author) %>%
+        dplyr::filter(AUid == selected_author) %>%
         pull(display_name)
       
       local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
         mutate(TI = to_title_case(TI),
                SO= to_title_case(SO))
-               
+      
       authorLocalProfile <- create_local_author_bio_card(
         local_author_data = local_data,
         selected_author = local_author,
@@ -2389,7 +2388,7 @@ To ensure the functionality of Biblioshiny,
       })
       
       local_author <- values$author_data %>%
-        filter(AUid == selected_author) %>%
+        dplyr::filter(AUid == selected_author) %>%
         pull(display_name)
       
       local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
@@ -3338,7 +3337,7 @@ To ensure the functionality of Biblioshiny,
     CR <- citations(values$M,sep=input$CitRefsSep)$Cited
     TAB <- data.frame(names(CR),as.numeric(CR))
     names(TAB) <- c("Cited References", "Citations")
-    values$TABCitRef <- TAB %>% filter(`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
+    values$TABCitRef <- TAB %>% dplyr::filter(`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
     
     xx=values$TABCitRef
     if (input$MostCitRefsK>dim(xx)[1]){
@@ -4266,8 +4265,8 @@ To ensure the functionality of Biblioshiny,
   render_network_coc <- reactive({
     req(values$COCnetwork$VIS)
     selected_year <- values$current_year_coc
-    show_nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med <= selected_year) %>% mutate(title = paste(title,year_med, sep=" "))
-    show_edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
+    show_nodes <- values$COCnetwork$VIS$x$nodes %>% dplyr::filter(year_med <= selected_year) %>% mutate(title = paste(title,year_med, sep=" "))
+    show_edges <- values$COCnetwork$VIS$x$edges %>% dplyr::filter(from %in% show_nodes$id & to %in% show_nodes$id)
     
     coords <- show_nodes %>% select(x, y) %>% as.matrix()
     
@@ -4327,8 +4326,8 @@ To ensure the functionality of Biblioshiny,
     values$current_year_coc <- min(values$years_coc)
     updateSliderInput(session, "year_slider_coc", value = min(values$years_coc))
     output$cocOverTime <- renderVisNetwork({
-      nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med < 0)
-      edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
+      nodes <- values$COCnetwork$VIS$x$nodes %>% dplyr::filter(year_med < 0)
+      edges <- values$COCnetwork$VIS$x$edges %>% dplyr::filter(from %in% nodes$id)
       visNetwork(nodes = nodes, edges = edges)
     })
   })
@@ -4622,7 +4621,7 @@ To ensure the functionality of Biblioshiny,
     values$d <- event_data("plotly_click")
     coord <- values$d[c("x","y")]
     color <- values$TM$clusters_orig %>% 
-      filter(rcentrality==coord$x,rdensity==coord$y) %>% 
+      dplyr::filter(rcentrality==coord$x,rdensity==coord$y) %>% 
       select(color) %>% as.character()
     g <- values$TM$subgraphs[[color]]
     values$plotClust <- igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
@@ -5277,8 +5276,8 @@ To ensure the functionality of Biblioshiny,
   render_network_col <- reactive({
     req(values$COLnetwork$VIS)
     selected_year_col <- values$current_year_col
-    show_nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med <= selected_year_col) %>% mutate(title = paste(title,year_med, sep=" "))
-    show_edges <- values$COLnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
+    show_nodes <- values$COLnetwork$VIS$x$nodes %>% dplyr::filter(year_med <= selected_year_col) %>% mutate(title = paste(title,year_med, sep=" "))
+    show_edges <- values$COLnetwork$VIS$x$edges %>% dplyr::filter(from %in% show_nodes$id & to %in% show_nodes$id)
     
     coords <- show_nodes %>% select(x, y) %>% as.matrix()
     
@@ -5335,8 +5334,8 @@ To ensure the functionality of Biblioshiny,
     values$current_year_col <- min(values$years_col)
     updateSliderInput(session, "year_slider_col", value = min(values$years_col))
     output$colOverTime <- renderVisNetwork({
-      nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med < 0)
-      edges <- values$COLnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
+      nodes <- values$COLnetwork$VIS$x$nodes %>% dplyr::filter(year_med < 0)
+      edges <- values$COLnetwork$VIS$x$edges %>% dplyr::filter(from %in% nodes$id)
       visNetwork(nodes = nodes, edges = edges)
     })
   })

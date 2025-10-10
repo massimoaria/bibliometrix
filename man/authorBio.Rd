@@ -13,16 +13,6 @@ authorBio(
   max_retries = 3,
   retry_delay = 2
 )
-
-authorBio(
-  author_position = 1,
-  doi = "10.1016/j.joi.2017.08.007",
-  verbose = FALSE,
-  return_all_authors = FALSE,
-  sleep_time = 1,
-  max_retries = 3,
-  retry_delay = 2
-)
 }
 \arguments{
 \item{author_position}{Integer. The numerical position of the author in the authors list (default: 1)}
@@ -33,7 +23,7 @@ authorBio(
 
 \item{return_all_authors}{Logical. If TRUE, returns information for all co-authors (default: FALSE)}
 
-\item{sleep_time}{Numeric. Seconds to wait between API calls to respect rate limits (default: 0.2)}
+\item{sleep_time}{Numeric. Seconds to wait between API calls to respect rate limits (default: 1)}
 
 \item{max_retries}{Integer. Maximum number of retry attempts for failed API calls (default: 3)}
 
@@ -50,23 +40,8 @@ If \code{return_all_authors = FALSE}, returns a tibble with comprehensive inform
     \item Paper-specific metadata (corresponding author status, position type)
   }
   If \code{return_all_authors = TRUE}, returns a list of tibbles, one for each co-author.
-
-If \code{return_all_authors = FALSE}, returns a tibble with comprehensive information 
-  about the specified author including:
-  \itemize{
-    \item Basic information (name, ORCID, OpenAlex ID)
-    \item Bibliometric indicators (works count, citations, h-index, i10-index)
-    \item Affiliation details from both the paper and author profile
-    \item Research topics and areas
-    \item Paper-specific metadata (corresponding author status, position type)
-  }
-  If \code{return_all_authors = TRUE}, returns a list of tibbles, one for each co-author.
 }
 \description{
-This function downloads comprehensive author information from OpenAlex based on a DOI 
-and the numerical position of the author in the co-authors list. It provides detailed 
-biographical data, bibliometric indicators, and affiliation information.
-
 This function downloads comprehensive author information from OpenAlex based on a DOI 
 and the numerical position of the author in the co-authors list. It provides detailed 
 biographical data, bibliometric indicators, and affiliation information.
@@ -84,41 +59,8 @@ configurable delays between requests.
 IMPORTANT: For better rate limits, set your OpenAlex API key using:
 Sys.setenv(openalexR_apikey = "YOUR_API_KEY")
 Get a free API key at: https://openalex.org/
-
-The function first retrieves the work information using the provided DOI, then extracts
-author IDs from the authorships data, and finally fetches detailed author profiles from
-OpenAlex. It enriches the author data with paper-specific information such as authorship
-position, corresponding author status, and affiliations as listed in the paper.
-
-The function implements automatic retry logic with exponential backoff to handle rate limiting
-(HTTP 429 errors) and temporary network issues. It respects OpenAlex API rate limits by adding
-configurable delays between requests.
-
-IMPORTANT: For better rate limits, set your OpenAlex API key using:
-Sys.setenv(openalexR_apikey = "YOUR_API_KEY")
-Get a free API key at: https://openalex.org/
 }
 \examples{
-\dontrun{
-# Get information for the first author
-first_author <- authorBio(doi = "10.1016/j.joi.2017.08.007")
-
-# Get information for the second author with verbose output
-second_author <- authorBio(
-  author_position = 2, 
-  doi = "10.1016/j.joi.2017.08.007", 
-  verbose = TRUE
-)
-
-# Get information for all co-authors with custom rate limiting
-all_authors <- authorBio(
-  doi = "10.1016/j.joi.2017.08.007", 
-  return_all_authors = TRUE,
-  sleep_time = 0.5,
-  max_retries = 5
-)
-}
-
 \dontrun{
 # Get information for the first author
 first_author <- authorBio(doi = "10.1016/j.joi.2017.08.007")

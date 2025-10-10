@@ -652,6 +652,102 @@ content_analysis_tab <- function(id = "content_analysis") {
                             )
                      )
                    )
+                 ),
+                 
+                 # ===========================================
+                 # TAB 5: REFERENCES
+                 # ===========================================
+                 tabPanel(
+                   title = "References",
+                   value = "tab_references",
+                   
+                   br(),
+                   
+                   # Header con info e download
+                   fluidRow(
+                     column(12,
+                            div(class = "box box-primary",
+                                div(class = "box-header with-border",
+                                    h4("Bibliography", class = "box-title", style = "color: #2E86AB;"),
+                                    div(class = "box-tools pull-right",
+                                        downloadButton("download_references",
+                                                       "Export References",
+                                                       class = "btn btn-primary btn-sm",
+                                                       icon = icon("download")
+                                        )
+                                    )
+                                ),
+                                div(class = "box-body",
+                                    conditionalPanel(
+                                      condition = "output.references_available",
+                                      
+                                      # Summary info
+                                      div(
+                                        style = "background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 20px;",
+                                        fluidRow(
+                                          column(4,
+                                                 div(
+                                                   style = "text-align: center;",
+                                                   icon("book", style = "font-size: 24px; color: #2E86AB;"),
+                                                   h4(textOutput("total_references", inline = TRUE), 
+                                                      style = "color: #2E86AB; margin: 10px 0 5px 0;"),
+                                                   p("Total References", style = "color: #666; margin: 0;")
+                                                 )
+                                          ),
+                                          column(4,
+                                                 div(
+                                                   style = "text-align: center;",
+                                                   icon("file-pdf", style = "font-size: 24px; color: #e74c3c;"),
+                                                   h4(textOutput("pdf_references", inline = TRUE), 
+                                                      style = "color: #e74c3c; margin: 10px 0 5px 0;"),
+                                                   p("From PDF", style = "color: #666; margin: 0;")
+                                                 )
+                                          ),
+                                          column(4,
+                                                 div(
+                                                   style = "text-align: center;",
+                                                   icon("cloud-download-alt", style = "font-size: 24px; color: #27ae60;"),
+                                                   h4(textOutput("crossref_references", inline = TRUE), 
+                                                      style = "color: #27ae60; margin: 10px 0 5px 0;"),
+                                                   p("From Crossref", style = "color: #666; margin: 0;")
+                                                 )
+                                          )
+                                        )
+                                      ),
+                                      
+                                      # Search box
+                                      fluidRow(
+                                        column(12,
+                                               textInput("reference_search",
+                                                         label = NULL,
+                                                         placeholder = "Search in references (author, title, year, DOI)...",
+                                                         width = "100%"
+                                               )
+                                        )
+                                      ),
+                                      
+                                      hr(),
+                                      
+                                      # References list
+                                      uiOutput("references_html")
+                                    ),
+                                    
+                                    conditionalPanel(
+                                      condition = "!output.references_available",
+                                      div(
+                                        style = "text-align: center; padding: 60px; color: #999;",
+                                        icon("book-open", style = "font-size: 48px; margin-bottom: 20px;"),
+                                        h4("No references available", style = "color: #666;"),
+                                        p("References will appear here after the analysis is complete.", 
+                                          style = "font-size: 14px;"),
+                                        p("References can be extracted from the PDF or fetched from Crossref using the document's DOI.",
+                                          style = "font-size: 12px; color: #999;")
+                                      )
+                                    )
+                                )
+                            )
+                     )
+                   )
                  )
                )
              ),
@@ -2344,6 +2440,260 @@ Avg sentence length: %.1f words",
           file, 
           row.names = FALSE
         )
+      }
+    }
+  )
+  
+  # ===========================================
+  # TAB 5: REFERENCES - VERSIONE CORRETTA
+  # ===========================================
+  
+  # Check if references are available
+  output$references_available <- reactive({
+    if (!is.null(values$analysis_results) && 
+        !is.null(values$analysis_results$parsed_references)) {
+      return(nrow(values$analysis_results$parsed_references) > 0)
+    }
+    return(FALSE)
+  })
+  outputOptions(output, "references_available", suspendWhenHidden = FALSE)
+  
+  # Total references count
+  output$total_references <- renderText({
+    if (!is.null(values$analysis_results) && 
+        !is.null(values$analysis_results$parsed_references)) {
+      format(nrow(values$analysis_results$parsed_references), big.mark = ",")
+    } else {
+      "0"
+    }
+  })
+  
+  # PDF references count
+  output$pdf_references <- renderText({
+    if (!is.null(values$analysis_results) && 
+        !is.null(values$analysis_results$parsed_references)) {
+      refs <- values$analysis_results$parsed_references
+      pdf_refs <- sum(tolower(refs$ref_source) == "pdf", na.rm = TRUE)
+      format(pdf_refs, big.mark = ",")
+    } else {
+      "0"
+    }
+  })
+  
+  # Crossref references count
+  output$crossref_references <- renderText({
+    if (!is.null(values$analysis_results) && 
+        !is.null(values$analysis_results$parsed_references)) {
+      refs <- values$analysis_results$parsed_references
+      crossref_refs <- sum(tolower(refs$ref_source) == "crossref", na.rm = TRUE)
+      format(crossref_refs, big.mark = ",")
+    } else {
+      "0"
+    }
+  })
+  
+  # References HTML display
+  output$references_html <- renderUI({
+    req(values$analysis_results)
+    req(values$analysis_results$parsed_references)
+    
+    refs <- values$analysis_results$parsed_references
+    
+    # Apply search filter
+    if (!is.null(input$reference_search) && nzchar(input$reference_search)) {
+      search_term <- tolower(input$reference_search)
+      
+      refs <- refs %>%
+        filter(
+          if_else(!is.na(ref_full_text), str_detect(tolower(ref_full_text), fixed(search_term)), FALSE) |
+            if_else(!is.na(ref_authors), str_detect(tolower(ref_authors), fixed(search_term)), FALSE) |
+            if_else(!is.na(ref_year), str_detect(tolower(ref_year), fixed(search_term)), FALSE) |
+            if_else(!is.na(doi), str_detect(tolower(doi), fixed(search_term)), FALSE)
+        )
+    }
+    
+    if (nrow(refs) == 0) {
+      return(
+        div(
+          style = "text-align: center; padding: 40px; color: #999;",
+          icon("search", style = "font-size: 24px; margin-bottom: 10px;"),
+          h4("No references match your search"),
+          p("Try different search terms.")
+        )
+      )
+    }
+    
+    # Create HTML for each reference
+    reference_items <- lapply(1:nrow(refs), function(i) {
+      ref <- refs[i, ]
+      
+      # Get reference text
+      ref_text <- if (!is.na(ref$ref_full_text) && nzchar(ref$ref_full_text)) {
+        ref$ref_full_text
+      } else {
+        "[Reference text not available]"
+      }
+      
+      # Determine source badge
+      source_badge <- if (!is.na(ref$ref_source) && tolower(ref$ref_source) == "crossref") {
+        tags$span(
+          class = "label label-success",
+          style = "font-size: 11px; margin-left: 10px;",
+          icon("cloud-download-alt"),
+          " Crossref"
+        )
+      } else {
+        tags$span(
+          class = "label label-info",
+          style = "font-size: 11px; margin-left: 10px;",
+          icon("file-pdf"),
+          " PDF"
+        )
+      }
+      
+      # DOI link if available
+      doi_link <- NULL
+      if ("doi" %in% names(ref) && !is.na(ref$doi) && nzchar(ref$doi)) {
+        doi_link <- tags$div(
+          style = "margin-top: 8px; font-size: 12px;",
+          icon("link", style = "color: #3498db;"),
+          tags$a(
+            href = paste0("https://doi.org/", ref$doi),
+            target = "_blank",
+            ref$doi,
+            style = "color: #3498db; margin-left: 5px;"
+          )
+        )
+      }
+      
+      # Author and year display (if available separately)
+      author_year_info <- NULL
+      if (!is.na(ref$ref_first_author) && !is.na(ref$ref_year)) {
+        n_auth <- if (!is.na(ref$n_authors) && ref$n_authors > 1) {
+          paste0(" et al. (", ref$n_authors, " authors)")
+        } else {
+          ""
+        }
+        
+        author_year_info <- tags$div(
+          style = "margin-top: 8px; font-size: 12px; color: #666;",
+          icon("user", style = "color: #3498db;"),
+          tags$span(
+            style = "margin-left: 5px;",
+            paste0(ref$ref_first_author, n_auth, " • ", ref$ref_year)
+          )
+        )
+      }
+      
+      # Citation count if available
+      citation_info <- NULL
+      if ("citation_count" %in% names(ref) && !is.na(ref$citation_count) && ref$citation_count > 0) {
+        citation_info <- tags$span(
+          style = "margin-left: 15px; color: #e67e22; font-size: 12px;",
+          icon("quote-right"),
+          sprintf(" Cited %d time%s in text", ref$citation_count, ifelse(ref$citation_count > 1, "s", ""))
+        )
+      }
+      
+      div(
+        class = "reference-item",
+        style = "padding: 15px; margin-bottom: 15px; border-left: 4px solid #2E86AB; background-color: #fafafa; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
+        
+        # Reference number and source
+        div(
+          style = "margin-bottom: 10px;",
+          tags$span(
+            style = "font-weight: bold; color: #2E86AB; font-size: 16px;",
+            paste0("[", i, "]")
+          ),
+          source_badge,
+          citation_info
+        ),
+        
+        # Full reference text
+        div(
+          style = "font-family: 'Georgia', serif; font-size: 14px; line-height: 1.6; color: #333;",
+          ref_text
+        ),
+        
+        # Author and year info
+        author_year_info,
+        
+        # DOI link
+        doi_link
+      )
+    })
+    
+    tagList(
+      tags$style(HTML("
+      .reference-item:hover {
+        background-color: #f0f8ff !important;
+        transition: background-color 0.2s ease;
+      }
+    ")),
+      reference_items
+    )
+  })
+  
+  # Download handler for references
+  output$download_references <- downloadHandler(
+    filename = function() {
+      paste0("references_", Sys.Date(), ".txt")
+    },
+    content = function(file) {
+      if (!is.null(values$analysis_results) && 
+          !is.null(values$analysis_results$parsed_references)) {
+        
+        refs <- values$analysis_results$parsed_references
+        
+        # Create formatted text
+        ref_text <- paste0(
+          "BIBLIOGRAPHY\n",
+          "============\n",
+          "Generated: ", Sys.time(), "\n",
+          "Total references: ", nrow(refs), "\n",
+          "From PDF: ", sum(tolower(refs$ref_source) == "pdf", na.rm = TRUE), "\n",
+          "From Crossref: ", sum(tolower(refs$ref_source) == "crossref", na.rm = TRUE), "\n\n"
+        )
+        
+        for (i in 1:nrow(refs)) {
+          ref <- refs[i, ]
+          
+          source_label <- if (!is.na(ref$ref_source) && tolower(ref$ref_source) == "crossref") {
+            "[Crossref]"
+          } else {
+            "[PDF]"
+          }
+          
+          ref_text <- paste0(
+            ref_text,
+            "[", i, "] ", source_label, "\n",
+            ref$ref_full_text, "\n"
+          )
+          
+          if (!is.na(ref$ref_first_author) && !is.na(ref$ref_year)) {
+            n_auth <- if (!is.na(ref$n_authors) && ref$n_authors > 1) {
+              paste0(" (", ref$n_authors, " authors)")
+            } else {
+              ""
+            }
+            ref_text <- paste0(ref_text, "Author: ", ref$ref_first_author, n_auth, " • Year: ", ref$ref_year, "\n")
+          }
+          
+          if ("doi" %in% names(ref) && !is.na(ref$doi) && nzchar(ref$doi)) {
+            ref_text <- paste0(ref_text, "DOI: ", ref$doi, "\n")
+          }
+          
+          if ("citation_count" %in% names(ref) && !is.na(ref$citation_count)) {
+            ref_text <- paste0(ref_text, "Cited ", ref$citation_count, " times in text\n")
+          }
+          
+          ref_text <- paste0(ref_text, "\n")
+        }
+        
+        writeLines(ref_text, file)
+      } else {
+        writeLines("No references available", file)
       }
     }
   )

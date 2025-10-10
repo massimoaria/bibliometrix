@@ -3,6 +3,8 @@ source("libraries.R", local=TRUE)
 source("biblioShot.R", local=TRUE)
 source("biblioAI.R", local=TRUE)
 source("contentAnalysisUI.R", local = TRUE)
+source("contentAnalysisServer.R", local = TRUE)
+source("article_summary.R", local = TRUE)
 
 suppressMessages(res <- libraries())
 if (!res) {

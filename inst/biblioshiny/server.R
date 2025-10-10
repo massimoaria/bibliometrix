@@ -1309,7 +1309,7 @@ To ensure the functionality of Biblioshiny,
     ranking <- read_journal_ranking(input$journal_ranking_upload$datapath)
     if (!is.null(ranking)){
       SOnotRanked <- setdiff(values$Morig$SO,ranking$SO)
-      ranking <- bind_rows(ranking, data.frame(SO=SOnotRanked, Ranking="Not Ranked"))
+      if (length(SOnotRanked)>0) ranking <- bind_rows(ranking, data.frame(SO=SOnotRanked, Ranking=rep("Not Ranked", length(SOnotRanked))))
     }
     values$journal_ranking <- ranking
     shinyjs::show("journal_ranking_subset")

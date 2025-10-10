@@ -685,31 +685,40 @@ content_analysis_tab <- function(id = "content_analysis") {
                                       div(
                                         style = "background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 20px;",
                                         fluidRow(
-                                          column(4,
+                                          column(3,
                                                  div(
                                                    style = "text-align: center;",
                                                    icon("book", style = "font-size: 24px; color: #2E86AB;"),
-                                                   h4(textOutput("total_references", inline = TRUE), 
+                                                   h4(textOutput("total_refs", inline = TRUE), 
                                                       style = "color: #2E86AB; margin: 10px 0 5px 0;"),
                                                    p("Total References", style = "color: #666; margin: 0;")
                                                  )
                                           ),
-                                          column(4,
+                                          column(3,
                                                  div(
                                                    style = "text-align: center;",
                                                    icon("file-pdf", style = "font-size: 24px; color: #e74c3c;"),
-                                                   h4(textOutput("pdf_references", inline = TRUE), 
+                                                   h4(textOutput("pdf_refs", inline = TRUE), 
                                                       style = "color: #e74c3c; margin: 10px 0 5px 0;"),
                                                    p("From PDF", style = "color: #666; margin: 0;")
                                                  )
                                           ),
-                                          column(4,
+                                          column(3,
                                                  div(
                                                    style = "text-align: center;",
                                                    icon("cloud-download-alt", style = "font-size: 24px; color: #27ae60;"),
-                                                   h4(textOutput("crossref_references", inline = TRUE), 
+                                                   h4(textOutput("crossref_refs", inline = TRUE), 
                                                       style = "color: #27ae60; margin: 10px 0 5px 0;"),
                                                    p("From Crossref", style = "color: #666; margin: 0;")
+                                                 )
+                                          ),
+                                          column(3,
+                                                 div(
+                                                   style = "text-align: center;",
+                                                   icon("database", style = "font-size: 24px; color: #8e44ad;"),
+                                                   h4(textOutput("openalex_refs", inline = TRUE), 
+                                                      style = "color: #8e44ad; margin: 10px 0 5px 0;"),
+                                                   p("From OpenAlex", style = "color: #666; margin: 0;")
                                                  )
                                           )
                                         )
@@ -1026,6 +1035,148 @@ content_analysis_tab <- function(id = "content_analysis") {
         )
       )
     ),
+    
+    # Modal to manage OpenAlex Reference Cards
+    tags$div(
+      class = "modal fade",
+      id = "oaDetailsModal",
+      tabindex = "-1",
+      role = "dialog",
+      
+      tags$div(
+        class = "modal-dialog modal-lg",
+        role = "document",
+        style = "width: 90%; max-width: 1000px;",
+        
+        tags$div(
+          class = "modal-content",
+          
+          # Header
+          tags$div(
+            class = "modal-header",
+            style = "background: linear-gradient(135deg, #1a5f7a 0%, #2874a6 100%); padding: 20px 25px;",
+            tags$button(
+              type = "button",
+              class = "close",
+              `data-dismiss` = "modal",
+              `aria-label` = "Close",
+              tags$span(
+                `aria-hidden` = "true", 
+                style = "color: white !important; font-size: 32px; opacity: 0.8;", 
+                HTML("&times;")
+              )
+            ),
+            tags$h4(
+              class = "modal-title",
+              id = "oaModalTitle",
+              style = "margin: 0; padding-right: 30px; color: white !important; font-weight: 600;",
+              "Document Details"
+            )
+          ),
+          
+          # Body
+          tags$div(
+            class = "modal-body",
+            id = "oaModalBody",
+            style = "max-height: 70vh; overflow-y: auto; padding: 20px;",
+            div(
+              style = "text-align: center; padding: 40px;",
+              icon("spinner", class = "fa-spin", style = "font-size: 32px; color: #3498db;"),
+              p("Loading document details...", style = "margin-top: 15px; color: #666;")
+            )
+          ),
+          
+          # Footer
+          tags$div(
+            class = "modal-footer",
+            tags$button(
+              type = "button",
+              class = "btn btn-default",
+              `data-dismiss` = "modal",
+              "Close"
+            )
+          )
+        )
+      )
+    ),
+    
+    tags$style(HTML("
+  #previewModal .modal-header,
+  #oaDetailsModal .modal-header {
+    background: linear-gradient(135deg, #1a5f7a 0%, #2874a6 100%) !important;
+  }
+  
+  #previewModal .modal-header .modal-title,
+  #oaDetailsModal .modal-header .modal-title,
+  #previewModal .modal-header h4,
+  #oaDetailsModal .modal-header h4 {
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+  }
+  
+  #previewModal .modal-header .close,
+  #oaDetailsModal .modal-header .close,
+  #previewModal .modal-header .close span,
+  #oaDetailsModal .modal-header .close span {
+    color: white !important;
+    opacity: 0.8 !important;
+    text-shadow: none !important;
+  }
+  
+  #previewModal .modal-header .close:hover,
+  #oaDetailsModal .modal-header .close:hover {
+    opacity: 1 !important;
+  }
+  
+  /* Responsive per schermi piccoli */
+  @media (max-width: 768px) {
+    #oaDetailsModal .modal-header .modal-title {
+      font-size: 16px !important;
+    }
+  }
+")),
+    
+    tags$style(HTML("
+  /* Layout responsive per le statistics boxes */
+  @media (max-width: 992px) {
+    .small-box {
+      margin-bottom: 15px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .small-box h3 {
+      font-size: 28px !important;
+    }
+    
+    .small-box i {
+      font-size: 32px !important;
+    }
+  }
+")),
+    
+    # JavaScript for OpenAlex  modal
+    tags$script(HTML("
+  // Funzione per mostrare i dettagli OpenAlex
+  function showOADetails(refIndex) {
+    // Reset modal content
+    $('#oaModalBody').html('<div style=\"text-align: center; padding: 40px;\"><i class=\"fa fa-spinner fa-spin\" style=\"font-size: 32px; color: #3498db;\"></i><p style=\"margin-top: 15px; color: #666;\">Loading document details...</p></div>');
+    
+    // Invia l'indice a Shiny
+    Shiny.setInputValue('selected_oa_ref_index', refIndex, {priority: 'event'});
+    
+    // Apri il modal
+    $('#oaDetailsModal').modal('show');
+  }
+  
+  // Handler personalizzato per aggiornare il contenuto del modal
+  Shiny.addCustomMessageHandler('updateOAModal', function(data) {
+    $('#oaModalTitle').html(data.title);
+    $('#oaModalBody').html(data.content);
+  });
+")),
 
     tags$script(HTML("
   // Function to open/close the PDF Import box
@@ -1042,6 +1193,414 @@ content_analysis_tab <- function(id = "content_analysis") {
 "))
   )
 }
+
+# Helper function for HTML card OpenAlex 
+create_oa_details_html <- function(oa_data) {
+  
+  # Helper per gestire valori NULL/NA
+  safe_value <- function(x, default = "Not available") {
+    if (is.null(x) || length(x) == 0 || all(is.na(x)) || !nzchar(trimws(as.character(x)))) {
+      return(default)
+    }
+    return(x)
+  }
+  
+  # === ESTRAI AUTORI E AFFILIAZIONI INLINE ===
+  authors_html <- NULL
+  if (!is.null(oa_data$authorships) && length(oa_data$authorships) > 0) {
+    authorships_df <- oa_data$authorships[[1]]
+    
+    if (!is.null(authorships_df) && nrow(authorships_df) > 0) {
+      authors_items <- lapply(1:min(nrow(authorships_df), 15), function(i) {
+        auth <- authorships_df[i, ]
+        
+        author_name <- safe_value(auth$display_name, "Unknown Author")
+        author_id <- safe_value(auth$id, "")
+        
+        # Estrai affiliazioni
+        affiliation_text <- ""
+        if (!is.null(auth$institutions) && length(auth$institutions) > 0) {
+          insts_df <- auth$institutions[[1]]
+          if (!is.null(insts_df) && nrow(insts_df) > 0 && "display_name" %in% names(insts_df)) {
+            affiliation_text <- paste(insts_df$display_name, collapse = ", ")
+          }
+        }
+        
+        # Se non ci sono istituzioni, prova con affiliation_raw
+        if (!nzchar(affiliation_text) && !is.na(auth$affiliation_raw) && nzchar(auth$affiliation_raw)) {
+          affiliation_text <- auth$affiliation_raw
+        }
+        
+        # Layout inline: nome e affiliazione sulla stessa riga
+        div(
+          style = "margin-bottom: 8px; padding: 6px 10px; background-color: #f8f9fa; border-radius: 4px; display: flex; align-items: center; flex-wrap: wrap;",
+          tags$div(
+            style = "font-weight: 500; font-size: 14px; margin-right: 12px;",
+            # Link OpenAlex se disponibile
+            if (nzchar(author_id) && author_id != "Not available") {
+              tags$a(
+                href = author_id,
+                target = "_blank",
+                style = "color: #2E86AB; text-decoration: none;",
+                author_name,
+                icon("external-link-alt", style = "margin-left: 4px; font-size: 10px;")
+              )
+            } else {
+              tags$span(style = "color: #2E86AB;", author_name)
+            }
+          ),
+          if (nzchar(affiliation_text)) {
+            tags$span(
+              style = "color: #666; font-size: 13px; font-style: italic;",
+              icon("university", style = "margin-right: 5px; font-size: 11px;"),
+              affiliation_text
+            )
+          }
+        )
+      })
+      
+      authors_html <- tagList(authors_items)
+      
+      if (nrow(authorships_df) > 15) {
+        authors_html <- tagList(
+          authors_html,
+          tags$small(
+            style = "color: #999; font-style: italic; display: block; margin-top: 8px; padding-left: 10px;",
+            paste("... and", nrow(authorships_df) - 15, "more authors")
+          )
+        )
+      }
+    }
+  }
+  
+  # === KEYWORDS - TUTTE ===
+  keywords_html <- NULL
+  if (!is.null(oa_data$keywords) && length(oa_data$keywords) > 0) {
+    keywords_data <- oa_data$keywords[[1]]
+    if (!is.null(keywords_data) && is.data.frame(keywords_data) && nrow(keywords_data) > 0) {
+      if ("display_name" %in% names(keywords_data)) {
+        # NESSUN LIMITE - tutte le keywords
+        keywords_html <- lapply(keywords_data$display_name, function(kw) {
+          tags$span(
+            class = "label label-primary",
+            style = "margin-right: 5px; margin-bottom: 5px; font-size: 11px; display: inline-block; background-color: #3498db; color: white; padding: 4px 10px; border-radius: 3px;",
+            kw
+          )
+        })
+      }
+    }
+  }
+  
+  # === ABSTRACT ===
+  abstract_text <- safe_value(oa_data$abstract, "Abstract not available")
+  
+  # === TOPICS - SOLO I PRIMI 5 ===
+  topics_html <- NULL
+  if (!is.null(oa_data$topics) && length(oa_data$topics) > 0) {
+    topics_data <- oa_data$topics[[1]]
+    if (!is.null(topics_data) && is.data.frame(topics_data) && nrow(topics_data) > 0) {
+      if ("display_name" %in% names(topics_data)) {
+        main_topics <- topics_data
+        if ("type" %in% names(topics_data)) {
+          main_topics <- topics_data[topics_data$type == "topic", ]
+        }
+        
+        if (nrow(main_topics) > 0) {
+          # LIMITE A 5 TOPICS
+          topics_html <- lapply(1:min(5, nrow(main_topics)), function(i) {
+            tags$span(
+              class = "label label-info",
+              style = "margin-right: 5px; margin-bottom: 5px; font-size: 11px; display: inline-block; background-color: #5bc0de; color: white; padding: 4px 10px; border-radius: 3px;",
+              main_topics$display_name[i]
+            )
+          })
+        }
+      }
+    }
+  }
+  
+  # === JOURNAL INFO ===
+  journal_name <- safe_value(oa_data$source_display_name, "Journal not available")
+  issn <- safe_value(oa_data$issn_l, "")
+  
+  # === DOCUMENT TYPE ===
+  doc_type <- safe_value(oa_data$type, "Unknown")
+  
+  # === PUBLICATION INFO ===
+  pub_year <- safe_value(oa_data$publication_year, "N/A")
+  citations <- safe_value(oa_data$cited_by_count, 0)
+  fwci <- safe_value(oa_data$fwci, NA)
+  
+  # === OPEN ACCESS INFO ===
+  is_oa <- !is.na(oa_data$is_oa) && oa_data$is_oa
+  oa_status <- tolower(safe_value(oa_data$oa_status, "closed"))  # Normalizza in lowercase
+  
+  # === DOI ===
+  doi_url <- safe_value(oa_data$doi, "")
+  doi_clean <- gsub("https://doi.org/", "", doi_url)
+  
+  # === PDF URL ===
+  pdf_url <- safe_value(oa_data$pdf_url, "")
+  has_pdf <- nzchar(pdf_url) && !is.na(pdf_url) && pdf_url != "Not available"
+  
+  # === CREA HTML COMPLETO ===
+  tagList(
+    div(
+      class = "oa-document-summary",
+      
+      # Metadata Cards Row
+      fluidRow(
+        style = "margin-bottom: 20px;",
+        
+        # Card 1: Publication Year (invariata)
+        column(3,
+               div(
+                 style = "background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); border-radius: 8px; padding: 15px; color: white; min-height: 85px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
+                 div(
+                   style = "display: flex; align-items: center;",
+                   icon("calendar", style = "font-size: 28px; margin-right: 12px; opacity: 0.9;"),
+                   div(
+                     tags$div(style = "font-size: 10px; text-transform: uppercase; opacity: 0.85; letter-spacing: 0.5px;", "Publication Year"),
+                     tags$div(style = "font-size: 24px; font-weight: bold; margin-top: 2px;", pub_year)
+                   )
+                 )
+               )
+        ),
+        
+        # Card 2: Citations (invariata)
+        column(3,
+               div(
+                 style = "background: linear-gradient(135deg, #27ae60 0%, #229954 100%); border-radius: 8px; padding: 15px; color: white; min-height: 85px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
+                 div(
+                   style = "display: flex; align-items: center;",
+                   icon("quote-right", style = "font-size: 28px; margin-right: 12px; opacity: 0.9;"),
+                   div(
+                     tags$div(style = "font-size: 10px; text-transform: uppercase; opacity: 0.85; letter-spacing: 0.5px;", "Citations"),
+                     tags$div(style = "font-size: 24px; font-weight: bold; margin-top: 2px;", format(as.numeric(citations), big.mark = ","))
+                   )
+                 )
+               )
+        ),
+        
+        # Card 3: Open Access Status (MODIFICATA)
+        column(3, {
+          # Determina colore e icona in base a oa_status
+          oa_colors <- list(
+            closed = list(bg = "#95a5a6 0%, #7f8c8d", icon = "lock", text = "Closed"),
+            gold = list(bg = "#f39c12 0%, #e67e22", icon = "unlock", text = "Gold OA"),
+            green = list(bg = "#27ae60 0%, #229954", icon = "unlock", text = "Green OA"),
+            bronze = list(bg = "#cd7f32 0%, #b8732d", icon = "unlock", text = "Bronze OA"),
+            hybrid = list(bg = "#16a085 0%, #138d75", icon = "unlock", text = "Hybrid OA")
+          )
+          
+          # Se oa_status non è nei valori conosciuti, usa closed come default
+          current_status <- if (oa_status %in% names(oa_colors)) oa_status else "closed"
+          status_info <- oa_colors[[current_status]]
+          
+          div(
+            style = paste0("background: linear-gradient(135deg, ", status_info$bg, " 100%); border-radius: 8px; padding: 15px; color: white; min-height: 85px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"),
+            div(
+              style = "display: flex; align-items: center;",
+              icon(status_info$icon, style = "font-size: 28px; margin-right: 12px; opacity: 0.9;"),
+              div(
+                tags$div(style = "font-size: 10px; text-transform: uppercase; opacity: 0.85; letter-spacing: 0.5px;", "Access"),
+                tags$div(style = "font-size: 18px; font-weight: bold; margin-top: 2px;", status_info$text)
+              )
+            )
+          )
+        }),
+        
+        # Card 4: FWCI (invariata)
+        column(3,
+               div(
+                 style = "background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border-radius: 8px; padding: 15px; color: white; min-height: 85px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
+                 div(
+                   style = "display: flex; align-items: center;",
+                   icon("chart-line", style = "font-size: 28px; margin-right: 12px; opacity: 0.9;"),
+                   div(
+                     tags$div(style = "font-size: 10px; text-transform: uppercase; opacity: 0.85; letter-spacing: 0.5px;", "FWCI"),
+                     tags$div(style = "font-size: 24px; font-weight: bold; margin-top: 2px;", if (!is.na(fwci)) round(as.numeric(fwci), 2) else "N/A")
+                   )
+                 )
+               )
+        )
+      ),
+      
+      # Authors Section - PIÙ COMPATTA
+      if (!is.null(authors_html)) {
+        div(
+          class = "box box-primary",
+          style = "margin-bottom: 15px;",
+          div(
+            class = "box-header with-border",
+            h5(
+              icon("users", style = "margin-right: 8px;"),
+              "Authors", 
+              style = "color: #2E86AB; margin: 0; font-weight: 600;"
+            )
+          ),
+          div(
+            class = "box-body",
+            style = "max-height: 250px; overflow-y: auto;",
+            authors_html
+          )
+        )
+      },
+      
+      # Journal Info
+      div(
+        class = "box box-success",
+        style = "margin-bottom: 15px;",
+        div(
+          class = "box-header with-border",
+          h5(
+            icon("book", style = "margin-right: 8px;"),
+            "Journal", 
+            style = "color: #27ae60; margin: 0; font-weight: 600;"
+          )
+        ),
+        div(
+          class = "box-body",
+          style = "padding: 15px;",
+          
+          # Container principale
+          div(
+            style = "display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;",
+            
+            # Colonna 1: Nome Journal e ISSN
+            div(
+              style = "flex: 1 1 300px; min-width: 250px;",
+              tags$div(
+                style = "font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 5px;",
+                journal_name
+              ),
+              if (nzchar(issn) && issn != "Not available") {
+                tags$div(
+                  style = "color: #666; font-size: 13px;",
+                  tags$strong("ISSN: "), issn
+                )
+              }
+            ),
+            
+            # Colonna 2: Document Type
+            div(
+              style = "flex: 0 0 auto; display: flex; align-items: center; gap: 8px;",
+              tags$span(
+                style = "color: #666; font-size: 13px; font-weight: 500;",
+                "Type:"
+              ),
+              tags$span(
+                class = "label label-info",
+                style = "font-size: 12px; padding: 5px 12px; background-color: #3498db; text-transform: capitalize;",
+                safe_value(oa_data$type, "Unknown")
+              )
+            ),
+            
+            # Colonna 3: DOI
+            if (nzchar(doi_url) && doi_url != "Not available") {
+              div(
+                style = "flex: 0 0 auto; display: flex; align-items: center; gap: 8px;",
+                tags$span(
+                  style = "color: #666; font-size: 13px; font-weight: 500;",
+                  "DOI:"
+                ),
+                tags$a(
+                  href = doi_url,
+                  target = "_blank",
+                  style = "color: #3498db; text-decoration: none; font-family: 'Courier New', monospace; font-size: 13px; font-weight: 500;",
+                  doi_clean,
+                  icon("external-link-alt", style = "margin-left: 5px; font-size: 11px;")
+                )
+              )
+            }
+          )
+        )
+      ),
+      
+      # Abstract
+      div(
+        class = "box box-info",
+        style = "margin-bottom: 15px;",
+        div(
+          class = "box-header with-border",
+          h5(
+            icon("align-left", style = "margin-right: 8px;"),
+            "Abstract", 
+            style = "color: #3498db; margin: 0; font-weight: 600;"
+          )
+        ),
+        div(
+          class = "box-body",
+          tags$p(style = "text-align: justify; line-height: 1.7; color: #333;", abstract_text)
+        )
+      ),
+      
+      # Keywords - TUTTE
+      if (!is.null(keywords_html) && length(keywords_html) > 0) {
+        div(
+          class = "box box-warning",
+          style = "margin-bottom: 15px;",
+          div(
+            class = "box-header with-border",
+            h5(
+              icon("tags", style = "margin-right: 8px;"),
+              "Keywords", 
+              tags$small(
+                style = "color: #999; font-weight: normal; margin-left: 8px;",
+                paste0("(", length(keywords_html), ")")
+              ),
+              style = "color: #f39c12; margin: 0; font-weight: 600;"
+            )
+          ),
+          div(
+            class = "box-body",
+            keywords_html
+          )
+        )
+      },
+      
+      # Topics - SOLO PRIMI 5
+      if (!is.null(topics_html) && length(topics_html) > 0) {
+        div(
+          class = "box",
+          style = "margin-bottom: 15px; border-top: 3px solid #9b59b6;",
+          div(
+            class = "box-header with-border",
+            h5(
+              icon("lightbulb", style = "margin-right: 8px;"),
+              "Research Topics", 
+              tags$small(
+                style = "color: #999; font-weight: normal; margin-left: 8px;",
+                "(Top 5)"
+              ),
+              style = "color: #9b59b6; margin: 0; font-weight: 600;"
+            )
+          ),
+          div(
+            class = "box-body",
+            topics_html
+          )
+        )
+      },
+      
+      # Action Button - PDF
+      if (has_pdf) {
+        div(
+          style = "margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center;",
+          tags$a(
+            class = "btn btn-danger btn-lg",
+            href = pdf_url,
+            target = "_blank",
+            icon("file-pdf"),
+            " Download Full Text PDF",
+            style = "font-weight: bold; padding: 12px 30px;"
+          )
+        )
+      }
+    )
+  )
+}
+
 
 #' Enhanced Server Logic for Content Analysis Tab with 3 Tabs
 #' 
@@ -1503,6 +2062,56 @@ content_analysis_server <- function(input, output, session, values) {
     return(!is.null(values$analysis_results))
   })
   outputOptions(output, "analysis_completed", suspendWhenHidden = FALSE)
+  
+  # ===========================================
+  # OPENALEX DATA FETCHING
+  # ===========================================
+  
+  # Scarica dati OpenAlex quando l'analisi è completata
+  observeEvent(values$analysis_results, {
+    if (!is.null(values$analysis_results$parsed_references)) {
+      
+      tryCatch({
+        references <- values$analysis_results$parsed_references
+        dois <- references$doi[!is.na(references$doi)]
+        dois <- unique(dois)
+        dois <- tolower(dois[dois != "" & !is.na(dois)])
+        
+        if (!is.null(dois) && length(dois) > 0) {
+          
+          showNotification(
+            paste("Fetching metadata from OpenAlex for", length(dois), "references..."),
+            type = "message",
+            duration = 3,
+            id = "oa_fetch"
+          )
+          
+          # Fetch OpenAlex data
+          values$references_oa <- bibliometrix:::safe_oa_fetch(
+            entity = "works", 
+            doi = dois
+          )
+          
+          if (!is.null(values$references_oa) && nrow(values$references_oa) > 0) {
+            showNotification(
+              paste("Successfully retrieved metadata for", nrow(values$references_oa), "references from OpenAlex"),
+              type = "message",
+              duration = 4,
+              id = "oa_success"
+            )
+          }
+        }
+        
+      }, error = function(e) {
+        showNotification(
+          "Could not fetch OpenAlex metadata for some references",
+          type = "warning",
+          duration = 4
+        )
+        cat("OpenAlex fetch error:", e$message, "\n")
+      })
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # ===========================================
   # TAB 1: DESCRIPTIVE STATISTICS OUTPUTS
@@ -2458,9 +3067,9 @@ Avg sentence length: %.1f words",
   })
   outputOptions(output, "references_available", suspendWhenHidden = FALSE)
   
-  # Total references count
-  output$total_references <- renderText({
-    if (!is.null(values$analysis_results) && 
+  # # Total references count
+  output$total_refs <- renderText({
+    if (!is.null(values$analysis_results) &&
         !is.null(values$analysis_results$parsed_references)) {
       format(nrow(values$analysis_results$parsed_references), big.mark = ",")
     } else {
@@ -2468,9 +3077,9 @@ Avg sentence length: %.1f words",
     }
   })
   
-  # PDF references count
-  output$pdf_references <- renderText({
-    if (!is.null(values$analysis_results) && 
+  # # PDF references count
+  output$pdf_refs <- renderText({
+    if (!is.null(values$analysis_results) &&
         !is.null(values$analysis_results$parsed_references)) {
       refs <- values$analysis_results$parsed_references
       pdf_refs <- sum(tolower(refs$ref_source) == "pdf", na.rm = TRUE)
@@ -2480,9 +3089,9 @@ Avg sentence length: %.1f words",
     }
   })
   
-  # Crossref references count
-  output$crossref_references <- renderText({
-    if (!is.null(values$analysis_results) && 
+  # # Crossref references count
+  output$crossref_refs<- renderText({
+    if (!is.null(values$analysis_results) &&
         !is.null(values$analysis_results$parsed_references)) {
       refs <- values$analysis_results$parsed_references
       crossref_refs <- sum(tolower(refs$ref_source) == "crossref", na.rm = TRUE)
@@ -2491,6 +3100,19 @@ Avg sentence length: %.1f words",
       "0"
     }
   })
+  
+  # Openalex references count
+  output$openalex_refs<- renderText({
+    req(values$references_oa)
+    
+    if (is.null(values$references_oa) || nrow(values$references_oa) == 0) {
+      return("0")
+    }
+    
+    nrow(values$references_oa)
+  })
+  
+ 
   
   # References HTML display
   output$references_html <- renderUI({
@@ -2534,6 +3156,33 @@ Avg sentence length: %.1f words",
         "[Reference text not available]"
       }
       
+      # Check if OpenAlex data is available for this reference
+      has_oa_data <- FALSE
+      oa_button <- NULL
+      
+      if (!is.null(values$references_oa) && !is.na(ref$doi) && nzchar(ref$doi)) {
+        # Cerca corrispondenza nel dataset OpenAlex
+        ref_doi_clean <- tolower(trimws(ref$doi))
+        
+        # Prova diverse varianti del DOI
+        oa_match_idx <- which(
+          tolower(gsub("https://doi.org/", "", values$references_oa$doi)) == ref_doi_clean |
+            tolower(values$references_oa$doi) == paste0("https://doi.org/", ref_doi_clean)
+        )
+        
+        if (length(oa_match_idx) > 0) {
+          has_oa_data <- TRUE
+          
+          oa_button <- tags$button(
+            class = "btn btn-info btn-xs",
+            style = "float: right; margin-left: 10px;",
+            onclick = sprintf("showOADetails(%d)", i),
+            icon("info-circle"),
+            " View Details"
+          )
+        }
+      }
+      
       # Determine source badge
       source_badge <- if (!is.na(ref$ref_source) && tolower(ref$ref_source) == "crossref") {
         tags$span(
@@ -2548,6 +3197,16 @@ Avg sentence length: %.1f words",
           style = "font-size: 11px; margin-left: 10px;",
           icon("file-pdf"),
           " PDF"
+        )
+      }
+      
+      # OpenAlex badge if available
+      oa_badge <- if (has_oa_data) {
+        tags$span(
+          class = "label label-primary",
+          style = "font-size: 11px; margin-left: 5px;",
+          icon("database"),
+          " OpenAlex"
         )
       }
       
@@ -2566,7 +3225,7 @@ Avg sentence length: %.1f words",
         )
       }
       
-      # Author and year display (if available separately)
+      # Author and year display
       author_year_info <- NULL
       if (!is.na(ref$ref_first_author) && !is.na(ref$ref_year)) {
         n_auth <- if (!is.na(ref$n_authors) && ref$n_authors > 1) {
@@ -2597,9 +3256,10 @@ Avg sentence length: %.1f words",
       
       div(
         class = "reference-item",
-        style = "padding: 15px; margin-bottom: 15px; border-left: 4px solid #2E86AB; background-color: #fafafa; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
+        `data-ref-index` = i,
+        style = "padding: 15px; margin-bottom: 15px; border-left: 4px solid #2E86AB; background-color: #fafafa; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;",
         
-        # Reference number and source
+        # Reference number, badges and OA button
         div(
           style = "margin-bottom: 10px;",
           tags$span(
@@ -2607,12 +3267,14 @@ Avg sentence length: %.1f words",
             paste0("[", i, "]")
           ),
           source_badge,
-          citation_info
+          oa_badge,
+          citation_info,
+          oa_button
         ),
         
         # Full reference text
         div(
-          style = "font-family: 'Georgia', serif; font-size: 14px; line-height: 1.6; color: #333;",
+          style = "font-family: 'Georgia', serif; font-size: 14px; line-height: 1.6; color: #333; clear: both;",
           ref_text
         ),
         
@@ -2629,6 +3291,33 @@ Avg sentence length: %.1f words",
       .reference-item:hover {
         background-color: #f0f8ff !important;
         transition: background-color 0.2s ease;
+      }
+      .oa-document-summary .info-box {
+        display: flex;
+        align-items: center;
+        border-radius: 4px;
+        padding: 10px;
+        color: white;
+      }
+      .oa-document-summary .info-box-icon {
+        font-size: 32px;
+        flex: 0 0 70px;
+        text-align: center;
+      }
+      .oa-document-summary .info-box-content {
+        flex: 1;
+      }
+      .oa-document-summary .info-box-text {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+      .oa-document-summary .info-box-number {
+        display: block;
+        font-size: 20px;
+        font-weight: bold;
+        margin-top: 5px;
       }
     ")),
       reference_items
@@ -2697,6 +3386,99 @@ Avg sentence length: %.1f words",
       }
     }
   )
+  
+  
+  # ===========================================
+  # OPENALEX MODAL HANDLER
+  # ===========================================
+  
+  observeEvent(input$selected_oa_ref_index, {
+    req(values$analysis_results$parsed_references)
+    req(values$references_oa)
+    req(input$selected_oa_ref_index)
+    
+    tryCatch({
+      ref_index <- input$selected_oa_ref_index
+      ref <- values$analysis_results$parsed_references[ref_index, ]
+      
+      if (is.na(ref$doi) || !nzchar(ref$doi)) {
+        session$sendCustomMessage("updateOAModal", list(
+          title = as.character(span("Reference Details", style = "font-weight: 600; font-size: 20px;")),
+          content = as.character(div(
+            style = "text-align: center; padding: 40px; color: #999;",
+            icon("exclamation-triangle", style = "font-size: 32px; margin-bottom: 15px; color: #f39c12;"),
+            h4("No DOI available"),
+            p("Cannot fetch OpenAlex data without a DOI.")
+          ))
+        ))
+        return()
+      }
+      
+      # Trova i dati OpenAlex corrispondenti
+      ref_doi_clean <- tolower(trimws(ref$doi))
+      
+      oa_match_idx <- which(
+        tolower(gsub("https://doi.org/", "", values$references_oa$doi)) == ref_doi_clean |
+          tolower(values$references_oa$doi) == paste0("https://doi.org/", ref_doi_clean)
+      )
+      
+      if (length(oa_match_idx) == 0) {
+        session$sendCustomMessage("updateOAModal", list(
+          title = as.character(span("Reference Details", style = "font-weight: 600; font-size: 20px;")),
+          content = as.character(div(
+            style = "text-align: center; padding: 40px; color: #999;",
+            icon("database", style = "font-size: 32px; margin-bottom: 15px; color: #e74c3c;"),
+            h4("OpenAlex data not found"),
+            p(paste("Could not find OpenAlex data for DOI:", ref$doi))
+          ))
+        ))
+        return()
+      }
+      
+      # Prendi il primo match
+      oa_data <- values$references_oa[oa_match_idx[1], ]
+      
+      # Estrai il titolo per l'header
+      doc_title <- if (!is.na(oa_data$title) && nzchar(oa_data$title)) {
+        oa_data$title
+      } else if (!is.na(oa_data$display_name) && nzchar(oa_data$display_name)) {
+        oa_data$display_name
+      } else {
+        "Reference Details"
+      }
+      
+      # Tronca il titolo se troppo lungo
+      if (nchar(doc_title) > 120) {
+        doc_title <- paste0(substr(doc_title, 1, 117), "...")
+      }
+      
+      # Crea l'HTML per il modal
+      modal_content <- create_oa_details_html(oa_data)
+      
+      # Aggiorna il modal con il titolo del documento
+      session$sendCustomMessage("updateOAModal", list(
+        title = as.character(span(
+          doc_title, 
+          style = "font-weight: 600; font-size: 20px; line-height: 1.4;" 
+        )),
+        content = as.character(modal_content)
+      ))
+      
+    }, error = function(e) {
+      session$sendCustomMessage("updateOAModal", list(
+        title = as.character(span("Error", style = "font-weight: 600; font-size: 20px;")),
+        content = as.character(div(
+          style = "text-align: center; padding: 40px; color: #e74c3c;",
+          icon("exclamation-circle", style = "font-size: 32px; margin-bottom: 15px;"),
+          h4("Error loading details"),
+          p(paste("Error:", e$message))
+        ))
+      ))
+      
+      cat("Error in OA modal handler:", e$message, "\n")
+      print(e)
+    })
+  })
   
   # ===========================================
   # RESET FUNCTIONALITY

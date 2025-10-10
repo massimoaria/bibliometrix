@@ -1,3 +1,6 @@
+utils::globalVariables(c("max_retries", "retry_delay", "sleep_time", "verbose"))
+
+
 #' Retrieve Author Biographical Information from OpenAlex
 #'
 #' This function downloads comprehensive author information from OpenAlex based on a DOI 
@@ -547,67 +550,6 @@ authorBio <- function(author_position = 1,
     cat("Set it with: Sys.setenv(openalexR_apikey = 'YOUR_API_KEY')\n\n")
   }
   
-  # Helper function to make API calls with retry logic
-  safe_oa_fetch <- function(entity, identifier = NULL, doi = NULL, attempt = 1) {
-    if (attempt > 1 && verbose) {
-      cat("Retry attempt", attempt, "of", max_retries, "\n")
-    }
-    
-    # Add delay before API call (except for first attempt)
-    if (attempt > 1 || entity == "authors") {
-      wait_time <- if (attempt == 1) sleep_time else retry_delay * (2 ^ (attempt - 2))
-      if (verbose) cat("Waiting", round(wait_time, 2), "seconds before API call...\n")
-      Sys.sleep(wait_time)
-    }
-    
-    result <- tryCatch({
-      if (!is.null(identifier)) {
-        openalexR::oa_fetch(
-          entity = entity,
-          identifier = identifier,
-          output = "tibble"
-        )
-      } else if (!is.null(doi)) {
-        openalexR::oa_fetch(
-          entity = entity,
-          doi = doi,
-          output = "tibble"
-        )
-      }
-    }, error = function(e) {
-      error_msg <- as.character(e$message)
-      
-      # Check if it's a rate limit error (429)
-      if (grepl("429", error_msg) || grepl("Too Many Requests", error_msg, ignore.case = TRUE)) {
-        if (attempt < max_retries) {
-          if (verbose) {
-            cat("Rate limit hit (HTTP 429). Retrying with exponential backoff...\n")
-          }
-          return(safe_oa_fetch(entity, identifier, doi, attempt + 1))
-        } else {
-          stop("Rate limit exceeded after ", max_retries, " attempts. ",
-               "Please wait a few minutes or set an OpenAlex API key for higher rate limits. ",
-               "Get a free key at: https://openalex.org/")
-        }
-      }
-      
-      # Check for other temporary errors
-      if (grepl("500|502|503|504", error_msg) || grepl("timeout", error_msg, ignore.case = TRUE)) {
-        if (attempt < max_retries) {
-          if (verbose) {
-            cat("Temporary server error. Retrying...\n")
-          }
-          return(safe_oa_fetch(entity, identifier, doi, attempt + 1))
-        }
-      }
-      
-      # If not a retryable error, or max retries reached, throw the error
-      stop(e$message)
-    })
-    
-    return(result)
-  }
-  
   if (verbose) cat("Retrieving article information for DOI:", doi, "\n")
   
   # Retrieve article information with error handling and retry logic
@@ -896,4 +838,65 @@ get_authors_summary <- function(doi = "10.1016/j.joi.2017.08.007",
   }
   
   return(summary_df)
+}
+
+# Helper function to make API calls with retry logic
+safe_oa_fetch <- function(entity, identifier = NULL, doi = NULL, attempt = 1) {
+  if (attempt > 1 && verbose) {
+    cat("Retry attempt", attempt, "of", max_retries, "\n")
+  }
+  
+  # Add delay before API call (except for first attempt)
+  if (attempt > 1 || entity == "authors") {
+    wait_time <- if (attempt == 1) sleep_time else retry_delay * (2 ^ (attempt - 2))
+    if (verbose) cat("Waiting", round(wait_time, 2), "seconds before API call...\n")
+    Sys.sleep(wait_time)
+  }
+  
+  result <- tryCatch({
+    if (!is.null(identifier)) {
+      openalexR::oa_fetch(
+        entity = entity,
+        identifier = identifier,
+        output = "tibble"
+      )
+    } else if (!is.null(doi)) {
+      openalexR::oa_fetch(
+        entity = entity,
+        doi = doi,
+        output = "tibble"
+      )
+    }
+  }, error = function(e) {
+    error_msg <- as.character(e$message)
+    
+    # Check if it's a rate limit error (429)
+    if (grepl("429", error_msg) || grepl("Too Many Requests", error_msg, ignore.case = TRUE)) {
+      if (attempt < max_retries) {
+        if (verbose) {
+          cat("Rate limit hit (HTTP 429). Retrying with exponential backoff...\n")
+        }
+        return(safe_oa_fetch(entity, identifier, doi, attempt + 1))
+      } else {
+        stop("Rate limit exceeded after ", max_retries, " attempts. ",
+             "Please wait a few minutes or set an OpenAlex API key for higher rate limits. ",
+             "Get a free key at: https://openalex.org/")
+      }
+    }
+    
+    # Check for other temporary errors
+    if (grepl("500|502|503|504", error_msg) || grepl("timeout", error_msg, ignore.case = TRUE)) {
+      if (attempt < max_retries) {
+        if (verbose) {
+          cat("Temporary server error. Retrying...\n")
+        }
+        return(safe_oa_fetch(entity, identifier, doi, attempt + 1))
+      }
+    }
+    
+    # If not a retryable error, or max retries reached, throw the error
+    stop(e$message)
+  })
+  
+  return(result)
 }

@@ -136,7 +136,12 @@ content_analysis_server <- function(input, output, session, values) {
       )
       
       values$pdf_text <- pdf_text$Full_text
-      values$pdf_sections <- pdf_text[-1]
+      if (length(values$pdf_text) > 1) {
+        values$pdf_sections <- pdf_text[-1]
+      } else{
+        values$pdf_sections <- values$pdf_text # Fallback to full text if no sections
+      }
+      
       values$citation_type_used <- citation_type  # Store for later use
       
       pdf_metadata <- unlist(pdftools::pdf_info(input$pdf_file$datapath))
@@ -402,6 +407,7 @@ content_analysis_server <- function(input, output, session, values) {
         n_segments_citations = n_segs_cit
       )
       
+      values$references_oa <- values$analysis_results$references_oa
       section_colors <- colorlist()[1:length(unique(values$analysis_results$citation_contexts$section))]
       names(section_colors) <- unique(values$analysis_results$citation_contexts$section)
       values$analysis_results$section_colors <- section_colors
@@ -462,55 +468,58 @@ content_analysis_server <- function(input, output, session, values) {
   })
   outputOptions(output, "analysis_completed", suspendWhenHidden = FALSE)
   
-  # ===========================================
-  # OPENALEX DATA FETCHING
-  # ===========================================
-  
-  # Scarica dati OpenAlex quando l'analisi è completata
-  observeEvent(values$analysis_results, {
-    if (!is.null(values$analysis_results$parsed_references)) {
-      
-      tryCatch({
-        references <- values$analysis_results$parsed_references
-        dois <- references$doi[!is.na(references$doi)]
-        dois <- unique(dois)
-        dois <- tolower(dois[dois != "" & !is.na(dois)])
-        
-        if (!is.null(dois) && length(dois) > 0) {
-          
-          showNotification(
-            paste("Fetching metadata from OpenAlex for", length(dois), "references..."),
-            type = "message",
-            duration = 3,
-            id = "oa_fetch"
-          )
-          
-          # Fetch OpenAlex data
-          values$references_oa <- bibliometrix:::safe_oa_fetch(
-            entity = "works", 
-            doi = dois
-          )
-          
-          if (!is.null(values$references_oa) && nrow(values$references_oa) > 0) {
-            showNotification(
-              paste("Successfully retrieved metadata for", nrow(values$references_oa), "references from OpenAlex"),
-              type = "message",
-              duration = 4,
-              id = "oa_success"
-            )
-          }
-        }
-        
-      }, error = function(e) {
-        showNotification(
-          "Could not fetch OpenAlex metadata for some references",
-          type = "warning",
-          duration = 4
-        )
-        cat("OpenAlex fetch error:", e$message, "\n")
-      })
-    }
-  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  # # ===========================================
+  # # OPENALEX DATA FETCHING
+  # # ===========================================
+  # 
+  # # Scarica dati OpenAlex quando l'analisi è completata
+  # observeEvent(values$analysis_results, {
+  #   if (!is.null(values$analysis_results$parsed_references)) {
+  #     
+  #     tryCatch({
+  #       references <- values$analysis_results$parsed_references
+  #       dois <- references$doi[!is.na(references$doi)]
+  #       dois <- unique(dois)
+  #       dois <- tolower(dois[dois != "" & !is.na(dois)])
+  #       
+  #       if (!is.null(dois) && length(dois) > 0) {
+  #         
+  #         showNotification(
+  #           paste("Fetching metadata from OpenAlex for", length(dois), "references..."),
+  #           type = "message",
+  #           duration = 3,
+  #           id = "oa_fetch"
+  #         )
+  #         
+  #         # Fetch OpenAlex data
+  #         values$references_oa <- bibliometrix:::safe_oa_fetch(
+  #           entity = "works", 
+  #           doi = dois
+  #         )
+  #         
+  #         if (!is.null(values$references_oa) && nrow(values$references_oa) > 0) {
+  #           values$references_oa <- add_reference_info(values$references_oa)
+  #           values$analysis_results$parsed_references <- complete_references_from_oa(values$analysis_results$parsed_references, 
+  #                                                                                    values$references_oa)
+  #           showNotification(
+  #             paste("Successfully retrieved metadata for", nrow(values$references_oa), "references from OpenAlex"),
+  #             type = "message",
+  #             duration = 4,
+  #             id = "oa_success"
+  #           )
+  #         }
+  #       }
+  #       
+  #     }, error = function(e) {
+  #       showNotification(
+  #         "Could not fetch OpenAlex metadata for some references",
+  #         type = "warning",
+  #         duration = 4
+  #       )
+  #       cat("OpenAlex fetch error:", e$message, "\n")
+  #     })
+  #   }
+  # }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # ===========================================
   # TAB 1: DESCRIPTIVE STATISTICS OUTPUTS
@@ -1543,11 +1552,10 @@ Avg sentence length: %.1f words",
         )
       )
     }
-    
+
     # Create HTML for each reference
     reference_items <- lapply(1:nrow(refs), function(i) {
       ref <- refs[i, ]
-      
       # Get reference text
       ref_text <- if (!is.na(ref$ref_full_text) && nzchar(ref$ref_full_text)) {
         ref$ref_full_text
@@ -2974,5 +2982,6 @@ create_oa_details_html <- function(oa_data) {
     )
   )
 }
+
 
 

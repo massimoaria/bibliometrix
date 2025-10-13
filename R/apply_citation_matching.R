@@ -125,11 +125,11 @@ normalize_citations <- function(CR_vector, threshold = 0.90, method = "jw", min_
       str_replace_all("PP\\.?\\s*\\d+\\s*[-\u2013\u2014]\\s*\\d+", "") %>%  # Remove page numbers
       str_replace_all("P\\.?\\s*\\d+\\s*[-\u2013\u2014]\\s*\\d+", "") %>%
       # Normalize common journal abbreviations
-      str_replace_all("J\\.?\\s+CLEAN\\.?\\s+PROD\\.?", "JOURNAL OF CLEANER PRODUCTION") %>%
-      str_replace_all("JOURNAL OF CLEANER PRODUCTION", "J CLEAN PROD") %>%
-      str_replace_all("LONG\\s+RANGE\\s+PLAN(NING)?", "LONG RANGE PLANNING") %>%
-      str_replace_all("ORGAN\\.?\\s+ENVIRON\\.?", "ORGANIZATION AND ENVIRONMENT") %>%
-      str_replace_all("J\\.?\\s+MANAG\\.?", "JOURNAL OF MANAGEMENT") %>%
+      # str_replace_all("J\\.?\\s+CLEAN\\.?\\s+PROD\\.?", "JOURNAL OF CLEANER PRODUCTION") %>%
+      # str_replace_all("JOURNAL OF CLEANER PRODUCTION", "J CLEAN PROD") %>%
+      # str_replace_all("LONG\\s+RANGE\\s+PLAN(NING)?", "LONG RANGE PLANNING") %>%
+      # str_replace_all("ORGAN\\.?\\s+ENVIRON\\.?", "ORGANIZATION AND ENVIRONMENT") %>%
+      # str_replace_all("J\\.?\\s+MANAG\\.?", "JOURNAL OF MANAGEMENT") %>%
       str_replace_all("[[:punct:]]", " ") %>%         # Remove punctuation
       str_replace_all("\\s+", " ") %>%                # Normalize whitespace
       str_trim()
@@ -596,14 +596,14 @@ applyCitationMatching <- function(M, threshold = 0.90, method = "jw", min_chars 
     dplyr::filter(!grepl("^FILTERED_", cluster_id)) %>%
     group_by(CR_canonical, cluster_id) %>%
     summarise(
-      #n = n(),
       n_variants = n_distinct(CR),
       format = first(format),
       variants_example = paste(head(unique(CR), 3), collapse = " | "),
       .groups = "drop"
     ) %>%
-    left_join(citation_count, by = "CR_canonical")
-    #arrange(desc(n))
+    ungroup() %>% 
+    left_join(citation_count, by = "CR_canonical") %>% 
+    arrange(desc(n))
   
   # Reconstruct CR field
   cat("Reconstructing CR field for each paper...\n")
@@ -625,7 +625,7 @@ applyCitationMatching <- function(M, threshold = 0.90, method = "jw", min_chars 
       length(unique(result$CR)) - length(unique(result$CR_canonical)), "\n")
   
   return(list(
-    full_data = result,
+    full_data = result %>% distinct(),
     summary = summary,
     matched_citations = matched,
     CR_normalized = CR_by_paper

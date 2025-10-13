@@ -1234,6 +1234,7 @@ To ensure the functionality of Biblioshiny,
         
         # Update CR field with normalized citations
         values$M <- values$M %>%
+          mutate(CR_original = CR) %>%
           select(-CR) %>%
           left_join(
             refMatch_results()$CR_normalized %>% select(SR, CR),
@@ -1449,10 +1450,11 @@ To ensure the functionality of Biblioshiny,
     req(refMatch_results())
     
     top_table <- refMatch_results()$summary %>%
-      head(50) %>%
       select(Citation = CR_canonical, 
              `Times Cited` = n, 
-             `Variants Found` = n_variants)
+             `Variants Found` = n_variants) %>% 
+      arrange(desc(`Times Cited`)) %>% 
+      head(50)
     
     datatable(
       top_table,

@@ -936,7 +936,7 @@ content_analysis_tab <- function(id = "content_analysis") {
       # LEFT PANEL: CONTROLS (column 2)
       # ===========================================
       column(2,
-
+             
              # PDF Import Card
              div(class = "box box-primary",
                  div(class = "box-body",
@@ -1335,7 +1335,7 @@ content_analysis_tab <- function(id = "content_analysis") {
     $('#oaModalBody').html(data.content);
   });
 ")),
-
+    
     tags$script(HTML("
   // Function to open/close the PDF Import box
   Shiny.addCustomMessageHandler('togglePdfImport', function(message) {

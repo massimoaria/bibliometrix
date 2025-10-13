@@ -6,7 +6,7 @@ safe_oa_fetch <- function(entity,
                           identifier = NULL, 
                           doi = NULL, 
                           attempt = 1,
-                          sleep_time = 1,
+                          sleep_time = 0.5,
                           retry_delay = 2,
                           max_retries = 3,
                           verbose = FALSE) {

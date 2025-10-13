@@ -345,23 +345,17 @@ To ensure the functionality of Biblioshiny,
                  ###  WoS ZIP Files
                  zip = {
                    D <-  utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                  M <- authorNameFormat(M, input$authorName)
-                                })
+                   M <- convert2df(D,
+                                   dbsource = input$dbsource,
+                                   format = formatDB(D))
+                   M <- authorNameFormat(M, input$authorName)
                  },
                  ### WoS Txt/Bib Files
                  {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(inFile$datapath))
-                                  M <- authorNameFormat(M, input$authorName)
-                                })
+                   M <- convert2df(inFile$datapath,
+                                   dbsource = input$dbsource,
+                                   format = formatDB(inFile$datapath))
+                   M <- authorNameFormat(M, input$authorName)
                  })
         },
         scopus = {
@@ -369,43 +363,31 @@ To ensure the functionality of Biblioshiny,
                  ###  Scopus ZIP Files
                  zip = {
                    D <- utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                  M <- authorNameFormat(M, input$authorName)
-                                  if (formatDB(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
-                                })
+                   M <- convert2df(D,
+                                   dbsource = input$dbsource,
+                                   format = formatDB(D))
+                   M <- authorNameFormat(M, input$authorName)
+                   if (formatDB(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
                  },
                  ### Scopus CSV/Bib Files
                  csv = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "csv")
-                                  M <- authorNameFormat(M, input$authorName)
-                                  if (input$authorName=="AF") M <- AuthorNameMerge(M)
-                                })
+                   M <- convert2df(inFile$datapath,
+                                   dbsource = input$dbsource,
+                                   format = "csv")
+                   M <- authorNameFormat(M, input$authorName)
+                   if (input$authorName=="AF") M <- AuthorNameMerge(M)
                  },
                  bib = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "bibtex")
-                                  M <- authorNameFormat(M, input$authorName)
-                                })
+                   M <- convert2df(inFile$datapath,
+                                   dbsource = input$dbsource,
+                                   format = "bibtex")
+                   M <- authorNameFormat(M, input$authorName)
                  })
         },
         openalex={
-          withProgress(message = 'Conversion in progress',
-                         value = 0, {
-                           M <- convert2df(inFile$datapath,
-                                           dbsource = input$dbsource,
-                                           format = "csv")
-                         })
+          M <- convert2df(inFile$datapath,
+                          dbsource = input$dbsource,
+                          format = "csv")
         },
         openalex_api = {
           M <- convert2df(inFile$datapath,
@@ -417,21 +399,15 @@ To ensure the functionality of Biblioshiny,
                  ###  Lens.org ZIP Files
                  zip = {
                    D <-  utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                })
+                   M <- convert2df(D,
+                                   dbsource = input$dbsource,
+                                   format = formatDB(D))
                  },
                  ### Lens.org CSV Files
                  {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(inFile$datapath))
-                                })
+                   M <- convert2df(inFile$datapath,
+                                   dbsource = input$dbsource,
+                                   format = formatDB(inFile$datapath))
                  })
         },
         cochrane = {
@@ -439,21 +415,15 @@ To ensure the functionality of Biblioshiny,
                  ###  Cochrane ZIP Files
                  zip = {
                    D <- utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                })
+                   M <- convert2df(D,
+                                   dbsource = input$dbsource,
+                                   format = formatDB(D))
                  },
                  ### Cochrane txt files
                  {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "plaintext")
-                                })
+                   M <- convert2df(inFile$datapath,
+                                   dbsource = input$dbsource,
+                                   format = "plaintext")
                  })
         },
         pubmed = {
@@ -461,21 +431,15 @@ To ensure the functionality of Biblioshiny,
                  ###  Pubmed ZIP Files
                  zip = {
                    D <- utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = "pubmed")
-                                })
+                   M <- convert2df(D,
+                                   dbsource = input$dbsource,
+                                   format = "pubmed")
                  },
                  ### Pubmed txt Files
                  txt = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "pubmed")
-                                })
+                   M <- convert2df(inFile$datapath,
+                                   dbsource = input$dbsource,
+                                   format = "pubmed")
                  })
         },
         dimensions = {
@@ -483,36 +447,24 @@ To ensure the functionality of Biblioshiny,
                  ###  Dimensions ZIP Files
                  zip = {
                    D = utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <-
-                                    convert2df(D,
-                                               dbsource = input$dbsource,
-                                               format = formatDB(D))
-                                })
+                   M <- convert2df(D,
+                                dbsource = input$dbsource,
+                                format = formatDB(D))
                  },
                  ### Dimensions Xlsx/csv Files
                  xlsx = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <-
-                                    convert2df(
-                                      inFile$datapath,
-                                      dbsource = "dimensions",
-                                      format = "excel"
-                                    )
-                                })
+                   M <- convert2df(
+                       inFile$datapath,
+                       dbsource = "dimensions",
+                       format = "excel"
+                     )
                  },
                  csv = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <-
-                                    convert2df(
-                                      inFile$datapath,
-                                      dbsource = "dimensions",
-                                      format = "csv"
-                                    )
-                                })
+                   M <- convert2df(
+                     inFile$datapath,
+                     dbsource = "dimensions",
+                     format = "csv"
+                   )
                  })
           
         }
@@ -557,12 +509,12 @@ To ensure the functionality of Biblioshiny,
              })
     } else if (is.null(inFile)) {return(NULL)}
     
-    values = initial(values)
     ## remove not useful columns
     ind <- which(substr(names(M),1,2)=="X.")
     if (length(ind)>0) M <- M[,-ind]
     ##
     M <- M %>% mergeKeywords(force = F)
+    values = initial(values)
     values$M <- M
     values$Morig = M
     values$SCdf <- wcTable(M)
@@ -2232,30 +2184,54 @@ To ensure the functionality of Biblioshiny,
     handlerExpr = {
       req(values$M)
       selected_author <- input$authorSearch
-      authorGlobalProfile <- authorCard(selected_author, values)
-      output$AuthorBioPageUI <- renderUI({
-        authorGlobalProfile
-      })
-      local_author <- values$author_data %>%
-        dplyr::filter(AUid == selected_author) %>%
-        pull(display_name)
       
-      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
-        mutate(TI = to_title_case(TI),
-               SO= to_title_case(SO))
+      # Show the spinner
+      shinyjs::show("authorFetchingSpinner")
       
-      authorLocalProfile <- create_local_author_bio_card(
-        local_author_data = local_data,
-        selected_author = local_author,
-        max_py = values$M$PY %>% max(na.rm = TRUE),
-        width = "100%",
-        show_trends = TRUE,
-        show_keywords = TRUE,
-        max_keywords = 20,
-        max_works_display = 50
-      )
-      output$AuthorLocalProfileUI <- renderUI({
-        authorLocalProfile
+      # Use tryCatch to manage erros and the spinner
+      tryCatch({
+        # Fetch data
+        authorGlobalProfile <- authorCard(selected_author, values)
+        
+        output$AuthorBioPageUI <- renderUI({
+          authorGlobalProfile
+        })
+        
+        local_author <- values$author_data %>%
+          dplyr::filter(AUid == selected_author) %>%
+          pull(display_name)
+        
+        local_data <- values$M[gregexpr(selected_author, values$M$AU) > -1, ] %>%
+          mutate(
+            TI = to_title_case(TI),
+            SO = to_title_case(SO)
+          )
+        
+        authorLocalProfile <- create_local_author_bio_card(
+          local_author_data = local_data,
+          selected_author = local_author,
+          max_py = values$M$PY %>% max(na.rm = TRUE),
+          width = "100%",
+          show_trends = TRUE,
+          show_keywords = TRUE,
+          max_keywords = 20,
+          max_works_display = 50
+        )
+        
+        output$AuthorLocalProfileUI <- renderUI({
+          authorLocalProfile
+        })
+        
+      }, error = function(e) {
+        # Manage the error
+        showNotification(
+          paste("Error fetching author data:", e$message),
+          type = "error",
+          duration = 5
+        )
+      }, finally = {
+        # Hide the spinner
+        shinyjs::hide("authorFetchingSpinner")
       })
     }
   )

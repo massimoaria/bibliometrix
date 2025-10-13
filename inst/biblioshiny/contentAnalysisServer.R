@@ -468,59 +468,6 @@ content_analysis_server <- function(input, output, session, values) {
   })
   outputOptions(output, "analysis_completed", suspendWhenHidden = FALSE)
   
-  # # ===========================================
-  # # OPENALEX DATA FETCHING
-  # # ===========================================
-  # 
-  # # Scarica dati OpenAlex quando l'analisi è completata
-  # observeEvent(values$analysis_results, {
-  #   if (!is.null(values$analysis_results$parsed_references)) {
-  #     
-  #     tryCatch({
-  #       references <- values$analysis_results$parsed_references
-  #       dois <- references$doi[!is.na(references$doi)]
-  #       dois <- unique(dois)
-  #       dois <- tolower(dois[dois != "" & !is.na(dois)])
-  #       
-  #       if (!is.null(dois) && length(dois) > 0) {
-  #         
-  #         showNotification(
-  #           paste("Fetching metadata from OpenAlex for", length(dois), "references..."),
-  #           type = "message",
-  #           duration = 3,
-  #           id = "oa_fetch"
-  #         )
-  #         
-  #         # Fetch OpenAlex data
-  #         values$references_oa <- bibliometrix:::safe_oa_fetch(
-  #           entity = "works", 
-  #           doi = dois
-  #         )
-  #         
-  #         if (!is.null(values$references_oa) && nrow(values$references_oa) > 0) {
-  #           values$references_oa <- add_reference_info(values$references_oa)
-  #           values$analysis_results$parsed_references <- complete_references_from_oa(values$analysis_results$parsed_references, 
-  #                                                                                    values$references_oa)
-  #           showNotification(
-  #             paste("Successfully retrieved metadata for", nrow(values$references_oa), "references from OpenAlex"),
-  #             type = "message",
-  #             duration = 4,
-  #             id = "oa_success"
-  #           )
-  #         }
-  #       }
-  #       
-  #     }, error = function(e) {
-  #       showNotification(
-  #         "Could not fetch OpenAlex metadata for some references",
-  #         type = "warning",
-  #         duration = 4
-  #       )
-  #       cat("OpenAlex fetch error:", e$message, "\n")
-  #     })
-  #   }
-  # }, ignoreNULL = TRUE, ignoreInit = TRUE)
-  
   # ===========================================
   # TAB 1: DESCRIPTIVE STATISTICS OUTPUTS
   # ===========================================

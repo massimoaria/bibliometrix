@@ -372,7 +372,7 @@ body <- dashboardBody(
             column(
               9,
               uiOutput("collection_descriptionUI"),
-              shinycssloaders::withSpinner(DT::DTOutput("contents"))
+              shinycssloaders::withSpinner(DT::DTOutput("contents"), caption = HTML("<br><strong>Converting data to Bibliometrix format</strong>"))
             ),
             column(
               3,
@@ -1728,20 +1728,14 @@ body <- dashboardBody(
                     )))
                   )
                 ),
-                column(
-                  4,
-                  # div(
-                  #   align = "center",
-                  #   title = "Export raw text(s) in Excel",
-                  #   do.call("actionButton", c(list(
-                  #     label = NULL,
-                  #     style = "display:block; height: 37px; width: 37px; border-radius: 50%;
-                  #                         border: 1px; margin-top: 16px;",
-                  #     icon = icon(name = "download-alt", lib = "glyphicon"),
-                  #     inputId = "wordsContSave"
-                  #   )))
-                  # )
-                )
+                column(4)
+              ),
+              br(),
+              div(
+                id = "authorFetchingSpinner",
+                style = "display: none; text-align: center; margin-top: 15px;",
+                icon("spinner", class = "fa-spin fa-3x", style = "color: #466fc4;"),
+                p("Fetching data...", style = "color: #666; font-size: 14px; margin-top: 10px;")
               )
             ),
             style = "margin-top:40px"

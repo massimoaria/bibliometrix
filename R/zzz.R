@@ -67,7 +67,9 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom dplyr relocate
 #' @importFrom dplyr slice_head
 #' @importFrom dplyr slice_tail
-#' @importFrom dplyr reframe
+#' @importFrom dplyr reframe 
+#' @importFrom dplyr coalesce group_split arrange n_distinct first
+#' @importFrom stringdist stringdistmatrix
 #' @importFrom plotly add_annotations
 #' @importFrom plotly add_lines
 #' @importFrom plotly config
@@ -268,10 +270,10 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom stringr str_detect
 #' @importFrom stringr fixed
 #' @importFrom stringr str_to_upper
-#' @importFrom stringr str_squish
+#' @importFrom stringr str_squish regex str_remove
 #' @importFrom stringr str_locate_all
-#' @importFrom stringr str_extract_all
-#' @importFrom stringr str_replace_all
+#' @importFrom stringr str_extract_all str_extract 
+#' @importFrom stringr str_replace_all str_remove_all
 #' @importFrom stringr str_trim
 #' @importFrom stringr str_split 
 #' @importFrom graphics barplot

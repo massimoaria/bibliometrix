@@ -1149,6 +1149,473 @@ To ensure the functionality of Biblioshiny,
              columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
   }
   
+  # REFERENCE MATCHING MENU ----
+  
+  ## ============================================================================
+  ## Logic per Reference Matching
+  ## ============================================================================
+  
+  # Reactive values to store matching results and original data
+  refMatch_results <- reactiveVal(NULL)
+  refMatch_M_original <- reactiveVal(NULL)
+  refMatch_applied <- reactiveVal(FALSE)
+  
+  # Store original M when first accessing the tab
+  observeEvent(values$M, {
+    if (is.null(refMatch_M_original())) {
+      refMatch_M_original(values$M)
+    }
+  }, ignoreInit = TRUE, once = TRUE)
+  
+  # Run matching when button is clicked
+  observeEvent(input$refMatch_run, {
+    
+    req(values$M)
+    
+    # Store original if not already stored
+    if (is.null(refMatch_M_original())) {
+      refMatch_M_original(values$M)
+    }
+    
+    # Show progress
+    withProgress(message = 'Citation matching in progress...', value = 0, {
+      
+      incProgress(0.1, detail = "Preparing data...")
+      
+      tryCatch({
+        
+        # Run the matching
+        incProgress(0.2, detail = "Normalizing citations...")
+        results <- applyCitationMatching(
+          M = values$M,
+          threshold = input$refMatch_threshold,
+          method = input$refMatch_method
+        )
+        
+        incProgress(0.8, detail = "Finalizing results...")
+        
+        # Store results
+        refMatch_results(results)
+        
+        incProgress(1.0, detail = "Complete!")
+        
+        showNotification(
+          "Citation matching completed successfully!",
+          type = "message",
+          duration = 5
+        )
+        
+      }, error = function(e) {
+        showNotification(
+          paste("Error during matching:", e$message),
+          type = "error",
+          duration = 10
+        )
+      })
+    })
+  })
+  
+  # Apply normalized citations to values$M
+  observeEvent(input$refMatch_apply, {
+    
+    req(refMatch_results())
+    req(values$M)
+    
+    withProgress(message = 'Applying normalized citations...', value = 0, {
+      
+      tryCatch({
+        
+        incProgress(0.3, detail = "Updating CR field...")
+        
+        # Store original CR if requested
+        if (input$refMatch_keepOriginal && !"CR_original" %in% names(values$M)) {
+          values$M$CR_original <- values$M$CR
+        }
+        
+        # Update CR field with normalized citations
+        values$M <- values$M %>%
+          select(-CR) %>%
+          left_join(
+            refMatch_results()$CR_normalized %>% select(SR, CR),
+            by = "SR"
+          )
+        
+        # Add statistics if requested
+        if (input$refMatch_addStats) {
+          stats <- refMatch_results()$CR_normalized %>%
+            select(SR, n_references_normalized = n_references)
+          
+          values$M <- values$M %>%
+            left_join(stats, by = "SR")
+        }
+        
+        incProgress(0.8, detail = "Finalizing...")
+        
+        # Mark as applied
+        refMatch_applied(TRUE)
+        
+        incProgress(1.0, detail = "Complete!")
+        
+        showNotification(
+          HTML(paste0(
+            "<b>Normalized citations applied!</b><br>",
+            "The CR field has been updated with normalized citations.<br>",
+            "You can now continue with other analyses."
+          )),
+          type = "message",
+          duration = 8
+        )
+        
+      }, error = function(e) {
+        showNotification(
+          paste("Error applying normalization:", e$message),
+          type = "error",
+          duration = 10
+        )
+      })
+    })
+  })
+  
+  # Reset to original data
+  observeEvent(input$refMatch_reset, {
+    
+    req(refMatch_M_original())
+    
+    # Confirmation dialog
+    showModal(
+      modalDialog(
+        title = "Confirm Reset",
+        "Are you sure you want to reset to the original data? This will undo all citation normalization.",
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton("refMatch_confirmReset", "Yes, Reset", class = "btn-danger")
+        )
+      )
+    )
+  })
+  
+  # Confirm reset
+  observeEvent(input$refMatch_confirmReset, {
+    
+    # Restore original M
+    values$M <- refMatch_M_original()
+    
+    # Clear applied flag
+    refMatch_applied(FALSE)
+    
+    # Clear results (optional - keep for reference)
+    # refMatch_results(NULL)
+    
+    removeModal()
+    
+    showNotification(
+      "Data reset to original state. All normalization has been removed.",
+      type = "warning",
+      duration = 5
+    )
+  })
+  
+  # Status message after running
+  output$refMatch_runStatus <- renderUI({
+    req(refMatch_results())
+    
+    div(
+      style = "margin-top: 10px;",
+      tags$div(
+        class = "alert alert-success",
+        icon("check-circle"),
+        tags$b(" Matching completed!"),
+        br(),
+        tags$small("Results are ready. Click 'Apply' to update your data.")
+      )
+    )
+  })
+  
+  # Status message after applying
+  output$refMatch_applyStatus <- renderUI({
+    
+    if (refMatch_applied()) {
+      div(
+        style = "margin-top: 10px;",
+        tags$div(
+          class = "alert alert-success",
+          icon("check-circle"),
+          tags$b(" Applied!"),
+          br(),
+          tags$small("Normalized citations are active in your dataset.")
+        )
+      )
+    } else {
+      NULL
+    }
+  })
+  
+  # Value boxes
+  output$refMatch_original <- renderValueBox({
+    req(refMatch_results())
+    
+    n_orig <- length(unique(refMatch_results()$full_data$CR))
+    
+    valueBox(
+      value = formatC(n_orig, format = "d", big.mark = ","),
+      subtitle = "Original Citations",
+      icon = icon("book"),
+      color = "blue"
+    )
+  })
+  
+  output$refMatch_normalized <- renderValueBox({
+    req(refMatch_results())
+    
+    n_norm <- nrow(refMatch_results()$summary)
+    
+    valueBox(
+      value = formatC(n_norm, format = "d", big.mark = ","),
+      subtitle = "Unique Works",
+      icon = icon("check-double"),
+      color = "green"
+    )
+  })
+  
+  output$refMatch_duplicates <- renderValueBox({
+    req(refMatch_results())
+    
+    n_orig <- length(unique(refMatch_results()$full_data$CR))
+    n_norm <- nrow(refMatch_results()$summary)
+    n_dup <- n_orig - n_norm
+    perc <- round(100 * n_dup / n_orig, 1)
+    
+    valueBox(
+      value = paste0(formatC(n_dup, format = "d", big.mark = ","), 
+                     " (", perc, "%)"),
+      subtitle = "Duplicates Found",
+      icon = icon("copy"),
+      color = "red"
+    )
+  })
+  
+  # Cluster size distribution plot
+  output$refMatch_clusterSizePlot <- renderPlot({
+    req(refMatch_results())
+    
+    cluster_sizes <- table(refMatch_results()$summary$n_variants)
+    
+    df_plot <- data.frame(
+      n_variants = as.numeric(names(cluster_sizes)),
+      count = as.numeric(cluster_sizes)
+    )
+    
+    ggplot(df_plot, aes(x = factor(n_variants), y = count)) +
+      geom_col(fill = "#3c8dbc", alpha = 0.8) +
+      labs(
+        title = "Distribution of Variant Counts",
+        x = "Number of Variants per Citation",
+        y = "Number of Citations"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(size = 9)
+      )
+  })
+  
+  # Top variants plot
+  output$refMatch_variantsPlot <- renderPlot({
+    req(refMatch_results())
+    
+    top_variants <- refMatch_results()$summary %>%
+      arrange(desc(n_variants)) %>%
+      head(10)
+    
+    ggplot(top_variants, aes(x = reorder(substr(CR_canonical, 1, 40), n_variants), 
+                             y = n_variants)) +
+      geom_col(fill = "#f39c12", alpha = 0.8) +
+      coord_flip() +
+      labs(
+        title = "Citations with Most Variants",
+        x = "",
+        y = "Number of Variants"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 12),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 9)
+      )
+  })
+  
+  # Top citations table
+  output$refMatch_topCitations <- renderDT({
+    req(refMatch_results())
+    
+    top_table <- refMatch_results()$summary %>%
+      head(50) %>%
+      select(Citation = CR_canonical, 
+             `Times Cited` = n, 
+             `Variants Found` = n_variants)
+    
+    datatable(
+      top_table,
+      options = list(
+        pageLength = 15,
+        dom = 'frtip',
+        scrollX = TRUE,
+        searchHighlight = TRUE
+      ),
+      selection = 'single',
+      rownames = FALSE,
+      class = 'cell-border stripe'
+    )
+  })
+  
+  # Variants table (shown when a citation is selected)
+  output$refMatch_variantsTable <- renderDT({
+    req(refMatch_results())
+    req(input$refMatch_topCitations_rows_selected)
+    
+    selected_row <- input$refMatch_topCitations_rows_selected
+    selected_citation <- refMatch_results()$summary$CR_canonical[selected_row]
+    
+    variants <- refMatch_results()$full_data %>%
+      filter(CR_canonical == selected_citation) %>%
+      select(Variant = CR) %>%
+      group_by(Variant) %>%
+      summarise(Count = n(), .groups = "drop") %>%
+      arrange(desc(Count))
+    
+    datatable(
+      variants,
+      options = list(
+        pageLength = 10,
+        dom = 'frtip',
+        scrollX = TRUE
+      ),
+      rownames = FALSE,
+      class = 'cell-border stripe'
+    )
+  })
+  
+  # Download normalized data
+  output$refMatch_download <- downloadHandler(
+    filename = function() {
+      format <- input$refMatch_exportFormat
+      base_name <- input$refMatch_filename
+      
+      if (format == "xlsx") {
+        paste0(base_name, ".xlsx")
+      } else if (format == "rdata") {
+        paste0(base_name, ".RData")
+      } else {
+        paste0(base_name, ".zip")
+      }
+    },
+    
+    content = function(file) {
+      req(refMatch_results())
+      req(values$M)
+      
+      withProgress(message = 'Preparing export...', value = 0, {
+        
+        # Create normalized M
+        incProgress(0.3, detail = "Processing data...")
+        
+        M_normalized <- values$M
+        
+        # If not already applied, create the normalized version
+        if (!refMatch_applied()) {
+          if (input$refMatch_keepOriginal) {
+            M_normalized$CR_original <- M_normalized$CR
+          }
+          
+          # Replace CR with normalized version
+          M_normalized <- M_normalized %>%
+            select(-CR) %>%
+            left_join(
+              refMatch_results()$CR_normalized %>% select(SR, CR),
+              by = "SR"
+            )
+          
+          # Add statistics if requested
+          if (input$refMatch_addStats) {
+            stats <- refMatch_results()$CR_normalized %>%
+              select(SR, n_references_normalized = n_references)
+            
+            M_normalized <- M_normalized %>%
+              left_join(stats, by = "SR")
+          }
+        }
+        
+        incProgress(0.6, detail = "Writing file...")
+        
+        format <- input$refMatch_exportFormat
+        
+        if (format == "xlsx") {
+          writexl::write_xlsx(M_normalized, file)
+          
+        } else if (format == "rdata") {
+          M <- M_normalized
+          save(M, file = file)
+          
+        } else {  # both
+          temp_dir <- tempdir()
+          xlsx_file <- file.path(temp_dir, paste0(input$refMatch_filename, ".xlsx"))
+          rdata_file <- file.path(temp_dir, paste0(input$refMatch_filename, ".RData"))
+          
+          writexl::write_xlsx(M_normalized, xlsx_file)
+          M <- M_normalized
+          save(M, file = rdata_file)
+          
+          zip(file, files = c(xlsx_file, rdata_file), flags = "-j")
+        }
+        
+        incProgress(1.0, detail = "Complete!")
+      })
+    }
+  )
+  
+  # Download detailed report
+  output$refMatch_downloadReport <- downloadHandler(
+    filename = function() {
+      paste0("citation_matching_report_", Sys.Date(), ".xlsx")
+    },
+    
+    content = function(file) {
+      req(refMatch_results())
+      
+      withProgress(message = 'Generating report...', value = 0, {
+        
+        incProgress(0.3, detail = "Preparing sheets...")
+        
+        # Create list of data frames for different sheets
+        report_data <- list(
+          "Summary" = refMatch_results()$summary,
+          "Full_Data" = refMatch_results()$full_data %>% select(-blocking_key),
+          "Normalized_CR" = refMatch_results()$CR_normalized,
+          "Parameters" = data.frame(
+            Parameter = c("Threshold", "Method", "Date", "Original_Citations", 
+                          "Normalized_Citations", "Duplicates_Found", "Applied_to_Data"),
+            Value = c(
+              input$refMatch_threshold,
+              input$refMatch_method,
+              as.character(Sys.Date()),
+              length(unique(refMatch_results()$full_data$CR)),
+              nrow(refMatch_results()$summary),
+              length(unique(refMatch_results()$full_data$CR)) - 
+                nrow(refMatch_results()$summary),
+              ifelse(refMatch_applied(), "Yes", "No")
+            )
+          )
+        )
+        
+        incProgress(0.7, detail = "Writing Excel file...")
+        
+        writexl::write_xlsx(report_data, file)
+        
+        incProgress(1.0, detail = "Complete!")
+      })
+    }
+  )
+  
   # FILTERS MENU ----
   
   #### Box about Filter Results ----

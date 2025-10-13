@@ -159,7 +159,8 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       tabName = "uploadData", icon = fa_i(name = "file-import"),
       menuSubItem("Import or Load", tabName = "loadData", icon = icon("chevron-right", lib = "glyphicon")),
       menuSubItem("API", tabName = "gathData", icon = icon("chevron-right", lib = "glyphicon")),
-      menuSubItem("Merge Collections", tabName = "mergeData", icon = icon("chevron-right", lib = "glyphicon"))
+      menuSubItem("Merge Collections", tabName = "mergeData", icon = icon("chevron-right", lib = "glyphicon")),
+      menuSubItem("Reference Matching", tabName = "refMatching", icon = icon("chevron-right", lib = "glyphicon"))
     ),
     menuItemOutput("rest_of_sidebar"),
     menuItem("Content Analysis", 
@@ -731,6 +732,246 @@ body <- dashboardBody(
         )
       )
     ),
+    #### Reference matching ----
+    ## ============================================================================
+    ## UI - tabItem per Reference Matching
+    ## ============================================================================
+    
+    tabItem(
+      tabName = "refMatching",
+      fluidRow(
+        # LEFT COLUMN - Results
+        column(
+          width = 9,
+          
+          # Summary Statistics Box
+          box(
+            title = "Matching Statistics",
+            width = NULL,
+            status = "primary",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            
+            fluidRow(
+              column(4, valueBoxOutput("refMatch_original", width = NULL)),
+              column(4, valueBoxOutput("refMatch_normalized", width = NULL)),
+              column(4, valueBoxOutput("refMatch_duplicates", width = NULL))
+            ),
+            
+            hr(),
+            
+            fluidRow(
+              column(6, plotOutput("refMatch_clusterSizePlot", height = "250px")),
+              column(6, plotOutput("refMatch_variantsPlot", height = "250px"))
+            )
+          ),
+          
+          # Top Citations Box
+          box(
+            title = "Top Cited References (After Normalization)",
+            width = NULL,
+            status = "info",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            
+            DTOutput("refMatch_topCitations")
+          ),
+          
+          # Variants Example Box
+          box(
+            title = "Citation Variants Examples",
+            width = NULL,
+            status = "warning",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            collapsed = TRUE,
+            
+            p("Select a citation from the table above to see all its variants."),
+            DTOutput("refMatch_variantsTable")
+          )
+        ),
+        
+        # RIGHT COLUMN - Options and Actions
+        column(
+          width = 3,
+          
+          # Matching Options Box
+          box(
+            title = "Matching Options",
+            width = NULL,
+            status = "primary",
+            solidHeader = TRUE,
+            
+            helpText("Configure the citation matching algorithm parameters."),
+            
+            sliderInput(
+              "refMatch_threshold",
+              "Similarity Threshold:",
+              min = 0.70,
+              max = 0.98,
+              value = 0.90,
+              step = 0.01
+            ),
+            
+            helpText(
+              tags$small(
+                tags$b("Guidelines:"), br(),
+                "• 0.90-0.95: Conservative (fewer false positives)", br(),
+                "• 0.85-0.90: Balanced (recommended)", br(),
+                "• 0.75-0.80: Aggressive (more matching)"
+              )
+            ),
+            
+            hr(),
+            
+            selectInput(
+              "refMatch_method",
+              "Distance Method:",
+              choices = c(
+                "Jaro-Winkler (recommended)" = "jw",
+                "Levenshtein" = "lv",
+                "Optimal String Alignment" = "osa",
+                "Longest Common Substring" = "lcs"
+              ),
+              selected = "jw"
+            ),
+            
+            hr(),
+            
+            actionButton(
+              "refMatch_run",
+              "Run Matching",
+              icon = icon("play"),
+              class = "btn-primary btn-lg btn-block",
+              style = "margin-bottom: 10px;"
+            ),
+            
+            uiOutput("refMatch_runStatus")
+          ),
+          
+          # Apply/Reset Box
+          box(
+            title = "Apply to Data",
+            width = NULL,
+            status = "warning",
+            solidHeader = TRUE,
+            
+            helpText(
+              icon("exclamation-triangle"),
+              "Apply the normalized citations to your bibliometric data. ",
+              "This will update the CR field in your dataset."
+            ),
+            
+            actionButton(
+              "refMatch_apply",
+              "Apply Normalized Citations",
+              icon = icon("check"),
+              class = "btn-warning btn-block",
+              style = "margin-bottom: 10px;"
+            ),
+            
+            uiOutput("refMatch_applyStatus"),
+            
+            hr(),
+            
+            actionButton(
+              "refMatch_reset",
+              "Reset to Original Data",
+              icon = icon("undo"),
+              class = "btn-danger btn-block"
+            ),
+            
+            helpText(
+              tags$small(
+                icon("info-circle"),
+                "Reset will restore the original CR field from your initial dataset."
+              )
+            )
+          ),
+          
+          # Export Options Box
+          box(
+            title = "Export Results",
+            width = NULL,
+            status = "success",
+            solidHeader = TRUE,
+            
+            helpText("Save the bibliographic collection with normalized citations."),
+            
+            radioButtons(
+              "refMatch_exportFormat",
+              "Export Format:",
+              choices = c(
+                "Excel (.xlsx)" = "xlsx",
+                "R Data (.RData)" = "rdata",
+                "Both formats" = "both"
+              ),
+              selected = "xlsx"
+            ),
+            
+            hr(),
+            
+            textInput(
+              "refMatch_filename",
+              "Filename (without extension):",
+              value = "M_normalized"
+            ),
+            
+            hr(),
+            
+            downloadButton(
+              "refMatch_download",
+              "Download Normalized Data",
+              class = "btn-success btn-block",
+              icon = icon("download")
+            ),
+            
+            br(), br(),
+            
+            helpText(
+              tags$small(
+                icon("info-circle"),
+                "The exported data will contain the bibliometric data with ",
+                "normalized citations in the CR field."
+              )
+            )
+          ),
+          
+          # Advanced Options Box (collapsed by default)
+          box(
+            title = "Advanced Options",
+            width = NULL,
+            status = "info",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            collapsed = TRUE,
+            
+            checkboxInput(
+              "refMatch_keepOriginal",
+              "Keep original CR field as CR_original",
+              value = TRUE
+            ),
+            
+            checkboxInput(
+              "refMatch_addStats",
+              "Add matching statistics columns",
+              value = TRUE
+            ),
+            
+            hr(),
+            
+            downloadButton(
+              "refMatch_downloadReport",
+              "Download Detailed Report",
+              class = "btn-info btn-block",
+              icon = icon("file-alt")
+            )
+          )
+        )
+      )
+    ),
+    
+    
     #### Filters ----
     tabItem(
       "filters",

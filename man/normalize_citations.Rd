@@ -20,6 +20,8 @@ Default is 0.85, which provides a good balance between precision and recall.}
   \item "lv": Levenshtein distance
   \item Other methods supported by \code{\link[stringdist]{stringdistmatrix}}
 }}
+
+\item{min_chars}{Minimum characters for valid citations (default: 20)}
 }
 \value{
 A data frame with the following columns:

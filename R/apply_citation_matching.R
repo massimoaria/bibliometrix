@@ -22,6 +22,7 @@ utils::globalVariables(c("CR_canonical", "CR_id", "CR_normalized", "CR_original"
 #'     \item "lv": Levenshtein distance
 #'     \item Other methods supported by \code{\link[stringdist]{stringdistmatrix}}
 #'   }
+#' @param min_chars Minimum characters for valid citations (default: 20)
 #'
 #' @details
 #' The function implements a five-phase matching algorithm:

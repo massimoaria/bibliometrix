@@ -13,6 +13,9 @@ if (!res) {
 
 #### SERVER ####
 server <- function(input, output,session){
+  # Enable shinyjs
+  shinyjs::useShinyjs()
+  
   session$onSessionEnded(stopApp)
   
   ## suppress warnings
@@ -1159,6 +1162,7 @@ To ensure the functionality of Biblioshiny,
   refMatch_results <- reactiveVal(NULL)
   refMatch_M_original <- reactiveVal(NULL)
   refMatch_applied <- reactiveVal(FALSE)
+  refMatch_selected_for_merge <- reactiveVal(character(0))
   
   # Store original M when first accessing the tab
   observeEvent(values$M, {
@@ -1172,42 +1176,244 @@ To ensure the functionality of Biblioshiny,
     
     req(values$M)
     
-    # Store original if not already stored
     if (is.null(refMatch_M_original())) {
       refMatch_M_original(values$M)
     }
     
-    # Show progress
-    withProgress(message = 'Citation matching in progress...', value = 0, {
+    # Show loading indicator
+    shinyjs::show("refMatch_loadingIndicator")
+    
+    # Collapse the matching options box
+    shinyjs::runjs("$('#refMatch_optionsBox').closest('.box').removeClass('collapsed-box').addClass('collapsed-box');")
+    shinyjs::runjs("$('#refMatch_optionsBox').slideUp();")
+    
+    # Small delay to allow UI update
+    Sys.sleep(0.1)
+    
+    tryCatch({
       
-      incProgress(0.1, detail = "Preparing data...")
+      results <- applyCitationMatching(
+        M = values$M,
+        threshold = input$refMatch_threshold,
+        method = input$refMatch_method
+      )
+      
+      refMatch_results(results)
+      refMatch_selected_for_merge(character(0))
+      
+      # Hide loading indicator
+      shinyjs::hide("refMatch_loadingIndicator")
+      
+      showNotification(
+        "Citation matching completed successfully!",
+        type = "message",
+        duration = 5
+      )
+      
+    }, error = function(e) {
+      shinyjs::hide("refMatch_loadingIndicator")
+      showNotification(
+        paste("Error during matching:", e$message),
+        type = "error",
+        duration = 10
+      )
+    })
+  })
+  
+  # Toggle selection for manual merge
+  observeEvent(input$refMatch_toggleSelection, {
+    req(refMatch_results())
+    req(input$refMatch_topCitations_rows_selected)
+    
+    selected_row <- input$refMatch_topCitations_rows_selected
+    selected_citation <- refMatch_results()$summary$CR_canonical[selected_row]
+    
+    current_selection <- refMatch_selected_for_merge()
+    
+    if (selected_citation %in% current_selection) {
+      # Remove from selection
+      refMatch_selected_for_merge(setdiff(current_selection, selected_citation))
+    } else {
+      # Add to selection
+      refMatch_selected_for_merge(c(current_selection, selected_citation))
+    }
+    
+    # Update table data without re-rendering the entire table
+    proxy <- dataTableProxy('refMatch_topCitations')
+    
+    # Get updated data
+    selected <- refMatch_selected_for_merge()
+    
+    top_table <- refMatch_results()$summary %>%
+      select(Citation = CR_canonical, 
+             `Times Cited` = n, 
+             `Variants Found` = n_variants) %>% 
+      arrange(desc(`Times Cited`)) %>% 
+      filter(`Times Cited`>1) %>%
+      mutate(
+        Selected = ifelse(Citation %in% selected, "TRUE", "FALSE"),
+        .before = 1
+      )
+    
+    # Replace data without losing search/filter state
+    replaceData(proxy, top_table, resetPaging = FALSE, rownames = FALSE)
+  })
+  
+  # Clear manual selection
+  observeEvent(input$refMatch_clearSelection, {
+    refMatch_selected_for_merge(character(0))
+    
+    # Update table data without re-rendering
+    proxy <- dataTableProxy('refMatch_topCitations')
+    
+    req(refMatch_results())
+    
+    top_table <- refMatch_results()$summary %>%
+      select(Citation = CR_canonical, 
+             `Times Cited` = n, 
+             `Variants Found` = n_variants) %>% 
+      arrange(desc(`Times Cited`)) %>% 
+      filter(`Times Cited`>1) %>%
+      mutate(
+        Selected = "FALSE",
+        .before = 1
+      )
+    
+    replaceData(proxy, top_table, resetPaging = FALSE, rownames = FALSE)
+    
+    showNotification("Selection cleared", type = "message", duration = 3)
+  })
+  
+  # Perform manual merge
+  observeEvent(input$refMatch_confirmMerge, {
+    
+    req(refMatch_results())
+    selected <- refMatch_selected_for_merge()
+    
+    if (length(selected) < 2) {
+      showNotification(
+        "Please select at least 2 citations to merge",
+        type = "warning",
+        duration = 5
+      )
+      return()
+    }
+    
+    showModal(
+      modalDialog(
+        title = "Confirm Manual Merge",
+        tags$div(
+          tags$p(tags$b(paste("You are about to merge", length(selected), "citations:"))),
+          tags$ul(
+            lapply(selected, function(cit) {
+              tags$li(substr(cit, 1, 100))
+            })
+          ),
+          tags$hr(),
+          tags$p("Select the canonical form to use:"),
+          radioButtons(
+            "refMatch_canonicalChoice",
+            NULL,
+            choices = setNames(selected, substr(selected, 1, 100)),
+            selected = selected[1]
+          )
+        ),
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton("refMatch_executeMerge", "Merge", class = "btn-primary")
+        ),
+        size = "l"
+      )
+    )
+  })
+  
+  # Execute the merge
+  observeEvent(input$refMatch_executeMerge, {
+    
+    req(refMatch_results())
+    req(input$refMatch_canonicalChoice)
+    
+    selected <- refMatch_selected_for_merge()
+    canonical <- input$refMatch_canonicalChoice
+    
+    withProgress(message = 'Merging citations...', value = 0, {
       
       tryCatch({
         
-        # Run the matching
-        incProgress(0.2, detail = "Normalizing citations...")
-        results <- applyCitationMatching(
-          M = values$M,
-          threshold = input$refMatch_threshold,
-          method = input$refMatch_method
-        )
+        incProgress(0.3, detail = "Updating citation clusters...")
         
-        incProgress(0.8, detail = "Finalizing results...")
+        results <- refMatch_results()
         
-        # Store results
+        all_variants <- results$full_data %>%
+          filter(CR_canonical %in% selected) %>%
+          pull(CR) %>%
+          unique()
+        
+        results$full_data <- results$full_data %>%
+          mutate(CR_canonical = ifelse(CR %in% all_variants, canonical, CR_canonical))
+        
+        incProgress(0.6, detail = "Recalculating statistics...")
+        
+        results$summary <- results$full_data %>%
+          group_by(CR_canonical) %>%
+          summarise(
+            n = n(),
+            n_variants = n_distinct(CR),
+            variants = paste(unique(CR), collapse = " | "),
+            .groups = "drop"
+          ) %>%
+          arrange(desc(n))
+        
+        results$CR_normalized <- results$full_data %>%
+          group_by(SR) %>%
+          summarise(
+            CR = paste(unique(CR_canonical), collapse = ";"),
+            n_references = n_distinct(CR_canonical),
+            .groups = "drop"
+          )
+        
+        incProgress(0.9, detail = "Finalizing...")
+        
+        # Store updated results
         refMatch_results(results)
+        
+        # Clear selection
+        old_selection <- refMatch_selected_for_merge()
+        refMatch_selected_for_merge(character(0))
+        
+        removeModal()
+        
+        # Update table preserving search state
+        proxy <- dataTableProxy('refMatch_topCitations')
+        
+        top_table <- results$summary %>%
+          select(Citation = CR_canonical, 
+                 `Times Cited` = n, 
+                 `Variants Found` = n_variants) %>% 
+          arrange(desc(`Times Cited`)) %>% 
+          head(50) %>%
+          mutate(
+            Selected = "FALSE",
+            .before = 1
+          )
+        
+        replaceData(proxy, top_table, resetPaging = FALSE, rownames = FALSE)
         
         incProgress(1.0, detail = "Complete!")
         
         showNotification(
-          "Citation matching completed successfully!",
+          HTML(paste0(
+            "<b>Manual merge completed!</b><br>",
+            length(old_selection), " citations have been merged into one.<br>",
+            "Statistics have been updated."
+          )),
           type = "message",
-          duration = 5
+          duration = 8
         )
         
       }, error = function(e) {
         showNotification(
-          paste("Error during matching:", e$message),
+          paste("Error during manual merge:", e$message),
           type = "error",
           duration = 10
         )
@@ -1227,12 +1433,10 @@ To ensure the functionality of Biblioshiny,
         
         incProgress(0.3, detail = "Updating CR field...")
         
-        # Store original CR if requested
         if (input$refMatch_keepOriginal && !"CR_original" %in% names(values$M)) {
           values$M$CR_original <- values$M$CR
         }
         
-        # Update CR field with normalized citations
         values$M <- values$M %>%
           mutate(CR_original = CR) %>%
           select(-CR) %>%
@@ -1241,7 +1445,6 @@ To ensure the functionality of Biblioshiny,
             by = "SR"
           )
         
-        # Add statistics if requested
         if (input$refMatch_addStats) {
           stats <- refMatch_results()$CR_normalized %>%
             select(SR, n_references_normalized = n_references)
@@ -1252,7 +1455,6 @@ To ensure the functionality of Biblioshiny,
         
         incProgress(0.8, detail = "Finalizing...")
         
-        # Mark as applied
         refMatch_applied(TRUE)
         
         incProgress(1.0, detail = "Complete!")
@@ -1282,7 +1484,6 @@ To ensure the functionality of Biblioshiny,
     
     req(refMatch_M_original())
     
-    # Confirmation dialog
     showModal(
       modalDialog(
         title = "Confirm Reset",
@@ -1295,19 +1496,18 @@ To ensure the functionality of Biblioshiny,
     )
   })
   
-  # Confirm reset
+  # Confirm reset 
   observeEvent(input$refMatch_confirmReset, {
-    
-    # Restore original M
     values$M <- refMatch_M_original()
-    
-    # Clear applied flag
     refMatch_applied(FALSE)
-    
-    # Clear results (optional - keep for reference)
-    # refMatch_results(NULL)
+    refMatch_results(NULL)
+    refMatch_selected_for_merge(character(0))
     
     removeModal()
+    
+    # Expand the matching options box
+    shinyjs::runjs("$('#refMatch_optionsBox').closest('.box').removeClass('collapsed-box');")
+    shinyjs::runjs("$('#refMatch_optionsBox').slideDown();")
     
     showNotification(
       "Data reset to original state. All normalization has been removed.",
@@ -1316,7 +1516,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
   
-  # Status message after running
+  # Status messages
   output$refMatch_runStatus <- renderUI({
     req(refMatch_results())
     
@@ -1332,7 +1532,6 @@ To ensure the functionality of Biblioshiny,
     )
   })
   
-  # Status message after applying
   output$refMatch_applyStatus <- renderUI({
     
     if (refMatch_applied()) {
@@ -1348,6 +1547,32 @@ To ensure the functionality of Biblioshiny,
       )
     } else {
       NULL
+    }
+  })
+  
+  # Selection status - INLINE version
+  output$refMatch_selectionStatusInline <- renderUI({
+    
+    n_selected <- length(refMatch_selected_for_merge())
+    
+    if (n_selected == 0) {
+      tags$span(
+        style = "color: #999; font-size: 13px;",
+        icon("info-circle"),
+        " No citations selected"
+      )
+    } else if (n_selected == 1) {
+      tags$span(
+        style = "color: #f39c12; font-weight: bold; font-size: 13px;",
+        icon("exclamation-triangle"),
+        sprintf(" %d citation selected (need at least 2)", n_selected)
+      )
+    } else {
+      tags$span(
+        style = "color: #00a65a; font-weight: bold; font-size: 14px;",
+        icon("check-circle"),
+        sprintf(" %d citations selected - ready to merge!", n_selected)
+      )
     }
   })
   
@@ -1395,7 +1620,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
   
-  # Cluster size distribution plot
+  # Plots
   output$refMatch_clusterSizePlot <- renderPlot({
     req(refMatch_results())
     
@@ -1420,7 +1645,6 @@ To ensure the functionality of Biblioshiny,
       )
   })
   
-  # Top variants plot
   output$refMatch_variantsPlot <- renderPlot({
     req(refMatch_results())
     
@@ -1449,28 +1673,50 @@ To ensure the functionality of Biblioshiny,
   output$refMatch_topCitations <- renderDT({
     req(refMatch_results())
     
+    # Don't depend on refMatch_selected_for_merge() to avoid re-rendering
     top_table <- refMatch_results()$summary %>%
       select(Citation = CR_canonical, 
              `Times Cited` = n, 
              `Variants Found` = n_variants) %>% 
       arrange(desc(`Times Cited`)) %>% 
-      head(50)
+      filter(`Times Cited`>1)
+    
+    # Add selection column - initially all FALSE
+    top_table <- top_table %>%
+      mutate(
+        Selected = "FALSE",
+        .before = 1
+      )
     
     datatable(
       top_table,
       options = list(
-        pageLength = 15,
+        pageLength = 10,
         dom = 'frtip',
         scrollX = TRUE,
         searchHighlight = TRUE
       ),
-      selection = 'single',
+      selection = list(mode = 'single', target = 'row'),
       rownames = FALSE,
       class = 'cell-border stripe'
-    )
+    ) %>%
+      formatStyle(
+        0,  # Apply to entire row
+        target = 'row',
+        backgroundColor = styleEqual(c("TRUE", "FALSE"), c('#d4edda', 'white')),
+        valueColumns = 'Selected'
+      ) %>%
+      formatStyle(
+        'Selected',
+        target = 'cell',
+        backgroundColor = styleEqual(c('TRUE', 'FALSE'), c('#28a745', '#ffffff')),
+        color = styleEqual(c('TRUE', 'FALSE'), c('#ffffff', '#000000')),
+        fontWeight = 'bold',
+        textAlign = 'center'
+      )
   })
   
-  # Variants table (shown when a citation is selected)
+  # Variants table
   output$refMatch_variantsTable <- renderDT({
     req(refMatch_results())
     req(input$refMatch_topCitations_rows_selected)
@@ -1497,7 +1743,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
   
-  # Download normalized data
+  # Download handlers
   output$refMatch_download <- downloadHandler(
     filename = function() {
       format <- input$refMatch_exportFormat
@@ -1518,18 +1764,15 @@ To ensure the functionality of Biblioshiny,
       
       withProgress(message = 'Preparing export...', value = 0, {
         
-        # Create normalized M
         incProgress(0.3, detail = "Processing data...")
         
         M_normalized <- values$M
         
-        # If not already applied, create the normalized version
         if (!refMatch_applied()) {
           if (input$refMatch_keepOriginal) {
             M_normalized$CR_original <- M_normalized$CR
           }
           
-          # Replace CR with normalized version
           M_normalized <- M_normalized %>%
             select(-CR) %>%
             left_join(
@@ -1537,7 +1780,6 @@ To ensure the functionality of Biblioshiny,
               by = "SR"
             )
           
-          # Add statistics if requested
           if (input$refMatch_addStats) {
             stats <- refMatch_results()$CR_normalized %>%
               select(SR, n_references_normalized = n_references)
@@ -1552,18 +1794,18 @@ To ensure the functionality of Biblioshiny,
         format <- input$refMatch_exportFormat
         
         if (format == "xlsx") {
-          writexl::write_xlsx(M_normalized, file)
+          openxlsx::write.xlsx(M_normalized, file)
           
         } else if (format == "rdata") {
           M <- M_normalized
           save(M, file = file)
           
-        } else {  # both
+        } else {
           temp_dir <- tempdir()
           xlsx_file <- file.path(temp_dir, paste0(input$refMatch_filename, ".xlsx"))
           rdata_file <- file.path(temp_dir, paste0(input$refMatch_filename, ".RData"))
           
-          writexl::write_xlsx(M_normalized, xlsx_file)
+          openxlsx::write.xlsx(M_normalized, xlsx_file)
           M <- M_normalized
           save(M, file = rdata_file)
           
@@ -1575,7 +1817,6 @@ To ensure the functionality of Biblioshiny,
     }
   )
   
-  # Download detailed report
   output$refMatch_downloadReport <- downloadHandler(
     filename = function() {
       paste0("citation_matching_report_", Sys.Date(), ".xlsx")
@@ -1588,7 +1829,6 @@ To ensure the functionality of Biblioshiny,
         
         incProgress(0.3, detail = "Preparing sheets...")
         
-        # Create list of data frames for different sheets
         report_data <- list(
           "Summary" = refMatch_results()$summary,
           "Full_Data" = refMatch_results()$full_data %>% select(-blocking_key),
@@ -1611,7 +1851,7 @@ To ensure the functionality of Biblioshiny,
         
         incProgress(0.7, detail = "Writing Excel file...")
         
-        writexl::write_xlsx(report_data, file)
+        openxlsx::write.xlsx(report_data, file)
         
         incProgress(1.0, detail = "Complete!")
       })

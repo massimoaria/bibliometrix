@@ -192,6 +192,69 @@ body <- dashboardBody(
     to { opacity: 1; transform: scale(1); }
   }
 "))),
+  ### css for citation matching
+  tags$head(
+    tags$style(HTML("
+    .dataTables_wrapper .dataTable tbody tr.selected {
+      background-color: #d4edda !important;
+    }
+    
+    .dataTables_wrapper .dataTable tbody tr.selected td {
+      font-weight: bold;
+    }
+    
+    #refMatch_topCitations tbody tr:hover {
+      background-color: #e9ecef;
+      cursor: pointer;
+    }
+  "))
+  ),
+  tags$head(
+    tags$style(HTML("
+    /* Manual merge buttons styling */
+    #refMatch_toggleSelection,
+    #refMatch_clearSelection,
+    #refMatch_confirmMerge {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Status inline box */
+    #refMatch_selectionStatusInline {
+      transition: background-color 0.3s ease;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      #refMatch_toggleSelection,
+      #refMatch_clearSelection,
+      #refMatch_confirmMerge {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  "))
+  ),
+  tags$head(
+    tags$style(HTML("
+    /* Loading indicator animation */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    #refMatch_loadingIndicator .box {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    #refMatch_loadingIndicator h4 {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  "))
+  ),
+  
   ### css for author link
   tags$head(
     tags$style(HTML("
@@ -732,6 +795,7 @@ body <- dashboardBody(
         )
       )
     ),
+    
     #### Reference matching ----
     ## ============================================================================
     ## UI - tabItem per Reference Matching
@@ -766,13 +830,82 @@ body <- dashboardBody(
             )
           ),
           
+          # Manual Merge Controls - Above the table
+          box(
+            title = "Manual Merge",
+            width = NULL,
+            status = "info",
+            solidHeader = TRUE,
+            
+            fluidRow(
+              # Buttons column
+              column(
+                width = 7,
+                tags$div(
+                  style = "display: flex; gap: 10px; align-items: center;",
+                  
+                  actionButton(
+                    "refMatch_toggleSelection",
+                    "Toggle Selection",
+                    icon = icon("check-square"),
+                    class = "btn-info",
+                    style = "flex: 1;"
+                  ),
+                  
+                  actionButton(
+                    "refMatch_clearSelection",
+                    "Clear Selection",
+                    icon = icon("times"),
+                    class = "btn-default",
+                    style = "flex: 1;"
+                  ),
+                  
+                  actionButton(
+                    "refMatch_confirmMerge",
+                    "Confirm Merge",
+                    icon = icon("compress"),
+                    class = "btn-primary",
+                    style = "flex: 1;"
+                  )
+                )
+              ),
+              
+              # Status column
+              column(
+                width = 5,
+                tags$div(
+                  id = "refMatch_selectionStatusInline",
+                  style = "padding: 8px 15px; background-color: #f4f4f4; border-radius: 4px; min-height: 42px; display: flex; align-items: center;",
+                  uiOutput("refMatch_selectionStatusInline")
+                )
+              )
+            ),
+            
+            # Help text below buttons
+            tags$div(
+              style = "margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;",
+              helpText(
+                icon("info-circle"),
+                tags$small(
+                  "Click on a row in the table below, then click 'Toggle Selection' to mark it for merging. ",
+                  "Repeat for all citations to merge, then click 'Confirm Merge'."
+                )
+              )
+            )
+          ),
+          
           # Top Citations Box
           box(
             title = "Top Cited References (After Normalization)",
             width = NULL,
-            status = "info",
+            status = "primary",
             solidHeader = TRUE,
             collapsible = TRUE,
+            
+            helpText(
+              icon("mouse-pointer"),
+              "Click on a row to view its citation variants below."
+            ),
             
             DTOutput("refMatch_topCitations")
           ),
@@ -786,7 +919,7 @@ body <- dashboardBody(
             collapsible = TRUE,
             collapsed = TRUE,
             
-            p("Select a citation from the table above to see all its variants."),
+            p("The table below shows all variants of the selected citation that were matched together."),
             DTOutput("refMatch_variantsTable")
           )
         ),
@@ -795,12 +928,14 @@ body <- dashboardBody(
         column(
           width = 3,
           
-          # Matching Options Box
+          # Matching Options Box - with ID for collapse control
           box(
+            id = "refMatch_optionsBox",
             title = "Matching Options",
             width = NULL,
             status = "primary",
             solidHeader = TRUE,
+            collapsible = TRUE,
             
             helpText("Configure the citation matching algorithm parameters."),
             
@@ -809,7 +944,7 @@ body <- dashboardBody(
               "Similarity Threshold:",
               min = 0.70,
               max = 0.98,
-              value = 0.90,
+              value = 0.85,
               step = 0.01
             ),
             
@@ -847,6 +982,38 @@ body <- dashboardBody(
             ),
             
             uiOutput("refMatch_runStatus")
+          ),
+          
+          # Loading Indicator Box
+          shinyjs::hidden(
+            div(
+              id = "refMatch_loadingIndicator",
+              box(
+                title = NULL,
+                width = NULL,
+                status = "info",
+                solidHeader = FALSE,
+                
+                tags$div(
+                  style = "text-align: center; padding: 20px;",
+                  
+                  tags$div(
+                    icon("sync", class = "fa-spin fa-3x"),
+                    style = "color: #3c8dbc; margin-bottom: 15px;"
+                  ),
+                  
+                  tags$h4(
+                    "Matching in progress...",
+                    style = "color: #3c8dbc; margin: 0;"
+                  ),
+                  
+                  tags$p(
+                    "Please wait while citations are being normalized.",
+                    style = "color: #666; font-size: 13px; margin-top: 10px;"
+                  )
+                )
+              )
+            )
           ),
           
           # Apply/Reset Box
@@ -937,7 +1104,7 @@ body <- dashboardBody(
             )
           ),
           
-          # Advanced Options Box (collapsed by default)
+          # Advanced Options Box
           box(
             title = "Advanced Options",
             width = NULL,
@@ -970,7 +1137,6 @@ body <- dashboardBody(
         )
       )
     ),
-    
     
     #### Filters ----
     tabItem(

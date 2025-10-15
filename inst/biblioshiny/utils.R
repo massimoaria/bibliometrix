@@ -180,6 +180,260 @@ countryTable <- function(M) {
 }
 
 # LOAD FUNCTIONS -----
+
+# dataLoadingFunction <- function(input,values){
+#   # input$file1 will be NULL initially. After the user selects
+#   # and uploads a file, it will be a data frame with 'name',
+#   # 'size', 'type', and 'datapath' columns. The 'datapath'
+#   # column will contain the local filenames where the data can
+#   # be found.
+#   if (input$load=="demo"){
+#     data(management, package="bibliometrixData")
+#     values = initial(values)
+#     row.names(management) <- management$SR
+#     management <- management %>% mergeKeywords(force = T)
+#     values$M <- management
+#     values$Morig = management
+#     values$SCdf <- wcTable(management)
+#     values$COdf <- countryTable(management)
+#     values$Histfield = "NA"
+#     values$results = list("NA")
+#     values$rest_sidebar <- TRUE
+#     values$missingdf <- df <- missingData(values$M)$mandatoryTags
+#     values$missTags <- NULL
+#     values$menu <- menuList(values)
+#     values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
+#     #"Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
+#     
+#     #showModal(missingModal(session))
+#     return(values)
+#   }
+#   inFile <- input$file1
+#   
+#   if (!is.null(inFile) & input$load=="import") {
+#     ext <- getFileNameExtension(inFile$datapath)
+#     switch(
+#       input$dbsource,
+#       isi = {
+#         switch(ext,
+#                ###  WoS ZIP Files
+#                zip = {
+#                  D <-  utils::unzip(inFile$datapath)
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(D,
+#                                                 dbsource = input$dbsource,
+#                                                 format = formatDB(D))
+#                                 M <- authorNameFormat(M, input$authorName)
+#                               })
+#                },
+#                ### WoS Txt/Bib Files
+#                {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(inFile$datapath,
+#                                                 dbsource = input$dbsource,
+#                                                 format = formatDB(inFile$datapath))
+#                                 M <- authorNameFormat(M, input$authorName)
+#                               })
+#                })
+#       },
+#       scopus = {
+#         switch(ext,
+#                ###  Scopus ZIP Files
+#                zip = {
+#                  D <- utils::unzip(inFile$datapath)
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(D,
+#                                                 dbsource = input$dbsource,
+#                                                 format = formatDB(D))
+#                                 M <- authorNameFormat(M, input$authorName)
+#                                 if (formatDB(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
+#                               })
+#                },
+#                ### Scopus CSV/Bib Files
+#                csv = {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(inFile$datapath,
+#                                                 dbsource = input$dbsource,
+#                                                 format = "csv")
+#                                 M <- authorNameFormat(M, input$authorName)
+#                                 if (input$authorName=="AF") M <- AuthorNameMerge(M)
+#                               })
+#                },
+#                bib = {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(inFile$datapath,
+#                                                 dbsource = input$dbsource,
+#                                                 format = "bibtex")
+#                                 M <- authorNameFormat(M, input$authorName)
+#                               })
+#                })
+#       },
+#       openalex={
+#         withProgress(message = 'Conversion in progress',
+#                      value = 0, {
+#                        M <- convert2df(inFile$datapath,
+#                                        dbsource = input$dbsource,
+#                                        format = "csv")
+#                      })
+#       },
+#       openalex_api = {
+#         M <- convert2df(inFile$datapath,
+#                         dbsource = input$dbsource,
+#                         format = "api")
+#       },
+#       lens = {
+#         switch(ext,
+#                ###  Lens.org ZIP Files
+#                zip = {
+#                  D <-  utils::unzip(inFile$datapath)
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(D,
+#                                                 dbsource = input$dbsource,
+#                                                 format = formatDB(D))
+#                               })
+#                },
+#                ### Lens.org CSV Files
+#                {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(inFile$datapath,
+#                                                 dbsource = input$dbsource,
+#                                                 format = formatDB(inFile$datapath))
+#                               })
+#                })
+#       },
+#       cochrane = {
+#         switch(ext,
+#                ###  Cochrane ZIP Files
+#                zip = {
+#                  D <- utils::unzip(inFile$datapath)
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(D,
+#                                                 dbsource = input$dbsource,
+#                                                 format = formatDB(D))
+#                               })
+#                },
+#                ### Cochrane txt files
+#                {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(inFile$datapath,
+#                                                 dbsource = input$dbsource,
+#                                                 format = "plaintext")
+#                               })
+#                })
+#       },
+#       pubmed = {
+#         switch(ext,
+#                ###  Pubmed ZIP Files
+#                zip = {
+#                  D <- utils::unzip(inFile$datapath)
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(D,
+#                                                 dbsource = input$dbsource,
+#                                                 format = "pubmed")
+#                               })
+#                },
+#                ### Pubmed txt Files
+#                txt = {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <- convert2df(inFile$datapath,
+#                                                 dbsource = input$dbsource,
+#                                                 format = "pubmed")
+#                               })
+#                })
+#       },
+#       dimensions = {
+#         switch(ext,
+#                ###  Dimensions ZIP Files
+#                zip = {
+#                  D = utils::unzip(inFile$datapath)
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <-
+#                                   convert2df(D,
+#                                              dbsource = input$dbsource,
+#                                              format = formatDB(D))
+#                               })
+#                },
+#                ### Dimensions Xlsx/csv Files
+#                xlsx = {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <-
+#                                   convert2df(
+#                                     inFile$datapath,
+#                                     dbsource = "dimensions",
+#                                     format = "excel"
+#                                   )
+#                               })
+#                },
+#                csv = {
+#                  withProgress(message = 'Conversion in progress',
+#                               value = 0, {
+#                                 M <-
+#                                   convert2df(
+#                                     inFile$datapath,
+#                                     dbsource = "dimensions",
+#                                     format = "csv"
+#                                   )
+#                               })
+#                })
+#         
+#       }
+#     )
+#     values$M <- M
+#   } else if (!is.null(inFile) & input$load=="load") {
+#     ext <- tolower(getFileNameExtension(inFile$datapath))
+#     switch(ext,
+#            ### excel format
+#            xlsx={
+#              M <- readxl::read_excel(inFile$datapath, col_types = "text") %>% as.data.frame()
+#              M$PY <- as.numeric(M$PY)
+#              M$TC <- as.numeric(M$TC)
+#              class(M) <- c("bibliometrixDB", "data.frame")
+#              ### M row names
+#              ### identify duplicated SRs 
+#              SR <- M$SR
+#              tab <- table(SR)
+#              tab2 <- table(tab)
+#              ind <- as.numeric(names(tab2))
+#              ind <- ind[which(ind>1)]
+#              if (length(ind)>0){
+#                for (i in ind){
+#                  indice=names(which(tab==i))
+#                  for (j in indice){
+#                    indice2 <- which(SR==j)
+#                    SR[indice2] <- paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
+#                  }
+#                }
+#              }
+#              M$SR <- SR
+#              row.names(M) <- SR
+#            },
+#            ### RData format
+#            rdata={
+#              M <- smart_load(inFile$datapath) 
+#            },
+#            rda={
+#              M <- smart_load(inFile$datapath) 
+#            },
+#            rds={
+#              M <- readRDS(inFile$datapath) 
+#            })
+#     values$M <- M
+#   } else if (is.null(inFile)) {return(values)}
+# }
+
 formatDB <- function(obj) {
   ext <- sub(".*\\.", "", obj[1])
   switch(
@@ -665,6 +919,389 @@ strSynPreview <- function(string) {
     collapse = ""
   )
   HTML(paste("<pre>", "File Preview: ", str1, "</pre>", sep = "<br/>"))
+}
+
+
+### LIFE CYCLE PLOTLY FUNCTION ----
+
+#' Plot Life Cycle Analysis Results with ggplot2
+#' 
+#' Creates ggplot2 plots from lifeCycle analysis results
+#' 
+#' @param results Output from lifeCycle() function
+#' @param plot_type Character, either "annual" or "cumulative" to specify which plot to generate
+#' 
+#' @return A ggplot2 object
+#' 
+#' @export
+ggplotLifeCycle <- function(results, plot_type = c("annual", "cumulative")) {
+  
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Package 'ggplot2' is required but not installed.")
+  }
+  
+  plot_type <- match.arg(plot_type)
+  
+  # Extract data
+  complete_curve <- results$complete_curve
+  observed_data <- results$data
+  params <- results$parameters_real_years
+  metrics <- results$metrics
+  K <- params$K
+  tm_year <- params$tm_year
+  R2 <- metrics$R_squared
+  
+  if (plot_type == "annual") {
+    # Plot 1: Annual Publications
+    max_annual <- max(complete_curve$annual, na.rm = TRUE)
+    
+    p <- ggplot() +
+      geom_line(data = complete_curve, 
+                aes(x = year, y = annual), 
+                color = "blue", linewidth = 1) +
+      geom_point(data = observed_data, 
+                 aes(x = PY, y = n), 
+                 color = "blue", size = 3) +
+      geom_vline(xintercept = tm_year, 
+                 linetype = "dashed", 
+                 color = "red",
+                 linewidth = 0.7) +
+      annotate("text", 
+               x = tm_year, 
+               y = max_annual * 0.95,
+               label = sprintf("Peak: %.1f", tm_year),
+               hjust = -0.1, 
+               color = "red", 
+               size = 3.5) +
+      annotate("text", 
+               x = max(complete_curve$year), 
+               y = max_annual * 1.05,
+               label = sprintf("R² = %.3f", R2),
+               hjust = 1, 
+               size = 4) +
+      labs(title = "Life Cycle - Annual Publications",
+           x = "Year",
+           y = "Publications (Annual)") +
+      scale_y_continuous(limits = c(0, max_annual * 1.1)) +
+      theme_minimal(base_size = 12) +
+      theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+            panel.grid.minor = element_blank())
+    
+    return(p)
+    
+  } else if (plot_type == "cumulative") {
+    # Plot 2: Cumulative Publications
+    reference_lines <- data.frame(
+      y = c(K * 0.5, K * 0.9, K * 0.99),
+      label = c("50%", "90%", "99%")
+    )
+    
+    p <- ggplot() +
+      geom_line(data = complete_curve, 
+                aes(x = year, y = cumulative), 
+                color = "darkgreen", linewidth = 1) +
+      geom_point(data = observed_data, 
+                 aes(x = PY, y = cumulative), 
+                 color = "darkgreen", size = 3) +
+      geom_hline(data = reference_lines, 
+                 aes(yintercept = y),
+                 linetype = "dotted", 
+                 color = "gray50",
+                 linewidth = 0.5) +
+      geom_text(data = reference_lines, 
+                aes(x = min(complete_curve$year), 
+                    y = y, 
+                    label = label),
+                hjust = 0, 
+                vjust = -0.5, 
+                size = 3, 
+                color = "gray50") +
+      labs(title = "Cumulative Growth Curve",
+           x = "Year",
+           y = "Cumulative Publications") +
+      scale_y_continuous(limits = c(0, K * 1.05)) +
+      theme_minimal(base_size = 12) +
+      theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+            panel.grid.minor = element_blank())
+    
+    return(p)
+  }
+}
+
+#' Plot Life Cycle Analysis with Plotly
+#' 
+#' Creates interactive plotly visualizations from lifeCycle results
+#' for use in biblioshiny
+#' 
+#' @param results Output from lifeCycle() function
+#' @param plot_type Character: "annual" or "cumulative" (default: "annual")
+#' 
+#' @return A plotly object
+#' 
+plotLifeCycle <- function(results, plot_type = c("annual", "cumulative")) {
+  
+  if (!requireNamespace("plotly", quietly = TRUE)) {
+    stop("Package 'plotly' is required. Please install it with: install.packages('plotly')")
+  }
+  
+  plot_type <- match.arg(plot_type)
+  
+  # Extract data
+  df <- results$data
+  complete <- results$complete_curve
+  params <- results$parameters_real_years
+  metrics <- results$metrics
+  
+  # Separate observed and forecast
+  last_obs_year <- max(df$PY)
+  observed <- complete[complete$year <= last_obs_year, ]
+  forecast <- complete[complete$year > last_obs_year, ]
+  
+  if (plot_type == "annual") {
+    # === ANNUAL PUBLICATIONS PLOT ===
+    
+    p <- plotly::plot_ly()
+    
+    # Observed curve (historical fit)
+    p <- p %>%
+      plotly::add_trace(
+        data = observed,
+        x = ~year,
+        y = ~annual,
+        type = 'scatter',
+        mode = 'lines',
+        name = 'Logistic fit',
+        line = list(color = '#1f77b4', width = 2),
+        hovertemplate = paste0(
+          '<b>Year:</b> %{x}<br>',
+          '<b>Annual:</b> %{y:.0f}<br>',
+          '<extra></extra>'
+        )
+      )
+    
+    # Forecast curve
+    if (nrow(forecast) > 0) {
+      p <- p %>%
+        plotly::add_trace(
+          data = forecast,
+          x = ~year,
+          y = ~annual,
+          type = 'scatter',
+          mode = 'lines',
+          name = 'Forecast',
+          line = list(color = '#1f77b4', width = 2, dash = 'dash'),
+          hovertemplate = paste0(
+            '<b>Year:</b> %{x}<br>',
+            '<b>Projected:</b> %{y:.0f}<br>',
+            '<extra></extra>'
+          )
+        )
+    }
+    
+    # Observed data points
+    p <- p %>%
+      plotly::add_trace(
+        data = df,
+        x = ~PY,
+        y = ~n,
+        type = 'scatter',
+        mode = 'markers',
+        name = 'Observed',
+        marker = list(color = '#1f77b4', size = 8),
+        hovertemplate = paste0(
+          '<b>Year:</b> %{x}<br>',
+          '<b>Publications:</b> %{y}<br>',
+          '<extra></extra>'
+        )
+      )
+    
+    # Peak year line
+    p <- p %>%
+      plotly::add_trace(
+        x = c(params$tm_year, params$tm_year),
+        y = c(0, max(complete$annual) * 1.1),
+        type = 'scatter',
+        mode = 'lines',
+        name = paste0('Peak year (', round(params$tm_year, 1), ')'),
+        line = list(color = 'red', width = 1.5, dash = 'dash'),
+        hoverinfo = 'name'
+      )
+    
+    # Layout
+    p <- p %>%
+      plotly::layout(
+        title = list(
+          text = sprintf(
+            "Life Cycle - Annual Publications<br><sup>R² = %.3f | Peak = %.0f publications in %.1f</sup>",
+            metrics$R_squared,
+            params$peak_annual,
+            params$tm_year
+          ),
+          x = 0.5,
+          xanchor = 'center'
+        ),
+        xaxis = list(
+          title = "Year",
+          showgrid = FALSE
+        ),
+        yaxis = list(
+          title = "Publications (Annual)",
+          showgrid = TRUE,
+          gridcolor = '#f0f0f0',
+          rangemode = 'tozero'
+        ),
+        hovermode = 'closest',
+        showlegend = TRUE,
+        legend = list(
+          x = 0.02,
+          y = 0.98,
+          bgcolor = 'rgba(255, 255, 255, 0.8)',
+          bordercolor = '#ddd',
+          borderwidth = 1
+        ),
+        plot_bgcolor = 'white',
+        paper_bgcolor = 'white'
+      )
+    
+  } else {
+    # === CUMULATIVE PUBLICATIONS PLOT ===
+    
+    K <- params$K
+    
+    p <- plotly::plot_ly()
+    
+    # Observed curve
+    p <- p %>%
+      plotly::add_trace(
+        data = observed,
+        x = ~year,
+        y = ~cumulative,
+        type = 'scatter',
+        mode = 'lines',
+        name = 'Logistic fit',
+        line = list(color = '#2ca02c', width = 2),
+        hovertemplate = paste0(
+          '<b>Year:</b> %{x}<br>',
+          '<b>Cumulative:</b> %{y:.0f}<br>',
+          '<b>% of K:</b> %{customdata:.1f}%<br>',
+          '<extra></extra>'
+        ),
+        customdata = ~(cumulative / K * 100)
+      )
+    
+    # Forecast curve
+    if (nrow(forecast) > 0) {
+      p <- p %>%
+        plotly::add_trace(
+          data = forecast,
+          x = ~year,
+          y = ~cumulative,
+          type = 'scatter',
+          mode = 'lines',
+          name = 'Forecast',
+          line = list(color = '#2ca02c', width = 2, dash = 'dash'),
+          hovertemplate = paste0(
+            '<b>Year:</b> %{x}<br>',
+            '<b>Projected:</b> %{y:.0f}<br>',
+            '<b>% of K:</b> %{customdata:.1f}%<br>',
+            '<extra></extra>'
+          ),
+          customdata = ~(cumulative / K * 100)
+        )
+    }
+    
+    # Observed data points
+    p <- p %>%
+      plotly::add_trace(
+        data = df,
+        x = ~PY,
+        y = ~cumulative,
+        type = 'scatter',
+        mode = 'markers',
+        name = 'Observed',
+        marker = list(color = '#2ca02c', size = 8),
+        hovertemplate = paste0(
+          '<b>Year:</b> %{x}<br>',
+          '<b>Cumulative:</b> %{y:.0f}<br>',
+          '<b>% of K:</b> %{customdata:.1f}%<br>',
+          '<extra></extra>'
+        ),
+        customdata = ~(cumulative / K * 100)
+      )
+    
+    # Reference lines (50%, 90%, 99%)
+    ref_levels <- data.frame(
+      level = c(0.5, 0.9, 0.99),
+      label = c("50%", "90%", "99%")
+    )
+    
+    for (i in 1:nrow(ref_levels)) {
+      p <- p %>%
+        plotly::add_trace(
+          x = c(min(complete$year), max(complete$year)),
+          y = c(K * ref_levels$level[i], K * ref_levels$level[i]),
+          type = 'scatter',
+          mode = 'lines',
+          name = ref_levels$label[i],
+          line = list(color = 'gray', width = 1, dash = 'dot'),
+          hovertemplate = paste0(
+            '<b>', ref_levels$label[i], ' of K</b><br>',
+            '<b>Value:</b> ', round(K * ref_levels$level[i]), '<br>',
+            '<extra></extra>'
+          ),
+          showlegend = FALSE
+        )
+      
+      # Add annotations
+      p <- p %>%
+        plotly::add_annotations(
+          x = min(complete$year),
+          y = K * ref_levels$level[i],
+          text = ref_levels$label[i],
+          xanchor = 'left',
+          yanchor = 'middle',
+          showarrow = FALSE,
+          font = list(size = 10, color = 'gray')
+        )
+    }
+    
+    # Layout
+    p <- p %>%
+      plotly::layout(
+        title = list(
+          text = sprintf(
+            "Cumulative Growth Curve<br><sup>Saturation (K) = %.0f publications</sup>",
+            K
+          ),
+          x = 0.5,
+          xanchor = 'center'
+        ),
+        xaxis = list(
+          title = "Year",
+          showgrid = FALSE
+        ),
+        yaxis = list(
+          title = "Cumulative Publications",
+          showgrid = TRUE,
+          gridcolor = '#f0f0f0',
+          rangemode = 'tozero',
+          range = c(0, K * 1.05)
+        ),
+        hovermode = 'closest',
+        showlegend = TRUE,
+        legend = list(
+          x = 0.02,
+          y = 0.98,
+          bgcolor = 'rgba(255, 255, 255, 0.8)',
+          bordercolor = '#ddd',
+          borderwidth = 1
+        ),
+        plot_bgcolor = 'white',
+        paper_bgcolor = 'white'
+      )
+  }
+  
+  return(p)
 }
 
 ### AUTHOR BIO SKETCH ----
@@ -1825,6 +2462,20 @@ initial <- function(values) {
   }
 
   return(values)
+}
+
+resetAnalysis <- function(){
+  # reset menus
+  output$lifeCycleSummaryUIid <- renderUI({
+    div()
+  })
+  output$DLCPlotYear <- renderUI({
+    div()
+  })
+  
+  output$DLCPlotCum <- renderUI({
+    div()
+  })
 }
 
 ### TALL Export functions ----
@@ -4755,6 +5406,7 @@ dfLabel <- function() {
     "MainInfo",
     "AnnualSciProd",
     "AnnualCitPerYear",
+    "LifeCycle",
     "ThreeFieldsPlot",
     "MostRelSources",
     "MostLocCitSources",
@@ -4803,6 +5455,7 @@ dfLabel <- function() {
     "Main Information",
     "Annual Scientific Production",
     "Annual Citation Per Year",
+    "Life Cycle of Publications",
     "Three-Field Plot",
     "Most Relevant Sources",
     "Most Local Cited Sources",
@@ -5165,6 +5818,11 @@ menuList <- function(values) {
           icon = icon("chevron-right", lib = "glyphicon")
         )
       },
+      menuSubItem(
+        "Life Cycle",
+        tabName = "lifeCycle",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
       menuSubItem(
         "Three-Field Plot",
         tabName = "threeFieldPlot",

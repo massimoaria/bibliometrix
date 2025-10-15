@@ -2,6 +2,7 @@ source("libraries.R", local = TRUE)
 source("helpContent.R", local = TRUE)
 source("utils.R", local = TRUE)
 source("contentAnalysisUI.R", local = TRUE)
+source("cssTags.R", local = TRUE)
 
 suppressMessages(libraries())
 
@@ -179,139 +180,8 @@ data("customTheme", envir = environment())
 ### Body Content ----
 body <- dashboardBody(
   customTheme,
-  ## workaround to solve visualization issues in Data Table
-  tags$head(tags$style(HTML(".has-feedback .form-control { padding-right: 0px;}"))),
-  ### animation for filter results box
-  tags$head(tags$style(HTML("
-  .fade-in {
-    animation: fadeInAnim 0.8s ease-in-out;
-  }
-
-  @keyframes fadeInAnim {
-    from { opacity: 0; transform: scale(0.98); }
-    to { opacity: 1; transform: scale(1); }
-  }
-"))),
-  ### css for citation matching
-  tags$head(
-    tags$style(HTML("
-    .dataTables_wrapper .dataTable tbody tr.selected {
-      background-color: #d4edda !important;
-    }
-    
-    .dataTables_wrapper .dataTable tbody tr.selected td {
-      font-weight: bold;
-    }
-    
-    #refMatch_topCitations tbody tr:hover {
-      background-color: #e9ecef;
-      cursor: pointer;
-    }
-  "))
-  ),
-  tags$head(
-    tags$style(HTML("
-    /* Manual merge buttons styling */
-    #refMatch_toggleSelection,
-    #refMatch_clearSelection,
-    #refMatch_confirmMerge {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    /* Status inline box */
-    #refMatch_selectionStatusInline {
-      transition: background-color 0.3s ease;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 1200px) {
-      #refMatch_toggleSelection,
-      #refMatch_clearSelection,
-      #refMatch_confirmMerge {
-        font-size: 12px;
-        padding: 6px 10px;
-      }
-    }
-  "))
-  ),
-  tags$head(
-    tags$style(HTML("
-    /* Loading indicator animation */
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-    
-    #refMatch_loadingIndicator .box {
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    #refMatch_loadingIndicator h4 {
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-  "))
-  ),
+  cssTags(), # function containing all the css tags
   
-  ### css for author link
-  tags$head(
-    tags$style(HTML("
-      .author-link {
-        color: #337ab7;
-        text-decoration: underline;
-        cursor: pointer;
-      }
-      .author-link:hover {
-        color: #23527c;
-        font-weight: bold;
-      }"
-    ))
-  ),
-  ## script to open more times the same modal ####
-  tags$script("
-    Shiny.addCustomMessageHandler('button_id', function(value) {
-    Shiny.setInputValue('button_id', value);
-    });
-  "),
-  tags$script("
-    Shiny.addCustomMessageHandler('selected_author', function(value) {
-    Shiny.setInputValue('selected_author', value);
-    });
-  "),
-  ## script to get the dimensions of the page ####
-  ###
-  tags$head(
-    tags$style(".fa-cloud-arrow-down {font-size: 20px}"),
-    tags$style(".fa-download {font-size: 20px}"),
-    tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"),
-    tags$style(".fa-envelope-open {font-size: 20px}"),
-    tags$style(".fa-cube {font-size: 20px}"),
-    tags$style(".fa-question {font-size: 20px}"),
-    tags$style(".fa-comment-dollar {font-size: 20px}"),
-    tags$style(".fa-bars {font-size: 20px}"),
-    tags$style(".sidebar-toggle {font-size: 15px}"),
-    tags$script(
-      'var dimension = [0, 0];
-              $(document).on("shiny:connected", function(e) {
-                  dimension[0] = window.innerWidth;
-                  dimension[1] = window.innerHeight;
-                  Shiny.onInputChange("dimension", dimension);
-              });
-              $(window).resize(function(e) {
-                  dimension[0] = window.innerWidth;
-                  dimension[1] = window.innerHeight;
-                  Shiny.onInputChange("dimension", dimension);
-              });
-              $(document).ready(function(){
-                  $("a[data-toggle=tab]").on("show.bs.tab", function(e){
-                    Shiny.setInputValue("activeTab", $(this).attr("data-value"));
-                   });
-            });
-      '
-    )
-  ),
   tabItems(
     #### Homepage ----
     ##### home ----
@@ -1399,6 +1269,7 @@ body <- dashboardBody(
         )
       )
     ),
+    
     ##### average citation per year ----
     tabItem(
       "averageCitPerYear",
@@ -1444,6 +1315,90 @@ body <- dashboardBody(
         )
       )
     ),
+    
+    ##### Life Cycle ----
+    
+    tabItem(
+      "lifeCycle",
+      fluidPage(
+        fluidRow(
+          column(
+            9,
+            h3(strong("Life Cycle of Scientific Production"), align = "center")
+          ),
+          div(
+            style = style_bttn,
+            title = t_run,
+            column(
+              1,
+              do.call("actionBttn", c(run_bttn, list(
+                inputId = "applyDLC"
+              )))
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_report,
+            column(
+              1,
+              do.call("actionBttn", c(report_bttn, list(
+                inputId = "reportDLC"
+              )))
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_export,
+            column(
+              1,
+              do.call("downloadBttn", c(export_bttn, list(
+                outputId = "DLCplot.save"
+              )))
+            )
+          )
+        ),
+        fluidRow(
+          tabsetPanel(
+            id = "tabsDLC",
+            type = "tabs",
+            # === TAB 1: SUMMARY ===
+            tabPanel(
+              title = tagList(shiny::icon("table"), " Summary"),
+              value = "summary",
+              br(),
+              uiOutput("lifeCycleSummaryUIid"),
+            ),
+            
+            # === TAB 2: INTERACTIVE PLOTS ===
+            tabPanel(
+              "Plot",
+              fluidRow(
+                column(6,
+                       shinycssloaders::withSpinner(plotlyOutput(outputId = "DLCPlotYear", height = "75vh"))
+                       ),
+                column(6,
+                       shinycssloaders::withSpinner(plotlyOutput(outputId = "DLCPlotCum", height = "75vh"))
+                )
+              )
+            ),
+            tabPanel(
+              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(htmlOutput("DLCGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
+                                                 image = "ai_small2.gif", color = "#466fc4")
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+    
     ##### three fields plot ----
     tabItem(
       "threeFieldPlot",

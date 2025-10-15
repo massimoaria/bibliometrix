@@ -345,6 +345,31 @@ biblioAiPrompts <- function(values, activeTab){
                             "and discuss what they reveal about the scope, productivity, and impact of the collection. ",
                             "This is the list of statistics: ",merge_df_to_string(values$TABvb))
          },
+         "lifeCycle"={
+           prompt <- paste0("Analyze the provided 'life cycle' plots showing the bibliographic collection's scientific production fitted to a logistic growth model. ",
+                            "You have been provided with: (1) an ANNUAL plot showing yearly publication counts, (2) a CUMULATIVE plot showing the total publications over time, ",
+                            "and (3) the logistic model parameters and goodness-of-fit metrics.\n\n",
+                            
+                            "Please provide a comprehensive interpretation covering:\n",
+                            "1. GROWTH PATTERN: Describe the overall growth trajectory (exponential, linear, or saturation phase). ",
+                            "Identify the inflection point where growth rate changes.\n",
+                            "2. MODEL FIT: Evaluate how well the logistic curve fits the observed data based on the provided metrics (R², RMSE, etc.). ",
+                            "Comment on any systematic deviations.\n",
+                            "3. KEY PARAMETERS: Interpret the logistic model parameters:\n",
+                            "   - K (carrying capacity): the estimated maximum cumulative production\n",
+                            "   - r (growth rate): the intrinsic rate of increase\n",
+                            "   - t₀ (inflection point): when maximum growth rate occurred\n",
+                            "4. TRENDS AND PHASES: Identify distinct phases in the publication timeline:\n",
+                            "   - Emergence phase (slow initial growth)\n",
+                            "   - Expansion phase (rapid growth)\n",
+                            "   - Maturity/saturation phase (if present)\n",
+                            "5. SCIENTIFIC IMPLICATIONS: Discuss what these patterns suggest about the research field's maturity, ",
+                            "potential factors influencing growth (e.g., funding, technological advances, paradigm shifts), ",
+                            "and future trajectories. Is the field still growing or approaching saturation?\n\n",
+                            
+                            "Provide your analysis in a structured format with clear sections.",
+                            "This a the list of statistics: Parameters ",merge_df_to_string(values$DLC$parameters), ", parameters_real_years ",merge_df_to_string(values$DLC$parameters_real_years), ", and goodness_of_fit ",merge_df_to_string(values$DLC$metrics))
+         },
          "threeFieldPlot"={
            prompt <- paste0("Provide an interpretation of this Three-Field Plot. The central field represents the target metadata,",
                             " while the left and the right fields are the destination metadata. The plot visualizes the connections",
@@ -425,14 +450,9 @@ biblioAiPrompts <- function(values, activeTab){
          "historiograph"={
            titles <- hist2docs(values$histPlotVis$VIS$x$nodes) %>% merge_df_to_string()
            prompt <- paste0("Interpret this historiograph, a temporal citation network built by mapping direct citation links among documents. ",
-                            #" The y-axis represents publication years, and directed edges indicate citations between articles. ",
                          "Highlight the main citation paths, pivotal works, and any notable temporal trends in knowledge development, looking also to the article titles and their topics.",
                          " Focus on the temporal evolution of each cluster",
                             "Here there is the list of each paper (node) and its title: ",titles)
-           # prompt <- paste0("This historiograph represents a temporal citation network, constructed by mapping direct citation links among documents. Please identify and describe the main clusters",
-           #                  " as research streams evolving over time. For each cluster, provide a label based on the titles of its pivotal documents. Explain the temporal trajectory of each stream,",
-           #                  " highlighting foundational or highly cited works, and discuss any thematic overlaps or transitions between clusters.",
-           #                   "Here there is the list of the first 20 most cited papers and its title: ",titles)
          },
          "collabNetwork"={
            prompt <- paste0("Provide an interpretation of this 'collaboration' network", 
@@ -467,6 +487,13 @@ geminiGenerate <- function(values, activeTab, gemini_additional, gemini_model_pa
          "mainInfo"={
            req(values$TABvb)
            values$MainInfoGemini <- geminiPromptImage(obj=NULL, type="text",
+                                                 prompt=prompt,
+                                                 key=values$geminiAPI, desc=desc, values=values)
+         },
+         "lifeCycle"={
+           req(values$DLC)
+           files <- DLC2Gemini(values$DLCplotYear,values$DLCplotCum)
+           values$DLCGemini <- geminiPromptImage(obj=files, type="multi",
                                                  prompt=prompt,
                                                  key=values$geminiAPI, desc=desc, values=values)
          },
@@ -586,6 +613,9 @@ geminiParameterPrompt <- function(values, activeTab, input){
          "mainInfo"={
            req(values$TABvb)
          },
+         "lifeCycle"={
+           req(values$DLC)
+         },
          "threeFieldPlot"={
            req(values$TFP)
            txt <- paste0(txt, " This graph was generated with the following parameters: target field '",
@@ -700,6 +730,10 @@ geminiWaitingMessage <- function(values, activeTab){
            req(values$TABvb)
            values$MainInfoGemini <- messageTxt
          },
+         "lifeCycle"={
+           req(values$DLC)
+           values$DLCGemini <- messageTxt
+         },
          "threeFieldPlot"={
            req(values$TFP)
            values$TFPGemini <- messageTxt
@@ -765,6 +799,9 @@ geminiSave <- function(values, activeTab){
   switch(activeTab,
          "mainInfo"={
            gemini <- values$MainInfoGemini
+         },
+         "lifeCycle"={
+           gemini <- values$DLCGemini
          },
          "threeFieldPlot"={
            gemini <- values$TFPGemini
@@ -1014,6 +1051,19 @@ plot2pngGemini <- function(p, filename, zoom = 2, type = "vis") {
   )
   
   biblioShot(html_name, zoom = zoom, file = filename)
+}
+
+## save all plots of the life cycle analysis
+DLC2Gemini <- function(DLCplotYear, DLCplotCum){
+  plots <- c("annual", "cumulative")
+  files <- unlist(lapply(plots, function(x){
+    paste0(tempdir(),"/plotDLC_",x,".png")
+  }))
+  
+  plot2pngGemini(DLCplotYear, filename=files[1], type="plotly")
+  plot2pngGemini(DLCplotCum, filename=files[2], type="plotly")
+  
+  return(files)
 }
 
 ## save all plots of the thematic evolution analysis

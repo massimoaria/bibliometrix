@@ -125,7 +125,7 @@ normalize_citations <- function(CR_vector, threshold = 0.90, method = "jw", min_
       str_replace_all("PP\\.?\\s*\\d+\\s*[-\u2013\u2014]\\s*\\d+", "") %>%  # Remove page numbers
       str_replace_all("P\\.?\\s*\\d+\\s*[-\u2013\u2014]\\s*\\d+", "") %>%
       # remove '"' symbols
-      str_replace_all("“", " ") %>%
+      str_replace_all("<e2><80><9c>", " ") %>%
       str_replace_all('"'," ") %>% 
       # Normalize common journal abbreviations
       # str_replace_all("J\\.?\\s+CLEAN\\.?\\s+PROD\\.?", "JOURNAL OF CLEANER PRODUCTION") %>%
@@ -168,7 +168,7 @@ normalize_citations <- function(CR_vector, threshold = 0.90, method = "jw", min_
     if (format == "scopus") {
       # Scopus: AUTHOR, TITLE (YEAR) JOURNAL, VOLUME, PAGES
       # Extract title (between first comma and year)
-      title <- str_extract(str_replace_all('"|“'," ",x), "(?<=,\\s)(.+?)(?=\\s*\\(\\d{4}\\))")
+      title <- str_extract(str_replace_all('"|<e2><80><9c>'," ",x), "(?<=,\\s)(.+?)(?=\\s*\\(\\d{4}\\))")
       
       # Extract journal (after year, before volume or pages)
       journal <- str_extract(x, "(?<=\\d{4}\\)\\s)([A-Z][A-Z\\s&\\.-]+?)(?=,\\s*\\d+|,\\s*PP)")

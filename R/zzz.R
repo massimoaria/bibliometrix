@@ -276,6 +276,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom stringr str_replace_all str_remove_all
 #' @importFrom stringr str_trim
 #' @importFrom stringr str_split 
+#' @importFrom graphics axis points
 #' @importFrom graphics barplot
 #' @importFrom graphics legend
 #' @importFrom graphics lines

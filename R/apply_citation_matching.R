@@ -1,7 +1,10 @@
 utils::globalVariables(c("CR_canonical", "CR_id", "CR_normalized", "CR_original", 
                          "blocking_key", "cluster_id", "completeness_score", 
                          "first_author", "journal", "merge_key", "n_cluster", 
-                         "pages", "temp_cluster", "volume", "doi", "n_exact"))
+                         "pages", "temp_cluster", "volume", "doi", "n_exact",
+                         "ABBREVIATION", "ABBR_CLEAN", "LANGUAGES", "NO_ABBR", "WORD", "WORD_CLEAN",
+                         "cur_group_id", "journal_iso4", "journal_original", "len", "page_start", "str_starts",
+                         "temp_citation", "wos_key"))
 
 #' Normalize and match bibliographic citations
 #'
@@ -1454,56 +1457,55 @@ remove_diacritics <- function(x) {
     NULL
   })
   
-  # If iconv fails or returns NA, use manual replacement
   if (is.null(result) || is.na(result)) {
     result <- x %>%
       # German umlauts
-      str_replace_all("Ä", "AE") %>%
-      str_replace_all("Ö", "OE") %>%
-      str_replace_all("Ü", "UE") %>%
-      str_replace_all("ä", "ae") %>%
-      str_replace_all("ö", "oe") %>%
-      str_replace_all("ü", "ue") %>%
-      str_replace_all("ß", "ss") %>%
+      str_replace_all("\u00C4", "AE") %>%  # Ä
+      str_replace_all("\u00D6", "OE") %>%  # Ö
+      str_replace_all("\u00DC", "UE") %>%  # Ü
+      str_replace_all("\u00E4", "ae") %>%  # ä
+      str_replace_all("\u00F6", "oe") %>%  # ö
+      str_replace_all("\u00FC", "ue") %>%  # ü
+      str_replace_all("\u00DF", "ss") %>%  # ß
       # French/Spanish accents - vowels with accents
-      str_replace_all("À|Á|Â|Ã|Å", "A") %>%
-      str_replace_all("È|É|Ê|Ë", "E") %>%
-      str_replace_all("Ì|Í|Î|Ï", "I") %>%
-      str_replace_all("Ò|Ó|Ô|Õ", "O") %>%
-      str_replace_all("Ù|Ú|Û", "U") %>%
-      str_replace_all("Ý", "Y") %>%
-      str_replace_all("à|á|â|ã|å", "a") %>%
-      str_replace_all("è|é|ê|ë", "e") %>%
-      str_replace_all("ì|í|î|ï", "i") %>%
-      str_replace_all("ò|ó|ô|õ", "o") %>%
-      str_replace_all("ù|ú|û", "u") %>%
-      str_replace_all("ý|ÿ", "y") %>%
+      str_replace_all("\u00C0|\u00C1|\u00C2|\u00C3|\u00C5", "A") %>%  # À|Á|Â|Ã|Å
+      str_replace_all("\u00C8|\u00C9|\u00CA|\u00CB", "E") %>%  # È|É|Ê|Ë
+      str_replace_all("\u00CC|\u00CD|\u00CE|\u00CF", "I") %>%  # Ì|Í|Î|Ï
+      str_replace_all("\u00D2|\u00D3|\u00D4|\u00D5", "O") %>%  # Ò|Ó|Ô|Õ
+      str_replace_all("\u00D9|\u00DA|\u00DB", "U") %>%  # Ù|Ú|Û
+      str_replace_all("\u00DD", "Y") %>%  # Ý
+      str_replace_all("\u00E0|\u00E1|\u00E2|\u00E3|\u00E5", "a") %>%  # à|á|â|ã|å
+      str_replace_all("\u00E8|\u00E9|\u00EA|\u00EB", "e") %>%  # è|é|ê|ë
+      str_replace_all("\u00EC|\u00ED|\u00EE|\u00EF", "i") %>%  # ì|í|î|ï
+      str_replace_all("\u00F2|\u00F3|\u00F4|\u00F5", "o") %>%  # ò|ó|ô|õ
+      str_replace_all("\u00F9|\u00FA|\u00FB", "u") %>%  # ù|ú|û
+      str_replace_all("\u00FD|\u00FF", "y") %>%  # ý|ÿ
       # Spanish
-      str_replace_all("Ñ", "N") %>%
-      str_replace_all("ñ", "n") %>%
+      str_replace_all("\u00D1", "N") %>%  # Ñ
+      str_replace_all("\u00F1", "n") %>%  # ñ
       # Czech, Polish, etc.
-      str_replace_all("Č|Ć|Ç", "C") %>%
-      str_replace_all("č|ć|ç", "c") %>%
-      str_replace_all("Š", "S") %>%
-      str_replace_all("š", "s") %>%
-      str_replace_all("Ž", "Z") %>%
-      str_replace_all("ž", "z") %>%
-      str_replace_all("Ł", "L") %>%
-      str_replace_all("ł", "l") %>%
+      str_replace_all("\u010C|\u0106|\u00C7", "C") %>%  # Č|Ć|Ç
+      str_replace_all("\u010D|\u0107|\u00E7", "c") %>%  # č|ć|ç
+      str_replace_all("\u0160", "S") %>%  # Š
+      str_replace_all("\u0161", "s") %>%  # š
+      str_replace_all("\u017D", "Z") %>%  # Ž
+      str_replace_all("\u017E", "z") %>%  # ž
+      str_replace_all("\u0141", "L") %>%  # Ł
+      str_replace_all("\u0142", "l") %>%  # ł
       # Scandinavian
-      str_replace_all("Ø", "O") %>%
-      str_replace_all("ø", "o") %>%
-      str_replace_all("Æ", "AE") %>%
-      str_replace_all("æ", "ae") %>%
-      str_replace_all("Å", "A") %>%
-      str_replace_all("å", "a") %>%
+      str_replace_all("\u00D8", "O") %>%  # Ø
+      str_replace_all("\u00F8", "o") %>%  # ø
+      str_replace_all("\u00C6", "AE") %>%  # Æ
+      str_replace_all("\u00E6", "ae") %>%  # æ
+      str_replace_all("\u00C5", "A") %>%  # Å (già coperto sopra)
+      str_replace_all("\u00E5", "a") %>%  # å (già coperto sopra)
       # Turkish
-      str_replace_all("İ|Ī", "I") %>%
-      str_replace_all("ı|ī", "i") %>%
-      str_replace_all("Ş", "S") %>%
-      str_replace_all("ş", "s") %>%
-      str_replace_all("Ğ", "G") %>%
-      str_replace_all("ğ", "g")
+      str_replace_all("\u0130|\u012A", "I") %>%  # İ|Ī
+      str_replace_all("\u0131|\u012B", "i") %>%  # ı|ī
+      str_replace_all("\u015E", "S") %>%  # Ş
+      str_replace_all("\u015F", "s") %>%  # ş
+      str_replace_all("\u011E", "G") %>%  # Ğ
+      str_replace_all("\u011F", "g")      # ğ
   }
   
   return(result)

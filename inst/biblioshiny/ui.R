@@ -680,7 +680,7 @@ body <- dashboardBody(
                  br(),
                  fluidRow(
                    column(12,
-                          #h3(strong("Reference Matching")),
+                          h3(strong("Reference Matching")),
                           helpText("This tool helps identify and merge duplicate citations in your bibliographic dataset. ",
                                    "It uses string similarity algorithms to find variants of the same reference, allowing you to clean and standardize your data for more accurate analysis."
                           ),
@@ -1246,9 +1246,21 @@ body <- dashboardBody(
                   )
                 )
               )
+            ),
+            tabPanel("Info & References", icon = icon("info-circle"),
+                     fluidPage(
+                       fluidRow(
+                         column(1),
+                         column(
+                           10,
+                           br(),
+                           HTML(helpContent()$mainInformation)
+                         ),
+                         column(1)
+                       )
+                     )
             )
           )
-          #) # end div
         )
       )
     ),
@@ -1422,6 +1434,19 @@ body <- dashboardBody(
                   )
                 )
               )
+            ),
+            tabPanel("Info & References", icon = icon("info-circle"),
+                     fluidPage(
+                       fluidRow(
+                         column(1),
+                         column(
+                           10,
+                           br(),
+                           HTML(helpContent()$lifeCycle)
+                         ),
+                         column(1)
+                       )
+                     )
             )
           )
         )

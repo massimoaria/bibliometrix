@@ -32,9 +32,11 @@ A data frame with the following columns:
   \item \code{n_cluster}: Number of citations in the cluster
   \item \code{first_author}: First author surname
   \item \code{year}: Publication year
-  \item \code{journal}: Normalized journal name
+  \item \code{journal_iso4}: Journal name normalized to ISO4 abbreviated form
+  \item \code{journal_original}: Original journal name as extracted from citation
   \item \code{volume}: Volume number
-  \item \code{blocking_key}: Internal key used for blocking (author_year)
+  \item \code{doi}: Digital Object Identifier (when available)
+  \item \code{blocking_key}: Internal key used for blocking (author_year_journal)
 }
 }
 \description{
@@ -55,6 +57,16 @@ The function implements a five-phase matching algorithm:
   \item Expands common journal abbreviations (e.g., "J. CLEAN. PROD." -> "JOURNAL OF CLEANER PRODUCTION")
   \item Extracts key features: first author, year, journal, volume, pages
 }
+
+\strong{Phase 1.5: Journal Normalization}
+The function uses the LTWA (List of Title Word Abbreviations) database from 
+ISO 4 standards to normalize journal names. This ensures that abbreviated 
+forms (e.g., "J. Clean. Prod.") and full forms (e.g., "Journal of Cleaner 
+Production") are recognized as the same journal and matched together.
+
+The LTWA database is included in the bibliometrix package. If not found, 
+the function attempts to download it from ISSN.org. Journal normalization 
+can be disabled by ensuring the LTWA database is not available.
 
 \strong{Phase 2: Blocking}
 Citations are grouped into blocks by first author and year. This dramatically 

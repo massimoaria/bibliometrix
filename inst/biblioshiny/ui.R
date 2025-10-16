@@ -56,6 +56,7 @@ info <- helpContent()$info
 pubs <- helpContent()$publications
 filters <- helpContent()$filters
 authorProfile <- helpContent()$authorProfile
+referenceMatching_help<- helpContent()$referenceMatching
 
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(
@@ -673,6 +674,19 @@ body <- dashboardBody(
     
     tabItem(
       tabName = "refMatching",
+      tabsetPanel(
+        type = "tabs",
+        tabPanel("Reference Matching", icon = icon("link"),
+                 br(),
+                 fluidRow(
+                   column(12,
+                          #h3(strong("Reference Matching")),
+                          helpText("This tool helps identify and merge duplicate citations in your bibliographic dataset. ",
+                                   "It uses string similarity algorithms to find variants of the same reference, allowing you to clean and standardize your data for more accurate analysis."
+                          ),
+                          hr()
+                   )
+                 ),
       fluidRow(
         # LEFT COLUMN - Results
         column(
@@ -1004,6 +1018,21 @@ body <- dashboardBody(
               icon = icon("file-alt")
             )
           )
+        )
+      )
+        ),
+        tabPanel("Info & References", icon = icon("info-circle"),
+                 fluidPage(
+                   fluidRow(
+                     column(1),
+                     column(
+                       10,
+                       br(),
+                       HTML(referenceMatching_help)
+                     ),
+                     column(1)
+                   )
+                 )
         )
       )
     ),

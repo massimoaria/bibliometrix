@@ -1,4 +1,5 @@
 helpContent <- function(){
+  ## biblioAI ----
   biblioAI <- 
     "<body>
     <div class='container'>
@@ -42,6 +43,7 @@ helpContent <- function(){
     </div>
     </body>"
   
+  ## Info ----
   info <- 
     "<body>
     <div class='container'>
@@ -71,6 +73,7 @@ helpContent <- function(){
     </div>
     </body>"
   
+  ## Team Publications ----
   publications <-
     "<body>
     <div class='container'>
@@ -108,48 +111,332 @@ helpContent <- function(){
     </div>
     </body>"
   
+  ## Filters ----
   filters <- 
     "<body>
-    <div class='container'>
-    <h3>🔍 Filters Information</h3>
-    
-    <p>This section allows users to refine the document collection by applying multiple filters based on metadata fields available in the dataset. Below is a description of each filter and its usage:</p>
-    
-    <h4>1. General</h4>
-    <ul>
-      <li><strong>Document Type:</strong> Filters documents by type (e.g., Article, Book Chapter, Proceedings Paper). The selected document types are shown automatically; to remove one, simply click on it.</li>
-      <li><strong>Language:</strong> Filters documents based on the language of publication.</li>
-      <li><strong>Publication Year:</strong> Select a range of years using the slider to filter documents published within a specific time interval.</li>
-      <li><strong>Subject Category:</strong> If available, this filter enables selection by subject category (e.g., Business, Education, Engineering). This option appears only if the source database (e.g., Scopus) provides this metadata. If the information is not available, the filter is automatically hidden.</li>
-    </ul>
-    
-    <h4>2. Journal (J)</h4>
-    <ul>
-      <li><strong>Upload a List of Journals:</strong> Allows users to upload a custom list of journal titles to restrict the collection accordingly. Accepted file formats: <code>.csv</code>, <code>.txt</code>, and <code>.xlsx</code>. Journal titles must be listed in the first column of the file.</li>
-      <li><strong>Upload a Journal Ranking List:</strong> Enables users to filter journals based on a predefined ranking system (e.g., Q1–Q4). The uploaded file must be in <code>.csv</code> or <code>.xlsx</code> format and include <strong>two columns with headers</strong>: the first for the journal titles, and the second for the corresponding ranking category.</li>
-      <li><strong>Source by Bradford Law Zones:</strong> Enables filtering of journals based on Bradford's Law.</li>
-    </ul>
-    
-    <h4>3. Author's Country (AU)</h4>
-    <ul>
-      <li><strong>Region and Country:</strong> Enables filtering by geographic region or specific country of the authors. Regions can be quickly selected using predefined buttons (e.g., Europe, Asia), while countries can be selected individually from the list.</li>
-    </ul>
-    
-    <h4>4. Documents (DOC)</h4>
-    <ul>
-      <li><strong>Total Citations:</strong> Filters documents based on the total number of citations received.</li>
-      <li><strong>Total Citations per Year:</strong> Filters documents by the average number of citations received per year since publication.</li>
-    </ul>
-    
-    <h4>📝 Additional Notes</h4>
-    <ul>
-      <li>Filters with dual-column boxes (e.g., Subject Category, Country) are automatically pre-populated with values representing the structure of the current collection. These selections can be modified by clicking on any item in the right-hand column to remove it.</li>
-      <li>Use the <strong>Apply</strong> button to activate the selected filters and update the collection.</li>
-      <li>Use the <strong>Reset</strong> button to clear all filters and restore the original dataset.</li>
-    </ul>
-    </div>
-    </body>"
+  <div class='container'>
+  <h3>🔍 Filters: Refining Your Bibliometric Collection</h3>
   
+  <p>The <strong>Filters</strong> module provides a comprehensive set of tools to refine and subset your bibliographic collection based on multiple metadata criteria. By applying filters, you can focus your analysis on specific document types, time periods, geographic regions, journals, or citation thresholds—enabling more targeted and meaningful bibliometric insights.</p>
+  
+  <p>Filters are organized into <strong>four thematic panels</strong>, each addressing different aspects of bibliographic metadata. At the top of the page, a <strong>real-time summary</strong> displays how many documents, sources, and authors remain after applying your filter selections.</p>
+  
+  <br>
+  
+  <h4>📊 Real-Time Filter Summary</h4>
+  <p>Located at the top of the Filters page, this summary updates dynamically as you adjust filter settings:</p>
+  <ul>
+    <li><strong>Documents:</strong> Shows the number of documents currently selected (e.g., '898 of 898' means all documents are included; '450 of 898' means 450 documents match your filter criteria).</li>
+    <li><strong>Sources:</strong> The number of distinct journals, books, or conferences represented in the filtered subset.</li>
+    <li><strong>Authors:</strong> The total number of unique authors contributing to the filtered documents.</li>
+  </ul>
+  
+  <p>These indicators help you assess the impact of your filters <em>before</em> applying them, ensuring your subset maintains sufficient size for robust analysis.</p>
+  
+  <br>
+  
+  <h4>1️⃣ General Filters</h4>
+  <p>The <strong>General</strong> panel provides fundamental filters applicable to most bibliometric collections:</p>
+  
+  <h4>Document Type</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters documents by publication type (e.g., Article, Book Chapter, Proceedings Paper, Review, Editorial, Letter, Note).</li>
+    <li><strong>How to Use:</strong> 
+      <ul>
+        <li>By default, all document types are selected (shown in the filter box).</li>
+        <li>To <strong>exclude</strong> a document type, click on its name in the filter box—it will be removed.</li>
+        <li>To <strong>include</strong> a previously excluded type, click on it in the list below the filter box.</li>
+      </ul>
+    </li>
+    <li><strong>Use Cases:</strong> 
+      <ul>
+        <li>Focus on <strong>peer-reviewed articles</strong> by excluding editorials, letters, and notes.</li>
+        <li>Analyze <strong>conference proceedings</strong> separately from journal articles.</li>
+        <li>Include only <strong>review articles</strong> for systematic literature reviews.</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <h4>Language</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters documents by publication language (e.g., English, Spanish, French, German, Chinese).</li>
+    <li><strong>Interaction:</strong> Similar to Document Type—click to select/deselect languages.</li>
+    <li><strong>Note:</strong> Most bibliometric databases predominantly index English-language publications. Non-English documents may represent a small fraction (<5%) of typical collections.</li>
+  </ul>
+  
+  <h4>Publication Year</h4>
+  <ul>
+    <li><strong>Function:</strong> Restricts the collection to documents published within a specific time range.</li>
+    <li><strong>How to Use:</strong> 
+      <ul>
+        <li>Use the <strong>slider</strong> to adjust the start and end years.</li>
+        <li>The selected range is displayed below the slider (e.g., '1985 - 2020').</li>
+        <li>The histogram shows the distribution of publications across years, helping you identify periods of high activity.</li>
+      </ul>
+    </li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li><strong>Temporal segmentation:</strong> Analyze different decades separately (e.g., 1990-2000 vs. 2010-2020).</li>
+        <li><strong>Exclude recent publications:</strong> Remove documents <2 years old to avoid citation lag bias.</li>
+        <li><strong>Focus on historical literature:</strong> Study foundational works from earlier periods.</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <br>
+  
+  <h4>2️⃣ Journal (J) Filters</h4>
+  <p>The <strong>Journal</strong> panel enables filtering based on publication venues, journal rankings, or Bradford's Law zones:</p>
+  
+  <h4>Upload a List of Journals</h4>
+  <ul>
+    <li><strong>Function:</strong> Restricts the collection to documents published in a user-defined list of journals.</li>
+    <li><strong>How to Use:</strong>
+      <ol>
+        <li>Prepare a file (<code>.csv</code>, <code>.txt</code>, or <code>.xlsx</code>) with journal titles listed in the <strong>first column</strong>.</li>
+        <li>Click <strong>Browse...</strong> and select your file.</li>
+        <li>Only documents from journals matching the uploaded list (case-insensitive, partial matching) will be retained.</li>
+      </ol>
+    </li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li>Focus on <strong>core journals</strong> in your field (e.g., top 10 management journals).</li>
+        <li>Analyze publications from <strong>open-access journals</strong> only.</li>
+        <li>Exclude predatory or low-quality journals identified via external blacklists.</li>
+      </ul>
+    </li>
+    <li><strong>Example File Format:</strong></li>
+  </ul>
+  <code>
+  Journal of Informetrics<br>
+  Scientometrics<br>
+  Journal of the Association for Information Science and Technology<br>
+  Research Policy
+  </code>
+  
+  <h4>Upload a Journal Ranking List</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters journals based on quality rankings (e.g., Q1, Q2, Q3, Q4 quartiles; A*, A, B, C grades).</li>
+    <li><strong>How to Use:</strong>
+      <ol>
+        <li>Prepare a file (<code>.csv</code> or <code>.xlsx</code>) with <strong>two columns and headers</strong>:
+          <ul>
+            <li><strong>Column 1:</strong> Journal titles (must match exactly or closely)</li>
+            <li><strong>Column 2:</strong> Ranking categories (e.g., Q1, Q2, A*, B)</li>
+          </ul>
+        </li>
+        <li>Upload the file via <strong>Browse...</strong></li>
+        <li>Select which ranking categories to include in your filtered collection.</li>
+      </ol>
+    </li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li>Focus on <strong>top-tier journals</strong> (e.g., Q1 only) for high-impact analysis.</li>
+        <li>Compare publication patterns across journal tiers (e.g., Q1 vs. Q2-Q4).</li>
+        <li>Filter by national rankings (e.g., Italian VQR, Australian ABDC, UK ABS).</li>
+      </ul>
+    </li>
+    <li><strong>Example File Format:</strong></li>
+  </ul>
+  <code>
+  Journal,Quartile<br>
+  Journal of Informetrics,Q1<br>
+  Scientometrics,Q1<br>
+  Library Quarterly,Q2<br>
+  Online Information Review,Q3
+  </code>
+  
+  <h4>Source by Bradford Law Zones</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters journals based on <strong>Bradford's Law</strong>, which divides sources into three productivity zones: <strong>Core</strong>, <strong>Zone 2</strong>, and <strong>Zone 3</strong>.</li>
+    <li><strong>Theory:</strong> Bradford's Law states that:
+      <ul>
+        <li><strong>Core journals (Zone 1):</strong> A small number of highly productive sources publishing ~1/3 of all documents.</li>
+        <li><strong>Zone 2:</strong> A moderate number of sources contributing another ~1/3.</li>
+        <li><strong>Zone 3:</strong> A large number of peripheral sources producing the final ~1/3.</li>
+      </ul>
+    </li>
+    <li><strong>How to Use:</strong>
+      <ul>
+        <li>Select <strong>'All Sources'</strong> to include everything (default).</li>
+        <li>Select <strong>'Core'</strong> to focus on the most productive journals.</li>
+        <li>Select <strong>'Zone 2'</strong> or <strong>'Zone 3'</strong> to analyze mid-tier or peripheral journals.</li>
+      </ul>
+    </li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li>Identify the <strong>core journals</strong> dominating a research field.</li>
+        <li>Compare citation impact between core and peripheral sources.</li>
+        <li>Exclude low-productivity journals (Zone 3) to streamline analysis.</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <br>
+  
+  <h4>3️⃣ Author's Country (AU) Filters</h4>
+  <p>The <strong>Author's Country</strong> panel enables geographic filtering based on author affiliations:</p>
+  
+  <h4>Region</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters documents by broad geographic regions (e.g., Africa, Asia, Europe, North America, South America, Oceania, Seven Seas, Unknown).</li>
+    <li><strong>How to Use:</strong> Click on region buttons to toggle selection. Selected regions are highlighted in blue.</li>
+    <li><strong>Note:</strong> 'Seven Seas' represents international waters or unclassified regions; 'Unknown' indicates missing affiliation data.</li>
+  </ul>
+  
+  <h4>Country</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters documents by specific author countries (e.g., USA, China, UK, Germany, Italy).</li>
+    <li><strong>How to Use:</strong>
+      <ul>
+        <li>Use the <strong>search box</strong> to quickly find countries.</li>
+        <li>Countries are displayed in two columns: <strong>left</strong> (available), <strong>right</strong> (selected).</li>
+        <li>Click a country in the left column to <strong>add</strong> it; click in the right column to <strong>remove</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li>Analyze <strong>national research outputs</strong> (e.g., Italian contributions to bibliometrics).</li>
+        <li>Study <strong>international collaboration</strong> by including multiple countries.</li>
+        <li>Compare <strong>regional trends</strong> (e.g., Europe vs. Asia vs. North America).</li>
+        <li>Identify <strong>emerging research nations</strong> in a field.</li>
+      </ul>
+    </li>
+    <li><strong>Important:</strong> Multi-country documents (with authors from different countries) are included if <em>any</em> selected country is represented among the authors.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>4️⃣ Documents (DOC) Filters</h4>
+  <p>The <strong>Documents</strong> panel provides citation-based filters with interactive histograms:</p>
+  
+  <h4>Total Citations</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters documents by their cumulative citation count (from database records).</li>
+    <li><strong>How to Use:</strong>
+      <ul>
+        <li>Use the <strong>slider</strong> below the histogram to set minimum and maximum citation thresholds.</li>
+        <li>The histogram shows the distribution of citation counts across documents, helping you identify highly-cited outliers.</li>
+        <li>Example: Set minimum = 50 to include only documents with ≥50 citations.</li>
+      </ul>
+    </li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li>Focus on <strong>high-impact documents</strong> (e.g., citations >100) for influence analysis.</li>
+        <li>Exclude <strong>uncited documents</strong> (citations = 0) for citation network studies.</li>
+        <li>Identify the <strong>citation elite</strong> (top 1% most-cited papers).</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <h4>Total Citations per Year</h4>
+  <ul>
+    <li><strong>Function:</strong> Filters documents by their <strong>average annual citation rate</strong>, calculated as: <code>Total Citations / (Current Year - Publication Year)</code>.</li>
+    <li><strong>Why Use This?</strong> Raw citation counts are biased toward older publications. Citations per year normalizes for document age, enabling fairer comparison between recent and historical works.</li>
+    <li><strong>How to Use:</strong> Adjust the slider to set citation-per-year thresholds (e.g., ≥5 citations/year).</li>
+    <li><strong>Use Cases:</strong>
+      <ul>
+        <li>Identify <strong>rapidly accumulating citations</strong> (indicators of emerging influence).</li>
+        <li>Compare <strong>citation velocity</strong> across time periods.</li>
+        <li>Find <strong>recent high-impact papers</strong> that haven't yet accumulated large total citation counts but show strong annual growth.</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <br>
+  
+  <h4>🎛️ Filter Workflow</h4>
+  <p>Follow these steps to apply filters effectively:</p>
+  
+  <ol>
+    <li><strong>Review the initial collection:</strong> Check the summary counts (Documents, Sources, Authors) before applying filters.</li>
+    <li><strong>Select filter criteria:</strong> Adjust settings across the four panels based on your research objectives.</li>
+    <li><strong>Monitor real-time updates:</strong> The summary at the top updates dynamically as you change selections, showing how many documents remain.</li>
+    <li><strong>Click 'Apply':</strong> Once satisfied with your selections, click the blue <strong>Apply</strong> button to activate the filters.</li>
+    <li><strong>Verify results:</strong> Check the updated summary to ensure your filters produced the expected subset size.</li>
+    <li><strong>Proceed to analysis:</strong> Navigate to other modules (Overview, Sources, Authors, etc.) to analyze the filtered collection.</li>
+    <li><strong>Reset if needed:</strong> Click the <strong>Reset</strong> button to clear all filters and restore the original dataset.</li>
+  </ol>
+  
+  <br>
+  
+  <h4>💡 Best Practices</h4>
+  <ul>
+    <li><strong>Avoid over-filtering:</strong> Very small subsets (<100 documents) may not provide robust results for network or clustering analyses. Aim for at least 200-300 documents when possible.</li>
+    <li><strong>Document your filters:</strong> Record which filters you applied for reproducibility and transparency in research reporting (e.g., 'Filtered to Q1 journals, 2010-2020, English-language articles only').</li>
+    <li><strong>Iterative refinement:</strong> Start with broad filters and gradually narrow your criteria while monitoring the summary counts.</li>
+    <li><strong>Combine filters strategically:</strong> Use multiple filter types together (e.g., specific countries + high citations + recent years) for highly targeted analyses.</li>
+    <li><strong>Save filtered collections:</strong> After applying filters, export your refined collection using the <strong>Data</strong> button (top right) to preserve your work.</li>
+    <li><strong>Compare filtered vs. unfiltered:</strong> Run key analyses on both the full and filtered collections to assess how filters impact results.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>⚠️ Important Considerations</h4>
+  <ul>
+    <li><strong>Citation Data Availability:</strong> Citation counts depend on database indexing. Web of Science and Scopus provide citation data; PubMed and some other databases do not. Missing citation data will result in empty histograms in the Documents panel.</li>
+    <li><strong>Affiliation Data Quality:</strong> Author country filters rely on affiliation metadata, which may be incomplete or inconsistent, especially in older publications or non-WoS/Scopus databases.</li>
+    <li><strong>Subject Category Coverage:</strong> Subject categories are database-specific. Scopus categories differ from Web of Science categories; merged collections may have inconsistent classification.</li>
+    <li><strong>Filter Order Independence:</strong> Filters are applied simultaneously, not sequentially. The order in which you select filters does not affect the final result.</li>
+    <li><strong>Bradford Zone Recalculation:</strong> Bradford's Law zones are calculated based on the <em>current</em> collection. If you merge collections or upload new data, zones may shift.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>🔍 Use Case Examples</h4>
+  
+  <p><strong>Example 1: Analyzing Top-Tier Recent Research</strong></p>
+  <ul>
+    <li><strong>Goal:</strong> Focus on high-impact, recent publications in core journals.</li>
+    <li><strong>Filters Applied:</strong>
+      <ul>
+        <li>Document Type: Article, Review</li>
+        <li>Publication Year: 2015-2020</li>
+        <li>Source by Bradford Law Zones: Core</li>
+        <li>Total Citations per Year: ≥10</li>
+      </ul>
+    </li>
+    <li><strong>Outcome:</strong> A curated subset of influential papers from leading journals, suitable for identifying emerging research fronts.</li>
+  </ul>
+  
+  <p><strong>Example 2: National Research Assessment</strong></p>
+  <ul>
+    <li><strong>Goal:</strong> Evaluate research output from Italian universities in Computer Science.</li>
+    <li><strong>Filters Applied:</strong>
+      <ul>
+        <li>Author's Country: Italy</li>
+        <li>Subject Category: Computer Science, Information Systems</li>
+        <li>Document Type: Article</li>
+      </ul>
+    </li>
+    <li><strong>Outcome:</strong> A collection focused on Italian contributions to CS, enabling analysis of national productivity, collaboration patterns, and impact.</li>
+  </ul>
+  
+  <p><strong>Example 3: Historical Foundational Literature</strong></p>
+  <ul>
+    <li><strong>Goal:</strong> Study the intellectual foundations of a field by examining seminal works.</li>
+    <li><strong>Filters Applied:</strong>
+      <ul>
+        <li>Publication Year: 1970-1990</li>
+        <li>Total Citations: ≥100</li>
+        <li>Document Type: Article</li>
+      </ul>
+    </li>
+    <li><strong>Outcome:</strong> A set of highly-cited historical documents representing foundational contributions.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>📚 References</h4>
+  <p><strong>Bradford, S. C. (1934).</strong> <i>Sources of information on specific subjects.</i> <strong>Engineering</strong>, 137, 85–86.</p>
+  
+  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  
+  <p><strong>Garfield, E. (2009).</strong> <i>From the science of science to Scientometrics: visualizing the history of science with HistCite software.</i> <strong>Journal of Informetrics</strong>, 3(3), 173–179. <a href='https://doi.org/10.1016/j.joi.2009.03.009' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.009</a></p>
+  </div>
+  </body>"
+  
+  ## Author Profile ----
   authorProfile <- 
     "<body>
     <div class='container'>
@@ -208,6 +495,7 @@ helpContent <- function(){
     </div>
     </body>"
   
+  #
   referenceMatching <- 
     "<body>
     <div class='container'>
@@ -308,12 +596,15 @@ helpContent <- function(){
     </div>
     </body>"
   
+  #
   importOrLoad <- 
     "<body>
     <div class='container'>
     <h3>📥 Import or Load: Building Your Bibliometric Collection</h3>
     
     <p>The <strong>Import or Load</strong> module is the starting point for any bibliometric analysis in <strong>Biblioshiny</strong>. This section allows users to build their bibliographic collection by either <em>importing raw files</em> from supported databases or <em>loading pre-processed bibliometrix files</em> saved in previous sessions.</p>
+    
+    <br>
     
     <h4>📂 Three Import Options</h4>
     <p><strong>Biblioshiny</strong> offers three flexible ways to create or load a bibliographic collection:</p>
@@ -350,7 +641,7 @@ helpContent <- function(){
     </ul>
     
     <h4>2. Load Bibliometrix File(s)</h4>
-    <p>Resume work on a previously processed collection by loading <strong>.rds</strong> or <strong>.xlsx</strong> files generated by Biblioshiny or the <code>bibliometrix</code> R package.</p>
+    <p>Resume work on a previously processed collection by loading <strong>.rdata</strong> or <strong>.xlsx</strong> files generated by Biblioshiny or the <code>bibliometrix</code> R package.</p>
     
     <p><strong>Use Cases:</strong></p>
     <ul>
@@ -362,7 +653,7 @@ helpContent <- function(){
     
     <p><strong>Supported Formats:</strong></p>
     <ul>
-      <li><strong>.rds</strong>: R Data Serialization format (preserves full metadata and structure)</li>
+      <li><strong>.rdata</strong>: R Data Serialization format (preserves full metadata and structure)</li>
       <li><strong>.xlsx</strong>: Excel format (compatible with bibliometrix exports)</li>
     </ul>
     
@@ -374,14 +665,18 @@ helpContent <- function(){
       <li>No file upload required—start analyzing immediately</li>
     </ul>
     
+    <br>
+    
     <h4>🔍 Post-Import Features</h4>
     <p>After successfully importing or loading a collection, you can:</p>
     <ul>
       <li><strong>View Collection Metadata:</strong> Preview document details in a sortable, filterable table</li>
       <li><strong>Add Brief Description:</strong> Write a custom description of your collection for documentation purposes</li>
-      <li><strong>Export Collection:</strong> Save your processed collection as <code>.rds</code>, <code>.xlsx</code>, or <code>.csv</code> for backup or sharing</li>
+      <li><strong>Export Collection:</strong> Save your processed collection as <code>.rdata</code>, <code>.xlsx</code>, or <code>.csv</code> for backup or sharing</li>
       <li><strong>Start Analysis:</strong> Click the blue <strong>Start</strong> button to proceed to filtering and analysis modules</li>
     </ul>
+    
+    <br>
     
     <h4>💾 Exporting Collections</h4>
     <p>Once your collection is loaded, you can export it in multiple formats:</p>
@@ -389,6 +684,8 @@ helpContent <- function(){
       <li><strong>.rdata</strong>: Recommended for preserving all metadata and R-specific structures</li>
       <li><strong>.xlsx</strong>: Excel-compatible format for sharing with non-R users</li>
     </ul>
+    
+    <br>
     
     <h4>⚠️ Best Practices</h4>
     <ul>
@@ -398,11 +695,14 @@ helpContent <- function(){
       <li><strong>For large collections (>5,000 documents)</strong>, consider applying filters early to improve performance</li>
     </ul>
     
+    <br>
+    
     <h4>📚 References</h4>
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
     </div>
     </body>"
   
+  ## API ----
   api <- 
     "<body>
     <div class='container'>
@@ -519,12 +819,15 @@ helpContent <- function(){
     </div>
     </body>"
   
+  ## Merge Collections ----
   mergeCollections <- 
     "<body>
     <div class='container'>
     <h3>🔀 Merge Collections: Combining Data from Multiple Sources</h3>
     
     <p>The <strong>Merge Collections</strong> module allows users to combine bibliographic datasets from different databases (Web of Science, Scopus, OpenAlex, PubMed, etc.) into a single unified collection. This functionality is essential for <strong>comprehensive literature reviews</strong>, <strong>cross-database validation</strong>, and maximizing <strong>metadata coverage</strong> by leveraging the strengths of multiple sources.</p>
+    
+    <br>
     
     <h4>🎯 Why Merge Collections?</h4>
     <ul>
@@ -533,6 +836,8 @@ helpContent <- function(){
       <li><strong>Validation:</strong> Cross-referencing records from multiple sources improves data quality and identifies discrepancies</li>
       <li><strong>Deduplication:</strong> Automatically removes duplicate records that appear in multiple databases</li>
     </ul>
+    
+    <br>
     
     <h4>🔧 How to Merge Collections</h4>
     <p>The merge process in <strong>Biblioshiny</strong> is straightforward:</p>
@@ -557,6 +862,8 @@ helpContent <- function(){
       <li><strong>Export Merged Collection:</strong> Save the unified dataset for future analysis</li>
     </ol>
     
+    <br>
+    
     <h4>🔬 Merge Algorithm Overview</h4>
     <p>The merge process follows a sophisticated multi-stage algorithm implemented by the <code>mergeDbSources()</code> function:</p>
     
@@ -575,10 +882,11 @@ helpContent <- function(){
       <li>A unified <code>KW_Merged</code> field is created by combining keywords from all sources</li>
     </ul>
     
+    
     <h4>Stage 3: Duplicate Detection</h4>
     <p>Duplicates are identified using a <strong>two-step matching strategy</strong>:</p>
     
-    <p><strong>Step 1: DOI-Based Matching</strong></p>
+    <p><strong>Step 3.1: DOI-Based Matching</strong></p>
     <ul>
       <li>Documents with identical DOIs are flagged as duplicates</li>
       <li>This is the most reliable method, as DOIs are unique identifiers</li>
@@ -586,7 +894,7 @@ helpContent <- function(){
       <li>Only the first occurrence is retained; subsequent matches are removed</li>
     </ul>
     
-    <p><strong>Step 2: Title-Year Matching</strong></p>
+    <p><strong>Step 3.2: Title-Year Matching</strong></p>
     <ul>
       <li>For records without DOIs, duplicates are detected using <strong>normalized titles</strong> and <strong>publication years</strong></li>
       <li><strong>Title Normalization:</strong>
@@ -623,6 +931,8 @@ helpContent <- function(){
       <li>A unique <code>SR</code> (Short Reference) identifier is generated for each document</li>
     </ul>
     
+    <br>
+    
     <h4>📊 Merge Statistics and Validation</h4>
     <p>After merging, the system provides detailed statistics:</p>
     <ul>
@@ -647,6 +957,8 @@ helpContent <- function(){
     Final collection: 4,530 documents
     </code>
     
+    <br>
+    
     <h4>📌 Best Practices</h4>
     <ul>
       <li><strong>Always enable duplicate removal</strong> unless you have a specific reason to retain duplicates</li>
@@ -656,6 +968,8 @@ helpContent <- function(){
       <li><strong>Save merged collections immediately</strong> to avoid re-processing</li>
     </ul>
     
+    <br>
+    
     <h4>⚠️ Important Considerations</h4>
     <ul>
       <li><strong>Citation Data:</strong> Merged collections reset the <code>CR</code> (Cited References) field—you'll need to run <strong>Reference Matching</strong> again after merging</li>
@@ -664,6 +978,8 @@ helpContent <- function(){
       <li><strong>Database-Specific Analyses:</strong> Some analyses are database-specific—merged collections may lose this granularity</li>
     </ul>
     
+    <br>
+    
     <h4>🔍 Example Use Cases</h4>
     <ul>
       <li><strong>Systematic Literature Review:</strong> Combine Web of Science, Scopus, and PubMed to ensure no relevant publications are missed</li>
@@ -671,6 +987,8 @@ helpContent <- function(){
       <li><strong>Validation Study:</strong> Compare overlap between databases to assess index coverage and bias</li>
       <li><strong>Longitudinal Analysis:</strong> Merge historical Web of Science data with recent OpenAlex records to extend temporal coverage</li>
     </ul>
+    
+    <br>
     
     <h4>📚 References</h4>
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
@@ -681,6 +999,7 @@ helpContent <- function(){
     </div>
     </body>"
   
+  ## Main Information ----
   mainInformation <- 
     "<body>
   <div class='container'>
@@ -844,6 +1163,7 @@ helpContent <- function(){
   </div>
   </body>"
   
+  ## Life Cycle ----
   lifeCycle <- 
     "<body>
   <div class='container'>

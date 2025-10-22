@@ -12,10 +12,11 @@ Must contain the columns:
 \itemize{
   \item \code{SR}: Short reference identifier for each document
   \item \code{CR}: Cited references field (citations separated by semicolons)
+  \item \code{DB}: (Optional) Database source identifier for format detection
 }}
 
-\item{threshold}{Numeric value between 0 and 1 indicating the similarity threshold 
-for matching citations. Default is 0.85. See \code{\link{normalize_citations}} 
+\item{threshold}{Numeric value between 0 and 1 indicating the similarity threshold
+for matching citations. Default is 0.85. See \code{\link{normalize_citations}}
 for details on selecting appropriate thresholds.}
 
 \item{method}{String distance method to use for fuzzy matching. Options include:
@@ -49,7 +50,7 @@ A list with four elements:
     }
     Sorted by citation frequency (n) in descending order.
   }
-  \item{matched_citations}{Complete output from \code{\link{normalize_citations}}, 
+  \item{matched_citations}{Complete output from \code{\link{normalize_citations}},
     useful for detailed analysis of the matching process.}
   \item{CR_normalized}{A data frame with columns:
     \itemize{
@@ -62,23 +63,29 @@ A list with four elements:
 }
 }
 \description{
-This is a convenience wrapper function that applies \code{\link{normalize_citations}} 
-to a bibliometrix data frame (typically loaded with \code{\link{convert2df}}). It 
-extracts citations from the CR field, performs normalization and matching, and 
+This is a convenience wrapper function that applies \code{\link{normalize_citations}}
+to a bibliometrix data frame (typically loaded with \code{\link{convert2df}}). It
+extracts citations from the CR field, performs normalization and matching, and
 returns comprehensive results including per-paper citation lists and summary statistics.
 }
 \details{
+The function automatically handles the new Scopus citation format (where the year
+appears at the end in parentheses) by converting it to the classic format before
+processing.
+
+
 The function performs the following steps:
 \enumerate{
   \item Splits the CR field by semicolons to extract individual citations
+  \item Detects and converts new Scopus format citations to classic format
   \item Trims whitespace from each citation
   \item Applies \code{\link{normalize_citations}} to identify duplicate citations
   \item Links normalized citations back to source documents (SR)
   \item Generates summary statistics and reconstructs normalized CR fields
 }
 
-The normalized CR field can be used to replace the original CR field in subsequent 
-bibliometric analyses, ensuring that citation counts and network analyses are not 
+The normalized CR field can be used to replace the original CR field in subsequent
+bibliometric analyses, ensuring that citation counts and network analyses are not
 inflated by duplicate citations with minor formatting differences.
 }
 \examples{
@@ -104,10 +111,10 @@ M_normalized <- M \%>\%
   left_join(results$CR_normalized, by = "SR")
 
 # Compare citation counts before and after normalization
-original_citations <- strsplit(M$CR, ";") \%>\% 
-  unlist() \%>\% 
-  trimws() \%>\% 
-  table() \%>\% 
+original_citations <- strsplit(M$CR, ";") \%>\%
+  unlist() \%>\%
+  trimws() \%>\%
+  table() \%>\%
   length()
 
 normalized_citations <- nrow(results$summary)
@@ -122,7 +129,7 @@ CR_analysis <- citations(M_normalized, field = "article", sep = ";")
 
 }
 \references{
-Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive 
+Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive
 science mapping analysis. Journal of Informetrics, 11(4), 959-975.
 }
 \seealso{

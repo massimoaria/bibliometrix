@@ -142,12 +142,53 @@ content_analysis_server <- function(input, output, session, values) {
           n_columns = n_columns,
           citation_type = citation_type
         )
-
         values$pdf_text <- pdf_text$Full_text
-        if (length(values$pdf_text) > 1) {
+
+        # Check if AI support is enabled
+        if (input$enable_ai_support) {
+          # withProgress(message = 'Extracting text...', {
+          #   # AI-ENHANCED EXTRACTION
+          #   incProgress(0.3, detail = "Using AI enhancement...")
+
+          # Execute AI-enhanced text extraction
+          text <- process_large_pdf(
+            input$pdf_file$datapath,
+            api_key = Sys.getenv("GEMINI_API_KEY"),
+            pages_per_chunk = 5
+          )
+
+          showNotification(
+            "Text extracted successfully with AI enhancement!",
+            type = "message",
+            duration = 3
+          )
+
+          if (!is.null(text)) {
+            text_AI <- merge_text_chunks_named(text) %>% as.list()
+
+            text_AI <- text_AI_conversion(
+              text_AI,
+              citation_type = citation_type
+            )
+
+            if ("Reference" %in% names(pdf_text)) {
+              text_AI$References <- pdf_text$References
+            } else if ("Bibliography" %in% names(text2)) {
+              text_AI$References <- pdf_text$Bibliography
+            }
+
+            Full_text <- paste(unlist(text_AI), collapse = "\n\n")
+            text_AI <- c(Full_text = Full_text, text_AI)
+            values$pdf_text <- text_AI$Full_text
+            pdf_text <- text_AI
+          }
+          # })
+        }
+
+        if (length(pdf_text) > 1) {
           values$pdf_sections <- pdf_text[-1]
         } else {
-          values$pdf_sections <- values$pdf_text # Fallback to full text if no sections
+          values$pdf_sections <- pdf_text # Fallback to full text if no sections
         }
 
         values$citation_type_used <- citation_type # Store for later use
@@ -568,6 +609,12 @@ content_analysis_server <- function(input, output, session, values) {
     return(!is.null(values$analysis_results))
   })
   outputOptions(output, "analysis_completed", suspendWhenHidden = FALSE)
+
+  # Check if Gemini API is available
+  output$gemini_api_available <- reactive({
+    return(!is.null(values$geminiAPI) && values$geminiAPI == TRUE)
+  })
+  outputOptions(output, "gemini_api_available", suspendWhenHidden = FALSE)
 
   # ===========================================
   # TAB 1: DESCRIPTIVE STATISTICS OUTPUTS

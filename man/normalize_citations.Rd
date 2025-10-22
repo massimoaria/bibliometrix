@@ -9,9 +9,9 @@ normalize_citations(CR_vector, threshold = 0.9, method = "jw", min_chars = 20)
 \arguments{
 \item{CR_vector}{Character vector containing bibliographic citations to be normalized and matched.}
 
-\item{threshold}{Numeric value between 0 and 1 indicating the similarity threshold 
-for matching citations. Higher values (e.g., 0.90-0.95) produce more conservative 
-matching, while lower values (e.g., 0.75-0.80) produce more aggressive matching. 
+\item{threshold}{Numeric value between 0 and 1 indicating the similarity threshold
+for matching citations. Higher values (e.g., 0.90-0.95) produce more conservative
+matching, while lower values (e.g., 0.75-0.80) produce more aggressive matching.
 Default is 0.85, which provides a good balance between precision and recall.}
 
 \item{method}{String distance method to use for fuzzy matching. Options include:
@@ -40,10 +40,10 @@ A data frame with the following columns:
 }
 }
 \description{
-This function performs advanced normalization and fuzzy matching of bibliographic 
-citations to identify and group citations that refer to the same work but are 
-formatted differently. It uses a multi-phase approach combining string normalization, 
-blocking strategies, hierarchical clustering, and post-processing to achieve both 
+This function performs advanced normalization and fuzzy matching of bibliographic
+citations to identify and group citations that refer to the same work but are
+formatted differently. It uses a multi-phase approach combining string normalization,
+blocking strategies, hierarchical clustering, and post-processing to achieve both
 speed and accuracy on large citation datasets.
 }
 \details{
@@ -59,32 +59,32 @@ The function implements a five-phase matching algorithm:
 }
 
 \strong{Phase 1.5: Journal Normalization}
-The function uses the LTWA (List of Title Word Abbreviations) database from 
-ISO 4 standards to normalize journal names. This ensures that abbreviated 
-forms (e.g., "J. Clean. Prod.") and full forms (e.g., "Journal of Cleaner 
+The function uses the LTWA (List of Title Word Abbreviations) database from
+ISO 4 standards to normalize journal names. This ensures that abbreviated
+forms (e.g., "J. Clean. Prod.") and full forms (e.g., "Journal of Cleaner
 Production") are recognized as the same journal and matched together.
 
-The LTWA database is included in the bibliometrix package. If not found, 
-the function attempts to download it from ISSN.org. Journal normalization 
+The LTWA database is included in the bibliometrix package. If not found,
+the function attempts to download it from ISSN.org. Journal normalization
 can be disabled by ensuring the LTWA database is not available.
 
 \strong{Phase 2: Blocking}
-Citations are grouped into blocks by first author and year. This dramatically 
-reduces computational complexity from O(n^2) to approximately O(k*m^2), where k is 
+Citations are grouped into blocks by first author and year. This dramatically
+reduces computational complexity from O(n^2) to approximately O(k*m^2), where k is
 the number of blocks and m is the average block size.
 
 \strong{Phase 3: Within-Block Matching}
-Within each block, citations are compared using string distance metrics and 
-hierarchical clustering. For blocks larger than 500 citations, exact matching 
+Within each block, citations are compared using string distance metrics and
+hierarchical clustering. For blocks larger than 500 citations, exact matching
 on normalized strings is used instead to maintain performance.
 
 \strong{Phase 4: Canonical Representative Selection}
-For each cluster, the most complete citation (prioritizing those with volume 
+For each cluster, the most complete citation (prioritizing those with volume
 and page information) is selected as the canonical representative.
 
 \strong{Phase 5: Post-Processing}
-Citations sharing the same first author, year, journal, and volume are merged 
-into a single cluster, even if they weren't matched in Phase 3. This catches 
+Citations sharing the same first author, year, journal, and volume are merged
+into a single cluster, even if they weren't matched in Phase 3. This catches
 cases where minor title variations prevented matching.
 }
 \examples{
@@ -111,7 +111,7 @@ matched_conservative <- normalize_citations(CR_vector, threshold = 0.90)
 
 }
 \references{
-Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive 
+Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive
 science mapping analysis. Journal of Informetrics, 11(4), 959-975.
 }
 \seealso{

@@ -67,7 +67,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom dplyr relocate
 #' @importFrom dplyr slice_head
 #' @importFrom dplyr slice_tail
-#' @importFrom dplyr reframe 
+#' @importFrom dplyr reframe
 #' @importFrom dplyr coalesce group_split arrange n_distinct first
 #' @importFrom stringdist stringdistmatrix
 #' @importFrom plotly add_annotations
@@ -272,10 +272,10 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom stringr str_to_upper
 #' @importFrom stringr str_squish regex str_remove
 #' @importFrom stringr str_locate_all
-#' @importFrom stringr str_extract_all str_extract 
+#' @importFrom stringr str_extract_all str_extract
 #' @importFrom stringr str_replace_all str_remove_all
-#' @importFrom stringr str_trim
-#' @importFrom stringr str_split 
+#' @importFrom stringr str_trim str_locate
+#' @importFrom stringr str_split
 #' @importFrom graphics axis points
 #' @importFrom graphics barplot
 #' @importFrom graphics legend
@@ -293,7 +293,8 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom SnowballC getStemLanguages
 # @importFrom rio import
 .onAttach <- function(...) {
-  packageStartupMessage("Please note that our software is open source and available for use, distributed under the MIT license.\nWhen it is used in a publication, we ask that authors properly cite the following reference:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis,
+  packageStartupMessage(
+    "Please note that our software is open source and available for use, distributed under the MIT license.\nWhen it is used in a publication, we ask that authors properly cite the following reference:\n\nAria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis,
                         Journal of Informetrics, 11(4), pp 959-975, Elsevier.\n\nFailure to properly cite the software is considered a violation of the license.
                         \nFor information and bug reports:
                         - Take a look at https://www.bibliometrix.org
@@ -301,7 +302,8 @@ utils::globalVariables(c("matches", "KW_Merged"))
                         - Write a post on https://github.com/massimoaria/bibliometrix/issues
                         \nHelp us to keep Bibliometrix and Biblioshiny free to download and use by contributing with a small donation to support our research team (https://bibliometrix.org/donate.html)\n
                         \nTo start with the Biblioshiny app, please digit:
-biblioshiny()\n")
+biblioshiny()\n"
+  )
 }
 
 
@@ -320,17 +322,18 @@ scale_data <- function(x, scale = diff(range(x))) {
 # ## Plot edges using ggplot2
 # ### Credits to François Briatte. Function is a fork of the package ggnetwork
 geom_network_edges <- function(
-    mapping = NULL,
-    data = NULL,
-    position = "identity",
-    arrow = NULL,
-    curvature = 0,
-    angle = 90,
-    ncp = 5,
-    na.rm = FALSE,
-    show.legend = NA,
-    inherit.aes = TRUE,
-    ...) {
+  mapping = NULL,
+  data = NULL,
+  position = "identity",
+  arrow = NULL,
+  curvature = 0,
+  angle = 90,
+  ncp = 5,
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  ...
+) {
   if (!curvature) {
     geom <- ggplot2::GeomSegment
     params <- list(arrow = arrow, na.rm = na.rm, ...)
@@ -360,13 +363,14 @@ geom_network_edges <- function(
 
 # ### Credits to François Briatte. Function is a fork of the package ggnetwork
 geom_network_nodes <- function(
-    mapping = NULL,
-    data = NULL,
-    position = "identity",
-    na.rm = FALSE,
-    show.legend = NA,
-    inherit.aes = TRUE,
-    ...) {
+  mapping = NULL,
+  data = NULL,
+  position = "identity",
+  na.rm = FALSE,
+  show.legend = NA,
+  inherit.aes = TRUE,
+  ...
+) {
   ggplot2::layer(
     data = data,
     mapping = mapping,
@@ -383,14 +387,18 @@ geom_network_nodes <- function(
 }
 #
 # ### Credits to François Briatte. Function is a fork of the package ggnetwork
-StatEdges <- ggplot2::ggproto("StatEdges", ggplot2::Stat,
+StatEdges <- ggplot2::ggproto(
+  "StatEdges",
+  ggplot2::Stat,
   compute_layer = function(data, scales, params) {
     unique(subset(data, !(x == xend & y == yend)))
   }
 )
 
 ### Credits to François Briatte. Function is a fork of the package ggnetwork
-StatNodes <- ggplot2::ggproto("StatNodes", ggplot2::Stat,
+StatNodes <- ggplot2::ggproto(
+  "StatNodes",
+  ggplot2::Stat,
   compute_layer = function(data, scales, params) {
     if (all(c("xend", "yend") %in% names(data))) {
       unique(subset(data, select = c(-xend, -yend)))
@@ -409,7 +417,9 @@ AbbrevTerm <- function(x, check = TRUE) {
     if (length(x) > 1) {
       stop("Please provide a single string (length(x) should equal 1)")
     } else if (grepl("[[:space:]]", x)) {
-      warning("The provided string contains spaces. This function is only designed to abbreviate a single word.")
+      warning(
+        "The provided string contains spaces. This function is only designed to abbreviate a single word."
+      )
     }
 
     # check whether x is title case
@@ -418,7 +428,11 @@ AbbrevTerm <- function(x, check = TRUE) {
 
     # check for whole word match
     # TODO: find way to deal with multiple whole word matches (e.g. w/ and w/o diacritics)
-    int_whole_match <- stringi::stri_cmp_equiv(x, ltwa_singles$WORD, strength = 1)
+    int_whole_match <- stringi::stri_cmp_equiv(
+      x,
+      ltwa_singles$WORD,
+      strength = 1
+    )
     ind_whole_match <- which(int_whole_match == TRUE)
 
     if (length(ind_whole_match > 0)) {
@@ -430,7 +444,11 @@ AbbrevTerm <- function(x, check = TRUE) {
     } else {
       # else, find matching prefix
       # TODO: give preference to matches with higher strength
-      lgl_prefix <- stringi::stri_startswith_coll(x, ltwa_prefix$WORD, strength = 1)
+      lgl_prefix <- stringi::stri_startswith_coll(
+        x,
+        ltwa_prefix$WORD,
+        strength = 1
+      )
       ind_prefix <- which(lgl_prefix == TRUE)
 
       # choose abbrev based on number of matching prefixes (0, 1, or 2+)
@@ -489,15 +507,26 @@ AbbrevTitle <- function(x) {
     xv_which_abb <- logical(length(xv))
 
     # search for multi-word matches (e.g. South Pacific)
-    lgl_phrase <- sapply(ltwa_phrase$WORD, function(y) grepl(y, tolower(x)), USE.NAMES = FALSE)
+    lgl_phrase <- sapply(
+      ltwa_phrase$WORD,
+      function(y) grepl(y, tolower(x)),
+      USE.NAMES = FALSE
+    )
     ind_phrase <- which(lgl_phrase)
 
     # if any matching multi-word phrases
     if (length(ind_phrase) > 0) {
       for (i in 1:length(ind_phrase)) {
-        match_phrase <- unlist(strsplit(ltwa_phrase$WORD[ind_phrase[i]], "[[:space:]]"))
+        match_phrase <- unlist(strsplit(
+          ltwa_phrase$WORD[ind_phrase[i]],
+          "[[:space:]]"
+        ))
         match_abb <- ltwa_phrase$ABBREVIATIONS[ind_phrase[i]]
-        ind_match <- sapply(match_phrase, function(y) grep(y, tolower(xv)), USE.NAMES = FALSE) # should only find sequential matches
+        ind_match <- sapply(
+          match_phrase,
+          function(y) grep(y, tolower(xv)),
+          USE.NAMES = FALSE
+        ) # should only find sequential matches
         if (length(ind_match[[1]]) > 0) {
           ind <- ind_match[[1]]:(ind_match[[1]] + length(ind_match) - 1)
           xv[ind[1]] <- match_abb
@@ -515,17 +544,31 @@ AbbrevTitle <- function(x) {
       # otherwise... deal with prepositions, articles, and conjunctions
 
       # remove prepositions not at beginning of word
-      ind_rem_prep <- c(FALSE, mapply(CheckPrep, USE.NAMES = F, x = xv[-1], check = !xv_which_abb[-1]))
+      ind_rem_prep <- c(
+        FALSE,
+        mapply(CheckPrep, USE.NAMES = F, x = xv[-1], check = !xv_which_abb[-1])
+      )
       xv <- xv[!ind_rem_prep]
       xv_which_abb <- xv_which_abb[!ind_rem_prep]
 
       # remove articles and conjunctions
-      ind_rem_artcon <- mapply(CheckArtCon, USE.NAMES = F, x = xv, check = !xv_which_abb)
+      ind_rem_artcon <- mapply(
+        CheckArtCon,
+        USE.NAMES = F,
+        x = xv,
+        check = !xv_which_abb
+      )
       xv <- xv[!ind_rem_artcon]
       xv_which_abb <- xv_which_abb[!ind_rem_artcon]
 
       # remove d' and l', if followed by character
-      xv <- gsub("^d'(?=[[:alpha:]])|^l'(?=[[:alpha:]])", "", xv, ignore.case = TRUE, perl = TRUE)
+      xv <- gsub(
+        "^d'(?=[[:alpha:]])|^l'(?=[[:alpha:]])",
+        "",
+        xv,
+        ignore.case = TRUE,
+        perl = TRUE
+      )
 
       # if title fully matches multi-word phrase(s) (minus articles/conjunctions), return
       if (all(xv_which_abb == TRUE)) {
@@ -546,7 +589,12 @@ AbbrevTitle <- function(x) {
         }
 
         # abbreviate all words in title (excluding multi-word phrases)
-        abbrev_full <- mapply(AbbrevTerm, x = xv, check = !xv_which_abb, USE.NAMES = F)
+        abbrev_full <- mapply(
+          AbbrevTerm,
+          x = xv,
+          check = !xv_which_abb,
+          USE.NAMES = F
+        )
 
         # add dashes back in, if applicable
         if (length(ind_dash) > 0) {
@@ -588,9 +636,41 @@ CheckArtCon <- function(x, check) {
 # color palette
 colorlist <- function() {
   c(
-    "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#A65628", "#F781BF", "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F",
-    "#B3B3B3", "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#B15928", "#8DD3C7", "#BEBADA",
-    "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#D9D9D9", "#BC80BD", "#CCEBC5"
+    "#E41A1C",
+    "#377EB8",
+    "#4DAF4A",
+    "#984EA3",
+    "#FF7F00",
+    "#A65628",
+    "#F781BF",
+    "#999999",
+    "#66C2A5",
+    "#FC8D62",
+    "#8DA0CB",
+    "#E78AC3",
+    "#A6D854",
+    "#FFD92F",
+    "#B3B3B3",
+    "#A6CEE3",
+    "#1F78B4",
+    "#B2DF8A",
+    "#33A02C",
+    "#FB9A99",
+    "#E31A1C",
+    "#FDBF6F",
+    "#FF7F00",
+    "#CAB2D6",
+    "#6A3D9A",
+    "#B15928",
+    "#8DD3C7",
+    "#BEBADA",
+    "#FB8072",
+    "#80B1D3",
+    "#FDB462",
+    "#B3DE69",
+    "#D9D9D9",
+    "#BC80BD",
+    "#CCEBC5"
   )
 }
 
@@ -603,8 +683,8 @@ firstup <- function(x) {
 
 #' Merge DE and ID Fields into a Unified Keywords Column
 #'
-#' This function creates a new column `KW_Merged` by combining the contents of the `DE` (author keywords) and `ID` (keywords plus) fields 
-#' in a bibliographic dataframe. Duplicate keywords within each record are removed, and leading/trailing spaces are trimmed. 
+#' This function creates a new column `KW_Merged` by combining the contents of the `DE` (author keywords) and `ID` (keywords plus) fields
+#' in a bibliographic dataframe. Duplicate keywords within each record are removed, and leading/trailing spaces are trimmed.
 #' The merged keywords are separated by a semicolon (`;`).
 #'
 #' If the `KW_Merged` column already exists, it will not be overwritten unless `force = TRUE` is specified.
@@ -622,22 +702,40 @@ firstup <- function(x) {
 #' }
 #'
 #' @export
-mergeKeywords <- function(M, force = FALSE){
-  if (force) M <- M %>% select(!matches("KW_Merged")) # force to replace old KW_Merged column 
-  if (!"KW_Merged" %in% names(M)){
-    if (!"DE" %in% names(M)) M$DE <- NA
-    if (!"ID" %in% names(M)) M$ID <- NA
-    M <- M %>% 
-      unite(col = "KW_Merged", DE,ID,sep = "; ", remove = FALSE, na.rm = TRUE) %>% 
-      mutate(KW_Merged = ifelse(KW_Merged=="",NA,KW_Merged)) %>% 
-      mutate(KW_Merged = map_chr(KW_Merged, ~ {
-        .x %>%
-          str_split(";") %>%
-          unlist() %>%
-          str_trim() %>%
-          unique() %>%
-          paste(collapse = "; ")
-      }))
+mergeKeywords <- function(M, force = FALSE) {
+  if (force) {
+    M <- M %>% select(!matches("KW_Merged"))
+  } # force to replace old KW_Merged column
+  if (!"KW_Merged" %in% names(M)) {
+    if (!"DE" %in% names(M)) {
+      M$DE <- NA
+    }
+    if (!"ID" %in% names(M)) {
+      M$ID <- NA
+    }
+    M <- M %>%
+      unite(
+        col = "KW_Merged",
+        DE,
+        ID,
+        sep = "; ",
+        remove = FALSE,
+        na.rm = TRUE
+      ) %>%
+      mutate(KW_Merged = ifelse(KW_Merged == "", NA, KW_Merged)) %>%
+      mutate(
+        KW_Merged = map_chr(
+          KW_Merged,
+          ~ {
+            .x %>%
+              str_split(";") %>%
+              unlist() %>%
+              str_trim() %>%
+              unique() %>%
+              paste(collapse = "; ")
+          }
+        )
+      )
   }
   ### bibliometrix>DB class
   class(M) <- c("bibliometrixDB", "data.frame")
@@ -645,8 +743,15 @@ mergeKeywords <- function(M, force = FALSE){
 }
 
 # adjust node positions in TM
-adjust_positions_oblique <- function(df, xvar = "rcentrality", yvar = "rdensity",
-                                     min_dist = 0.5, max_iter = 100, step_factor = 0.5, jitter_strength = 0.1) {
+adjust_positions_oblique <- function(
+  df,
+  xvar = "rcentrality",
+  yvar = "rdensity",
+  min_dist = 0.5,
+  max_iter = 100,
+  step_factor = 0.5,
+  jitter_strength = 0.1
+) {
   df_adj <- df
 
   for (iter in 1:max_iter) {

@@ -1,6 +1,6 @@
-helpContent <- function(){
+helpContent <- function() {
   ## biblioAI ----
-  biblioAI <- 
+  biblioAI <-
     "<body>
     <div class='container'>
     <h3>🧠 Biblio AI: AI-Powered Bibliometric Analysis</h3>
@@ -42,9 +42,9 @@ helpContent <- function(){
     </ul>
     </div>
     </body>"
-  
+
   ## Info ----
-  info <- 
+  info <-
     "<body>
     <div class='container'>
     <h3>📚 Supported Bibliographic Databases and Suggested File Formats</h3>
@@ -72,7 +72,7 @@ helpContent <- function(){
     </ul>
     </div>
     </body>"
-  
+
   ## Team Publications ----
   publications <-
     "<body>
@@ -110,9 +110,9 @@ helpContent <- function(){
     </ul>
     </div>
     </body>"
-  
+
   ## Filters ----
-  filters <- 
+  filters <-
     "<body>
   <div class='container'>
   <h3>🔍 Filters: Refining Your Bibliometric Collection</h3>
@@ -435,9 +435,9 @@ helpContent <- function(){
   <p><strong>Garfield, E. (2009).</strong> <i>From the science of science to Scientometrics: visualizing the history of science with HistCite software.</i> <strong>Journal of Informetrics</strong>, 3(3), 173–179. <a href='https://doi.org/10.1016/j.joi.2009.03.009' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.009</a></p>
   </div>
   </body>"
-  
+
   ## Author Profile ----
-  authorProfile <- 
+  authorProfile <-
     "<body>
     <div class='container'>
     <h3>👤 Author Profile Overview</h3>
@@ -494,9 +494,9 @@ helpContent <- function(){
     <p><strong>Hirsch, J.E. (2005).</strong> <i>An index to quantify an individual's scientific research output.</i> <strong>Proceedings of the National Academy of Sciences</strong>, 102(46), 16569–16572. <a href='https://doi.org/10.1073/pnas.0507655102' target='_blank'>https://doi.org/10.1073/pnas.0507655102</a></p>
     </div>
     </body>"
-  
+
   #
-  referenceMatching <- 
+  referenceMatching <-
     "<body>
     <div class='container'>
     <h3>🔗 Reference Matching: Algorithm and Usage</h3>
@@ -595,9 +595,9 @@ helpContent <- function(){
     <p><strong>Small, H. (1973).</strong> <i>Co-citation in the scientific literature: A new measure of the relationship between two documents.</i> <strong>Journal of the American Society for Information Science</strong>, 24(4), 265–269. <a href='https://doi.org/10.1002/asi.4630240406' target='_blank'>https://doi.org/10.1002/asi.4630240406</a></p>
     </div>
     </body>"
-  
+
   #
-  importOrLoad <- 
+  importOrLoad <-
     "<body>
     <div class='container'>
     <h3>📥 Import or Load: Building Your Bibliometric Collection</h3>
@@ -701,9 +701,9 @@ helpContent <- function(){
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
     </div>
     </body>"
-  
+
   ## API ----
-  api <- 
+  api <-
     "<body>
     <div class='container'>
     <h3>🌐 API: Gathering Data from Bibliographic Databases</h3>
@@ -818,9 +818,9 @@ helpContent <- function(){
     <p><strong>NCBI Resource Coordinators. (2018).</strong> <i>Database resources of the National Center for Biotechnology Information.</i> <strong>Nucleic Acids Research</strong>, 46(D1), D8–D13. <a href='https://doi.org/10.1093/nar/gkx1095' target='_blank'>https://doi.org/10.1093/nar/gkx1095</a></p>
     </div>
     </body>"
-  
+
   ## Merge Collections ----
-  mergeCollections <- 
+  mergeCollections <-
     "<body>
     <div class='container'>
     <h3>🔀 Merge Collections: Combining Data from Multiple Sources</h3>
@@ -998,9 +998,9 @@ helpContent <- function(){
     <p><strong>Martín-Martín, A., Thelwall, M., Orduna-Malea, E., & Delgado López-Cózar, E. (2021).</strong> <i>Google Scholar, Microsoft Academic, Scopus, Dimensions, Web of Science, and OpenCitations' COCI: a multidisciplinary comparison of coverage via citations.</i> <strong>Scientometrics</strong>, 126(1), 871–906. <a href='https://doi.org/10.1007/s11192-020-03690-4' target='_blank'>https://doi.org/10.1007/s11192-020-03690-4</a></p>
     </div>
     </body>"
-  
+
   ## Main Information ----
-  mainInformation <- 
+  mainInformation <-
     "<body>
   <div class='container'>
   <h3>📊 Main Information: Overview of Your Bibliometric Collection</h3>
@@ -1162,9 +1162,9 @@ helpContent <- function(){
   <p><strong>Zupic, I., & Čater, T. (2015).</strong> <i>Bibliometric methods in management and organization.</i> <strong>Organizational Research Methods</strong>, 18(3), 429–472. <a href='https://doi.org/10.1177/1094428114562629' target='_blank'>https://doi.org/10.1177/1094428114562629</a></p>
   </div>
   </body>"
-  
+
   ## Life Cycle ----
-  lifeCycle <- 
+  lifeCycle <-
     "<body>
   <div class='container'>
   <h3>📈 Life Cycle of Scientific Production: Modeling Research Topic Evolution</h3>
@@ -1460,18 +1460,507 @@ helpContent <- function(){
   <p><strong>Wang, Q. (2018).</strong> <i>A bibliometric model for identifying emerging research topics.</i> <strong>Journal of the Association for Information Science and Technology</strong>, 69(2), 290–304. <a href='https://doi.org/10.1002/asi.23930' target='_blank'>https://doi.org/10.1002/asi.23930</a></p>
   </div>
   </body>"
+
+  ## Content Analysis ----
+  contentAnalysis <-
+    "<body>
+  <div class='container'>
+  <h3>📄 Scientific Article Content Analysis</h3>
   
+  <p><strong>Content Analysis</strong> is a specialized feature in <em>Biblioshiny</em> that enables researchers to perform deep, AI-enhanced analysis of individual scientific articles in PDF format. This tool goes beyond traditional bibliometric analysis by examining the full text of documents, extracting citations with their surrounding context, and revealing patterns in how research is cited and discussed within scholarly narratives.</p>
+  
+  <p>This menu integrates in <em>Biblioshiny</em> the functions included in the R library <strong>contentanalysis</strong> by Aria and Cuccurullo (<a href='https://github.com/massimoaria/contentanalysis' target='_blank'>https://github.com/massimoaria/contentanalysis</a>). The module is built on the <strong>bibliometrix</strong> ecosystem and integrates advanced text mining capabilities to support:</p>
+  <ul>
+    <li>Extraction and analysis of in-text citations with context windows</li>
+    <li>Citation co-occurrence network analysis</li>
+    <li>Readability and linguistic quality assessment</li>
+    <li>Word distribution and trend analysis across document sections</li>
+    <li>AI-powered document summarization through <strong>Biblio AI</strong></li>
+    <li>Comprehensive reference list extraction and matching</li>
+  </ul>
+  
+  <br>
+  
+  <h4>🎯 Purpose and Applications</h4>
+  <p><strong>Content Analysis</strong> is particularly valuable for:</p>
+  <ul>
+    <li><strong>Understanding Citation Context:</strong> Examining how and where references are cited within a paper, distinguishing between peripheral mentions and substantive discussions.</li>
+    <li><strong>Identifying Citation Clusters:</strong> Detecting which references are frequently cited together, revealing the conceptual structure and intellectual foundations of the research.</li>
+    <li><strong>Quality Assessment:</strong> Evaluating document readability, lexical diversity, and linguistic complexity using established metrics like Flesch-Kincaid, ARI, and Gunning Fog Index.</li>
+    <li><strong>Thematic Flow Analysis:</strong> Tracking how key terms and concepts are distributed across different sections of the paper (Introduction, Methods, Results, Discussion).</li>
+    <li><strong>Literature Review Enhancement:</strong> Using AI-powered summarization to quickly extract key insights, research questions, methodologies, and findings from lengthy documents.</li>
+    <li><strong>Citation Practice Research:</strong> Analyzing citation patterns and practices for methodological or meta-research studies.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>📥 Step 1: Import PDF File</h4>
+  <p>The analysis begins by uploading a scientific article in PDF format. The system supports both single-column and multi-column layouts (specify the number of columns for accurate text extraction).</p>
+  
+  <p><strong>Citation Format Detection:</strong> The tool uses AI-enhanced extraction to identify citations in multiple formats:</p>
+  <ul>
+    <li><strong>Author-year format:</strong> (Smith, 2020) or Smith et al. (2015)</li>
+    <li><strong>Numeric brackets:</strong> [1] or [15-17]</li>
+    <li><strong>Numeric superscripts:</strong> ¹ or ²³</li>
+    <li><strong>Mixed formats:</strong> The system can handle documents with inconsistent citation styles (though results may be less reliable)</li>
+  </ul>
+  
+  <p><strong>AI-Enhanced Extraction:</strong> When enabled, this feature uses advanced AI models to improve citation detection accuracy, particularly useful for:</p>
+  <ul>
+    <li>PDFs with complex layouts or formatting issues</li>
+    <li>Documents with non-standard citation formats</li>
+    <li>Multi-column articles where citation boundaries are ambiguous</li>
+    <li>Papers with extensive in-text author listings (e.g., 'Smith, Jones, Williams, and Brown, 2020')</li>
+  </ul>
+  
+  <p><strong>Note:</strong> AI-enhanced extraction requires a configured <strong>Google Gemini API key</strong> in Settings. See the <em>Biblio AI</em> help section for setup instructions.</p>
+  
+  <br>
+  
+  <h4>⚙️ Step 2: Analysis Parameters</h4>
+  <p>Users can customize the extraction and analysis through several key parameters:</p>
+  
+  <h5>Context Window Size (words)</h5>
+  <p>Defines the number of words to extract <em>before and after</em> each citation. Default is <strong>20 words</strong>.</p>
+  <ul>
+    <li><strong>Smaller windows (5-10 words):</strong> Capture only immediate context, useful for identifying direct citation purposes (e.g., methodology references).</li>
+    <li><strong>Medium windows (15-30 words):</strong> Balance between context richness and data volume. Suitable for most analyses.</li>
+    <li><strong>Larger windows (40-50 words):</strong> Capture broader argumentative context, useful for discourse analysis or understanding how citations are integrated into narrative flow.</li>
+  </ul>
+  
+  <h5>Max Distance for Network (characters)</h5>
+  <p>Defines the maximum character distance between two citations to be considered 'co-occurring' in the network analysis. Default is <strong>800 characters</strong> (roughly 120-150 words).</p>
+  <ul>
+    <li><strong>Shorter distances (300-500 chars):</strong> Identify only tightly co-cited references, revealing core conceptual links.</li>
+    <li><strong>Medium distances (600-1000 chars):</strong> Capture paragraph-level co-citations, showing related but distinct concepts.</li>
+    <li><strong>Longer distances (1200-2000 chars):</strong> Include section-level co-citations, useful for broad thematic analysis but may create noisy networks.</li>
+  </ul>
+  
+  <h5>Advanced Options</h5>
+  <ul>
+    <li><strong>Parse complex multiple citations:</strong> Attempts to separate compound citations like '(Smith 2020; Jones 2019; Williams et al. 2018)' into individual references. This improves network accuracy but may increase processing time.</li>
+    <li><strong>Remove stopwords from analysis:</strong> Excludes common words (e.g., 'the', 'and', 'of') from word frequency and trend analyses, focusing on substantive terms.</li>
+    <li><strong>Custom stopwords (comma-separated):</strong> Add domain-specific stopwords (e.g., 'study', 'research', 'analysis') to refine term extraction for your field.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>📊 Analysis Results and Tabs</h4>
+  
+  <br>
+  
+  <h5>1️⃣ Descriptive Statistics</h5>
+  <p>Provides an overview of the document's structural and linguistic characteristics:</p>
+  
+  <p><strong>Document Metrics:</strong></p>
+  <ul>
+    <li><strong>Total Words:</strong> Overall word count (excluding references section if detected).</li>
+    <li><strong>Citations Found:</strong> Number of unique in-text citations identified.</li>
+    <li><strong>Narrative Citations:</strong> Citations that include author names in the sentence (e.g., 'As Smith (2020) demonstrated...').</li>
+    <li><strong>Citation Density:</strong> Citations per 1000 words, indicating reference saturation. Typical ranges:
+      <ul>
+        <li>0-5: Light citation (review articles often have 10-20+)</li>
+        <li>5-10: Moderate (common in empirical studies)</li>
+        <li>10+: Heavy (common in systematic reviews or theoretical papers)</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <p><strong>Readability Indices:</strong></p>
+  <ul>
+    <li><strong>Flesch-Kincaid Grade:</strong> Estimates U.S. grade level required to understand the text. Values of 12-14 indicate college-level reading, while 16+ suggests graduate-level complexity.</li>
+    <li><strong>Reading Ease (Flesch):</strong> 0-100 scale where higher scores indicate easier readability. Scientific papers typically score 20-40 (difficult to very difficult).</li>
+    <li><strong>ARI Index (Automated Readability Index):</strong> Another grade-level estimate based on character count rather than syllables. Generally correlates with Flesch-Kincaid but may differ for technical texts.</li>
+    <li><strong>Gunning Fog Index:</strong> Estimates years of formal education needed. Values above 17 indicate very complex, technical prose common in specialized research.</li>
+  </ul>
+  
+  <p><strong>Text Statistics:</strong></p>
+  <ul>
+    <li><strong>Characters, Words, Sentences:</strong> Basic text volume metrics.</li>
+    <li><strong>Syllables:</strong> Used in readability calculations.</li>
+    <li><strong>Complex Words:</strong> Words with 3+ syllables, expressed as count and percentage. Higher percentages (>30%) indicate technical vocabulary.</li>
+    <li><strong>Avg words/sentence:</strong> Sentence length. Scientific writing typically ranges from 15-25 words/sentence. Very long sentences (>30) may reduce readability.</li>
+    <li><strong>Lexical Diversity:</strong> Ratio of unique words to total words. Higher diversity (>0.5) suggests varied vocabulary; lower values (<0.4) may indicate repetitive or formulaic writing.</li>
+  </ul>
+  
+  <p><strong>N-grams Analysis:</strong> Displays the most frequent unigrams (single words), bigrams (two-word phrases), and trigrams (three-word phrases) in the document. This reveals key concepts and repeated terminology.</p>
+  
+  <br>
+  
+  <h5>2️⃣ Word Trends</h5>
+  <p>Visualizes how selected terms are distributed across the document's sections. This analysis helps understand the <em>thematic flow</em> and identify where specific concepts are emphasized.</p>
+  
+  <p><strong>Features:</strong></p>
+  <ul>
+    <li><strong>Track up to 10 terms:</strong> Select from the most frequent words or enter custom terms (e.g., domain-specific keywords).</li>
+    <li><strong>Segmentation options:</strong>
+      <ul>
+        <li><strong>Auto (use sections if available):</strong> Automatically detects standard sections (Abstract, Introduction, Methods, Results, Discussion, Conclusion) if structured.</li>
+        <li><strong>Document sections:</strong> Manually defined sections based on detected headers.</li>
+        <li><strong>Equal-length segments:</strong> Divides the document into uniform chunks (e.g., quartiles) regardless of logical structure.</li>
+      </ul>
+    </li>
+    <li><strong>Visualization types:</strong>
+      <ul>
+        <li><strong>Line chart:</strong> Shows temporal trends for each term across segments.</li>
+        <li><strong>Area chart:</strong> Emphasizes volume changes with filled areas under lines.</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <p><strong>Interpretation Examples:</strong></p>
+  <ul>
+    <li>A term peaking in the <strong>Introduction</strong> but absent in <strong>Results</strong> may indicate a concept discussed in literature review but not directly addressed in the study.</li>
+    <li>Uniform distribution suggests a <strong>central theme</strong> integrated throughout the paper.</li>
+    <li>Concentration in <strong>Methods</strong> indicates technical or procedural terminology.</li>
+    <li>Terms appearing only in <strong>Discussion</strong> may represent emerging implications or future directions.</li>
+  </ul>
+  
+  <p><strong>Distribution Statistics:</strong> Provides detailed frequency counts and statistical measures (mean, standard deviation, skewness) for each tracked term across segments.</p>
+  
+  <br>
+  
+  <h5>3️⃣ In-Context Citations</h5>
+  <p>Displays each extracted citation with its surrounding context window, enabling <strong>qualitative citation analysis</strong>. This is one of the most powerful features for understanding <em>why</em> and <em>how</em> sources are cited.</p>
+  
+  <p><strong>Features:</strong></p>
+  <ul>
+    <li><strong>Searchable list:</strong> Filter citations by searching for specific authors, keywords, or phrases.</li>
+    <li><strong>Minimum context words:</strong> Set a threshold to exclude citations with insufficient context (useful for filtering out reference-only lists or captions).</li>
+    <li><strong>Grouping options:</strong>
+      <ul>
+        <li><strong>Auto (use sections if available):</strong> Groups citations by paper section (e.g., all Introduction citations together).</li>
+        <li><strong>Document sections:</strong> Uses manually detected section headers.</li>
+        <li><strong>Equal-length segments:</strong> Groups citations by position in the document (e.g., first quartile, second quartile).</li>
+      </ul>
+    </li>
+    <li><strong>Citation type identification:</strong> The interface distinguishes between:
+      <ul>
+        <li><strong>Parenthetical citations:</strong> References in parentheses, often used for supporting evidence.</li>
+        <li><strong>Narrative citations:</strong> Author names integrated into sentence structure, typically indicating more substantive engagement.</li>
+      </ul>
+    </li>
+    <li><strong>Reference matching:</strong> When possible, the system attempts to match in-text citations to the corresponding full reference in the bibliography. A green indicator shows successful matches; hover to view full reference details.</li>
+  </ul>
+  
+  <p><strong>Analytical Uses:</strong></p>
+  <ul>
+    <li><strong>Citation Function Analysis:</strong> Categorize citations by their role (e.g., establishing theoretical framework, justifying methodology, supporting findings, contrasting results).</li>
+    <li><strong>Author Authority:</strong> Identify which authors are cited most frequently and in what contexts (e.g., some authors may be cited exclusively for methods, others for theory).</li>
+    <li><strong>Hedging and Certainty:</strong> Examine the language surrounding citations to assess how authors express confidence or uncertainty (e.g., 'Smith (2020) demonstrated...' vs. 'some studies suggest... (Smith 2020)').</li>
+    <li><strong>Self-Citation Patterns:</strong> Identify author self-citations and analyze whether they serve substantive or promotional purposes.</li>
+  </ul>
+  
+  <p><strong>Export Contexts:</strong> Use the 'Export Contexts' button to download all citation contexts as a structured dataset (CSV format) for external qualitative coding or further analysis in tools like NVivo, ATLAS.ti, or custom R scripts.</p>
+  
+  <br>
+  
+  <h5>4️⃣ Network Analysis</h5>
+  <p>Generates a <strong>citation co-occurrence network</strong> that visualizes which references are cited near each other in the text. This reveals the intellectual structure and conceptual clusters within the paper.</p>
+  
+  <p><strong>Network Construction:</strong></p>
+  <ul>
+    <li><strong>Nodes:</strong> Each node represents a cited reference (identified by first author and year).</li>
+    <li><strong>Edges:</strong> A link is created between two references if they appear within the specified <em>Max Distance</em> parameter (default: 800 characters).</li>
+    <li><strong>Node Size:</strong> Proportional to the number of times each reference is cited in the document (total citation frequency).</li>
+    <li><strong>Node Color:</strong> Represents the document section where the reference appears most frequently, helping identify whether certain clusters are methodological, theoretical, or results-focused.</li>
+  </ul>
+  
+  <p><strong>Interpretation:</strong></p>
+  <ul>
+    <li><strong>Densely connected clusters:</strong> Groups of tightly co-cited references indicate core conceptual or methodological frameworks that the paper builds upon.</li>
+    <li><strong>Bridge references:</strong> Nodes connecting otherwise separate clusters represent interdisciplinary links or integrative studies that synthesize multiple research traditions.</li>
+    <li><strong>Peripheral isolates:</strong> References cited alone without nearby co-citations may serve specific, standalone purposes (e.g., citing a statistical test or a single example).</li>
+    <li><strong>Section-based coloring:</strong> If most nodes are blue (Introduction), the paper heavily relies on literature review. If red (Methods) dominates, it's methodology-focused.</li>
+  </ul>
+  
+  <p><strong>Network Metrics:</strong> While not explicitly displayed, users can infer centrality and clustering qualitatively:
+    <ul>
+      <li><strong>Central nodes (many connections):</strong> Foundational references that anchor the paper's argument.</li>
+      <li><strong>Betweenness (bridge position):</strong> References connecting distinct themes, suggesting synthesis or interdisciplinary work.</li>
+    </ul>
+  </p>
+  
+  <p><strong>Export Network:</strong> Download the network as a graph file (GraphML or edge list format) for advanced analysis in specialized network software like Gephi, Cytoscape, or igraph in R.</p>
+  
+  <p><strong>Legend:</strong> The right panel displays a legend showing the color coding for different document sections. This helps quickly identify which parts of the paper contribute most to the citation network.</p>
+  
+  <br>
+  
+  <h5>5️⃣ References</h5>
+  <p>Displays the complete <strong>bibliography</strong> extracted from the document. References are automatically parsed and enriched with metadata from <strong>Crossref</strong> and <strong>OpenAlex</strong> databases when DOIs are available.</p>
+  
+  <p><strong>Features:</strong></p>
+  <ul>
+    <li><strong>Search functionality:</strong> Find specific references by author name, title, year, or DOI.</li>
+    <li><strong>Source indicators:</strong> Icons show the data source:
+      <ul>
+        <li><strong>PDF icon:</strong> Reference extracted directly from the PDF.</li>
+        <li><strong>Crossref icon:</strong> Metadata retrieved from Crossref (indicates DOI-based matching).</li>
+        <li><strong>OpenAlex icon:</strong> Metadata enriched from OpenAlex (provides additional fields like citation counts, authors' affiliations).</li>
+      </ul>
+    </li>
+    <li><strong>View Details:</strong> Click on any reference to open a detailed modal showing:
+      <ul>
+        <li>Full author list</li>
+        <li>Publication year and journal/venue</li>
+        <li>DOI (with direct link to the publisher)</li>
+        <li>Abstract (if available)</li>
+        <li>Citation counts and impact metrics from OpenAlex</li>
+      </ul>
+    </li>
+    <li><strong>Export References:</strong> Download the bibliography in various formats (BibTeX, RIS, CSV) for import into reference managers like Zotero, Mendeley, or EndNote.</li>
+  </ul>
+  
+  <p><strong>Reference Matching Quality:</strong></p>
+  <ul>
+    <li><strong>High confidence (green):</strong> Reference successfully matched to Crossref/OpenAlex with high certainty (exact DOI or strong title/author match).</li>
+    <li><strong>Low confidence (yellow):</strong> Partial match based on fuzzy title/author similarity; manual verification recommended.</li>
+    <li><strong>No match (red):</strong> Reference could not be matched to external databases. Possible reasons include:
+      <ul>
+        <li>Missing or incorrect DOI</li>
+        <li>Pre-print or non-indexed publication</li>
+        <li>Parsing errors in reference extraction</li>
+        <li>Non-standard formatting in the original PDF</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <p><strong>Total References:</strong> The header shows the breakdown:
+    <ul>
+      <li><strong>Total References:</strong> All unique references found in the document.</li>
+      <li><strong>From PDF:</strong> References extracted directly from the PDF (may have parsing imperfections).</li>
+      <li><strong>From Crossref:</strong> References successfully matched to the Crossref database.</li>
+      <li><strong>From OpenAlex:</strong> References matched to OpenAlex (often overlaps with Crossref but provides broader coverage for non-DOI works).</li>
+    </ul>
+  </p>
+  
+  <br>
+  
+  <h5>6️⃣ BiblioAI Summary</h5>
+  <p>Uses <strong>Google Gemini</strong> AI models to generate intelligent, context-aware summaries of the analyzed document. This feature transforms raw PDF content into structured, actionable insights.</p>
+  
+  <p><strong>Summary Types:</strong></p>
+  <ul>
+    <li><strong>Short Abstract (250 words):</strong> A concise overview covering the main research question, methodology, key findings, and conclusions. Ideal for quick reference or creating study cards.</li>
+    <li><strong>Narrative Abstract (500-600 words):</strong> A detailed, paragraph-form summary that places the research in context, explains the study's rationale, describes methods and results, and discusses implications. Suitable for grant applications or research summaries.</li>
+    <li><strong>IMRaD Structure Summary:</strong> A structured summary organized by the traditional scientific paper format:
+      <ul>
+        <li><strong>Introduction:</strong> Background, research gap, and objectives</li>
+        <li><strong>Methods:</strong> Study design, data sources, analytical approach</li>
+        <li><strong>Results:</strong> Key findings with quantitative details where applicable</li>
+        <li><strong>Discussion:</strong> Interpretation, limitations, and implications</li>
+      </ul>
+      This format is particularly useful for systematic reviews or meta-analyses where standardized extraction is needed.
+    </li>
+    <li><strong>Thematic Bibliography:</strong> Generates a thematic categorization of the paper's references, grouping cited works by conceptual topic (e.g., 'Theoretical Foundations', 'Methodological Approaches', 'Empirical Evidence', 'Critiques and Limitations'). This is invaluable for:
+      <ul>
+        <li>Understanding how the author organizes their intellectual framework</li>
+        <li>Identifying key reference clusters for literature review purposes</li>
+        <li>Discovering reading lists organized by research theme</li>
+      </ul>
+    </li>
+    <li><strong>Research Questions & Context:</strong> Extracts and articulates:
+      <ul>
+        <li>The main research question(s) or hypotheses</li>
+        <li>The broader research context and motivation</li>
+        <li>Key theoretical or empirical gaps the study addresses</li>
+        <li>The study's positioning within its field</li>
+      </ul>
+      Useful for understanding the strategic positioning of the research and for identifying potential research directions.
+    </li>
+  </ul>
+  
+  <p><strong>Customization:</strong></p>
+  <ul>
+    <li><strong>Edit Prompt:</strong> The AI summary generation is driven by an editable prompt template. Users can:
+      <ul>
+        <li>Add specific questions to the prompt (e.g., 'What statistical methods were used?')</li>
+        <li>Specify output format preferences</li>
+        <li>Include contextual information (e.g., 'This paper is from a special issue on climate change')</li>
+        <li>Request focus on particular sections (e.g., 'Emphasize methodological contributions')</li>
+      </ul>
+    </li>
+    <li><strong>Language Selection:</strong> Summaries can be generated in multiple languages (depending on Gemini model support), making international collaboration and translation easier.</li>
+  </ul>
+  
+  <p><strong>Requirements:</strong></p>
+  <ul>
+    <li>A valid <strong>Google Gemini API key</strong> must be configured in <em>Settings</em>. Free tier limits allow for moderate usage (typically 15-60 requests per minute depending on the model).</li>
+    <li>The 'API Key Configured' indicator must show green for the feature to work.</li>
+  </ul>
+  
+  <p><strong>Best Practices:</strong></p>
+  <ul>
+    <li><strong>Verify AI outputs:</strong> While Gemini models are highly capable, always review generated summaries for accuracy, especially for technical details or numerical results.</li>
+    <li><strong>Use appropriate summary types:</strong> Short abstracts are great for skimming large numbers of papers, while IMRaD summaries are better for in-depth study or quality appraisal.</li>
+    <li><strong>Combine with manual review:</strong> AI summaries should complement, not replace, human reading. Use them to prioritize which papers to read in full.</li>
+    <li><strong>Iterate prompts:</strong> If the initial summary misses key information, refine your prompt with more specific instructions.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>🧠 Integration with Biblio AI</h4>
+  <p><strong>Content Analysis</strong> is fully integrated with the <strong>Biblio AI</strong> ecosystem. Throughout the analysis tabs, users can activate AI-assisted interpretation panels that:</p>
+  <ul>
+    <li>Explain patterns in the citation network (e.g., why certain clusters form)</li>
+    <li>Interpret readability scores in the context of the target audience and field norms</li>
+    <li>Suggest alternative analyses or parameters based on detected document characteristics</li>
+    <li>Generate publication-ready text descriptions of figures and results</li>
+  </ul>
+  
+  <p>These dynamic interpretations adapt to your specific document and parameters, providing contextualized guidance rather than generic explanations.</p>
+  
+  <br>
+  
+  <h4>💡 Advanced Use Cases</h4>
+  
+  <h5>1. Citation Context Mining for Meta-Research</h5>
+  <p>Researchers studying citation practices can use Content Analysis to:</p>
+  <ul>
+    <li>Quantify the proportion of narrative vs. parenthetical citations across papers</li>
+    <li>Analyze sentiment or evaluative language in citation contexts (requires exporting contexts for sentiment analysis)</li>
+    <li>Study how often citations are backed by direct quotes vs. paraphrases</li>
+    <li>Examine self-citation contexts to distinguish between necessary methodological references and gratuitous self-promotion</li>
+  </ul>
+  
+  <h5>2. Quality and Transparency Assessment</h5>
+  <p>Evaluate methodological transparency by:</p>
+  <ul>
+    <li>Checking if key methodological references appear in the Methods section (using In-Context Citations and section grouping)</li>
+    <li>Identifying whether data sources and statistical tests are properly cited</li>
+    <li>Assessing whether limitations are discussed with appropriate citations to prior critiques</li>
+  </ul>
+  
+  <h5>3. Comparative Literature Review</h5>
+  <p>Analyze multiple papers on the same topic by:</p>
+  <ul>
+    <li>Running Content Analysis on several key papers</li>
+    <li>Comparing their citation networks to identify consensus foundational references</li>
+    <li>Examining differences in thematic emphasis using Word Trends</li>
+    <li>Creating a merged bibliography of all thematic bibliographies from BiblioAI summaries</li>
+  </ul>
+  
+  <h5>4. Pedagogical Applications</h5>
+  <p>Use Content Analysis to teach:</p>
+  <ul>
+    <li><strong>Citation Skills:</strong> Show students examples of effective narrative vs. parenthetical citations.</li>
+    <li><strong>Literature Review Structure:</strong> Demonstrate how successful papers organize their conceptual frameworks using network analysis.</li>
+    <li><strong>Writing Clarity:</strong> Use readability scores to illustrate the balance between technical precision and accessibility.</li>
+    <li><strong>Source Integration:</strong> Highlight how professional academics weave citations into argumentative flow.</li>
+  </ul>
+  
+  <h5>5. Editorial and Peer Review Support</h5>
+  <p>Editors and reviewers can use Content Analysis to:</p>
+  <ul>
+    <li>Quickly assess whether a manuscript cites the appropriate foundational literature (using network analysis to check for missing clusters)</li>
+    <li>Identify potential plagiarism or over-reliance on a single source (using n-gram analysis and citation frequency)</li>
+    <li>Evaluate whether methods and results are properly supported by citations</li>
+    <li>Generate constructive feedback on readability for papers that score poorly on standard metrics</li>
+  </ul>
+  
+  <br>
+  
+  <h4>📌 Best Practices</h4>
+  <ul>
+    <li><strong>PDF Quality Matters:</strong> Text-based PDFs (not scanned images) produce the most accurate results. Use OCR pre-processing for image-based PDFs.</li>
+    <li><strong>Check Citation Parsing:</strong> Always review the 'Citations Found' count. If it seems unusually low, try enabling AI-enhanced extraction or manually specifying the citation format.</li>
+    <li><strong>Balance Context Windows:</strong> Larger windows provide richer qualitative data but increase processing time and data volume. Start with default settings (20 words) and adjust based on your analytical needs.</li>
+    <li><strong>Export for Deep Dives:</strong> For complex citation function analysis or qualitative coding, export the citation contexts to CSV and work with specialized qualitative data analysis software.</li>
+    <li><strong>Combine with Traditional Bibliometrics:</strong> Content Analysis is designed to complement, not replace, traditional bibliometric methods. Use it alongside tools like <em>Data → Overview</em> or <em>Conceptual Structure</em> for a complete picture.</li>
+    <li><strong>Mind the Model Limits:</strong> AI-powered features (enhanced extraction, BiblioAI summaries) have rate limits and token constraints. For very long documents (>50 pages), summaries may truncate; consider analyzing sections separately.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>⚠️ Limitations and Considerations</h4>
+  <ul>
+    <li><strong>Citation Format Variability:</strong> Non-standard or inconsistent citation formats may result in incomplete extraction. Manual verification is recommended for critical analyses.</li>
+    <li><strong>Automatic Section Detection:</strong> The system attempts to identify standard sections (Introduction, Methods, etc.) using heuristics. Papers with unconventional structures may be segmented incorrectly. Use 'Equal-length segments' as a fallback.</li>
+    <li><strong>Language Support:</strong> While the tool supports PDFs in any language, AI-powered features (enhanced extraction, summaries) are optimized for English. Other languages may produce less accurate results.</li>
+    <li><strong>Reference Matching Accuracy:</strong> Matching in-text citations to bibliography entries relies on fuzzy matching when DOIs are unavailable. Ambiguous references (e.g., 'Smith et al., 2020' when multiple Smiths exist) may match incorrectly.</li>
+    <li><strong>Network Interpretation:</strong> Citation co-occurrence does not imply intellectual similarity. References may appear together for diverse reasons (e.g., contrasting studies, citing a methods paper alongside an application). Always combine network analysis with context reading.</li>
+    <li><strong>AI Hallucinations:</strong> While rare, Biblio AI summaries may occasionally include plausible but incorrect details not present in the original text. Critical applications (e.g., systematic reviews) should verify AI outputs against the source document.</li>
+    <li><strong>Database Coverage:</strong> Reference enrichment from Crossref/OpenAlex is limited to indexed works with DOIs. Books, preprints, gray literature, or very recent papers may not be matched.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>🔄 Integration with Biblioshiny Workflow</h4>
+  <p><strong>Content Analysis</strong> complements other Biblioshiny modules:</p>
+  <ul>
+    <li><strong>Import Phase:</strong> After collecting a bibliographic dataset (e.g., from Web of Science), use Content Analysis to deeply examine a few key highly-cited papers identified in <em>Most Local Cited Documents</em>.</li>
+    <li><strong>Conceptual Structure Analysis:</strong> Once you've identified thematic clusters using co-word analysis or MCA, select representative papers from each cluster and use Content Analysis to understand how those themes are discussed and cited within individual papers.</li>
+    <li><strong>Intellectual Structure:</strong> After running co-citation or bibliographic coupling networks, use Content Analysis on the central nodes to see <em>why</em> they're central—are they cited together because they address the same method, theory, or empirical finding?</li>
+    <li><strong>Trend Topics:</strong> When you identify an emerging trend, analyze a seminal paper from that trend to understand its intellectual roots and citation context.</li>
+  </ul>
+  
+  <br>
+  
+  <h4>📚 Key References</h4>
+  
+  <p><strong>Main References on Bibliometrix and Content Analysis Tools:</strong></p>
+  
+  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  
+  <p><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2024).</strong> <i>Comparative science mapping: a novel conceptual structure analysis with metadata.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-024-05161-6' target='_blank'>https://doi.org/10.1007/s11192-024-05161-6</a></p>
+  
+  <p><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2022).</strong> <i>Thematic Analysis as a New Culturomic Tool: The Social Media Coverage on COVID-19 Pandemic in Italy.</i> <strong>Sustainability</strong>, 14(6), 3643. <a href='https://doi.org/10.3390/su14063643' target='_blank'>https://doi.org/10.3390/su14063643</a></p>
+  
+  <p><strong>Aria, M., Misuraca, M., & Spano, M. (2020).</strong> <i>Mapping the evolution of social research and data science on 30 years of Social Indicators Research.</i> <strong>Social Indicators Research</strong>, 149, 803–831. <a href='https://doi.org/10.1007/s11205-020-02281-3' target='_blank'>https://doi.org/10.1007/s11205-020-02281-3</a></p>
+  
+  <br>
+  
+  <p><strong>Quantitative Content Analysis - Foundational Works:</strong></p>
+  
+  <p><strong>Berelson, B. (1952).</strong> <i>Content Analysis in Communication Research.</i> Glencoe, IL: Free Press.</p>
+  
+  <p><strong>Krippendorff, K. (2018).</strong> <i>Content Analysis: An Introduction to Its Methodology</i> (4th ed.). Thousand Oaks, CA: SAGE Publications.</p>
+  
+  <p><strong>Neuendorf, K. A. (2017).</strong> <i>The Content Analysis Guidebook</i> (2nd ed.). Thousand Oaks, CA: SAGE Publications.</p>
+  
+  <p><strong>Weber, R. P. (1990).</strong> <i>Basic Content Analysis</i> (2nd ed.). Newbury Park, CA: SAGE Publications.</p>
+  
+  <br>
+  
+  <p><strong>Computational and Quantitative Text Analysis:</strong></p>
+  
+  <p><strong>Grimmer, J., & Stewart, B. M. (2013).</strong> <i>Text as Data: The Promise and Pitfalls of Automatic Content Analysis Methods for Political Texts.</i> <strong>Political Analysis</strong>, 21(3), 267–297. <a href='https://doi.org/10.1093/pan/mps028' target='_blank'>https://doi.org/10.1093/pan/mps028</a></p>
+  
+  <p><strong>Roberts, M. E., Stewart, B. M., & Tingley, D. (2019).</strong> <i>stm: An R Package for Structural Topic Models.</i> <strong>Journal of Statistical Software</strong>, 91(2), 1–40. <a href='https://doi.org/10.18637/jss.v091.i02' target='_blank'>https://doi.org/10.18637/jss.v091.i02</a></p>
+  
+  <p><strong>Welbers, K., Van Atteveldt, W., & Benoit, K. (2017).</strong> <i>Text Analysis in R.</i> <strong>Communication Methods and Measures</strong>, 11(4), 245–265. <a href='https://doi.org/10.1080/19312458.2017.1387238' target='_blank'>https://doi.org/10.1080/19312458.2017.1387238</a></p>
+  
+  <p><strong>Boumans, J. W., & Trilling, D. (2016).</strong> <i>Taking Stock of the Toolkit: An overview of relevant automated content analysis approaches and techniques for digital journalism scholars.</i> <strong>Digital Journalism</strong>, 4(1), 8–23. <a href='https://doi.org/10.1080/21670811.2015.1096598' target='_blank'>https://doi.org/10.1080/21670811.2015.1096598</a></p>
+  
+  <p><strong>Ignatow, G., & Mihalcea, R. (2017).</strong> <i>Text Mining: A Guidebook for the Social Sciences.</i> Thousand Oaks, CA: SAGE Publications.</p>
+  
+  <br>
+  
+  <h4>🎓 Further Reading</h4>
+  <p>For more information on using Content Analysis and related techniques, see:</p>
+  <ul>
+    <li><strong>bibliometrix documentation:</strong> <a href='https://www.bibliometrix.org' target='_blank'>https://www.bibliometrix.org</a></li>
+    <li><strong>contentanalysis R package:</strong> <a href='https://github.com/massimoaria/contentanalysis' target='_blank'>https://github.com/massimoaria/contentanalysis</a></li>
+    <li><strong>Quantitative text analysis methods:</strong> Grimmer, J., Roberts, M. E., & Stewart, B. M. (2022). <i>Text as Data: A New Framework for Machine Learning and the Social Sciences</i>. Princeton University Press.</li>
+    <li><strong>Content analysis in communication research:</strong> Riffe, D., Lacy, S., & Fico, F. (2014). <i>Analyzing Media Messages: Using Quantitative Content Analysis in Research</i> (3rd ed.). Routledge.</li>
+  </ul>
+  
+  </div>
+  </body>"
+
   return(list(
-    biblioAI = biblioAI, 
-    info = info, 
-    publications = publications, 
-    filters = filters, 
+    biblioAI = biblioAI,
+    info = info,
+    publications = publications,
+    filters = filters,
     authorProfile = authorProfile,
     referenceMatching = referenceMatching,
     importOrLoad = importOrLoad,
     api = api,
     mergeCollections = mergeCollections,
     mainInformation = mainInformation,
-    lifeCycle = lifeCycle
+    lifeCycle = lifeCycle,
+    contentAnalysis = contentAnalysis
   ))
 }

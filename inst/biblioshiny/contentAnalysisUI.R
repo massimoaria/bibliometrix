@@ -78,17 +78,40 @@ content_analysis_tab <- function(id = "content_analysis") {
                 # First row: preview button and message
                 fluidRow(
                   column(
-                    12,
+                    6,
                     actionButton(
                       "open_preview_btn",
                       "View Extracted Text & PDF Preview",
                       icon = icon("file-alt"),
                       class = "btn-info",
                       onclick = "$('#previewModal').modal('show');"
+                    )
+                  ),
+                  column(
+                    6,
+                    downloadButton(
+                      "save_text_file",
+                      "Save Extracted Text",
+                      icon = icon("save"),
+                      class = "btn-success",
+                      style = "width: 100%;"
+                    )
+                  )
+                ),
+                fluidRow(
+                  column(
+                    12,
+                    div(
+                      style = "margin-top: 10px;",
+                      span(
+                        icon("check-circle", style = "color: #27ae60;"),
+                        " Text extracted successfully!",
+                        style = "color: #555; font-weight: 500;"
+                      )
                     ),
-                    span(
-                      " Text extracted successfully!",
-                      style = "margin-left: 15px; color: #555; font-weight: 500;"
+                    helpText(
+                      "💾 The 'Save' button will save the text with DOI and citation format info for easy reloading.",
+                      style = "margin-top: 5px; font-size: 11px; color: #666; font-style: italic;"
                     )
                   )
                 ),
@@ -1307,173 +1330,262 @@ content_analysis_tab <- function(id = "content_analysis") {
           column(
             2,
 
-            # PDF Import Card
+            # Import Method Selection
             div(
-              class = "box box-primary",
+              class = "box box-info",
               div(
                 class = "box-body",
+                style = "padding: 15px;",
 
-                tags$details(
-                  id = "pdf_import_details",
-                  open = NA, # Open by default
-                  tags$summary(
-                    "1. Import PDF File ▼",
-                    style = "font-weight: bold; cursor: pointer; color: #2E86AB; font-size: 16px; padding: 8px 0;"
+                div(
+                  style = "text-align: center; margin-bottom: 15px;",
+                  icon(
+                    "file-import",
+                    style = "font-size: 28px; color: #2E86AB;"
                   ),
-                  br(),
+                  h4(
+                    "Choose Import Method",
+                    style = "color: #2E86AB; margin-top: 10px; margin-bottom: 5px; font-weight: bold;"
+                  )
+                ),
 
-                  fileInput(
-                    "pdf_file",
-                    label = "Choose PDF File",
-                    accept = c(".pdf"),
-                    buttonLabel = "Browse...",
-                    placeholder = "No file selected",
-                    width = "100%"
+                radioButtons(
+                  "import_method",
+                  label = NULL,
+                  choices = list(
+                    "Import PDF File" = "import_pdf",
+                    "Load Saved Text File" = "load_txt"
                   ),
+                  selected = "import_pdf",
+                  width = "100%"
+                ),
 
-                  numericInput(
-                    "Columns",
-                    label = "Number of Columns in PDF",
-                    value = NULL,
-                    min = 1,
-                    max = 3,
-                    step = 1,
-                    width = "100%"
-                  ),
-                  helpText(
-                    "Specify if the PDF has multiple columns (e.g., 2 for typical academic articles)."
-                  ),
+                helpText(
+                  "Select whether to extract text from a PDF or load a previously saved text file.",
+                  style = "font-size: 11px; color: #666; text-align: center; margin-top: -5px;"
+                )
+              )
+            ),
 
-                  # MODIFIED: Citation Type Selection - NO DEFAULT
-                  radioButtons(
-                    "citation_type_import",
-                    label = div(
-                      tags$span(
-                        "Citation Format in PDF:",
-                        style = "color: #d9534f; font-weight: bold;"
-                      ),
-                      tags$span(
-                        " *",
-                        style = "color: #d9534f; font-size: 16px;"
-                      ),
-                      tags$a(
-                        icon("info-circle"),
-                        href = "#",
-                        onclick = "return false;",
-                        style = "margin-left: 5px; color: #3498db; cursor: help;",
-                        title = "Choose the citation format used in your document. This helps avoid false positives in citation detection."
-                      )
+            # PDF Import Card - visible only if import_pdf is selected
+            conditionalPanel(
+              condition = "input.import_method == 'import_pdf'",
+              div(
+                class = "box box-primary",
+                div(
+                  class = "box-body",
+
+                  tags$details(
+                    id = "pdf_import_details",
+                    open = NA, # Open by default
+                    tags$summary(
+                      "1. Import PDF File ▼",
+                      style = "font-weight: bold; cursor: pointer; color: #2E86AB; font-size: 16px; padding: 8px 0;"
                     ),
-                    choices = list(
-                      "Author-year (Smith, 2020)" = "author_year",
-                      "Numeric brackets [1]" = "numeric_bracketed",
-                      "Numeric superscript¹" = "numeric_superscript",
-                      "All formats (may have false positives)" = "all"
+                    br(),
+
+                    fileInput(
+                      "pdf_file",
+                      label = "Choose PDF File",
+                      accept = c(".pdf"),
+                      buttonLabel = "Browse...",
+                      placeholder = "No file selected",
+                      width = "100%"
                     ),
-                    selected = character(0), # NO DEFAULT SELECTION
-                    width = "100%"
-                  ),
 
-                  # Warning message when no selection
-                  conditionalPanel(
-                    condition = "!input.citation_type_import || input.citation_type_import == ''",
-                    div(
-                      style = "background-color: #fcf8e3; padding: 8px 12px; border-radius: 4px; border-left: 4px solid #f0ad4e; margin-top: -8px; margin-bottom: 10px;",
-                      icon("exclamation-triangle", style = "color: #8a6d3b;"),
-                      span(
-                        " Please select the citation format before extracting text.",
-                        style = "color: #8a6d3b; margin-left: 8px; font-size: 12px; font-weight: 500;"
-                      )
-                    )
-                  ),
+                    numericInput(
+                      "Columns",
+                      label = "Number of Columns in PDF",
+                      value = NULL,
+                      min = 1,
+                      max = 3,
+                      step = 1,
+                      width = "100%"
+                    ),
+                    helpText(
+                      "Specify if the PDF has multiple columns (e.g., 2 for typical academic articles)."
+                    ),
 
-                  # AI Support checkbox - visible only when Gemini API is available
-                  conditionalPanel(
-                    condition = "output.gemini_api_available",
-                    div(
-                      style = "margin-top: 12px; margin-bottom: 12px; background-color: #e8f8f5; padding: 15px; border-radius: 6px; border-left: 4px solid #17a589;",
-                      div(
-                        style = "display: flex; align-items: center; gap: 10px;",
-                        div(
-                          style = "flex-shrink: 0;",
-                          checkboxInput(
-                            "enable_ai_support",
-                            label = NULL,
-                            value = FALSE,
-                            width = "auto"
-                          )
-                        ),
-                        div(
-                          style = "display: flex; align-items: center; flex-grow: 1;",
-                          icon(
-                            "robot",
-                            style = "color: #17a589; margin-right: 10px; font-size: 22px;"
-                          ),
-                          span(
-                            "Enable AI-Enhanced Extraction",
-                            style = "font-weight: bold; color: #17a589; font-size: 15px;"
-                          )
-                        )
-                      ),
-                      helpText(
-                        "Use advanced AI to improve text extraction quality and citation detection accuracy.",
-                        style = "margin-top: 8px; margin-bottom: 0px; margin-left: 35px; font-size: 11px; color: #555;"
-                      )
-                    )
-                  ),
-
-                  # Processing spinner - visible ONLY during PDF text extraction (not during analysis)
-                  conditionalPanel(
-                    condition = "$('html').hasClass('shiny-busy') && (input.extract_text > 0) && !output.text_extracted",
-                    div(
-                      style = "margin-top: 10px; margin-bottom: 10px; background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; text-align: center;",
-                      div(
-                        icon(
-                          "spinner",
-                          class = "fa-spin",
-                          style = "font-size: 24px; color: #ff9800; margin-bottom: 10px;"
-                        ),
-                        br(),
-                        tags$strong(
-                          "Extracting Text from PDF...",
-                          style = "color: #856404; font-size: 14px;"
-                        ),
-                        br(),
+                    # MODIFIED: Citation Type Selection - NO DEFAULT
+                    radioButtons(
+                      "citation_type_import",
+                      label = div(
                         tags$span(
-                          id = "extraction_status_text",
-                          "Please wait while we extract the document content.",
-                          style = "color: #856404; font-size: 12px; font-style: italic;"
+                          "Citation Format in PDF:",
+                          style = "color: #d9534f; font-weight: bold;"
+                        ),
+                        tags$span(
+                          " *",
+                          style = "color: #d9534f; font-size: 16px;"
+                        ),
+                        tags$a(
+                          icon("info-circle"),
+                          href = "#",
+                          onclick = "return false;",
+                          style = "margin-left: 5px; color: #3498db; cursor: help;",
+                          title = "Choose the citation format used in your document. This helps avoid false positives in citation detection."
+                        )
+                      ),
+                      choices = list(
+                        "Author-year (Smith, 2020)" = "author_year",
+                        "Numeric brackets [1]" = "numeric_bracketed",
+                        "Numeric superscript¹" = "numeric_superscript",
+                        "All formats (may have false positives)" = "all"
+                      ),
+                      selected = character(0), # NO DEFAULT SELECTION
+                      width = "100%"
+                    ),
+
+                    # Warning message when no selection
+                    conditionalPanel(
+                      condition = "!input.citation_type_import || input.citation_type_import == ''",
+                      div(
+                        style = "background-color: #fcf8e3; padding: 8px 12px; border-radius: 4px; border-left: 4px solid #f0ad4e; margin-top: -8px; margin-bottom: 10px;",
+                        icon("exclamation-triangle", style = "color: #8a6d3b;"),
+                        span(
+                          " Please select the citation format before extracting text.",
+                          style = "color: #8a6d3b; margin-left: 8px; font-size: 12px; font-weight: 500;"
                         )
                       )
-                    )
-                  ),
+                    ),
 
-                  # File info display
-                  conditionalPanel(
-                    condition = "output.pdf_uploaded",
-                    div(
-                      style = "background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;",
-                      icon("file-pdf", style = "color: #e74c3c;"),
-                      span(
-                        " PDF uploaded successfully!",
-                        style = "color: #27ae60; font-weight: bold;"
-                      ),
-                      br(),
-                      textOutput("pdf_info", inline = TRUE)
-                    )
-                  ),
+                    # AI Support checkbox - visible only when Gemini API is available
+                    conditionalPanel(
+                      condition = "output.gemini_api_available",
+                      div(
+                        style = "margin-top: 12px; margin-bottom: 12px; background-color: #e8f8f5; padding: 15px; border-radius: 6px; border-left: 4px solid #17a589;",
+                        div(
+                          style = "display: flex; align-items: center; gap: 10px;",
+                          div(
+                            style = "flex-shrink: 0;",
+                            checkboxInput(
+                              "enable_ai_support",
+                              label = NULL,
+                              value = FALSE,
+                              width = "auto"
+                            )
+                          ),
+                          div(
+                            style = "display: flex; align-items: center; flex-grow: 1;",
+                            icon(
+                              "robot",
+                              style = "color: #17a589; margin-right: 10px; font-size: 22px;"
+                            ),
+                            span(
+                              "Enable AI-Enhanced Extraction",
+                              style = "font-weight: bold; color: #17a589; font-size: 15px;"
+                            )
+                          )
+                        ),
+                        helpText(
+                          "Use advanced AI to improve text extraction quality and citation detection accuracy.",
+                          style = "margin-top: 8px; margin-bottom: 0px; margin-left: 35px; font-size: 11px; color: #555;"
+                        )
+                      )
+                    ),
 
-                  br(),
-                  actionButton(
-                    "extract_text",
-                    "Extract Text from PDF",
-                    icon = icon("file-text"),
-                    class = "btn-info btn-block",
-                    style = "margin-top: 10px;"
+                    # Processing spinner - visible ONLY during PDF text extraction (not during analysis)
+                    conditionalPanel(
+                      condition = "$('html').hasClass('shiny-busy') && (input.extract_text > 0) && !output.text_extracted",
+                      div(
+                        style = "margin-top: 10px; margin-bottom: 10px; background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; text-align: center;",
+                        div(
+                          icon(
+                            "spinner",
+                            class = "fa-spin",
+                            style = "font-size: 24px; color: #ff9800; margin-bottom: 10px;"
+                          ),
+                          br(),
+                          tags$strong(
+                            "Extracting Text from PDF...",
+                            style = "color: #856404; font-size: 14px;"
+                          ),
+                          br(),
+                          tags$span(
+                            id = "extraction_status_text",
+                            "Please wait while we extract the document content.",
+                            style = "color: #856404; font-size: 12px; font-style: italic;"
+                          )
+                        )
+                      )
+                    ),
+
+                    # File info display
+                    conditionalPanel(
+                      condition = "output.pdf_uploaded",
+                      div(
+                        style = "background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;",
+                        icon("file-pdf", style = "color: #e74c3c;"),
+                        span(
+                          " PDF uploaded successfully!",
+                          style = "color: #27ae60; font-weight: bold;"
+                        ),
+                        br(),
+                        textOutput("pdf_info", inline = TRUE)
+                      )
+                    ),
+
+                    br(),
+                    actionButton(
+                      "extract_text",
+                      "Extract Text from PDF",
+                      icon = icon("file-text"),
+                      class = "btn-info btn-block",
+                      style = "margin-top: 10px;"
+                    )
                   )
                 )
               )
             ),
+            # End of conditionalPanel for import_pdf
+
+            # Load Text File Card - visible only if load_txt is selected
+            conditionalPanel(
+              condition = "input.import_method == 'load_txt'",
+              div(
+                class = "box box-primary",
+                div(
+                  class = "box-body",
+                  tags$details(
+                    open = NA, # Open by default
+                    tags$summary(
+                      "1. Load Saved Text File ▼",
+                      style = "font-weight: bold; color: #2E86AB; font-size: 16px; padding: 8px 0; margin-bottom: 15px; display: block;"
+                    ),
+
+                    helpText(
+                      "Load a .txt file that was previously saved from this tool. The file should have DOI and citation format info in the first lines for automatic configuration.",
+                      style = "font-size: 12px; color: #666; margin-bottom: 15px;"
+                    ),
+
+                    fileInput(
+                      "load_text_file",
+                      "Select Text File",
+                      accept = c("text/plain", ".txt"),
+                      buttonLabel = "Browse...",
+                      placeholder = "No file selected",
+                      width = "100%"
+                    ),
+
+                    # File info display for loaded text
+                    conditionalPanel(
+                      condition = "output.text_file_loaded",
+                      div(
+                        style = "background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;",
+                        icon("file-alt", style = "color: #3498db;"),
+                        span(
+                          " Text file loaded successfully!",
+                          style = "color: #27ae60; font-weight: bold;"
+                        ),
+                        br(),
+                        textOutput("text_file_info", inline = TRUE)
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            # End of conditionalPanel for load_txt
 
             # Analysis Parameters Card
             div(
@@ -1596,6 +1708,7 @@ content_analysis_tab <- function(id = "content_analysis") {
             )
           )
         )
+        # )
       ), # Close Import PDF File tabPanel
 
       # ===========================================

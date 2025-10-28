@@ -161,12 +161,6 @@ content_analysis_server <- function(input, output, session, values) {
 
         values$pdf_sections <- pdf_text
 
-        # if (length(pdf_text) > 1) {
-        #   values$pdf_sections <- pdf_text[-1]
-        # } else {
-        #   values$pdf_sections <- pdf_text # Fallback to full text if no sections
-        # }
-
         values$citation_type_used <- citation_type # Store for later use
 
         pdf_metadata <- unlist(pdftools::pdf_info(input$pdf_file$datapath))
@@ -392,6 +386,209 @@ content_analysis_server <- function(input, output, session, values) {
       }
     },
     ignoreInit = TRUE
+  )
+
+  # ===========================================
+  # LOAD PREVIOUSLY SAVED TEXT FILE
+  # ===========================================
+
+  # Check if text file is loaded
+  output$text_file_loaded <- reactive({
+    return(!is.null(input$load_text_file))
+  })
+  outputOptions(output, "text_file_loaded", suspendWhenHidden = FALSE)
+
+  # Display text file info
+  output$text_file_info <- renderText({
+    if (!is.null(input$load_text_file)) {
+      file_size <- round(input$load_text_file$size / 1024, 2)
+      paste("File:", input$load_text_file$name, "| Size:", file_size, "KB")
+    }
+  })
+
+  observeEvent(input$load_text_file, {
+    req(input$load_text_file)
+
+    tryCatch(
+      {
+        # Read the text file
+        file_content <- readLines(input$load_text_file$datapath, warn = FALSE)
+
+        if (length(file_content) == 0) {
+          showNotification(
+            "The text file is empty.",
+            type = "error",
+            duration = 5
+          )
+          return()
+        }
+
+        # Extract DOI from first line if present (format: "DOI: xxxxx")
+        first_line <- file_content[1]
+        extracted_doi <- ""
+        text_start_line <- 1
+
+        if (grepl("^DOI:\\s*", first_line, ignore.case = TRUE)) {
+          extracted_doi <- sub("^DOI:\\s*", "", first_line, ignore.case = TRUE)
+          extracted_doi <- trimws(extracted_doi)
+          text_start_line <- 2
+        }
+
+        # Extract CITATION_TYPE from second line if present (format: "CITATION_TYPE: xxxxx")
+        extracted_citation_type <- ""
+        if (length(file_content) >= 2) {
+          second_line <- file_content[2]
+          if (grepl("^CITATION_TYPE:\\s*", second_line, ignore.case = TRUE)) {
+            extracted_citation_type <- sub(
+              "^CITATION_TYPE:\\s*",
+              "",
+              second_line,
+              ignore.case = TRUE
+            )
+            extracted_citation_type <- trimws(extracted_citation_type)
+            text_start_line <- 3
+          }
+        }
+
+        # Get the text content (everything after metadata lines)
+        if (length(file_content) >= text_start_line) {
+          text_content <- reconstruct_from_txt(
+            file_content[text_start_line:length(file_content)]
+          )
+        } else {
+          text_content <- ""
+        }
+
+        # Store the text
+        values$pdf_text <- unlist(text_content[1])
+        values$pdf_sections <- text_content
+
+        # Update DOI field
+        if (nzchar(extracted_doi)) {
+          values$pdf_doi <- extracted_doi
+          updateTextInput(session, "pdf_doi_input", value = extracted_doi)
+        } else {
+          values$pdf_doi <- ""
+          updateTextInput(session, "pdf_doi_input", value = "")
+        }
+
+        # Update citation_type field if available
+        if (nzchar(extracted_citation_type)) {
+          values$citation_type_used <- extracted_citation_type
+          # Note: citation_type_import is only used during PDF import, not needed here
+        }
+
+        # Show notification
+        notification_msg <- "Text file loaded successfully!"
+        if (nzchar(extracted_doi)) {
+          notification_msg <- paste0(notification_msg, " DOI: ", extracted_doi)
+        }
+        if (nzchar(extracted_citation_type)) {
+          citation_type_label <- switch(
+            extracted_citation_type,
+            "author_year" = "Author-year",
+            "numeric_bracketed" = "Numeric brackets",
+            "numeric_superscript" = "Numeric superscript",
+            "all" = "All formats",
+            extracted_citation_type
+          )
+          notification_msg <- paste0(
+            notification_msg,
+            " | Citation format: ",
+            citation_type_label
+          )
+        }
+
+        showNotification(
+          notification_msg,
+          type = "message",
+          duration = 7
+        )
+
+        # Enable analysis button
+        updateActionButton(
+          session,
+          "run_analysis",
+          label = "Start",
+          icon = icon("play")
+        )
+      },
+      error = function(e) {
+        showNotification(
+          paste("Error loading text file:", e$message),
+          type = "error",
+          duration = 5
+        )
+      }
+    )
+  })
+
+  # ===========================================
+  # SAVE EXTRACTED TEXT TO FILE
+  # ===========================================
+  output$save_text_file <- downloadHandler(
+    filename = function() {
+      # Generate filename with DOI or timestamp
+      if (!is.null(values$pdf_doi) && nzchar(values$pdf_doi)) {
+        # Clean DOI for filename (replace / with _)
+        clean_doi <- gsub("/", "_", values$pdf_doi)
+        clean_doi <- gsub("[^a-zA-Z0-9._-]", "", clean_doi)
+        paste0("extracted_text_", clean_doi, ".txt")
+      } else {
+        paste0("extracted_text_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt")
+      }
+    },
+    content = function(file) {
+      # Prepare content with DOI and CITATION_TYPE in first lines
+      file_content <- ""
+
+      # Add DOI as first line if available
+      if (!is.null(values$pdf_doi) && nzchar(values$pdf_doi)) {
+        file_content <- paste0("DOI: ", values$pdf_doi, "\n")
+      } else {
+        file_content <- "DOI: \n"
+      }
+
+      # Add CITATION_TYPE as second line if available
+      if (
+        !is.null(values$citation_type_used) && nzchar(values$citation_type_used)
+      ) {
+        file_content <- paste0(
+          file_content,
+          "CITATION_TYPE: ",
+          values$citation_type_used,
+          "\n"
+        )
+      } else {
+        file_content <- paste0(file_content, "CITATION_TYPE: \n")
+      }
+
+      if (length(values$pdf_sections) > 1) {
+        txt <- values$pdf_sections
+        section_names <- setdiff(names(txt), "Full_text")
+        # save txt in a text file adding a row with \n\nSECTION: section names\n\n before each section except Full_text
+        #file_content <- ""
+        for (section in section_names) {
+          file_content <- paste0(
+            file_content,
+            "\n\nSECTION LINE SEPARATION: ",
+            section,
+            "\n\n",
+            txt[[section]]
+          )
+        }
+      } else {
+        file_content <- paste0(file_content, unlist(values$pdf_sections[1]))
+      }
+
+      # # Add the extracted text
+      # if (!is.null(values$pdf_text)) {
+      #   file_content <- paste0(file_content, values$pdf_text)
+      # }
+
+      # Write to file
+      writeLines(file_content, file, sep = "")
+    }
   )
 
   # Text length information
@@ -3846,4 +4043,34 @@ create_oa_details_html <- function(oa_data) {
       }
     )
   )
+}
+
+reconstruct_from_txt <- function(file_lines) {
+  reconstructed_txt <- list()
+  current_section <- "Full_text"
+  section_content <- ""
+  for (line in file_lines) {
+    if (grepl("^SECTION LINE SEPARATION: ", line)) {
+      # Save the previous section content
+      if (current_section != "Full_text") {
+        reconstructed_txt[[current_section]] <- section_content
+      }
+      # Start a new section
+      current_section <- sub("^SECTION LINE SEPARATION: ", "", line)
+      section_content <- ""
+    } else {
+      section_content <- paste0(
+        section_content,
+        ifelse(section_content == "", "", "\n"),
+        line
+      )
+    }
+  }
+  # Save the last section content
+  reconstructed_txt[[current_section]] <- section_content
+  if (!"Full_text" %in% names(reconstructed_txt)) {
+    Full_text <- paste(reconstructed_txt, collapse = "\n\n")
+    reconstructed_txt <- c(Full_text = Full_text, reconstructed_txt)
+  }
+  return(reconstructed_txt)
 }

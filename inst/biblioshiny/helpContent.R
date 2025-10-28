@@ -1923,26 +1923,11 @@ helpContent <- function() {
   
   <br>
   
-  <p><strong>Computational and Quantitative Text Analysis:</strong></p>
-  
-  <p><strong>Grimmer, J., & Stewart, B. M. (2013).</strong> <i>Text as Data: The Promise and Pitfalls of Automatic Content Analysis Methods for Political Texts.</i> <strong>Political Analysis</strong>, 21(3), 267–297. <a href='https://doi.org/10.1093/pan/mps028' target='_blank'>https://doi.org/10.1093/pan/mps028</a></p>
-  
-  <p><strong>Roberts, M. E., Stewart, B. M., & Tingley, D. (2019).</strong> <i>stm: An R Package for Structural Topic Models.</i> <strong>Journal of Statistical Software</strong>, 91(2), 1–40. <a href='https://doi.org/10.18637/jss.v091.i02' target='_blank'>https://doi.org/10.18637/jss.v091.i02</a></p>
-  
-  <p><strong>Welbers, K., Van Atteveldt, W., & Benoit, K. (2017).</strong> <i>Text Analysis in R.</i> <strong>Communication Methods and Measures</strong>, 11(4), 245–265. <a href='https://doi.org/10.1080/19312458.2017.1387238' target='_blank'>https://doi.org/10.1080/19312458.2017.1387238</a></p>
-  
-  <p><strong>Boumans, J. W., & Trilling, D. (2016).</strong> <i>Taking Stock of the Toolkit: An overview of relevant automated content analysis approaches and techniques for digital journalism scholars.</i> <strong>Digital Journalism</strong>, 4(1), 8–23. <a href='https://doi.org/10.1080/21670811.2015.1096598' target='_blank'>https://doi.org/10.1080/21670811.2015.1096598</a></p>
-  
-  <p><strong>Ignatow, G., & Mihalcea, R. (2017).</strong> <i>Text Mining: A Guidebook for the Social Sciences.</i> Thousand Oaks, CA: SAGE Publications.</p>
-  
-  <br>
-  
   <h4>🎓 Further Reading</h4>
   <p>For more information on using Content Analysis and related techniques, see:</p>
   <ul>
     <li><strong>bibliometrix documentation:</strong> <a href='https://www.bibliometrix.org' target='_blank'>https://www.bibliometrix.org</a></li>
     <li><strong>contentanalysis R package:</strong> <a href='https://github.com/massimoaria/contentanalysis' target='_blank'>https://github.com/massimoaria/contentanalysis</a></li>
-    <li><strong>Quantitative text analysis methods:</strong> Grimmer, J., Roberts, M. E., & Stewart, B. M. (2022). <i>Text as Data: A New Framework for Machine Learning and the Social Sciences</i>. Princeton University Press.</li>
     <li><strong>Content analysis in communication research:</strong> Riffe, D., Lacy, S., & Fico, F. (2014). <i>Analyzing Media Messages: Using Quantitative Content Analysis in Research</i> (3rd ed.). Routledge.</li>
   </ul>
   

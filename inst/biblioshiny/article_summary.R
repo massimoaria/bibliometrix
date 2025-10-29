@@ -42,7 +42,10 @@ get_article_summary_prompt <- function(summary_type) {
       "Provide a detailed summary of the methodology used in the provided article. Structure your response with the following headings:\n- **Research Design:** Describe the overall approach (e.g., experimental, survey, case study).\n- **Data Collection:** Explain how the data was gathered, including the instruments or protocols used.\n- **Data Analysis:** Detail the statistical or qualitative techniques used to analyze the data.\n- **Tools:** List any specific software or equipment mentioned."
     },
     "implications" = {
-      "Based on the 'Discussion' and 'Conclusion' sections of the article, identify and summarize the implications of the research findings. Please organize them into two distinct categories using these headings:\n- **Theoretical Implications:** How do the findings contribute to, challenge, or extend existing theories?\n- **Practical Implications:** What are the real-world applications, recommendations for practice, or policy suggestions derived from the results?"
+      "Based on the 'Discussion' and 'Conclusion' sections of the article, identify and summarize the main conclusions and implications of the research findings. Please organize them into three distinct categories using these headings: 
+**Conclusions**: What are the main findings or definitive statements presented by the authors? 
+**Theoretical Implications**: How do the findings contribute to, challenge, or extend existing theories? 
+**Practical Implications**: What are the real-world applications, recommendations for practice, or policy suggestions derived from the results?"
     },
     "list_tables_figures" = {
       "Scan the entire document and extract a complete list of all tables and figures. For each item, provide its number and its full title or caption exactly as it appears in the text (e.g., 'Table 1: Participant Demographics' or 'Figure 1: Conceptual Model') and a brief description of the content."

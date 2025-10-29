@@ -1440,8 +1440,8 @@ content_analysis_tab <- function(id = "content_analysis") {
                       choices = list(
                         "Author-year (Smith, 2020)" = "author_year",
                         "Numeric brackets [1]" = "numeric_bracketed",
-                        "Numeric superscript¹" = "numeric_superscript",
-                        "All formats (may have false positives)" = "all"
+                        "Numeric superscript¹" = "numeric_superscript"
+                        # ,"All formats (may have false positives)" = "all"
                       ),
                       selected = character(0), # NO DEFAULT SELECTION
                       width = "100%"

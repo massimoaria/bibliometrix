@@ -288,16 +288,28 @@ content_analysis_server <- function(input, output, session, values) {
       metadata <- values$pdf_metadata
 
       # Extract metadata fields with safe defaults
-      authors <- if (!is.null(metadata$authors) && nzchar(metadata$authors)) {
-        metadata$authors
+      authors <- if (
+        !is.null(metadata$authors) &&
+          nzchar(metadata$authors) &&
+          !is.na(metadata$authors)
+      ) {
+        if (nchar(metadata$authors) > 120) {
+          paste0(substr(metadata$authors, 1, 117), "...")
+        } else {
+          metadata$authors
+        }
       } else {
         "Authors not available"
       }
 
-      title <- if (!is.null(metadata$title) && nzchar(metadata$title)) {
+      title <- if (
+        !is.null(metadata$title) &&
+          nzchar(metadata$title) &&
+          !is.na(metadata$title)
+      ) {
         # Truncate title if too long
-        if (nchar(metadata$title) > 80) {
-          paste0(substr(metadata$title, 1, 77), "...")
+        if (nchar(metadata$title) > 120) {
+          paste0(substr(metadata$title, 1, 117), "...")
         } else {
           metadata$title
         }
@@ -305,13 +317,21 @@ content_analysis_server <- function(input, output, session, values) {
         "Title not available"
       }
 
-      journal <- if (!is.null(metadata$journal) && nzchar(metadata$journal)) {
+      journal <- if (
+        !is.null(metadata$journal) &&
+          nzchar(metadata$journal) &&
+          !is.na(metadata$journal)
+      ) {
         metadata$journal
       } else {
         "Journal not available"
       }
 
-      year <- if (!is.null(metadata$year) && !is.na(metadata$year)) {
+      year <- if (
+        !is.null(metadata$year) &&
+          !is.na(metadata$year) &&
+          !is.na(metadata$year)
+      ) {
         as.character(metadata$year)
       } else {
         ""
@@ -319,7 +339,8 @@ content_analysis_server <- function(input, output, session, values) {
 
       # Build compact display for top-right corner
       div(
-        style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; text-align: left; font-size: 12px;",
+        # style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; text-align: left; font-size: 12px;",
+        style = "background: linear-gradient(135deg, #1D8FE1 0%, #5765B1 100%); padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; text-align: left; font-size: 12px;",
 
         # Title (most prominent)
         div(
@@ -2585,7 +2606,7 @@ Avg sentence length: %.1f words",
     # Get model from Biblioshiny settings or use default
     model <- values$gemini_api_model
     if (is.null(model) || !nzchar(model)) {
-      model <- "2.0-flash"
+      model <- "2.0-flash-lite"
     }
 
     # Use "huge" as default output size

@@ -31,7 +31,7 @@ content_analysis_tab <- function(id = "content_analysis") {
         # Tab header
         fluidRow(
           column(
-            8,
+            7,
             div(
               class = "page-header",
               h2(
@@ -45,9 +45,17 @@ content_analysis_tab <- function(id = "content_analysis") {
             )
           ),
           column(
-            4,
+            5,
             div(
               style = "text-align: right; padding-top: 15px;",
+
+              # Document metadata display (shown after text extraction)
+              conditionalPanel(
+                condition = "output.metadata_available",
+                uiOutput("pdf_metadata_display")
+              ),
+
+              # Export button (shown after analysis completion)
               conditionalPanel(
                 condition = "output.analysis_completed",
                 downloadButton(
@@ -55,7 +63,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                   "Export All Results",
                   icon = icon("file-excel"),
                   class = "btn-success",
-                  style = "font-weight: bold;"
+                  style = "font-weight: bold; margin-top: 10px;"
                 )
               )
             )
@@ -79,22 +87,25 @@ content_analysis_tab <- function(id = "content_analysis") {
                 fluidRow(
                   column(
                     6,
+                    align = "center",
                     actionButton(
                       "open_preview_btn",
                       "View Extracted Text & PDF Preview",
                       icon = icon("file-alt"),
                       class = "btn-info",
-                      onclick = "$('#previewModal').modal('show');"
+                      onclick = "$('#previewModal').modal('show');",
+                      style = "width: 70%;"
                     )
                   ),
                   column(
                     6,
+                    align = "center",
                     downloadButton(
                       "save_text_file",
                       "Save Extracted Text",
                       icon = icon("save"),
                       class = "btn-success",
-                      style = "width: 100%;"
+                      style = "width: 70%;"
                     )
                   )
                 ),

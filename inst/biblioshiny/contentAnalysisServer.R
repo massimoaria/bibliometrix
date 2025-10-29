@@ -148,6 +148,22 @@ content_analysis_server <- function(input, output, session, values) {
 
         values$pdf_text <- pdf_text[[1]]
 
+        # Extract PDF metadata (authors, title, journal, year, doi)
+        pdf_metadata_info <- tryCatch(
+          {
+            contentanalysis::extract_pdf_metadata(
+              input$pdf_file$datapath,
+              fields = "all"
+            )
+          },
+          error = function(e) {
+            NULL
+          }
+        )
+
+        # Store metadata in values
+        values$pdf_metadata <- pdf_metadata_info
+
         # Check if AI support is enabled
         if (input$enable_ai_support) {
           if (!is.null(pdf_text)) {
@@ -265,6 +281,77 @@ content_analysis_server <- function(input, output, session, values) {
       shinyjs::addCssClass("extract_text", "btn-secondary")
     }
   })
+
+  # Display PDF metadata (authors, title, journal) - compact version for top-right
+  output$pdf_metadata_display <- renderUI({
+    if (!is.null(values$pdf_metadata)) {
+      metadata <- values$pdf_metadata
+
+      # Extract metadata fields with safe defaults
+      authors <- if (!is.null(metadata$authors) && nzchar(metadata$authors)) {
+        metadata$authors
+      } else {
+        "Authors not available"
+      }
+
+      title <- if (!is.null(metadata$title) && nzchar(metadata$title)) {
+        # Truncate title if too long
+        if (nchar(metadata$title) > 80) {
+          paste0(substr(metadata$title, 1, 77), "...")
+        } else {
+          metadata$title
+        }
+      } else {
+        "Title not available"
+      }
+
+      journal <- if (!is.null(metadata$journal) && nzchar(metadata$journal)) {
+        metadata$journal
+      } else {
+        "Journal not available"
+      }
+
+      year <- if (!is.null(metadata$year) && !is.na(metadata$year)) {
+        as.character(metadata$year)
+      } else {
+        ""
+      }
+
+      # Build compact display for top-right corner
+      div(
+        style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; text-align: left; font-size: 12px;",
+
+        # Title (most prominent)
+        div(
+          style = "margin-bottom: 6px; font-weight: 600; font-size: 13px; line-height: 1.3;",
+          title
+        ),
+
+        # Authors
+        div(
+          style = "margin-bottom: 4px; opacity: 0.95;",
+          icon("user", style = "margin-right: 5px; font-size: 11px;"),
+          tags$span(authors, style = "font-size: 11px;")
+        ),
+
+        # Journal and Year
+        div(
+          style = "opacity: 0.9;",
+          icon("book", style = "margin-right: 5px; font-size: 11px;"),
+          tags$span(
+            paste0(journal, if (nzchar(year)) paste0(" (", year, ")") else ""),
+            style = "font-size: 11px;"
+          )
+        )
+      )
+    }
+  })
+
+  # Check if metadata is available
+  output$metadata_available <- reactive({
+    return(!is.null(values$pdf_metadata))
+  })
+  outputOptions(output, "metadata_available", suspendWhenHidden = FALSE)
 
   # Check if DOI was detected automatically
   output$doi_detected <- reactive({
@@ -2772,12 +2859,18 @@ Avg sentence length: %.1f words",
 
   # Clear summary on reset
   observeEvent(input$reset_analysis, {
+    values$pdf_metadata <- NULL
     values$biblioai_summary <- NULL
     values$biblioai_summary_type <- NULL
     values$biblioai_summary_timestamp <- NULL
 
     # Reset UI inputs
     updateSelectInput(session, "summary_type", selected = "short_abstract")
+  })
+
+  # Clear metadata when new PDF is uploaded
+  observeEvent(input$pdf_file, {
+    values$pdf_metadata <- NULL
   })
 
   # ===========================================

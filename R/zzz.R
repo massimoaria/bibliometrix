@@ -132,6 +132,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom igraph centr_betw
 #' @importFrom igraph centr_eigen
 #' @importFrom igraph mean_distance
+#' @importFrom igraph delete_edges delete_vertices layout_with_fr modularity norm_coords
 #' @importFrom igraph closeness
 #' @importFrom igraph induced_subgraph
 #' @importFrom igraph page.rank

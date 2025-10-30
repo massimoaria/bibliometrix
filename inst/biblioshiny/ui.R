@@ -5818,10 +5818,10 @@ body <- dashboardBody(
                       numericInput(
                         "CMrepulsion",
                         label = "Community Repulsion",
-                        value = 0,
+                        value = 0.5,
                         min = 0,
                         max = 1,
-                        step = 0.01
+                        step = 0.1
                       )
                     ),
                     column(
@@ -6179,7 +6179,7 @@ body <- dashboardBody(
                         label = "Repulsion Force",
                         min = 0,
                         max = 1,
-                        value = 0.1,
+                        value = 0.5,
                         step = 0.1
                       )
                     )
@@ -6720,10 +6720,10 @@ body <- dashboardBody(
                       numericInput(
                         "TMrepulsion",
                         label = "Community Repulsion",
-                        value = 0,
+                        value = 0.5,
                         min = 0,
                         max = 1,
-                        step = 0.01
+                        step = 0.1
                       )
                     ),
                     column(
@@ -7875,7 +7875,7 @@ body <- dashboardBody(
                         label = "Repulsion Force",
                         min = 0,
                         max = 1,
-                        value = 0.1,
+                        value = 0.5,
                         step = 0.1
                       )
                     )
@@ -8458,7 +8458,7 @@ body <- dashboardBody(
                         label = "Repulsion Force",
                         min = 0,
                         max = 1,
-                        value = 0.1,
+                        value = 0.5,
                         step = 0.1
                       )
                     )

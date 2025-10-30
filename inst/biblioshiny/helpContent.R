@@ -1469,7 +1469,7 @@ helpContent <- function() {
   
   <p><strong>Content Analysis</strong> is a specialized feature in <em>Biblioshiny</em> that enables researchers to perform deep, AI-enhanced analysis of individual scientific articles in PDF format. This tool goes beyond traditional bibliometric analysis by examining the full text of documents, extracting citations with their surrounding context, and revealing patterns in how research is cited and discussed within scholarly narratives.</p>
   
-  <p>This menu integrates in <em>Biblioshiny</em> the functions included in the R library <strong>contentanalysis</strong> by Aria and Cuccurullo (<a href='https://github.com/massimoaria/contentanalysis' target='_blank'>https://github.com/massimoaria/contentanalysis</a>). The module is built on the <strong>bibliometrix</strong> ecosystem and integrates advanced text mining capabilities to support:</p>
+  <p>This menu integrates in <em>Biblioshiny</em> the functions included in the R library <strong>contentanalysis</strong> by Aria and Cuccurullo (<a href='https://cran.r-project.org/package=contentanalysis' target='_blank'>https://cran.r-project.org/package=contentanalysis</a>). The module is built on the <strong>bibliometrix</strong> ecosystem and integrates advanced text mining capabilities to support:</p>
   <ul>
     <li>Extraction and analysis of in-text citations with context windows</li>
     <li>Citation co-occurrence network analysis</li>
@@ -1927,7 +1927,7 @@ helpContent <- function() {
   <p>For more information on using Content Analysis and related techniques, see:</p>
   <ul>
     <li><strong>bibliometrix documentation:</strong> <a href='https://www.bibliometrix.org' target='_blank'>https://www.bibliometrix.org</a></li>
-    <li><strong>contentanalysis R package:</strong> <a href='https://github.com/massimoaria/contentanalysis' target='_blank'>https://github.com/massimoaria/contentanalysis</a></li>
+    <li><strong>contentanalysis R package:</strong> <a href='https://cran.r-project.org/package=contentanalysis' target='_blank'>https://cran.r-project.org/package=contentanalysis/a></li>
     <li><strong>Content analysis in communication research:</strong> Riffe, D., Lacy, S., & Fico, F. (2014). <i>Analyzing Media Messages: Using Quantitative Content Analysis in Research</i> (3rd ed.). Routledge.</li>
   </ul>
   

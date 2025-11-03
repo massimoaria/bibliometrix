@@ -71,6 +71,7 @@ utils::globalVariables(c(
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @param subgraphs is a logical. If TRUE cluster subgraphs are returned.
+#' @param seed is an integer. It indicates the seed for random number generation. Default is \code{seed = 1234}.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
@@ -107,8 +108,9 @@ thematicMap <- function(
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
-  cluster = "walktrap",
-  subgraphs = FALSE
+  cluster = "louvain",
+  subgraphs = FALSE,
+  seed = 1234
 ) {
   minfreq <- max(2, floor(minfreq * nrow(M) / 1000))
 
@@ -207,6 +209,7 @@ thematicMap <- function(
       size = 1,
       edges.min = 1,
       label.n = n,
+      seed = seed,
       verbose = FALSE
     )
   } else {

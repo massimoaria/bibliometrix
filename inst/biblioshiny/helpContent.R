@@ -1900,6 +1900,8 @@ helpContent <- function() {
   <h4>📚 Key References</h4>
   
   <p><strong>Main References on Bibliometrix and Content Analysis Tools:</strong></p>
+  	
+  <p><strong>Aria, M., & Cuccurullo, C. (2025).</strong> <i>contentanalysis: Scientific Content and Citation Analysis from PDF Documents.</i> <strong>[R package]</strong>. <a href='https://doi.org/10.32614/CRAN.package.contentanalysis' target='_blank'>https://doi.org/10.32614/CRAN.package.contentanalysis</a></p>
   
   <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   
@@ -1927,7 +1929,7 @@ helpContent <- function() {
   <p>For more information on using Content Analysis and related techniques, see:</p>
   <ul>
     <li><strong>bibliometrix documentation:</strong> <a href='https://www.bibliometrix.org' target='_blank'>https://www.bibliometrix.org</a></li>
-    <li><strong>contentanalysis R package:</strong> <a href='https://cran.r-project.org/package=contentanalysis' target='_blank'>https://cran.r-project.org/package=contentanalysis/a></li>
+    <li><strong>contentanalysis documentation:</strong> <a href='https://massimoaria.github.io/contentanalysis-website/' target='_blank'>https://massimoaria.github.io/contentanalysis-website/</a></li>
     <li><strong>Content analysis in communication research:</strong> Riffe, D., Lacy, S., & Fico, F. (2014). <i>Analyzing Media Messages: Using Quantitative Content Analysis in Research</i> (3rd ed.). Routledge.</li>
   </ul>
   

@@ -17,8 +17,9 @@ thematicMap(
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
-  cluster = "walktrap",
-  subgraphs = FALSE
+  cluster = "louvain",
+  subgraphs = FALSE,
+  seed = 1234
 )
 }
 \arguments{
@@ -51,6 +52,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{cluster}{is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 
 \item{subgraphs}{is a logical. If TRUE cluster subgraphs are returned.}
+
+\item{seed}{is an integer. It indicates the seed for random number generation. Default is \code{seed = 1234}.}
 }
 \value{
 a list containing:

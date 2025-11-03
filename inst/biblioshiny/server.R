@@ -6,6 +6,8 @@ source("contentAnalysisUI.R", local = TRUE)
 source("contentAnalysisServer.R", local = TRUE)
 source("article_summary.R", local = TRUE)
 source("lifeCycleUI.R", local = TRUE)
+source("openalex_api.R", local = TRUE)
+source("pubmed_api.R", local = TRUE)
 
 suppressMessages(res <- libraries())
 if (!res) {
@@ -136,6 +138,9 @@ To ensure the functionality of Biblioshiny,
   values$ApiOk <- 0
   values$checkControlBar <- FALSE
 
+  ## Openalex API
+  values$data_source <- ""
+
   ## Diachronic networks
   values$index_coc <- 0
   values$playing_coc <- TRUE
@@ -265,9 +270,17 @@ To ensure the functionality of Biblioshiny,
     updateTabItems(session, "sidebarmenu", "loadData")
   })
 
-  observeEvent(input$apiApply, {
-    updateTabItems(session, "sidebarmenu", "gathData")
+  observeEvent(input$oaFetchData, {
+    updateTabItems(session, "sidebarmenu", "openalexMenu")
   })
+
+  observeEvent(input$pmFetchData, {
+    updateTabItems(session, "sidebarmenu", "pubmedMenu")
+  })
+
+  # observeEvent(input$apiApply, {
+  #   updateTabItems(session, "sidebarmenu", "gathData")
+  # })
 
   observeEvent(values$missTags, {
     switch(
@@ -277,6 +290,12 @@ To ensure the functionality of Biblioshiny,
       },
       "merge" = {
         updateTabItems(session, "sidebarmenu", "mergeData")
+      },
+      "openalex_api" = {
+        updateTabItems(session, "sidebarmenu", "openalexMenu")
+      },
+      "pubmed_api" = {
+        updateTabItems(session, "sidebarmenu", "pubmedMenu")
       }
     )
     values$loadMenu <- NA
@@ -716,6 +735,12 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
+  ## Openalex API Query Sample Size ----
+  openAlexServer(input, output, session, values)
+
+  ## Pubmed API Query Sample Size ----
+  pubmedServer(input, output, session, values)
+
   ## Merge Menu ----
   DATAmerging <- eventReactive(input$applyMerge, {
     inFile <- input$fileMerge
@@ -1154,8 +1179,19 @@ To ensure the functionality of Biblioshiny,
     if (k == 1) {
       k = 0
     }
-    log = paste("Number of Documents ", k)
-    textInput("textLog", "Conversion results", value = log)
+    log = paste("Number of Documents", k)
+
+    div(
+      style = "background-color: #f8f9fa; padding: 12px; border-radius: 5px; border: 1px solid #dee2e6; margin: 10px 0;",
+      tags$label(
+        "Conversion results",
+        style = "font-weight: 600; color: #495057; margin-bottom: 5px; display: block; font-size: 14px;"
+      ),
+      div(
+        log,
+        style = "color: #212529; font-size: 15px; font-weight: 500;"
+      )
+    )
   })
 
   dsModal <- function(failed = FALSE) {
@@ -1323,218 +1359,218 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  ### API MENU: PubMed ----
-  ### PubMed modal
-  pmModal <- function(failed = FALSE) {
-    modalDialog(
-      title = "PubMed API",
-      size = "l",
-      h4(em(strong(
-        "1) Generate a valid query"
-      ))),
-      textInput(
-        "pmQueryText",
-        "Search terms",
-        " ",
-        width = NULL,
-        placeholder = NULL
-      ),
-      numericInput("pmStartYear", "Start Year", value = 1990),
-      numericInput(
-        "pmEndYear",
-        "End Year",
-        value = as.numeric(substr(Sys.time(), 1, 4))
-      ),
-      actionButton("pmQuery", "Try the query "),
-      h5(tags$b("Query Translation")),
-      verbatimTextOutput("pmQueryLog", placeholder = FALSE),
-      h5(tags$b("Documents returned using your query")),
-      verbatimTextOutput("pmSampleLog", placeholder = FALSE),
-      tags$hr(),
-      h4(em(
-        strong("2) Choose how many documents to download")
-      )),
-      uiOutput("pmSliderLimit"),
-      footer = tagList(
-        modalButton("Cancel"),
-        actionButton("pmok", "OK")
-      )
-    )
-  }
-
-  # Show modal when button is clicked.
-  observeEvent(input$pmShow, {
-    showModal(pmModal())
-  })
-
-  observeEvent(input$pmok, {
-    removeModal()
-  })
-
-  pmQUERYLOAD <- eventReactive(input$pmQuery, {
-    query = paste(
-      input$pmQueryText,
-      "[Title/Abstract] AND english[LA] AND Journal Article[PT] AND ",
-      input$pmStartYear,
-      ":",
-      input$pmEndYear,
-      "[DP]",
-      sep = ""
-    )
-    res <- pmQueryTotalCount(query = query, api_key = NULL)
-    if (class(res) == "list") {
-      values$pmSample <- res$total_count
-      values$pmQuery <- res$query_translation
-    }
-    values$pmQuery <- res$query_translation
-  })
-  output$pmQueryLog <- renderText({
-    pmQUERYLOAD()
-    values$pmQuery
-  })
-
-  output$pmQueryLog2 <- renderText({
-    pmQUERYLOAD()
-    values$pmQuery
-  })
-
-  output$pmSampleLog <- renderText({
-    pmQUERYLOAD()
-    mes <- paste(
-      "PubMed returns ",
-      values$pmSample,
-      " documents",
-      collapse = "",
-      sep = ""
-    )
-    mes
-  })
-  output$pmSampleLog2 <- renderText({
-    if (nrow(values$M) < 2) {
-      n <- 0
-    } else {
-      n <- nrow(values$M)
-    }
-
-    mes <- paste(
-      "PubMed API returns ",
-      n,
-      " documents",
-      collapse = "",
-      sep = ""
-    )
-    values$ApiOk <- 0
-    return(mes)
-  })
-
-  output$pmSliderLimit <- renderUI({
-    sliderInput(
-      "pmSliderLimit",
-      "Total document to download",
-      min = 1,
-      max = values$pmSample,
-      value = values$pmSample,
-      step = 1
-    )
-  })
-
-  ### API MENU: Content Download ----
-  APIDOWNLOAD <- eventReactive(input$apiApply, {
-    values = initial(values)
-    values$M <- data.frame(Message = "Waiting for data")
-    switch(
-      input$dbapi,
-      ds = {
-        if (input$dsWords != "") {
-          D <-
-            dsApiRequest(
-              token = values$dsToken,
-              query = values$dsQuery,
-              limit = input$sliderLimit
-            )
-          M <- convert2df(D, "dimensions", "api")
-          values$ApiOk <- 1
-          values$M <- M
-          values$Morig = M
-          values$SCdf <- wcTable(M)
-          values$COdf <- countryTable(M)
-          if (ncol(values$M) > 1) {
-            values$rest_sidebar <- TRUE
-          }
-          if (ncol(values$M) > 1) {
-            showModal(missingModal(session))
-          }
-          values$Histfield = "NA"
-          values$results = list("NA")
-          contentTable(values)
-        }
-      },
-      pubmed = {
-        if (input$pmQueryText != " ") {
-          D <-
-            pmApiRequest(
-              query = values$pmQuery,
-              limit = input$pmSliderLimit,
-              api_key = NULL
-            )
-          M <- convert2df(D, "pubmed", "api")
-          values$ApiOk <- 1
-          values$M <- M
-          values$Morig = M
-          if (ncol(values$M) > 1) {
-            values$rest_sidebar <- TRUE
-          }
-          if (ncol(values$M) > 1) {
-            showModal(missingModal(session))
-          }
-          values$Histfield = "NA"
-          values$results = list("NA")
-        }
-      }
-    )
-  })
-
-  output$apiContents <- DT::renderDT({
-    APIDOWNLOAD()
-    contentTable(values)
-  })
-
-  ### function returns a formatted data.frame ----
-  contentTable <- function(values) {
-    MData = as.data.frame(apply(values$M, 2, function(x) {
-      substring(x, 1, 150)
-    }))
-    MData$DOI <-
-      paste0(
-        '<a href=\"https://doi.org/',
-        MData$DI,
-        '\" target=\"_blank\">',
-        MData$DI,
-        '</a>'
-      )
-    nome = c("DOI", names(MData)[-length(names(MData))])
-    MData = MData[nome]
-    DTformat(
-      MData,
-      nrow = 3,
-      filename = "Table",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = NULL,
-      dom = TRUE,
-      size = '70%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 2,
-      title = "",
-      button = FALSE,
-      escape = FALSE,
-      selection = FALSE,
-      scrollX = TRUE
-    )
-  }
+  # ### API MENU: PubMed ----
+  # ### PubMed modal
+  # pmModal <- function(failed = FALSE) {
+  #   modalDialog(
+  #     title = "PubMed API",
+  #     size = "l",
+  #     h4(em(strong(
+  #       "1) Generate a valid query"
+  #     ))),
+  #     textInput(
+  #       "pmQueryText",
+  #       "Search terms",
+  #       " ",
+  #       width = NULL,
+  #       placeholder = NULL
+  #     ),
+  #     numericInput("pmStartYear", "Start Year", value = 1990),
+  #     numericInput(
+  #       "pmEndYear",
+  #       "End Year",
+  #       value = as.numeric(substr(Sys.time(), 1, 4))
+  #     ),
+  #     actionButton("pmQuery", "Try the query "),
+  #     h5(tags$b("Query Translation")),
+  #     verbatimTextOutput("pmQueryLog", placeholder = FALSE),
+  #     h5(tags$b("Documents returned using your query")),
+  #     verbatimTextOutput("pmSampleLog", placeholder = FALSE),
+  #     tags$hr(),
+  #     h4(em(
+  #       strong("2) Choose how many documents to download")
+  #     )),
+  #     uiOutput("pmSliderLimit"),
+  #     footer = tagList(
+  #       modalButton("Cancel"),
+  #       actionButton("pmok", "OK")
+  #     )
+  #   )
+  # }
+  #
+  # # Show modal when button is clicked.
+  # observeEvent(input$pmShow, {
+  #   showModal(pmModal())
+  # })
+  #
+  # observeEvent(input$pmok, {
+  #   removeModal()
+  # })
+  #
+  # pmQUERYLOAD <- eventReactive(input$pmQuery, {
+  #   query = paste(
+  #     input$pmQueryText,
+  #     "[Title/Abstract] AND english[LA] AND Journal Article[PT] AND ",
+  #     input$pmStartYear,
+  #     ":",
+  #     input$pmEndYear,
+  #     "[DP]",
+  #     sep = ""
+  #   )
+  #   res <- pmQueryTotalCount(query = query, api_key = NULL)
+  #   if (class(res) == "list") {
+  #     values$pmSample <- res$total_count
+  #     values$pmQuery <- res$query_translation
+  #   }
+  #   values$pmQuery <- res$query_translation
+  # })
+  # output$pmQueryLog <- renderText({
+  #   pmQUERYLOAD()
+  #   values$pmQuery
+  # })
+  #
+  # output$pmQueryLog2 <- renderText({
+  #   pmQUERYLOAD()
+  #   values$pmQuery
+  # })
+  #
+  # output$pmSampleLog <- renderText({
+  #   pmQUERYLOAD()
+  #   mes <- paste(
+  #     "PubMed returns ",
+  #     values$pmSample,
+  #     " documents",
+  #     collapse = "",
+  #     sep = ""
+  #   )
+  #   mes
+  # })
+  # output$pmSampleLog2 <- renderText({
+  #   if (nrow(values$M) < 2) {
+  #     n <- 0
+  #   } else {
+  #     n <- nrow(values$M)
+  #   }
+  #
+  #   mes <- paste(
+  #     "PubMed API returns ",
+  #     n,
+  #     " documents",
+  #     collapse = "",
+  #     sep = ""
+  #   )
+  #   values$ApiOk <- 0
+  #   return(mes)
+  # })
+  #
+  # output$pmSliderLimit <- renderUI({
+  #   sliderInput(
+  #     "pmSliderLimit",
+  #     "Total document to download",
+  #     min = 1,
+  #     max = values$pmSample,
+  #     value = values$pmSample,
+  #     step = 1
+  #   )
+  # })
+  #
+  # ### API MENU: Content Download ----
+  # APIDOWNLOAD <- eventReactive(input$apiApply, {
+  #   values = initial(values)
+  #   values$M <- data.frame(Message = "Waiting for data")
+  #   switch(
+  #     input$dbapi,
+  #     ds = {
+  #       if (input$dsWords != "") {
+  #         D <-
+  #           dsApiRequest(
+  #             token = values$dsToken,
+  #             query = values$dsQuery,
+  #             limit = input$sliderLimit
+  #           )
+  #         M <- convert2df(D, "dimensions", "api")
+  #         values$ApiOk <- 1
+  #         values$M <- M
+  #         values$Morig = M
+  #         values$SCdf <- wcTable(M)
+  #         values$COdf <- countryTable(M)
+  #         if (ncol(values$M) > 1) {
+  #           values$rest_sidebar <- TRUE
+  #         }
+  #         if (ncol(values$M) > 1) {
+  #           showModal(missingModal(session))
+  #         }
+  #         values$Histfield = "NA"
+  #         values$results = list("NA")
+  #         contentTable(values)
+  #       }
+  #     },
+  #     pubmed = {
+  #       if (input$pmQueryText != " ") {
+  #         D <-
+  #           pmApiRequest(
+  #             query = values$pmQuery,
+  #             limit = input$pmSliderLimit,
+  #             api_key = NULL
+  #           )
+  #         M <- convert2df(D, "pubmed", "api")
+  #         values$ApiOk <- 1
+  #         values$M <- M
+  #         values$Morig = M
+  #         if (ncol(values$M) > 1) {
+  #           values$rest_sidebar <- TRUE
+  #         }
+  #         if (ncol(values$M) > 1) {
+  #           showModal(missingModal(session))
+  #         }
+  #         values$Histfield = "NA"
+  #         values$results = list("NA")
+  #       }
+  #     }
+  #   )
+  # })
+  #
+  # output$apiContents <- DT::renderDT({
+  #   APIDOWNLOAD()
+  #   contentTable(values)
+  # })
+  #
+  # ### function returns a formatted data.frame ----
+  # contentTable <- function(values) {
+  #   MData = as.data.frame(apply(values$M, 2, function(x) {
+  #     substring(x, 1, 150)
+  #   }))
+  #   MData$DOI <-
+  #     paste0(
+  #       '<a href=\"https://doi.org/',
+  #       MData$DI,
+  #       '\" target=\"_blank\">',
+  #       MData$DI,
+  #       '</a>'
+  #     )
+  #   nome = c("DOI", names(MData)[-length(names(MData))])
+  #   MData = MData[nome]
+  #   DTformat(
+  #     MData,
+  #     nrow = 3,
+  #     filename = "Table",
+  #     pagelength = TRUE,
+  #     left = NULL,
+  #     right = NULL,
+  #     numeric = NULL,
+  #     dom = TRUE,
+  #     size = '70%',
+  #     filter = "top",
+  #     columnShort = NULL,
+  #     columnSmall = NULL,
+  #     round = 2,
+  #     title = "",
+  #     button = FALSE,
+  #     escape = FALSE,
+  #     selection = FALSE,
+  #     scrollX = TRUE
+  #   )
+  # }
 
   # REFERENCE MATCHING MENU ----
 
@@ -2618,6 +2654,11 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$applyFilter, {
     DTfiltered()
     updateTabItems(session, "sidebarmenu", "filters")
+    showNotification(
+      "Filters applied successfully.",
+      type = "message",
+      duration = 3
+    )
   })
 
   #### Reset Filters ----
@@ -2730,6 +2771,11 @@ To ensure the functionality of Biblioshiny,
         floor(min(values$Morig$TCpY, na.rm = T)),
         ceiling(max(values$Morig$TCpY, na.rm = T))
       )
+    )
+    showNotification(
+      "Filters reset to default.",
+      type = "warning",
+      duration = 3
     )
   })
 
@@ -7945,7 +7991,8 @@ To ensure the functionality of Biblioshiny,
       repel = FALSE,
       remove.terms = remove.terms,
       synonyms = synonyms,
-      subgraphs = TRUE
+      subgraphs = TRUE,
+      seed = values$random_seed
     )
     values$TM$doc2clust <- values$TM$documentToClusters %>%
       select(Assigned_cluster, SR, pagerank)
@@ -8309,7 +8356,8 @@ To ensure the functionality of Biblioshiny,
         repel = FALSE,
         ngrams = ngrams,
         remove.terms = remove.terms,
-        synonyms = synonyms
+        synonyms = synonyms,
+        seed = values$random_seed
       )
       validate(
         need(
@@ -10054,6 +10102,33 @@ To ensure the functionality of Biblioshiny,
 
   observeEvent(input$h, {
     values$h <- as.numeric(input$h)
+  })
+
+  # Server code for randomize seed button
+  observeEvent(input$randomize_seed, {
+    # Generate a random seed between 1 and 999999
+    new_seed <- sample(1:999999, 1)
+
+    # Update the random_seed input with the new value
+    updateNumericInput(session, "random_seed", value = new_seed)
+
+    # Optional: Show notification
+    showNotification(
+      paste("Random seed set to:", new_seed),
+      type = "message",
+      duration = 2
+    )
+  })
+
+  # Optional: Observer to apply the seed globally when it changes
+  observe({
+    req(input$random_seed)
+
+    # Set the global random seed for reproducibility
+    set.seed(input$random_seed)
+
+    # Store in reactive values for access across the app
+    values$random_seed <- input$random_seed
   })
 
   output$apiStatus <- renderUI({

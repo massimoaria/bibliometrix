@@ -181,259 +181,6 @@ countryTable <- function(M) {
 
 # LOAD FUNCTIONS -----
 
-# dataLoadingFunction <- function(input,values){
-#   # input$file1 will be NULL initially. After the user selects
-#   # and uploads a file, it will be a data frame with 'name',
-#   # 'size', 'type', and 'datapath' columns. The 'datapath'
-#   # column will contain the local filenames where the data can
-#   # be found.
-#   if (input$load=="demo"){
-#     data(management, package="bibliometrixData")
-#     values = initial(values)
-#     row.names(management) <- management$SR
-#     management <- management %>% mergeKeywords(force = T)
-#     values$M <- management
-#     values$Morig = management
-#     values$SCdf <- wcTable(management)
-#     values$COdf <- countryTable(management)
-#     values$Histfield = "NA"
-#     values$results = list("NA")
-#     values$rest_sidebar <- TRUE
-#     values$missingdf <- df <- missingData(values$M)$mandatoryTags
-#     values$missTags <- NULL
-#     values$menu <- menuList(values)
-#     values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
-#     #"Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
-#
-#     #showModal(missingModal(session))
-#     return(values)
-#   }
-#   inFile <- input$file1
-#
-#   if (!is.null(inFile) & input$load=="import") {
-#     ext <- getFileNameExtension(inFile$datapath)
-#     switch(
-#       input$dbsource,
-#       isi = {
-#         switch(ext,
-#                ###  WoS ZIP Files
-#                zip = {
-#                  D <-  utils::unzip(inFile$datapath)
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(D,
-#                                                 dbsource = input$dbsource,
-#                                                 format = formatDB(D))
-#                                 M <- authorNameFormat(M, input$authorName)
-#                               })
-#                },
-#                ### WoS Txt/Bib Files
-#                {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(inFile$datapath,
-#                                                 dbsource = input$dbsource,
-#                                                 format = formatDB(inFile$datapath))
-#                                 M <- authorNameFormat(M, input$authorName)
-#                               })
-#                })
-#       },
-#       scopus = {
-#         switch(ext,
-#                ###  Scopus ZIP Files
-#                zip = {
-#                  D <- utils::unzip(inFile$datapath)
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(D,
-#                                                 dbsource = input$dbsource,
-#                                                 format = formatDB(D))
-#                                 M <- authorNameFormat(M, input$authorName)
-#                                 if (formatDB(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
-#                               })
-#                },
-#                ### Scopus CSV/Bib Files
-#                csv = {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(inFile$datapath,
-#                                                 dbsource = input$dbsource,
-#                                                 format = "csv")
-#                                 M <- authorNameFormat(M, input$authorName)
-#                                 if (input$authorName=="AF") M <- AuthorNameMerge(M)
-#                               })
-#                },
-#                bib = {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(inFile$datapath,
-#                                                 dbsource = input$dbsource,
-#                                                 format = "bibtex")
-#                                 M <- authorNameFormat(M, input$authorName)
-#                               })
-#                })
-#       },
-#       openalex={
-#         withProgress(message = 'Conversion in progress',
-#                      value = 0, {
-#                        M <- convert2df(inFile$datapath,
-#                                        dbsource = input$dbsource,
-#                                        format = "csv")
-#                      })
-#       },
-#       openalex_api = {
-#         M <- convert2df(inFile$datapath,
-#                         dbsource = input$dbsource,
-#                         format = "api")
-#       },
-#       lens = {
-#         switch(ext,
-#                ###  Lens.org ZIP Files
-#                zip = {
-#                  D <-  utils::unzip(inFile$datapath)
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(D,
-#                                                 dbsource = input$dbsource,
-#                                                 format = formatDB(D))
-#                               })
-#                },
-#                ### Lens.org CSV Files
-#                {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(inFile$datapath,
-#                                                 dbsource = input$dbsource,
-#                                                 format = formatDB(inFile$datapath))
-#                               })
-#                })
-#       },
-#       cochrane = {
-#         switch(ext,
-#                ###  Cochrane ZIP Files
-#                zip = {
-#                  D <- utils::unzip(inFile$datapath)
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(D,
-#                                                 dbsource = input$dbsource,
-#                                                 format = formatDB(D))
-#                               })
-#                },
-#                ### Cochrane txt files
-#                {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(inFile$datapath,
-#                                                 dbsource = input$dbsource,
-#                                                 format = "plaintext")
-#                               })
-#                })
-#       },
-#       pubmed = {
-#         switch(ext,
-#                ###  Pubmed ZIP Files
-#                zip = {
-#                  D <- utils::unzip(inFile$datapath)
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(D,
-#                                                 dbsource = input$dbsource,
-#                                                 format = "pubmed")
-#                               })
-#                },
-#                ### Pubmed txt Files
-#                txt = {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <- convert2df(inFile$datapath,
-#                                                 dbsource = input$dbsource,
-#                                                 format = "pubmed")
-#                               })
-#                })
-#       },
-#       dimensions = {
-#         switch(ext,
-#                ###  Dimensions ZIP Files
-#                zip = {
-#                  D = utils::unzip(inFile$datapath)
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <-
-#                                   convert2df(D,
-#                                              dbsource = input$dbsource,
-#                                              format = formatDB(D))
-#                               })
-#                },
-#                ### Dimensions Xlsx/csv Files
-#                xlsx = {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <-
-#                                   convert2df(
-#                                     inFile$datapath,
-#                                     dbsource = "dimensions",
-#                                     format = "excel"
-#                                   )
-#                               })
-#                },
-#                csv = {
-#                  withProgress(message = 'Conversion in progress',
-#                               value = 0, {
-#                                 M <-
-#                                   convert2df(
-#                                     inFile$datapath,
-#                                     dbsource = "dimensions",
-#                                     format = "csv"
-#                                   )
-#                               })
-#                })
-#
-#       }
-#     )
-#     values$M <- M
-#   } else if (!is.null(inFile) & input$load=="load") {
-#     ext <- tolower(getFileNameExtension(inFile$datapath))
-#     switch(ext,
-#            ### excel format
-#            xlsx={
-#              M <- readxl::read_excel(inFile$datapath, col_types = "text") %>% as.data.frame()
-#              M$PY <- as.numeric(M$PY)
-#              M$TC <- as.numeric(M$TC)
-#              class(M) <- c("bibliometrixDB", "data.frame")
-#              ### M row names
-#              ### identify duplicated SRs
-#              SR <- M$SR
-#              tab <- table(SR)
-#              tab2 <- table(tab)
-#              ind <- as.numeric(names(tab2))
-#              ind <- ind[which(ind>1)]
-#              if (length(ind)>0){
-#                for (i in ind){
-#                  indice=names(which(tab==i))
-#                  for (j in indice){
-#                    indice2 <- which(SR==j)
-#                    SR[indice2] <- paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
-#                  }
-#                }
-#              }
-#              M$SR <- SR
-#              row.names(M) <- SR
-#            },
-#            ### RData format
-#            rdata={
-#              M <- smart_load(inFile$datapath)
-#            },
-#            rda={
-#              M <- smart_load(inFile$datapath)
-#            },
-#            rds={
-#              M <- readRDS(inFile$datapath)
-#            })
-#     values$M <- M
-#   } else if (is.null(inFile)) {return(values)}
-# }
-
 formatDB <- function(obj) {
   ext <- sub(".*\\.", "", obj[1])
   switch(
@@ -4148,6 +3895,7 @@ cocNetwork <- function(input, values) {
       cluster = input$cocCluster,
       remove.isolates = (input$coc.isolates == "yes"),
       community.repulsion = input$coc.repulsion / 2,
+      seed = values$random_seed,
       verbose = FALSE
     )
 
@@ -4310,12 +4058,20 @@ socialStructure <- function(input, values) {
   ) {
     values$colField <- input$colField
 
-    # values$cluster="walktrap"
+    if (!"nAU" %in% names(values$M)) {
+      values$M$nAU <- str_count(values$M$AU, ";") + 1
+    }
+
     switch(
       input$colField,
       COL_AU = {
+        if (input$col.filterMaxAuthors) {
+          M_AU <- values$M %>% filter(nAU <= 20)
+        } else {
+          M_AU <- values$M
+        }
         values$ColNetRefs <- biblioNetwork(
-          values$M,
+          M_AU,
           analysis = "collaboration",
           network = "authors",
           n = n,

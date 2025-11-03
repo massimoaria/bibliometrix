@@ -442,13 +442,13 @@ delete.isolates <- function(graph, mode = "all") {
 clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
   colorlist <- colorlist()
 
-  # Per algoritmi stocastici, esegui multiple run e scegli la migliore
+  # For stochastic algorithms, perform multiple runs and select the best one
   if (cluster %in% c("louvain", "leiden") && !is.null(seed)) {
     best_modularity <- -Inf
     best_result <- NULL
 
     for (i in 1:n_runs) {
-      set.seed(seed + i - 1) # Seed diverso per ogni run
+      set.seed(seed + i - 1) # Different seed for each run
 
       if (cluster == "louvain") {
         result <- cluster_louvain(bsk.network)
@@ -471,10 +471,10 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
 
     net_groups <- best_result
   } else {
-    # Per altri algoritmi usa la logica standard
-    if (!is.null(seed) && cluster %in% c("spinglass", "leading_eigen")) {
-      set.seed(seed)
-    }
+    # For other algorithms, use standard logic
+    # if (!is.null(seed) && cluster %in% c("spinglass", "leading_eigen","walktrap")) {
+    set.seed(seed)
+    # }
 
     switch(
       cluster,
@@ -555,17 +555,17 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
 
 switchLayout <- function(bsk.network, type, community.repulsion) {
   if (community.repulsion > 0) {
-    # Estrai informazioni sulla struttura delle community
+    # Extract community structure information
     membership <- V(bsk.network)$community
     names(membership) <- V(bsk.network)$name
     n_communities <- length(unique(membership))
     n_nodes <- vcount(bsk.network)
 
-    # Calcola statistiche per normalizzazione adattiva
+    # Calculate statistics for adaptive normalization
     community_sizes <- table(membership)
     avg_community_size <- mean(community_sizes)
 
-    # Calcola la forza di repulsione adattiva
+    # Calculate adaptive repulsion strength
     repulsion_strength <- adaptive_repulsion_strength(
       community.repulsion,
       n_nodes,
@@ -573,17 +573,17 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
       avg_community_size
     )
 
-    # Estrai edgelist
+    # Extract edgelist
     row <- get.edgelist(bsk.network)
 
-    # Salva o inizializza i pesi originali
+    # Save or initialize original weights
     if (is.null(E(bsk.network)$weight[1])) {
       original_weights <- rep(1, nrow(row))
     } else {
       original_weights <- E(bsk.network)$weight
     }
 
-    # Applica nuovo schema di pesatura con crescita graduata
+    # Apply new weighting scheme with gradual growth
     new_weights <- numeric(nrow(row))
 
     for (i in 1:nrow(row)) {
@@ -594,23 +594,23 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
       comm2 <- membership[which(names(membership) == node2)]
 
       if (comm1 == comm2) {
-        # Edge INTRA-COMMUNITY
-        # Incremento moderato con crescita sub-lineare
+        # INTRA-COMMUNITY Edge
+        # Moderate increase with sub-linear growth
         multiplier <- 1 + (repulsion_strength^0.7) * 1.5
         new_weights[i] <- original_weights[i] * multiplier
       } else {
-        # Edge INTER-COMMUNITY
-        # Riduzione graduata con funzione esponenziale attenuata
+        # INTER-COMMUNITY Edge
+        # Gradual reduction with attenuated exponential function
         divisor <- 1 + exp(repulsion_strength * 1.2) - 1
         new_weights[i] <- original_weights[i] / divisor
       }
     }
 
-    # Applica i nuovi pesi
+    # Apply new weights
     E(bsk.network)$weight <- new_weights
   }
 
-  # Applica il layout scelto
+  # Apply the chosen layout
   switch(
     type,
     auto = {
@@ -636,7 +636,7 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
     }
   )
 
-  # Normalizza il layout
+  # Normalize the layout
   l <- norm_coords(l)
 
   layout_results <- list(l = l, bsk.network = bsk.network)
@@ -650,18 +650,18 @@ adaptive_repulsion_strength <- function(
   n_communities,
   avg_community_size
 ) {
-  # Fattore di scala basato sulle dimensioni del network
+  # Scale factor based on network size
   scale_factor <- log10(n_nodes + 10) / log10(100)
 
-  # Fattore di correzione basato sul numero di community
+  # Correction factor based on the number of communities
   community_factor <- 1 + (n_communities - 2) * 0.1
   community_factor <- max(0.5, min(community_factor, 2))
 
-  # Trasformazione sigmoidale del parametro utente
+  # Sigmoidal transformation of the user parameter
   x <- community.repulsion * 10
   sigmoid_transform <- x / (1 + x)
 
-  # Combina i fattori
+  # Combine the factors
   strength <- sigmoid_transform * scale_factor * community_factor
 
   return(strength)

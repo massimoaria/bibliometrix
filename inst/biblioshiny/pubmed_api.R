@@ -108,40 +108,39 @@ pubmedUI <- function() {
               ),
               actionButton(
                 "pmToggleDateRange",
-                label = "+ Date range",
+                label = "- Date range",
                 icon = icon("calendar"),
                 class = "btn-outline-primary btn-sm",
                 style = "margin-left: 10px;"
               )
             ),
 
-            # Date Range Section (with shinyjs toggle instead of conditionalPanel)
-            shinyjs::hidden(
-              div(
-                id = "pmDateRangePanel",
-                wellPanel(
-                  style = "background-color: #f8f9fa;",
-                  h5("Date Range Filter", style = "font-weight: bold;"),
-                  fluidRow(
-                    column(
-                      width = 6,
-                      numericInput(
-                        "pmYearFrom",
-                        "From Year:",
-                        value = 2020,
-                        min = 1800,
-                        max = as.integer(format(Sys.Date(), "%Y"))
-                      )
-                    ),
-                    column(
-                      width = 6,
-                      numericInput(
-                        "pmYearTo",
-                        "To Year:",
-                        value = as.integer(format(Sys.Date(), "%Y")),
-                        min = 1800,
-                        max = as.integer(format(Sys.Date(), "%Y"))
-                      )
+            # Date Range Section (VISIBLE by default)
+            div(
+              id = "pmDateRangeSection",
+              style = "display: block;",
+              wellPanel(
+                style = "background-color: #f8f9fa;",
+                h5("Date Range Filter", style = "font-weight: bold;"),
+                fluidRow(
+                  column(
+                    width = 6,
+                    numericInput(
+                      "pmYearFrom",
+                      "From Year:",
+                      value = 2020,
+                      min = 1800,
+                      max = as.integer(format(Sys.Date(), "%Y"))
+                    )
+                  ),
+                  column(
+                    width = 6,
+                    numericInput(
+                      "pmYearTo",
+                      "To Year:",
+                      value = as.integer(format(Sys.Date(), "%Y")),
+                      min = 1800,
+                      max = as.integer(format(Sys.Date(), "%Y"))
                     )
                   )
                 )
@@ -151,91 +150,100 @@ pubmedUI <- function() {
             # Advanced filters toggle
             actionButton(
               "pmToggleAdvanced",
-              label = "Advanced filters",
+              label = "Hide advanced filters",
               icon = icon("filter"),
               class = "btn-link",
               style = "padding: 5px; margin-bottom: 10px;"
             ),
 
-            # Additional Filters Section (with shinyjs toggle instead of conditionalPanel)
-            shinyjs::hidden(
-              div(
-                id = "pmAdvancedPanel",
-                wellPanel(
-                  style = "background-color: #f8f9fa;",
-                  fluidRow(
-                    column(
-                      width = 4,
-                      selectizeInput(
-                        "pmDocType",
-                        "Document Type:",
-                        choices = c(
-                          "All" = "",
-                          "Journal Article" = "Journal Article",
-                          "Review" = "Review",
-                          "Clinical Trial" = "Clinical Trial",
-                          "Meta-Analysis" = "Meta-Analysis",
-                          "Case Reports" = "Case Reports",
-                          "Randomized Controlled Trial" = "Randomized Controlled Trial",
-                          "Systematic Review" = "Systematic Review",
-                          "Letter" = "Letter",
-                          "Editorial" = "Editorial"
-                        ),
-                        selected = "",
-                        multiple = TRUE
-                      )
-                    ),
-                    column(
-                      width = 4,
-                      selectizeInput(
-                        "pmLanguage",
-                        "Language:",
-                        choices = c(
-                          "All" = "",
-                          "English" = "english",
-                          "Spanish" = "spanish",
-                          "French" = "french",
-                          "German" = "german",
-                          "Italian" = "italian",
-                          "Portuguese" = "portuguese",
-                          "Chinese" = "chinese",
-                          "Japanese" = "japanese"
-                        ),
-                        selected = "",
-                        multiple = TRUE
-                      )
-                    ),
-                    column(
-                      width = 4,
-                      numericInput(
-                        "pmMaxRecords",
-                        "Max Records:",
-                        value = 1000,
-                        min = 1,
-                        max = 10000,
-                        step = 100
-                      )
+            # Additional Filters Section (VISIBLE by default)
+            div(
+              id = "pmAdvancedSection",
+              style = "display: block;",
+              wellPanel(
+                style = "background-color: #f8f9fa;",
+                fluidRow(
+                  column(
+                    width = 4,
+                    selectizeInput(
+                      "pmDocType",
+                      "Document Type:",
+                      choices = c(
+                        "All" = "",
+                        "Journal Article" = "Journal Article",
+                        "Review" = "Review",
+                        "Clinical Trial" = "Clinical Trial",
+                        "Meta-Analysis" = "Meta-Analysis",
+                        "Case Reports" = "Case Reports",
+                        "Randomized Controlled Trial" = "Randomized Controlled Trial",
+                        "Systematic Review" = "Systematic Review",
+                        "Letter" = "Letter",
+                        "Editorial" = "Editorial"
+                      ),
+                      selected = "",
+                      multiple = TRUE
+                    )
+                  ),
+                  column(
+                    width = 4,
+                    selectizeInput(
+                      "pmLanguage",
+                      "Language:",
+                      choices = c(
+                        "All" = "",
+                        "English" = "english",
+                        "Spanish" = "spanish",
+                        "French" = "french",
+                        "German" = "german",
+                        "Italian" = "italian",
+                        "Portuguese" = "portuguese",
+                        "Chinese" = "chinese",
+                        "Japanese" = "japanese"
+                      ),
+                      selected = "",
+                      multiple = TRUE
+                    )
+                  ),
+                  column(
+                    width = 4,
+                    numericInput(
+                      "pmMaxRecords",
+                      "Max Records:",
+                      value = 1000,
+                      min = 1,
+                      max = 10000,
+                      step = 100
                     )
                   )
                 )
               )
             ),
 
-            # Action buttons
+            # Action buttons with reactive count
             div(
-              style = "margin-top: 10px; text-align: right;",
-              actionButton(
-                "pmClearQuery",
-                "Clear",
-                icon = icon("times"),
-                class = "btn-outline-secondary"
+              style = "margin-top: 10px; display: flex; justify-content: space-between; align-items: center;",
+
+              # Left side: Reactive query count message
+              div(
+                style = "display: flex; align-items: center;",
+                uiOutput("pmQueryCountInfo")
               ),
-              actionButton(
-                "pmFetchData",
-                "Search",
-                icon = icon("search"),
-                class = "btn-primary",
-                style = "margin-left: 10px;"
+
+              # Right side: Clear and Search buttons
+              div(
+                style = "display: flex; gap: 10px;",
+                actionButton(
+                  "pmClearQuery",
+                  "Clear",
+                  icon = icon("times"),
+                  class = "btn-outline-secondary"
+                ),
+                actionButton(
+                  "pmFetchData",
+                  "Search",
+                  icon = icon("search"),
+                  class = "btn-primary"
+                )
               )
             )
           )
@@ -273,78 +281,119 @@ pubmedUI <- function() {
               )
             ),
 
-            # Data preview
+            # Data table output
             div(
-              style = "margin-top: 20px;",
-              h5("Data Preview", style = "font-weight: bold;"),
-              DT::DTOutput("pmDataTable")
+              style = "margin-top: 15px;",
+              DT::dataTableOutput("pmDataTable")
             )
           )
         )
       )
-    )
+    ),
+
+    # JavaScript for collapsible functionality
+    tags$script(HTML(
+      "
+      $(document).ready(function() {
+        // Initialize collapsed state
+        var isCollapsed = false;
+        
+        // Initialize visibility states as TRUE (open)
+        var dateRangeVisible = true;
+        var advancedVisible = true;
+        
+        // Handle toggle button click for main panel
+        $('#pmToggleQueryPanel').on('click', function() {
+          isCollapsed = !isCollapsed;
+          $('#pmQueryContent').slideToggle(300);
+          
+          // Update button icon
+          if (isCollapsed) {
+            $(this).html('<i class=\"fa fa-chevron-down\"></i>');
+          } else {
+            $(this).html('<i class=\"fa fa-chevron-up\"></i>');
+          }
+        });
+        
+        // Handle date range toggle
+        $('#pmToggleDateRange').on('click', function() {
+          dateRangeVisible = !dateRangeVisible;
+          $('#pmDateRangeSection').slideToggle(300);
+          
+          // Update button text
+          if (dateRangeVisible) {
+            $(this).html('<i class=\"fa fa-calendar\"></i> - Date range');
+          } else {
+            $(this).html('<i class=\"fa fa-calendar\"></i> + Date range');
+          }
+          
+          // Notify Shiny
+          Shiny.setInputValue('pmShowDateRange', dateRangeVisible);
+        });
+        
+        // Handle advanced filters toggle
+        $('#pmToggleAdvanced').on('click', function() {
+          advancedVisible = !advancedVisible;
+          $('#pmAdvancedSection').slideToggle(300);
+          
+          // Update button text
+          if (advancedVisible) {
+            $(this).html('<i class=\"fa fa-filter\"></i> Hide advanced filters');
+          } else {
+            $(this).html('<i class=\"fa fa-filter\"></i> Show advanced filters');
+          }
+          
+          // Notify Shiny
+          Shiny.setInputValue('pmShowAdvanced', advancedVisible);
+        });
+        
+        // Set initial values in Shiny
+        Shiny.setInputValue('pmShowDateRange', true);
+        Shiny.setInputValue('pmShowAdvanced', true);
+      });
+      
+      // Custom message handler to collapse panel when data is loaded
+      Shiny.addCustomMessageHandler('pmCollapseQueryPanel', function(message) {
+        $('#pmQueryContent').slideUp(300);
+        $('#pmToggleQueryPanel').html('<i class=\"fa fa-chevron-down\"></i>');
+      });
+    "
+    ))
   )
 }
 
+
 # ==============================================================================
-# Server Logic for PubMed API
+# Server Component - Query Builder for PubMed
 # ==============================================================================
 
 pubmedServer <- function(input, output, session, values) {
   # Reactive values to track query rows and toggle states
-  pmQueryRows <- reactiveVal(1)
-  pmShowDateRange <- reactiveVal(FALSE)
-  pmShowAdvanced <- reactiveVal(FALSE)
-
-  # Toggle query panel collapse
-  observeEvent(input$pmToggleQueryPanel, {
-    session$sendCustomMessage('pmToggleQueryPanel', TRUE)
-  })
-
-  # Toggle date range visibility
-  observeEvent(input$pmToggleDateRange, {
-    currentState <- pmShowDateRange()
-    pmShowDateRange(!currentState)
-    updateActionButton(
-      session,
-      "pmToggleDateRange",
-      label = if (!currentState) "- Date range" else "+ Date range"
-    )
-    shinyjs::toggle("pmDateRangePanel", anim = TRUE) # Usa l'ID corretto
-  })
-
-  # Toggle advanced filters visibility
-  observeEvent(input$pmToggleAdvanced, {
-    currentState <- pmShowAdvanced()
-    pmShowAdvanced(!currentState)
-    updateActionButton(
-      session,
-      "pmToggleAdvanced",
-      label = if (!currentState) "Hide advanced filters" else "Advanced filters"
-    )
-    shinyjs::toggle("pmAdvancedPanel", anim = TRUE) # Usa l'ID corretto
-  })
+  queryRows <- reactiveVal(1)
+  showDateRange <- reactiveVal(TRUE) # TRUE by default
+  showAdvanced <- reactiveVal(TRUE) # TRUE by default
 
   # Add new query row
   observeEvent(input$pmAddRow, {
-    currentRows <- pmQueryRows()
-    newRowNum <- currentRows + 1
-    pmQueryRows(newRowNum)
+    currentRows <- queryRows()
+    newRowId <- currentRows + 1
+    queryRows(newRowId)
 
+    # Insert new row in UI (WITH operator column)
     insertUI(
       selector = "#pm-query-builder-container",
       where = "beforeEnd",
       ui = div(
-        id = paste0("pm-query-row-", newRowNum),
+        id = paste0("pm-query-row-", newRowId),
         class = "pm-query-row",
         style = "margin-bottom: 10px;",
         fluidRow(
           column(
             width = 1,
             selectInput(
-              paste0("pmOperator_", newRowNum),
+              paste0("pmOperator_", newRowId),
               NULL,
-              choices = c("AND", "OR", "NOT"),
+              choices = c("AND" = "AND", "OR" = "OR", "NOT" = "NOT"),
               selected = "AND",
               width = "100%"
             )
@@ -352,7 +401,7 @@ pubmedServer <- function(input, output, session, values) {
           column(
             width = 2,
             selectInput(
-              paste0("pmField_", newRowNum),
+              paste0("pmField_", newRowId),
               NULL,
               choices = c(
                 "All Fields" = "all",
@@ -370,7 +419,7 @@ pubmedServer <- function(input, output, session, values) {
           column(
             width = 8,
             textInput(
-              paste0("pmQuery_", newRowNum),
+              paste0("pmQuery_", newRowId),
               NULL,
               value = "",
               placeholder = 'Example: "deep learning"',
@@ -380,163 +429,240 @@ pubmedServer <- function(input, output, session, values) {
           column(
             width = 1,
             actionButton(
-              paste0("pmRemoveRow_", newRowNum),
+              paste0("pmRemoveRow_", newRowId),
               icon("minus-circle"),
               class = "btn-danger btn-sm",
               style = "margin-top: 0px;",
-              title = "Remove row",
-              onclick = sprintf(
-                "Shiny.setInputValue('pmRemoveRow', %d, {priority: 'event'})",
-                newRowNum
-              )
+              title = "Remove row"
             )
           )
         )
       )
     )
+
+    # Make remove button visible for first row if adding second row
+    if (newRowId == 2) {
+      runjs("$('#pm-remove-button-1').css('visibility', 'visible');")
+    }
+
+    # Add observer for the remove button of the new row
+    local({
+      rowId <- newRowId
+      observeEvent(input[[paste0("pmRemoveRow_", rowId)]], {
+        removeUI(selector = paste0("#pm-query-row-", rowId))
+
+        # Check if only one row remains
+        if (queryRows() - 1 == 1) {
+          runjs("$('#pm-remove-button-1').css('visibility', 'hidden');")
+        }
+      })
+    })
   })
 
-  # Remove query row
-  observeEvent(input$pmRemoveRow, {
-    rowNum <- input$pmRemoveRow
-    removeUI(selector = paste0("#pm-query-row-", rowNum))
-  })
-
-  # Clear all fields
+  # Clear all query fields
   observeEvent(input$pmClearQuery, {
-    currentRows <- pmQueryRows()
-
-    # Reset all query fields
-    for (i in 1:currentRows) {
-      if (i == 1) {
-        updateTextInput(session, "pmQuery_1", value = "")
-        updateSelectInput(session, "pmField_1", selected = "tiab")
-      } else {
-        removeUI(selector = paste0("#pm-query-row-", i))
+    # Reset all query inputs
+    for (i in 1:queryRows()) {
+      updateTextInput(session, paste0("pmQuery_", i), value = "")
+      updateSelectInput(session, paste0("pmField_", i), selected = "tiab")
+      if (i > 1) {
+        updateSelectInput(session, paste0("pmOperator_", i), selected = "AND")
       }
     }
-    pmQueryRows(1)
 
-    # Reset date range
+    # Reset filters
     updateNumericInput(session, "pmYearFrom", value = 2020)
     updateNumericInput(
       session,
       "pmYearTo",
       value = as.integer(format(Sys.Date(), "%Y"))
     )
-
-    # Reset advanced filters
     updateSelectizeInput(session, "pmDocType", selected = "")
     updateSelectizeInput(session, "pmLanguage", selected = "")
     updateNumericInput(session, "pmMaxRecords", value = 1000)
   })
 
-  # Build PubMed query from multiple rows with advanced filters
-  buildPubMedQuery <- function() {
+  # Helper function to build PubMed query
+  build_pubmed_query <- function(queryList) {
+    if (length(queryList) == 0) {
+      return("")
+    }
+
     query_parts <- c()
-    currentRows <- pmQueryRows()
+
+    for (i in seq_along(queryList)) {
+      item <- queryList[[i]]
+
+      # Wrap query with field tag
+      field_tag <- switch(
+        item$field,
+        "all" = "",
+        "title" = "[Title]",
+        "abstract" = "[Abstract]",
+        "tiab" = "[Title/Abstract]",
+        "author" = "[Author]",
+        "mesh" = "[MeSH Terms]",
+        "affiliation" = "[Affiliation]",
+        ""
+      )
+
+      wrapped_query <- paste0("(", item$query, ")", field_tag)
+
+      if (i == 1) {
+        query_parts <- c(query_parts, wrapped_query)
+      } else {
+        operator <- item$operator
+        query_parts <- c(query_parts, operator, wrapped_query)
+      }
+    }
+
+    query <- paste(query_parts, collapse = " ")
+    return(query)
+  }
+
+  # Reactive query count - updates automatically when query changes
+  output$pmQueryCountInfo <- renderUI({
+    # Make this reactive to query inputs
+    lapply(1:queryRows(), function(i) {
+      input[[paste0("pmQuery_", i)]]
+      input[[paste0("pmField_", i)]]
+      if (i > 1) input[[paste0("pmOperator_", i)]]
+    })
+
+    # Also react to filters
+    input$pmYearFrom
+    input$pmYearTo
+    input$pmDocType
+    input$pmLanguage
 
     # Collect all query rows
-    for (i in 1:currentRows) {
-      field_id <- paste0("pmField_", i)
-      query_id <- paste0("pmQuery_", i)
-      operator_id <- paste0("pmOperator_", i)
-
-      field_value <- input[[field_id]]
-      query_text <- input[[query_id]]
-
-      if (!is.null(query_text) && nchar(trimws(query_text)) > 0) {
-        # Map field to PubMed tag
-        field_tag <- switch(
-          field_value,
-          "all" = "[All Fields]",
-          "title" = "[Title]",
-          "abstract" = "[Abstract]",
-          "tiab" = "[Title/Abstract]",
-          "author" = "[Author]",
-          "mesh" = "[MeSH Terms]",
-          "affiliation" = "[Affiliation]",
-          "[All Fields]"
+    queryList <- list()
+    for (i in 1:queryRows()) {
+      queryText <- input[[paste0("pmQuery_", i)]]
+      if (!is.null(queryText) && queryText != "") {
+        queryList[[i]] <- list(
+          query = queryText,
+          field = input[[paste0("pmField_", i)]],
+          operator = if (i > 1) input[[paste0("pmOperator_", i)]] else NULL
         )
+      }
+    }
 
-        # Add operator for rows after the first
-        if (i > 1) {
-          operator <- input[[operator_id]]
-          if (!is.null(operator)) {
-            query_parts <- c(query_parts, operator)
+    # If no query, show hint
+    if (length(queryList) == 0) {
+      return(
+        div(
+          style = "display: inline-block; padding: 5px 10px; color: #6c757d; font-size: 13px; font-style: italic;",
+          icon("info-circle"),
+          " Enter search terms to see record count"
+        )
+      )
+    }
+
+    # Build query and fetch count
+    tryCatch(
+      {
+        # Build the PubMed query
+        query <- build_pubmed_query(queryList)
+
+        # Add date range
+        if (showDateRange()) {
+          if (!is.na(input$pmYearFrom) && !is.na(input$pmYearTo)) {
+            date_filter <- sprintf(
+              " AND (%s:%s[pdat])",
+              input$pmYearFrom,
+              input$pmYearTo
+            )
+            query <- paste0(query, date_filter)
           }
         }
 
-        # Add query with field tag
-        query_parts <- c(query_parts, paste0("(", query_text, ")", field_tag))
+        # Add document type filter
+        if (
+          showAdvanced() &&
+            !is.null(input$pmDocType) &&
+            length(input$pmDocType) > 0 &&
+            input$pmDocType != ""
+        ) {
+          type_filters <- sapply(input$pmDocType, function(t) {
+            paste0("\"", t, "\"[Publication Type]")
+          })
+          type_filter <- paste0(
+            " AND (",
+            paste(type_filters, collapse = " OR "),
+            ")"
+          )
+          query <- paste0(query, type_filter)
+        }
+
+        # Add language filter
+        if (
+          showAdvanced() &&
+            !is.null(input$pmLanguage) &&
+            length(input$pmLanguage) > 0 &&
+            input$pmLanguage != ""
+        ) {
+          lang_filters <- sapply(input$pmLanguage, function(l) {
+            paste0(l, "[Language]")
+          })
+          lang_filter <- paste0(
+            " AND (",
+            paste(lang_filters, collapse = " OR "),
+            ")"
+          )
+          query <- paste0(query, lang_filter)
+        }
+
+        # Get count from PubMed
+        if (!require("pubmedR", quietly = TRUE)) {
+          return(
+            div(
+              style = "display: inline-block; padding: 5px 10px; background-color: #f8d7da; color: #721c24; border-radius: 4px; font-size: 13px;",
+              icon("exclamation-circle"),
+              " pubmedR package not installed"
+            )
+          )
+        }
+
+        count_result <- pmQueryTotalCount(query = query, api_key = NULL)
+        total_available <- count_result$total_count
+
+        div(
+          style = "display: inline-block; padding: 5px 10px; background-color: #d4edda; color: #155724; border-radius: 4px; font-size: 13px; font-weight: 500;",
+          icon("check-circle"),
+          sprintf(" Found %s records", format(total_available, big.mark = ","))
+        )
+      },
+      error = function(e) {
+        div(
+          style = "display: inline-block; padding: 5px 10px; background-color: #f8d7da; color: #721c24; border-radius: 4px; font-size: 13px;",
+          icon("exclamation-circle"),
+          " Error: ",
+          e$message
+        )
       }
-    }
+    )
+  })
 
-    # Combine all parts
-    base_query <- paste(query_parts, collapse = " ")
-
-    # Add date range filter if enabled: YYYY:YYYY[DP]
-    if (
-      pmShowDateRange() &&
-        !is.null(input$pmYearFrom) &&
-        !is.null(input$pmYearTo)
-    ) {
-      date_filter <- sprintf("%s:%s[DP]", input$pmYearFrom, input$pmYearTo)
-      if (nchar(base_query) > 0) {
-        base_query <- paste(base_query, "AND", date_filter)
-      } else {
-        base_query <- date_filter
-      }
-    }
-
-    # Add language filter: [LA]
-    if (
-      pmShowAdvanced() &&
-        !is.null(input$pmLanguage) &&
-        length(input$pmLanguage) > 0 &&
-        input$pmLanguage[1] != ""
-    ) {
-      languages <- paste(
-        sapply(input$pmLanguage, function(x) paste0(x, "[LA]")),
-        collapse = " OR "
-      )
-      if (nchar(base_query) > 0) {
-        base_query <- paste(base_query, "AND (", languages, ")")
-      } else {
-        base_query <- paste("(", languages, ")")
-      }
-    }
-
-    # Add document type filter: [PT]
-    if (
-      pmShowAdvanced() &&
-        !is.null(input$pmDocType) &&
-        length(input$pmDocType) > 0 &&
-        input$pmDocType[1] != ""
-    ) {
-      doc_types <- paste(
-        sapply(input$pmDocType, function(x) paste0(x, "[PT]")),
-        collapse = " OR "
-      )
-      if (nchar(base_query) > 0) {
-        base_query <- paste(base_query, "AND (", doc_types, ")")
-      } else {
-        base_query <- paste("(", doc_types, ")")
-      }
-    }
-
-    return(base_query)
-  }
-
-  # Fetch data from PubMed
+  # Download data from PubMed
   observeEvent(input$pmFetchData, {
-    # Build query with all filters
-    query <- buildPubMedQuery()
+    # Collect all query rows
+    queryList <- list()
+    for (i in 1:queryRows()) {
+      queryText <- input[[paste0("pmQuery_", i)]]
+      if (!is.null(queryText) && queryText != "") {
+        queryList[[i]] <- list(
+          query = queryText,
+          field = input[[paste0("pmField_", i)]],
+          operator = if (i > 1) input[[paste0("pmOperator_", i)]] else NULL
+        )
+      }
+    }
 
-    # Validate query
-    if (is.null(query) || nchar(trimws(query)) == 0) {
+    # Validate that at least one query exists
+    if (length(queryList) == 0) {
       showModal(modalDialog(
-        title = "Invalid Query",
+        title = "Error",
         "Please enter at least one search term.",
         easyClose = TRUE,
         footer = modalButton("OK")
@@ -544,26 +670,76 @@ pubmedServer <- function(input, output, session, values) {
       return()
     }
 
-    # Get max records from advanced filters
-    max_records <- input$pmMaxRecords
-    if (is.null(max_records)) {
-      max_records <- 1000
+    # Build the PubMed query
+    query <- build_pubmed_query(queryList)
+
+    # Add date range
+    if (showDateRange()) {
+      if (!is.na(input$pmYearFrom) && !is.na(input$pmYearTo)) {
+        date_filter <- sprintf(
+          " AND (%s:%s[pdat])",
+          input$pmYearFrom,
+          input$pmYearTo
+        )
+        query <- paste0(query, date_filter)
+      }
     }
+
+    # Add document type filter
+    if (
+      showAdvanced() &&
+        !is.null(input$pmDocType) &&
+        length(input$pmDocType) > 0 &&
+        input$pmDocType != ""
+    ) {
+      type_filters <- sapply(input$pmDocType, function(t) {
+        paste0("\"", t, "\"[Publication Type]")
+      })
+      type_filter <- paste0(
+        " AND (",
+        paste(type_filters, collapse = " OR "),
+        ")"
+      )
+      query <- paste0(query, type_filter)
+    }
+
+    # Add language filter
+    if (
+      showAdvanced() &&
+        !is.null(input$pmLanguage) &&
+        length(input$pmLanguage) > 0 &&
+        input$pmLanguage != ""
+    ) {
+      lang_filters <- sapply(input$pmLanguage, function(l) {
+        paste0(l, "[Language]")
+      })
+      lang_filter <- paste0(
+        " AND (",
+        paste(lang_filters, collapse = " OR "),
+        ")"
+      )
+      query <- paste0(query, lang_filter)
+    }
+
+    max_records <- input$pmMaxRecords
+
+    print("PubMed Query:")
+    print(query)
 
     # Show progress modal
     showModal(modalDialog(
       title = "Downloading from PubMed",
       div(
-        id = "pm-download-progress",
-        div(
-          class = "progress",
-          style = "height: 25px;",
-          div(
-            class = "progress-bar progress-bar-striped progress-bar-animated",
-            role = "progressbar",
-            style = "width: 100%",
-            "Searching PubMed..."
-          )
+        shinyWidgets::progressBar(
+          id = "pm-download-progress",
+          value = 0,
+          total = 100,
+          display_pct = TRUE,
+          status = "info",
+          striped = TRUE,
+          title = NULL,
+          style = "width: 100%",
+          "Searching PubMed..."
         ),
         div(
           id = "pm-download-progress-text",

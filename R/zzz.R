@@ -743,6 +743,63 @@ mergeKeywords <- function(M, force = FALSE) {
   return(M)
 }
 
+filter_keywords_by_score <- function(
+  df,
+  input_col = "ID",
+  output_col = "ID_filtered",
+  threshold = 0.5
+) {
+  # Funzione per processare una singola stringa
+  process_string <- function(x) {
+    if (is.na(x) || x == "") {
+      return("")
+    }
+
+    # Splitta per punto e virgola
+    keywords <- strsplit(x, ";")[[1]]
+
+    # Trimma spazi bianchi
+    keywords <- trimws(keywords)
+
+    # Estrai keyword e score
+    filtered_kw <- sapply(keywords, function(kw) {
+      # Estrai lo score tra parentesi usando regex
+      score_match <- regmatches(kw, regexpr("\\(\\s*([0-9.]+)\\s*\\)", kw))
+
+      if (length(score_match) > 0) {
+        # Estrai il valore numerico dello score
+        score <- as.numeric(gsub("[\\(\\)\\s]", "", score_match))
+
+        # Se score >= threshold, estrai solo la keyword (parte prima delle parentesi)
+        if (!is.na(score) && score >= threshold) {
+          keyword_name <- trimws(sub("\\s*\\(.*\\)\\s*$", "", kw))
+          return(keyword_name)
+        } else {
+          # Score presente ma < threshold
+          return(NA)
+        }
+      } else {
+        # Score NON presente: include la keyword così com'è
+        return(trimws(kw))
+      }
+    })
+
+    # Rimuovi NA e concatena con punto e virgola
+    filtered_kw <- filtered_kw[!is.na(filtered_kw)]
+
+    if (length(filtered_kw) > 0) {
+      return(paste(filtered_kw, collapse = "; "))
+    } else {
+      return("")
+    }
+  }
+
+  # Applica la funzione a tutte le righe
+  df[[output_col]] <- sapply(df[[input_col]], process_string)
+
+  return(df)
+}
+
 # adjust node positions in TM
 adjust_positions_oblique <- function(
   df,

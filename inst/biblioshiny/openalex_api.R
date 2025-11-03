@@ -114,9 +114,10 @@ openAlexUI <- function() {
               )
             ),
 
-            # Date Range Section (collapsible)
-            conditionalPanel(
-              condition = "input.oaShowDateRange == true",
+            # Date Range Section (initially visible)
+            div(
+              id = "oaDateRangeSection",
+              style = "display: block;", # Visibile di default
               wellPanel(
                 style = "background-color: #f8f9fa;",
                 h5("Date Range Filter", style = "font-weight: bold;"),
@@ -154,9 +155,10 @@ openAlexUI <- function() {
               style = "padding: 5px; margin-bottom: 10px;"
             ),
 
-            # Additional Filters Section (collapsible)
-            conditionalPanel(
-              condition = "input.oaShowAdvanced == true",
+            # Additional Filters Section (initially visible)
+            div(
+              id = "oaAdvancedSection",
+              style = "display: block;", # Visibile di default
               wellPanel(
                 style = "background-color: #f8f9fa;",
                 fluidRow(
@@ -215,22 +217,31 @@ openAlexUI <- function() {
                 )
               )
             ),
-
-            # Action buttons
+            # Action buttons section
             div(
-              style = "margin-top: 10px; text-align: right;",
-              actionButton(
-                "oaClearQuery",
-                "Clear",
-                icon = icon("times"),
-                class = "btn-outline-secondary"
+              style = "margin-top: 10px; display: flex; justify-content: space-between; align-items: center;",
+
+              # Left side: Reactive query count message
+              div(
+                style = "display: flex; align-items: center;",
+                uiOutput("oaQueryCountInfo")
               ),
-              actionButton(
-                "oaFetchData",
-                "Search",
-                icon = icon("search"),
-                class = "btn-primary",
-                style = "margin-left: 10px;"
+
+              # Right side: Clear and Search buttons
+              div(
+                style = "display: flex; gap: 10px;",
+                actionButton(
+                  "oaClearQuery",
+                  "Clear",
+                  icon = icon("times"),
+                  class = "btn-outline-secondary"
+                ),
+                actionButton(
+                  "oaFetchData",
+                  "Search",
+                  icon = icon("search"),
+                  class = "btn-primary"
+                )
               )
             )
           )
@@ -281,52 +292,84 @@ openAlexUI <- function() {
     # JavaScript for collapsible functionality
     tags$script(HTML(
       "
-      $(document).ready(function() {
-        // Initialize collapsed state
-        var isCollapsed = false;
-        
-        // Handle toggle button click
-        $('#oaToggleQueryPanel').on('click', function() {
-          isCollapsed = !isCollapsed;
-          $('#oaQueryContent').slideToggle(300);
-          
-          // Update button icon
-          if (isCollapsed) {
-            $(this).html('<i class=\"fa fa-chevron-down\"></i>');
-          } else {
-            $(this).html('<i class=\"fa fa-chevron-up\"></i>');
-          }
-        });
-      });
+  $(document).ready(function() {
+    // Initialize collapsed state
+    var isCollapsed = false;
+    
+    // Initialize visibility states
+    var dateRangeVisible = true;
+    var advancedVisible = true;
+    
+    // Handle toggle button click for main panel
+    $('#oaToggleQueryPanel').on('click', function() {
+      isCollapsed = !isCollapsed;
+      $('#oaQueryContent').slideToggle(300);
       
-      // Custom message handler to collapse panel when data is loaded
-      Shiny.addCustomMessageHandler('oaCollapseQueryPanel', function(message) {
-        $('#oaQueryContent').slideUp(300);
-        $('#oaToggleQueryPanel').html('<i class=\"fa fa-chevron-down\"></i>');
-      });
+      // Update button icon
+      if (isCollapsed) {
+        $(this).html('<i class=\"fa fa-chevron-down\"></i>');
+      } else {
+        $(this).html('<i class=\"fa fa-chevron-up\"></i>');
+      }
+    });
+    
+    // Handle date range toggle
+    $('#oaToggleDateRange').on('click', function() {
+      dateRangeVisible = !dateRangeVisible;
+      $('#oaDateRangeSection').slideToggle(300);
       
-      Shiny.addCustomMessageHandler('oaToggleDateRange', function(show) {
-        Shiny.setInputValue('oaShowDateRange', show);
-      });
+      // Update button text
+      if (dateRangeVisible) {
+        $(this).html('<i class=\"fa fa-calendar\"></i> - Date range');
+      } else {
+        $(this).html('<i class=\"fa fa-calendar\"></i> + Date range');
+      }
       
-      Shiny.addCustomMessageHandler('oaToggleAdvanced', function(show) {
-        Shiny.setInputValue('oaShowAdvanced', show);
-      });
-    "
+      // Notify Shiny
+      Shiny.setInputValue('oaShowDateRange', dateRangeVisible);
+    });
+    
+    // Handle advanced filters toggle
+    $('#oaToggleAdvanced').on('click', function() {
+      advancedVisible = !advancedVisible;
+      $('#oaAdvancedSection').slideToggle(300);
+      
+      // Update button text
+      if (advancedVisible) {
+        $(this).html('<i class=\"fa fa-filter\"></i> Hide advanced filters');
+      } else {
+        $(this).html('<i class=\"fa fa-filter\"></i> Show advanced filters');
+      }
+      
+      // Notify Shiny
+      Shiny.setInputValue('oaShowAdvanced', advancedVisible);
+    });
+    
+    // Set initial button labels
+    $('#oaToggleDateRange').html('<i class=\"fa fa-calendar\"></i> - Date range');
+    $('#oaToggleAdvanced').html('<i class=\"fa fa-filter\"></i> Hide advanced filters');
+  });
+  
+  // Custom message handler to collapse panel when data is loaded
+  Shiny.addCustomMessageHandler('oaCollapseQueryPanel', function(message) {
+    $('#oaQueryContent').slideUp(300);
+    $('#oaToggleQueryPanel').html('<i class=\"fa fa-chevron-down\"></i>');
+  });
+"
     ))
   )
 }
 
 
 # ==============================================================================
-# Server Component - WebOfScience-like Query Builder (CORRECTED)
+# Server Component - WebOfScience-like Query Builder
 # ==============================================================================
 
 openAlexServer <- function(input, output, session, values) {
   # Reactive values to track query rows and toggle states
   queryRows <- reactiveVal(1)
-  showDateRange <- reactiveVal(FALSE)
-  showAdvanced <- reactiveVal(FALSE)
+  showDateRange <- reactiveVal(TRUE)
+  showAdvanced <- reactiveVal(TRUE)
   downloadProgress <- reactiveVal(NULL)
 
   # Toggle date range visibility
@@ -530,6 +573,117 @@ openAlexServer <- function(input, output, session, values) {
 
     return(search_filters)
   }
+
+  # Reactive query count - updates automatically when query changes
+  output$oaQueryCountInfo <- renderUI({
+    # Make this reactive to query inputs
+    lapply(1:queryRows(), function(i) {
+      input[[paste0("oaQuery_", i)]]
+      input[[paste0("oaField_", i)]]
+      if (i > 1) input[[paste0("oaOperator_", i)]]
+    })
+
+    # Also react to filters
+    input$oaYearFrom
+    input$oaYearTo
+    input$oaDocType
+    input$oaLanguage
+
+    # Collect all query rows
+    queryList <- list()
+    for (i in 1:queryRows()) {
+      queryText <- input[[paste0("oaQuery_", i)]]
+      if (!is.null(queryText) && queryText != "") {
+        queryList[[i]] <- list(
+          query = queryText,
+          field = input[[paste0("oaField_", i)]],
+          operator = if (i > 1) input[[paste0("oaOperator_", i)]] else NULL
+        )
+      }
+    }
+
+    # If no query, show nothing or a hint
+    if (length(queryList) == 0) {
+      return(
+        div(
+          style = "display: inline-block; padding: 5px 10px; color: #6c757d; font-size: 13px; font-style: italic;",
+          icon("info-circle"),
+          " Enter search terms to see record count"
+        )
+      )
+    }
+
+    # Show loading state while fetching
+    tryCatch(
+      {
+        # Build the query filters grouped by field
+        search_filters <- build_query_filters(queryList)
+
+        # Add date range filter if visible
+        if (showDateRange()) {
+          if (!is.na(input$oaYearFrom)) {
+            search_filters$from_publication_date <- paste0(
+              input$oaYearFrom,
+              "-01-01"
+            )
+          }
+          if (!is.na(input$oaYearTo)) {
+            search_filters$to_publication_date <- paste0(
+              input$oaYearTo,
+              "-12-31"
+            )
+          }
+        }
+
+        # Add advanced filters if visible
+        if (showAdvanced()) {
+          if (
+            !is.null(input$oaDocType) &&
+              length(input$oaDocType) > 0 &&
+              input$oaDocType != ""
+          ) {
+            search_filters$type <- input$oaDocType
+          }
+          if (
+            !is.null(input$oaLanguage) &&
+              length(input$oaLanguage) > 0 &&
+              input$oaLanguage != ""
+          ) {
+            search_filters$language <- input$oaLanguage
+          }
+        }
+
+        # Get the count of available records
+        count_result <- do.call(
+          openalexR::oa_fetch,
+          c(
+            list(
+              entity = "works",
+              count_only = TRUE,
+              verbose = FALSE
+            ),
+            search_filters
+          )
+        )
+
+        total_available <- as.integer(count_result$count)
+
+        div(
+          style = "display: inline-block; padding: 5px 10px; background-color: #d4edda; color: #155724; border-radius: 4px; font-size: 13px; font-weight: 500;",
+          icon("check-circle"),
+          sprintf(" Found %s records", format(total_available, big.mark = ","))
+        )
+      },
+      error = function(e) {
+        div(
+          style = "display: inline-block; padding: 5px 10px; background-color: #f8d7da; color: #721c24; border-radius: 4px; font-size: 13px;",
+          icon("exclamation-circle"),
+          " Error: ",
+          e$message
+        )
+      }
+    )
+  })
 
   # Download data from OpenAlex
   observeEvent(input$oaFetchData, {

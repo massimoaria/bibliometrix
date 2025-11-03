@@ -58,29 +58,72 @@
 #'
 #' @export
 
-convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.duplicates = TRUE) {
-  allowed_formats <- c("api", "bibtex", "csv", "endnote", "excel", "plaintext", "pubmed")
-  allowed_db <- c("cochrane", "dimensions", "generic", "isi", "openalex", "openalex_api", "pubmed", "scopus", "wos", "lens")
+convert2df <- function(
+  file,
+  dbsource = "wos",
+  format = "plaintext",
+  remove.duplicates = TRUE
+) {
+  allowed_formats <- c(
+    "api",
+    "bibtex",
+    "csv",
+    "endnote",
+    "excel",
+    "plaintext",
+    "pubmed"
+  )
+  allowed_db <- c(
+    "cochrane",
+    "dimensions",
+    "generic",
+    "isi",
+    "openalex",
+    "openalex_api",
+    "pubmed",
+    "scopus",
+    "wos",
+    "lens"
+  )
 
-  cat("\nConverting your", dbsource, "collection into a bibliographic dataframe\n\n")
+  cat(
+    "\nConverting your",
+    dbsource,
+    "collection into a bibliographic dataframe\n\n"
+  )
   if (length(setdiff(dbsource, allowed_db)) > 0) {
     cat("\n 'dbsource' argument is not properly specified")
-    cat("\n 'dbsource' argument has to be a character string matching one among:", allowed_db, "\n")
+    cat(
+      "\n 'dbsource' argument has to be a character string matching one among:",
+      allowed_db,
+      "\n"
+    )
   }
   if (length(setdiff(format, allowed_formats)) > 0) {
     cat("\n 'format' argument is not properly specified")
-    cat("\n 'format' argument has to be a character string matching one among:", allowed_formats, "\n")
+    cat(
+      "\n 'format' argument has to be a character string matching one among:",
+      allowed_formats,
+      "\n"
+    )
   }
 
-  if (dbsource == "wos") dbsource <- "isi"
-  if (format == "endnote") format <- "plaintext"
-  if (format == "lens") format <- "csv"
+  if (dbsource == "wos") {
+    dbsource <- "isi"
+  }
+  if (format == "endnote") {
+    format <- "plaintext"
+  }
+  if (format == "lens") {
+    format <- "csv"
+  }
 
-
-  switch(dbsource,
+  switch(
+    dbsource,
     ## db WOS
     isi = {
-      switch(format,
+      switch(
+        format,
         bibtex = {
           D <- importFiles(file)
           M <- bib2df(D, dbsource = "isi")
@@ -93,7 +136,8 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
     },
     ## db SCOPUS
     scopus = {
-      switch(format,
+      switch(
+        format,
         bibtex = {
           D <- importFiles(file)
           M <- bib2df(D, dbsource = "scopus")
@@ -114,7 +158,8 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
     },
     ## db PUBMED
     pubmed = {
-      switch(format,
+      switch(
+        format,
         api = {
           M <- pmApi2df(file)
           M$DB <- "PUBMED"
@@ -132,7 +177,8 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
     },
     ## db DIMENSIONS
     dimensions = {
-      switch(format,
+      switch(
+        format,
         api = {
           M <- dsApi2df(file)
           M$DB <- "DIMENSIONS"
@@ -145,14 +191,21 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
     },
     openalex = {
       M <- csvOA2df(file)
+      M <- filter_keywords_by_score(
+        M %>% rename(ID_raw = ID),
+        input_col = "ID_raw",
+        output_col = "ID",
+        threshold = 0.5
+      )
     },
     openalex_api = {
       M <- apiOA2df(file)
-      # if (!"bibliometrixDB" %in% class(file)) {
-      #   M <- openalexR::oa2bibliometrix(file)
-      # } else {
-      #   M <- file
-      # }
+      M <- filter_keywords_by_score(
+        M %>% rename(ID_raw = ID),
+        input_col = "ID_raw",
+        output_col = "ID",
+        threshold = 0.5
+      )
     }
   )
   if ("PY" %in% names(M)) {
@@ -171,7 +224,11 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
   if (!("CR" %in% names(M))) {
     M$CR <- "none"
   } else {
-    M$CR <- trim.leading(trimES(gsub("\\[,||\\[||\\]|| \\.\\. || \\. ", "", M$CR))) # remove foreign characters from CR (i.e. Chinese, Russian characters)
+    M$CR <- trim.leading(trimES(gsub(
+      "\\[,||\\[||\\]|| \\.\\. || \\. ",
+      "",
+      M$CR
+    ))) # remove foreign characters from CR (i.e. Chinese, Russian characters)
   }
 
   if (dbsource %in% c("cochrane", "openalex_api")) {
@@ -185,7 +242,9 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
     if ("C1" %in% names(M)) {
       cat("\nGenerating affiliation field tag AU_UN from C1:  ")
 
-      if (!"AU_UN" %in% names(M)) M <- metaTagExtraction(M, Field = "AU_UN")
+      if (!"AU_UN" %in% names(M)) {
+        M <- metaTagExtraction(M, Field = "AU_UN")
+      }
       cat("Done!\n\n")
     } else {
       M$C1 <- NA
@@ -217,7 +276,8 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
 
   ### SR field creation
   if (isTRUE(remove.duplicates)) {
-    switch(dbsource,
+    switch(
+      dbsource,
       isi = {
         id_field <- "UT"
       },
@@ -248,7 +308,9 @@ convert2df <- function(file, dbsource = "wos", format = "plaintext", remove.dupl
       }
     )
     d <- duplicated(M[id_field])
-    if (sum(d) > 0) cat("\nRemoved ", sum(d), "duplicated documents\n")
+    if (sum(d) > 0) {
+      cat("\nRemoved ", sum(d), "duplicated documents\n")
+    }
     M <- M[!d, ]
   }
   suppressWarnings(M <- metaTagExtraction(M, Field = "SR"))

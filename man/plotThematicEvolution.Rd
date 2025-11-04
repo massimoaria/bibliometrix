@@ -2,50 +2,34 @@
 % Please edit documentation in R/plotThematicEvolution.R
 \name{plotThematicEvolution}
 \alias{plotThematicEvolution}
-\title{Plot Thematic Evolution Network}
+\title{Plot a Thematic Evolution Analysis}
 \usage{
-plotThematicEvolution(
-  Nodes,
-  Edges,
-  min.flow = 0,
-  measure = "weighted",
-  label_size = 5,
-  edge_scale = 10,
-  node_scale = 30
-)
+plotThematicEvolution(Nodes, Edges, measure = "inclusion", min.flow = 0)
 }
 \arguments{
 \item{Nodes}{is a list of nodes obtained by \code{\link{thematicEvolution}} function.}
 
 \item{Edges}{is a list of edges obtained by \code{\link{thematicEvolution}} function.}
 
-\item{min.flow}{Numeric. Minimum threshold for edge weight (i.e., flow) to be included in the network visualization. Default is `0`.}
+\item{measure}{is a character. It can be \code{measure=("inclusion","stability", "weighted")}.}
 
-\item{measure}{Character. The method to define edge weight: `"inclusion"`, `"stability"`, or `"weighted"` (default is `"weighted"`).}
-
-\item{label_size}{Numeric. Font size of the node labels. Default is `15`.}
-
-\item{edge_scale}{Numeric. Scaling factor for edge width. Default is `10`.}
-
-\item{node_scale}{Numeric. Scaling factor for node size. Default is `30`.}
+\item{min.flow}{is numerical. It indicates the minimum value of measure to plot a flow.}
 }
 \value{
-A `visNetwork` object displaying a time-structured thematic evolution network.
+a sankeyPlot
 }
 \description{
-Visualizes the thematic evolution of clusters over time using a temporal network layout.
-Nodes are positioned along the x-axis according to time slices and vertically to minimize overlap.
-Edges represent links between themes across time periods, with customizable weights and styles.
-Nodes and Edges objects are the results of a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
+It plot a Thematic Evolution Analysis performed using the \code{\link{thematicEvolution}} function.
 }
 \examples{
+
 \dontrun{
-data(managemeent, package = "bibliometrixData")
-years <- c(2004, 2015)
+data(scientometrics, package = "bibliometrixData")
+years=c(2000)
 
-nexus <- thematicEvolution(management, field = "ID", years = years, n = 100, minFreq = 2)
+nexus <- thematicEvolution(scientometrics,field="ID",years=years,n=100,minFreq=2)
 
-plotThematicEvolution(nexus$Nodes, nexus$Edges)
+plotThematicEvolution(nexus$Nodes,nexus$Edges)
 }
 
 }

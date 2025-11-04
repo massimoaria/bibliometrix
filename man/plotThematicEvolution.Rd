@@ -36,7 +36,7 @@ plotThematicEvolution(nexus$Nodes,nexus$Edges)
 \seealso{
 \code{\link{thematicMap}} function to create a thematic map based on co-word network analysis and clustering.
 
-\code{\link{thematicMap}} function to perform a thematic evolution analysis.
+\code{\link{thematicEvolution}} function to perform a thematic evolution analysis.
 
 \code{\link{networkPlot}} to plot a bibliographic network.
 }

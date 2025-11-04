@@ -33,7 +33,16 @@ utils::globalVariables(c("degree"))
 #' @param label.cex is logical. If TRUE the label size of each vertex is proportional to its degree.
 #' @param halo is logical. If TRUE communities are plotted using different colors. Default is \code{halo=FALSE}
 #' @param cluster is a character. It indicates the type of cluster to perform among ("none", "optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
-#' @param community.repulsion is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.
+#' @param community.repulsion is a real number between 0 and 1.
+#'   Controls the separation between communities with adaptive scaling.
+#'   The algorithm automatically adapts to network size and structure.
+#'   Recommended values:
+#'   \tabular{ll}{
+#'   \code{0.0}\tab No repulsion - communities may overlap\cr
+#'   \code{0.2-0.4}\tab Light separation - suitable for dense networks\cr
+#'   \code{0.5-0.7}\tab Moderate separation - general use (RECOMMENDED)\cr
+#'   \code{0.8-1.0}\tab Strong separation - for many small communities}
+#'   Default is \code{community.repulsion = 0.5}.
 #' @param curved is a logical or a number. If TRUE edges are plotted with an optimal curvature. Default is \code{curved=FALSE}. Curved values are any numbers from 0 to 1.
 #' @param weighted This argument specifies whether to create a weighted graph from an adjacency matrix.
 #' If it is NULL then an unweighted graph is created and the elements of the adjacency matrix gives the number of edges between the vertices.
@@ -43,6 +52,7 @@ utils::globalVariables(c("degree"))
 #' @param edges.min is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.
 #' @param label.n is an integer. It indicates the number of vertex labels to draw.
 #' @param alpha is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.
+#' @param seed is an integer. It indicates the random seed for clustering reproducibility. Default is \code{seed = 123}.
 #' @param verbose is a logical. If TRUE, network will be plotted. Default is \code{verbose = TRUE}.
 #' @return It is a list containing the following elements:
 #' \tabular{lll}{
@@ -70,32 +80,35 @@ utils::globalVariables(c("degree"))
 #'
 #' @export
 networkPlot <-
-  function(NetMatrix,
-           normalize = NULL,
-           n = NULL,
-           degree = NULL,
-           Title = "Plot",
-           type = "auto",
-           label = TRUE,
-           labelsize = 1,
-           label.cex = FALSE,
-           label.color = FALSE,
-           label.n = NULL,
-           halo = FALSE,
-           cluster = "walktrap",
-           community.repulsion = 0.1,
-           vos.path = NULL,
-           size = 3,
-           size.cex = FALSE,
-           curved = FALSE,
-           noloops = TRUE,
-           remove.multiple = TRUE,
-           remove.isolates = FALSE,
-           weighted = NULL,
-           edgesize = 1,
-           edges.min = 0,
-           alpha = 0.5,
-           verbose = TRUE) {
+  function(
+    NetMatrix,
+    normalize = NULL,
+    n = NULL,
+    degree = NULL,
+    Title = "Plot",
+    type = "auto",
+    label = TRUE,
+    labelsize = 1,
+    label.cex = FALSE,
+    label.color = FALSE,
+    label.n = NULL,
+    halo = FALSE,
+    cluster = "walktrap",
+    community.repulsion = 0.5,
+    vos.path = NULL,
+    size = 3,
+    size.cex = FALSE,
+    curved = FALSE,
+    noloops = TRUE,
+    remove.multiple = TRUE,
+    remove.isolates = FALSE,
+    weighted = NULL,
+    edgesize = 1,
+    edges.min = 0,
+    alpha = 0.5,
+    seed = 123,
+    verbose = TRUE
+  ) {
     S <- NULL
 
     colnames(NetMatrix) <- rownames(NetMatrix) <- tolower(colnames(NetMatrix))
@@ -108,7 +121,7 @@ networkPlot <-
 
     if (!is.null(normalize)) {
       S <- normalizeSimilarity(NetMatrix, type = normalize)
-      bsk.S <- graph.adjacency(S, mode = "undirected", weighted = T)
+      bsk.S <- graph_from_adjacency_matrix(S, mode = "undirected", weighted = T)
     }
 
     ## legacy with version <1.9.4
@@ -123,8 +136,11 @@ networkPlot <-
 
     # Create igraph object
     bsk.network <-
-      graph.adjacency(NetMatrix, mode = "undirected", weighted = weighted)
-
+      graph_from_adjacency_matrix(
+        NetMatrix,
+        mode = "undirected",
+        weighted = weighted
+      )
 
     # vertex labels
     V(bsk.network)$name <- colnames(NetMatrix)
@@ -135,7 +151,6 @@ networkPlot <-
     deg.dist <- data.frame(node = V(bsk.network)$name, degree = deg) %>%
       arrange(desc(degree)) %>%
       mutate(degree = degree / max(degree))
-
 
     # Compute node degrees (#links) and use that to set node size:
     # deg <- degree(bsk.network, mode = "all")
@@ -163,9 +178,9 @@ networkPlot <-
         cat("\ndegree argument is to high!\n\n")
         return()
       }
-      bsk.network <- delete.vertices(bsk.network, which(Vind))
+      bsk.network <- delete_vertices(bsk.network, which(Vind))
       if (!isTRUE(bsk.S)) {
-        bsk.S <- delete.vertices(bsk.S, which(Vind))
+        bsk.S <- delete_vertices(bsk.S, which(Vind))
       }
     } else if (!is.null(n)) {
       if (n > dim(NetMatrix)[1]) {
@@ -173,9 +188,12 @@ networkPlot <-
       }
       nodes <- names(sort(deg, decreasing = TRUE)[1:n])
 
-      bsk.network <- delete.vertices(bsk.network, which(!(V(bsk.network)$name %in% nodes)))
+      bsk.network <- delete_vertices(
+        bsk.network,
+        which(!(V(bsk.network)$name %in% nodes))
+      )
       if (!isTRUE(bsk.S)) {
-        bsk.S <- delete.vertices(bsk.S, which(!(V(bsk.S)$name %in% nodes)))
+        bsk.S <- delete_vertices(bsk.S, which(!(V(bsk.S)$name %in% nodes)))
       }
     }
 
@@ -184,13 +202,15 @@ networkPlot <-
       remove.multiple <- FALSE
     }
     bsk.network <-
-      simplify(bsk.network,
+      simplify(
+        bsk.network,
         remove.multiple = remove.multiple,
         remove.loops = noloops
       )
     if (!isTRUE(bsk.S)) {
       bsk.S <-
-        simplify(bsk.S,
+        simplify(
+          bsk.S,
           remove.multiple = remove.multiple,
           remove.loops = noloops
         )
@@ -205,15 +225,19 @@ networkPlot <-
     # Clustering
     # if (type != "vosviewer") {
     ## Edge size
-    E(bsk.network)$num <- E(bsk.save)$num <- count_multiple(bsk.network, eids = E(bsk.network))
+    E(bsk.network)$num <- E(bsk.save)$num <- count_multiple(
+      bsk.network,
+      eids = E(bsk.network)
+    )
     if (is.null(weighted)) {
       E(bsk.save)$weight <- E(bsk.save)$num
     }
 
     if (!is.null(weighted)) {
       E(bsk.network)$width <-
-        (E(bsk.network)$weight + min(E(bsk.network)$weight)) / max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *
-          edgesize
+        (E(bsk.network)$weight + min(E(bsk.network)$weight)) /
+        max(E(bsk.network)$weight + min(E(bsk.network)$weight)) *
+        edgesize
     } else {
       if (isTRUE(remove.multiple)) {
         E(bsk.network)$width <- edgesize
@@ -223,9 +247,12 @@ networkPlot <-
       }
     }
 
-    bsk.network <- delete.edges(bsk.network, which(E(bsk.network)$num < edges.min))
+    bsk.network <- delete_edges(
+      bsk.network,
+      which(E(bsk.network)$num < edges.min)
+    )
     if (!isTRUE(bsk.S)) {
-      bsk.S <- delete.edges(bsk.S, which(E(bsk.network)$num < edges.min))
+      bsk.S <- delete_edges(bsk.S, which(E(bsk.network)$num < edges.min))
     }
 
     # delete not linked vertices
@@ -233,18 +260,22 @@ networkPlot <-
       bsk.network <- delete.isolates(bsk.network, mode = "all")
       if (!isTRUE(bsk.S)) {
         bsk.S <-
-          delete.vertices(bsk.S, which(V(bsk.S)$name %in% setdiff(
-            V(bsk.S)$name, V(bsk.network)$name
-          )))
+          delete_vertices(
+            bsk.S,
+            which(
+              V(bsk.S)$name %in%
+                setdiff(
+                  V(bsk.S)$name,
+                  V(bsk.network)$name
+                )
+            )
+          )
       }
     }
 
-
-
-
     # Community Detection
 
-    cl <- clusteringNetwork(bsk.network, cluster)
+    cl <- clusteringNetwork(bsk.network, cluster, seed = seed)
 
     bsk.network <- cl$bsk.network
     if (!isTRUE(bsk.S)) {
@@ -284,16 +315,11 @@ networkPlot <-
       }
     }
 
-
-
-
     if (isTRUE(label.color)) {
       lab.color <- V(bsk.network)$color
     } else {
       lab.color <- "black"
     }
-
-
 
     # l <- layout.norm(l)
 
@@ -312,7 +338,6 @@ networkPlot <-
     V(bsk.network)$label.color <- adjustcolor("black", min(c(1, alpha + 0.1)))
     V(bsk.network)$label.font <- 2
     V(bsk.network)$label <- LABEL
-
 
     ## Plot the network
     if (isTRUE(halo) & cluster != "none") {
@@ -334,14 +359,21 @@ networkPlot <-
         net_groups$membership,
         as.numeric(betweenness(
           bsk.network,
-          directed = F, normalized = F
+          directed = F,
+          normalized = F
         )),
         suppressWarnings(as.numeric(closeness(
           bsk.network
         ))),
         as.numeric(page.rank(bsk.network)$vector)
       )
-      names(cluster_res) <- c("vertex", "cluster", "btw_centrality", "clos_centrality", "pagerank_centrality")
+      names(cluster_res) <- c(
+        "vertex",
+        "cluster",
+        "btw_centrality",
+        "clos_centrality",
+        "pagerank_centrality"
+      )
       cluster_res <- cluster_res[order(cluster_res$cluster), ]
     } else {
       cluster_res <- NA
@@ -374,7 +406,11 @@ networkPlot <-
       alpha = alpha,
       verbose = verbose
     )
-    params <- data.frame(params = names(unlist(params)), values = unlist(params), row.names = NULL)
+    params <- data.frame(
+      params = names(unlist(params)),
+      values = unlist(params),
+      row.names = NULL
+    )
 
     net <- list(
       graph = bsk.network,
@@ -392,86 +428,111 @@ networkPlot <-
   }
 
 
-
-
-
-
 ### internal functions:
 
 ### deleteIsolates
 
 delete.isolates <- function(graph, mode = "all") {
   isolates <- which(degree(graph, mode = mode) == 0) - 1
-  delete.vertices(graph, names(isolates))
+  delete_vertices(graph, names(isolates))
 }
 
 ### clusteringNetwork
 
-clusteringNetwork <- function(bsk.network, cluster) {
+clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
   colorlist <- colorlist()
-  #   c(
-  #   brewer.pal(9, 'Set1')[-6],
-  #   brewer.pal(8, 'Set2')[-7],
-  #   brewer.pal(12, 'Paired')[-11],
-  #   brewer.pal(12, 'Set3')[-c(2, 8, 12)]
-  # )
 
-  switch(cluster,
-    none = {
-      net_groups <- list(membership = rep(1, vcount(bsk.network)))
-    },
-    optimal = {
-      net_groups <- cluster_optimal(bsk.network)
-    },
-    leiden = {
-      net_groups <- cluster_leiden(bsk.network,
-        objective_function = "modularity",
-        n_iterations = 3, resolution_parameter = 0.75
-      )
-    },
-    louvain = {
-      net_groups <- cluster_louvain(bsk.network)
-      # net_groups <- louvain(bsk.network)
-    },
-    fast_greedy = {
-      net_groups <- cluster_fast_greedy(bsk.network)
-    },
-    leading_eigen = {
-      net_groups <- cluster_leading_eigen(bsk.network)
-    },
-    spinglass = {
-      net_groups <- cluster_spinglass(bsk.network)
-    },
-    infomap = {
-      net_groups <- cluster_infomap(bsk.network)
-    },
-    edge_betweenness = {
-      net_groups <- cluster_edge_betweenness(bsk.network)
-    },
-    walktrap = {
-      net_groups <- cluster_walktrap(bsk.network)
-    },
+  # For stochastic algorithms, perform multiple runs and select the best one
+  if (cluster %in% c("louvain", "leiden") && !is.null(seed)) {
+    best_modularity <- -Inf
+    best_result <- NULL
 
-    ## default statement
-    {
-      cat("\nUnknown cluster argument. Using default algorithm\n")
-      net_groups <- cluster_walktrap(bsk.network)
+    for (i in 1:n_runs) {
+      set.seed(seed + i - 1) # Different seed for each run
+
+      if (cluster == "louvain") {
+        result <- cluster_louvain(bsk.network)
+      } else if (cluster == "leiden") {
+        result <- cluster_leiden(
+          bsk.network,
+          objective_function = "modularity",
+          n_iterations = 3,
+          resolution_parameter = 0.75
+        )
+      }
+
+      current_modularity <- modularity(bsk.network, result$membership)
+
+      if (current_modularity > best_modularity) {
+        best_modularity <- current_modularity
+        best_result <- result
+      }
     }
-  )
+
+    net_groups <- best_result
+  } else {
+    # For other algorithms, use standard logic
+    # if (!is.null(seed) && cluster %in% c("spinglass", "leading_eigen","walktrap")) {
+    set.seed(seed)
+    # }
+
+    switch(
+      cluster,
+      none = {
+        net_groups <- list(membership = rep(1, vcount(bsk.network)))
+      },
+      optimal = {
+        net_groups <- cluster_optimal(bsk.network)
+      },
+      leiden = {
+        set.seed(seed)
+        net_groups <- cluster_leiden(
+          bsk.network,
+          objective_function = "modularity",
+          n_iterations = 3,
+          resolution_parameter = 0.75
+        )
+      },
+      louvain = {
+        set.seed(seed)
+        net_groups <- cluster_louvain(bsk.network)
+      },
+      fast_greedy = {
+        net_groups <- cluster_fast_greedy(bsk.network)
+      },
+      leading_eigen = {
+        if (!is.null(seed)) {
+          set.seed(seed)
+        }
+        net_groups <- cluster_leading_eigen(bsk.network)
+      },
+      spinglass = {
+        if (!is.null(seed)) {
+          set.seed(seed)
+        }
+        net_groups <- cluster_spinglass(bsk.network)
+      },
+      infomap = {
+        net_groups <- cluster_infomap(bsk.network)
+      },
+      edge_betweenness = {
+        net_groups <- cluster_edge_betweenness(bsk.network)
+      },
+      walktrap = {
+        net_groups <- cluster_walktrap(bsk.network)
+      },
+      {
+        cat("\nUnknown cluster argument. Using default algorithm\n")
+        net_groups <- cluster_walktrap(bsk.network)
+      }
+    )
+  }
 
   V(bsk.network)$color <- colorlist[net_groups$membership]
-
-  ### set egde intra-class colors
   V(bsk.network)$community <- net_groups$membership
   El <- as.data.frame(get.edgelist(bsk.network, names = F))
 
   colorlist <- colorlist()
-  #   c(
-  #   brewer.pal(9, 'Set1')[-6],
-  #   brewer.pal(8, 'Set2')[-7],
-  #   brewer.pal(12, 'Paired')[-11],
-  #   brewer.pal(12, 'Set3')[-c(2, 8, 12)]
-  # )
   E(bsk.network)$color <- apply(El, 1, function(x) {
     if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]) {
       C <- colorlist[V(bsk.network)$community[x[1]]]
@@ -482,7 +543,6 @@ clusteringNetwork <- function(bsk.network, cluster) {
   })
   E(bsk.network)$lty <- 1
   E(bsk.network)$lty[E(bsk.network)$color == "gray70"] <- 5
-  ### end
 
   cl <- list()
   cl$bsk.network <- bsk.network
@@ -490,23 +550,69 @@ clusteringNetwork <- function(bsk.network, cluster) {
   return(cl)
 }
 
+
 ### switchLayout
 
 switchLayout <- function(bsk.network, type, community.repulsion) {
   if (community.repulsion > 0) {
-    community.repulsion <- round(community.repulsion * 100)
-    row <- get.edgelist(bsk.network)
+    # Extract community structure information
     membership <- V(bsk.network)$community
     names(membership) <- V(bsk.network)$name
+    n_communities <- length(unique(membership))
+    n_nodes <- vcount(bsk.network)
 
+    # Calculate statistics for adaptive normalization
+    community_sizes <- table(membership)
+    avg_community_size <- mean(community_sizes)
+
+    # Calculate adaptive repulsion strength
+    repulsion_strength <- adaptive_repulsion_strength(
+      community.repulsion,
+      n_nodes,
+      n_communities,
+      avg_community_size
+    )
+
+    # Extract edgelist
+    row <- get.edgelist(bsk.network)
+
+    # Save or initialize original weights
     if (is.null(E(bsk.network)$weight[1])) {
-      E(bsk.network)$weight <- apply(row, 1, weight.community, membership, community.repulsion, 1)
+      original_weights <- rep(1, nrow(row))
     } else {
-      E(bsk.network)$weight <- E(bsk.network)$weight + apply(row, 1, weight.community, membership, community.repulsion, 1)
+      original_weights <- E(bsk.network)$weight
     }
+
+    # Apply new weighting scheme with gradual growth
+    new_weights <- numeric(nrow(row))
+
+    for (i in 1:nrow(row)) {
+      node1 <- row[i, 1]
+      node2 <- row[i, 2]
+
+      comm1 <- membership[which(names(membership) == node1)]
+      comm2 <- membership[which(names(membership) == node2)]
+
+      if (comm1 == comm2) {
+        # INTRA-COMMUNITY Edge
+        # Moderate increase with sub-linear growth
+        multiplier <- 1 + (repulsion_strength^0.7) * 1.5
+        new_weights[i] <- original_weights[i] * multiplier
+      } else {
+        # INTER-COMMUNITY Edge
+        # Gradual reduction with attenuated exponential function
+        divisor <- 1 + exp(repulsion_strength * 1.2) - 1
+        new_weights[i] <- original_weights[i] / divisor
+      }
+    }
+
+    # Apply new weights
+    E(bsk.network)$weight <- new_weights
   }
 
-  switch(type,
+  # Apply the chosen layout
+  switch(
+    type,
     auto = {
       l <- layout.auto(bsk.network)
     },
@@ -523,29 +629,54 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
       l <- layout.mds(bsk.network)
     },
     fruchterman = {
-      l <- layout.fruchterman.reingold(bsk.network)
+      l <- layout_with_fr(bsk.network)
     },
     kamada = {
       l <- layout.kamada.kawai(bsk.network)
     }
   )
-  l <- layout.norm(l)
+
+  # Normalize the layout
+  l <- norm_coords(l)
 
   layout_results <- list(l = l, bsk.network = bsk.network)
   return(layout_results)
 }
 
 
+adaptive_repulsion_strength <- function(
+  community.repulsion,
+  n_nodes,
+  n_communities,
+  avg_community_size
+) {
+  # Scale factor based on network size
+  scale_factor <- log10(n_nodes + 10) / log10(100)
+
+  # Correction factor based on the number of communities
+  community_factor <- 1 + (n_communities - 2) * 0.1
+  community_factor <- max(0.5, min(community_factor, 2))
+
+  # Sigmoidal transformation of the user parameter
+  x <- community.repulsion * 10
+  sigmoid_transform <- x / (1 + x)
+
+  # Combine the factors
+  strength <- sigmoid_transform * scale_factor * community_factor
+
+  return(strength)
+}
+
 # Community repulsion
 
-weight.community <- function(row, membership, weigth.within, weight.between) {
-  if (as.numeric(membership[which(names(membership) == row[1])]) == as.numeric(membership[which(names(membership) == row[2])])) {
-    weight <- weigth.within
-  } else {
-    weight <- weight.between
-  }
-  return(weight)
-}
+# weight.community <- function(row, membership, weigth.within, weight.between) {
+#   if (as.numeric(membership[which(names(membership) == row[1])]) == as.numeric(membership[which(names(membership) == row[2])])) {
+#     weight <- weigth.within
+#   } else {
+#     weight <- weight.between
+#   }
+#   return(weight)
+# }
 
 # # louvain community detection
 # louvain <- function(g){

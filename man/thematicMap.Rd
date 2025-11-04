@@ -13,12 +13,13 @@ thematicMap(
   stemming = FALSE,
   size = 0.5,
   n.labels = 1,
-  community.repulsion = 0.1,
+  community.repulsion = 0.5,
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
-  cluster = "walktrap",
-  subgraphs = FALSE
+  cluster = "louvain",
+  subgraphs = FALSE,
+  seed = 1234
 )
 }
 \arguments{
@@ -31,7 +32,7 @@ thematicMap(
 
 \item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
 
-\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts. 
+\item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}
 
 \item{stemming}{is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).}
@@ -40,7 +41,7 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 
 \item{n.labels}{is integer. It indicates how many labels associate to each cluster. Default is \code{n.labels = 1}.}
 
-\item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.}
+\item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.5}.}
 
 \item{repel}{is logical. If it is TRUE ggplot uses geom_label_repel instead of geom_label.}
 
@@ -51,6 +52,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{cluster}{is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 
 \item{subgraphs}{is a logical. If TRUE cluster subgraphs are returned.}
+
+\item{seed}{is an integer. It indicates the seed for random number generation. Default is \code{seed = 1234}.}
 }
 \value{
 a list containing:
@@ -66,11 +69,11 @@ It creates a thematic map based on co-word network analysis and clustering.
 The methodology is inspired by the proposal of Cobo et al. (2011).
 }
 \details{
-\code{thematicMap} starts from a co-occurrence keyword network to plot in a 
+\code{thematicMap} starts from a co-occurrence keyword network to plot in a
 two-dimensional map the typological themes of a domain.\cr\cr
 
 Reference:\cr
-Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, 
+Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying,
 and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 }
 \examples{

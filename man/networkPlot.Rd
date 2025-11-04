@@ -18,7 +18,7 @@ networkPlot(
   label.n = NULL,
   halo = FALSE,
   cluster = "walktrap",
-  community.repulsion = 0.1,
+  community.repulsion = 0.5,
   vos.path = NULL,
   size = 3,
   size.cex = FALSE,
@@ -30,6 +30,7 @@ networkPlot(
   edgesize = 1,
   edges.min = 0,
   alpha = 0.5,
+  seed = 123,
   verbose = TRUE
 )
 }
@@ -69,7 +70,16 @@ Inclusion, Salton or Equivalence similarity index respectively. The default is t
 
 \item{cluster}{is a character. It indicates the type of cluster to perform among ("none", "optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 
-\item{community.repulsion}{is a real. It indicates the repulsion force among network communities. It is a real number between 0 and 1. Default is \code{community.repulsion = 0.1}.}
+\item{community.repulsion}{is a real number between 0 and 1.
+Controls the separation between communities with adaptive scaling.
+The algorithm automatically adapts to network size and structure.
+Recommended values:
+\tabular{ll}{
+\code{0.0}\tab No repulsion - communities may overlap\cr
+\code{0.2-0.4}\tab Light separation - suitable for dense networks\cr
+\code{0.5-0.7}\tab Moderate separation - general use (RECOMMENDED)\cr
+\code{0.8-1.0}\tab Strong separation - for many small communities}
+Default is \code{community.repulsion = 0.5}.}
 
 \item{vos.path}{is a character indicating the full path where VOSviewer.jar is located.}
 
@@ -95,6 +105,8 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 \item{edges.min}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
 
 \item{alpha}{is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.}
+
+\item{seed}{is an integer. It indicates the random seed for clustering reproducibility. Default is \code{seed = 123}.}
 
 \item{verbose}{is a logical. If TRUE, network will be plotted. Default is \code{verbose = TRUE}.}
 }

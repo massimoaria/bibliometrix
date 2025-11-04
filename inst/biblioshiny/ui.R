@@ -1,13 +1,19 @@
 source("libraries.R", local = TRUE)
 source("helpContent.R", local = TRUE)
 source("utils.R", local = TRUE)
+source("contentAnalysisUI.R", local = TRUE)
+source("cssTags.R", local = TRUE)
+source("openalex_api.R", local = TRUE)
+source("pubmed_api.R", local = TRUE)
+
 suppressMessages(libraries())
 
 # UI components ----
 ## Title ----
 mytitle <- tags$link(
   tags$a(
-    href = "https://www.bibliometrix.org/", target = "_blank",
+    href = "https://www.bibliometrix.org/",
+    target = "_blank",
     tags$img(src = "logo2.jpg", height = "40", width = "40")
   ),
   strong("bibliometrix")
@@ -21,7 +27,7 @@ bibliometrixWeb <- "https://www.bibliometrix.org/"
 k_synth <- "https://www.k-synth.unina.it"
 github_aria <- "https://github.com/massimoaria/bibliometrix"
 
-biblioshinyVersion <- substr(packageVersion("bibliometrix"),1,7)
+biblioshinyVersion <- substr(packageVersion("bibliometrix"), 1, 7)
 
 style_opt <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
 style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
@@ -53,20 +59,24 @@ info <- helpContent()$info
 pubs <- helpContent()$publications
 filters <- helpContent()$filters
 authorProfile <- helpContent()$authorProfile
+referenceMatching_help <- helpContent()$referenceMatching
 
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(
   title = mytitle,
   titleWidth = 300,
-  tags$li(class = "dropdown", 
-          tags$a(
-            title = "Total downloads from CRAN",  # ← Tooltip 
-            icon("cloud-arrow-down", lib="font-awesome"),
-            tags$span(
-              HTML(suppressWarnings(format_abbreviated(total_downloads("bibliometrix")))),
-              style = "margin-left: 5px; font-weight: bold;"
-            )
-          )
+  tags$li(
+    class = "dropdown",
+    tags$a(
+      title = "Total downloads from CRAN", # ← Tooltip
+      icon("cloud-arrow-down", lib = "font-awesome"),
+      tags$span(
+        HTML(suppressWarnings(format_abbreviated(total_downloads(
+          "bibliometrix"
+        )))),
+        style = "margin-left: 5px; font-weight: bold;"
+      )
+    )
   ),
   dropdownMenuOutput("notificationMenu"),
   dropdownMenu(
@@ -146,20 +156,76 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
   useShinyjs(),
   sidebarMenu(
     id = "sidebarmenu",
-    menuItem("biblioshiny", tabName = "biblioshinyy", icon = fa_i(name = "house-user")),
-    menuItem("Info",
-      tabName = "info", icon = fa_i(name = "circle-info"),
-      menuSubItem("Biblio AI", tabName = "biblioAI", icon = fa_i(name = "microchip")),
-      menuSubItem("Supported Files", tabName = "supFiles", icon = fa_i(name = "database")),
-      menuSubItem("Team's Publications", tabName = "pubs", icon = fa_i(name = "book"))
+    menuItem(
+      "biblioshiny",
+      tabName = "biblioshinyy",
+      icon = fa_i(name = "house-user")
     ),
-    menuItem("Data",
-      tabName = "uploadData", icon = fa_i(name = "file-import"),
-      menuSubItem("Import or Load", tabName = "loadData", icon = icon("chevron-right", lib = "glyphicon")),
-      menuSubItem("API", tabName = "gathData", icon = icon("chevron-right", lib = "glyphicon")),
-      menuSubItem("Merge Collections", tabName = "mergeData", icon = icon("chevron-right", lib = "glyphicon"))
+    menuItem(
+      "Info",
+      tabName = "info",
+      icon = fa_i(name = "circle-info"),
+      menuSubItem(
+        "Biblio AI",
+        tabName = "biblioAI",
+        icon = fa_i(name = "microchip")
+      ),
+      menuSubItem(
+        "Supported Files",
+        tabName = "supFiles",
+        icon = fa_i(name = "database")
+      ),
+      menuSubItem(
+        "Team's Publications",
+        tabName = "pubs",
+        icon = fa_i(name = "book")
+      )
+    ),
+    menuItem(
+      "Data",
+      tabName = "uploadData",
+      icon = fa_i(name = "file-import"),
+      menuSubItem(
+        "Import or Load",
+        tabName = "loadData",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuItem(
+        "API",
+        startExpanded = TRUE,
+        menuSubItem(
+          "OpenAlex",
+          tabName = "openalexMenu",
+          icon = icon("chevron-right", lib = "glyphicon")
+        ),
+        menuSubItem(
+          "Pubmed",
+          tabName = "pubmedMenu",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+        # ,menuSubItem(
+        #   "PubMed & DS Dimensions",
+        #   tabName = "gathData",
+        #   icon = icon("chevron-right", lib = "glyphicon")
+        # )
+      ),
+      menuSubItem(
+        "Merge Collections",
+        tabName = "mergeData",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Reference Matching",
+        tabName = "refMatching",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
     ),
     menuItemOutput("rest_of_sidebar"),
+    menuItem(
+      "Content Analysis",
+      tabName = "content_analysis",
+      icon = icon("quote-right")
+    ),
     menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
   ),
   textOutput("res"),
@@ -173,76 +239,8 @@ data("customTheme", envir = environment())
 ### Body Content ----
 body <- dashboardBody(
   customTheme,
-  ## workaround to solve visualization issues in Data Table
-  tags$head(tags$style(HTML(".has-feedback .form-control { padding-right: 0px;}"))),
-  ### animation for filter results box
-  tags$head(tags$style(HTML("
-  .fade-in {
-    animation: fadeInAnim 0.8s ease-in-out;
-  }
+  cssTags(), # function containing all the css tags
 
-  @keyframes fadeInAnim {
-    from { opacity: 0; transform: scale(0.98); }
-    to { opacity: 1; transform: scale(1); }
-  }
-"))),
-  ### css for author link
-  tags$head(
-    tags$style(HTML("
-      .author-link {
-        color: #337ab7;
-        text-decoration: underline;
-        cursor: pointer;
-      }
-      .author-link:hover {
-        color: #23527c;
-        font-weight: bold;
-      }"
-    ))
-  ),
-  ## script to open more times the same modal ####
-  tags$script("
-    Shiny.addCustomMessageHandler('button_id', function(value) {
-    Shiny.setInputValue('button_id', value);
-    });
-  "),
-  tags$script("
-    Shiny.addCustomMessageHandler('selected_author', function(value) {
-    Shiny.setInputValue('selected_author', value);
-    });
-  "),
-  ## script to get the dimensions of the page ####
-  ###
-  tags$head(
-    tags$style(".fa-cloud-arrow-down {font-size: 20px}"),
-    tags$style(".fa-download {font-size: 20px}"),
-    tags$style(".fa-envelope {color:#FF0000; font-size: 20px}"),
-    tags$style(".fa-envelope-open {font-size: 20px}"),
-    tags$style(".fa-cube {font-size: 20px}"),
-    tags$style(".fa-question {font-size: 20px}"),
-    tags$style(".fa-comment-dollar {font-size: 20px}"),
-    tags$style(".fa-bars {font-size: 20px}"),
-    tags$style(".sidebar-toggle {font-size: 15px}"),
-    tags$script(
-      'var dimension = [0, 0];
-              $(document).on("shiny:connected", function(e) {
-                  dimension[0] = window.innerWidth;
-                  dimension[1] = window.innerHeight;
-                  Shiny.onInputChange("dimension", dimension);
-              });
-              $(window).resize(function(e) {
-                  dimension[0] = window.innerWidth;
-                  dimension[1] = window.innerHeight;
-                  Shiny.onInputChange("dimension", dimension);
-              });
-              $(document).ready(function(){
-                  $("a[data-toggle=tab]").on("show.bs.tab", function(e){
-                    Shiny.setInputValue("activeTab", $(this).attr("data-value"));
-                   });
-            });
-      '
-    )
-  ),
   tabItems(
     #### Homepage ----
     ##### home ----
@@ -252,49 +250,66 @@ body <- dashboardBody(
         fluidRow(
           column(
             12,
-            div(h1("biblioshiny: the shiny app for bibliometrix",
+            div(h1(
+              "biblioshiny: the shiny app for bibliometrix",
               style = "text-align:center; font-size:50px;"
             )),
             br()
           ),
           column(
             12,
-            div(img(src = "logoAI.jpg", height = "35%", width = "35%"), style = "text-align: center;")
+            div(
+              img(src = "logoAI.jpg", height = "35%", width = "35%"),
+              style = "text-align: center;"
+            )
           ),
           column(
             12,
-            div(h3(em("Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
-            #   em(a("bibliometrix website.",
-            #     href = "https://www.bibliometrix.org", target = "_blank"
-            #   )),
-              ),style = "text-align:center; font-size:24px;"
+            div(h3(
+              em(
+                "Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
+                #   em(a("bibliometrix website.",
+                #     href = "https://www.bibliometrix.org", target = "_blank"
+                #   )),
+              ),
+              style = "text-align:center; font-size:24px;"
             )),
             br(),
             hr()
           ),
           column(
             12,
-            div(h6("biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.",
+            div(h6(
+              "biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.",
               style = "text-align:center; font-size:19px;"
             )),
-            div(h6("When they are used in a publication, we ask that authors to cite the following reference:",
+            div(h6(
+              "When they are used in a publication, we ask that authors to cite the following reference:",
               style = "text-align:center; font-size:19px;"
             )),
-            div(h6("Aria, M., & Cuccurullo, C. (2017).", strong(" bibliometrix: An R-tool for comprehensive"),
+            div(h6(
+              "Aria, M., & Cuccurullo, C. (2017).",
+              strong(" bibliometrix: An R-tool for comprehensive"),
               style = "text-align:center; font-size:22px;"
             )),
-            div(h6(strong("science mapping analysis."),
-              em("Journal of Informetrics"), ", 11(4), 959-975.",
+            div(h6(
+              strong("science mapping analysis."),
+              em("Journal of Informetrics"),
+              ", 11(4), 959-975.",
               style = "text-align:center; font-size:22px;"
             )),
             br(),
-            div(h6("Failure to properly cite the software is considered a violation of the license.",
+            div(h6(
+              "Failure to properly cite the software is considered a violation of the license.",
               style = "text-align:center; font-size:19px;"
             )),
             br(),
-            div(p("For an introduction and live examples, visit the ",
-              em(a("bibliometrix website.",
-                href = "https://www.bibliometrix.org", target = "_blank"
+            div(p(
+              "For an introduction and live examples, visit the ",
+              em(a(
+                "bibliometrix website.",
+                href = "https://www.bibliometrix.org",
+                target = "_blank"
               )),
               style = "text-align:center; font-size:18px;"
             )),
@@ -323,7 +338,10 @@ body <- dashboardBody(
           column(
             10,
             HTML(info),
-            div(img(src = "table_DBformats.jpg", height = "70%", width = "70%"), style = "text-align: center;")
+            div(
+              img(src = "table_DBformats.jpg", height = "70%", width = "70%"),
+              style = "text-align: center;"
+            )
           ),
           column(1)
         )
@@ -346,112 +364,501 @@ body <- dashboardBody(
     ##### load Data ----
     tabItem(
       "loadData",
-      fluidPage(
-        fluidRow(
-          div(
-            tags$head(tags$style(
-              HTML(
-                "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "Import or Load",
+          icon = fa_i(name = "file-import"),
+          fluidPage(
+            fluidRow(
+              div(
+                tags$head(tags$style(
+                  HTML(
+                    "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
                                   }
                                   "
-              )
-            )),
-            tags$style(
-              HTML(
-                ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  )
+                )),
+                tags$style(
+                  HTML(
+                    ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
                   color: #000000 !important;
                   }"
-              )
-            ),
-            column(
-              9,
-              uiOutput("collection_descriptionUI"),
-              shinycssloaders::withSpinner(DT::DTOutput("contents"))
-            ),
-            column(
-              3,
-              fluidRow(
-                box(
-                  width = "100%",
-                  h3(strong("Import or Load ")),
-                  selectInput("load",
-                    label = "Please, choose what to do",
-                    choices = c(
-                      " " = "null",
-                      "Import raw file(s)" = "import",
-                      "Load bibliometrix file(s)" = "load",
-                      "Use a sample collection" = "demo"
-                    ),
-                    selected = "null"
-                  ),
-                  conditionalPanel(
-                    condition = "input.load == 'demo'",
-                    helpText(
-                      h4(strong("The use of bibliometric approaches in business and management disciplines.")),
-                      h5(strong("Dataset 'Management'")),
-                      em(
-                        "A collection of scientific articles about the use of bibliometric approaches",
-                        "in business and management disciplines."
-                      ),
-                      br(),
-                      em("Period: 1985 - 2020
-                                                    , Source WoS.")
+                  )
+                ),
+                column(
+                  9,
+                  uiOutput("collection_descriptionUI"),
+                  shinycssloaders::withSpinner(
+                    DT::DTOutput("contents"),
+                    caption = HTML(
+                      "<br><strong>Converting data to Bibliometrix format</strong>"
                     )
-                  ),
-                  conditionalPanel(
-                    condition = "input.load == 'import'",
-                    selectInput(
-                      "dbsource",
-                      label = "Database",
-                      choices = c(
-                        "Web of Science (WoS/WoK)" = "isi",
-                        "Scopus" = "scopus",
-                        "Dimensions" = "dimensions",
-                        "Openalex" = "openalex",
-                        "OpenAlex API (via openalexR)" = "openalex_api",
-                        "Lens.org" = "lens",
-                        "PubMed" = "pubmed",
-                        "Cochrane Library" = "cochrane"
+                  )
+                ),
+                # Improved layout for "Import or Load" parameter options column
+                column(
+                  3,
+                  fluidRow(
+                    box(
+                      width = "100%",
+                      status = "primary",
+                      solidHeader = TRUE,
+
+                      # ============================================
+                      # SECTION 1: IMPORT OR LOAD OPTIONS
+                      # ============================================
+                      div(
+                        style = "margin-bottom: 20px;",
+                        h3(
+                          icon("file-import", style = "margin-right: 8px;"),
+                          strong("Import or Load"),
+                          style = "color: #3c8dbc; margin-bottom: 15px;"
+                        ),
+                        selectInput(
+                          "load",
+                          label = tags$strong("Please, choose what to do"),
+                          choices = c(
+                            " " = "null",
+                            "Import raw file(s)" = "import",
+                            "Load bibliometrix file(s)" = "load",
+                            "Use a sample collection" = "demo"
+                          ),
+                          selected = "null",
+                          width = "100%"
+                        )
                       ),
-                      selected = "isi"
-                    ),
-                    selectInput(
-                      "authorName",
-                      label = "Author Name format",
-                      choices = c(
-                        "Fullname (if available)" = "AF",
-                        "Surname and Initials" = "AU"
+
+                      # ============================================
+                      # SECTION 2: DEMO COLLECTION INFO
+                      # ============================================
+                      conditionalPanel(
+                        condition = "input.load == 'demo'",
+                        div(
+                          style = "background-color: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3c8dbc; margin-bottom: 20px;",
+                          h4(
+                            strong(
+                              "The use of bibliometric approaches in business and management disciplines."
+                            ),
+                            style = "color: #2c3e50; margin-top: 0;"
+                          ),
+                          h5(
+                            strong("Dataset 'Management'"),
+                            style = "color: #34495e; margin-top: 10px;"
+                          ),
+                          div(
+                            style = "color: #555; font-size: 14px; line-height: 1.6;",
+                            em(
+                              "A collection of scientific articles about the use of bibliometric approaches ",
+                              "in business and management disciplines."
+                            ),
+                            br(),
+                            br(),
+                            em("Period: 1985 - 2020, Source WoS.")
+                          )
+                        )
                       ),
-                      selected = "AU"
-                    )
-                  ),
-                  conditionalPanel(
-                    condition = "input.load != 'null' & input.load != 'demo'",
-                    conditionalPanel(
-                      condition = "input.load == 'load'",
-                      helpText(em("Load a collection in XLSX or R format previously exported from bibliometrix"))
-                    ),
-                    fileInput(
-                      "file1",
-                      "Choose a file",
-                      multiple = FALSE,
-                      accept = c(
-                        ".csv",
-                        ".txt",
-                        ".ciw",
-                        ".bib",
-                        ".xlsx",
-                        ".zip",
-                        ".xls",
-                        ".rdata",
-                        ".rda",
-                        ".rds"
+
+                      # ============================================
+                      # SECTION 3: DATABASE AND FORMAT OPTIONS
+                      # ============================================
+                      conditionalPanel(
+                        condition = "input.load == 'import'",
+                        div(
+                          style = "margin-bottom: 15px;",
+                          tags$label(
+                            "Database",
+                            style = "font-weight: 600; color: #3c8dbc; margin-bottom: 5px; display: block;"
+                          ),
+                          selectInput(
+                            "dbsource",
+                            label = NULL,
+                            choices = c(
+                              "Web of Science (WoS/WoK)" = "isi",
+                              "Scopus" = "scopus",
+                              "Dimensions" = "dimensions",
+                              "Openalex" = "openalex",
+                              "OpenAlex API (via openalexR)" = "openalex_api",
+                              "Lens.org" = "lens",
+                              "PubMed" = "pubmed",
+                              "Cochrane Library" = "cochrane"
+                            ),
+                            selected = "isi",
+                            width = "100%"
+                          )
+                        ),
+                        div(
+                          style = "margin-bottom: 20px;",
+                          tags$label(
+                            "Author Name Format",
+                            style = "font-weight: 600; color: #3c8dbc; margin-bottom: 5px; display: block;"
+                          ),
+                          selectInput(
+                            "authorName",
+                            label = NULL,
+                            choices = c(
+                              "Fullname (if available)" = "AF",
+                              "Surname and Initials" = "AU"
+                            ),
+                            selected = "AU",
+                            width = "100%"
+                          )
+                        )
+                      ),
+
+                      # ============================================
+                      # SECTION 4: FILE UPLOAD
+                      # ============================================
+                      conditionalPanel(
+                        condition = "input.load != 'null' & input.load != 'demo'",
+                        div(
+                          style = "margin-bottom: 20px;",
+                          conditionalPanel(
+                            condition = "input.load == 'load'",
+                            div(
+                              style = "background-color: #ffffcc; padding: 10px; border-radius: 5px; margin-bottom: 10px;",
+                              icon(
+                                "info-circle",
+                                style = "margin-right: 5px; color: #856404;"
+                              ),
+                              tags$span(
+                                em(
+                                  "Load a collection in XLSX or R format previously exported from bibliometrix"
+                                ),
+                                style = "color: #856404; font-size: 13px;"
+                              )
+                            )
+                          ),
+                          fileInput(
+                            "file1",
+                            tags$strong("Choose a file"),
+                            multiple = FALSE,
+                            accept = c(
+                              ".csv",
+                              ".txt",
+                              ".ciw",
+                              ".bib",
+                              ".xlsx",
+                              ".zip",
+                              ".xls",
+                              ".rdata",
+                              ".rda",
+                              ".rds"
+                            ),
+                            width = "100%"
+                          )
+                        )
+                      ),
+
+                      # ============================================
+                      # SECTION 5: START BUTTON
+                      # ============================================
+                      conditionalPanel(
+                        condition = "input.load != 'null'",
+                        div(
+                          style = "margin: 20px 0;text-align: center;",
+                          actionBttn(
+                            inputId = "applyLoad",
+                            label = strong("Start"),
+                            width = "100%",
+                            style = "pill",
+                            color = "primary",
+                            size = "lg",
+                            icon = icon(name = "play", lib = "glyphicon")
+                          )
+                        )
+                      ),
+
+                      # ============================================
+                      # SECTION 6: LOG OUTPUT
+                      # ============================================
+                      div(
+                        style = "margin: 20px 0;",
+                        tags$hr(style = "border-color: #ddd;"),
+                        uiOutput("textLog2"),
+                        tags$hr(style = "border-color: #ddd;")
+                      ),
+
+                      # ============================================
+                      # SECTION 7: EXPORT OPTIONS
+                      # ============================================
+                      div(
+                        style = "margin-top: 20px;",
+                        h3(
+                          icon("download", style = "margin-right: 8px;"),
+                          strong("Export Collection"),
+                          style = "color: #3c8dbc; margin-bottom: 15px;"
+                        ),
+                        selectInput(
+                          "save_file",
+                          label = tags$strong("Save as:"),
+                          choices = c(
+                            " " = "null",
+                            "Excel" = "xlsx",
+                            "R Data Format" = "RData"
+                          ),
+                          selected = "null",
+                          width = "100%"
+                        ),
+                        conditionalPanel(
+                          condition = "input.save_file != 'null'",
+                          div(
+                            style = "margin-top: 15px;text-align: center;",
+                            downloadBttn(
+                              outputId = "collection.save",
+                              label = strong("Export"),
+                              style = "pill",
+                              color = "primary",
+                              size = "lg"
+                            )
+                          )
+                        )
                       )
                     )
-                  ),
-                  conditionalPanel(
-                    condition = "input.load != 'null'",
+                  )
+                )
+              )
+            )
+          )
+        ),
+        tabPanel(
+          "Info & References",
+          icon = fa_i(name = "info-circle"),
+          br(),
+          fluidRow(
+            column(1),
+            column(
+              10,
+              HTML(helpContent()$importOrLoad)
+            ),
+            column(1)
+          )
+        )
+      )
+    ),
+    #### OpenAlex API via openalexR ----
+    tabItem(
+      "openalexMenu",
+      tabPanel("OpenAlex Collection", value = "openalex", openAlexUI())
+    ),
+
+    #### Pubmed API via pubmedR ----
+    tabItem(
+      "pubmedMenu",
+      tabPanel("Pubmed Collection", value = "pubmed", pubmedUI())
+    ),
+
+    # ##### gather Data ----
+    # tabItem(
+    #   "gathData",
+    #   tabsetPanel(
+    #     type = "tabs",
+    #     tabPanel(
+    #       "APIs",
+    #       icon = fa_i(name = "cloud-arrow-down"),
+    #       fluidPage(
+    #         fluidRow(
+    #           tags$head(tags$style(
+    #             HTML(
+    #               "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+    #                               background-color: #9c4242 !important;
+    #                               }
+    #                               "
+    #             )
+    #           )),
+    #           tags$style(
+    #             HTML(
+    #               ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    #               color: #000000 !important;
+    #               }"
+    #             )
+    #           ),
+    #           column(
+    #             9,
+    #             shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
+    #           ),
+    #           column(
+    #             3,
+    #             box(
+    #               width = "100%",
+    #               h3(strong(
+    #                 "Gather data using APIs "
+    #               )),
+    #               br(),
+    #               selectInput(
+    #                 "dbapi",
+    #                 label = "Database",
+    #                 choices = c(
+    #                   "DS Dimensions" = "ds",
+    #                   "PubMed" = "pubmed"
+    #                 ),
+    #                 selected = "pubmed"
+    #               ),
+    #               ## Dimenions API
+    #               conditionalPanel(
+    #                 condition = "input.dbapi == 'ds'",
+    #                 br(),
+    #                 fluidRow(column(
+    #                   12,
+    #                   div(
+    #                     style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
+    #                     align = "center",
+    #                     width = "100%",
+    #                     actionBttn(
+    #                       inputId = "dsShow",
+    #                       label = "1. Configure API",
+    #                       style = "pill",
+    #                       color = "primary",
+    #                       icon = icon(name = "sliders")
+    #                     )
+    #                   )
+    #                 )),
+    #                 # h5(tags$b("Your Query")),
+    #                 verbatimTextOutput("queryLog2", placeholder = FALSE),
+    #                 h5(tags$b("Documents returned using your query")),
+    #                 verbatimTextOutput("sampleLog2", placeholder = FALSE)
+    #               ),
+    #               ### Pubmed API
+    #               conditionalPanel(
+    #                 condition = "input.dbapi == 'pubmed'",
+    #                 br(),
+    #                 fluidRow(column(
+    #                   12,
+    #                   div(
+    #                     style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
+    #                     align = "center",
+    #                     width = "100%",
+    #                     actionBttn(
+    #                       inputId = "pmShow",
+    #                       label = "1. Configure API",
+    #                       style = "pill",
+    #                       color = "primary",
+    #                       icon = icon(name = "sliders")
+    #                     )
+    #                   )
+    #                 )),
+    #                 # h5(tags$b("Your Query")),
+    #                 verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
+    #                 h5(tags$b("Documents returned using your query")),
+    #                 verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
+    #               ),
+    #               tags$hr(),
+    #               fluidRow(column(
+    #                 12,
+    #                 div(
+    #                   style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
+    #                   align = "center",
+    #                   width = "100%",
+    #                   actionBttn(
+    #                     inputId = "apiApply",
+    #                     label = "2. Download",
+    #                     style = "pill",
+    #                     color = "primary",
+    #                     icon(name = "download")
+    #                   )
+    #                 )
+    #               )),
+    #               tags$hr(),
+    #               h3(strong("Export a bibliometrix file ")),
+    #               br(),
+    #               selectInput(
+    #                 "save_file_api",
+    #                 "Save as:",
+    #                 choices = c(
+    #                   " " = "null",
+    #                   "Excel" = "xlsx",
+    #                   "R Data Format" = "RData"
+    #                 ),
+    #                 selected = "null"
+    #               ),
+    #               conditionalPanel(
+    #                 condition = "input.save_file_api != 'null'",
+    #                 fluidRow(column(
+    #                   12,
+    #                   div(
+    #                     style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+    #                     align = "center",
+    #                     width = "100%",
+    #                     downloadBttn(
+    #                       outputId = "collection.save_api",
+    #                       label = strong("Export"),
+    #                       style = "pill",
+    #                       color = "primary"
+    #                     )
+    #                   )
+    #                 ))
+    #               )
+    #             )
+    #           )
+    #         )
+    #       )
+    #     ),
+    #     tabPanel(
+    #       "Info & References",
+    #       icon = fa_i(name = "info-circle"),
+    #       br(),
+    #       fluidRow(
+    #         column(1),
+    #         column(
+    #           10,
+    #           HTML(helpContent()$api)
+    #         ),
+    #         column(1)
+    #       )
+    #     )
+    #   )
+    # ),
+    ##### merge Data ----
+    tabItem(
+      "mergeData",
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "Merge Collections",
+          icon = fa_i(name = "object-group"),
+          fluidPage(
+            fluidRow(
+              div(
+                tags$head(tags$style(
+                  HTML(
+                    "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+                                  background-color: #9c4242 !important;
+                                  }
+                                  "
+                  )
+                )),
+                tags$style(
+                  HTML(
+                    ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                  color: #000000 !important;
+                  }"
+                  )
+                ),
+                column(
+                  9,
+                  uiOutput("collection_description_mergeUI"),
+                  shinycssloaders::withSpinner(DT::DTOutput("contentsMerge"))
+                ),
+                column(
+                  3,
+                  fluidRow(
+                    box(
+                      width = "100%",
+                      h3(strong("Load Collections")),
+                      helpText(em(
+                        "Merge collections in Excel or R format coming from different DBs"
+                      )),
+                      fileInput(
+                        "fileMerge",
+                        "Select collection files",
+                        multiple = TRUE,
+                        accept = c(
+                          ".xlsx",
+                          ".rdata"
+                        )
+                      )
+                    ),
                     fluidRow(column(
                       12,
                       div(
@@ -459,21 +866,22 @@ body <- dashboardBody(
                         align = "center",
                         width = "100%",
                         actionBttn(
-                          inputId = "applyLoad", label = strong("Start"),
-                          width = "100%", style = "pill", color = "primary",
+                          inputId = "applyMerge",
+                          label = strong("Start"),
+                          width = "100%",
+                          style = "pill",
+                          color = "primary",
                           icon = icon(name = "play", lib = "glyphicon")
                         )
                       )
                     ))
                   ),
                   tags$hr(),
-                  uiOutput("textLog2"),
-                  tags$hr(),
                   h3(strong(
                     "Export collection"
                   )),
                   selectInput(
-                    "save_file",
+                    "save_fileMerge",
                     "Save as:",
                     choices = c(
                       " " = "null",
@@ -483,7 +891,7 @@ body <- dashboardBody(
                     selected = "null"
                   ),
                   conditionalPanel(
-                    condition = "input.save_file != 'null'",
+                    condition = "input.save_fileMerge != 'null'",
                     fluidRow(column(
                       12,
                       div(
@@ -491,9 +899,11 @@ body <- dashboardBody(
                         align = "center",
                         width = "100%",
                         downloadBttn(
-                          outputId = "collection.save", label = strong("Export"),
+                          outputId = "collection.saveMerge",
+                          label = strong("Export"),
                           # width = "100%",
-                          style = "pill", color = "primary"
+                          style = "pill",
+                          color = "primary"
                         )
                       )
                     ))
@@ -502,366 +912,637 @@ body <- dashboardBody(
               )
             )
           )
-        )
-      )
-    ),
-    ##### gather Data ----
-    tabItem(
-      "gathData",
-      fluidPage(
-        fluidRow(
-          tags$head(tags$style(
-            HTML(
-              "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
-                                  background-color: #9c4242 !important;
-                                  }
-                                  "
-            )
-          )),
-          tags$style(
-            HTML(
-              ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-                  color: #000000 !important;
-                  }"
-            )
-          ),
-          column(9, shinycssloaders::withSpinner(DT::DTOutput("apiContents"))),
-          column(
-            3,
-            box(
-              width = "100%",
-              h3(strong(
-                "Gather data using APIs "
-              )),
-              br(),
-              selectInput(
-                "dbapi",
-                label = "Database",
-                choices = c(
-                  "DS Dimensions" = "ds",
-                  "PubMed" = "pubmed"
-                ),
-                selected = "pubmed"
-              ),
-              ## Dimenions API
-              conditionalPanel(
-                condition = "input.dbapi == 'ds'",
-                br(),
-                fluidRow(column(
-                  12,
-                  div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                    align = "center",
-                    width = "100%",
-                    actionBttn(
-                      inputId = "dsShow", label = "1. Configure API",
-                      style = "pill", color = "primary",
-                      icon = icon(name = "sliders")
-                    )
-                  )
-                )),
-                # h5(tags$b("Your Query")),
-                verbatimTextOutput("queryLog2", placeholder = FALSE),
-                h5(tags$b("Documents returned using your query")),
-                verbatimTextOutput("sampleLog2", placeholder = FALSE)
-              ),
-              ### Pubmed API
-              conditionalPanel(
-                condition = "input.dbapi == 'pubmed'",
-                br(),
-                fluidRow(column(
-                  12,
-                  div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                    align = "center",
-                    width = "100%",
-                    actionBttn(
-                      inputId = "pmShow", label = "1. Configure API",
-                      style = "pill", color = "primary",
-                      icon = icon(name = "sliders")
-                    )
-                  )
-                )),
-                # h5(tags$b("Your Query")),
-                verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
-                h5(tags$b("Documents returned using your query")),
-                verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
-              ),
-              tags$hr(),
-              fluidRow(column(
-                12,
-                div(
-                  style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                  align = "center",
-                  width = "100%",
-                  actionBttn(
-                    inputId = "apiApply", label = "2. Download",
-                    style = "pill", color = "primary",
-                    icon(name = "download")
-                  )
-                )
-              )),
-              tags$hr(),
-              h3(strong("Export a bibliometrix file ")),
-              br(),
-              selectInput(
-                "save_file_api",
-                "Save as:",
-                choices = c(
-                  " " = "null",
-                  "Excel" = "xlsx",
-                  "R Data Format" = "RData"
-                ),
-                selected = "null"
-              ),
-              conditionalPanel(
-                condition = "input.save_file_api != 'null'",
-                fluidRow(column(
-                  12,
-                  div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-                    align = "center",
-                    width = "100%",
-                    downloadBttn(
-                      outputId = "collection.save_api", label = strong("Export"),
-                      style = "pill", color = "primary"
-                    )
-                  )
-                ))
-              )
-            )
-          )
-        )
-      )
-    ),
-    ##### merge Data ----
-    tabItem(
-      "mergeData",
-      fluidPage(
-        fluidRow(
-          div(
-            tags$head(tags$style(
-              HTML(
-                "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
-                                  background-color: #9c4242 !important;
-                                  }
-                                  "
-              )
-            )),
-            tags$style(
-              HTML(
-                ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-                  color: #000000 !important;
-                  }"
-              )
-            ),
-            column(
-              9,
-              uiOutput("collection_description_mergeUI"),
-              shinycssloaders::withSpinner(DT::DTOutput("contentsMerge"))
-            ),
-            column(
-              3,
-              fluidRow(
-                box(
-                  width = "100%",
-                  h3(strong("Load Collections")),
-                  helpText(em("Merge collections in Excel or R format coming from different DBs")),
-                  fileInput(
-                    "fileMerge",
-                    "Select collection files",
-                    multiple = TRUE,
-                    accept = c(
-                      ".xlsx",
-                      ".rdata"
-                    )
-                  )
-                ),
-                fluidRow(column(
-                  12,
-                  div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-                    align = "center",
-                    width = "100%",
-                    actionBttn(
-                      inputId = "applyMerge", label = strong("Start"),
-                      width = "100%", style = "pill", color = "primary",
-                      icon = icon(name = "play", lib = "glyphicon")
-                    )
-                  )
-                ))
-              ),
-              tags$hr(),
-              h3(strong(
-                "Export collection"
-              )),
-              selectInput(
-                "save_fileMerge",
-                "Save as:",
-                choices = c(
-                  " " = "null",
-                  "Excel" = "xlsx",
-                  "R Data Format" = "RData"
-                ),
-                selected = "null"
-              ),
-              conditionalPanel(
-                condition = "input.save_fileMerge != 'null'",
-                fluidRow(column(
-                  12,
-                  div(
-                    style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-                    align = "center",
-                    width = "100%",
-                    downloadBttn(
-                      outputId = "collection.saveMerge", label = strong("Export"),
-                      # width = "100%",
-                      style = "pill", color = "primary"
-                    )
-                  )
-                ))
-              )
-            )
-          )
-        )
-      )
-    ),
-    #### Filters ----
-    tabItem(
-      "filters",
-      fluidPage(
-      tabsetPanel(
-        id = "tabsFilters",
-        type = "tabs",
-        tabPanel(
-          "Filter List",
-          fluidRow(
-            column(4,
-                   box(h6(htmlOutput("textDim")),
-                       width = "100%"
-                   )),
-                column(
-                  2,
-                  div(
-                    style = "display: flex; align-items: center; height: 150px;",
-                    align = "center",
-                    width = "100%",
-                    actionBttn(
-                      inputId = "applyFilter", label = strong("Apply"),
-                      width = "100%", style = "pill", color = "primary",
-                      icon = icon(name = "play", lib = "glyphicon")
-                    )
-                  )
-                ),
-                column(
-                  2,
-                  div(
-                    style = "display: flex; align-items: center; height: 150px;",
-                    align = "center",
-                    width = "100%",
-                    actionBttn(
-                      inputId = "resetFilter", label = strong("Reset"),
-                      width = "100%", style = "pill", color = "primary",
-                      icon = icon(name = "repeat", lib = "glyphicon")
-                    )
-                  )
-                ),
-            column(
-              2,
-              div(
-                style = "display: flex; align-items: center; height: 150px;",
-                align = "center",
-                width = "100%",
-                actionBttn(
-                  inputId = "viewDataFilter", label = strong("Data"),
-                  width = "100%", style = "pill", color = "primary",
-                  icon = icon(name = "table", lib = "font-awesome")
-                )
-              )
-            )
-            ),
-        fluidRow(column(3,
-                fluidRow(
-                  box(title = "1. General", width = 12, solidHeader = TRUE, 
-                      status = "primary",
-                      selectizeInput("selectType", "Document Type", choices = NULL, multiple = TRUE),
-                      selectizeInput("selectLA", "Language", choices = NULL, multiple = TRUE),
-                      sliderInput("sliderPY", "Publication Year", min = 1900, max = 2025,
-                                  value = c(2000, 2025), sep = ""),
-                      shinyWidgets::multiInput(
-                        inputId = "subject_category",
-                        label = "Subject Category",
-                        choices = character(0),  
-                        selected = NULL)
-                  )
-                )),
-                column(3,
-                fluidRow(
-                  box(title = "2. (J) Journal", width = 12, solidHeader = TRUE, status = "success",
-                      fileInput("journal_list_upload", "Upload a List of Journals", accept = c(".txt", ".csv",".xlsx")),
-                      uiOutput("journal_list_ui"),
-                      br(),
-                      fileInput("journal_ranking_upload", "Upload a Journal Ranking List", accept = c(".csv",".xlsx")),
-                      uiOutput("journal_ranking_ui"),
-                      uiOutput("journal_ranking_ui_view"),
-                      br(),
-                      selectInput("bradfordSources", "Source by Bradford Law Zones",
-                                  choices = c(
-                                    "Core Sources" = "core",
-                                    "Core + Zone 2 Sources" = "zone2",
-                                    "All Sources" = "all"
-                                  ),
-                                  selected = "all")
-                  )
-                )),
-                column(3,
-                fluidRow(
-                  box(title = "3. (AU) Author's Country", width = 12, solidHeader = TRUE, status = "warning",
-                      selectInput("region", "Region", 
-                                  choices = c(
-                                    "Africa" = "AFRICA",
-                                    "Asia" = "ASIA",
-                                    "Europe" = "EUROPE",
-                                    "North America" = "NORTH AMERICA",
-                                    "South America" = "SOUTH AMERICA",
-                                    "Seven Seas"= "SEVEN SEAS (OPEN OCEAN)",
-                                    "Oceania" = "OCEANIA",
-                                    "Unknown" = "Unknown"),
-                                  selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown"),
-                                  multiple = TRUE),
-                      # selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
-                      shinyWidgets::multiInput(
-                        inputId = "country",
-                        label = "Country",
-                        choices = character(0),  
-                        selected = NULL)
-                  )
-                )),
-                column(3,
-                fluidRow(
-                  box(title = "4. (DOC) Documents", width = 12, solidHeader = TRUE, status = "danger",
-                      sliderInput("sliderTC", "Total Citations", min = 0, max = 500, value = c(0, 500)),
-                      sliderInput("sliderTCpY", "Total Citations per Year", min = 0, max = 100, value = c(0, 100))
-                  )
-                )
-              )
-            )
         ),
-      tabPanel(
-        "Info & References",
-        fluidPage(
+        tabPanel(
+          "Info & References",
+          icon = fa_i(name = "info-circle"),
+          br(),
           fluidRow(
             column(1),
             column(
               10,
-              br(),
-              HTML(filters)
+              HTML(helpContent()$mergeCollections)
             ),
             column(1)
           )
         )
       )
+    ),
+
+    #### Reference matching ----
+    ## ============================================================================
+    ## UI - tabItem per Reference Matching
+    ## ============================================================================
+
+    tabItem(
+      tabName = "refMatching",
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "Reference Matching",
+          icon = icon("link"),
+          br(),
+          fluidRow(
+            column(
+              12,
+              h3(strong("Reference Matching")),
+              helpText(
+                "This tool helps identify and merge duplicate citations in your bibliographic dataset. ",
+                "It uses string similarity algorithms to find variants of the same reference, allowing you to clean and standardize your data for more accurate analysis."
+              ),
+              hr()
+            )
+          ),
+          fluidRow(
+            # LEFT COLUMN - Results
+            column(
+              width = 9,
+
+              # Summary Statistics Box
+              box(
+                title = "Matching Statistics",
+                width = NULL,
+                status = "primary",
+                solidHeader = TRUE,
+                collapsible = TRUE,
+
+                fluidRow(
+                  column(4, valueBoxOutput("refMatch_original", width = NULL)),
+                  column(
+                    4,
+                    valueBoxOutput("refMatch_normalized", width = NULL)
+                  ),
+                  column(4, valueBoxOutput("refMatch_duplicates", width = NULL))
+                ),
+
+                hr(),
+
+                fluidRow(
+                  column(
+                    6,
+                    plotOutput("refMatch_clusterSizePlot", height = "250px")
+                  ),
+                  column(
+                    6,
+                    plotOutput("refMatch_variantsPlot", height = "250px")
+                  )
+                )
+              ),
+
+              # Manual Merge Controls - Above the table
+              box(
+                title = "Manual Merge",
+                width = NULL,
+                status = "info",
+                solidHeader = TRUE,
+
+                fluidRow(
+                  # Buttons column
+                  column(
+                    width = 7,
+                    tags$div(
+                      style = "display: flex; gap: 10px; align-items: center;",
+
+                      actionButton(
+                        "refMatch_toggleSelection",
+                        "Toggle Selection",
+                        icon = icon("check-square"),
+                        class = "btn-info",
+                        style = "flex: 1;"
+                      ),
+
+                      actionButton(
+                        "refMatch_clearSelection",
+                        "Clear Selection",
+                        icon = icon("times"),
+                        class = "btn-default",
+                        style = "flex: 1;"
+                      ),
+
+                      actionButton(
+                        "refMatch_confirmMerge",
+                        "Confirm Merge",
+                        icon = icon("compress"),
+                        class = "btn-primary",
+                        style = "flex: 1;"
+                      )
+                    )
+                  ),
+
+                  # Status column
+                  column(
+                    width = 5,
+                    tags$div(
+                      id = "refMatch_selectionStatusInline",
+                      style = "padding: 8px 15px; background-color: #f4f4f4; border-radius: 4px; min-height: 42px; display: flex; align-items: center;",
+                      uiOutput("refMatch_selectionStatusInline")
+                    )
+                  )
+                ),
+
+                # Help text below buttons
+                tags$div(
+                  style = "margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;",
+                  helpText(
+                    icon("info-circle"),
+                    tags$small(
+                      "Click on a row in the table below, then click 'Toggle Selection' to mark it for merging. ",
+                      "Repeat for all citations to merge, then click 'Confirm Merge'."
+                    )
+                  )
+                )
+              ),
+
+              # Top Citations Box
+              box(
+                title = "Top Cited References (After Normalization)",
+                width = NULL,
+                status = "primary",
+                solidHeader = TRUE,
+                collapsible = TRUE,
+
+                helpText(
+                  icon("mouse-pointer"),
+                  "Click on a row to view its citation variants below."
+                ),
+
+                DTOutput("refMatch_topCitations")
+              ),
+
+              # Variants Example Box
+              box(
+                title = "Citation Variants Examples",
+                width = NULL,
+                status = "warning",
+                solidHeader = TRUE,
+                collapsible = TRUE,
+                collapsed = TRUE,
+
+                p(
+                  "The table below shows all variants of the selected citation that were matched together."
+                ),
+                DTOutput("refMatch_variantsTable")
+              )
+            ),
+
+            # RIGHT COLUMN - Options and Actions
+            column(
+              width = 3,
+
+              # Matching Options Box - with ID for collapse control
+              box(
+                id = "refMatch_optionsBox",
+                title = "Matching Options",
+                width = NULL,
+                status = "primary",
+                solidHeader = TRUE,
+                collapsible = TRUE,
+
+                helpText(
+                  "Configure the citation matching algorithm parameters."
+                ),
+
+                sliderInput(
+                  "refMatch_threshold",
+                  "Similarity Threshold:",
+                  min = 0.70,
+                  max = 0.98,
+                  value = 0.85,
+                  step = 0.01
+                ),
+
+                helpText(
+                  tags$small(
+                    tags$b("Guidelines:"),
+                    br(),
+                    "• 0.90-0.95: Conservative (fewer false positives)",
+                    br(),
+                    "• 0.85-0.90: Balanced (recommended)",
+                    br(),
+                    "• 0.75-0.80: Aggressive (more matching)"
+                  )
+                ),
+
+                hr(),
+
+                selectInput(
+                  "refMatch_method",
+                  "Distance Method:",
+                  choices = c(
+                    "Jaro-Winkler (recommended)" = "jw",
+                    "Levenshtein" = "lv",
+                    "Optimal String Alignment" = "osa",
+                    "Longest Common Substring" = "lcs"
+                  ),
+                  selected = "jw"
+                ),
+
+                hr(),
+
+                actionButton(
+                  "refMatch_run",
+                  "Run Matching",
+                  icon = icon("play"),
+                  class = "btn-primary btn-lg btn-block",
+                  style = "margin-bottom: 10px;"
+                ),
+
+                uiOutput("refMatch_runStatus")
+              ),
+
+              # Loading Indicator Box
+              shinyjs::hidden(
+                div(
+                  id = "refMatch_loadingIndicator",
+                  box(
+                    title = NULL,
+                    width = NULL,
+                    status = "info",
+                    solidHeader = FALSE,
+
+                    tags$div(
+                      style = "text-align: center; padding: 20px;",
+
+                      tags$div(
+                        icon("sync", class = "fa-spin fa-3x"),
+                        style = "color: #3c8dbc; margin-bottom: 15px;"
+                      ),
+
+                      tags$h4(
+                        "Matching in progress...",
+                        style = "color: #3c8dbc; margin: 0;"
+                      ),
+
+                      tags$p(
+                        "Please wait while citations are being normalized.",
+                        style = "color: #666; font-size: 13px; margin-top: 10px;"
+                      )
+                    )
+                  )
+                )
+              ),
+
+              # Apply/Reset Box
+              box(
+                title = "Apply to Data",
+                width = NULL,
+                status = "warning",
+                solidHeader = TRUE,
+
+                helpText(
+                  icon("exclamation-triangle"),
+                  "Apply the normalized citations to your bibliometric data. ",
+                  "This will update the CR field in your dataset."
+                ),
+
+                actionButton(
+                  "refMatch_apply",
+                  "Apply Normalized Citations",
+                  icon = icon("check"),
+                  class = "btn-warning btn-block",
+                  style = "margin-bottom: 10px;"
+                ),
+
+                uiOutput("refMatch_applyStatus"),
+
+                hr(),
+
+                actionButton(
+                  "refMatch_reset",
+                  "Reset to Original Data",
+                  icon = icon("undo"),
+                  class = "btn-danger btn-block"
+                ),
+
+                helpText(
+                  tags$small(
+                    icon("info-circle"),
+                    "Reset will restore the original CR field from your initial dataset."
+                  )
+                )
+              ),
+
+              # Export Options Box
+              box(
+                title = "Export Results",
+                width = NULL,
+                status = "success",
+                solidHeader = TRUE,
+
+                helpText(
+                  "Save the bibliographic collection with normalized citations."
+                ),
+
+                radioButtons(
+                  "refMatch_exportFormat",
+                  "Export Format:",
+                  choices = c(
+                    "Excel (.xlsx)" = "xlsx",
+                    "R Data (.RData)" = "rdata",
+                    "Both formats" = "both"
+                  ),
+                  selected = "xlsx"
+                ),
+
+                hr(),
+
+                textInput(
+                  "refMatch_filename",
+                  "Filename (without extension):",
+                  value = "M_normalized"
+                ),
+
+                hr(),
+
+                downloadButton(
+                  "refMatch_download",
+                  "Download Normalized Data",
+                  class = "btn-success btn-block",
+                  icon = icon("download")
+                ),
+
+                br(),
+                br(),
+
+                helpText(
+                  tags$small(
+                    icon("info-circle"),
+                    "The exported data will contain the bibliometric data with ",
+                    "normalized citations in the CR field."
+                  )
+                )
+              ),
+
+              # Advanced Options Box
+              box(
+                title = "Advanced Options",
+                width = NULL,
+                status = "info",
+                solidHeader = TRUE,
+                collapsible = TRUE,
+                collapsed = TRUE,
+
+                checkboxInput(
+                  "refMatch_keepOriginal",
+                  "Keep original CR field as CR_original",
+                  value = TRUE
+                ),
+
+                checkboxInput(
+                  "refMatch_addStats",
+                  "Add matching statistics columns",
+                  value = TRUE
+                ),
+
+                hr(),
+
+                downloadButton(
+                  "refMatch_downloadReport",
+                  "Download Detailed Report",
+                  class = "btn-info btn-block",
+                  icon = icon("file-alt")
+                )
+              )
+            )
+          )
+        ),
+        tabPanel(
+          "Info & References",
+          icon = icon("info-circle"),
+          fluidPage(
+            fluidRow(
+              column(1),
+              column(
+                10,
+                br(),
+                HTML(referenceMatching_help)
+              ),
+              column(1)
+            )
+          )
+        )
       )
+    ),
+
+    #### Filters ----
+    tabItem(
+      "filters",
+      fluidPage(
+        tabsetPanel(
+          id = "tabsFilters",
+          type = "tabs",
+          tabPanel(
+            "Filter List",
+            fluidRow(
+              column(4, box(h6(htmlOutput("textDim")), width = "100%")),
+              column(
+                2,
+                div(
+                  style = "display: flex; align-items: center; height: 150px;",
+                  align = "center",
+                  width = "100%",
+                  actionBttn(
+                    inputId = "applyFilter",
+                    label = strong("Apply"),
+                    width = "100%",
+                    style = "pill",
+                    color = "primary",
+                    icon = icon(name = "play", lib = "glyphicon")
+                  )
+                )
+              ),
+              column(
+                2,
+                div(
+                  style = "display: flex; align-items: center; height: 150px;",
+                  align = "center",
+                  width = "100%",
+                  actionBttn(
+                    inputId = "resetFilter",
+                    label = strong("Reset"),
+                    width = "100%",
+                    style = "pill",
+                    color = "primary",
+                    icon = icon(name = "repeat", lib = "glyphicon")
+                  )
+                )
+              ),
+              column(
+                2,
+                div(
+                  style = "display: flex; align-items: center; height: 150px;",
+                  align = "center",
+                  width = "100%",
+                  actionBttn(
+                    inputId = "viewDataFilter",
+                    label = strong("Data"),
+                    width = "100%",
+                    style = "pill",
+                    color = "primary",
+                    icon = icon(name = "table", lib = "font-awesome")
+                  )
+                )
+              )
+            ),
+            fluidRow(
+              column(
+                3,
+                fluidRow(
+                  box(
+                    title = "1. General",
+                    width = 12,
+                    solidHeader = TRUE,
+                    status = "primary",
+                    selectizeInput(
+                      "selectType",
+                      "Document Type",
+                      choices = NULL,
+                      multiple = TRUE
+                    ),
+                    selectizeInput(
+                      "selectLA",
+                      "Language",
+                      choices = NULL,
+                      multiple = TRUE
+                    ),
+                    sliderInput(
+                      "sliderPY",
+                      "Publication Year",
+                      min = 1900,
+                      max = 2025,
+                      value = c(2000, 2025),
+                      sep = ""
+                    ),
+                    shinyWidgets::multiInput(
+                      inputId = "subject_category",
+                      label = "Subject Category",
+                      choices = character(0),
+                      selected = NULL
+                    )
+                  )
+                )
+              ),
+              column(
+                3,
+                fluidRow(
+                  box(
+                    title = "2. (J) Journal",
+                    width = 12,
+                    solidHeader = TRUE,
+                    status = "success",
+                    fileInput(
+                      "journal_list_upload",
+                      "Upload a List of Journals",
+                      accept = c(".txt", ".csv", ".xlsx")
+                    ),
+                    uiOutput("journal_list_ui"),
+                    br(),
+                    fileInput(
+                      "journal_ranking_upload",
+                      "Upload a Journal Ranking List",
+                      accept = c(".csv", ".xlsx")
+                    ),
+                    uiOutput("journal_ranking_ui"),
+                    uiOutput("journal_ranking_ui_view"),
+                    br(),
+                    selectInput(
+                      "bradfordSources",
+                      "Source by Bradford Law Zones",
+                      choices = c(
+                        "Core Sources" = "core",
+                        "Core + Zone 2 Sources" = "zone2",
+                        "All Sources" = "all"
+                      ),
+                      selected = "all"
+                    )
+                  )
+                )
+              ),
+              column(
+                3,
+                fluidRow(
+                  box(
+                    title = "3. (AU) Author's Country",
+                    width = 12,
+                    solidHeader = TRUE,
+                    status = "warning",
+                    selectInput(
+                      "region",
+                      "Region",
+                      choices = c(
+                        "Africa" = "AFRICA",
+                        "Asia" = "ASIA",
+                        "Europe" = "EUROPE",
+                        "North America" = "NORTH AMERICA",
+                        "South America" = "SOUTH AMERICA",
+                        "Seven Seas" = "SEVEN SEAS (OPEN OCEAN)",
+                        "Oceania" = "OCEANIA",
+                        "Unknown" = "Unknown"
+                      ),
+                      selected = c(
+                        "AFRICA",
+                        "ASIA",
+                        "EUROPE",
+                        "NORTH AMERICA",
+                        "SOUTH AMERICA",
+                        "SEVEN SEAS (OPEN OCEAN)",
+                        "OCEANIA",
+                        "Unknown"
+                      ),
+                      multiple = TRUE
+                    ),
+                    # selectizeInput("country", "Country", choices = NULL, multiple = TRUE)
+                    shinyWidgets::multiInput(
+                      inputId = "country",
+                      label = "Country",
+                      choices = character(0),
+                      selected = NULL
+                    )
+                  )
+                )
+              ),
+              column(
+                3,
+                fluidRow(
+                  box(
+                    title = "4. (DOC) Documents",
+                    width = 12,
+                    solidHeader = TRUE,
+                    status = "danger",
+                    sliderInput(
+                      "sliderTC",
+                      "Total Citations",
+                      min = 0,
+                      max = 500,
+                      value = c(0, 500)
+                    ),
+                    sliderInput(
+                      "sliderTCpY",
+                      "Total Citations per Year",
+                      min = 0,
+                      max = 100,
+                      value = c(0, 100)
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          tabPanel(
+            "Info & References",
+            fluidPage(
+              fluidRow(
+                column(1),
+                column(
+                  10,
+                  br(),
+                  HTML(filters)
+                ),
+                column(1)
+              )
+            )
+          )
+        )
       )
     ),
     #### Overview ----
@@ -879,16 +1560,23 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMI"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMI"
+                  )
+                )
+              )
             )
           )
         ),
         fluidRow(
           #div(id = "valuebox-container",
           tabsetPanel(
-            type = "tabs", id = "maininfo",
+            type = "tabs",
+            id = "maininfo",
             tabPanel(
               "Plot",
               fluidRow(
@@ -919,25 +1607,50 @@ body <- dashboardBody(
                 ),
               )
             ),
-            tabPanel("Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "MainInfo", width = 700)),
+            tabPanel(
+              "Table",
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "MainInfo",
+                width = 700
+              )),
               align = "center"
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("MainInfoGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("MainInfoGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
+                )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$mainInformation)
+                  ),
+                  column(1)
                 )
               )
             )
           )
-          #) # end div
         )
       )
     ),
@@ -955,9 +1668,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportASP"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportASP"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -965,9 +1684,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "ASPplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "ASPplot.save"
+                  )
+                )
+              )
             )
           )
         ),
@@ -977,7 +1702,10 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualProdPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "AnnualProdPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -987,6 +1715,7 @@ body <- dashboardBody(
         )
       )
     ),
+
     ##### average citation per year ----
     tabItem(
       "averageCitPerYear",
@@ -1001,9 +1730,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportACpY"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportACpY"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1011,9 +1746,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "ACpYplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "ACpYplot.save"
+                  )
+                )
+              )
             )
           )
         ),
@@ -1022,16 +1763,153 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "AnnualTotCitperYearPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "AnnualTotCitperYearPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("AnnualTotCitperYearTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                "AnnualTotCitperYearTable"
+              ))
             )
           )
         )
       )
     ),
+
+    ##### Life Cycle ----
+
+    tabItem(
+      "lifeCycle",
+      fluidPage(
+        fluidRow(
+          column(
+            9,
+            h3(strong("Life Cycle of Scientific Production"), align = "center")
+          ),
+          div(
+            style = style_bttn,
+            title = t_run,
+            column(
+              1,
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyDLC"
+                  )
+                )
+              )
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_report,
+            column(
+              1,
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportDLC"
+                  )
+                )
+              )
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_export,
+            column(
+              1,
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "DLCplot.save"
+                  )
+                )
+              )
+            )
+          )
+        ),
+        fluidRow(
+          tabsetPanel(
+            id = "tabsDLC",
+            type = "tabs",
+            # === TAB 1: SUMMARY ===
+            tabPanel(
+              title = tagList(shiny::icon("table"), " Summary"),
+              value = "summary",
+              br(),
+              uiOutput("lifeCycleSummaryUIid"),
+            ),
+
+            # === TAB 2: INTERACTIVE PLOTS ===
+            tabPanel(
+              "Plot",
+              fluidRow(
+                column(
+                  6,
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "DLCPlotYear",
+                    height = "75vh"
+                  ))
+                ),
+                column(
+                  6,
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "DLCPlotCum",
+                    height = "75vh"
+                  ))
+                )
+              )
+            ),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(
+                      htmlOutput("DLCGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
+                  )
+                )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$lifeCycle)
+                  ),
+                  column(1)
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+
     ##### three fields plot ----
     tabItem(
       "threeFieldPlot",
@@ -1046,9 +1924,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "apply3F"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "apply3F"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1056,9 +1940,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportTFP"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportTFP"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1066,116 +1956,200 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenTFP"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  export_bttn,
+                  list(
+                    inputId = "screenTFP"
+                  )
+                )
+              )
             )
           ),
           div(
-            style = style_opt,
             column(
               1,
               dropdown(
-                box(
-                  title = h4(strong("Parameters")),
-                  collapsible = FALSE,
-                  width = 15,
-                  solidHeader = FALSE,
-                  fluidRow(
-                    column(6, selectInput("CentralField",
-                                          label = "Middle Field",
-                                          choices = c(
-                                            "Authors" = "AU",
-                                            "Affiliations" = "AU_UN",
-                                            "Countries" = "AU_CO",
-                                            "Keywords" = "DE",
-                                            "Keywords Plus" = "ID",
-                                            "All Keywords" = "KW_Merged",
-                                            "Titles" = "TI_TM",
-                                            "Abstract" = "AB_TM",
-                                            "Sources" = "SO",
-                                            "References" = "CR",
-                                            "Cited Sources" = "CR_SO"
-                                          ),
-                                          selected = "AU"
-                    )),
-                    column(6, numericInput("CentralFieldn",
-                                           label = ("Number of items"),
-                                           min = 1, max = 50, step = 1, value = 20
-                    ))
+                h4(strong("Options: ")),
+                br(),
+
+                # ============================================
+                # MAIN CONFIGURATION
+                # ============================================
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
+
+                  # Middle Field
                   fluidRow(
-                    column(6, selectInput("LeftField",
-                                          label = "Left Field",
-                                          choices = c(
-                                            "Authors" = "AU",
-                                            "Affiliations" = "AU_UN",
-                                            "Countries" = "AU_CO",
-                                            "Keywords" = "DE",
-                                            "Keywords Plus" = "ID",
-                                            "All Keywords" = "KW_Merged",
-                                            "Titles" = "TI_TM",
-                                            "Abstract" = "AB_TM",
-                                            "Sources" = "SO",
-                                            "References" = "CR",
-                                            "Cited Sources" = "CR_SO"
-                                          ),
-                                          selected = "CR"
-                    )),
-                    column(6, numericInput("LeftFieldn",
-                                           label = ("Number of items"),
-                                           min = 1, max = 50, step = 1, value = 20
-                    ))
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "CentralField",
+                          label = strong("Middle Field"),
+                          choices = c(
+                            "Authors" = "AU",
+                            "Affiliations" = "AU_UN",
+                            "Countries" = "AU_CO",
+                            "Keywords" = "DE",
+                            "Keywords Plus" = "ID",
+                            "All Keywords" = "KW_Merged",
+                            "Titles" = "TI_TM",
+                            "Abstract" = "AB_TM",
+                            "Sources" = "SO",
+                            "References" = "CR",
+                            "Cited Sources" = "CR_SO"
+                          ),
+                          selected = "AU"
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          "CentralFieldn",
+                          label = ("Number of Items"),
+                          min = 1,
+                          max = 50,
+                          step = 1,
+                          value = 20
+                        )
+                      )
+                    )
                   ),
+
+                  # Left Field
                   fluidRow(
-                    column(6, selectInput("RightField",
-                                          label = "Right Field",
-                                          choices = c(
-                                            "Authors" = "AU",
-                                            "Affiliations" = "AU_UN",
-                                            "Countries" = "AU_CO",
-                                            "Keywords" = "DE",
-                                            "Keywords Plus" = "ID",
-                                            "All Keywords" = "KW_Merged",
-                                            "Titles" = "TI_TM",
-                                            "Abstract" = "AB_TM",
-                                            "Sources" = "SO",
-                                            "References" = "CR",
-                                            "Cited Sources" = "CR_SO"
-                                          ),
-                                          selected = "KW_Merged"
-                    )),
-                    column(6, numericInput("RightFieldn",
-                                           label = ("Number of items"),
-                                           min = 1, max = 50, step = 1, value = 20
-                    ))
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px; margin-top: 10px;",
+                        selectInput(
+                          "LeftField",
+                          label = strong("Left Field"),
+                          choices = c(
+                            "Authors" = "AU",
+                            "Affiliations" = "AU_UN",
+                            "Countries" = "AU_CO",
+                            "Keywords" = "DE",
+                            "Keywords Plus" = "ID",
+                            "All Keywords" = "KW_Merged",
+                            "Titles" = "TI_TM",
+                            "Abstract" = "AB_TM",
+                            "Sources" = "SO",
+                            "References" = "CR",
+                            "Cited Sources" = "CR_SO"
+                          ),
+                          selected = "CR"
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px; margin-top: 10px;",
+                        numericInput(
+                          "LeftFieldn",
+                          label = ("Number of Items"),
+                          min = 1,
+                          max = 50,
+                          step = 1,
+                          value = 20
+                        )
+                      )
+                    )
+                  ),
+
+                  # Right Field
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px; margin-top: 10px;",
+                        selectInput(
+                          "RightField",
+                          label = strong("Right Field"),
+                          choices = c(
+                            "Authors" = "AU",
+                            "Affiliations" = "AU_UN",
+                            "Countries" = "AU_CO",
+                            "Keywords" = "DE",
+                            "Keywords Plus" = "ID",
+                            "All Keywords" = "KW_Merged",
+                            "Titles" = "TI_TM",
+                            "Abstract" = "AB_TM",
+                            "Sources" = "SO",
+                            "References" = "CR",
+                            "Cited Sources" = "CR_SO"
+                          ),
+                          selected = "KW_Merged"
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px; margin-top: 10px;",
+                        numericInput(
+                          "RightFieldn",
+                          label = ("Number of Items"),
+                          min = 1,
+                          max = 50,
+                          step = 1,
+                          value = 20
+                        )
+                      )
+                    )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
                 width = "300px"
               )
-            )
+            ),
+            style = style_opt
           )
         ),
         fluidRow(
           tabsetPanel(
             type = "tabs",
-            tabPanel("Plot",
-                     shinycssloaders::withSpinner(plotlyOutput(outputId = "ThreeFieldsPlot", height = "90vh"))
+            tabPanel(
+              "Plot",
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "ThreeFieldsPlot",
+                height = "90vh"
+              ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("TFPGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("TFPGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
@@ -1199,9 +2173,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMRSources"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMRSources"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1209,9 +2189,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMRS"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMRS"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1219,9 +2205,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MRSplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MRSplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1230,12 +2222,25 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostRelSourcesK",
-                  label = ("Number of Sources"),
-                  value = 10
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "MostRelSourcesK",
+                    label = ("Number of Sources"),
+                    value = 10
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1250,7 +2255,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelSourcesPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostRelSourcesPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
@@ -1274,9 +2283,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMLCSources"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMLCSources"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1284,9 +2299,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMLS"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMLS"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1294,9 +2315,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MLCSplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MLCSplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1305,12 +2332,25 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostRelCitSourcesK",
-                  label = ("Number of Sources"),
-                  value = 10
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "MostRelCitSourcesK",
+                    label = ("Number of Sources"),
+                    value = 10
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1325,11 +2365,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCitSourcesPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostRelCitSourcesPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelCitSourcesTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                "MostRelCitSourcesTable"
+              ))
             )
           )
         )
@@ -1350,9 +2396,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportBradford"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportBradford"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1360,9 +2412,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "BLplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "BLplot.save"
+                  )
+                )
+              )
             )
           )
         ),
@@ -1371,7 +2429,10 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "bradfordPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "bradfordPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -1395,9 +2456,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyHsource"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyHsource"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1405,9 +2472,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportSI"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportSI"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1415,9 +2488,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "SIplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "SIplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1426,23 +2505,43 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("HmeasureSources",
-                  label = "Impact measure",
-                  choices = c(
-                    "H-Index" = "h",
-                    "G-Index" = "g",
-                    "M-Index" = "m",
-                    "Total Citation" = "tc"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "h"
+
+                  # Impact Measure Selection
+                  selectInput(
+                    "HmeasureSources",
+                    label = strong("Impact Measure"),
+                    choices = c(
+                      "H-Index" = "h",
+                      "G-Index" = "g",
+                      "M-Index" = "m",
+                      "Total Citation" = "tc"
+                    ),
+                    selected = "h"
+                  ),
+
+                  # Number of Sources
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "Hksource",
+                      label = ("Number of Sources"),
+                      value = 10
+                    )
+                  )
                 ),
-                br(),
-                numericInput("Hksource",
-                  label = ("Number of sources"),
-                  value = 10
-                ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1457,11 +2556,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "SourceHindexPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "SourceHindexPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "SourceHindexTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "SourceHindexTable"
+              ))
             )
           )
         )
@@ -1481,9 +2586,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applySOGrowth"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applySOGrowth"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1491,9 +2602,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportSD"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportSD"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1501,9 +2618,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "SDplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "SDplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1512,19 +2635,44 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("cumSO", "Occurrences",
-                  choices = c(
-                    "Cumulate" = "Cum",
-                    "Per year" = "noCum"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "Cum"
+
+                  # Occurrences Selection
+                  selectInput(
+                    "cumSO",
+                    label = strong("Occurrences"),
+                    choices = c(
+                      "Cumulate" = "Cum",
+                      "Per year" = "noCum"
+                    ),
+                    selected = "Cum"
+                  ),
+
+                  # Number of Sources Slider
+                  div(
+                    style = "margin-top: 10px;",
+                    sliderInput(
+                      "topSO",
+                      label = "Number of Sources",
+                      min = 1,
+                      max = 50,
+                      step = 1,
+                      value = c(1, 5)
+                    )
+                  )
                 ),
-                sliderInput("topSO",
-                  label = "Number of Sources",
-                  min = 1, max = 50, step = 1, value = c(1, 5)
-                ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1539,11 +2687,16 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "soGrowthPlot", height = "90vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "soGrowthPlot",
+                height = "90vh"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "soGrowthtable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "soGrowthtable"
+              ))
             )
           )
         )
@@ -1564,9 +2717,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMRAuthors"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMRAuthors"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1574,9 +2733,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMRA"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMRA"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1584,9 +2749,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MRAplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MRAplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1595,21 +2766,46 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostRelAuthorsK",
-                  label = ("Number of Authors"),
-                  value = 10
-                ),
-                selectInput("AuFreqMeasure",
-                  label = "Frequency measure",
-                  choices = c(
-                    "N. of Documents " = "t",
-                    "Percentage" = "p",
-                    "Fractionalized Frequency" = "f"
+
+                # ============================================
+                # MAIN CONFIGURATION
+                # ============================================
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "t"
+
+                  # Frequency Measure Selection
+                  selectInput(
+                    "AuFreqMeasure",
+                    label = strong("Frequency Measure"),
+                    choices = c(
+                      "N. of Documents" = "t",
+                      "N. of Documents (%)" = "p",
+                      "N. of Documents (Fractionalized)" = "f"
+                    ),
+                    selected = "t"
+                  ),
+
+                  # Number of Authors
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "MostRelAuthorsK",
+                      label = "Number of Authors",
+                      value = 10,
+                      min = 1,
+                      step = 1
+                    )
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1624,7 +2820,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAuthorsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostRelAuthorsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
@@ -1665,7 +2865,7 @@ body <- dashboardBody(
                 # style = "height: 700px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;",
                 shinycssloaders::withSpinner(uiOutput("AuthorLocalProfileUI"))
               )
-            ), 
+            ),
             tabPanel(
               "Info & References",
               fluidPage(
@@ -1692,7 +2892,8 @@ body <- dashboardBody(
               style = "text-align: left; text-color: #989898",
               selectizeInput(
                 inputId = "authorSearch",
-                label = h4(strong("Search Auhtor")), choices = NULL
+                label = h4(strong("Search Auhtor")),
+                choices = NULL
               ),
               fluidRow(
                 column(
@@ -1700,13 +2901,16 @@ body <- dashboardBody(
                   div(
                     align = "center",
                     title = "Apply",
-                    do.call("actionButton", c(list(
-                      label = NULL,
-                      style = "display:block; height: 37px; width: 37px; border-radius: 50%;
+                    do.call(
+                      "actionButton",
+                      c(list(
+                        label = NULL,
+                        style = "display:block; height: 37px; width: 37px; border-radius: 50%;
                                       border: 1px; margin-top: 16px;",
-                      icon = icon(name = "play", lib = "glyphicon"),
-                      inputId = "authorPageApply"
-                    )))
+                        icon = icon(name = "play", lib = "glyphicon"),
+                        inputId = "authorPageApply"
+                      ))
+                    )
                   )
                 ),
                 column(
@@ -1714,28 +2918,32 @@ body <- dashboardBody(
                   div(
                     align = "center",
                     title = "Reset",
-                    do.call("actionButton", c(list(
-                      label = NULL,
-                      style = "display:block; height: 37px; width: 37px; border-radius: 50%;
+                    do.call(
+                      "actionButton",
+                      c(list(
+                        label = NULL,
+                        style = "display:block; height: 37px; width: 37px; border-radius: 50%;
                                       border: 1px; margin-top: 16px;",
-                      icon = icon(name = "remove", lib = "glyphicon"),
-                      inputId = "authorPageAReset"
-                    )))
+                        icon = icon(name = "remove", lib = "glyphicon"),
+                        inputId = "authorPageAReset"
+                      ))
+                    )
                   )
                 ),
-                column(
-                  4,
-                  # div(
-                  #   align = "center",
-                  #   title = "Export raw text(s) in Excel",
-                  #   do.call("actionButton", c(list(
-                  #     label = NULL,
-                  #     style = "display:block; height: 37px; width: 37px; border-radius: 50%;
-                  #                         border: 1px; margin-top: 16px;",
-                  #     icon = icon(name = "download-alt", lib = "glyphicon"),
-                  #     inputId = "wordsContSave"
-                  #   )))
-                  # )
+                column(4)
+              ),
+              br(),
+              div(
+                id = "authorFetchingSpinner",
+                style = "display: none; text-align: center; margin-top: 15px;",
+                icon(
+                  "spinner",
+                  class = "fa-spin fa-3x",
+                  style = "color: #466fc4;"
+                ),
+                p(
+                  "Fetching data...",
+                  style = "color: #666; font-size: 14px; margin-top: 10px;"
                 )
               )
             ),
@@ -1758,9 +2966,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMLCAuthors"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMLCAuthors"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1768,9 +2982,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMLCA"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMLCA"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1778,9 +2998,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MLCAplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MLCAplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1789,12 +3015,25 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostCitAuthorsK",
-                  label = ("Number of Authors"),
-                  value = 10
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "MostCitAuthorsK",
+                    label = ("Number of Authors"),
+                    value = 10
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1809,7 +3048,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostCitAuthorsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
@@ -1833,18 +3076,31 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyAUoverTime"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyAUoverTime"
+                  )
+                )
+              )
             )
-          ), div(
+          ),
+          div(
             style = style_bttn,
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportAPOT"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportAPOT"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1852,9 +3108,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "APOTplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "APOTplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1863,12 +3125,25 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("TopAuthorsProdK",
-                  label = ("Number of Authors"),
-                  value = 10
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "TopAuthorsProdK",
+                    label = ("Number of Authors"),
+                    value = 10
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -1883,7 +3158,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "TopAuthorsProdPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "TopAuthorsProdPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table - Production per Year",
@@ -1891,22 +3170,30 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table - Documents",
-              shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTablePapers"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                "TopAuthorsProdTablePapers"
+              ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("ApotGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("ApotGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
             )
-            
           )
         )
       )
@@ -1918,16 +3205,25 @@ body <- dashboardBody(
         fluidRow(
           column(
             10,
-            h3(strong("Author Productivity through Lotka's Law"), align = "center")
+            h3(
+              strong("Author Productivity through Lotka's Law"),
+              align = "center"
+            )
           ),
           div(
             style = style_bttn,
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportLotka"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportLotka"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1935,9 +3231,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "LLplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "LLplot.save"
+                  )
+                )
+              )
             )
           )
         ),
@@ -1946,7 +3248,10 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "lotkaPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "lotkaPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -1970,9 +3275,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyHAuthors"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyHAuthors"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1980,9 +3291,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportAI"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportAI"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -1990,9 +3307,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "AIplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "AIplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2001,22 +3324,43 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("HmeasureAuthors",
-                  label = "Impact measure",
-                  choices = c(
-                    "H-Index" = "h",
-                    "G-Index" = "g",
-                    "M-Index" = "m",
-                    "Total Citation" = "tc"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "h"
+
+                  # Impact Measure Selection
+                  selectInput(
+                    "HmeasureAuthors",
+                    label = strong("Impact Measure"),
+                    choices = c(
+                      "H-Index" = "h",
+                      "G-Index" = "g",
+                      "M-Index" = "m",
+                      "Total Citation" = "tc"
+                    ),
+                    selected = "h"
+                  ),
+
+                  # Number of Authors
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "Hkauthor",
+                      label = ("Number of Authors"),
+                      value = 10
+                    )
+                  )
                 ),
-                numericInput("Hkauthor",
-                  label = ("Number of authors"),
-                  value = 10
-                ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2031,11 +3375,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "AuthorHindexPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "AuthorHindexPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "AuthorHindexTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "AuthorHindexTable"
+              ))
             )
           )
         )
@@ -2055,9 +3405,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMRAffiliations"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMRAffiliations"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2065,9 +3421,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMRAFF"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMRAFF"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2075,9 +3437,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "AFFplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "AFFplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2086,20 +3454,41 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("disAff",
-                  label = "Affiliation Name Disambiguation",
-                  choices = c(
-                    "Yes" = "Y",
-                    "No" = "N"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "Y"
+
+                  # Affiliation Name Disambiguation
+                  selectInput(
+                    "disAff",
+                    label = strong("Affiliation Name Disambiguation"),
+                    choices = c(
+                      "Yes" = "Y",
+                      "No" = "N"
+                    ),
+                    selected = "Y"
+                  ),
+
+                  # Number of Affiliations
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "MostRelAffiliationsK",
+                      label = ("Number of Affiliations"),
+                      value = 10
+                    )
+                  )
                 ),
-                numericInput("MostRelAffiliationsK",
-                  label = ("Number of Affiliations"),
-                  value = 10
-                ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2114,11 +3503,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelAffiliationsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostRelAffiliationsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelAffiliationsTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                "MostRelAffiliationsTable"
+              ))
             )
           )
         )
@@ -2138,9 +3533,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyAFFGrowth"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyAFFGrowth"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2148,9 +3549,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportAFFPOT"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportAFFPOT"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2158,9 +3565,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "AffOverTimeplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "AffOverTimeplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2169,12 +3582,28 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("topAFF",
-                  label = "Number of Affiliations",
-                  min = 1, max = 50, step = 1, value = 5
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "topAFF",
+                    label = "Number of Affiliations",
+                    min = 1,
+                    max = 50,
+                    step = 1,
+                    value = 5
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2189,11 +3618,16 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "AffOverTimePlot", height = "90vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "AffOverTimePlot",
+                height = "90vh"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "AffOverTimeTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "AffOverTimeTable"
+              ))
             )
           )
         )
@@ -2213,9 +3647,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCAUCountries"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyCAUCountries"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2223,9 +3663,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMRCO"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMRCO"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2233,9 +3679,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MRCOplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MRCOplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2244,12 +3696,27 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostRelCountriesK",
-                  label = ("Number of Countries"),
-                  value = 20, min = 1, max = 50
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "MostRelCountriesK",
+                    label = ("Number of Countries"),
+                    value = 20,
+                    min = 1,
+                    max = 50
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2264,21 +3731,34 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelCountriesPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostRelCountriesPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelCountriesTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                "MostRelCountriesTable"
+              ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("MostRelCountriesGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("MostRelCountriesGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
@@ -2301,9 +3781,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCSP"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportCSP"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2311,9 +3797,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "CSPplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "CSPplot.save"
+                  )
+                )
+              )
             )
           )
         ),
@@ -2322,7 +3814,10 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "countryProdPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "countryProdPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -2346,9 +3841,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCOGrowth"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyCOGrowth"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2356,9 +3857,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCPOT"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportCPOT"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2366,9 +3873,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "CountryOverTimeplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "CountryOverTimeplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2377,12 +3890,28 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                sliderInput("topCO",
-                  label = "Number of Countries",
-                  min = 1, max = 50, step = 1, value = 5
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  sliderInput(
+                    "topCO",
+                    label = "Number of Countries",
+                    min = 1,
+                    max = 50,
+                    step = 1,
+                    value = 5
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2397,11 +3926,16 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "CountryOverTimePlot", height = "90vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "CountryOverTimePlot",
+                height = "90vh"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CountryOverTimeTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "CountryOverTimeTable"
+              ))
             )
           )
         )
@@ -2421,9 +3955,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMCCountries"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMCCountries"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2431,9 +3971,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMCCO"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMCCO"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2441,9 +3987,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MCCplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MCCplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2452,20 +4004,41 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("CitCountriesMeasure",
-                  label = "Measure",
-                  choices = c(
-                    "Total Citations" = "TC",
-                    "Average Article Citations" = "TCY"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "TC"
+
+                  # Measure Selection
+                  selectInput(
+                    "CitCountriesMeasure",
+                    label = strong("Measure"),
+                    choices = c(
+                      "Total Citations" = "TC",
+                      "Average Article Citations" = "TCY"
+                    ),
+                    selected = "TC"
+                  ),
+
+                  # Number of Countries
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "MostCitCountriesK",
+                      label = ("Number of Countries"),
+                      value = 10
+                    )
+                  )
                 ),
-                numericInput("MostCitCountriesK",
-                  label = ("Number of Countries"),
-                  value = 10
-                ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2480,11 +4053,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitCountriesPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostCitCountriesPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitCountriesTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                "MostCitCountriesTable"
+              ))
             )
           )
         )
@@ -2505,9 +4084,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMGCDocuments"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMGCDocuments"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2515,9 +4100,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMCD"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMCD"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2525,9 +4116,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MGCDplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MGCDplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2536,20 +4133,41 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostCitDocsK",
-                  label = ("Number of Documents"),
-                  value = 10
-                ),
-                selectInput("CitDocsMeasure",
-                  label = "Measure",
-                  choices = c(
-                    "Total Citations" = "TC",
-                    "Total Citations per Year" = "TCY"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "TC"
+
+                  # Number of Documents
+                  numericInput(
+                    "MostCitDocsK",
+                    label = ("Number of Documents"),
+                    value = 10
+                  ),
+
+                  # Measure Selection
+                  div(
+                    style = "margin-top: 10px;",
+                    selectInput(
+                      "CitDocsMeasure",
+                      label = strong("Measure"),
+                      choices = c(
+                        "Total Citations" = "TC",
+                        "Total Citations per Year" = "TCY"
+                      ),
+                      selected = "TC"
+                    )
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2564,7 +4182,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitDocsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostCitDocsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
@@ -2588,9 +4210,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMLCDocuments"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMLCDocuments"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2598,9 +4226,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMLCD"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMLCD"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2608,9 +4242,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MLCDplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MLCDplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2619,22 +4259,42 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostLocCitDocsK",
-                  label = ("Number of Documents"),
-                  value = 10
-                ),
-                selectInput(
-                  inputId = "LocCitSep",
-                  label = "Field separator character",
-                  choices = c(
-                    ";" = ";",
-                    ".  " = ".  ",
-                    "," = ","
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = ";"
+
+                  # Number of Documents
+                  numericInput(
+                    "MostLocCitDocsK",
+                    label = ("Number of Documents"),
+                    value = 10
+                  ),
+
+                  # Field Separator
+                  div(
+                    style = "margin-top: 10px;",
+                    selectInput(
+                      inputId = "LocCitSep",
+                      label = strong("Field Separator Character"),
+                      choices = c(
+                        ";" = ";",
+                        ".  " = ".  ",
+                        "," = ","
+                      ),
+                      selected = ";"
+                    )
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2649,21 +4309,32 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostLocCitDocsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostLocCitDocsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("MostLocCitDocsGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("MostLocCitDocsGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
@@ -2686,9 +4357,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMLCReferences"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMLCReferences"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2696,9 +4373,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMLCR"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMLCR"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2706,9 +4389,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MLCRplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MLCRplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2717,7 +4406,8 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput("MostCitRefsK",
+                numericInput(
+                  "MostCitRefsK",
                   label = ("Number of Documents"),
                   value = 10
                 ),
@@ -2731,7 +4421,9 @@ body <- dashboardBody(
                   ),
                   selected = ";"
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
@@ -2747,7 +4439,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitRefsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostCitRefsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
@@ -2771,9 +4467,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyRPYS"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyRPYS"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2781,9 +4483,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportRPYS"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportRPYS"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2791,9 +4499,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "RSplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "RSplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2802,47 +4516,81 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("rpysMedianWindow",
-                            label = "Median Window",
-                  choices = c(
-                    "Centered (Marx et al., 2014)" = "centered",
-                    "Backward (bibliometrix)" = "backward"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "centered"
-                ),
-                selectInput(
-                  inputId = "rpysSep",
-                  label = "Field separator character",
-                  choices = c(
-                    ";" = ";",
-                    ".  " = ".  ",
-                    "," = ","
+
+                  # Median Window
+                  selectInput(
+                    "rpysMedianWindow",
+                    label = strong("Median Window"),
+                    choices = c(
+                      "Centered (Marx et al., 2014)" = "centered",
+                      "Backward (bibliometrix)" = "backward"
+                    ),
+                    selected = "centered"
                   ),
-                  selected = ";"
-                ),
-                h4(em(strong("Time slice"))),
-                fluidRow(
-                  column(
-                    6,
-                    numericInput(
-                      inputId = "rpysMinYear",
-                      label = "Starting Year",
-                      value = NA,
-                      step = 1
-                    )
-                  ),
-                  column(
-                    6,
-                    numericInput(
-                      inputId = "rpysMaxYear",
-                      label = "End Year",
-                      value = NA,
-                      step = 1
+
+                  # Field Separator
+                  div(
+                    style = "margin-top: 10px;",
+                    selectInput(
+                      inputId = "rpysSep",
+                      label = strong("Field Separator Character"),
+                      choices = c(
+                        ";" = ";",
+                        ".  " = ".  ",
+                        "," = ","
+                      ),
+                      selected = ";"
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                # Time Slice Configuration
+                div(
+                  style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-top: 15px;",
+                  h6(
+                    strong("Time Slice"),
+                    style = "color: #34495e; margin-bottom: 10px;"
+                  ),
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px;",
+                        numericInput(
+                          inputId = "rpysMinYear",
+                          label = "Starting Year",
+                          value = NA,
+                          step = 1
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          inputId = "rpysMaxYear",
+                          label = "End Year",
+                          value = NA,
+                          step = 1
+                        )
+                      )
+                    )
+                  )
+                ),
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -2857,7 +4605,10 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "rpysPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "rpysPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table - RPYS",
@@ -2873,20 +4624,24 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table - Influential References",
-              fluidRow(column(10),
-                       column(2,
-                              selectInput("rpysInfluential",
-                                            label = "Type",
-                                            choices = c(
-                                              "Constant Performer" = "Constant Performer",
-                                              "Hot Paper" = "Hot Paper" ,
-                                              "Life Cycle" = "Life Cycle",
-                                              "Sleeping Beauty" =  "Sleeping Beauty",
-                                              "Not Influent" = "Not Influent"
-                                            ),
-                                            selected = "Hot Paper"
-                                )
-                       )),
+              fluidRow(
+                column(10),
+                column(
+                  2,
+                  selectInput(
+                    "rpysInfluential",
+                    label = "Type",
+                    choices = c(
+                      "Constant Performer" = "Constant Performer",
+                      "Hot Paper" = "Hot Paper",
+                      "Life Cycle" = "Life Cycle",
+                      "Sleeping Beauty" = "Sleeping Beauty",
+                      "Not Influent" = "Not Influent"
+                    ),
+                    selected = "Hot Paper"
+                  )
+                )
+              ),
               shinycssloaders::withSpinner(DT::DTOutput(
                 outputId = "rpysSequence"
               ))
@@ -2898,14 +4653,21 @@ body <- dashboardBody(
               ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("rpysGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("rpysGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
@@ -2928,9 +4690,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyMFWords"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyMFWords"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2938,9 +4706,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportMFW"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportMFW"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2948,9 +4722,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "MRWplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "MRWplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -2959,35 +4739,78 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("MostRelWords", "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB",
-                    "Subject Categories (WoS)" = "WC"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.MostRelWords == 'AB' |input.MostRelWords == 'TI'",
-                  selectInput("MRWngrams", "N-Grams",
+
+                  # Field Selection
+                  selectInput(
+                    "MostRelWords",
+                    label = strong("Field"),
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB",
+                      "Subject Categories (WoS)" = "WC"
                     ),
-                    selected = 1
+                    selected = "KW_Merged"
+                  ),
+
+                  # N-Grams (conditional)
+                  conditionalPanel(
+                    condition = "input.MostRelWords == 'AB' |input.MostRelWords == 'TI'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "MRWngrams",
+                        label = strong("N-Grams"),
+                        choices = c(
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
+                        ),
+                        selected = 1
+                      )
+                    )
+                  ),
+
+                  # Number of Words
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "MostRelWordsN",
+                      label = "Number of Words",
+                      min = 2,
+                      max = 100,
+                      step = 1,
+                      value = 10
+                    )
                   )
                 ),
-                numericInput("MostRelWordsN", label = "Number of words", min = 2, max = 100, step = 1, value = 10),
-                br(),
+
+                # Text Editing Box (collapsed)
                 box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("MostRelWordsStopFile", "Load a list of terms to remove",
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+
+                  selectInput(
+                    "MostRelWordsStopFile",
+                    "Load a list of terms to remove",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -2997,10 +4820,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.MostRelWordsStopFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("MostRelWordsStop", "",
+                    fileInput(
+                      "MostRelWordsStop",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3009,7 +4838,9 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("MostRelWordsSep", "File Separator",
+                    selectInput(
+                      "MostRelWordsSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
@@ -3017,9 +4848,10 @@ body <- dashboardBody(
                       ),
                       selected = ","
                     )
-                    # ,h5(htmlOutput("MostRelWordsStopPreview"))
                   ),
-                  selectInput("MRWSynFile", "Load a list of synonyms",
+                  selectInput(
+                    "MRWSynFile",
+                    "Load a list of synonyms",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3029,11 +4861,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.MRWSynFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing terms and their respective synonyms."
+                      )),
+                      h5(
+                        ("Each row must contain a term and related synonyms, separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("MRWSyn", "",
+                    fileInput(
+                      "MRWSyn",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3042,7 +4879,9 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("MRWSynSep", "File Separator",
+                    selectInput(
+                      "MRWSynSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
@@ -3050,11 +4889,13 @@ body <- dashboardBody(
                       ),
                       selected = ","
                     )
-                    # ,h5(htmlOutput("MRWSynPreview"))
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -3069,7 +4910,11 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "MostRelWordsPlot", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "MostRelWordsPlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
@@ -3093,9 +4938,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyWordCloud"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyWordCloud"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3103,9 +4954,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportWC"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportWC"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3113,9 +4970,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenWC"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  export_bttn,
+                  list(
+                    inputId = "screenWC"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3124,35 +4987,82 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("summaryTerms", "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB",
-                    "Subject Categories (WoS)" = "WC"
+
+                # ============================================
+                # MAIN CONFIGURATION
+                # ============================================
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.summaryTerms == 'AB' |input.summaryTerms == 'TI'",
-                  selectInput("summaryTermsngrams", "N-Grams",
+
+                  # Field Selection
+                  selectInput(
+                    "summaryTerms",
+                    label = strong("Field"),
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB",
+                      "Subject Categories (WoS)" = "WC"
                     ),
-                    selected = 1
+                    selected = "KW_Merged"
+                  ),
+
+                  # N-Grams (conditional)
+                  conditionalPanel(
+                    condition = "input.summaryTerms == 'AB' |input.summaryTerms == 'TI'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "summaryTermsngrams",
+                        label = strong("N-Grams"),
+                        choices = c(
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
+                        ),
+                        selected = 1
+                      )
+                    )
+                  ),
+
+                  # Number of Words
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "n_words",
+                      label = "Number of Words",
+                      min = 10,
+                      max = 500,
+                      step = 1,
+                      value = 50
+                    )
                   )
                 ),
-                numericInput("n_words", label = "Number of words", min = 10, max = 500, step = 1, value = 50),
-                br(),
+
+                # ============================================
+                # TEXT EDITING BOX
+                # ============================================
                 box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("WCStopFile", "Load a list of terms to remove",
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+
+                  selectInput(
+                    "WCStopFile",
+                    "Load a list of terms to remove",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3162,10 +5072,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.WCStopFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("WCStop", "",
+                    fileInput(
+                      "WCStop",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3174,7 +5090,9 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("WCSep", "File Separator",
+                    selectInput(
+                      "WCSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
@@ -3183,7 +5101,9 @@ body <- dashboardBody(
                       selected = ","
                     )
                   ),
-                  selectInput("WCSynFile", "Load a list of synonyms",
+                  selectInput(
+                    "WCSynFile",
+                    "Load a list of synonyms",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3193,11 +5113,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.WCSynFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)"
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator). Rows have to be separated by return separator.")
+                      )
                     ),
-                    fileInput("WCSyn", "",
+                    fileInput(
+                      "WCSyn",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3206,7 +5131,9 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("WCSynSep", "File Separator",
+                    selectInput(
+                      "WCSynSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
@@ -3216,86 +5143,166 @@ body <- dashboardBody(
                     )
                   )
                 ),
-                br(),
+
+                # ============================================
+                # PARAMETERS BOX
+                # ============================================
                 box(
-                  title = p(strong("Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput("measure", "Word occurrence by",
-                        choices = c(
-                          "Frequency" = "freq",
-                          "Square root" = "sqrt",
-                          "Log" = "log",
-                          "Log10" = "log10"
-                        ),
-                        selected = "freq"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput("wcShape", "Shape",
-                        choices = c(
-                          "Circle" = "circle",
-                          "Cardiod" = "cardioid",
-                          "Diamond" = "diamond",
-                          "Pentagon" = "pentagon",
-                          "Star" = "star",
-                          "Triangle-forward" = "triangle-forward",
-                          "Triangle" = "triangle"
-                        ),
-                        selected = "circle"
-                      )
-                    )
+                  title = span(
+                    icon("sliders", style = "margin-right: 5px;"),
+                    strong("Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
                   ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+
                   fluidRow(
                     column(
                       6,
-                      selectInput("font",
-                        label = "Font type",
-                        choices = c("Impact",
-                          "Comic Sans MS (No plz!)" = "Comic Sans MS",
-                          "Arial", "Arial Black", "Tahoma", "Verdana", "Courier New",
-                          "Georgia", "Times New Roman", "Andale Mono"
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "measure",
+                          "Word occurrence by",
+                          choices = c(
+                            "Frequency" = "freq",
+                            "Square root" = "sqrt",
+                            "Log" = "log",
+                            "Log10" = "log10"
+                          ),
+                          selected = "freq"
                         )
                       )
                     ),
                     column(
                       6,
-                      selectInput("wcCol", "Text colors",
-                        choices = c(
-                          "Random Dark" = "random-dark",
-                          "Random Light" = "random-light"
-                        ),
-                        selected = "random-dark"
+                      div(
+                        style = "padding-left: 8px;",
+                        selectInput(
+                          "wcShape",
+                          "Shape",
+                          choices = c(
+                            "Circle" = "circle",
+                            "Cardiod" = "cardioid",
+                            "Diamond" = "diamond",
+                            "Pentagon" = "pentagon",
+                            "Star" = "star",
+                            "Triangle-forward" = "triangle-forward",
+                            "Triangle" = "triangle"
+                          ),
+                          selected = "circle"
+                        )
                       )
                     )
                   ),
                   fluidRow(
                     column(
                       6,
-                      numericInput("scale", label = "Font size", min = 0.1, max = 5, step = 0.1, value = 0.5)
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "font",
+                          label = "Font type",
+                          choices = c(
+                            "Impact",
+                            "Comic Sans MS (No plz!)" = "Comic Sans MS",
+                            "Arial",
+                            "Arial Black",
+                            "Tahoma",
+                            "Verdana",
+                            "Courier New",
+                            "Georgia",
+                            "Times New Roman",
+                            "Andale Mono"
+                          )
+                        )
+                      )
                     ),
                     column(
                       6,
-                      numericInput("ellipticity", label = "Ellipticity", min = 0, max = 1, step = 0.05, value = 0.65)
+                      div(
+                        style = "padding-left: 8px;",
+                        selectInput(
+                          "wcCol",
+                          "Text colors",
+                          choices = c(
+                            "Random Dark" = "random-dark",
+                            "Random Light" = "random-light"
+                          ),
+                          selected = "random-dark"
+                        )
+                      )
                     )
                   ),
                   fluidRow(
                     column(
                       6,
-                      numericInput("padding", label = "Padding", min = 0, max = 5, value = 1, step = 1)
+                      div(
+                        style = "padding-right: 8px;",
+                        numericInput(
+                          "scale",
+                          label = "Font size",
+                          min = 0.1,
+                          max = 5,
+                          step = 0.1,
+                          value = 0.5
+                        )
+                      )
                     ),
                     column(
                       6,
-                      numericInput("rotate", label = "Rotate", min = 0, max = 20, value = 0, step = 1)
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          "ellipticity",
+                          label = "Ellipticity",
+                          min = 0,
+                          max = 1,
+                          step = 0.05,
+                          value = 0.65
+                        )
+                      )
+                    )
+                  ),
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px;",
+                        numericInput(
+                          "padding",
+                          label = "Padding",
+                          min = 0,
+                          max = 5,
+                          value = 1,
+                          step = 1
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          "rotate",
+                          label = "Rotate",
+                          min = 0,
+                          max = 20,
+                          value = 0,
+                          step = 1
+                        )
+                      )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -3334,9 +5341,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyTreeMap"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyTreeMap"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3344,9 +5357,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportTREEMAP"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportTREEMAP"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3354,9 +5373,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenTREEMAP"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  export_bttn,
+                  list(
+                    inputId = "screenTREEMAP"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3365,35 +5390,78 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("treeTerms", "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB",
-                    "Subject Categories (WoS)" = "WC"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.treeTerms == 'AB' |input.treeTerms == 'TI'",
-                  selectInput("treeTermsngrams", "N-Grams",
+
+                  # Field Selection
+                  selectInput(
+                    "treeTerms",
+                    label = strong("Field"),
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB",
+                      "Subject Categories (WoS)" = "WC"
                     ),
-                    selected = 1
+                    selected = "KW_Merged"
+                  ),
+
+                  # N-Grams (conditional)
+                  conditionalPanel(
+                    condition = "input.treeTerms == 'AB' |input.treeTerms == 'TI'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "treeTermsngrams",
+                        label = strong("N-Grams"),
+                        choices = c(
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
+                        ),
+                        selected = 1
+                      )
+                    )
+                  ),
+
+                  # Number of Words
+                  div(
+                    style = "margin-top: 10px;",
+                    numericInput(
+                      "treen_words",
+                      label = "Number of Words",
+                      min = 10,
+                      max = 200,
+                      step = 5,
+                      value = 50
+                    )
                   )
                 ),
-                numericInput("treen_words", label = "Number of words", min = 10, max = 200, step = 5, value = 50),
-                br(),
+
+                # Text Editing Box (collapsed)
                 box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("TreeMapStopFile", "Load a list of terms to remove",
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+
+                  selectInput(
+                    "TreeMapStopFile",
+                    "Load a list of terms to remove",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3403,10 +5471,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.TreeMapStopFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("TreeMapStop", "",
+                    fileInput(
+                      "TreeMapStop",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3415,17 +5489,20 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("TreeMapSep", "File Separator",
+                    selectInput(
+                      "TreeMapSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
                         "Tab " = "\t"
                       ),
                       selected = ","
-                    ),
-                    # h5(htmlOutput("TreeMapStopPreview"))
+                    )
                   ),
-                  selectInput("TreeMapSynFile", "Load a list of synonyms",
+                  selectInput(
+                    "TreeMapSynFile",
+                    "Load a list of synonyms",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3435,11 +5512,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.TreeMapSynFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing terms and their respective synonyms."
+                      )),
+                      h5(
+                        ("Each row must contain a term and related synonyms, separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("TreeMapSyn", "",
+                    fileInput(
+                      "TreeMapSyn",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3448,19 +5530,23 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("TreeMapSynSep", "File Separator",
+                    selectInput(
+                      "TreeMapSynSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
                         "Tab " = "\t"
                       ),
                       selected = ","
-                    ),
-                    # h5(htmlOutput("TreeMapSynPreview"))
+                    )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -3475,7 +5561,10 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "treemap", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "treemap",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -3499,9 +5588,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyWD"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyWD"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3509,9 +5604,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportWD"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportWD"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3519,9 +5620,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "WDplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "WDplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3530,33 +5637,67 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("growthTerms", "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB"
+                # ============================================
+                # MAIN CONFIGURATION
+                # ============================================
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
-                  selectInput("growthTermsngrams", "N-Grams",
+
+                  # Field Selection
+                  selectInput(
+                    "growthTerms",
+                    label = strong("Field"),
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB"
                     ),
-                    selected = 1
+                    selected = "KW_Merged"
+                  ),
+
+                  # N-Grams (conditional)
+                  conditionalPanel(
+                    condition = "input.growthTerms == 'AB' |input.growthTerms == 'TI'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "growthTermsngrams",
+                        label = strong("N-Grams"),
+                        choices = c(
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
+                        ),
+                        selected = 1
+                      )
+                    )
                   )
                 ),
-                br(),
+
+                # ============================================
+                # TEXT EDITING BOX
+                # ============================================
                 box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("WDStopFile", "Load a list of terms to remove",
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+
+                  selectInput(
+                    "WDStopFile",
+                    "Load a list of terms to remove",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3566,10 +5707,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.WDStopFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("WDStop", "",
+                    fileInput(
+                      "WDStop",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3578,17 +5725,20 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("WDSep", "File Separator",
+                    selectInput(
+                      "WDSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
                         "Tab " = "\t"
                       ),
                       selected = ","
-                    ),
-                    # h5(htmlOutput("WDStopPreview"))
+                    )
                   ),
-                  selectInput("WDSynFile", "Load a list of synonyms",
+                  selectInput(
+                    "WDSynFile",
+                    "Load a list of synonyms",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3598,11 +5748,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.WDSynFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)"
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator). Rows have to be separated by return separator.")
+                      )
                     ),
-                    fileInput("WDSyn", "",
+                    fileInput(
+                      "WDSyn",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3611,36 +5766,60 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("WDSynSep", "File Separator",
+                    selectInput(
+                      "WDSynSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
                         "Tab " = "\t"
                       ),
                       selected = ","
-                    ),
-                    # h5(htmlOutput("WDSynPreview"))
+                    )
                   )
                 ),
-                br(),
+
+                # ============================================
+                # PARAMETERS BOX
+                # ============================================
                 box(
-                  title = p(strong("Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("cumTerms", "Occurrences",
+                  title = span(
+                    icon("sliders", style = "margin-right: 5px;"),
+                    strong("Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+
+                  selectInput(
+                    "cumTerms",
+                    label = strong("Occurrences"),
                     choices = c(
                       "Cumulate" = "Cum",
                       "Per year" = "noCum"
                     ),
                     selected = "Cum"
                   ),
-                  sliderInput("topkw",
-                    label = "Number of words",
-                    min = 1, max = 100, step = 1, value = c(1, 10)
+                  div(
+                    style = "margin-top: 10px;",
+                    sliderInput(
+                      "topkw",
+                      label = "Number of words",
+                      min = 1,
+                      max = 100,
+                      step = 1,
+                      value = c(1, 10)
+                    )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -3655,11 +5834,16 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "kwGrowthPlot", height = "90vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "kwGrowthPlot",
+                height = "90vh"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "kwGrowthtable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "kwGrowthtable"
+              ))
             )
           )
         )
@@ -3679,9 +5863,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyTrendTopics"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyTrendTopics"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3689,9 +5879,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportTT"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportTT"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3699,9 +5895,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "TTplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "TTplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3710,45 +5912,91 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("trendTerms", "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB"
+
+                # ============================================
+                # MAIN CONFIGURATION
+                # ============================================
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
-                  selectInput("trendTermsngrams", "N-Grams",
+
+                  # Field Selection
+                  selectInput(
+                    "trendTerms",
+                    label = strong("Field"),
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB"
                     ),
-                    selected = 1
+                    selected = "KW_Merged"
+                  ),
+
+                  # N-Grams (conditional)
+                  conditionalPanel(
+                    condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "trendTermsngrams",
+                        label = strong("N-Grams"),
+                        choices = c(
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
+                        ),
+                        selected = 1
+                      )
+                    )
+                  ),
+
+                  # Word Stemming (conditional)
+                  conditionalPanel(
+                    condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "trendStemming",
+                        label = strong("Word Stemming"),
+                        choices = c(
+                          "Yes" = TRUE,
+                          "No" = FALSE
+                        ),
+                        selected = FALSE
+                      )
+                    )
+                  ),
+
+                  # Trend Slider (dynamic UI output)
+                  div(
+                    style = "margin-top: 10px;",
+                    uiOutput("trendSliderPY")
                   )
                 ),
-                conditionalPanel(
-                  condition = "input.trendTerms == 'TI' | input.trendTerms == 'AB'",
-                  selectInput("trendStemming",
-                    label = "Word Stemming",
-                    choices = c(
-                      "Yes" = TRUE,
-                      "No" = FALSE
-                    ),
-                    selected = FALSE
-                  )
-                ),
-                uiOutput("trendSliderPY"),
-                br(),
+
+                # ============================================
+                # TEXT EDITING BOX
+                # ============================================
                 box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("TTStopFile", "Load a list of terms to remove",
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+
+                  selectInput(
+                    "TTStopFile",
+                    "Load a list of terms to remove",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3758,10 +6006,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.TTStopFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator).")
+                      )
                     ),
-                    fileInput("TTStop", "",
+                    fileInput(
+                      "TTStop",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3770,17 +6024,20 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("TTSep", "File Separator",
+                    selectInput(
+                      "TTSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
                         "Tab " = "\t"
                       ),
                       selected = ","
-                    ),
-                    # h5(htmlOutput("TTStopPreview"))
+                    )
                   ),
-                  selectInput("TTSynFile", "Load a list of synonyms",
+                  selectInput(
+                    "TTSynFile",
+                    "Load a list of synonyms",
                     choices = c(
                       "Yes" = "Y",
                       "No" = "N"
@@ -3790,11 +6047,16 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.TTSynFile == 'Y'",
                     helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
+                      h5(strong(
+                        "Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)"
+                      )),
+                      h5(
+                        ("Terms have to be separated by a standard separator (comma, semicolon or tabulator). Rows have to be separated by return separator.")
+                      )
                     ),
-                    fileInput("TTSyn", "",
+                    fileInput(
+                      "TTSyn",
+                      "",
                       multiple = FALSE,
                       accept = c(
                         "text/csv",
@@ -3803,35 +6065,70 @@ body <- dashboardBody(
                         ".txt"
                       )
                     ),
-                    selectInput("TTSynSep", "File Separator",
+                    selectInput(
+                      "TTSynSep",
+                      "File Separator",
                       choices = c(
                         'Comma ","' = ",",
                         'Semicolon ";"' = ";",
                         "Tab " = "\t"
                       ),
                       selected = ","
-                    ),
-                    # h5(htmlOutput("TTSynPreview"))
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("trendMinFreq", label = "Word Minimum Frequency", min = 0, max = 100, value = 5, step = 1),
-                    ),
-                    column(
-                      6,
-                      numericInput("trendNItems", label = "Number of Words per Year", min = 1, max = 20, step = 1, value = 3)
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                # ============================================
+                # PARAMETERS BOX
+                # ============================================
+                box(
+                  title = span(
+                    icon("sliders", style = "margin-right: 5px;"),
+                    strong("Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px;",
+                        numericInput(
+                          "trendMinFreq",
+                          label = "Word Minimum Frequency",
+                          min = 0,
+                          max = 100,
+                          value = 5,
+                          step = 1
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          "trendNItems",
+                          label = "Number of Words per Year",
+                          min = 1,
+                          max = 20,
+                          step = 1,
+                          value = 3
+                        )
+                      )
+                    )
+                  )
+                ),
+
                 style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
@@ -3846,21 +6143,34 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "trendTopicsPlot", height = "90vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "trendTopicsPlot",
+                height = "90vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "trendTopicsTable"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "trendTopicsTable"
+              ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("trendTopicsGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("trendTopicsGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
@@ -3883,9 +6193,15 @@ body <- dashboardBody(
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCM"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyCM"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3893,9 +6209,15 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCM"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportCM"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3903,9 +6225,15 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "CMplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "CMplot.save"
+                  )
+                )
+              )
             )
           ),
           div(
@@ -3914,7 +6242,8 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("CManalysis",
+                selectInput(
+                  "CManalysis",
                   label = "Unit of Analysis",
                   choices = c(
                     "Documents" = "documents",
@@ -3925,11 +6254,16 @@ body <- dashboardBody(
                 ),
                 " ",
                 box(
-                  title = p(strong("Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
+                  title = p(
+                    strong("Parameters"),
+                    style = "font-size:16px;color:black;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
                   solidHeader = FALSE,
                   collapsed = FALSE,
-                  selectInput("CMfield",
+                  selectInput(
+                    "CMfield",
                     label = "Coupling measured by",
                     choices = c(
                       "References" = "CR",
@@ -3942,7 +6276,8 @@ body <- dashboardBody(
                   ),
                   conditionalPanel(
                     condition = "input.CMfield == 'TI' | input.CMfield == 'AB'",
-                    selectInput("CMstemming",
+                    selectInput(
+                      "CMstemming",
                       label = "Word Stemming",
                       choices = c(
                         "Yes" = TRUE,
@@ -3951,7 +6286,8 @@ body <- dashboardBody(
                       selected = FALSE
                     )
                   ),
-                  selectInput("CMimpact",
+                  selectInput(
+                    "CMimpact",
                     label = "Impact measure",
                     choices = c(
                       "Local Citation Score" = "local",
@@ -3959,7 +6295,8 @@ body <- dashboardBody(
                     ),
                     selected = "local"
                   ),
-                  selectInput("CMlabeling",
+                  selectInput(
+                    "CMlabeling",
                     label = "Cluster labeling by",
                     choices = c(
                       "None" = "none",
@@ -3972,7 +6309,9 @@ body <- dashboardBody(
                   ),
                   conditionalPanel(
                     condition = "input.CMlabeling == 'TI' | input.CMlabeling == 'AB'",
-                    selectInput("CMngrams", "N-Grams",
+                    selectInput(
+                      "CMngrams",
+                      "N-Grams",
                       choices = c(
                         "Unigrams" = "1",
                         "Bigrams" = "2",
@@ -3984,31 +6323,67 @@ body <- dashboardBody(
                   fluidRow(
                     column(
                       6,
-                      numericInput("CMn", label = "Number of Units\n ", value = 250, min = 50, max = 5000, step = 1)
+                      numericInput(
+                        "CMn",
+                        label = "Number of Units\n ",
+                        value = 250,
+                        min = 50,
+                        max = 5000,
+                        step = 1
+                      )
                     ),
                     column(
                       6,
-                      numericInput("CMfreq", label = "Min Cluster Freq. ", value = 5, min = 1, max = 100, step = 1)
+                      numericInput(
+                        "CMfreq",
+                        label = "Min Cluster Freq. ",
+                        value = 5,
+                        min = 1,
+                        max = 100,
+                        step = 1
+                      )
                     )
                   ),
                   fluidRow(
                     column(
                       6,
-                      numericInput("CMn.labels", label = "Labels per cluster", value = 3, min = 1, max = 10, step = 1)
+                      numericInput(
+                        "CMn.labels",
+                        label = "Labels per cluster",
+                        value = 3,
+                        min = 1,
+                        max = 10,
+                        step = 1
+                      )
                     ),
                     column(
                       6,
-                      numericInput("sizeCM", label = "Label size", value = 0.3, min = 0.0, max = 1, step = 0.05)
+                      numericInput(
+                        "sizeCM",
+                        label = "Label size",
+                        value = 0.3,
+                        min = 0.0,
+                        max = 1,
+                        step = 0.05
+                      )
                     )
                   ),
                   fluidRow(
                     column(
                       6,
-                      numericInput("CMrepulsion", label = "Community Repulsion", value = 0, min = 0, max = 1, step = 0.01)
+                      numericInput(
+                        "CMrepulsion",
+                        label = "Community Repulsion",
+                        value = 0.5,
+                        min = 0,
+                        max = 1,
+                        step = 0.1
+                      )
                     ),
                     column(
                       6,
-                      selectInput("CMcluster",
+                      selectInput(
+                        "CMcluster",
                         label = "Clustering Algorithm",
                         choices = c(
                           "None" = "none",
@@ -4021,12 +6396,14 @@ body <- dashboardBody(
                           "Spinglass" = "spinglass",
                           "Walktrap" = "walktrap"
                         ),
-                        selected = "walktrap"
+                        selected = "louvain"
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
@@ -4042,11 +6419,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Map",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "CMPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "CMPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Network",
-              shinycssloaders::withSpinner(visNetworkOutput("CMNetPlot", height = "75vh"))
+              shinycssloaders::withSpinner(visNetworkOutput(
+                "CMNetPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -4054,7 +6437,9 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Clusters",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTableCluster"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "CMTableCluster"
+              ))
             )
           )
         )
@@ -4065,19 +6450,15 @@ body <- dashboardBody(
     tabItem(
       "coOccurenceNetwork",
       fluidPage(
+        # Header Section
         fluidRow(
-          column(
-            8,
-            h3(strong("Co-occurrence Network"), align = "center")
-          ),
+          column(8, h3(strong("Co-occurrence Network"), align = "center")),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCoc"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyCoc")))
             )
           ),
           div(
@@ -4085,9 +6466,7 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCOC"
-              )))
+              do.call("actionBttn", c(report_bttn, list(inputId = "reportCOC")))
             )
           ),
           div(
@@ -4095,378 +6474,544 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenCOC"
-              )))
+              do.call("actionBttn", c(export_bttn, list(inputId = "screenCOC")))
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("field",
-                  "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's Keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB",
-                    "Subject Categories (WoS)" = "WC"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.field == 'TI' | input.field == 'AB'",
-                  selectInput("cocngrams", "N-Grams",
+                  selectInput(
+                    "field",
+                    "Field",
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's Keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB",
+                      "Subject Categories (WoS)" = "WC"
                     ),
-                    selected = 1
-                  )
-                ),
-                br(),
-                materialSwitch(
-                  inputId = "noOverlap",
-                  label = "Avoid Label Overlap",
-                  value = TRUE,
-                  status = "primary"
-                ),
-                br(),
-                box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("COCStopFile", "Load a list of terms to remove",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
+                    selected = "KW_Merged"
                   ),
                   conditionalPanel(
-                    condition = "input.COCStopFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                    ),
-                    fileInput("COCStop", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("COCSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("COCStopPreview"))
-                  ),
-                  selectInput("COCSynFile", "Load a list of synonyms",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
-                  ),
-                  conditionalPanel(
-                    condition = "input.COCSynFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
-                    ),
-                    fileInput("COCSyn", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("COCSynSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("COCSynPreview"))
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Method Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput("layout",
-                        label = "Network Layout",
-                        choices = c(
-                          "Automatic layout" = "auto",
-                          "Circle" = "circle",
-                          "Fruchterman & Reingold" = "fruchterman",
-                          "Kamada & Kawai" = "kamada",
-                          "MultiDimensional Scaling" = "mds",
-                          "Sphere" = "sphere",
-                          "Star" = "star"
-                        ),
-                        selected = "auto"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput("cocCluster",
-                        label = "Clustering Algorithm",
-                        choices = c(
-                          "None" = "none",
-                          "Edge Betweenness" = "edge_betweenness",
-                          # "Fast Greedy" = "fast_greedy",
-                          "InfoMap" = "infomap",
-                          "Leading Eigenvalues" = "leading_eigen",
-                          "Leiden" = "leiden",
-                          "Louvain" = "louvain",
-                          "Spinglass" = "spinglass",
-                          "Walktrap" = "walktrap"
-                        ),
-                        selected = "walktrap"
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput("normalize",
-                        label = "Normalization",
-                        choices = c(
-                          "none",
-                          "association",
-                          "jaccard",
-                          "salton",
-                          "inclusion",
-                          "equivalence"
-                        ),
-                        selected = "association"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput("cocyears",
-                        label = "Node Color by Year",
-                        choices = c(
-                          "No" = "No",
-                          "Yes" = "Yes"
-                        ),
-                        selected = "No"
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "Nodes",
-                        label = "Number of Nodes",
-                        min = 5,
-                        max = 1000,
-                        value = 50,
-                        step = 1
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "coc.repulsion",
-                        label = "Repulsion Force",
-                        min = 0,
-                        max = 1,
-                        value = 0.1,
-                        step = 0.1
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "coc.isolates",
-                        label = "Remove Isolated Nodes",
-                        choices = c(
-                          "Yes" = "yes",
-                          "No" = "no"
-                        ),
-                        selected = "yes"
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput("edges.min",
-                        label = ("Minimum Number of Edges"),
-                        value = 2,
-                        step = 1,
-                        min = 0
-                      )
-                    )
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Graphical Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "cocAlpha",
-                        label = "Opacity",
-                        min = 0,
-                        max = 1,
-                        value = 0.7,
-                        step = 0.05
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "Labels",
-                        label = "Number of labels",
-                        min = 0,
-                        max = 1000,
-                        value = 1000,
-                        step = 1
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "label.cex",
-                        label = "Label cex",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "coc.shape",
-                        label = "Node Shape",
-                        choices = c(
-                          "Box" = "box",
-                          "Circle" = "circle",
-                          "Dot" = "dot",
-                          "Ellipse" = "ellipse",
-                          "Square" = "square",
-                          "Text" = "text"
-                        ),
-                        selected = "dot"
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "labelsize",
-                        label = "Label size",
-                        min = 0.0,
-                        max = 20,
-                        value = 3,
-                        step = 0.10
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "edgesize",
-                        label = "Edge size",
-                        min = 0.0,
-                        max = 20,
-                        value = 5,
-                        step = 0.5
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "coc.shadow",
-                        label = "Node shadow",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "coc.curved",
-                        label = "Edit Nodes",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "No"
-                      )
-                    )
-                  )
-                ),
-                br(),
-                fluidRow(
-                  column(
-                    6,
+                    condition = "input.field == 'TI' | input.field == 'AB'",
                     div(
-                      style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                      align = "center",
-                      width = "100%",
-                      downloadBttn(
-                        outputId = "network.coc", label = ("Pajek"),
-                        style = "pill", color = "primary"
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "cocngrams",
+                        "N-Grams",
+                        choices = c(
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
+                        ),
+                        selected = 1
                       )
                     )
                   ),
-                  column(
-                    6,
-                    div(
-                      style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                      align = "center",
-                      width = "100%",
-                      downloadBttn(
-                        outputId = "networkCoc.fig", label = ("HTML"),
-                        style = "pill", color = "primary"
+                  div(
+                    style = "margin-top: 10px;",
+                    materialSwitch(
+                      inputId = "noOverlap",
+                      label = "Avoid Label Overlap",
+                      value = TRUE,
+                      status = "primary"
+                    )
+                  )
+                ),
+
+                # Text Editing Box
+                box(
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; margin-bottom: 15px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("ban", style = "margin-right: 5px;"),
+                      strong("Stop Words"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
+                    ),
+                    selectInput(
+                      "COCStopFile",
+                      "Load a list of terms to remove",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.COCStopFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator (comma, semicolon or tabulator)."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "COCStop",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "COCSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 3px solid #4caf50;",
+                    h6(
+                      icon("exchange-alt", style = "margin-right: 5px;"),
+                      strong("Synonyms"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    selectInput(
+                      "COCSynFile",
+                      "Load a list of synonyms",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.COCSynFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing, in each row, a list of synonyms that will be merged into a single term."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator. Rows have to be separated by return separator."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "COCSyn",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "COCSynSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                # Method Parameters Box
+                box(
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Method Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "primary",
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "layout",
+                          label = strong("Network Layout"),
+                          choices = c(
+                            "Automatic layout" = "auto",
+                            "Circle" = "circle",
+                            "Fruchterman & Reingold" = "fruchterman",
+                            "Kamada & Kawai" = "kamada",
+                            "MultiDimensional Scaling" = "mds",
+                            "Sphere" = "sphere",
+                            "Star" = "star"
+                          ),
+                          selected = "auto"
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        selectInput(
+                          "cocCluster",
+                          label = strong("Clustering Algorithm"),
+                          choices = c(
+                            "None" = "none",
+                            "Edge Betweenness" = "edge_betweenness",
+                            "InfoMap" = "infomap",
+                            "Leading Eigenvalues" = "leading_eigen",
+                            "Leiden" = "leiden",
+                            "Louvain" = "louvain",
+                            "Spinglass" = "spinglass",
+                            "Walktrap" = "walktrap"
+                          ),
+                          selected = "louvain"
+                        )
+                      )
+                    )
+                  ),
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "normalize",
+                          label = strong("Normalization Method"),
+                          choices = c(
+                            "None" = "none",
+                            "Association" = "association",
+                            "Jaccard" = "jaccard",
+                            "Salton" = "salton",
+                            "Inclusion" = "inclusion",
+                            "Equivalence" = "equivalence"
+                          ),
+                          selected = "association"
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        selectInput(
+                          "cocyears",
+                          label = strong("Node Color by Year"),
+                          choices = c("No" = "No", "Yes" = "Yes"),
+                          selected = "No"
+                        )
+                      )
+                    )
+                  ),
+                  hr(style = "margin: 15px 0; border-top: 1px solid #ddd;"),
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Network Size"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "Nodes",
+                            label = "Number of Nodes",
+                            min = 5,
+                            max = 1000,
+                            value = 50,
+                            step = 1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "coc.repulsion",
+                            label = "Repulsion Force",
+                            min = 0,
+                            max = 1,
+                            value = 0.5,
+                            step = 0.1
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("filter", style = "margin-right: 5px;"),
+                      strong("Filtering Options"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "coc.isolates",
+                            label = "Remove Isolated Nodes",
+                            choices = c("Yes" = "yes", "No" = "no"),
+                            selected = "yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "edges.min",
+                            label = "Minimum Number of Edges",
+                            value = 2,
+                            step = 1,
+                            min = 0
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Graphical Parameters Box
+                box(
+                  title = span(
+                    icon("palette", style = "margin-right: 5px;"),
+                    strong("Graphical Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Visual Appearance"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "cocAlpha",
+                            label = "Opacity",
+                            min = 0,
+                            max = 1,
+                            value = 0.7,
+                            step = 0.05
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "Labels",
+                            label = "Number of Labels",
+                            min = 0,
+                            max = 1000,
+                            value = 1000,
+                            step = 1
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Label Settings"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "label.cex",
+                            label = "Label Scaling (cex)",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "labelsize",
+                            label = "Label Size",
+                            min = 0.0,
+                            max = 20,
+                            value = 3,
+                            step = 0.10
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #fce4ec; padding: 12px; border-radius: 5px;",
+                    h6(
+                      strong("Node & Edge Settings"),
+                      style = "color: #c2185b; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "coc.shape",
+                            label = "Node Shape",
+                            choices = c(
+                              "Box" = "box",
+                              "Circle" = "circle",
+                              "Dot" = "dot",
+                              "Ellipse" = "ellipse",
+                              "Square" = "square",
+                              "Text" = "text"
+                            ),
+                            selected = "dot"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "edgesize",
+                            label = "Edge Size",
+                            min = 0.0,
+                            max = 20,
+                            value = 5,
+                            step = 0.5
+                          )
+                        )
+                      )
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px; margin-top: 10px;",
+                          selectInput(
+                            inputId = "coc.shadow",
+                            label = "Node Shadow",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px; margin-top: 10px;",
+                          selectInput(
+                            inputId = "coc.curved",
+                            label = "Edit Nodes",
+                            choices = c("Yes", "No"),
+                            selected = "No"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Export Options
+                br(),
+                div(
+                  style = "background-color: #e3f2fd; padding: 12px; border-radius: 8px;",
+                  h6(
+                    icon("download", style = "margin-right: 5px;"),
+                    strong("Export Network"),
+                    style = "color: #1976d2; margin-bottom: 12px;"
+                  ),
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 5px;",
+                        downloadBttn(
+                          outputId = "network.coc",
+                          label = "Pajek",
+                          style = "pill",
+                          color = "primary",
+                          size = "sm",
+                          block = TRUE
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 5px;",
+                        downloadBttn(
+                          outputId = "networkCoc.fig",
+                          label = "HTML",
+                          style = "pill",
+                          color = "primary",
+                          size = "sm",
+                          block = TRUE
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -4477,53 +7022,75 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Network",
-              shinycssloaders::withSpinner(visNetworkOutput("cocPlot", height = "75vh"))
+              shinycssloaders::withSpinner(visNetworkOutput(
+                "cocPlot",
+                height = "75vh"
+              ))
             ),
-            
             tabPanel(
               "Diachronic Network",
               br(),
               fluidRow(
-                column(2, actionButton("start_coc", "▶ Start", width = "90%")),
-                column(2, actionButton("pause_coc", "⏸ Pause / Resume", width = "90%")),
-                column(2, actionButton("reset_coc", "⏹ Reset", width = "90%")),
+                column(
+                  2,
+                  actionButton("start_coc", "â–¶ Start", width = "90%")
+                ),
+                column(
+                  2,
+                  actionButton("pause_coc", "â¸ Pause / Resume", width = "90%")
+                ),
+                column(2, actionButton("reset_coc", "â¹ Reset", width = "90%")),
                 column(2, uiOutput("export_cocUI")),
-                column(1, div(style = "text-align:right;","Speed (ms)")),
-                column(2, selectInput("speed_coc", label = NULL, seq(250,2000, by=250), selected = 500))
+                column(1, div(style = "text-align:right;", "Speed (ms)")),
+                column(
+                  2,
+                  selectInput(
+                    "speed_coc",
+                    label = NULL,
+                    seq(250, 2000, by = 250),
+                    selected = 500
+                  )
+                )
               ),
+              fluidRow(column(12, uiOutput("year_slider_cocUI"))),
               fluidRow(
-                column(12, uiOutput("year_slider_cocUI"))
-              ),
-              fluidRow(column(1, uiOutput("cocYearUI")),
-                       column(11,visNetworkOutput("cocOverTime", height = "65vh")
-                       ))
+                column(1, uiOutput("cocYearUI")),
+                column(11, visNetworkOutput("cocOverTime", height = "65vh"))
+              )
             ),
             tabPanel(
               "Density",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "cocOverlay", height = "75vh"))
-            ),
-            tabPanel(
-              "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
-                outputId = "cocTable"
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "cocOverlay",
+                height = "75vh"
               ))
             ),
             tabPanel(
-              "Degree Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "cocDegree", height = "75vh"))
+              "Table",
+              shinycssloaders::withSpinner(DT::DTOutput(outputId = "cocTable"))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("cocGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              "Degree Plot",
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "cocDegree",
+                height = "75vh"
+              ))
+            ),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("cocGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
                 )
-              )
+              )))
             )
           )
         )
@@ -4534,18 +7101,13 @@ body <- dashboardBody(
       "thematicMap",
       fluidPage(
         fluidRow(
-          column(
-            8,
-            h3(strong("Thematic Map"), align = "center")
-          ),
+          column(8, h3(strong("Thematic Map"), align = "center")),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyTM"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyTM")))
             )
           ),
           div(
@@ -4553,9 +7115,7 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportTM"
-              )))
+              do.call("actionBttn", c(report_bttn, list(inputId = "reportTM")))
             )
           ),
           div(
@@ -4563,184 +7123,332 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "TMplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(export_bttn, list(outputId = "TMplot.save"))
+              )
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("TMfield",
-                  label = "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's Keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
-                  selectInput("TMngrams", "N-Grams",
+                  selectInput(
+                    "TMfield",
+                    label = "Field",
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's Keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB"
                     ),
-                    selected = 1
-                  )
-                ),
-                conditionalPanel(
-                  condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
-                  selectInput("TMstemming",
-                    label = "Word Stemming",
-                    choices = c(
-                      "Yes" = TRUE,
-                      "No" = FALSE
-                    ),
-                    selected = FALSE
-                  )
-                ),
-                br(),
-                materialSwitch(
-                  inputId = "noOverlapTM",
-                  label = "Avoid Label Overlap",
-                  value = TRUE,
-                  status = "primary"
-                ),
-                br(),
-                box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("TMStopFile", "Load a list of terms to remove",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
+                    selected = "KW_Merged"
                   ),
                   conditionalPanel(
-                    condition = "input.TMStopFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                    ),
-                    fileInput("TMStop", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("TMSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("TMStopPreview"))
-                  ),
-                  selectInput("TMapSynFile", "Load a list of synonyms",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
-                  ),
-                  conditionalPanel(
-                    condition = "input.TMapSynFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
-                    ),
-                    fileInput("TMapSyn", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("TMapSynSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("TMapSynPreview"))
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("TMn", label = "Number of Words", value = 250, min = 50, max = 5000, step = 1)
-                    ),
-                    column(
-                      6,
-                      numericInput("TMfreq", label = "Min Cluster Frequency (per thousand docs)", value = 5, min = 1, max = 100, step = 1)
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("TMn.labels", label = "Number of Labels", value = 3, min = 0, max = 10, step = 1)
-                    ),
-                    column(
-                      6,
-                      numericInput("sizeTM", label = "Label size", value = 0.3, min = 0.0, max = 1, step = 0.05)
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("TMrepulsion", label = "Community Repulsion", value = 0, min = 0, max = 1, step = 0.01)
-                    ),
-                    column(
-                      6,
-                      selectInput("TMCluster",
-                        label = "Clustering Algorithm",
+                    condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "TMngrams",
+                        "N-Grams",
                         choices = c(
-                          "None" = "none",
-                          "Edge Betweenness" = "edge_betweenness",
-                          # "Fast Greedy" = "fast_greedy",
-                          "InfoMap" = "infomap",
-                          "Leading Eigenvalues" = "leading_eigen",
-                          "Leiden" = "leiden",
-                          "Louvain" = "louvain",
-                          "Spinglass" = "spinglass",
-                          "Walktrap" = "walktrap"
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
                         ),
-                        selected = "walktrap"
+                        selected = 1
+                      )
+                    )
+                  ),
+                  conditionalPanel(
+                    condition = "input.TMfield == 'TI' | input.TMfield == 'AB'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "TMstemming",
+                        label = "Word Stemming",
+                        choices = c("Yes" = TRUE, "No" = FALSE),
+                        selected = FALSE
+                      )
+                    )
+                  ),
+                  div(
+                    style = "margin-top: 10px;",
+                    materialSwitch(
+                      inputId = "noOverlapTM",
+                      label = "Avoid Label Overlap",
+                      value = TRUE,
+                      status = "primary"
+                    )
+                  )
+                ),
+
+                # Text Editing Box
+                box(
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; margin-bottom: 15px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("ban", style = "margin-right: 5px;"),
+                      strong("Stop Words"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
+                    ),
+                    selectInput(
+                      "TMStopFile",
+                      "Load a list of terms to remove",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.TMStopFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator (comma, semicolon or tabulator)."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "TMStop",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "TMSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 3px solid #4caf50;",
+                    h6(
+                      icon("exchange-alt", style = "margin-right: 5px;"),
+                      strong("Synonyms"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    selectInput(
+                      "TMapSynFile",
+                      "Load a list of synonyms",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.TMapSynFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing, in each row, a list of synonyms that will be merged into a single term."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator. Rows have to be separated by return separator."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "TMapSyn",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "TMapSynSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                # Parameters Box
+                box(
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "primary",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Data Parameters"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            "TMn",
+                            label = "Number of Words",
+                            value = 250,
+                            min = 50,
+                            max = 5000,
+                            step = 1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "TMfreq",
+                            label = "Min Cluster Frequency (per thousand docs)",
+                            value = 5,
+                            min = 1,
+                            max = 100,
+                            step = 1
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Display Parameters"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            "TMn.labels",
+                            label = "Number of Labels",
+                            value = 3,
+                            min = 0,
+                            max = 10,
+                            step = 1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "sizeTM",
+                            label = "Label Size",
+                            value = 0.3,
+                            min = 0.0,
+                            max = 1,
+                            step = 0.05
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #fce4ec; padding: 12px; border-radius: 5px;",
+                    h6(
+                      strong("Network Parameters"),
+                      style = "color: #c2185b; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            "TMrepulsion",
+                            label = "Community Repulsion",
+                            value = 0.5,
+                            min = 0,
+                            max = 1,
+                            step = 0.1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          selectInput(
+                            "TMCluster",
+                            label = "Clustering Algorithm",
+                            choices = c(
+                              "None" = "none",
+                              "Edge Betweenness" = "edge_betweenness",
+                              "InfoMap" = "infomap",
+                              "Leading Eigenvalues" = "leading_eigen",
+                              "Leiden" = "leiden",
+                              "Louvain" = "louvain",
+                              "Spinglass" = "spinglass",
+                              "Walktrap" = "walktrap"
+                            ),
+                            selected = "louvain"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -4751,11 +7459,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Map",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "TMPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Network",
-              shinycssloaders::withSpinner(visNetworkOutput("NetPlot", height = "75vh"))
+              shinycssloaders::withSpinner(visNetworkOutput(
+                "NetPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -4763,24 +7477,31 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Clusters",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "TMTableCluster"
+              ))
             ),
             tabPanel(
               "Documents",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument"))
+              shinycssloaders::withSpinner(DT::DTOutput(
+                outputId = "TMTableDocument"
+              ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("TMGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("TMGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
                 )
-              )
+              )))
             )
           )
         )
@@ -4791,18 +7512,13 @@ body <- dashboardBody(
       "thematicEvolution",
       fluidPage(
         fluidRow(
-          column(
-            8,
-            h3(strong("Thematic Evolution"), align = "center")
-          ),
+          column(8, h3(strong("Thematic Evolution"), align = "center")),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyTE"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyTE")))
             )
           ),
           div(
@@ -4810,9 +7526,7 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportTE"
-              )))
+              do.call("actionBttn", c(report_bttn, list(inputId = "reportTE")))
             )
           ),
           div(
@@ -4820,168 +7534,313 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "TEplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(export_bttn, list(outputId = "TEplot.save"))
+              )
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("TEfield",
-                  label = "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's Keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.TEfield == 'TI' | input.TEfield == 'AB'",
-                  selectInput("TEngrams", "N-Grams",
+                  selectInput(
+                    "TEfield",
+                    label = "Field",
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's Keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB"
                     ),
-                    selected = 1
-                  )
-                ),
-                br(),
-                materialSwitch(
-                  inputId = "noOverlapTE",
-                  label = "Avoid Label Overlap",
-                  value = TRUE,
-                  status = "primary"
-                ),
-                br(),
-                box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("TEStopFile", "Load a list of terms to remove",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
+                    selected = "KW_Merged"
                   ),
                   conditionalPanel(
-                    condition = "input.TEStopFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                    ),
-                    fileInput("TEStop", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("TESep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("TEStopPreview"))
-                  ),
-                  selectInput("TESynFile", "Load a list of synonyms",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
-                  ),
-                  conditionalPanel(
-                    condition = "input.TESynFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
-                    ),
-                    fileInput("TESyn", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("TESynSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("TESynPreview"))
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("nTE", label = "Number of Words", value = 250, min = 50, max = 5000, step = 1)
-                    ),
-                    column(
-                      6,
-                      numericInput("fTE", label = "Min Cluster Frequency (per thousand docs)", value = 5, min = 1, max = 100, step = 1)
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput("TEmeasure",
-                        label = "Weight index",
+                    condition = "input.TEfield == 'TI' | input.TEfield == 'AB'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "TEngrams",
+                        "N-Grams",
                         choices = c(
-                          "Inclusion Index" = "inclusion",
-                          "Inclusion Index weighted by Word-Occurrences" = "weighted",
-                          "Stability Index" = "stability"
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
                         ),
-                        selected = "weighted"
+                        selected = 1
                       )
-                    ),
-                    column(
-                      6,
-                      numericInput("minFlowTE", label = "Min Weight Index", value = 0.1, min = 0.02, max = 1, step = 0.02)
                     )
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("sizeTE", label = "Label size", value = 0.3, min = 0.0, max = 1, step = 0.05)
+                  div(
+                    style = "margin-top: 10px;",
+                    materialSwitch(
+                      inputId = "noOverlapTE",
+                      label = "Avoid Label Overlap",
+                      value = TRUE,
+                      status = "primary"
+                    )
+                  )
+                ),
+
+                # Text Editing Box
+                box(
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; margin-bottom: 15px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("ban", style = "margin-right: 5px;"),
+                      strong("Stop Words"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
                     ),
-                    column(
-                      6,
-                      numericInput("TEn.labels", label = "Number of Labels (for each cluster)", value = 3, min = 1, max = 5, step = 1)
+                    selectInput(
+                      "TEStopFile",
+                      "Load a list of terms to remove",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.TEStopFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator (comma, semicolon or tabulator)."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "TEStop",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "TESep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 3px solid #4caf50;",
+                    h6(
+                      icon("exchange-alt", style = "margin-right: 5px;"),
+                      strong("Synonyms"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    selectInput(
+                      "TESynFile",
+                      "Load a list of synonyms",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.TESynFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing, in each row, a list of synonyms that will be merged into a single term."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator. Rows have to be separated by return separator."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "TESyn",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "TESynSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Parameters Box
+                box(
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "primary",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Data Parameters"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            "nTE",
+                            label = "Number of Words",
+                            value = 250,
+                            min = 50,
+                            max = 5000,
+                            step = 1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "fTE",
+                            label = "Min Cluster Frequency (per thousand docs)",
+                            value = 5,
+                            min = 1,
+                            max = 100,
+                            step = 1
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Weight Parameters"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            "TEmeasure",
+                            label = "Weight Index",
+                            choices = c(
+                              "Inclusion Index" = "inclusion",
+                              "Inclusion Index weighted by Word-Occurrences" = "weighted",
+                              "Stability Index" = "stability"
+                            ),
+                            selected = "weighted"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "minFlowTE",
+                            label = "Min Weight Index",
+                            value = 0.1,
+                            min = 0.02,
+                            max = 1,
+                            step = 0.02
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #fce4ec; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Display Parameters"),
+                      style = "color: #c2185b; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            "sizeTE",
+                            label = "Label Size",
+                            value = 0.3,
+                            min = 0.0,
+                            max = 1,
+                            step = 0.05
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "TEn.labels",
+                            label = "Number of Labels (for each cluster)",
+                            value = 3,
+                            min = 1,
+                            max = 5,
+                            step = 1
+                          )
+                        )
+                      )
                     )
                   ),
                   fluidRow(column(
                     12,
-                    selectInput("TECluster",
-                      label = "Clustering Algorithm",
+                    selectInput(
+                      "TECluster",
+                      label = strong("Clustering Algorithm"),
                       choices = c(
                         "None" = "none",
                         "Edge Betweenness" = "edge_betweenness",
-                        # "Fast Greedy" = "fast_greedy",
                         "InfoMap" = "infomap",
                         "Leading Eigenvalues" = "leading_eigen",
                         "Leiden" = "leiden",
@@ -4989,25 +7848,42 @@ body <- dashboardBody(
                         "Spinglass" = "spinglass",
                         "Walktrap" = "walktrap"
                       ),
-                      selected = "walktrap"
+                      selected = "louvain"
                     )
                   ))
                 ),
-                br(),
+
+                # Time Slices Box
                 box(
-                  title = p(strong("Time Slices"), style = "font-size:16px;color:black;"),
-                  collapsible = FALSE, width = 15,
-                  solidHeader = FALSE, collapsed = FALSE,
-                  numericInput("numSlices", label = "Number of Cutting Points", min = 1, max = 4, value = 1),
+                  title = span(
+                    icon("clock", style = "margin-right: 5px;"),
+                    strong("Time Slices"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = FALSE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = FALSE,
+                  status = "info",
+                  numericInput(
+                    "numSlices",
+                    label = "Number of Cutting Points",
+                    min = 1,
+                    max = 4,
+                    value = 1
+                  ),
                   "Please, write the cutting points (in year) for your collection",
                   uiOutput("sliders")
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -5022,141 +7898,225 @@ body <- dashboardBody(
                 type = "tabs",
                 tabPanel(
                   "Map",
-                  shinycssloaders::withSpinner(visNetworkOutput(outputId = "TEPlot", height = "75vh", width = "100%"))
+                  shinycssloaders::withSpinner(visNetworkOutput(
+                    outputId = "TEPlot",
+                    height = "75vh",
+                    width = "100%"
+                  ))
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(outputId = "TETable"))
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TETable"
+                  ))
                 )
               )
             ),
-            tabPanel("Time Slice 1", tabsetPanel(
-              type = "tabs",
-              tabPanel(
-                "Map",
-                shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot1", height = "75vh"))
-              ),
-              tabPanel(
-                "Network",
-                shinycssloaders::withSpinner(visNetworkOutput("NetPlot1", height = "75vh"))
-              ),
-              tabPanel(
-                "Table",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable1"))
-              ),
-              tabPanel(
-                "Clusters",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster1"))
-              ),
-              tabPanel(
-                "Documents",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument1"))
-              )
-            )),
-            tabPanel("Time Slice 2", tabsetPanel(
-              type = "tabs",
-              tabPanel(
-                "Map",
-                shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot2", height = "75vh"))
-              ),
-              tabPanel(
-                "Network",
-                shinycssloaders::withSpinner(visNetworkOutput("NetPlot2", height = "75vh"))
-              ),
-              tabPanel(
-                "Table",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable2"))
-              ),
-              tabPanel(
-                "Clusters",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster2"))
-              ),
-              tabPanel(
-                "Documents",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument2"))
-              )
-            )),
-            tabPanel("Time Slice 3", tabsetPanel(
-              type = "tabs",
-              tabPanel(
-                "Map",
-                shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot3", height = "75vh"))
-              ),
-              tabPanel(
-                "Network",
-                shinycssloaders::withSpinner(visNetworkOutput("NetPlot3", height = "75vh"))
-              ),
-              tabPanel(
-                "Table",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable3"))
-              ),
-              tabPanel(
-                "Clusters",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster3"))
-              ),
-              tabPanel(
-                "Documents",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument3"))
-              )
-            )),
-            tabPanel("Time Slice 4", tabsetPanel(
-              type = "tabs",
-              tabPanel(
-                "Map",
-                shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot4", height = "75vh"))
-              ),
-              tabPanel(
-                "Network",
-                shinycssloaders::withSpinner(visNetworkOutput("NetPlot4", height = "75vh"))
-              ),
-              tabPanel(
-                "Table",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable4"))
-              ),
-              tabPanel(
-                "Clusters",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster4"))
-              ),
-              tabPanel(
-                "Documents",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument4"))
-              )
-            )),
-            tabPanel("Time Slice 5", tabsetPanel(
-              type = "tabs",
-              tabPanel(
-                "Map",
-                shinycssloaders::withSpinner(plotlyOutput(outputId = "TMPlot5", height = "75vh"))
-              ),
-              tabPanel(
-                "Network",
-                shinycssloaders::withSpinner(visNetworkOutput("NetPlot5", height = "75vh"))
-              ),
-              tabPanel(
-                "Table",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable5"))
-              ),
-              tabPanel(
-                "Clusters",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableCluster5"))
-              ),
-              tabPanel(
-                "Documents",
-                shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTableDocument5"))
-              )
-            )),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("TEGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              "Time Slice 1",
+              tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                  "Map",
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "TMPlot1",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Network",
+                  shinycssloaders::withSpinner(visNetworkOutput(
+                    "NetPlot1",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Table",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTable1"
+                  ))
+                ),
+                tabPanel(
+                  "Clusters",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableCluster1"
+                  ))
+                ),
+                tabPanel(
+                  "Documents",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableDocument1"
+                  ))
                 )
               )
+            ),
+            tabPanel(
+              "Time Slice 2",
+              tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                  "Map",
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "TMPlot2",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Network",
+                  shinycssloaders::withSpinner(visNetworkOutput(
+                    "NetPlot2",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Table",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTable2"
+                  ))
+                ),
+                tabPanel(
+                  "Clusters",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableCluster2"
+                  ))
+                ),
+                tabPanel(
+                  "Documents",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableDocument2"
+                  ))
+                )
+              )
+            ),
+            tabPanel(
+              "Time Slice 3",
+              tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                  "Map",
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "TMPlot3",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Network",
+                  shinycssloaders::withSpinner(visNetworkOutput(
+                    "NetPlot3",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Table",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTable3"
+                  ))
+                ),
+                tabPanel(
+                  "Clusters",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableCluster3"
+                  ))
+                ),
+                tabPanel(
+                  "Documents",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableDocument3"
+                  ))
+                )
+              )
+            ),
+            tabPanel(
+              "Time Slice 4",
+              tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                  "Map",
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "TMPlot4",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Network",
+                  shinycssloaders::withSpinner(visNetworkOutput(
+                    "NetPlot4",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Table",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTable4"
+                  ))
+                ),
+                tabPanel(
+                  "Clusters",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableCluster4"
+                  ))
+                ),
+                tabPanel(
+                  "Documents",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableDocument4"
+                  ))
+                )
+              )
+            ),
+            tabPanel(
+              "Time Slice 5",
+              tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                  "Map",
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "TMPlot5",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Network",
+                  shinycssloaders::withSpinner(visNetworkOutput(
+                    "NetPlot5",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
+                  "Table",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTable5"
+                  ))
+                ),
+                tabPanel(
+                  "Clusters",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableCluster5"
+                  ))
+                ),
+                tabPanel(
+                  "Documents",
+                  shinycssloaders::withSpinner(DT::DTOutput(
+                    outputId = "TMTableDocument5"
+                  ))
+                )
+              )
+            ),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("TEGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
+                )
+              )))
             )
           )
         )
@@ -5167,18 +8127,13 @@ body <- dashboardBody(
       "factorialAnalysis",
       fluidPage(
         fluidRow(
-          column(
-            8,
-            h3(strong("Factorial Analysis"), align = "center")
-          ),
+          column(8, h3(strong("Factorial Analysis"), align = "center")),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCA"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyCA")))
             )
           ),
           div(
@@ -5186,9 +8141,7 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportFA"
-              )))
+              do.call("actionBttn", c(report_bttn, list(inputId = "reportFA")))
             )
           ),
           div(
@@ -5196,182 +8149,284 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "FAplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(export_bttn, list(outputId = "FAplot.save"))
+              )
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("method",
-                  label = "Method",
-                  choices = c(
-                    "Correspondence Analysis" = "CA",
-                    "Multiple Correspondence Analysis" = "MCA",
-                    "Multidimensional Scaling" = "MDS"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "MCA"
-                ),
-                selectInput("CSfield",
-                  label = "Field",
-                  choices = c(
-                    "Keywords Plus" = "ID",
-                    "Author's Keywords" = "DE",
-                    "All Keywords" = "KW_Merged",
-                    "Titles" = "TI",
-                    "Abstracts" = "AB"
+                  selectInput(
+                    "method",
+                    label = "Method",
+                    choices = c(
+                      "Correspondence Analysis" = "CA",
+                      "Multiple Correspondence Analysis" = "MCA",
+                      "Multidimensional Scaling" = "MDS"
+                    ),
+                    selected = "MCA"
                   ),
-                  selected = "KW_Merged"
-                ),
-                conditionalPanel(
-                  condition = "input.CSfield == 'TI' | input.CSfield == 'AB'",
-                  selectInput("CSngrams", "N-Grams",
+                  selectInput(
+                    "CSfield",
+                    label = "Field",
                     choices = c(
-                      "Unigrams" = "1",
-                      "Bigrams" = "2",
-                      "Trigrams" = "3"
+                      "Keywords Plus" = "ID",
+                      "Author's Keywords" = "DE",
+                      "All Keywords" = "KW_Merged",
+                      "Titles" = "TI",
+                      "Abstracts" = "AB"
                     ),
-                    selected = 1
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Text Editing"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  selectInput("CSStopFile", "Load a list of terms to remove",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
+                    selected = "KW_Merged"
                   ),
                   conditionalPanel(
-                    condition = "input.CSStopFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."))
-                    ),
-                    fileInput("CSStop", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("CSSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("CSStopPreview"))
-                  ),
-                  selectInput("FASynFile", "Load a list of synonyms",
-                    choices = c(
-                      "Yes" = "Y",
-                      "No" = "N"
-                    ),
-                    selected = "N"
-                  ),
-                  conditionalPanel(
-                    condition = "input.FASynFile == 'Y'",
-                    helpText(
-                      h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms, that will be merged into a single term (the first word contained in the row)")),
-                      h5(("Terms have to be separated by a standard separator (comma, semicolon or tabulator).
-                              Rows have to be separated by return separator."))
-                    ),
-                    fileInput("FASyn", "",
-                      multiple = FALSE,
-                      accept = c(
-                        "text/csv",
-                        "text/comma-separated-values,text/plain",
-                        ".csv",
-                        ".txt"
-                      )
-                    ),
-                    selectInput("FASynSep", "File Separator",
-                      choices = c(
-                        'Comma ","' = ",",
-                        'Semicolon ";"' = ";",
-                        "Tab " = "\t"
-                      ),
-                      selected = ","
-                    ),
-                    # h5(htmlOutput("FASynPreview"))
-                  )
-                ),
-                br(),
-                box(
-                  title = p(strong("Method Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput("CSn",
-                        label = ("Number of terms"),
-                        value = 50, step = 1
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput("nClustersCS",
-                        label = "N. of Clusters",
+                    condition = "input.CSfield == 'TI' | input.CSfield == 'AB'",
+                    div(
+                      style = "margin-top: 10px;",
+                      selectInput(
+                        "CSngrams",
+                        "N-Grams",
                         choices = c(
-                          "1" = "1",
-                          "2" = "2",
-                          "3" = "3",
-                          "4" = "4",
-                          "5" = "5",
-                          "6" = "6",
-                          "7" = "7",
-                          "8" = "8"
+                          "Unigrams" = "1",
+                          "Bigrams" = "2",
+                          "Trigrams" = "3"
                         ),
-                        selected = "1"
+                        selected = 1
                       )
                     )
                   )
                 ),
-                br(),
+
+                # Text Editing Box
                 box(
-                  title = p(strong("Graphical Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "CSlabelsize",
-                        label = "Label size",
-                        min = 5,
-                        max = 30,
-                        value = 10
-                      )
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; margin-bottom: 15px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("ban", style = "margin-right: 5px;"),
+                      strong("Stop Words"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
                     ),
-                    column(
-                      6,
-                      numericInput("CSdoc",
-                        label = ("Num. of documents"),
-                        value = 5
+                    selectInput(
+                      "CSStopFile",
+                      "Load a list of terms to remove",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.CSStopFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing a list of terms you want to remove from the analysis."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator (comma, semicolon or tabulator)."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "CSStop",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "CSSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 3px solid #4caf50;",
+                    h6(
+                      icon("exchange-alt", style = "margin-right: 5px;"),
+                      strong("Synonyms"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    selectInput(
+                      "FASynFile",
+                      "Load a list of synonyms",
+                      choices = c("Yes" = "Y", "No" = "N"),
+                      selected = "N"
+                    ),
+                    conditionalPanel(
+                      condition = "input.FASynFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(
+                          h5(strong(
+                            "Upload a TXT or CSV file containing, in each row, a list of synonyms that will be merged into a single term."
+                          )),
+                          h5(
+                            "Terms have to be separated by a standard separator. Rows have to be separated by return separator."
+                          ),
+                          style = "color: #666;"
+                        ),
+                        fileInput(
+                          "FASyn",
+                          "",
+                          multiple = FALSE,
+                          accept = c(
+                            "text/csv",
+                            "text/comma-separated-values,text/plain",
+                            ".csv",
+                            ".txt"
+                          )
+                        ),
+                        selectInput(
+                          "FASynSep",
+                          "File Separator",
+                          choices = c(
+                            'Comma ","' = ",",
+                            'Semicolon ";"' = ";",
+                            "Tab" = "\t"
+                          ),
+                          selected = ","
+                        )
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                # Method Parameters Box
+                box(
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Method Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "primary",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px;",
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            "CSn",
+                            label = "Number of Terms",
+                            value = 50,
+                            step = 1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          selectInput(
+                            "nClustersCS",
+                            label = "N. of Clusters",
+                            choices = c(
+                              "1" = "1",
+                              "2" = "2",
+                              "3" = "3",
+                              "4" = "4",
+                              "5" = "5",
+                              "6" = "6",
+                              "7" = "7",
+                              "8" = "8"
+                            ),
+                            selected = "1"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Graphical Parameters Box
+                box(
+                  title = span(
+                    icon("palette", style = "margin-right: 5px;"),
+                    strong("Graphical Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px;",
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "CSlabelsize",
+                            label = "Label Size",
+                            min = 5,
+                            max = 30,
+                            value = 10
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "CSdoc",
+                            label = "Num. of Documents",
+                            value = 5
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -5382,18 +8437,20 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Word Map",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "CSPlot1", height = "75vh", width = "98.9%"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "CSPlot1",
+                height = "75vh",
+                width = "98.9%"
+              ))
             ),
             tabPanel(
               "Topic Dendrogram",
-              shinycssloaders::withSpinner(visNetworkOutput("CSPlot4", width = "auto", height = "75vh"))
+              shinycssloaders::withSpinner(visNetworkOutput(
+                "CSPlot4",
+                width = "auto",
+                height = "75vh"
+              ))
             ),
-            # tabPanel("Most Contributing Papers",
-            #          shinycssloaders::withSpinner(plotOutput(
-            #            outputId = "CSPlot2"))),
-            # tabPanel("Most Cited Papers",
-            #          shinycssloaders::withSpinner(plotOutput(
-            #            outputId = "CSPlot3"))),
             tabPanel(
               "Words by Cluster",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))
@@ -5403,17 +8460,20 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD"))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("CSGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("CSGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
                 )
-              )
+              )))
             )
           )
         )
@@ -5424,19 +8484,15 @@ body <- dashboardBody(
     tabItem(
       "coCitationNetwork",
       fluidPage(
+        # Header Section
         fluidRow(
-          column(
-            8,
-            h3(strong("Co-citation Network"), align = "center")
-          ),
+          column(8, h3(strong("Co-citation Network"), align = "center")),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCocit"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyCocit")))
             )
           ),
           div(
@@ -5444,9 +8500,10 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCOCIT"
-              )))
+              do.call(
+                "actionBttn",
+                c(report_bttn, list(inputId = "reportCOCIT"))
+              )
             )
           ),
           div(
@@ -5454,276 +8511,389 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenCOCIT"
-              )))
+              do.call(
+                "actionBttn",
+                c(export_bttn, list(inputId = "screenCOCIT"))
+              )
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("citField",
-                  label = "Field",
-                  choices = c(
-                    "Papers" = "CR",
-                    "Authors" = "CR_AU",
-                    "Sources" = "CR_SO"
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "CR"
-                ),
-                selectInput(
-                  inputId = "citSep",
-                  label = "Field separator character",
-                  choices = c(
-                    '";" (Semicolon)' = ";",
-                    '".   " (Dot and 3 or more spaces)' = ".   ",
-                    '"," (Comma)' = ","
-                  ),
-                  selected = "';'"
-                ),
-                br(),
-                materialSwitch(
-                  inputId = "citNoOverlap",
-                  label = "Avoid Label Overlap",
-                  value = TRUE,
-                  status = "primary"
-                ),
-                br(),
-                box(
-                  title = p(strong("Method Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput("citlayout",
-                        label = "Network Layout",
-                        choices = c(
-                          "Automatic layout" = "auto",
-                          "Circle" = "circle",
-                          "Fruchterman & Reingold" = "fruchterman",
-                          "Kamada & Kawai" = "kamada",
-                          "MultiDimensional Scaling" = "mds",
-                          "Sphere" = "sphere",
-                          "Star" = "star"
-                        ),
-                        selected = "auto"
-                      )
+                  selectInput(
+                    "citField",
+                    label = "Field",
+                    choices = c(
+                      "Papers" = "CR",
+                      "Authors" = "CR_AU",
+                      "Sources" = "CR_SO"
                     ),
-                    column(
-                      6,
-                      selectInput("cocitCluster",
-                        label = "Clustering Algorithm",
-                        choices = c(
-                          "None" = "none",
-                          "Edge Betweenness" = "edge_betweenness",
-                          # "Fast Greedy" = "fast_greedy",
-                          "InfoMap" = "infomap",
-                          "Leading Eigenvalues" = "leading_eigen",
-                          "Leiden" = "leiden",
-                          "Louvain" = "louvain",
-                          "Spinglass" = "spinglass",
-                          "Walktrap" = "walktrap"
-                        ),
-                        selected = "walktrap"
-                      )
-                    )
+                    selected = "CR"
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "citNodes",
-                        label = "Number of Nodes",
-                        min = 5,
-                        max = 1000,
-                        value = 50,
-                        step = 1
-                      )
+                  selectInput(
+                    inputId = "citSep",
+                    label = "Field separator character",
+                    choices = c(
+                      '";" (Semicolon)' = ";",
+                      '".   " (Dot and 3 or more spaces)' = ".   ",
+                      '"," (Comma)' = ","
                     ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "cocit.repulsion",
-                        label = "Repulsion Force",
-                        min = 0,
-                        max = 1,
-                        value = 0.1,
-                        step = 0.1
-                      )
-                    )
+                    selected = "';'"
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "cit.isolates",
-                        label = "Remove Isolated Nodes",
-                        choices = c(
-                          "Yes" = "yes",
-                          "No" = "no"
-                        ),
-                        selected = "yes"
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput("citedges.min",
-                        label = ("Minimum Number of Edges"),
-                        value = 2,
-                        step = 1,
-                        min = 0
-                      )
+                  div(
+                    style = "margin-top: 10px;",
+                    materialSwitch(
+                      inputId = "citNoOverlap",
+                      label = "Avoid Label Overlap",
+                      value = TRUE,
+                      status = "primary"
                     )
                   )
                 ),
-                br(),
+
+                # Method Parameters Box
                 box(
-                  title = p(strong("Graphical Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Method Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "primary",
                   fluidRow(
                     column(
                       6,
-                      selectInput(
-                        inputId = "citShortlabel",
-                        label = "Short Label",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "citlayout",
+                          label = strong("Network Layout"),
+                          choices = c(
+                            "Automatic layout" = "auto",
+                            "Circle" = "circle",
+                            "Fruchterman & Reingold" = "fruchterman",
+                            "Kamada & Kawai" = "kamada",
+                            "MultiDimensional Scaling" = "mds",
+                            "Sphere" = "sphere",
+                            "Star" = "star"
+                          ),
+                          selected = "auto"
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 8px;",
+                        selectInput(
+                          "cocitCluster",
+                          label = strong("Clustering Algorithm"),
+                          choices = c(
+                            "None" = "none",
+                            "Edge Betweenness" = "edge_betweenness",
+                            "InfoMap" = "infomap",
+                            "Leading Eigenvalues" = "leading_eigen",
+                            "Leiden" = "leiden",
+                            "Louvain" = "louvain",
+                            "Spinglass" = "spinglass",
+                            "Walktrap" = "walktrap"
+                          ),
+                          selected = "louvain"
+                        )
+                      )
+                    )
+                  ),
+                  hr(style = "margin: 15px 0; border-top: 1px solid #ddd;"),
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Network Size"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "citNodes",
+                            label = "Number of Nodes",
+                            min = 5,
+                            max = 1000,
+                            value = 50,
+                            step = 1
+                          )
+                        )
                       ),
-                    ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "citLabels",
-                        label = "Number of labels",
-                        min = 0,
-                        max = 1000,
-                        value = 1000,
-                        step = 1
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "cocit.repulsion",
+                            label = "Repulsion Force",
+                            min = 0,
+                            max = 1,
+                            value = 0.5,
+                            step = 0.1
+                          )
+                        )
                       )
                     )
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "citlabel.cex",
-                        label = "Label cex",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
-                      )
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("filter", style = "margin-right: 5px;"),
+                      strong("Filtering Options"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
                     ),
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "cocit.shape",
-                        label = "Node Shape",
-                        choices = c(
-                          "Box" = "box",
-                          "Circle" = "circle",
-                          "Dot" = "dot",
-                          "Ellipse" = "ellipse",
-                          "Square" = "square",
-                          "Text" = "text"
-                        ),
-                        selected = "dot"
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "citlabelsize",
-                        label = "Label size",
-                        min = 0.0,
-                        max = 20,
-                        value = 2,
-                        step = 0.10
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "citedgesize",
-                        label = "Edge size",
-                        min = 0.5,
-                        max = 20,
-                        value = 2,
-                        step = 0.5
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "cocit.shadow",
-                        label = "Node shadow",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "cocit.curved",
-                        label = "Edit Nodes",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "No"
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "cit.isolates",
+                            label = "Remove Isolated Nodes",
+                            choices = c("Yes" = "yes", "No" = "no"),
+                            selected = "yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "citedges.min",
+                            label = "Minimum Number of Edges",
+                            value = 2,
+                            step = 1,
+                            min = 0
+                          )
+                        )
                       )
                     )
                   )
                 ),
+
+                # Graphical Parameters Box
+                box(
+                  title = span(
+                    icon("palette", style = "margin-right: 5px;"),
+                    strong("Graphical Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Visual Appearance"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "citShortlabel",
+                            label = "Short Label",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "citLabels",
+                            label = "Number of Labels",
+                            min = 0,
+                            max = 1000,
+                            value = 1000,
+                            step = 1
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Label Settings"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "citlabel.cex",
+                            label = "Label Scaling (cex)",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "citlabelsize",
+                            label = "Label Size",
+                            min = 0.0,
+                            max = 20,
+                            value = 2,
+                            step = 0.10
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #fce4ec; padding: 12px; border-radius: 5px;",
+                    h6(
+                      strong("Node & Edge Settings"),
+                      style = "color: #c2185b; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "cocit.shape",
+                            label = "Node Shape",
+                            choices = c(
+                              "Box" = "box",
+                              "Circle" = "circle",
+                              "Dot" = "dot",
+                              "Ellipse" = "ellipse",
+                              "Square" = "square",
+                              "Text" = "text"
+                            ),
+                            selected = "dot"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "citedgesize",
+                            label = "Edge Size",
+                            min = 0.5,
+                            max = 20,
+                            value = 2,
+                            step = 0.5
+                          )
+                        )
+                      )
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px; margin-top: 10px;",
+                          selectInput(
+                            inputId = "cocit.shadow",
+                            label = "Node Shadow",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px; margin-top: 10px;",
+                          selectInput(
+                            inputId = "cocit.curved",
+                            label = "Edit Nodes",
+                            choices = c("Yes", "No"),
+                            selected = "No"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Export Options
                 br(),
-                fluidRow(
-                  column(
-                    6,
-                    div(
-                      style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                      align = "center",
-                      width = "100%",
-                      downloadBttn(
-                        outputId = "network.cocit", label = ("Pajek"),
-                        style = "pill", color = "primary"
-                      )
-                    )
+                div(
+                  style = "background-color: #e3f2fd; padding: 12px; border-radius: 8px;",
+                  h6(
+                    icon("download", style = "margin-right: 5px;"),
+                    strong("Export Network"),
+                    style = "color: #1976d2; margin-bottom: 12px;"
                   ),
-                  column(
-                    6,
-                    div(
-                      style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                      align = "center",
-                      width = "100%",
-                      downloadBttn(
-                        outputId = "networkCocit.fig", label = ("HTML"),
-                        style = "pill", color = "primary"
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 5px;",
+                        downloadBttn(
+                          outputId = "network.cocit",
+                          label = "Pajek",
+                          style = "pill",
+                          color = "primary",
+                          size = "sm",
+                          block = TRUE
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 5px;",
+                        downloadBttn(
+                          outputId = "networkCocit.fig",
+                          label = "HTML",
+                          style = "pill",
+                          color = "primary",
+                          size = "sm",
+                          block = TRUE
+                        )
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -5734,11 +8904,17 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Network",
-              shinycssloaders::withSpinner(visNetworkOutput("cocitPlot", height = "75vh"))
+              shinycssloaders::withSpinner(visNetworkOutput(
+                "cocitPlot",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Density",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitOverlay", height = "75vh"))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "cocitOverlay",
+                height = "75vh"
+              ))
             ),
             tabPanel(
               "Table",
@@ -5748,42 +8924,44 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Degree Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "cocitDegree", height = 700))
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "cocitDegree",
+                height = 700
+              ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("cocitGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("cocitGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
                 )
-              )
+              )))
             )
           )
         )
       )
     ),
+
     ##### historiograph ----
     tabItem(
       "historiograph",
       fluidPage(
         fluidRow(
-          column(
-            8,
-            h3(strong("Historiograph"), align = "center")
-          ),
+          column(8, h3(strong("Historiograph"), align = "center")),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyHist"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyHist")))
             )
           ),
           div(
@@ -5791,9 +8969,10 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportHIST"
-              )))
+              do.call(
+                "actionBttn",
+                c(report_bttn, list(inputId = "reportHIST"))
+              )
             )
           ),
           div(
@@ -5801,81 +8980,128 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenHIST"
-              )))
+              do.call(
+                "actionBttn",
+                c(export_bttn, list(inputId = "screenHIST"))
+              )
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                numericInput(
-                  inputId = "histNodes",
-                  label = "Number of Nodes",
-                  min = 5,
-                  max = 100,
-                  value = 20,
-                  step = 1
+
+                # Main Configuration
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    inputId = "histNodes",
+                    label = "Number of Nodes",
+                    min = 5,
+                    max = 100,
+                    value = 20,
+                    step = 1
+                  )
                 ),
-                "  ",
-                br(),
+
+                # Graphical Parameters Box
                 box(
-                  title = p(strong("Graphical Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
+                  title = span(
+                    icon("palette", style = "margin-right: 5px;"),
+                    strong("Graphical Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
                   solidHeader = FALSE,
                   collapsed = FALSE,
-                  selectInput(
-                    inputId = "titlelabel",
-                    label = "Node label",
-                    choices = c(
-                      "Short id (1st Author, Year)" = "short",
-                      "Document Title" = "title",
-                      "Authors' Keywords" = "keywords",
-                      "Keywords Plus" = "keywordsplus"
+                  status = "info",
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Label Configuration"),
+                      style = "color: #34495e; margin-bottom: 10px;"
                     ),
-                    selected = "short"
+                    selectInput(
+                      inputId = "titlelabel",
+                      label = "Node Label",
+                      choices = c(
+                        "Short id (1st Author, Year)" = "short",
+                        "Document Title" = "title",
+                        "Authors' Keywords" = "keywords",
+                        "Keywords Plus" = "keywordsplus"
+                      ),
+                      selected = "short"
+                    )
                   ),
-                  selectInput(
-                    inputId = "hist.isolates",
-                    label = "Remove Isolated Nodes",
-                    choices = c(
-                      "Yes" = "yes",
-                      "No" = "no"
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; border-left: 3px solid #f39c12; margin-bottom: 10px;",
+                    h6(
+                      icon("filter", style = "margin-right: 5px;"),
+                      strong("Filtering Options"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
                     ),
-                    selected = "yes"
+                    selectInput(
+                      inputId = "hist.isolates",
+                      label = "Remove Isolated Nodes",
+                      choices = c("Yes" = "yes", "No" = "no"),
+                      selected = "yes"
+                    )
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "histlabelsize",
-                        label = "Label size",
-                        min = 0.0,
-                        max = 20,
-                        value = 3, step = 1
-                      )
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px;",
+                    h6(
+                      strong("Visual Settings"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
                     ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "histsize",
-                        label = "Node size",
-                        min = 0,
-                        max = 20,
-                        value = 2, step = 1
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "histlabelsize",
+                            label = "Label Size",
+                            min = 0.0,
+                            max = 20,
+                            value = 3,
+                            step = 1
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "histsize",
+                            label = "Node Size",
+                            min = 0,
+                            max = 20,
+                            value = 2,
+                            step = 1
+                          )
+                        )
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -5886,24 +9112,30 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Network",
-              shinycssloaders::withSpinner(visNetworkOutput("histPlotVis", height = "80vh"))
+              shinycssloaders::withSpinner(visNetworkOutput(
+                "histPlotVis",
+                height = "80vh"
+              ))
             ),
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("histGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("histGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
                 )
-              )
+              )))
             )
           )
         )
@@ -5914,358 +9146,599 @@ body <- dashboardBody(
     tabItem(
       "collabNetwork",
       fluidPage(
+        # ============================================
+        # HEADER SECTION WITH ACTION BUTTONS
+        # ============================================
         fluidRow(
-          column(8, h3(strong("Collaboration Network"), align = "center")),
+          column(
+            8,
+            h3(strong("Collaboration Network"), align = "center")
+          ),
+
+          # Run Analysis Button
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyCol"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(inputId = "applyCol")
+                )
+              )
             )
           ),
+
+          # Add to Report Button
           div(
             style = style_bttn,
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCOL"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(inputId = "reportCOL")
+                )
+              )
             )
           ),
+
+          # Export Button
           div(
             style = style_bttn,
             title = t_export,
             column(
               1,
-              do.call("actionBttn", c(export_bttn, list(
-                inputId = "screenCOL"
-              )))
+              do.call(
+                "actionBttn",
+                c(
+                  export_bttn,
+                  list(inputId = "screenCOL")
+                )
+              )
             )
           ),
+
+          # ============================================
+          # OPTIONS DROPDOWN MENU
+          # ============================================
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                selectInput("colField",
-                  label = "Field",
-                  choices = c(
-                    "Authors" = "COL_AU",
-                    "Institutions" = "COL_UN",
-                    "Countries" = "COL_CO"
+
+                # ============================================
+                # MAIN CONFIGURATION
+                # ============================================
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
                   ),
-                  selected = "COL_AU"
+
+                  # Field Selection
+                  selectInput(
+                    "colField",
+                    label = "Field",
+                    choices = c(
+                      "Authors" = "COL_AU",
+                      "Institutions" = "COL_UN",
+                      "Countries" = "COL_CO"
+                    ),
+                    selected = "COL_AU"
+                  ),
+
+                  # Label Overlap Switch
+                  div(
+                    style = "margin-top: 10px;",
+                    materialSwitch(
+                      inputId = "colNoOverlap",
+                      label = "Avoid Label Overlap",
+                      value = TRUE,
+                      status = "primary"
+                    )
+                  )
                 ),
-                br(),
-                materialSwitch(
-                  inputId = "colNoOverlap",
-                  label = "Avoid Label Overlap",
-                  value = TRUE,
-                  status = "primary"
-                ),
-                br(),
+
+                # ============================================
+                # METHOD PARAMETERS BOX
+                # ============================================
                 box(
-                  title = p(strong("Method Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Method Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "primary",
+
+                  # Network Layout and Clustering Algorithm
                   fluidRow(
                     column(
                       6,
-                      selectInput("collayout",
-                        label = "Network Layout",
-                        choices = c(
-                          "Automatic layout" = "auto",
-                          "Circle" = "circle",
-                          "Fruchterman & Reingold" = "fruchterman",
-                          "Kamada & Kawai" = "kamada",
-                          "MultiDimensional Scaling" = "mds",
-                          "Sphere" = "sphere",
-                          "Star" = "star"
-                        ),
-                        selected = "auto"
+                      div(
+                        style = "padding-right: 8px;",
+                        selectInput(
+                          "collayout",
+                          label = strong("Network Layout"),
+                          choices = c(
+                            "Automatic layout" = "auto",
+                            "Circle" = "circle",
+                            "Fruchterman & Reingold" = "fruchterman",
+                            "Kamada & Kawai" = "kamada",
+                            "MultiDimensional Scaling" = "mds",
+                            "Sphere" = "sphere",
+                            "Star" = "star"
+                          ),
+                          selected = "auto"
+                        )
                       )
                     ),
                     column(
                       6,
-                      selectInput("colCluster",
-                        label = "Clustering Algorithm",
+                      div(
+                        style = "padding-left: 8px;",
+                        selectInput(
+                          "colCluster",
+                          label = strong("Clustering Algorithm"),
+                          choices = c(
+                            "None" = "none",
+                            "Edge Betweenness" = "edge_betweenness",
+                            "InfoMap" = "infomap",
+                            "Leading Eigenvalues" = "leading_eigen",
+                            "Leiden" = "leiden",
+                            "Louvain" = "louvain",
+                            "Spinglass" = "spinglass",
+                            "Walktrap" = "walktrap"
+                          ),
+                          selected = "louvain"
+                        )
+                      )
+                    )
+                  ),
+
+                  # Normalization Method
+                  fluidRow(
+                    column(
+                      12,
+                      selectInput(
+                        "colnormalize",
+                        label = strong("Normalization Method"),
                         choices = c(
                           "None" = "none",
-                          "Edge Betweenness" = "edge_betweenness",
-                          # "Fast Greedy" = "fast_greedy",
-                          "InfoMap" = "infomap",
-                          "Leading Eigenvalues" = "leading_eigen",
-                          "Leiden" = "leiden",
-                          "Louvain" = "louvain",
-                          "Spinglass" = "spinglass",
-                          "Walktrap" = "walktrap"
+                          "Association" = "association",
+                          "Jaccard" = "jaccard",
+                          "Salton" = "salton",
+                          "Inclusion" = "inclusion",
+                          "Equivalence" = "equivalence"
                         ),
-                        selected = "walktrap"
+                        selected = "association"
                       )
                     )
                   ),
-                  fluidRow(column(
-                    6,
-                    selectInput("colnormalize",
-                      label = "Normalization",
-                      choices = c(
-                        "none",
-                        "association",
-                        "jaccard",
-                        "salton",
-                        "inclusion",
-                        "equivalence"
+
+                  hr(style = "margin: 15px 0; border-top: 1px solid #ddd;"),
+
+                  # Network Size Parameters
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Network Size"),
+                      style = "color: #34495e; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "colNodes",
+                            label = "Number of Nodes",
+                            min = 5,
+                            max = 1000,
+                            value = 50,
+                            step = 1
+                          )
+                        )
                       ),
-                      selected = "association"
-                    )
-                  )),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "colNodes",
-                        label = "Number of Nodes",
-                        min = 5,
-                        max = 1000,
-                        value = 50,
-                        step = 1
-                      )
-                    ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "col.repulsion",
-                        label = "Repulsion Force",
-                        min = 0,
-                        max = 1,
-                        value = 0.1,
-                        step = 0.1
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "col.repulsion",
+                            label = "Repulsion Force",
+                            min = 0,
+                            max = 1,
+                            value = 0.5,
+                            step = 0.1
+                          )
+                        )
                       )
                     )
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "col.isolates",
-                        label = "Remove Isolated Nodes",
-                        choices = c(
-                          "Yes" = "yes",
-                          "No" = "no"
-                        ),
-                        selected = "yes"
+
+                  # Filtering Options
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("filter", style = "margin-right: 5px;"),
+                      strong("Filtering Options"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "col.isolates",
+                            label = "Remove Isolated Nodes",
+                            choices = c(
+                              "Yes" = "yes",
+                              "No" = "no"
+                            ),
+                            selected = "yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "coledges.min",
+                            label = "Minimum Number of Edges",
+                            value = 1,
+                            step = 1,
+                            min = 0
+                          )
+                        )
                       )
                     ),
-                    column(
-                      6,
-                      numericInput("coledges.min",
-                        label = ("Minimum Number of Edges"),
-                        value = 1,
-                        step = 1,
-                        min = 0
+
+                    # NEW: Filter articles with more than 20 authors
+                    fluidRow(
+                      column(
+                        12,
+                        div(
+                          style = "margin-top: 10px;",
+                          materialSwitch(
+                            inputId = "col.filterMaxAuthors",
+                            label = "Exclude articles with > 20 authors",
+                            value = FALSE,
+                            status = "warning"
+                          ),
+                          helpText(
+                            "Enable this option to filter out hyper-authored papers (>20 authors) from the analysis.",
+                            style = "margin-top: 5px; color: #666; font-size: 11px;"
+                          )
+                        )
                       )
                     )
                   )
                 ),
-                br(),
+
+                # ============================================
+                # GRAPHICAL PARAMETERS BOX
+                # ============================================
                 box(
-                  title = p(strong("Graphical Parameters"), style = "font-size:16px;color:black;"),
-                  collapsible = TRUE, width = 15,
-                  solidHeader = FALSE, collapsed = TRUE,
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "colAlpha",
-                        label = "Opacity",
-                        min = 0,
-                        max = 1,
-                        value = 0.7,
-                        step = 0.05
-                      )
+                  title = span(
+                    icon("palette", style = "margin-right: 5px;"),
+                    strong("Graphical Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
+
+                  # Visual Appearance
+                  div(
+                    style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Visual Appearance"),
+                      style = "color: #34495e; margin-bottom: 10px;"
                     ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "colLabels",
-                        label = "Number of labels",
-                        min = 0,
-                        max = 1000,
-                        value = 1000,
-                        step = 1
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          numericInput(
+                            inputId = "colAlpha",
+                            label = "Opacity",
+                            min = 0,
+                            max = 1,
+                            value = 0.7,
+                            step = 0.05
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "colLabels",
+                            label = "Number of Labels",
+                            min = 0,
+                            max = 1000,
+                            value = 1000,
+                            step = 1
+                          )
+                        )
                       )
                     )
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "collabel.cex",
-                        label = "Label cex",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
-                      )
+
+                  # Label Settings
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
+                    h6(
+                      strong("Label Settings"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
                     ),
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "col.shape",
-                        label = "Node Shape",
-                        choices = c(
-                          "Box" = "box",
-                          "Circle" = "circle",
-                          "Dot" = "dot",
-                          "Ellipse" = "ellipse",
-                          "Square" = "square",
-                          "Text" = "text"
-                        ),
-                        selected = "dot"
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "collabel.cex",
+                            label = "Label Scaling (cex)",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "collabelsize",
+                            label = "Label Size",
+                            min = 0.0,
+                            max = 20,
+                            value = 2,
+                            step = 0.10
+                          )
+                        )
                       )
                     )
                   ),
-                  fluidRow(
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "collabelsize",
-                        label = "Label size",
-                        min = 0.0,
-                        max = 20,
-                        value = 2,
-                        step = 0.10
+
+                  # Node and Edge Settings
+                  div(
+                    style = "background-color: #fce4ec; padding: 12px; border-radius: 5px;",
+                    h6(
+                      strong("Node & Edge Settings"),
+                      style = "color: #c2185b; margin-bottom: 10px;"
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px;",
+                          selectInput(
+                            inputId = "col.shape",
+                            label = "Node Shape",
+                            choices = c(
+                              "Box" = "box",
+                              "Circle" = "circle",
+                              "Dot" = "dot",
+                              "Ellipse" = "ellipse",
+                              "Square" = "square",
+                              "Text" = "text"
+                            ),
+                            selected = "dot"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            inputId = "coledgesize",
+                            label = "Edge Size",
+                            min = 0.5,
+                            max = 20,
+                            value = 5,
+                            step = 0.5
+                          )
+                        )
                       )
                     ),
-                    column(
-                      6,
-                      numericInput(
-                        inputId = "coledgesize",
-                        label = "Edge size",
-                        min = 0.5,
-                        max = 20,
-                        value = 5,
-                        step = 0.5
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "col.shadow",
-                        label = "Node shadow",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "Yes"
-                      )
-                    ),
-                    column(
-                      6,
-                      selectInput(
-                        inputId = "soc.curved",
-                        label = "Edit Nodes",
-                        choices = c(
-                          "Yes",
-                          "No"
-                        ),
-                        selected = "No"
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-right: 8px; margin-top: 10px;",
+                          selectInput(
+                            inputId = "col.shadow",
+                            label = "Node Shadow",
+                            choices = c("Yes", "No"),
+                            selected = "Yes"
+                          )
+                        )
+                      ),
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px; margin-top: 10px;",
+                          selectInput(
+                            inputId = "soc.curved",
+                            label = "Edit Nodes",
+                            choices = c("Yes", "No"),
+                            selected = "No"
+                          )
+                        )
                       )
                     )
                   )
                 ),
+
+                # ============================================
+                # EXPORT OPTIONS
+                # ============================================
                 br(),
-                fluidRow(
-                  column(
-                    6,
-                    div(
-                      style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                      align = "center",
-                      width = "100%",
-                      downloadBttn(
-                        outputId = "network.col", label = ("Pajek"),
-                        style = "pill", color = "primary"
-                      )
-                    )
+                div(
+                  style = "background-color: #e3f2fd; padding: 12px; border-radius: 8px;",
+                  h6(
+                    icon("download", style = "margin-right: 5px;"),
+                    strong("Export Network"),
+                    style = "color: #1976d2; margin-bottom: 12px;"
                   ),
-                  column(
-                    6,
-                    div(
-                      style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-                      align = "center",
-                      width = "100%",
-                      downloadBttn(
-                        outputId = "networkCol.fig", label = ("HTML"),
-                        style = "pill", color = "primary"
+                  fluidRow(
+                    column(
+                      6,
+                      div(
+                        style = "padding-right: 5px;",
+                        downloadBttn(
+                          outputId = "network.col",
+                          label = "Pajek",
+                          style = "pill",
+                          color = "primary",
+                          size = "sm",
+                          block = TRUE
+                        )
+                      )
+                    ),
+                    column(
+                      6,
+                      div(
+                        style = "padding-left: 5px;",
+                        downloadBttn(
+                          outputId = "networkCol.fig",
+                          label = "HTML",
+                          style = "pill",
+                          color = "primary",
+                          size = "sm",
+                          block = TRUE
+                        )
                       )
                     )
                   )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
           )
         ),
+
+        # ============================================
+        # MAIN CONTENT AREA WITH TABS
+        # ============================================
         fluidRow(
           tabsetPanel(
             type = "tabs",
+
+            # Network Tab
             tabPanel(
               "Network",
-              shinycssloaders::withSpinner(visNetworkOutput("colPlot", height = "75vh"))
+              shinycssloaders::withSpinner(
+                visNetworkOutput("colPlot", height = "75vh")
+              )
             ),
+
+            # Diachronic Network Tab
             tabPanel(
               "Diachronic Network",
               br(),
               fluidRow(
-                column(2, actionButton("start_col", "▶ Start", width = "90%")),
-                column(2, actionButton("pause_col", "⏸ Pause / Resume", width = "90%")),
-                column(2, actionButton("reset_col", "⏹ Reset", width = "90%")),
+                column(
+                  2,
+                  actionButton("start_col", "â–¶ Start", width = "90%")
+                ),
+                column(
+                  2,
+                  actionButton("pause_col", "â¸ Pause / Resume", width = "90%")
+                ),
+                column(2, actionButton("reset_col", "â¹ Reset", width = "90%")),
                 column(2, uiOutput("export_colUI")),
-                column(1, div(style = "text-align:right;","Speed (ms)")),
-                column(2, selectInput("speed_col", label = NULL, seq(250,2000, by=250), selected = 500))
+                column(1, div(style = "text-align:right;", "Speed (ms)")),
+                column(
+                  2,
+                  selectInput(
+                    "speed_col",
+                    label = NULL,
+                    seq(250, 2000, by = 250),
+                    selected = 500
+                  )
+                )
               ),
               fluidRow(
                 column(12, uiOutput("year_slider_colUI"))
               ),
-              fluidRow(column(1, uiOutput("colYearUI")),
-                       column(11,visNetworkOutput("colOverTime", height = "65vh")
-                       ))
+              fluidRow(
+                column(1, uiOutput("colYearUI")),
+                column(11, visNetworkOutput("colOverTime", height = "65vh"))
+              )
             ),
+
+            # Density Tab
             tabPanel(
               "Density",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "colOverlay", height = "75vh"))
+              shinycssloaders::withSpinner(
+                plotlyOutput(outputId = "colOverlay", height = "75vh")
+              )
             ),
+
+            # Table Tab
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "colTable"))
+              shinycssloaders::withSpinner(
+                DT::DTOutput(outputId = "colTable")
+              )
             ),
+
+            # Degree Plot Tab
             tabPanel(
               "Degree Plot",
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "colDegree", height = "75vh"))
+              shinycssloaders::withSpinner(
+                plotlyOutput(outputId = "colDegree", height = "75vh")
+              )
             ),
+
+            # Biblio AI Tab
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
               fluidPage(
                 fluidRow(
                   column(
                     12,
                     br(),
-                    shinycssloaders::withSpinner(htmlOutput("colGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
+                    shinycssloaders::withSpinner(
+                      htmlOutput("colGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
                   )
                 )
               )
@@ -6279,15 +9752,16 @@ body <- dashboardBody(
       "collabWorldMap",
       fluidPage(
         fluidRow(
-          column(8, h3(strong("Countries' Collaboration World Map"), align = "center")),
+          column(
+            8,
+            h3(strong("Countries' Collaboration World Map"), align = "center")
+          ),
           div(
             style = style_bttn,
             title = t_run,
             column(
               1,
-              do.call("actionBttn", c(run_bttn, list(
-                inputId = "applyWM"
-              )))
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyWM")))
             )
           ),
           div(
@@ -6295,9 +9769,10 @@ body <- dashboardBody(
             title = t_report,
             column(
               1,
-              do.call("actionBttn", c(report_bttn, list(
-                inputId = "reportCOLW"
-              )))
+              do.call(
+                "actionBttn",
+                c(report_bttn, list(inputId = "reportCOLW"))
+              )
             )
           ),
           div(
@@ -6305,41 +9780,84 @@ body <- dashboardBody(
             title = t_export,
             column(
               1,
-              do.call("downloadBttn", c(export_bttn, list(
-                outputId = "CCplot.save"
-              )))
+              do.call(
+                "downloadBttn",
+                c(export_bttn, list(outputId = "CCplot.save"))
+              )
             )
           ),
+
           div(
             column(
               1,
               dropdown(
                 h4(strong("Options: ")),
                 br(),
-                h4(strong("Method Parameters: ")),
-                "  ",
-                numericInput("WMedges.min",
-                  label = ("Min edges"),
-                  value = 2,
-                  step = 1
+
+                # Method Parameters Box
+                box(
+                  title = span(
+                    icon("cogs", style = "margin-right: 5px;"),
+                    strong("Method Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = FALSE,
+                  status = "primary",
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("filter", style = "margin-right: 5px;"),
+                      strong("Filtering Options"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
+                    ),
+                    numericInput(
+                      "WMedges.min",
+                      label = "Min Edges",
+                      value = 2,
+                      step = 1
+                    )
+                  )
                 ),
-                "  ",
-                br(),
-                h4(strong("Graphical Parameters: ")),
-                "  ",
-                numericInput(
-                  inputId = "WMedgesize",
-                  label = "Edge size",
-                  min = 0.1,
-                  max = 20,
-                  value = 5
+
+                # Graphical Parameters Box
+                box(
+                  title = span(
+                    icon("palette", style = "margin-right: 5px;"),
+                    strong("Graphical Parameters"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = FALSE,
+                  status = "info",
+                  div(
+                    style = "background-color: #fce4ec; padding: 12px; border-radius: 5px;",
+                    h6(
+                      strong("Edge Settings"),
+                      style = "color: #c2185b; margin-bottom: 10px;"
+                    ),
+                    numericInput(
+                      inputId = "WMedgesize",
+                      label = "Edge Size",
+                      min = 0.1,
+                      max = 20,
+                      value = 5
+                    )
+                  )
                 ),
-                right = TRUE, animate = TRUE, circle = TRUE,
+
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
                 style = "gradient",
                 tooltip = tooltipOptions(title = "Options"),
                 color = "primary",
                 icon = icon("sliders"),
-                width = "300px"
+                width = "320px"
               )
             ),
             style = style_opt
@@ -6350,32 +9868,38 @@ body <- dashboardBody(
             type = "tabs",
             tabPanel(
               "Plot",
-              # shinycssloaders::withSpinner(plotOutput(outputId = "WMPlot"))
-              shinycssloaders::withSpinner(plotlyOutput(outputId = "WMPlot", height = "75vh"))
-            ),
-            tabPanel(
-              "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
-                outputId = "WMTable"
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "WMPlot",
+                height = "75vh"
               ))
             ),
             tabPanel(
-              title = tagList(icon("microchip"), tags$span(strong("Biblio AI"), style = "margin-left: 5px;")),
-              fluidPage(
-                fluidRow(
-                  column(
-                    12,
-                    br(),
-                    shinycssloaders::withSpinner(htmlOutput("WMGeminiUI"), caption = HTML("<br><strong>Thinking...</strong>"),
-                                                 image = "ai_small2.gif", color = "#466fc4")
-                  )
+              "Table",
+              shinycssloaders::withSpinner(DT::DTOutput(outputId = "WMTable"))
+            ),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("WMGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
                 )
-              )
+              )))
             )
           )
         )
       )
     ),
+    #### Content Analysis ----
+    content_analysis_tab("content_analysis"),
+
     #### Report ----
     tabItem(
       "report",
@@ -6385,14 +9909,19 @@ body <- dashboardBody(
           br(),
         ),
         fluidRow(
-          column(6,
+          column(
+            6,
             offset = 1,
             box(
-              title = strong("Select results to include in the Report",
+              title = strong(
+                "Select results to include in the Report",
                 style = "font-size:20px;color:white;"
               ),
-              status = "primary", width = 11, solidHeader = TRUE,
-              tags$style(HTML("
+              status = "primary",
+              width = 11,
+              solidHeader = TRUE,
+              tags$style(HTML(
+                "
                          .box.box-solid.box-primary>.box-header {
                          background:#4379cd;
                          }
@@ -6402,7 +9931,8 @@ body <- dashboardBody(
                          border-right-color:black;
                          border-top-color:black;
                          border-width:2px;
-                                         }")),
+                                         }"
+              )),
               uiOutput("reportSheets"),
               tags$style("#reportSheets {font-size:18px;}")
             )
@@ -6417,7 +9947,8 @@ body <- dashboardBody(
                 inputId = "allSheets",
                 label = strong("Select All"),
                 icon = icon("ok-circle", lib = "glyphicon"),
-                style = "pill", color = "primary",
+                style = "pill",
+                color = "primary",
                 block = TRUE
               ),
               # tags$style("#allSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
@@ -6426,7 +9957,8 @@ body <- dashboardBody(
                 inputId = "noSheets",
                 label = strong("Deselect All"),
                 icon = icon("remove-circle", lib = "glyphicon"),
-                style = "pill", color = "primary",
+                style = "pill",
+                color = "primary",
                 block = TRUE
               ),
               # tags$style("#noSheets {font-size:20px; color:#363636; background-color:white; text-align:center; border-width: 3px;}"),
@@ -6437,7 +9969,8 @@ body <- dashboardBody(
               downloadBttn(
                 outputId = "report.save",
                 label = strong("Export Report"),
-                style = "pill", color = "success",
+                style = "pill",
+                color = "success",
                 size = "md",
                 block = TRUE,
                 no_outline = TRUE,
@@ -6449,7 +9982,8 @@ body <- dashboardBody(
                 inputId = "deleteAll",
                 label = strong("Delete Report"),
                 icon = icon("exclamation-sign", lib = "glyphicon"),
-                style = "pill", color = "danger",
+                style = "pill",
+                color = "danger",
                 block = TRUE
               )
             )
@@ -6471,7 +10005,10 @@ body <- dashboardBody(
             fluidRow(
               column(
                 4,
-                div(img(src = "tall_logo.jpg", height = "90%", width = "90%"), style = "text-align: center;")
+                div(
+                  img(src = "tall_logo.jpg", height = "90%", width = "90%"),
+                  style = "text-align: center;"
+                )
               ),
               column(
                 8,
@@ -6501,7 +10038,10 @@ body <- dashboardBody(
             fluidRow(
               box(
                 width = 12,
-                div(h3(strong(em("Export a corpus for TALL"))), style = "margin-top:-57px"),
+                div(
+                  h3(strong(em("Export a corpus for TALL"))),
+                  style = "margin-top:-57px"
+                ),
                 hr(),
                 helpText(h4("Select textual metadata:")),
                 multiInput(
@@ -6526,29 +10066,46 @@ body <- dashboardBody(
                     column(
                       6,
                       div(
-                        style = style_bttn, align = "center",
+                        style = style_bttn,
+                        align = "center",
                         title = t_run,
                         # column(1,
-                        do.call("actionBttn", c(run_bttn, list(
-                          inputId = "tallRun"
-                        )))
+                        do.call(
+                          "actionBttn",
+                          c(
+                            run_bttn,
+                            list(
+                              inputId = "tallRun"
+                            )
+                          )
+                        )
                       )
                     ),
                     column(
                       6,
                       div(
-                        style = style_bttn, align = "center",
+                        style = style_bttn,
+                        align = "center",
                         title = t_export,
-                        do.call("downloadBttn", c(export_bttn, list(
-                          outputId = "tall.save"
-                        )))
+                        do.call(
+                          "downloadBttn",
+                          c(
+                            export_bttn,
+                            list(
+                              outputId = "tall.save"
+                            )
+                          )
+                        )
                       )
                     )
                   ),
                   style = "margin-top:-15px"
                 ),
                 hr(),
-                helpText("Select at least one textual field to export, click 'Play' to generate the dataset, then save and import it into TALL.", style = "font-size: 16px"),
+                helpText(
+                  "Select at least one textual field to export, click 'Play' to generate the dataset, then save and import it into TALL.",
+                  style = "font-size: 16px"
+                ),
                 uiOutput("tallBttn1"),
                 uiOutput("tallBttn2")
                 # fluidRow(
@@ -6568,67 +10125,300 @@ body <- dashboardBody(
     tabItem(
       "settings",
       fluidPage(
+        # Page Header
         fluidRow(
-          h3(strong("Settings"), align = "center"),
-          br()
-        ),
-        fluidRow(column(
-          6,
-          h3("Plot settings:"),
-          br(),
-          sliderTextInput(
-            inputId = "dpi",
-            label = "Please select the desired DPI",
-            grid = TRUE,
-            force_edges = TRUE,
-            choices = c("75", "150", "300", "600"),
-            width = "70%",
-            selected = "300"
-          ),
-          br(),
-          sliderTextInput(
-            inputId = "h",
-            label = "Please select the desired heigth in inches",
-            grid = TRUE,
-            force_edges = TRUE,
-            width = "70%",
-            choices = seq(5, 15),
-            selected = "7"
+          column(
+            12,
+            div(
+              class = "page-header",
+              h2(
+                icon("cog", style = "margin-right: 10px;"),
+                "Settings",
+                style = "color: #2E86AB; margin-bottom: 20px; font-weight: 600;"
+              ),
+              p(
+                "Configure global settings for plots, analysis reproducibility, and AI features.",
+                style = "color: #666; font-size: 16px;"
+              )
+            )
           )
-        ), column(
-          6
-          ### To insert settings for default path, etc.
-        )),
-        hr(),
-        h3("'Biblio AI' Api Key"),
-        h4("Set a valid API Key to use 'Biblio AI' features powered by Google Gemini."),
-        h5(HTML(
-          'If you don’t have one yet, you can generate it by logging into <a href="https://aistudio.google.com/app/apikey" target="_blank">AI Studio</a> with your Google account and creating a new API Key.'
-        )),
+        ),
+
         br(),
+
+        # ============================================
+        # SECTION 1: PLOT SETTINGS
+        # ============================================
         fluidRow(
-          column(4,
-                 passwordInput("api_key", "Enter your Gemini API Key:", "", width = "100%"),
-                 uiOutput("apiStatus"),
-                 br(),
-                 fluidRow(
-                   column(6,
-                          actionButton("set_key", "Set API Key",style = "color:white;", width = "90%")
-                   ),
-                   column(6,
-                          actionButton("remove_key", "Remove API Key",style = "color:white;",width = "90%")
-                   )
-                 )),
-          column(1),
-          column(3,
-                 uiOutput("geminiModelChoice")#, style = "color: red; font-weight: bold;")
+          column(
+            6,
+            div(
+              class = "box box-primary",
+              div(
+                class = "box-header with-border",
+                h4(
+                  icon("chart-bar", style = "margin-right: 8px;"),
+                  "Plot Export Settings",
+                  class = "box-title",
+                  style = "color: #2E86AB; font-weight: 600;"
+                )
+              ),
+              div(
+                class = "box-body",
+
+                # DPI Setting
+                div(
+                  style = "margin-bottom: 25px;",
+                  tags$label(
+                    "Resolution (DPI)",
+                    style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
+                  ),
+                  sliderTextInput(
+                    inputId = "dpi",
+                    label = NULL,
+                    grid = TRUE,
+                    force_edges = TRUE,
+                    choices = c("75", "150", "300", "600"),
+                    width = "100%",
+                    selected = "300"
+                  ),
+                  helpText(
+                    "Higher DPI values produce better quality images but larger file sizes.",
+                    style = "margin-top: 5px; color: #666; font-size: 12px;"
+                  )
+                ),
+
+                # Height Setting
+                div(
+                  style = "margin-bottom: 10px;",
+                  tags$label(
+                    "Plot Height (inches)",
+                    style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
+                  ),
+                  sliderTextInput(
+                    inputId = "h",
+                    label = NULL,
+                    grid = TRUE,
+                    force_edges = TRUE,
+                    width = "100%",
+                    choices = seq(5, 15),
+                    selected = "7"
+                  ),
+                  helpText(
+                    "Adjust the height of exported plots. Width is automatically calculated to maintain aspect ratio.",
+                    style = "margin-top: 5px; color: #666; font-size: 12px;"
+                  )
+                )
+              )
+            )
           ),
-          column(2,
-                 uiOutput("geminiOutputSize")
-                 )
+
+          # ============================================
+          # SECTION 2: REPRODUCIBILITY SETTINGS
+          # ============================================
+          column(
+            6,
+            div(
+              class = "box box-success",
+              div(
+                class = "box-header with-border",
+                h4(
+                  icon("random", style = "margin-right: 8px;"),
+                  "Reproducibility Settings",
+                  class = "box-title",
+                  style = "color: #27ae60; font-weight: 600;"
+                )
+              ),
+              div(
+                class = "box-body",
+
+                # Random Seed Setting
+                div(
+                  style = "margin-bottom: 15px;",
+                  tags$label(
+                    "Random Seed",
+                    style = "font-weight: 600; color: #27ae60; margin-bottom: 8px; display: block;"
+                  ),
+                  div(
+                    style = "display: flex; gap: 10px; align-items: flex-start;",
+                    div(
+                      style = "flex: 1;",
+                      numericInput(
+                        "random_seed",
+                        label = NULL,
+                        value = 1234,
+                        min = 1,
+                        max = 999999,
+                        step = 1,
+                        width = "100%"
+                      )
+                    ),
+                    div(
+                      style = "padding-top: 5px;",
+                      actionButton(
+                        "randomize_seed",
+                        "Randomize",
+                        icon = icon("dice"),
+                        class = "btn-default",
+                        style = "padding: 6px 12px;"
+                      )
+                    )
+                  ),
+                  helpText(
+                    "Set a random seed to ensure reproducible results in stochastic algorithms (e.g., community detection, network layouts).",
+                    style = "margin-top: 5px; color: #666; font-size: 12px;"
+                  )
+                ),
+
+                # Info Box
+                div(
+                  style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 4px solid #27ae60; margin-top: 15px;",
+                  icon(
+                    "info-circle",
+                    style = "color: #27ae60; margin-right: 8px;"
+                  ),
+                  tags$span(
+                    "Using the same seed value ensures that analyses involving randomization will produce identical results when re-run.",
+                    style = "color: #555; font-size: 13px;"
+                  )
+                )
+              )
+            )
+          )
+        ),
+
+        # ============================================
+        # SECTION 3: BIBLIO AI API SETTINGS
+        # ============================================
+        fluidRow(
+          column(
+            12,
+            div(
+              class = "box box-warning",
+              div(
+                class = "box-header with-border",
+                h4(
+                  icon("robot", style = "margin-right: 8px;"),
+                  "Biblio AI - Google Gemini Integration",
+                  class = "box-title",
+                  style = "color: #f39c12; font-weight: 600;"
+                )
+              ),
+              div(
+                class = "box-body",
+
+                # Description
+                div(
+                  style = "margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-radius: 5px; border-left: 4px solid #f39c12;",
+                  icon(
+                    "lightbulb",
+                    style = "color: #f39c12; margin-right: 8px; font-size: 18px;"
+                  ),
+                  tags$span(
+                    style = "color: #856404; font-size: 14px;",
+                    HTML(
+                      "Enable advanced AI-powered features by providing your Google Gemini API Key. If you don't have one, you can generate it at "
+                    ),
+                    tags$a(
+                      href = "https://aistudio.google.com/app/apikey",
+                      target = "_blank",
+                      style = "color: #856404; font-weight: bold; text-decoration: underline;",
+                      "AI Studio"
+                    ),
+                    HTML(".")
+                  )
+                ),
+
+                # API Key Configuration
+                fluidRow(
+                  # API Key Input Column
+                  column(
+                    4,
+                    div(
+                      style = "padding-right: 15px;",
+                      tags$label(
+                        "API Key",
+                        style = "font-weight: 600; color: #f39c12; margin-bottom: 8px; display: block;"
+                      ),
+                      passwordInput(
+                        "api_key",
+                        label = NULL,
+                        placeholder = "Enter your Gemini API Key",
+                        value = "",
+                        width = "100%"
+                      ),
+
+                      # Status Display
+                      div(
+                        style = "margin: 10px 0;",
+                        uiOutput("apiStatus")
+                      ),
+
+                      # Action Buttons
+                      fluidRow(
+                        column(
+                          6,
+                          actionButton(
+                            "set_key",
+                            "Set API Key",
+                            icon = icon("check"),
+                            class = "btn-success btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        ),
+                        column(
+                          6,
+                          actionButton(
+                            "remove_key",
+                            "Remove Key",
+                            icon = icon("trash"),
+                            class = "btn-danger btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        )
+                      )
+                    )
+                  ),
+
+                  # Model Selection Column
+                  column(
+                    4,
+                    div(
+                      style = "padding: 0 15px;",
+                      tags$label(
+                        "Model Selection",
+                        style = "font-weight: 600; color: #f39c12; margin-bottom: 8px; display: block;"
+                      ),
+                      uiOutput("geminiModelChoice"),
+                      helpText(
+                        "Select the Gemini model to use for AI operations.",
+                        style = "margin-top: 8px; color: #666; font-size: 12px;"
+                      )
+                    )
+                  ),
+
+                  # Output Size Column
+                  column(
+                    4,
+                    div(
+                      style = "padding-left: 15px;",
+                      tags$label(
+                        "Output Size",
+                        style = "font-weight: 600; color: #f39c12; margin-bottom: 8px; display: block;"
+                      ),
+                      uiOutput("geminiOutputSize"),
+                      helpText(
+                        "Configure the maximum output length for AI responses.",
+                        style = "margin-top: 8px; color: #666; font-size: 12px;"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
-        # br(),
-       )
+      )
     )
   )
 )

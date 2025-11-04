@@ -4,12 +4,21 @@
 \alias{get_authors_summary}
 \title{Get Authors Summary from OpenAlex}
 \usage{
-get_authors_summary(doi = "10.1016/j.joi.2017.08.007", verbose = FALSE)
+get_authors_summary(
+  doi = "10.1016/j.joi.2017.08.007",
+  verbose = FALSE,
+  sleep_time = 0.2,
+  max_retries = 3
+)
 }
 \arguments{
 \item{doi}{Character. DOI of the article}
 
 \item{verbose}{Logical. Print informative messages during execution (default: FALSE)}
+
+\item{sleep_time}{Numeric. Seconds to wait before API call (default: 0.2)}
+
+\item{max_retries}{Integer. Maximum number of retry attempts (default: 3)}
 }
 \value{
 A data frame with summary information for all authors including:

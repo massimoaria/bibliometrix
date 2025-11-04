@@ -1,11 +1,26 @@
-# bibliometrix (development version)
+# bibliometrix V.5.2.0 (Release date: 2025-11-04)
 
 Features:
-* Added Author Bio Card
-* Biblioshiny: Added Article AI-Summary
+
+* Added Author Bio Card (new function AuthorBio())
+* Added seed argument to networkPlot(), ThematicMap(), and ThematicEvolution() functions
+* Improved OpenAlex data conversion process
+* Enhanced Community Repulsion algorithm in networkPlot(), ThematicMap(), and ThematicEvolution() functions
+* Added Citation Matching algorithm (new function applyCitationMatching())
+* Added Life Cycle Analysis (new function lifeCycle())
+* Biblioshiny enhancements:
+    - Added AI-powered article summaries
+    - Added Author Profile feature (using OpenAlex data)
+    - Added API Search and Download menu for OpenAlex and PubMed
+    - Removed API support for Dimensions.ai
+    - Added Content Analysis menu (using contentanalysis library)
+    - Improved parameter layout across all analyses
+    - Added seed parameter in Settings
+    - Added Life Cycle Analysis menu
 
 Changes:
-* #564 [Solved] - Now bibliometrix supports new scopus CSV format (both in importing and local citation analyses)
+
+#564 [Solved] - bibliometrix now supports the new Scopus CSV format (both for data import and local citation analyses)
 
 
 # bibliometrix V.5.1.1 (Release date: 2025-09-02)

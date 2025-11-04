@@ -1,118 +1,146 @@
-source("utils.R", local=TRUE)
-source("libraries.R", local=TRUE)
-source("biblioShot.R", local=TRUE)
-source("biblioAI.R", local=TRUE)
+source("utils.R", local = TRUE)
+source("libraries.R", local = TRUE)
+source("biblioShot.R", local = TRUE)
+source("biblioAI.R", local = TRUE)
+source("contentAnalysisUI.R", local = TRUE)
+source("contentAnalysisServer.R", local = TRUE)
+source("article_summary.R", local = TRUE)
+source("lifeCycleUI.R", local = TRUE)
+source("openalex_api.R", local = TRUE)
+source("pubmed_api.R", local = TRUE)
 
 suppressMessages(res <- libraries())
 if (!res) {
-  stop("Biblioshiny cannot be loaded, some packages are missing. Please check your internet connection and try again.")
+  stop(
+    "Biblioshiny cannot be loaded, some packages are missing. Please check your internet connection and try again."
+  )
 }
 
 #### SERVER ####
-server <- function(input, output,session){
+server <- function(input, output, session) {
+  # Enable shinyjs
+  shinyjs::useShinyjs()
+
   session$onSessionEnded(stopApp)
-  
+
   ## suppress warnings
   options(warn = -1)
-  
-  if (inherits(try(pagedown::find_chrome(), silent=T), "try-error")) {
+
+  if (inherits(try(pagedown::find_chrome(), silent = T), "try-error")) {
     Chrome_url <- NULL
-  }else{
+  } else {
     Chrome_url <- pagedown::find_chrome()
   }
 
   #  Sys.setenv (CHROMOTE_CHROME = Chrome_url)
-  
+
   ## chrome configuration for shinyapps server
 
   if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
     chromote::set_default_chromote_object(
       chromote::Chromote$new(chromote::Chrome$new(
-        args = c("--disable-gpu",
-                 "--no-sandbox",
-                 "--disable-dev-shm-usage", # required bc the target easily crashes
-                 c("--force-color-profile", "srgb"))
+        args = c(
+          "--disable-gpu",
+          "--no-sandbox",
+          "--disable-dev-shm-usage", # required bc the target easily crashes
+          c("--force-color-profile", "srgb")
+        )
       ))
     )
   }
   ## end configuration
-  
+
   ## Check if Chrome browser is installed on the computer
-  if(is.null(Chrome_url)){
+  if (is.null(Chrome_url)) {
     showModal(modalDialog(
       title = strong("Warning message!"),
-      HTML("Chrome or a Chromium-based browser is not installed on your computer.<br>
+      HTML(
+        "Chrome or a Chromium-based browser is not installed on your computer.<br>
 If you do not have either of these browsers installed, Biblioshiny will be unable to export graphs.<br>
 To ensure the functionality of Biblioshiny,
-           please download Chrome by <a href='https://www.google.com/chrome/' target='_blank' > <b>clicking here</b></a>."),
+           please download Chrome by <a href='https://www.google.com/chrome/' target='_blank' > <b>clicking here</b></a>."
+      ),
       footer = modalButton("Dismiss"),
       easyClose = TRUE
     ))
   } else {
-    Sys.setenv (CHROMOTE_CHROME = Chrome_url)
+    Sys.setenv(CHROMOTE_CHROME = Chrome_url)
   }
-  
+
   ## file upload max size
   maxUploadSize <- 200 # default value
   maxUploadSize <- getShinyOption("maxUploadSize", maxUploadSize)
-  options(shiny.maxRequestSize=maxUploadSize*1024^2)
-  
+  options(shiny.maxRequestSize = maxUploadSize * 1024^2)
+
   ## initial values
   selected_author <- reactiveVal()
-  data("logo",package="bibliometrix",envir=environment())
+  data("logo", package = "bibliometrix", envir = environment())
   values = reactiveValues()
   values$Chrome_url <- Chrome_url
   values$sidebar <- sidebarMenu()
   values$rest_sidebar <- FALSE
-  values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
-  values$wb <-  openxlsx::createWorkbook()
+  values$list_file <- data.frame(sheet = NULL, file = NULL, n = NULL)
+  values$wb <- openxlsx::createWorkbook()
   values$dfLabel <- dfLabel()
   values$myChoices <- "Empty Report"
   values$logo <- logo
-  values$logoGrid <- grid::rasterGrob(logo,interpolate = TRUE)
+  values$logoGrid <- grid::rasterGrob(logo, interpolate = TRUE)
   values$out <- NULL
   values$loadMenu <- NA
-  
+
   ### column to export in TALL
   if (suppressPackageStartupMessages(!require("tall", quietly = TRUE))) {
-      values$TALLmissing <- TRUE
-    } else {
-      values$TALLmissing <- FALSE  
-    }
-  values$corpusCol <- c("Title" = "TI","Abstract"="AB", "Author's Keywords"="DE")
-  values$metadataCol <- c("Publication Year" = "PY","Document Type"="DT", "DOI"="DI", "Open Access"="OA", "Language"="LA", "First Author"= "AU1")
-  
-  
+    values$TALLmissing <- TRUE
+  } else {
+    values$TALLmissing <- FALSE
+  }
+  values$corpusCol <- c(
+    "Title" = "TI",
+    "Abstract" = "AB",
+    "Author's Keywords" = "DE"
+  )
+  values$metadataCol <- c(
+    "Publication Year" = "PY",
+    "Document Type" = "DT",
+    "DOI" = "DI",
+    "Open Access" = "OA",
+    "Language" = "LA",
+    "First Author" = "AU1"
+  )
+
   ### setting values
   values$dpi <- 300
   values$h <- 7
-  #values$w <- 14 
-  values$path <- paste(getwd(),"/", sep="")
+  #values$w <- 14
+  values$path <- paste(getwd(), "/", sep = "")
   ###
-  
+
   values$results <- list("NA")
   values$log <- "working..."
-  values$load="FALSE"
+  values$load = "FALSE"
   values$field = values$cocngrams = "NA"
-  values$citField=values$colField=values$citSep="NA"
-  values$NetWords=values$NetRefs=values$ColNetRefs=matrix(NA,1,1)
-  values$Title="Network"
-  values$Histfield="NA"
-  values$histlog="working..."
-  values$kk=0
-  values$M=data.frame(PY=0)
-  values$histsearch="NA"
-  values$citShortlabel="NA"
-  values$S=list("NA")
-  values$GR="NA"
+  values$citField = values$colField = values$citSep = "NA"
+  values$NetWords = values$NetRefs = values$ColNetRefs = matrix(NA, 1, 1)
+  values$Title = "Network"
+  values$Histfield = "NA"
+  values$histlog = "working..."
+  values$kk = 0
+  values$M = data.frame(PY = 0)
+  values$histsearch = "NA"
+  values$citShortlabel = "NA"
+  values$S = list("NA")
+  values$GR = "NA"
   values$dsToken <- "Wrong account or password"
   values$dsSample <- 0
   values$dsQuery <- ""
   values$pmQuery <- " "
   values$pmSample <- 0
   values$ApiOk <- 0
-  values$checkControlBar <-FALSE
-  
+  values$checkControlBar <- FALSE
+
+  ## Openalex API
+  values$data_source <- ""
+
   ## Diachronic networks
   values$index_coc <- 0
   values$playing_coc <- TRUE
@@ -120,151 +148,210 @@ To ensure the functionality of Biblioshiny,
   values$index_col <- 0
   values$playing_col <- TRUE
   values$paused_col <- FALSE
-  
+
+  ## Content Analysis
+  values$pdf_text = NULL
+  values$analysis_results = NULL
+  values$network_plot = NULL
+  values$analysis_running = FALSE
+
   ## gemini api and model
   home <- homeFolder()
-  path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
+  path_gemini_key <- paste0(home, "/.biblio_gemini_key.txt", collapse = "")
   # check if sub directory exists
   values$geminiAPI <- load_api_key(path_gemini_key)
   values$collection_description <- NULL
   values$gemini_additional <- NULL
-  
-  path_gemini_model <- paste0(home,"/.biblio_gemini_model.txt", collapse="")
+
+  path_gemini_model <- paste0(home, "/.biblio_gemini_model.txt", collapse = "")
   gemini_api_model <- loadGeminiModel(path_gemini_model)
   values$gemini_api_model <- gemini_api_model[1]
   values$gemini_output_size <- gemini_api_model[2]
-  
+
   ## NOTIFICATION ITEM ----
   output$notificationMenu <- renderMenu({
     notifTot <- notifications()
     values$nots <- apply(notifTot, 1, function(row) {
-      
       ## extract href from messages
-      if (is.na(row[["href"]])){href <- NULL
-      }else{
-        href <- paste("javascript:void(window.open('",row[["href"]],"', '_blank'))", sep="")
+      if (is.na(row[["href"]])) {
+        href <- NULL
+      } else {
+        href <- paste(
+          "javascript:void(window.open('",
+          row[["href"]],
+          "', '_blank'))",
+          sep = ""
+        )
       }
-      
+
       ## add bold to new messages and split the long ones in two rows
-      if (row[["status"]]=="danger"){  ### new messages
-        textRows <- paste("tags$strong('",row[["nots"]],"')", sep="")
-        textRows <- strsplit(substr(textRows,1,85), "(?<=.{48})", perl = TRUE)[[1]]
-        if (length(textRows)>1){
-          textRows <- paste("tags$div(",textRows[1],"',tags$br(),'",textRows[2],")", sep="")
-        }else{
-          textRows <- paste("tags$div(",textRows,")", sep="")
+      if (row[["status"]] == "danger") {
+        ### new messages
+        textRows <- paste("tags$strong('", row[["nots"]], "')", sep = "")
+        textRows <- strsplit(
+          substr(textRows, 1, 85),
+          "(?<=.{48})",
+          perl = TRUE
+        )[[1]]
+        if (length(textRows) > 1) {
+          textRows <- paste(
+            "tags$div(",
+            textRows[1],
+            "',tags$br(),'",
+            textRows[2],
+            ")",
+            sep = ""
+          )
+        } else {
+          textRows <- paste("tags$div(", textRows, ")", sep = "")
         }
-      }else{ ## old messages
-        textRows <- strsplit(substr(row[["nots"]],1,70), "(?<=.{35})", perl = TRUE)[[1]]
-        if (length(textRows)>1){
-          textRows <- paste("tags$div('",textRows[1],"',tags$br(),'",textRows[2],"')", sep="")
-        }else{
-          textRows <- paste("tags$div('",textRows,"')", sep="")
+      } else {
+        ## old messages
+        textRows <- strsplit(
+          substr(row[["nots"]], 1, 70),
+          "(?<=.{35})",
+          perl = TRUE
+        )[[1]]
+        if (length(textRows) > 1) {
+          textRows <- paste(
+            "tags$div('",
+            textRows[1],
+            "',tags$br(),'",
+            textRows[2],
+            "')",
+            sep = ""
+          )
+        } else {
+          textRows <- paste("tags$div('", textRows, "')", sep = "")
         }
       }
-      
+
       notificationItem(
-        text = eval(parse(text=textRows)),
-        icon = if (row[["status"]]=="danger") {fa_i(name ="envelope")}else{fa_i(name ="envelope-open")},
+        text = eval(parse(text = textRows)),
+        icon = if (row[["status"]] == "danger") {
+          fa_i(name = "envelope")
+        } else {
+          fa_i(name = "envelope-open")
+        },
         status = row[["status"]],
         href = href
       )
     })
-    
-    if ("danger" %in% notifTot[["status"]]){
+
+    if ("danger" %in% notifTot[["status"]]) {
       badge = "danger"
-      icon_name ="envelope"
+      icon_name = "envelope"
     } else {
       badge = NULL
-      icon_name ="envelope-open"
+      icon_name = "envelope-open"
     }
-    
-    dropdownMenu(type = "notifications", 
-                 .list = values$nots, 
-                 headerText ="",
-                 badgeStatus = NULL, 
-                 icon = fa_i(name = icon_name)
+
+    dropdownMenu(
+      type = "notifications",
+      .list = values$nots,
+      headerText = "",
+      badgeStatus = NULL,
+      icon = fa_i(name = icon_name)
     )
   })
-  
+
   ## SIDEBAR MENU ----
   ### Apply Data----
-  
+
   output$rest_of_sidebar <- renderMenu({
-    if (isTRUE(values$rest_sidebar)){
-      sidebarMenu(.list=values$menu)
+    if (isTRUE(values$rest_sidebar)) {
+      sidebarMenu(.list = values$menu)
     } else {
       sidebarMenu()
     }
   })
-  
+
   observeEvent(input$applyLoad, {
     updateTabItems(session, "sidebarmenu", "loadData")
   })
-  
-  observeEvent(input$apiApply, {
-    updateTabItems(session, "sidebarmenu", "gathData")
+
+  observeEvent(input$oaFetchData, {
+    updateTabItems(session, "sidebarmenu", "openalexMenu")
   })
-  
+
+  observeEvent(input$pmFetchData, {
+    updateTabItems(session, "sidebarmenu", "pubmedMenu")
+  })
+
+  # observeEvent(input$apiApply, {
+  #   updateTabItems(session, "sidebarmenu", "gathData")
+  # })
+
   observeEvent(values$missTags, {
-    switch(values$loadMenu,
-           "load"={
-             updateTabItems(session, "sidebarmenu", "loadData")
-           },
-           "merge"={
-             updateTabItems(session, "sidebarmenu", "mergeData")
-           })
+    switch(
+      values$loadMenu,
+      "load" = {
+        updateTabItems(session, "sidebarmenu", "loadData")
+      },
+      "merge" = {
+        updateTabItems(session, "sidebarmenu", "mergeData")
+      },
+      "openalex_api" = {
+        updateTabItems(session, "sidebarmenu", "openalexMenu")
+      },
+      "pubmed_api" = {
+        updateTabItems(session, "sidebarmenu", "pubmedMenu")
+      }
+    )
     values$loadMenu <- NA
   })
 
   observeEvent(input$applyMerge, {
     updateTabItems(session, "sidebarmenu", "mergeData")
   })
-  
+
   ## observe Gemini copy2clipboard button
   observeEvent(input$copy_btn, {
     content <- geminiSave(values, input$sidebarmenu)
     copy_to_clipboard(content)
   })
-  
+
   ## observe Gemini Save button
   output$save_btn <- downloadHandler(
     filename = function() {
-      paste0("BiblioAI_",input$sidebarmenu,".txt")
+      paste0("BiblioAI_", input$sidebarmenu, ".txt")
     },
     content <- function(file) {
       txtOutput <- geminiSave(values, input$sidebarmenu)
-      writeLines(txtOutput, con=file)
+      writeLines(txtOutput, con = file)
     },
     contentType = "txt"
   )
-  
 
-  
   ## observe gemini generate button
-  
+
   observeEvent(input$gemini_btn, {
     values$gemini_additional <- input$gemini_additional ## additional info to Gemini prompt
     #values$gemini_api_model <- input$gemini_api_model
     values <- geminiWaitingMessage(values, input$sidebarmenu)
-    values <- geminiGenerate(values, input$sidebarmenu, values$gemini_additional,values$gemini_model_parameters, input)
+    values <- geminiGenerate(
+      values,
+      input$sidebarmenu,
+      values$gemini_additional,
+      values$gemini_model_parameters,
+      input
+    )
   })
-  
-  observeEvent(input$applyLoad,
-               {
-                 output$collection_descriptionUI <- renderUI({
-                   textAreaInput(
-                     inputId = "collection_description_merge",
-                     label = "Brief description about your collection",
-                     placeholder = "Please provide a brief description of your bibliographic collection (e.g., type of content, domain, research hypotheses, timespan) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
-                     value = NULL,
-                     rows = 3,
-                     width = "100%"
-                   )
-                 })
-               })
-  
-  observeEvent(values$M,{
+
+  observeEvent(input$applyLoad, {
+    output$collection_descriptionUI <- renderUI({
+      textAreaInput(
+        inputId = "collection_description_merge",
+        label = "Brief description about your collection",
+        placeholder = "Please provide a brief description of your bibliographic collection (e.g., type of content, domain, research hypotheses, timespan) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
+        value = NULL,
+        rows = 3,
+        width = "100%"
+      )
+    })
+  })
+
+  observeEvent(values$M, {
     updateTextAreaInput(
       session = getDefaultReactiveDomain(),
       inputId = "collection_description",
@@ -278,34 +365,47 @@ To ensure the functionality of Biblioshiny,
       value = values$collection_description
     )
   })
-  
-  observeEvent(eventExpr = {
-    input$collection_description},
+
+  observeEvent(
+    eventExpr = {
+      input$collection_description
+    },
     handlerExpr = {
-      if (input$collection_description!="" & nchar(input$collection_description)>1){
+      if (
+        input$collection_description != "" &
+          nchar(input$collection_description) > 1
+      ) {
         values$collection_description <- input$collection_description
       }
-    },ignoreNULL = TRUE)
-  
-  observeEvent(eventExpr = {
-    input$collection_description_merge},
+    },
+    ignoreNULL = TRUE
+  )
+
+  observeEvent(
+    eventExpr = {
+      input$collection_description_merge
+    },
     handlerExpr = {
-      if (input$collection_description_merge!="" & nchar(input$collection_description_merge)>1){
+      if (
+        input$collection_description_merge != "" &
+          nchar(input$collection_description_merge) > 1
+      ) {
         values$collection_description <- input$collection_description_merge
       }
-    },ignoreNULL = TRUE)
-  
-  
+    },
+    ignoreNULL = TRUE
+  )
+
   ## Load Menu ----
-  
-  DATAloading<- eventReactive(input$applyLoad,{
+
+  DATAloading <- eventReactive(input$applyLoad, {
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
     # 'size', 'type', and 'datapath' columns. The 'datapath'
     # column will contain the local filenames where the data can
     # be found.
-    if (input$load=="demo"){
-      data(management, package="bibliometrixData")
+    if (input$load == "demo") {
+      data(management, package = "bibliometrixData")
       values = initial(values)
       row.names(management) <- management$SR
       management <- management %>% mergeKeywords(force = T)
@@ -320,238 +420,267 @@ To ensure the functionality of Biblioshiny,
       values$missTags <- NULL
       values$menu <- menuList(values)
       values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
-        #"Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
-      
+      #"Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
+
       showModal(missingModal(session))
       return()
     }
     inFile <- input$file1
-    
-    if (!is.null(inFile) & input$load=="import") {
+
+    if (!is.null(inFile) & input$load == "import") {
       ext <- getFileNameExtension(inFile$datapath)
       switch(
         input$dbsource,
         isi = {
-          switch(ext,
-                 ###  WoS ZIP Files
-                 zip = {
-                   D <-  utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                  M <- authorNameFormat(M, input$authorName)
-                                })
-                 },
-                 ### WoS Txt/Bib Files
-                 {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(inFile$datapath))
-                                  M <- authorNameFormat(M, input$authorName)
-                                })
-                 })
+          switch(
+            ext,
+            ###  WoS ZIP Files
+            zip = {
+              D <- utils::unzip(inFile$datapath)
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  D,
+                  dbsource = input$dbsource,
+                  format = formatDB(D)
+                )
+                M <- authorNameFormat(M, input$authorName)
+              })
+            },
+            ### WoS Txt/Bib Files
+            {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = formatDB(inFile$datapath)
+                )
+                M <- authorNameFormat(M, input$authorName)
+              })
+            }
+          )
         },
         scopus = {
-          switch(ext,
-                 ###  Scopus ZIP Files
-                 zip = {
-                   D <- utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                  M <- authorNameFormat(M, input$authorName)
-                                  if (formatDB(D)=="csv" & input$authorName=="AF") M <- AuthorNameMerge(M)
-                                })
-                 },
-                 ### Scopus CSV/Bib Files
-                 csv = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "csv")
-                                  M <- authorNameFormat(M, input$authorName)
-                                  if (input$authorName=="AF") M <- AuthorNameMerge(M)
-                                })
-                 },
-                 bib = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "bibtex")
-                                  M <- authorNameFormat(M, input$authorName)
-                                })
-                 })
+          switch(
+            ext,
+            ###  Scopus ZIP Files
+            zip = {
+              D <- utils::unzip(inFile$datapath)
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  D,
+                  dbsource = input$dbsource,
+                  format = formatDB(D)
+                )
+                M <- authorNameFormat(M, input$authorName)
+                if (formatDB(D) == "csv" & input$authorName == "AF") {
+                  M <- AuthorNameMerge(M)
+                }
+              })
+            },
+            ### Scopus CSV/Bib Files
+            csv = {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = "csv"
+                )
+                M <- authorNameFormat(M, input$authorName)
+                if (input$authorName == "AF") M <- AuthorNameMerge(M)
+              })
+            },
+            bib = {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = "bibtex"
+                )
+                M <- authorNameFormat(M, input$authorName)
+              })
+            }
+          )
         },
-        openalex={
-          withProgress(message = 'Conversion in progress',
-                         value = 0, {
-                           M <- convert2df(inFile$datapath,
-                                           dbsource = input$dbsource,
-                                           format = "csv")
-                         })
+        openalex = {
+          withProgress(message = 'Conversion in progress', value = 0, {
+            M <- convert2df(
+              inFile$datapath,
+              dbsource = input$dbsource,
+              format = "csv"
+            )
+          })
         },
         openalex_api = {
-          M <- convert2df(inFile$datapath,
+          M <- convert2df(
+            inFile$datapath,
             dbsource = input$dbsource,
-            format = "api")
+            format = "api"
+          )
         },
         lens = {
-          switch(ext,
-                 ###  Lens.org ZIP Files
-                 zip = {
-                   D <-  utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                })
-                 },
-                 ### Lens.org CSV Files
-                 {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(inFile$datapath))
-                                })
-                 })
+          switch(
+            ext,
+            ###  Lens.org ZIP Files
+            zip = {
+              D <- utils::unzip(inFile$datapath)
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  D,
+                  dbsource = input$dbsource,
+                  format = formatDB(D)
+                )
+              })
+            },
+            ### Lens.org CSV Files
+            {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = formatDB(inFile$datapath)
+                )
+              })
+            }
+          )
         },
         cochrane = {
-          switch(ext,
-                 ###  Cochrane ZIP Files
-                 zip = {
-                   D <- utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = formatDB(D))
-                                })
-                 },
-                 ### Cochrane txt files
-                 {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "plaintext")
-                                })
-                 })
+          switch(
+            ext,
+            ###  Cochrane ZIP Files
+            zip = {
+              D <- utils::unzip(inFile$datapath)
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  D,
+                  dbsource = input$dbsource,
+                  format = formatDB(D)
+                )
+              })
+            },
+            ### Cochrane txt files
+            {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = "plaintext"
+                )
+              })
+            }
+          )
         },
         pubmed = {
-          switch(ext,
-                 ###  Pubmed ZIP Files
-                 zip = {
-                   D <- utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(D,
-                                                  dbsource = input$dbsource,
-                                                  format = "pubmed")
-                                })
-                 },
-                 ### Pubmed txt Files
-                 txt = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <- convert2df(inFile$datapath,
-                                                  dbsource = input$dbsource,
-                                                  format = "pubmed")
-                                })
-                 })
+          switch(
+            ext,
+            ###  Pubmed ZIP Files
+            zip = {
+              D <- utils::unzip(inFile$datapath)
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(D, dbsource = input$dbsource, format = "pubmed")
+              })
+            },
+            ### Pubmed txt Files
+            txt = {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <- convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = "pubmed"
+                )
+              })
+            }
+          )
         },
         dimensions = {
-          switch(ext,
-                 ###  Dimensions ZIP Files
-                 zip = {
-                   D = utils::unzip(inFile$datapath)
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <-
-                                    convert2df(D,
-                                               dbsource = input$dbsource,
-                                               format = formatDB(D))
-                                })
-                 },
-                 ### Dimensions Xlsx/csv Files
-                 xlsx = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <-
-                                    convert2df(
-                                      inFile$datapath,
-                                      dbsource = "dimensions",
-                                      format = "excel"
-                                    )
-                                })
-                 },
-                 csv = {
-                   withProgress(message = 'Conversion in progress',
-                                value = 0, {
-                                  M <-
-                                    convert2df(
-                                      inFile$datapath,
-                                      dbsource = "dimensions",
-                                      format = "csv"
-                                    )
-                                })
-                 })
-          
+          switch(
+            ext,
+            ###  Dimensions ZIP Files
+            zip = {
+              D = utils::unzip(inFile$datapath)
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <-
+                  convert2df(D, dbsource = input$dbsource, format = formatDB(D))
+              })
+            },
+            ### Dimensions Xlsx/csv Files
+            xlsx = {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <-
+                  convert2df(
+                    inFile$datapath,
+                    dbsource = "dimensions",
+                    format = "excel"
+                  )
+              })
+            },
+            csv = {
+              withProgress(message = 'Conversion in progress', value = 0, {
+                M <-
+                  convert2df(
+                    inFile$datapath,
+                    dbsource = "dimensions",
+                    format = "csv"
+                  )
+              })
+            }
+          )
         }
       )
-    } else if (!is.null(inFile) & input$load=="load") {
+    } else if (!is.null(inFile) & input$load == "load") {
       ext <- tolower(getFileNameExtension(inFile$datapath))
-      switch(ext,
-             ### excel format
-             xlsx={
-               M <- readxl::read_excel(inFile$datapath, col_types = "text") %>% as.data.frame()
-               M$PY <- as.numeric(M$PY)
-               M$TC <- as.numeric(M$TC)
-               class(M) <- c("bibliometrixDB", "data.frame")
-               ### M row names
-               ### identify duplicated SRs 
-               SR <- M$SR
-               tab <- table(SR)
-               tab2 <- table(tab)
-               ind <- as.numeric(names(tab2))
-               ind <- ind[which(ind>1)]
-               if (length(ind)>0){
-                 for (i in ind){
-                   indice=names(which(tab==i))
-                   for (j in indice){
-                     indice2 <- which(SR==j)
-                     SR[indice2] <- paste(SR[indice2],as.character(1:length(indice2)),sep=" ")
-                   }
-                 }
-               }
-               M$SR <- SR
-               row.names(M) <- SR
-             },
-             ### RData format
-             rdata={
-               M <- smart_load(inFile$datapath) 
-             },
-             rda={
-               M <- smart_load(inFile$datapath) 
-             },
-             rds={
-               M <- readRDS(inFile$datapath) 
-             })
-    } else if (is.null(inFile)) {return(NULL)}
-    
+      switch(
+        ext,
+        ### excel format
+        xlsx = {
+          M <- readxl::read_excel(inFile$datapath, col_types = "text") %>%
+            as.data.frame()
+          M$PY <- as.numeric(M$PY)
+          M$TC <- as.numeric(M$TC)
+          class(M) <- c("bibliometrixDB", "data.frame")
+          ### M row names
+          ### identify duplicated SRs
+          SR <- M$SR
+          tab <- table(SR)
+          tab2 <- table(tab)
+          ind <- as.numeric(names(tab2))
+          ind <- ind[which(ind > 1)]
+          if (length(ind) > 0) {
+            for (i in ind) {
+              indice = names(which(tab == i))
+              for (j in indice) {
+                indice2 <- which(SR == j)
+                SR[indice2] <- paste(
+                  SR[indice2],
+                  as.character(1:length(indice2)),
+                  sep = " "
+                )
+              }
+            }
+          }
+          M$SR <- SR
+          row.names(M) <- SR
+        },
+        ### RData format
+        rdata = {
+          M <- smart_load(inFile$datapath)
+        },
+        rda = {
+          M <- smart_load(inFile$datapath)
+        },
+        rds = {
+          M <- readRDS(inFile$datapath)
+        }
+      )
+    } else if (is.null(inFile)) {
+      return(NULL)
+    }
+
     values = initial(values)
     ## remove not useful columns
-    ind <- which(substr(names(M),1,2)=="X.")
-    if (length(ind)>0) M <- M[,-ind]
+    ind <- which(substr(names(M), 1, 2) == "X.")
+    if (length(ind) > 0) {
+      M <- M[, -ind]
+    }
     ##
     M <- M %>% mergeKeywords(force = F)
     values$M <- M
@@ -560,14 +689,17 @@ To ensure the functionality of Biblioshiny,
     values$COdf <- countryTable(M)
     values$Histfield = "NA"
     values$results = list("NA")
-    if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
-    if (ncol(values$M)>1){
+    if (ncol(values$M) > 1) {
+      values$rest_sidebar <- TRUE
+    }
+    if (ncol(values$M) > 1) {
       values$loadMenu <- "load"
-      showModal(missingModal(session))}
+      showModal(missingModal(session))
+    }
   })
-  
+
   output$contents <- DT::renderDT({
-    DATAloading()   
+    DATAloading()
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
     }))
@@ -581,42 +713,71 @@ To ensure the functionality of Biblioshiny,
       )
     nome = c("DOI", names(MData)[-length(names(MData))])
     MData = MData[nome]
-    DTformat(MData, nrow=3, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
-             columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=TRUE)
+    DTformat(
+      MData,
+      nrow = 3,
+      filename = "Table",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '70%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = FALSE,
+      escape = FALSE,
+      selection = FALSE,
+      scrollX = TRUE
+    )
   })
-  
-  
+
+  ## Openalex API Query Sample Size ----
+  openAlexServer(input, output, session, values)
+
+  ## Pubmed API Query Sample Size ----
+  pubmedServer(input, output, session, values)
+
   ## Merge Menu ----
-  DATAmerging<- eventReactive(input$applyMerge,{
-    
+  DATAmerging <- eventReactive(input$applyMerge, {
     inFile <- input$fileMerge
-    
-    if (!is.null(inFile)){
+
+    if (!is.null(inFile)) {
       #save(inFile,file="prova.rdata")
       M <- merge_files(inFile)
-    } else if (is.null(inFile)) {return(NULL)}
-    
+    } else if (is.null(inFile)) {
+      return(NULL)
+    }
+
     values = initial(values)
     ## remove not useful columns
-    ind <- which(substr(names(M),1,2)=="X.")
-    if (length(ind)>0) M <- M[,-ind]
+    ind <- which(substr(names(M), 1, 2) == "X.")
+    if (length(ind) > 0) {
+      M <- M[, -ind]
+    }
     ##
-    
+
     values$M <- M
     values$Morig = M
     values$SCdf <- wcTable(M)
     values$COdf <- countryTable(M)
-    values$nMerge <- attr(M,"nMerge")
+    values$nMerge <- attr(M, "nMerge")
     values$Histfield = "NA"
     values$results = list("NA")
-    if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
-    if (ncol(values$M)>1){
+    if (ncol(values$M) > 1) {
+      values$rest_sidebar <- TRUE
+    }
+    if (ncol(values$M) > 1) {
       values$loadMenu <- "merge"
-      showModal(missingModal(session))}
+      showModal(missingModal(session))
+    }
   })
-  
+
   output$contentsMerge <- DT::renderDT({
-    DATAmerging()   
+    DATAmerging()
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
     }))
@@ -630,92 +791,127 @@ To ensure the functionality of Biblioshiny,
       )
     nome = c("DOI", names(MData)[-length(names(MData))])
     MData = MData[nome]
-    DTformat(MData, nrow=3, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
-             columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE, scrollX=TRUE)
+    DTformat(
+      MData,
+      nrow = 3,
+      filename = "Table",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '70%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = FALSE,
+      escape = FALSE,
+      selection = FALSE,
+      scrollX = TRUE
+    )
   })
-  
-  observeEvent(input$applyMerge,
-               {
-                 output$collection_description_mergeUI <- renderUI({
-                   textAreaInput(
-                     inputId = "collection_description",
-                     label = "Brief description about your collection",
-                     placeholder = "Please provide a brief description of your bibliographic collection (e.g., source, type of content, domain) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
-                     value = NULL,
-                     rows = 3,
-                     width = "100%"
-                   )
-                 })
-               })
-  
+
+  observeEvent(input$applyMerge, {
+    output$collection_description_mergeUI <- renderUI({
+      textAreaInput(
+        inputId = "collection_description",
+        label = "Brief description about your collection",
+        placeholder = "Please provide a brief description of your bibliographic collection (e.g., source, type of content, domain) to improve prompts for the BIBLIO AI Assistant.\n\nExample: The corpus consists of 150 academic articles from biomedical journals published between 2015 and 2020...",
+        value = NULL,
+        rows = 3,
+        width = "100%"
+      )
+    })
+  })
+
   ### Missing Data in Metadata ----
   output$missingDataTable <- DT::renderDT({
     values$missingdf <- df <- missingData(values$M)$mandatoryTags
-    values$missTags <- df$tag[df$missing_pct>50]
+    values$missTags <- df$tag[df$missing_pct > 50]
     values$menu <- menuList(values)
-    
-    names(df) <- c("Metadata", "Description", "Missing Counts", "Missing %", "Status")
-    values$missingDataTable <- DT::datatable(df,escape = FALSE,rownames = FALSE, #extensions = c("Buttons"),
-                  class = 'cell-border stripe',
-                  selection = 'none',
-                  options = list(
-                    pageLength = nrow(df),
-                    info = FALSE,
-                    autoWidth = FALSE, scrollX = TRUE, 
-                    dom = 'rti',
-                    ordering=F,
-                    columnDefs = list(
-                      list(
-                        targets = ncol(df)-1,
-                        createdCell = JS(
-                          "function(td, cellData, rowData, row, col) {",
-                          "  if (cellData === 'Completely missing') {",
-                          "    $(td).css('background-color', '#b22222');",
-                          "  } else if (cellData === 'Critical') {",
-                          "    $(td).css('background-color', '#f08080');",
-                          "  } else if (cellData === 'Poor') {",
-                          "    $(td).css('background-color', 'lightgrey');",
-                          "  } else if (cellData === 'Acceptable') {",
-                          "    $(td).css('background-color', '#f0e68c');",
-                          "  } else if (cellData === 'Good') {",
-                          "    $(td).css('background-color', '#90ee90');",
-                          "  } else if (cellData === 'Excellent') {",
-                          "    $(td).css('background-color', '#32cd32');",
-                          "  }",
-                          "}")
-                      )
-                    )
-                  )
-    ) %>% 
-      formatRound("Missing %", digits=2) %>% 
+
+    names(df) <- c(
+      "Metadata",
+      "Description",
+      "Missing Counts",
+      "Missing %",
+      "Status"
+    )
+    values$missingDataTable <- DT::datatable(
+      df,
+      escape = FALSE,
+      rownames = FALSE, #extensions = c("Buttons"),
+      class = 'cell-border stripe',
+      selection = 'none',
+      options = list(
+        pageLength = nrow(df),
+        info = FALSE,
+        autoWidth = FALSE,
+        scrollX = TRUE,
+        dom = 'rti',
+        ordering = F,
+        columnDefs = list(
+          list(
+            targets = ncol(df) - 1,
+            createdCell = JS(
+              "function(td, cellData, rowData, row, col) {",
+              "  if (cellData === 'Completely missing') {",
+              "    $(td).css('background-color', '#b22222');",
+              "  } else if (cellData === 'Critical') {",
+              "    $(td).css('background-color', '#f08080');",
+              "  } else if (cellData === 'Poor') {",
+              "    $(td).css('background-color', 'lightgrey');",
+              "  } else if (cellData === 'Acceptable') {",
+              "    $(td).css('background-color', '#f0e68c');",
+              "  } else if (cellData === 'Good') {",
+              "    $(td).css('background-color', '#90ee90');",
+              "  } else if (cellData === 'Excellent') {",
+              "    $(td).css('background-color', '#32cd32');",
+              "  }",
+              "}"
+            )
+          )
+        )
+      )
+    ) %>%
+      formatRound("Missing %", digits = 2) %>%
       formatStyle(
         "Status",
         textAlign = 'center'
       )
     values$missingDataTable
   })
-  
-  observeEvent(input$missingMessage,{
-    tag <- values$missingdf$description[values$missingdf$status %in% c("Critical", "Completely missing")]
-    if (length(values$out)>0){
-      text <- paste("The following analyses could not be performed: <br><br>",paste("- ","<em>",values$out,"</em>","<br>", collapse=""),
-                    "<br>These menu will be hidden in the Biblioshiny dashboard!",collapse="")
+
+  observeEvent(input$missingMessage, {
+    tag <- values$missingdf$description[
+      values$missingdf$status %in% c("Critical", "Completely missing")
+    ]
+    if (length(values$out) > 0) {
+      text <- paste(
+        "The following analyses could not be performed: <br><br>",
+        paste("- ", "<em>", values$out, "</em>", "<br>", collapse = ""),
+        "<br>These menu will be hidden in the Biblioshiny dashboard!",
+        collapse = ""
+      )
       type <- "warning"
-    }else{
+    } else {
       text <- "Your metadata have no critical issues"
       type <- "success"
     }
-   
+
     show_alert(
       title = NULL,
       #text = HTML(paste("Analyses that require the following information:<br>",paste("- ",tag,"<br>", collapse=""),"cannot be performed!",collapse="")),
-      text =tagList(
+      text = tagList(
         div(
           h4(HTML(text)),
-          style="text-align:left")
+          style = "text-align:left"
+        )
       ),
       type = type,
-      size = "s", 
+      size = "s",
       closeOnEsc = TRUE,
       closeOnClickOutside = TRUE,
       html = TRUE,
@@ -728,29 +924,45 @@ To ensure the functionality of Biblioshiny,
       animation = TRUE
     )
   })
-  
+
   output$missingTitle <- renderUI({
     ndocs <- nrow(values$M)
-    if ("DB_Original" %in% names(values$M)){
-      DB <- paste0(length(unique(values$M$DB_Original))," DBs")
-      txt1 <- paste0("Completeness of metadata -- ", strong(ndocs)," docs merged from ", DB)
-      txt2 <- paste0("Original size ",strong(values$nMerge), " docs -- Deleted ", strong(values$nMerge-ndocs), " duplicated docs")
+    if ("DB_Original" %in% names(values$M)) {
+      DB <- paste0(length(unique(values$M$DB_Original)), " DBs")
+      txt1 <- paste0(
+        "Completeness of metadata -- ",
+        strong(ndocs),
+        " docs merged from ",
+        DB
+      )
+      txt2 <- paste0(
+        "Original size ",
+        strong(values$nMerge),
+        " docs -- Deleted ",
+        strong(values$nMerge - ndocs),
+        " duplicated docs"
+      )
     } else {
       DB <- firstup(values$M$DB[1])
-      txt1 <- paste0("Completeness of metadata -- ", strong(ndocs)," docs from ", strong(DB))
+      txt1 <- paste0(
+        "Completeness of metadata -- ",
+        strong(ndocs),
+        " docs from ",
+        strong(DB)
+      )
       txt2 <- ""
     }
-    
-    
+
     tagList(
       div(
         h3(HTML(txt1)),
         br(),
         h4(HTML(txt2)),
-        style="text-align:center")
+        style = "text-align:center"
+      )
     )
   })
-  
+
   missingModal <- function(session) {
     ns <- session$ns
     modalDialog(
@@ -759,60 +971,95 @@ To ensure the functionality of Biblioshiny,
       size = "l",
       easyClose = TRUE,
       footer = tagList(
-        actionButton(label="Advice", inputId = "missingMessage",
-                     icon = icon("exclamation-sign", lib = "glyphicon")),
-        actionButton(label="Report", inputId = "missingReport",
-                     icon = icon("plus", lib = "glyphicon")),
-        actionButton(label="Save", inputId = "missingDataTable",
-                     icon = icon("camera", lib = "glyphicon")),
-        modalButton(label="Close")),
+        actionButton(
+          label = "Advice",
+          inputId = "missingMessage",
+          icon = icon("exclamation-sign", lib = "glyphicon")
+        ),
+        actionButton(
+          label = "Report",
+          inputId = "missingReport",
+          icon = icon("plus", lib = "glyphicon")
+        ),
+        actionButton(
+          label = "Save",
+          inputId = "missingDataTable",
+          icon = icon("camera", lib = "glyphicon")
+        ),
+        modalButton(label = "Close")
+      ),
     )
   }
-  
-  observeEvent(input$missingDataTable,{
-    filename = paste("missingDataTable-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$missingDataTable, filename=filename, type="plotly")
+
+  observeEvent(input$missingDataTable, {
+    filename = paste(
+      "missingDataTable-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$missingDataTable, filename = filename, type = "plotly")
   })
-  
-  observeEvent(input$missingReport,{
-    if (!is.null(values$missingDataTable)){
+
+  observeEvent(input$missingReport, {
+    if (!is.null(values$missingDataTable)) {
       sheetname <- "MissingData"
-      ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
-      if (length(ind)>0){
-        sheetname <- paste(sheetname,length(ind)+1,sep="")
-      } 
-      addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
+      ind <- which(regexpr(sheetname, values$wb$sheet_names) > -1)
+      if (length(ind) > 0) {
+        sheetname <- paste(sheetname, length(ind) + 1, sep = "")
+      }
+      addWorksheet(wb = values$wb, sheetName = sheetname, gridLines = FALSE)
       #values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
-      values$fileMissingData <- screenSh(values$missingDataTable, zoom = 2, type="plotly")
-      values$list_file <- rbind(values$list_file, c(sheetname,values$fileMissingData,1))
-      popUp(title="Missing Data Table", type="success")
+      values$fileMissingData <- screenSh(
+        values$missingDataTable,
+        zoom = 2,
+        type = "plotly"
+      )
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname, values$fileMissingData, 1)
+      )
+      popUp(title = "Missing Data Table", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ## export functions ----
   output$collection.save <- downloadHandler(
     filename = function() {
-      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file, sep="")
+      paste(
+        "Bibliometrix-Export-File-",
+        Sys.Date(),
+        ".",
+        input$save_file,
+        sep = ""
+      )
     },
     content <- function(file) {
       tr <- FALSE
-      if ("CR" %in% names(values$M)) tr <- (sum(nchar(values$M$CR)>32767, na.rm=TRUE))>0
-      
-      if (tr & input$save_file=="xlsx"){
+      if ("CR" %in% names(values$M)) {
+        tr <- (sum(nchar(values$M$CR) > 32767, na.rm = TRUE)) > 0
+      }
+
+      if (tr & input$save_file == "xlsx") {
         show_alert(
           text = tags$span(
-            tags$h4("Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
-                    style = "color: firebrick;"),
+            tags$h4(
+              "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
+              style = "color: firebrick;"
+            ),
             tags$br(),
-            tags$h4("Data in the column CR could be truncated.",
-                    style = "color: firebrick;")
+            tags$h4(
+              "Data in the column CR could be truncated.",
+              style = "color: firebrick;"
+            )
           ),
           title = "Please save the collection using the 'RData' format",
           type = "warning",
-          width =  "50%", ##NEW ----
+          width = "50%", ##NEW ----
           closeOnEsc = TRUE,
           closeOnClickOutside = TRUE,
           html = FALSE,
@@ -824,40 +1071,56 @@ To ensure the functionality of Biblioshiny,
           imageUrl = "",
           animation = TRUE
         )
-        suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
+        suppressWarnings(openxlsx::write.xlsx(values$M, file = file))
       } else {
-        switch(input$save_file,
-               xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
-               RData={
-                 M=values$M
-                 save(M, file=file)
-               })
+        switch(
+          input$save_file,
+          xlsx = {
+            suppressWarnings(openxlsx::write.xlsx(values$M, file = file))
+          },
+          RData = {
+            M = values$M
+            save(M, file = file)
+          }
+        )
       }
     },
     contentType = input$save_file
   )
-  
+
   output$collection.saveMerge <- downloadHandler(
     filename = function() {
-      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_fileMerge, sep="")
+      paste(
+        "Bibliometrix-Export-File-",
+        Sys.Date(),
+        ".",
+        input$save_fileMerge,
+        sep = ""
+      )
     },
     content <- function(file) {
       tr <- FALSE
-      if ("CR" %in% names(values$M)) tr <- (sum(nchar(values$M$CR)>32767, na.rm=TRUE))>0
-      
-      if (tr & input$save_file=="xlsx"){
+      if ("CR" %in% names(values$M)) {
+        tr <- (sum(nchar(values$M$CR) > 32767, na.rm = TRUE)) > 0
+      }
+
+      if (tr & input$save_file == "xlsx") {
         show_alert(
           text = tags$span(
-            tags$h4("Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
-                    style = "color: firebrick;"),
+            tags$h4(
+              "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
+              style = "color: firebrick;"
+            ),
             tags$br(),
-            tags$h4("Data in the column CR could be truncated.",
-                    style = "color: firebrick;")
+            tags$h4(
+              "Data in the column CR could be truncated.",
+              style = "color: firebrick;"
+            )
           ),
           #text = "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).\nData in the column CR could be truncated",
           title = "Please save the collection using the 'RData' format",
           type = "warning",
-          width =  "50%", ##NEW ----
+          width = "50%", ##NEW ----
           closeOnEsc = TRUE,
           closeOnClickOutside = TRUE,
           html = FALSE,
@@ -869,45 +1132,68 @@ To ensure the functionality of Biblioshiny,
           imageUrl = "",
           animation = TRUE
         )
-        suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
+        suppressWarnings(openxlsx::write.xlsx(values$M, file = file))
       } else {
-        switch(input$save_fileMerge,
-               xlsx={
-                 suppressWarnings(openxlsx::write.xlsx(values$M, file=file))
-                 },
-               RData={
-                 M=values$M
-                 save(M, file=file)
-               })
+        switch(
+          input$save_fileMerge,
+          xlsx = {
+            suppressWarnings(openxlsx::write.xlsx(values$M, file = file))
+          },
+          RData = {
+            M = values$M
+            save(M, file = file)
+          }
+        )
       }
     },
     contentType = input$save_fileMerge
   )
-  
+
   output$collection.save_api <- downloadHandler(
     filename = function() {
-      
-      paste("Bibliometrix-Export-File-", Sys.Date(), ".",input$save_file_api, sep="")
+      paste(
+        "Bibliometrix-Export-File-",
+        Sys.Date(),
+        ".",
+        input$save_file_api,
+        sep = ""
+      )
     },
     content <- function(file) {
-      switch(input$save_file_api,
-             xlsx={suppressWarnings(openxlsx::write.xlsx(values$M, file=file))},
-             RData={
-               M=values$M
-               save(M, file=file)
-             })
+      switch(
+        input$save_file_api,
+        xlsx = {
+          suppressWarnings(openxlsx::write.xlsx(values$M, file = file))
+        },
+        RData = {
+          M = values$M
+          save(M, file = file)
+        }
+      )
     },
     contentType = input$save_file_api
   )
-  
-  output$textLog2 <- renderUI({  
-    k=dim(values$M)[1]
-    if (k==1){k=0}
-    log=paste("Number of Documents ",k)
-    textInput("textLog", "Conversion results", 
-              value=log)
+
+  output$textLog2 <- renderUI({
+    k = dim(values$M)[1]
+    if (k == 1) {
+      k = 0
+    }
+    log = paste("Number of Documents", k)
+
+    div(
+      style = "background-color: #f8f9fa; padding: 12px; border-radius: 5px; border: 1px solid #dee2e6; margin: 10px 0;",
+      tags$label(
+        "Conversion results",
+        style = "font-weight: 600; color: #495057; margin-bottom: 5px; display: block; font-size: 14px;"
+      ),
+      div(
+        log,
+        style = "color: #212529; font-size: 15px; font-weight: 500;"
+      )
+    )
   })
-  
+
   dsModal <- function(failed = FALSE) {
     modalDialog(
       title = "Dimensions API",
@@ -922,11 +1208,12 @@ To ensure the functionality of Biblioshiny,
         width = NULL,
         placeholder = NULL
       ),
-      passwordInput("dsPassword",
-                    "Password",
-                    "",
-                    width = NULL,
-                    placeholder = NULL
+      passwordInput(
+        "dsPassword",
+        "Password",
+        "",
+        width = NULL,
+        placeholder = NULL
       ),
       actionButton("dsToken", "Get a token "),
       h5(tags$b("Token")),
@@ -943,8 +1230,7 @@ To ensure the functionality of Biblioshiny,
       selectInput(
         "dsFullsearch",
         label = "search field",
-        choices = c("Title and Abstract only" = FALSE,
-                    "Full text" = TRUE),
+        choices = c("Title and Abstract only" = FALSE, "Full text" = TRUE),
         selected = FALSE
       ),
       textInput(
@@ -955,7 +1241,11 @@ To ensure the functionality of Biblioshiny,
         placeholder = NULL
       ),
       numericInput("dsStartYear", "Start Year", value = 1990),
-      numericInput("dsEndYear", "End Year", value = as.numeric(substr(Sys.time(), 1, 4))),
+      numericInput(
+        "dsEndYear",
+        "End Year",
+        value = as.numeric(substr(Sys.time(), 1, 4))
+      ),
       actionButton("dsQuery", "Create the query "),
       h5(tags$b("Your query")),
       verbatimTextOutput("queryLog", placeholder = FALSE),
@@ -968,239 +1258,1085 @@ To ensure the functionality of Biblioshiny,
       )
     )
   }
-  
+
   ### Show Dimensions modal when button is clicked.
   observeEvent(input$dsShow, {
     showModal(dsModal())
   })
-  
+
   observeEvent(input$dsok, {
     removeModal()
-    values$M <- data.frame(Message="Waiting for data")
+    values$M <- data.frame(Message = "Waiting for data")
   })
-  
-  output$tokenLog <- renderText({ 
-    input$dsToken 
+
+  output$tokenLog <- renderText({
+    input$dsToken
     isolate({
-      capture.output(Token <- dsAuth(username = input$dsAccount, password = input$dsPassword))
-      if (Token==1){
+      capture.output(
+        Token <- dsAuth(username = input$dsAccount, password = input$dsPassword)
+      )
+      if (Token == 1) {
         values$dsToken <- "Wrong account or password"
-      }else{
+      } else {
         values$dsToken <- Token
       }
       values$dsToken
     })
   })
-  
-  DSQUERYload<- eventReactive(input$dsQuery,{
-    values$dsQuery <- dsQueryBuild(item = "publications", 
-                                   words = input$dsWords, 
-                                   full.search = input$dsFullsearch,
-                                   type = "article", 
-                                   categories = input$dsCategories, 
-                                   start_year = input$dsStartYear, end_year = input$dsEndYear)
+
+  DSQUERYload <- eventReactive(input$dsQuery, {
+    values$dsQuery <- dsQueryBuild(
+      item = "publications",
+      words = input$dsWords,
+      full.search = input$dsFullsearch,
+      type = "article",
+      categories = input$dsCategories,
+      start_year = input$dsStartYear,
+      end_year = input$dsEndYear
+    )
     dsSample <- 0
-    capture.output(dsSample <- dsApiRequest(token = values$dsToken, query = values$dsQuery, limit = 0))
-    if (class(dsSample)=="numeric"){
-      values$dsSample <- 0
-    }else{values$dsSample <- dsSample$total_count}
-  })
-  
-  output$queryLog <- renderText({ 
-    DSQUERYload()
-    values$dsQuery
-  })
-  
-  output$queryLog2 <- renderText({ 
-    DSQUERYload()
-    values$dsQuery
-  })
-  
-  output$sampleLog <- renderText({ 
-    DSQUERYload()
-    mes <- paste("Dimensions returns ",values$dsSample, " documents", collapse="",sep="")
-    mes
-  }) 
-  
-  output$sampleLog2 <- renderText({ 
-    if (nrow(values$M)<2) {n <- 0}else{n <- nrow(values$M)}
-    mes <- paste("Dimensions API returns ",n, " documents", collapse="",sep="")
-    values$ApiOk <- 0
-    return(mes)
-  }) 
-  
-  output$sliderLimit <- renderUI({
-    sliderInput("sliderLimit", "Total document to download", min = 1,
-                max = values$dsSample, value = values$dsSample, step = 1)
-  })
-  
-  ### API MENU: PubMed ----
-  ### PubMed modal 
-  pmModal <- function(failed = FALSE) {
-    modalDialog(
-      title = "PubMed API",
-      size = "l",
-      h4(em(strong(
-        "1) Generate a valid query"
-      ))),
-      textInput(
-        "pmQueryText",
-        "Search terms",
-        " ",
-        width = NULL,
-        placeholder = NULL
-      ),
-      numericInput("pmStartYear", "Start Year", value = 1990),
-      numericInput("pmEndYear", "End Year", value = as.numeric(substr(Sys.time(
-      ), 1, 4))),
-      actionButton("pmQuery", "Try the query "),
-      h5(tags$b("Query Translation")),
-      verbatimTextOutput("pmQueryLog", placeholder = FALSE),
-      h5(tags$b("Documents returned using your query")),
-      verbatimTextOutput("pmSampleLog", placeholder = FALSE),
-      tags$hr(),
-      h4(em(
-        strong("2) Choose how many documents to download")
-      )),
-      uiOutput("pmSliderLimit"),
-      footer = tagList(
-        modalButton("Cancel"),
-        actionButton("pmok", "OK")
+    capture.output(
+      dsSample <- dsApiRequest(
+        token = values$dsToken,
+        query = values$dsQuery,
+        limit = 0
       )
     )
-  }
-  
-  # Show modal when button is clicked.
-  observeEvent(input$pmShow, {
-    showModal(pmModal())
+    if (class(dsSample) == "numeric") {
+      values$dsSample <- 0
+    } else {
+      values$dsSample <- dsSample$total_count
+    }
   })
-  
-  observeEvent(input$pmok, {
-    removeModal()
+
+  output$queryLog <- renderText({
+    DSQUERYload()
+    values$dsQuery
   })
-  
-  pmQUERYLOAD <- eventReactive(input$pmQuery,{
-    query = paste(input$pmQueryText,"[Title/Abstract] AND english[LA] AND Journal Article[PT] AND "
-                  ,input$pmStartYear,":",input$pmEndYear,"[DP]", sep="")
-    res <- pmQueryTotalCount(query = query, api_key = NULL)
-    if (class(res)=="list"){
-      values$pmSample <- res$total_count
-      values$pmQuery <- res$query_translation}
-    values$pmQuery <- res$query_translation
-    
+
+  output$queryLog2 <- renderText({
+    DSQUERYload()
+    values$dsQuery
   })
-  output$pmQueryLog <- renderText({ 
-    pmQUERYLOAD()
-    values$pmQuery
-  })
-  
-  output$pmQueryLog2 <- renderText({ 
-    pmQUERYLOAD()
-    values$pmQuery
-  })
-  
-  output$pmSampleLog <- renderText({ 
-    pmQUERYLOAD()
-    mes <- paste("PubMed returns ",values$pmSample, " documents", collapse="",sep="")
+
+  output$sampleLog <- renderText({
+    DSQUERYload()
+    mes <- paste(
+      "Dimensions returns ",
+      values$dsSample,
+      " documents",
+      collapse = "",
+      sep = ""
+    )
     mes
-    
-  }) 
-  output$pmSampleLog2 <- renderText({ 
-    if (nrow(values$M)<2) {n <- 0}else{n <- nrow(values$M)}
-    
-    mes <- paste("PubMed API returns ",n, " documents", collapse="",sep="")
+  })
+
+  output$sampleLog2 <- renderText({
+    if (nrow(values$M) < 2) {
+      n <- 0
+    } else {
+      n <- nrow(values$M)
+    }
+    mes <- paste(
+      "Dimensions API returns ",
+      n,
+      " documents",
+      collapse = "",
+      sep = ""
+    )
     values$ApiOk <- 0
     return(mes)
-  }) 
-  
-  output$pmSliderLimit <- renderUI({
-    sliderInput("pmSliderLimit", "Total document to download", min = 1,
-                max = values$pmSample, value = values$pmSample, step = 1)
   })
-  
-  ### API MENU: Content Download ----
-  APIDOWNLOAD <- eventReactive(input$apiApply,{
-    values = initial(values)
-    values$M <- data.frame(Message="Waiting for data")
-    switch(input$dbapi,
-           ds={
-             if (input$dsWords!="") {
-               D <-
-                 dsApiRequest(
-                   token = values$dsToken,
-                   query = values$dsQuery,
-                   limit = input$sliderLimit
-                 )
-               M <- convert2df(D, "dimensions", "api")
-               values$ApiOk <- 1
-               values$M <- M
-               values$Morig = M
-               values$SCdf <- wcTable(M)
-               values$COdf <- countryTable(M)
-               if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
-               if (ncol(values$M)>1){showModal(missingModal(session))}
-               values$Histfield = "NA"
-               values$results = list("NA")
-               contentTable(values)
-             }
-           },
-           pubmed={
-             if (input$pmQueryText !=" ") {
-               D <-
-                 pmApiRequest(
-                   query = values$pmQuery,
-                   limit = input$pmSliderLimit,
-                   api_key = NULL
-                 )
-               M <- convert2df(D, "pubmed", "api")
-               values$ApiOk <- 1
-               values$M <- M
-               values$Morig = M
-               if (ncol(values$M)>1){values$rest_sidebar <- TRUE}
-               if (ncol(values$M)>1){showModal(missingModal(session))}
-               values$Histfield = "NA"
-               values$results = list("NA")
-             }
-           })
+
+  output$sliderLimit <- renderUI({
+    sliderInput(
+      "sliderLimit",
+      "Total document to download",
+      min = 1,
+      max = values$dsSample,
+      value = values$dsSample,
+      step = 1
+    )
   })
-  
-  output$apiContents <- DT::renderDT({
-    APIDOWNLOAD()
-    contentTable(values)
+
+  # ### API MENU: PubMed ----
+  # ### PubMed modal
+  # pmModal <- function(failed = FALSE) {
+  #   modalDialog(
+  #     title = "PubMed API",
+  #     size = "l",
+  #     h4(em(strong(
+  #       "1) Generate a valid query"
+  #     ))),
+  #     textInput(
+  #       "pmQueryText",
+  #       "Search terms",
+  #       " ",
+  #       width = NULL,
+  #       placeholder = NULL
+  #     ),
+  #     numericInput("pmStartYear", "Start Year", value = 1990),
+  #     numericInput(
+  #       "pmEndYear",
+  #       "End Year",
+  #       value = as.numeric(substr(Sys.time(), 1, 4))
+  #     ),
+  #     actionButton("pmQuery", "Try the query "),
+  #     h5(tags$b("Query Translation")),
+  #     verbatimTextOutput("pmQueryLog", placeholder = FALSE),
+  #     h5(tags$b("Documents returned using your query")),
+  #     verbatimTextOutput("pmSampleLog", placeholder = FALSE),
+  #     tags$hr(),
+  #     h4(em(
+  #       strong("2) Choose how many documents to download")
+  #     )),
+  #     uiOutput("pmSliderLimit"),
+  #     footer = tagList(
+  #       modalButton("Cancel"),
+  #       actionButton("pmok", "OK")
+  #     )
+  #   )
+  # }
+  #
+  # # Show modal when button is clicked.
+  # observeEvent(input$pmShow, {
+  #   showModal(pmModal())
+  # })
+  #
+  # observeEvent(input$pmok, {
+  #   removeModal()
+  # })
+  #
+  # pmQUERYLOAD <- eventReactive(input$pmQuery, {
+  #   query = paste(
+  #     input$pmQueryText,
+  #     "[Title/Abstract] AND english[LA] AND Journal Article[PT] AND ",
+  #     input$pmStartYear,
+  #     ":",
+  #     input$pmEndYear,
+  #     "[DP]",
+  #     sep = ""
+  #   )
+  #   res <- pmQueryTotalCount(query = query, api_key = NULL)
+  #   if (class(res) == "list") {
+  #     values$pmSample <- res$total_count
+  #     values$pmQuery <- res$query_translation
+  #   }
+  #   values$pmQuery <- res$query_translation
+  # })
+  # output$pmQueryLog <- renderText({
+  #   pmQUERYLOAD()
+  #   values$pmQuery
+  # })
+  #
+  # output$pmQueryLog2 <- renderText({
+  #   pmQUERYLOAD()
+  #   values$pmQuery
+  # })
+  #
+  # output$pmSampleLog <- renderText({
+  #   pmQUERYLOAD()
+  #   mes <- paste(
+  #     "PubMed returns ",
+  #     values$pmSample,
+  #     " documents",
+  #     collapse = "",
+  #     sep = ""
+  #   )
+  #   mes
+  # })
+  # output$pmSampleLog2 <- renderText({
+  #   if (nrow(values$M) < 2) {
+  #     n <- 0
+  #   } else {
+  #     n <- nrow(values$M)
+  #   }
+  #
+  #   mes <- paste(
+  #     "PubMed API returns ",
+  #     n,
+  #     " documents",
+  #     collapse = "",
+  #     sep = ""
+  #   )
+  #   values$ApiOk <- 0
+  #   return(mes)
+  # })
+  #
+  # output$pmSliderLimit <- renderUI({
+  #   sliderInput(
+  #     "pmSliderLimit",
+  #     "Total document to download",
+  #     min = 1,
+  #     max = values$pmSample,
+  #     value = values$pmSample,
+  #     step = 1
+  #   )
+  # })
+  #
+  # ### API MENU: Content Download ----
+  # APIDOWNLOAD <- eventReactive(input$apiApply, {
+  #   values = initial(values)
+  #   values$M <- data.frame(Message = "Waiting for data")
+  #   switch(
+  #     input$dbapi,
+  #     ds = {
+  #       if (input$dsWords != "") {
+  #         D <-
+  #           dsApiRequest(
+  #             token = values$dsToken,
+  #             query = values$dsQuery,
+  #             limit = input$sliderLimit
+  #           )
+  #         M <- convert2df(D, "dimensions", "api")
+  #         values$ApiOk <- 1
+  #         values$M <- M
+  #         values$Morig = M
+  #         values$SCdf <- wcTable(M)
+  #         values$COdf <- countryTable(M)
+  #         if (ncol(values$M) > 1) {
+  #           values$rest_sidebar <- TRUE
+  #         }
+  #         if (ncol(values$M) > 1) {
+  #           showModal(missingModal(session))
+  #         }
+  #         values$Histfield = "NA"
+  #         values$results = list("NA")
+  #         contentTable(values)
+  #       }
+  #     },
+  #     pubmed = {
+  #       if (input$pmQueryText != " ") {
+  #         D <-
+  #           pmApiRequest(
+  #             query = values$pmQuery,
+  #             limit = input$pmSliderLimit,
+  #             api_key = NULL
+  #           )
+  #         M <- convert2df(D, "pubmed", "api")
+  #         values$ApiOk <- 1
+  #         values$M <- M
+  #         values$Morig = M
+  #         if (ncol(values$M) > 1) {
+  #           values$rest_sidebar <- TRUE
+  #         }
+  #         if (ncol(values$M) > 1) {
+  #           showModal(missingModal(session))
+  #         }
+  #         values$Histfield = "NA"
+  #         values$results = list("NA")
+  #       }
+  #     }
+  #   )
+  # })
+  #
+  # output$apiContents <- DT::renderDT({
+  #   APIDOWNLOAD()
+  #   contentTable(values)
+  # })
+  #
+  # ### function returns a formatted data.frame ----
+  # contentTable <- function(values) {
+  #   MData = as.data.frame(apply(values$M, 2, function(x) {
+  #     substring(x, 1, 150)
+  #   }))
+  #   MData$DOI <-
+  #     paste0(
+  #       '<a href=\"https://doi.org/',
+  #       MData$DI,
+  #       '\" target=\"_blank\">',
+  #       MData$DI,
+  #       '</a>'
+  #     )
+  #   nome = c("DOI", names(MData)[-length(names(MData))])
+  #   MData = MData[nome]
+  #   DTformat(
+  #     MData,
+  #     nrow = 3,
+  #     filename = "Table",
+  #     pagelength = TRUE,
+  #     left = NULL,
+  #     right = NULL,
+  #     numeric = NULL,
+  #     dom = TRUE,
+  #     size = '70%',
+  #     filter = "top",
+  #     columnShort = NULL,
+  #     columnSmall = NULL,
+  #     round = 2,
+  #     title = "",
+  #     button = FALSE,
+  #     escape = FALSE,
+  #     selection = FALSE,
+  #     scrollX = TRUE
+  #   )
+  # }
+
+  # REFERENCE MATCHING MENU ----
+
+  ## ============================================================================
+  ## Logic per Reference Matching
+  ## ============================================================================
+
+  # Reactive values to store matching results and original data
+  refMatch_results <- reactiveVal(NULL)
+  refMatch_M_original <- reactiveVal(NULL)
+  refMatch_applied <- reactiveVal(FALSE)
+  refMatch_selected_for_merge <- reactiveVal(character(0))
+
+  # Store original M when first accessing the tab
+  observeEvent(
+    values$M,
+    {
+      if (is.null(refMatch_M_original())) {
+        refMatch_M_original(values$M)
+      }
+    },
+    ignoreInit = TRUE,
+    once = TRUE
+  )
+
+  # Run matching when button is clicked
+  observeEvent(input$refMatch_run, {
+    req(values$M)
+
+    if (is.null(refMatch_M_original())) {
+      refMatch_M_original(values$M)
+    }
+
+    # Show loading indicator
+    shinyjs::show("refMatch_loadingIndicator")
+
+    # Collapse the matching options box
+    shinyjs::runjs(
+      "$('#refMatch_optionsBox').closest('.box').removeClass('collapsed-box').addClass('collapsed-box');"
+    )
+    shinyjs::runjs("$('#refMatch_optionsBox').slideUp();")
+
+    # Small delay to allow UI update
+    Sys.sleep(0.1)
+
+    tryCatch(
+      {
+        results <- applyCitationMatching(
+          M = values$M,
+          threshold = input$refMatch_threshold,
+          method = input$refMatch_method
+        )
+
+        refMatch_results(results)
+        refMatch_selected_for_merge(character(0))
+
+        # Hide loading indicator
+        shinyjs::hide("refMatch_loadingIndicator")
+
+        showNotification(
+          "Citation matching completed successfully!",
+          type = "message",
+          duration = 5
+        )
+      },
+      error = function(e) {
+        shinyjs::hide("refMatch_loadingIndicator")
+        showNotification(
+          paste("Error during matching:", e$message),
+          type = "error",
+          duration = 10
+        )
+      }
+    )
   })
-  
-  ### function returns a formatted data.frame ----
-  contentTable <- function(values){
-    MData = as.data.frame(apply(values$M, 2, function(x) {
-      substring(x, 1, 150)
-    }))
-    MData$DOI <-
-      paste0(
-        '<a href=\"https://doi.org/',
-        MData$DI,
-        '\" target=\"_blank\">',
-        MData$DI,
-        '</a>'
+
+  # Toggle selection for manual merge
+  observeEvent(input$refMatch_toggleSelection, {
+    req(refMatch_results())
+    req(input$refMatch_topCitations_rows_selected)
+
+    selected_row <- input$refMatch_topCitations_rows_selected
+    selected_citation <- refMatch_results()$summary$CR_canonical[selected_row]
+
+    current_selection <- refMatch_selected_for_merge()
+
+    if (selected_citation %in% current_selection) {
+      # Remove from selection
+      refMatch_selected_for_merge(setdiff(current_selection, selected_citation))
+    } else {
+      # Add to selection
+      refMatch_selected_for_merge(c(current_selection, selected_citation))
+    }
+
+    # Update table data without re-rendering the entire table
+    proxy <- dataTableProxy('refMatch_topCitations')
+
+    # Get updated data
+    selected <- refMatch_selected_for_merge()
+
+    top_table <- refMatch_results()$summary %>%
+      select(
+        Citation = CR_canonical,
+        `Times Cited` = n,
+        `Variants Found` = n_variants
+      ) %>%
+      arrange(desc(`Times Cited`)) %>%
+      filter(`Times Cited` > 1) %>%
+      mutate(
+        Selected = ifelse(Citation %in% selected, "TRUE", "FALSE"),
+        .before = 1
       )
-    nome = c("DOI", names(MData)[-length(names(MData))])
-    MData = MData[nome]
-    DTformat(MData, nrow=3, filename="Table", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
-             columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
-  }
-  
+
+    # Replace data without losing search/filter state
+    replaceData(proxy, top_table, resetPaging = FALSE, rownames = FALSE)
+  })
+
+  # Clear manual selection
+  observeEvent(input$refMatch_clearSelection, {
+    refMatch_selected_for_merge(character(0))
+
+    # Update table data without re-rendering
+    proxy <- dataTableProxy('refMatch_topCitations')
+
+    req(refMatch_results())
+
+    top_table <- refMatch_results()$summary %>%
+      select(
+        Citation = CR_canonical,
+        `Times Cited` = n,
+        `Variants Found` = n_variants
+      ) %>%
+      arrange(desc(`Times Cited`)) %>%
+      filter(`Times Cited` > 1) %>%
+      mutate(
+        Selected = "FALSE",
+        .before = 1
+      )
+
+    replaceData(proxy, top_table, resetPaging = FALSE, rownames = FALSE)
+
+    showNotification("Selection cleared", type = "message", duration = 3)
+  })
+
+  # Perform manual merge
+  observeEvent(input$refMatch_confirmMerge, {
+    req(refMatch_results())
+    selected <- refMatch_selected_for_merge()
+
+    if (length(selected) < 2) {
+      showNotification(
+        "Please select at least 2 citations to merge",
+        type = "warning",
+        duration = 5
+      )
+      return()
+    }
+
+    showModal(
+      modalDialog(
+        title = "Confirm Manual Merge",
+        tags$div(
+          tags$p(tags$b(paste(
+            "You are about to merge",
+            length(selected),
+            "citations:"
+          ))),
+          tags$ul(
+            lapply(selected, function(cit) {
+              tags$li(substr(cit, 1, 100))
+            })
+          ),
+          tags$hr(),
+          tags$p("Select the canonical form to use:"),
+          radioButtons(
+            "refMatch_canonicalChoice",
+            NULL,
+            choices = setNames(selected, substr(selected, 1, 100)),
+            selected = selected[1]
+          )
+        ),
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton("refMatch_executeMerge", "Merge", class = "btn-primary")
+        ),
+        size = "l"
+      )
+    )
+  })
+
+  # Execute the merge
+  observeEvent(input$refMatch_executeMerge, {
+    req(refMatch_results())
+    req(input$refMatch_canonicalChoice)
+
+    selected <- refMatch_selected_for_merge()
+    canonical <- input$refMatch_canonicalChoice
+
+    withProgress(message = 'Merging citations...', value = 0, {
+      tryCatch(
+        {
+          incProgress(0.3, detail = "Updating citation clusters...")
+
+          results <- refMatch_results()
+
+          all_variants <- results$full_data %>%
+            filter(CR_canonical %in% selected) %>%
+            pull(CR) %>%
+            unique()
+
+          results$full_data <- results$full_data %>%
+            mutate(
+              CR_canonical = ifelse(
+                CR %in% all_variants,
+                canonical,
+                CR_canonical
+              )
+            )
+
+          incProgress(0.6, detail = "Recalculating statistics...")
+
+          results$summary <- results$full_data %>%
+            group_by(CR_canonical) %>%
+            summarise(
+              n = n(),
+              n_variants = n_distinct(CR),
+              variants = paste(unique(CR), collapse = " | "),
+              .groups = "drop"
+            ) %>%
+            arrange(desc(n))
+
+          results$CR_normalized <- results$full_data %>%
+            group_by(SR) %>%
+            summarise(
+              CR = paste(unique(CR_canonical), collapse = ";"),
+              n_references = n_distinct(CR_canonical),
+              .groups = "drop"
+            )
+
+          incProgress(0.9, detail = "Finalizing...")
+
+          # Store updated results
+          refMatch_results(results)
+
+          # Clear selection
+          old_selection <- refMatch_selected_for_merge()
+          refMatch_selected_for_merge(character(0))
+
+          removeModal()
+
+          # Update table preserving search state
+          proxy <- dataTableProxy('refMatch_topCitations')
+
+          top_table <- results$summary %>%
+            select(
+              Citation = CR_canonical,
+              `Times Cited` = n,
+              `Variants Found` = n_variants
+            ) %>%
+            arrange(desc(`Times Cited`)) %>%
+            head(50) %>%
+            mutate(
+              Selected = "FALSE",
+              .before = 1
+            )
+
+          replaceData(proxy, top_table, resetPaging = FALSE, rownames = FALSE)
+
+          incProgress(1.0, detail = "Complete!")
+
+          showNotification(
+            HTML(paste0(
+              "<b>Manual merge completed!</b><br>",
+              length(old_selection),
+              " citations have been merged into one.<br>",
+              "Statistics have been updated."
+            )),
+            type = "message",
+            duration = 8
+          )
+        },
+        error = function(e) {
+          showNotification(
+            paste("Error during manual merge:", e$message),
+            type = "error",
+            duration = 10
+          )
+        }
+      )
+    })
+  })
+
+  # Apply normalized citations to values$M
+  observeEvent(input$refMatch_apply, {
+    req(refMatch_results())
+    req(values$M)
+
+    withProgress(message = 'Applying normalized citations...', value = 0, {
+      tryCatch(
+        {
+          incProgress(0.3, detail = "Updating CR field...")
+
+          if (
+            input$refMatch_keepOriginal && !"CR_original" %in% names(values$M)
+          ) {
+            values$M$CR_original <- values$M$CR
+          }
+
+          values$M <- values$M %>%
+            mutate(CR_original = CR) %>%
+            select(-CR) %>%
+            left_join(
+              refMatch_results()$CR_normalized %>% select(SR, CR),
+              by = "SR"
+            )
+
+          if (input$refMatch_addStats) {
+            stats <- refMatch_results()$CR_normalized %>%
+              select(SR, n_references_normalized = n_references)
+
+            values$M <- values$M %>%
+              left_join(stats, by = "SR")
+          }
+
+          incProgress(0.8, detail = "Finalizing...")
+
+          refMatch_applied(TRUE)
+
+          incProgress(1.0, detail = "Complete!")
+
+          showNotification(
+            HTML(paste0(
+              "<b>Normalized citations applied!</b><br>",
+              "The CR field has been updated with normalized citations.<br>",
+              "You can now continue with other analyses."
+            )),
+            type = "message",
+            duration = 8
+          )
+        },
+        error = function(e) {
+          showNotification(
+            paste("Error applying normalization:", e$message),
+            type = "error",
+            duration = 10
+          )
+        }
+      )
+    })
+  })
+
+  # Reset to original data
+  observeEvent(input$refMatch_reset, {
+    req(refMatch_M_original())
+
+    showModal(
+      modalDialog(
+        title = "Confirm Reset",
+        "Are you sure you want to reset to the original data? This will undo all citation normalization.",
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(
+            "refMatch_confirmReset",
+            "Yes, Reset",
+            class = "btn-danger"
+          )
+        )
+      )
+    )
+  })
+
+  # Confirm reset
+  observeEvent(input$refMatch_confirmReset, {
+    values$M <- refMatch_M_original()
+    refMatch_applied(FALSE)
+    refMatch_results(NULL)
+    refMatch_selected_for_merge(character(0))
+
+    removeModal()
+
+    # Expand the matching options box
+    shinyjs::runjs(
+      "$('#refMatch_optionsBox').closest('.box').removeClass('collapsed-box');"
+    )
+    shinyjs::runjs("$('#refMatch_optionsBox').slideDown();")
+
+    showNotification(
+      "Data reset to original state. All normalization has been removed.",
+      type = "warning",
+      duration = 5
+    )
+  })
+
+  # Status messages
+  output$refMatch_runStatus <- renderUI({
+    req(refMatch_results())
+
+    div(
+      style = "margin-top: 10px;",
+      tags$div(
+        class = "alert alert-success",
+        icon("check-circle"),
+        tags$b(" Matching completed!"),
+        br(),
+        tags$small("Results are ready. Click 'Apply' to update your data.")
+      )
+    )
+  })
+
+  output$refMatch_applyStatus <- renderUI({
+    if (refMatch_applied()) {
+      div(
+        style = "margin-top: 10px;",
+        tags$div(
+          class = "alert alert-success",
+          icon("check-circle"),
+          tags$b(" Applied!"),
+          br(),
+          tags$small("Normalized citations are active in your dataset.")
+        )
+      )
+    } else {
+      NULL
+    }
+  })
+
+  # Selection status - INLINE version
+  output$refMatch_selectionStatusInline <- renderUI({
+    n_selected <- length(refMatch_selected_for_merge())
+
+    if (n_selected == 0) {
+      tags$span(
+        style = "color: #999; font-size: 13px;",
+        icon("info-circle"),
+        " No citations selected"
+      )
+    } else if (n_selected == 1) {
+      tags$span(
+        style = "color: #f39c12; font-weight: bold; font-size: 13px;",
+        icon("exclamation-triangle"),
+        sprintf(" %d citation selected (need at least 2)", n_selected)
+      )
+    } else {
+      tags$span(
+        style = "color: #00a65a; font-weight: bold; font-size: 14px;",
+        icon("check-circle"),
+        sprintf(" %d citations selected - ready to merge!", n_selected)
+      )
+    }
+  })
+
+  # Value boxes
+  output$refMatch_original <- renderValueBox({
+    req(refMatch_results())
+
+    n_orig <- length(unique(refMatch_results()$full_data$CR))
+
+    valueBox(
+      value = formatC(n_orig, format = "d", big.mark = ","),
+      subtitle = "Original Citations",
+      icon = icon("book"),
+      color = "blue"
+    )
+  })
+
+  output$refMatch_normalized <- renderValueBox({
+    req(refMatch_results())
+
+    n_norm <- nrow(refMatch_results()$summary)
+
+    valueBox(
+      value = formatC(n_norm, format = "d", big.mark = ","),
+      subtitle = "Unique Citations (after matching)",
+      icon = icon("check-double"),
+      color = "green"
+    )
+  })
+
+  output$refMatch_duplicates <- renderValueBox({
+    req(refMatch_results())
+
+    n_orig <- length(unique(refMatch_results()$full_data$CR))
+    n_norm <- nrow(refMatch_results()$summary)
+    n_dup <- n_orig - n_norm
+    perc <- round(100 * n_dup / n_orig, 1)
+
+    valueBox(
+      value = paste0(
+        formatC(n_dup, format = "d", big.mark = ","),
+        " (",
+        perc,
+        "%)"
+      ),
+      subtitle = "Merged Variants",
+      icon = icon("copy"),
+      color = "red"
+    )
+  })
+
+  # Plots
+  output$refMatch_clusterSizePlot <- renderPlot({
+    req(refMatch_results())
+
+    cluster_sizes <- table(refMatch_results()$summary$n_variants)
+
+    df_plot <- data.frame(
+      n_variants = as.numeric(names(cluster_sizes)),
+      count = as.numeric(cluster_sizes)
+    )
+
+    ggplot(df_plot, aes(x = factor(n_variants), y = count)) +
+      geom_col(fill = "#3c8dbc", alpha = 0.8) +
+      labs(
+        title = "Distribution of Variant Counts",
+        x = "Number of Variants per Citation",
+        y = "Number of Citations"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(size = 9)
+      )
+  })
+
+  output$refMatch_variantsPlot <- renderPlot({
+    req(refMatch_results())
+
+    top_variants <- refMatch_results()$summary %>%
+      arrange(desc(n_variants)) %>%
+      head(10)
+
+    ggplot(
+      top_variants,
+      aes(x = reorder(substr(CR_canonical, 1, 40), n_variants), y = n_variants)
+    ) +
+      geom_col(fill = "#f39c12", alpha = 0.8) +
+      coord_flip() +
+      labs(
+        title = "Citations with Most Variants",
+        x = "",
+        y = "Number of Variants"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 12),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 9)
+      )
+  })
+
+  # Top citations table
+  output$refMatch_topCitations <- renderDT({
+    req(refMatch_results())
+
+    # Don't depend on refMatch_selected_for_merge() to avoid re-rendering
+    top_table <- refMatch_results()$summary %>%
+      select(
+        Citation = CR_canonical,
+        `Times Cited` = n,
+        `Variants Found` = n_variants
+      ) %>%
+      arrange(desc(`Times Cited`)) %>%
+      filter(`Times Cited` > 1)
+
+    # Add selection column - initially all FALSE
+    top_table <- top_table %>%
+      mutate(
+        Selected = "FALSE",
+        .before = 1
+      )
+
+    datatable(
+      top_table,
+      options = list(
+        pageLength = 10,
+        dom = 'frtip',
+        scrollX = TRUE,
+        searchHighlight = TRUE
+      ),
+      selection = list(mode = 'single', target = 'row'),
+      rownames = FALSE,
+      class = 'cell-border stripe'
+    ) %>%
+      formatStyle(
+        0, # Apply to entire row
+        target = 'row',
+        backgroundColor = styleEqual(c("TRUE", "FALSE"), c('#d4edda', 'white')),
+        valueColumns = 'Selected'
+      ) %>%
+      formatStyle(
+        'Selected',
+        target = 'cell',
+        backgroundColor = styleEqual(
+          c('TRUE', 'FALSE'),
+          c('#28a745', '#ffffff')
+        ),
+        color = styleEqual(c('TRUE', 'FALSE'), c('#ffffff', '#000000')),
+        fontWeight = 'bold',
+        textAlign = 'center'
+      )
+  })
+
+  # Variants table
+  output$refMatch_variantsTable <- renderDT({
+    req(refMatch_results())
+    req(input$refMatch_topCitations_rows_selected)
+
+    selected_row <- input$refMatch_topCitations_rows_selected
+    selected_citation <- refMatch_results()$summary$CR_canonical[selected_row]
+
+    variants <- refMatch_results()$full_data %>%
+      filter(CR_canonical == selected_citation) %>%
+      select(Variant = CR) %>%
+      group_by(Variant) %>%
+      summarise(Count = n(), .groups = "drop") %>%
+      arrange(desc(Count))
+
+    datatable(
+      variants,
+      options = list(
+        pageLength = 10,
+        dom = 'frtip',
+        scrollX = TRUE
+      ),
+      rownames = FALSE,
+      class = 'cell-border stripe'
+    )
+  })
+
+  # Download handlers
+  output$refMatch_download <- downloadHandler(
+    filename = function() {
+      format <- input$refMatch_exportFormat
+      base_name <- input$refMatch_filename
+
+      if (format == "xlsx") {
+        paste0(base_name, ".xlsx")
+      } else if (format == "rdata") {
+        paste0(base_name, ".RData")
+      } else {
+        paste0(base_name, ".zip")
+      }
+    },
+
+    content = function(file) {
+      req(refMatch_results())
+      req(values$M)
+
+      withProgress(message = 'Preparing export...', value = 0, {
+        incProgress(0.3, detail = "Processing data...")
+
+        M_normalized <- values$M
+
+        if (!refMatch_applied()) {
+          if (input$refMatch_keepOriginal) {
+            M_normalized$CR_original <- M_normalized$CR
+          }
+
+          M_normalized <- M_normalized %>%
+            select(-CR) %>%
+            left_join(
+              refMatch_results()$CR_normalized %>% select(SR, CR),
+              by = "SR"
+            )
+
+          if (input$refMatch_addStats) {
+            stats <- refMatch_results()$CR_normalized %>%
+              select(SR, n_references_normalized = n_references)
+
+            M_normalized <- M_normalized %>%
+              left_join(stats, by = "SR")
+          }
+        }
+
+        incProgress(0.6, detail = "Writing file...")
+
+        format <- input$refMatch_exportFormat
+
+        if (format == "xlsx") {
+          openxlsx::write.xlsx(M_normalized, file)
+        } else if (format == "rdata") {
+          M <- M_normalized
+          save(M, file = file)
+        } else {
+          temp_dir <- tempdir()
+          xlsx_file <- file.path(
+            temp_dir,
+            paste0(input$refMatch_filename, ".xlsx")
+          )
+          rdata_file <- file.path(
+            temp_dir,
+            paste0(input$refMatch_filename, ".RData")
+          )
+
+          openxlsx::write.xlsx(M_normalized, xlsx_file)
+          M <- M_normalized
+          save(M, file = rdata_file)
+
+          zip(file, files = c(xlsx_file, rdata_file), flags = "-j")
+        }
+
+        incProgress(1.0, detail = "Complete!")
+      })
+    }
+  )
+
+  output$refMatch_downloadReport <- downloadHandler(
+    filename = function() {
+      paste0("citation_matching_report_", Sys.Date(), ".xlsx")
+    },
+
+    content = function(file) {
+      req(refMatch_results())
+
+      withProgress(message = 'Generating report...', value = 0, {
+        incProgress(0.3, detail = "Preparing sheets...")
+
+        report_data <- list(
+          "Summary" = refMatch_results()$summary,
+          "Full_Data" = refMatch_results()$full_data %>% select(-blocking_key),
+          "Normalized_CR" = refMatch_results()$CR_normalized,
+          "Parameters" = data.frame(
+            Parameter = c(
+              "Threshold",
+              "Method",
+              "Date",
+              "Original_Citations",
+              "Normalized_Citations",
+              "Duplicates_Found",
+              "Applied_to_Data"
+            ),
+            Value = c(
+              input$refMatch_threshold,
+              input$refMatch_method,
+              as.character(Sys.Date()),
+              length(unique(refMatch_results()$full_data$CR)),
+              nrow(refMatch_results()$summary),
+              length(unique(refMatch_results()$full_data$CR)) -
+                nrow(refMatch_results()$summary),
+              ifelse(refMatch_applied(), "Yes", "No")
+            )
+          )
+        )
+
+        incProgress(0.7, detail = "Writing Excel file...")
+
+        openxlsx::write.xlsx(report_data, file)
+
+        incProgress(1.0, detail = "Complete!")
+      })
+    }
+  )
+
   # FILTERS MENU ----
-  
+
   #### Box about Filter Results ----
   output$textDim <- renderUI({
     n_doc_current <- dim(values$M)[1]
     n_doc_total <- dim(values$Morig)[1]
-    
+
     n_sources_current <- length(unique(values$M$SO))
     n_sources_total <- length(unique(values$Morig$SO))
-    
+
     n_authors_current <- length(unique(unlist(strsplit(values$M$AU, ";"))))
     n_authors_total <- length(unique(unlist(strsplit(values$Morig$AU, ";"))))
-    
+
     HTML(paste0(
       "<div class='fade-in' style='
       border: 1px solid #ddd;
@@ -1214,53 +2350,81 @@ To ensure the functionality of Biblioshiny,
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       margin-top: 15px;
     '>",
-      
+
       "<div style='display: flex; justify-content: space-between;'>",
       "<div style='flex: 1; font-weight: bold;'>Documents</div>",
-      "<div style='flex: 1; text-align: right;'>", n_doc_current, " of ", n_doc_total, "</div>",
+      "<div style='flex: 1; text-align: right;'>",
+      n_doc_current,
+      " of ",
+      n_doc_total,
       "</div>",
-      
+      "</div>",
+
       "<div style='display: flex; justify-content: space-between; margin-top: 5px;'>",
       "<div style='flex: 1; font-weight: bold;'>Sources</div>",
-      "<div style='flex: 1; text-align: right;'>", n_sources_current, " of ", n_sources_total, "</div>",
+      "<div style='flex: 1; text-align: right;'>",
+      n_sources_current,
+      " of ",
+      n_sources_total,
       "</div>",
-      
+      "</div>",
+
       "<div style='display: flex; justify-content: space-between; margin-top: 5px;'>",
       "<div style='flex: 1; font-weight: bold;'>Authors</div>",
-      "<div style='flex: 1; text-align: right;'>", n_authors_current, " of ", n_authors_total, "</div>",
+      "<div style='flex: 1; text-align: right;'>",
+      n_authors_current,
+      " of ",
+      n_authors_total,
       "</div>",
-      
+      "</div>",
+
       "</div>"
     ))
   })
-  
+
   #### Journal List Message ----
   output$journal_list_ui <- renderUI({
     req(input$journal_list_upload)
-    div(id = "journal_list_helptext", 
-        helpText("Journal list loaded. Now it will be used to filter the results.", style = "color:#dc3545"),
-        div(align = "center",
+    div(
+      id = "journal_list_helptext",
+      helpText(
+        "Journal list loaded. Now it will be used to filter the results.",
+        style = "color:#dc3545"
+      ),
+      div(
+        align = "center",
         actionBttn(
-          inputId = "viewJournals", label = strong("View List"),
-          width = "50%", style = "pill", color = "primary", size="s",
+          inputId = "viewJournals",
+          label = strong("View List"),
+          width = "50%",
+          style = "pill",
+          color = "primary",
+          size = "s",
           icon = icon(name = "eye", lib = "font-awesome")
-        )),
-        br()
         )
+      ),
+      br()
+    )
   })
-  
-  observeEvent(input$viewJournals,{
-    journal_list_html <- paste0("<ul style='padding-left: 20px;'>",
-                                paste0("<li>", stringi::stri_trans_totitle(values$journal_list), "</li>", collapse = ""),
-                                "</ul>")
+
+  observeEvent(input$viewJournals, {
+    journal_list_html <- paste0(
+      "<ul style='padding-left: 20px;'>",
+      paste0(
+        "<li>",
+        stringi::stri_trans_totitle(values$journal_list),
+        "</li>",
+        collapse = ""
+      ),
+      "</ul>"
+    )
 
     content_html <- paste0(
       "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
       journal_list_html,
       "</div>"
     )
-    
-    
+
     shinyWidgets::show_alert(
       title = "Journal List Loaded",
       text = HTML(content_html),
@@ -1269,22 +2433,29 @@ To ensure the functionality of Biblioshiny,
       btn_labels = "OK"
     )
   })
-  
+
   observeEvent(input$journal_list_upload, {
     req(input$journal_list_upload)
-    
-    journals<- read_journal_list(input$journal_list_upload$datapath)
+
+    journals <- read_journal_list(input$journal_list_upload$datapath)
     values$journal_list <- journals
-    journal_list_html <- paste0("<ul style='padding-left: 20px;'>",
-                                paste0("<li>", stringi::stri_trans_totitle(journals), "</li>", collapse = ""),
-                                "</ul>")
-    
+    journal_list_html <- paste0(
+      "<ul style='padding-left: 20px;'>",
+      paste0(
+        "<li>",
+        stringi::stri_trans_totitle(journals),
+        "</li>",
+        collapse = ""
+      ),
+      "</ul>"
+    )
+
     content_html <- paste0(
       "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
       journal_list_html,
       "</div>"
     )
-    
+
     shinyWidgets::show_alert(
       title = "Journal List Loaded",
       text = HTML(content_html),
@@ -1292,54 +2463,88 @@ To ensure the functionality of Biblioshiny,
       html = TRUE,
       btn_labels = "OK"
     )
-
   })
-  
+
   #### Journal Ranking list ----
   observeEvent(input$journal_ranking_upload, {
     req(input$journal_ranking_upload)
     # Load the journal ranking data
     ranking <- read_journal_ranking(input$journal_ranking_upload$datapath)
+    if (!is.null(ranking)) {
+      SOnotRanked <- setdiff(values$Morig$SO, ranking$SO)
+      if (length(SOnotRanked) > 0) {
+        ranking <- bind_rows(
+          ranking,
+          data.frame(
+            SO = SOnotRanked,
+            Ranking = rep("Not Ranked", length(SOnotRanked))
+          )
+        )
+      }
+    }
     values$journal_ranking <- ranking
     shinyjs::show("journal_ranking_subset")
   })
-  
+
   output$journal_ranking_ui <- renderUI({
     req(values$journal_ranking)
-    ranking <- values$journal_ranking %>% select("Ranking") %>% pull() %>% unique()
-    selectInput("journal_ranking_subset", "Select a Ranking Subset",
-                choices = ranking,
-                selected = ranking,
-                multiple = TRUE)
-    
-  })
-  
-  output$journal_ranking_ui_view <- renderUI({
-    req(input$journal_ranking_upload)
-    div(id = "journal_ranking_helptext", 
-        helpText("Journal Ranking list loaded. Now it will be used to filter the results.", style = "color:#dc3545"),
-        div(align = "center",
-            actionBttn(
-              inputId = "viewRankingJournals", label = strong("View Ranking"),
-              width = "50%", style = "pill", color = "primary", size="s",
-              icon = icon(name = "eye", lib = "font-awesome")
-            )),
-        br()
+    ranking <- values$journal_ranking %>%
+      select("Ranking") %>%
+      pull() %>%
+      unique()
+    selectInput(
+      "journal_ranking_subset",
+      "Select a Ranking Subset",
+      choices = ranking,
+      selected = ranking,
+      multiple = TRUE
     )
   })
-  
-  observeEvent(input$viewRankingJournals,{
-    journal_ranking_html <- paste0("<ul style='padding-left: 20px;'>",
-                                paste0("<li>", values$journal_ranking$Ranking, " -- ", stringi::stri_trans_totitle(values$journal_ranking$SO) ,"</li>", collapse = ""),
-                                "</ul>")
-    
+
+  output$journal_ranking_ui_view <- renderUI({
+    req(input$journal_ranking_upload)
+    div(
+      id = "journal_ranking_helptext",
+      helpText(
+        "Journal Ranking list loaded. Now it will be used to filter the results.",
+        style = "color:#dc3545"
+      ),
+      div(
+        align = "center",
+        actionBttn(
+          inputId = "viewRankingJournals",
+          label = strong("View Ranking"),
+          width = "50%",
+          style = "pill",
+          color = "primary",
+          size = "s",
+          icon = icon(name = "eye", lib = "font-awesome")
+        )
+      ),
+      br()
+    )
+  })
+
+  observeEvent(input$viewRankingJournals, {
+    journal_ranking_html <- paste0(
+      "<ul style='padding-left: 20px;'>",
+      paste0(
+        "<li>",
+        values$journal_ranking$Ranking,
+        " -- ",
+        stringi::stri_trans_totitle(values$journal_ranking$SO),
+        "</li>",
+        collapse = ""
+      ),
+      "</ul>"
+    )
+
     content_html <- paste0(
       "<div style='max-height: 300px; overflow-y: auto; text-align: left;'>",
       journal_ranking_html,
       "</div>"
     )
-    
-    
+
     shinyWidgets::show_alert(
       title = "Journal Ranking List",
       text = HTML(content_html),
@@ -1348,158 +2553,296 @@ To ensure the functionality of Biblioshiny,
       btn_labels = "OK"
     )
   })
-  
+
   #### Update Filter Inputs ----
   observe({
-    req(values$Morig) 
-    if (!"TCpY" %in% names(values$Morig)){
-      values$Morig <- values$Morig %>% 
-        mutate(Age = as.numeric(substr(Sys.time(),1,4)) - PY+1,
-               TCpY = round(TC/Age,2)) %>% 
-        group_by(PY) %>% 
-        mutate(NTC = TC/mean(TC, na.rm=T)) %>% 
+    req(values$Morig)
+    if (!"TCpY" %in% names(values$Morig)) {
+      values$Morig <- values$Morig %>%
+        mutate(
+          Age = as.numeric(substr(Sys.time(), 1, 4)) - PY + 1,
+          TCpY = round(TC / Age, 2)
+        ) %>%
+        group_by(PY) %>%
+        mutate(NTC = TC / mean(TC, na.rm = T)) %>%
         as.data.frame()
     }
 
-    artType=sort(unique(values$Morig$DT))
-    if ("LA" %in% names(values$Morig)){
-      LA <- sort(unique(values$Morig$LA))} else {
-        values$Morig$LA <- "N.A."
-        LA <- "N.A."
-      }
-    
-    updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
-    updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
-    updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$WC)), selected = sort(unique(values$SCdf$WC)))
-    updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
-    updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
-                      max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
-                      value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
+    artType = sort(unique(values$Morig$DT))
+    if ("LA" %in% names(values$Morig)) {
+      LA <- sort(unique(values$Morig$LA))
+    } else {
+      values$Morig$LA <- "N.A."
+      LA <- "N.A."
+    }
+    values$Morig$TCpY <- as.numeric(values$Morig$TCpY)
+
+    updateSelectizeInput(
+      session,
+      "selectType",
+      choices = artType,
+      selected = artType,
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "selectLA",
+      choices = LA,
+      selected = LA,
+      server = TRUE
+    )
+    updateSliderInput(
+      session,
+      "sliderPY",
+      min = min(values$Morig$PY, na.rm = T),
+      max = max(values$Morig$PY, na.rm = T),
+      value = c(
+        min(values$Morig$PY, na.rm = T),
+        max(values$Morig$PY, na.rm = T)
+      )
+    )
+    updateMultiInput(
+      session,
+      "subject_category",
+      choices = sort(unique(values$SCdf$WC)),
+      selected = sort(unique(values$SCdf$WC))
+    )
+    updateSliderInput(
+      session,
+      "sliderTC",
+      min = 0,
+      max = max(values$Morig$TC),
+      value = c(0, max(values$Morig$TC))
+    )
+    updateSliderInput(
+      session,
+      "sliderTCpY",
+      min = floor(min(values$Morig$TCpY, na.rm = T)),
+      max = ceiling(max(values$Morig$TCpY, na.rm = T)),
+      step = 0.1,
+      value = c(
+        floor(min(values$Morig$TCpY, na.rm = T)),
+        ceiling(max(values$Morig$TCpY, na.rm = T))
+      )
+    )
   })
-  
+
   observe({
     req(values$SCdf)
-    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$WC)), selected = sort(unique(values$SCdf$WC)))
-    if (length(unique(values$SCdf$WC)) == 1){
+    updateMultiInput(
+      session,
+      "subject_category",
+      choices = sort(unique(values$SCdf$WC)),
+      selected = sort(unique(values$SCdf$WC))
+    )
+    if (length(unique(values$SCdf$WC)) == 1) {
       if (unique(values$SCdf$WC) == "N.A.") shinyjs::hide("subject_category")
-  } else{
+    } else {
       shinyjs::show("subject_category")
     }
   })
 
   observe({
     req(values$Morig) # assicurati che i dati siano già caricati
-    CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
+    CO <- sort(unique(
+      values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)
+    ))
     updateMultiInput(session, "country", choices = CO, selected = CO)
   })
-  
+
   #### Update filtered data ----
   observeEvent(input$applyFilter, {
     DTfiltered()
     updateTabItems(session, "sidebarmenu", "filters")
+    showNotification(
+      "Filters applied successfully.",
+      type = "message",
+      duration = 3
+    )
   })
-  
+
   #### Reset Filters ----
   observeEvent(input$resetFilter, {
     values$M <- values$Morig
     updateTabItems(session, "sidebarmenu", "filters")
-    
+
     # reset del fileInput
     shinyjs::reset("journal_list_upload")
     shinyjs::hide("journal_list_helptext")
     values$journal_list <- unique(values$Morig$SO)
+    values$journal_ranking <- NULL
     shinyjs::reset("journal_ranking_upload")
     shinyjs::hide("journal_ranking_subset")
     shinyjs::hide("journal_ranking_helptext")
-    
-    if (!"TCpY" %in% names(values$Morig)){
-      values$Morig <- values$Morig %>% 
-        mutate(Age = as.numeric(substr(Sys.time(),1,4)) - PY+1,
-               TCpY = round(TC/Age,2)) %>% 
-        group_by(PY) %>% 
-        mutate(NTC = TC/mean(TC, na.rm=T)) %>% 
+
+    if (!"TCpY" %in% names(values$Morig)) {
+      values$Morig <- values$Morig %>%
+        mutate(
+          Age = as.numeric(substr(Sys.time(), 1, 4)) - PY + 1,
+          TCpY = round(TC / Age, 2)
+        ) %>%
+        group_by(PY) %>%
+        mutate(NTC = TC / mean(TC, na.rm = T)) %>%
         as.data.frame()
     }
-    
-    artType=sort(unique(values$Morig$DT))
-    if ("LA" %in% names(values$Morig)){
-      LA <- sort(unique(values$Morig$LA))} else {
-        values$Morig$LA <- "N.A."
-        LA <- "N.A."
-      }
-    
-    updateSelectizeInput(session, "selectType", choices = artType, selected = artType, server = TRUE)
-    updateSelectizeInput(session, "selectLA", choices = LA, selected = LA, server = TRUE)
-    updateSliderInput(session, "sliderPY", min = min(values$Morig$PY,na.rm=T), max = max(values$Morig$PY,na.rm=T), value = c(min(values$Morig$PY,na.rm=T), max(values$Morig$PY,na.rm=T)))
-    updateMultiInput(session, "subject_category", choices = sort(unique(values$SCdf$WC)), selected = sort(unique(values$SCdf$WC)))
-    
-    updateSelectizeInput(session, "region", 
-                         selected = c("AFRICA", "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "SEVEN SEAS (OPEN OCEAN)", "OCEANIA","Unknown")) # supponendo sia già calcolato
-    CO <- sort(unique(values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)))
+
+    artType = sort(unique(values$Morig$DT))
+    if ("LA" %in% names(values$Morig)) {
+      LA <- sort(unique(values$Morig$LA))
+    } else {
+      values$Morig$LA <- "N.A."
+      LA <- "N.A."
+    }
+
+    updateSelectizeInput(
+      session,
+      "selectType",
+      choices = artType,
+      selected = artType,
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "selectLA",
+      choices = LA,
+      selected = LA,
+      server = TRUE
+    )
+    updateSliderInput(
+      session,
+      "sliderPY",
+      min = min(values$Morig$PY, na.rm = T),
+      max = max(values$Morig$PY, na.rm = T),
+      value = c(
+        min(values$Morig$PY, na.rm = T),
+        max(values$Morig$PY, na.rm = T)
+      )
+    )
+    updateMultiInput(
+      session,
+      "subject_category",
+      choices = sort(unique(values$SCdf$WC)),
+      selected = sort(unique(values$SCdf$WC))
+    )
+
+    updateSelectizeInput(
+      session,
+      "region",
+      selected = c(
+        "AFRICA",
+        "ASIA",
+        "EUROPE",
+        "NORTH AMERICA",
+        "SOUTH AMERICA",
+        "SEVEN SEAS (OPEN OCEAN)",
+        "OCEANIA",
+        "Unknown"
+      )
+    ) # supponendo sia già calcolato
+    CO <- sort(unique(
+      values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)
+    ))
     updateMultiInput(session, "country", choices = unique(CO), selected = CO)
-    updateSelectInput(session, "bradfordSources",selected = "all")
-    if (!is.null(values$journal_ranking)) updateSelectInput(session, "journal_raking_subset",selected = values$journal_ranking %>% select("Ranking") %>% pull() %>% unique())
-    updateSliderInput(session, "sliderTC", min = 0, max = max(values$Morig$TC), value = c(0, max(values$Morig$TC)))
-    updateSliderInput(session, "sliderTCpY", min = floor(min(values$Morig$TCpY, na.rm=T)),
-                      max = ceiling(max(values$Morig$TCpY,na.rm=T)), step=0.1,
-                      value = c(floor(min(values$Morig$TCpY, na.rm=T)),ceiling(max(values$Morig$TCpY,na.rm=T))))
+    updateSelectInput(session, "bradfordSources", selected = "all")
+    if (!is.null(values$journal_ranking)) {
+      updateSelectInput(
+        session,
+        "journal_raking_subset",
+        selected = values$journal_ranking %>%
+          select("Ranking") %>%
+          pull() %>%
+          unique()
+      )
+    }
+    updateSliderInput(
+      session,
+      "sliderTC",
+      min = 0,
+      max = max(values$Morig$TC),
+      value = c(0, max(values$Morig$TC))
+    )
+    updateSliderInput(
+      session,
+      "sliderTCpY",
+      min = floor(min(values$Morig$TCpY, na.rm = T)),
+      max = ceiling(max(values$Morig$TCpY, na.rm = T)),
+      step = 0.1,
+      value = c(
+        floor(min(values$Morig$TCpY, na.rm = T)),
+        ceiling(max(values$Morig$TCpY, na.rm = T))
+      )
+    )
+    showNotification(
+      "Filters reset to default.",
+      type = "warning",
+      duration = 3
+    )
   })
-  
+
   #### Filter Data Reactive Function ----
-  DTfiltered <- eventReactive(input$applyFilter,{
+  DTfiltered <- eventReactive(input$applyFilter, {
     M <- values$Morig
     B <- bradford(M)$table
     # list of documents per subject categories
     wc <- values$SCdf %>%
       dplyr::filter(WC %in% input$subject_category) %>%
-      pull(SR) %>% unique()
+      pull(SR) %>%
+      unique()
     # list of documents per country
     co <- values$COdf %>%
       dplyr::filter(CO %in% input$country) %>%
-      pull(SR) %>% unique()
-    
-    if (!is.null(values$journal_list)){
-      M <- M %>% 
+      pull(SR) %>%
+      unique()
+
+    if (!is.null(values$journal_list)) {
+      M <- M %>%
         dplyr::filter(SO %in% values$journal_list) # filter by journal list
     }
-    
-    if (inherits(values$journal_ranking,"data.frame")){
+
+    if (inherits(values$journal_ranking, "data.frame")) {
       soR <- values$journal_ranking %>%
         dplyr::filter(Ranking %in% input$journal_ranking_subset) %>%
-        pull(SO) %>% unique()
-      M <- M %>% 
+        pull(SO) %>%
+        unique()
+      M <- M %>%
         dplyr::filter(SO %in% soR) # filter by journal ranking
     }
-    
-  M <- M %>%
+
+    M <- M %>%
       dplyr::filter(PY >= input$sliderPY[1], PY <= input$sliderPY[2]) %>% # publication year
-      dplyr::filter(TCpY >= input$sliderTCpY[1], TCpY <= input$sliderTCpY[2]) %>% # average citations per year
+      dplyr::filter(
+        TCpY >= input$sliderTCpY[1],
+        TCpY <= input$sliderTCpY[2]
+      ) %>% # average citations per year
       dplyr::filter(TC >= input$sliderTC[1], TC <= input$sliderTC[2]) %>% # total citations
       dplyr::filter(DT %in% input$selectType) %>% # document type
       dplyr::filter(LA %in% input$selectLA) %>% # language
       dplyr::filter(SR %in% wc) %>% # subject categories
       dplyr::filter(SR %in% co) # countries
-      
-    switch(input$bradfordSources,
-           "core"={
-             so <- B$SO[B$Zone %in% "Zone 1"]
-           },
-           "zone2"={
-             so <- B$SO[B$Zone %in% c("Zone 1", "Zone 2")]
-           },
-           "all"={so <- B$SO})
+
+    switch(
+      input$bradfordSources,
+      "core" = {
+        so <- B$SO[B$Zone %in% "Zone 1"]
+      },
+      "zone2" = {
+        so <- B$SO[B$Zone %in% c("Zone 1", "Zone 2")]
+      },
+      "all" = {
+        so <- B$SO
+      }
+    )
     M <- M %>%
       dplyr::filter(SO %in% so)
-    
-    values<-initial(values)
+
+    values <- initial(values)
     row.names(M) <- M$SR
     class(M) <- c("bibliometrixDB", "data.frame")
     values$M <- M
   })
-  
+
   #### Show Filtered Data Modal ----
-  observeEvent(input$viewDataFilter,{
+  observeEvent(input$viewDataFilter, {
     showModal(modalDialog(
       title = "Filtered Data",
       size = "l",
@@ -1510,673 +2853,1257 @@ To ensure the functionality of Biblioshiny,
       )
     ))
   })
-  
+
   output$dataFiltered <- DT::renderDT({
     DTfiltered()
     Mdisp <- values$M %>%
       select(SR, AU, TI, SO, PY, LA, DT, TC, TCpY, DI) %>%
       as.data.frame()
-    
-    if (dim(Mdisp)[1]>0){
-      DTformat(Mdisp, nrow=3, filename="Filtered_DataTable", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='70%', filter="top",
-               columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
-    }else{Mdisp=data.frame(Message="Empty collection", row.names = " ")}
+
+    if (dim(Mdisp)[1] > 0) {
+      DTformat(
+        Mdisp,
+        nrow = 3,
+        filename = "Filtered_DataTable",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = NULL,
+        dom = TRUE,
+        size = '70%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 2,
+        title = "",
+        button = FALSE,
+        escape = FALSE,
+        selection = FALSE,
+        scrollX = TRUE
+      )
+    } else {
+      Mdisp = data.frame(Message = "Empty collection", row.names = " ")
+    }
   })
-  
-  
+
   # OVERVIEW ----
   ### Main Info ----
   output$MainInfo <- DT::renderDT({
-    DTformat(values$TABvb , nrow=50, filename="Main_Information", pagelength=TRUE, left=1, right=2, numeric=NULL, dom=TRUE, size='100%', filter="none",
-             columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, selection=FALSE)
+    DTformat(
+      values$TABvb,
+      nrow = 50,
+      filename = "Main_Information",
+      pagelength = TRUE,
+      left = 1,
+      right = 2,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   #### box1 ---------------
   output$Timespan <- renderValueBox({
     TAB <- ValueBoxes(values$M)
     values$TABvb <- TAB
-    valueBox(value = p(TAB[TAB$Description=="Timespan", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong((TAB[TAB$Description=="Timespan", 2])), style = 'font-size:36px;color:white;', align="center"), 
-             icon = fa_i(name="hourglass"), color = "blue",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Timespan", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong((TAB[TAB$Description == "Timespan", 2])),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "hourglass"),
+      color = "blue",
+      width = NULL
+    )
   })
-  
+
   #### box2 ---------------
   output$au <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Authors", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Authors", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="user"), color = "light-blue",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Authors", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Authors", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "user"),
+      color = "light-blue",
+      width = NULL
+    )
   })
-  
+
   #### box3 ------------
   output$kw <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Author's Keywords (DE)", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Author's Keywords (DE)", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="spell-check"), color = "aqua",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Author's Keywords (DE)", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Author's Keywords (DE)", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "spell-check"),
+      color = "aqua",
+      width = NULL
+    )
   })
-  
+
   #### box4 ---------------
   output$so <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p("Sources", style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Sources (Journals, Books, etc)", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name ="book"), color = "blue",
-             width = NULL)
+    valueBox(
+      value = p("Sources", style = 'font-size:16px;color:white;'),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Sources (Journals, Books, etc)", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "book"),
+      color = "blue",
+      width = NULL
+    )
   })
-  
+
   #### box5 --------------------
   output$auS1 <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Authors of single-authored docs", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Authors of single-authored docs", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="pen-fancy"), color = "light-blue",
-             width = NULL)
-  }) 
-  
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Authors of single-authored docs", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Authors of single-authored docs", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "pen-fancy"),
+      color = "light-blue",
+      width = NULL
+    )
+  })
+
   #### box6 -------------
   output$cr <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="References", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="References", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="file"), color = "aqua",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "References", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "References", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "file"),
+      color = "aqua",
+      width = NULL
+    )
   })
-  
+
   #### box7 ----------------
   output$doc <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Documents", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Documents", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="layer-group"), color = "blue",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Documents", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Documents", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "layer-group"),
+      color = "blue",
+      width = NULL
+    )
   })
-  
+
   #### box8 ---------------
   output$col <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(strong("International Co-Authorship"), style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="International co-authorships %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
-             icon = icon("globe",lib = "glyphicon"), color = "light-blue",
-             width = NULL)
+    valueBox(
+      value = p(
+        strong("International Co-Authorship"),
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(
+          TAB[TAB$Description == "International co-authorships %", 2],
+          " %"
+        ),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = icon("globe", lib = "glyphicon"),
+      color = "light-blue",
+      width = NULL
+    )
   })
-  
+
   #### box9 ---------------
   output$agePerDoc <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Document Average Age", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Document Average Age", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="calendar"), color = "aqua",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Document Average Age", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Document Average Age", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "calendar"),
+      color = "aqua",
+      width = NULL
+    )
   })
-  
+
   #### box10 ------------------
   output$cagr <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(strong("Annual Growth Rate"), style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Annual Growth Rate %", 2]," %"), style = 'font-size:36px;color:white;',align="center"), 
-             icon = icon("arrow-up", lib="glyphicon"), color = "blue",
-             width = NULL)
+    valueBox(
+      value = p(
+        strong("Annual Growth Rate"),
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Annual Growth Rate %", 2], " %"),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = icon("arrow-up", lib = "glyphicon"),
+      color = "blue",
+      width = NULL
+    )
   })
-  
+
   #### box11 ------
   output$coAuPerDoc <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Co-Authors per Doc", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Co-Authors per Doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = fa_i(name="users"), color = "light-blue",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Co-Authors per Doc", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Co-Authors per Doc", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = fa_i(name = "users"),
+      color = "light-blue",
+      width = NULL
+    )
   })
-  
+
   #### box12 -------
   output$tc <- renderValueBox({
     TAB <- values$TABvb
-    valueBox(value = p(TAB[TAB$Description=="Average citations per doc", 1], style = 'font-size:16px;color:white;'),
-             subtitle = p(strong(TAB[TAB$Description=="Average citations per doc", 2]), style = 'font-size:36px;color:white;',align="center"), 
-             icon = icon("volume-up", lib = "glyphicon"), color = "aqua",
-             width = NULL)
+    valueBox(
+      value = p(
+        TAB[TAB$Description == "Average citations per doc", 1],
+        style = 'font-size:16px;color:white;'
+      ),
+      subtitle = p(
+        strong(TAB[TAB$Description == "Average citations per doc", 2]),
+        style = 'font-size:36px;color:white;',
+        align = "center"
+      ),
+      icon = icon("volume-up", lib = "glyphicon"),
+      color = "aqua",
+      width = NULL
+    )
   })
-  
-  observeEvent(input$reportMI,{
-    if(!is.null(values$TABvb)){
+
+  observeEvent(input$reportMI, {
+    if (!is.null(values$TABvb)) {
       sheetname <- "MainInfo"
       list_df <- list(values$TABvb)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$wb <- res$wb
-      popUp(title="Main Information", type="success")
+      popUp(title = "Main Information", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # gemini button for word network
   output$MainInfoGeminiUI <- renderUI({
     #values <- geminiWaitingMessage(values, input$sidebarmenu)
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$MainInfoGemini, values)
   })
-  
+
   # Annual Production ----
   output$CAGR <- renderText({
-    paste0(values$GR," %")
+    paste0(values$GR, " %")
   })
-  
+
   output$AnnualProdPlot <- renderPlotly({
-    res <- descriptive(values,type="tab2")
-    values <-res$values
+    res <- descriptive(values, type = "tab2")
+    values <- res$values
     Y <- values$TAB
-    
-    names(Y)=c("Year","Freq")
-    x <- c(max(Y$Year)-0.02-diff(range(Y$Year))*0.125, max(Y$Year)-0.02)+1
-    y <- c(min(Y$Freq),min(Y$Freq)+diff(range(Y$Freq))*0.125)
-    
-    g=ggplot2::ggplot(Y, aes(x = Year, y = Freq, text=paste("Year: ",Year,"\nN .of Documents: ",Freq))) +
-      geom_line(aes(group="NA")) +
+
+    names(Y) = c("Year", "Freq")
+    x <- c(
+      max(Y$Year) - 0.02 - diff(range(Y$Year)) * 0.125,
+      max(Y$Year) - 0.02
+    ) +
+      1
+    y <- c(min(Y$Freq), min(Y$Freq) + diff(range(Y$Freq)) * 0.125)
+
+    g = ggplot2::ggplot(
+      Y,
+      aes(
+        x = Year,
+        y = Freq,
+        text = paste("Year: ", Year, "\nN .of Documents: ", Freq)
+      )
+    ) +
+      geom_line(aes(group = "NA")) +
       #geom_area(aes(group="NA"),fill = 'grey90', alpha = .5) +
-      labs(x = 'Year'
-           , y = 'Articles'
-           , title = "Annual Scientific Production") +
-      scale_x_continuous(breaks= (Y$Year[seq(1,length(Y$Year),by=2)])) +
-      theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#FFFFFF')
-            ,panel.grid.minor = element_line(color = '#EFEFEF')
-            ,panel.grid.major = element_line(color = '#EFEFEF')
-            ,plot.title = element_text(size = 24)
-            ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 0)
-            ,axis.title.x = element_text(hjust = 0)
-            ,axis.text.x = element_text(vjust = 1, angle = 90)
-            ,axis.line.x = element_line(color="black",linewidth=0.5)
-            ,axis.line.y = element_line(color="black",linewidth=0.5)
+      labs(x = 'Year', y = 'Articles', title = "Annual Scientific Production") +
+      scale_x_continuous(breaks = (Y$Year[seq(1, length(Y$Year), by = 2)])) +
+      theme(
+        text = element_text(color = "#444444"),
+        panel.background = element_rect(fill = '#FFFFFF'),
+        panel.grid.minor = element_line(color = '#EFEFEF'),
+        panel.grid.major = element_line(color = '#EFEFEF'),
+        plot.title = element_text(size = 24),
+        axis.title = element_text(size = 14, color = '#555555'),
+        axis.title.y = element_text(vjust = 1, angle = 0),
+        axis.title.x = element_text(hjust = 0),
+        axis.text.x = element_text(vjust = 1, angle = 90),
+        axis.line.x = element_line(color = "black", linewidth = 0.5),
+        axis.line.y = element_line(color = "black", linewidth = 0.5)
       ) +
-      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+      annotation_custom(
+        values$logoGrid,
+        xmin = x[1],
+        xmax = x[2],
+        ymin = y[1],
+        ymax = y[2]
+      )
     values$ASPplot <- g
-    
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.7, size = 0.10)
   })
-  
-  observeEvent(input$reportASP,{
-    if(!is.null(values$TAB)){
+
+  observeEvent(input$reportASP, {
+    if (!is.null(values$TAB)) {
       list_df <- list(values$TAB)
       list_plot <- list(values$ASPplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AnnualSciProd", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "AnnualSciProd",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Annual Scientific Production", type="success")
+      popUp(title = "Annual Scientific Production", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   output$ASPplot.save <- downloadHandler(
     filename = function() {
-      
-      paste("AnnualScientificProduction-", Sys.Date(), ".png", sep="")
+      paste("AnnualScientificProduction-", Sys.Date(), ".png", sep = "")
     },
-    
+
     content <- function(file) {
-      ggsave(filename = file, plot = values$ASPplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$ASPplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$AnnualProdTable <- DT::renderDT({
     TAB <- values$TAB
-    DTformat(TAB , nrow=10, filename="Annual_Production", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, size='100%', filter="none",
-             columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Annual_Production",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   ## Annual Citation per Year ----
   output$AnnualTotCitperYearPlot <- renderPlotly({
-    current_year = as.numeric(substr(Sys.Date(),1,4))+1
+    current_year = as.numeric(substr(Sys.Date(), 1, 4)) + 1
     Table2 <- values$M %>%
-      group_by(PY) %>% 
-      summarize(MeanTCperArt=round(mean(TC, na.rm=TRUE),2),
-                N =n()) %>% 
-      mutate(MeanTCperYear = round(MeanTCperArt/(current_year-PY),2),
-             CitableYears = current_year-PY) %>% 
-      rename(Year = PY) %>% 
+      group_by(PY) %>%
+      summarize(MeanTCperArt = round(mean(TC, na.rm = TRUE), 2), N = n()) %>%
+      mutate(
+        MeanTCperYear = round(MeanTCperArt / (current_year - PY), 2),
+        CitableYears = current_year - PY
+      ) %>%
+      rename(Year = PY) %>%
       drop_na()
-    values$AnnualTotCitperYear=Table2
-    Table2$group="A"
-    
-    x <- c(max(Table2$Year)-0.02-diff(range(Table2$Year))*0.125, max(Table2$Year)-0.02)+1
-    y <- c(min(Table2$MeanTCperYear),min(Table2$MeanTCperYear)+diff(range(Table2$MeanTCperYear))*0.125)
-    
-    g <- ggplot(Table2, aes(x = Year, y =MeanTCperYear,text=paste("Year: ",Year,"\nAverage Citations per Year: ",round(MeanTCperYear,1)))) +
-      geom_line(aes(x = Year, y = MeanTCperYear, group=group)) +
+    values$AnnualTotCitperYear = Table2
+    Table2$group = "A"
+
+    x <- c(
+      max(Table2$Year) - 0.02 - diff(range(Table2$Year)) * 0.125,
+      max(Table2$Year) - 0.02
+    ) +
+      1
+    y <- c(
+      min(Table2$MeanTCperYear),
+      min(Table2$MeanTCperYear) + diff(range(Table2$MeanTCperYear)) * 0.125
+    )
+
+    g <- ggplot(
+      Table2,
+      aes(
+        x = Year,
+        y = MeanTCperYear,
+        text = paste(
+          "Year: ",
+          Year,
+          "\nAverage Citations per Year: ",
+          round(MeanTCperYear, 1)
+        )
+      )
+    ) +
+      geom_line(aes(x = Year, y = MeanTCperYear, group = group)) +
       #geom_area(aes(x = Year, y = MeanTCperYear, group=group),fill = 'grey90', alpha = .5) +
-      labs(x = 'Year'
-           , y = 'Citations'
-           , title = "Average Citations per Year")+
-      scale_x_continuous(breaks= (Table2$Year[seq(1,length(Table2$Year),by=2)])) +
-      theme(text = element_text(color = "#444444")
-            ,panel.background = element_rect(fill = '#FFFFFF')
-            ,panel.grid.minor = element_line(color = '#EFEFEF')
-            ,panel.grid.major = element_line(color = '#EFEFEF')
-            ,plot.title = element_text(size = 24)
-            ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 0)
-            ,axis.title.x = element_text(hjust = 0)
-            ,axis.line.x = element_line(color="black",linewidth=0.5)
-            ,axis.line.y = element_line(color="black",linewidth=0.5)
-      ) + 
-      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
+      labs(x = 'Year', y = 'Citations', title = "Average Citations per Year") +
+      scale_x_continuous(
+        breaks = (Table2$Year[seq(1, length(Table2$Year), by = 2)])
+      ) +
+      theme(
+        text = element_text(color = "#444444"),
+        panel.background = element_rect(fill = '#FFFFFF'),
+        panel.grid.minor = element_line(color = '#EFEFEF'),
+        panel.grid.major = element_line(color = '#EFEFEF'),
+        plot.title = element_text(size = 24),
+        axis.title = element_text(size = 14, color = '#555555'),
+        axis.title.y = element_text(vjust = 1, angle = 0),
+        axis.title.x = element_text(hjust = 0),
+        axis.line.x = element_line(color = "black", linewidth = 0.5),
+        axis.line.y = element_line(color = "black", linewidth = 0.5)
+      ) +
+      annotation_custom(
+        values$logoGrid,
+        xmin = x[1],
+        xmax = x[2],
+        ymin = y[1],
+        ymax = y[2]
+      )
     values$ACpYplot <- g
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.7, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.7, size = 0.10)
   })
-  
-  observeEvent(input$reportACpY,{
-    if(!is.null(values$AnnualTotCitperYear)){
+
+  observeEvent(input$reportACpY, {
+    if (!is.null(values$AnnualTotCitperYear)) {
       list_df <- list(values$AnnualTotCitperYear)
       list_plot <- list(values$ACpYplot)
-      wb <- addSheetToReport(list_df, list_plot, sheetname = "AnnualCitPerYear", wb = values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "AnnualCitPerYear",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Average Citations per Year", type="success")
+      popUp(title = "Average Citations per Year", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   output$ACpYplot.save <- downloadHandler(
     filename = function() {
-      paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep="")
+      paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$ACpYplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$ACpYplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$AnnualTotCitperYearTable <- DT::renderDT({
     TAB <- values$AnnualTotCitperYear
-    DTformat(TAB , nrow=10, filename="Annual_Total_Citation_per_Year", pagelength=TRUE, left=NULL, right=NULL, numeric=c(2,4), dom=TRUE, size='100%', filter="none",
-             columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Annual_Total_Citation_per_Year",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(2, 4),
+      dom = TRUE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  ## Three Fields Plot ---- 
-  TFP <- eventReactive(input$apply3F,{
-    fields=c(input$LeftField, input$CentralField, input$RightField)
-    threeFieldsPlot(values$M, fields=fields,n=c(input$LeftFieldn, input$CentralFieldn,input$RightFieldn))
+
+  ## Life Cycle ----
+
+  observeEvent(input$applyDLC, {
+    req(values$M)
+    if (nrow(values$M) > 1) {
+      values$DLC <- lifeCycle(
+        values$M %>% group_by(PY) %>% count(),
+        forecast_years = 20,
+        plot = FALSE
+      )
+      values$DLCplotYear <- plotLifeCycle(values$DLC, plot_type = "annual")
+      values$DLCplotCum <- plotLifeCycle(values$DLC, plot_type = "cumulative")
+      values$DLC$parameters <- values$DLC$parameters %>%
+        as.data.frame() %>%
+        tibble::rownames_to_column("Metrics") %>%
+        rename(Value = ".")
+    } else {
+      values$DLC = NULL
+    }
   })
-  
+
+  output$lifeCycleSummaryUIid <- renderUI({
+    req(values$DLC)
+    lifeCycleSummaryUI(values$DLC)
+  })
+
+  output$DLCPlotYear <- renderPlotly({
+    req(values$DLCplotYear)
+    values$DLCplotYear
+  })
+
+  output$DLCPlotCum <- renderPlotly({
+    req(values$DLCplotCum)
+    values$DLCplotCum
+  })
+
+  observeEvent(input$reportDLC, {
+    if (!is.null(values$DLC)) {
+      values$DLC$residuals <- values$DLC$residuals %>%
+        as.data.frame() %>%
+        tibble::rownames_to_column("Year") %>%
+        rename(Residuals = ".")
+      values$DLC$base_year <- values$DLC$base_year %>%
+        as.data.frame() %>%
+        rename(base_year = ".")
+      list_df <- values$DLC
+      list_plot <- list(
+        ggplotLifeCycle(values$DLC, plot_type = c("annual")),
+        ggplotLifeCycle(values$DLC, plot_type = c("cumulative"))
+      )
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "LifeCycle",
+        wb = values$wb
+      )
+      values$wb <- wb
+      popUp(title = "Life Cycle", type = "success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type = "error")
+    }
+  })
+
+  # gemini button for DLC
+  output$DLCGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
+    geminiOutput(title = "", content = values$DLCGemini, values)
+  })
+
+  output$DLCplot.save <- downloadHandler(
+    filename = function() {
+      paste("LifeCycle-", Sys.Date(), ".zip", sep = "")
+    },
+    content = function(file) {
+      tmpdir <- tempdir()
+      owd <- setwd(tmpdir)
+      on.exit(setwd(owd))
+
+      myfile <- NULL
+      for (i in c("annual", "cumulative")) {
+        filename <- basename(sub(".zip", paste0("_", i, ".png"), file))
+        myfile <- c(myfile, filename)
+
+        ggsave(
+          filename = filename,
+          plot = ggplotLifeCycle(values$DLC, plot_type = c(i)),
+          dpi = values$dpi,
+          height = values$h,
+          width = values$h * 2,
+          bg = "white"
+        )
+      }
+
+      zip::zip(zipfile = file, files = myfile, include_directories = FALSE)
+    },
+    contentType = "zip"
+  )
+
+  ## Three Fields Plot ----
+  TFP <- eventReactive(input$apply3F, {
+    fields = c(input$LeftField, input$CentralField, input$RightField)
+    threeFieldsPlot(
+      values$M,
+      fields = fields,
+      n = c(input$LeftFieldn, input$CentralFieldn, input$RightFieldn)
+    )
+  })
+
   output$ThreeFieldsPlot <- renderPlotly({
-    values$TFP <- TFP()  
-    
+    values$TFP <- TFP()
+
     is.reactive(values$TFP)
     values$TFP
   })
-  
-  
+
   # gemini button for Three Fields Plot
   output$TFPGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$TFPGemini, values)
-    
   })
-  
-  observeEvent(input$reportTFP,{
-    if (!is.null(values$TFP)){
+
+  observeEvent(input$reportTFP, {
+    if (!is.null(values$TFP)) {
       sheetname <- "ThreeFieldsPlot"
-      ind <- which(regexpr(sheetname,values$wb$sheet_names)>-1)
-      if (length(ind)>0){
+      ind <- which(regexpr(sheetname, values$wb$sheet_names) > -1)
+      if (length(ind) > 0) {
         sheetname <- paste(sheetname, "(", length(ind) + 1, ")", sep = "")
-      } 
-      addWorksheet(wb=values$wb, sheetName=sheetname, gridLines = FALSE)
-      values$fileTFP <- screenSh(values$TFP, zoom = 2, type="plotly")
-      values$list_file <- rbind(values$list_file, c(sheetname,values$fileTFP,1))
-      popUp(title="Three-Field Plot", type="success")
+      }
+      addWorksheet(wb = values$wb, sheetName = sheetname, gridLines = FALSE)
+      values$fileTFP <- screenSh(values$TFP, zoom = 2, type = "plotly")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname, values$fileTFP, 1)
+      )
+      popUp(title = "Three-Field Plot", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # SOURCES MENU ----
   ### Most Relevant Sources ----
-  MRSources <- eventReactive(input$applyMRSources,{
-    res <- descriptive(values,type="tab7")
-    values <-res$values
-    values$TABSo<-values$TAB
-    xx<- values$TAB %>% 
+  MRSources <- eventReactive(input$applyMRSources, {
+    res <- descriptive(values, type = "tab7")
+    values <- res$values
+    values$TABSo <- values$TAB
+    xx <- values$TAB %>%
       drop_na()
-    if (input$MostRelSourcesK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostRelSourcesK}
-    xx <- xx %>% 
-      slice_head(n=k)
-    xx$Sources=substr(xx$Sources,1,50)
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Sources", textLabx = "N. of Documents", title = "Most Relevant Sources", values)
-    
+    if (input$MostRelSourcesK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostRelSourcesK
+    }
+    xx <- xx %>%
+      slice_head(n = k)
+    xx$Sources = substr(xx$Sources, 1, 50)
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Sources",
+      textLabx = "N. of Documents",
+      title = "Most Relevant Sources",
+      values
+    )
+
     values$MRSplot <- g
     return(g)
   })
-  
+
   output$MRSplot.save <- downloadHandler(
     filename = function() {
-      paste("MostRelevantSources-", Sys.Date(), ".png", sep="")
+      paste("MostRelevantSources-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRSplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MRSplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostRelSourcesPlot <- renderPlotly({
     g <- MRSources()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.1, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.1, size = 0.10)
   })
-  
+
   output$MostRelSourcesTable <- DT::renderDT({
-    
     g <- MRSources()
-    
+
     TAB <- values$TABSo %>% drop_na()
-    DTformat(TAB , nrow=10, filename="Most_Relevant_Sources", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Relevant_Sources",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMRS,{
-    if(!is.null(values$TABSo)){
+
+  observeEvent(input$reportMRS, {
+    if (!is.null(values$TABSo)) {
       list_df <- list(values$TABSo %>% drop_na())
       list_plot <- list(values$MRSplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelSources", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostRelSources",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Relevant Sources", type="success")
+      popUp(title = "Most Relevant Sources", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Most Local Cited Sources ---- 
-  MLCSources <- eventReactive(input$applyMLCSources,{
-    values$M=metaTagExtraction(values$M,"CR_SO")
-    TAB=tableTag(values$M,"CR_SO")
-    TAB=data.frame(Sources=names(TAB),Articles=as.numeric(TAB))
-    values$TABSoCit<-TAB
-    xx<- TAB
-    if (input$MostRelCitSourcesK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostRelCitSourcesK}
-    xx=subset(xx, row.names(xx) %in% row.names(xx)[1:k])
-    xx$Articles=as.numeric(xx$Articles)
-    xx$Sources=substr(xx$Sources,1,50)
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Cited Sources", textLabx = "N. of Local Citations", title = "Most Local Cited Sources", values)
-    
+
+  ### Most Local Cited Sources ----
+  MLCSources <- eventReactive(input$applyMLCSources, {
+    values$M = metaTagExtraction(values$M, "CR_SO")
+    TAB = tableTag(values$M, "CR_SO")
+    TAB = data.frame(Sources = names(TAB), Articles = as.numeric(TAB))
+    values$TABSoCit <- TAB
+    xx <- TAB
+    if (input$MostRelCitSourcesK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostRelCitSourcesK
+    }
+    xx = subset(xx, row.names(xx) %in% row.names(xx)[1:k])
+    xx$Articles = as.numeric(xx$Articles)
+    xx$Sources = substr(xx$Sources, 1, 50)
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Cited Sources",
+      textLabx = "N. of Local Citations",
+      title = "Most Local Cited Sources",
+      values
+    )
+
     values$MLCSplot <- g
     return(g)
   })
-  
+
   output$MLCSplot.save <- downloadHandler(
     filename = function() {
-      paste("MostLocalCitedSources-", Sys.Date(), ".png", sep="")
+      paste("MostLocalCitedSources-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCSplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MLCSplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostRelCitSourcesPlot <- renderPlotly({
-    
     g <- MLCSources()
-    
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$MostRelCitSourcesTable <- DT::renderDT({
-    
     g <- MLCSources()
     TAB <- values$TABSoCit
-    DTformat(TAB , nrow=10, filename="Most_Cited_Sources", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Cited_Sources",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMLS,{
-    if(!is.null(values$TABSoCit)){
+
+  observeEvent(input$reportMLS, {
+    if (!is.null(values$TABSoCit)) {
       list_df <- list(values$TABSoCit)
       list_plot <- list(values$MLCSplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitSources", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostLocCitSources",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Local Cited Sources", type="success")
+      popUp(title = "Most Local Cited Sources", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Bradford's Law ---- 
+
+  ### Bradford's Law ----
   output$bradfordPlot <- renderPlotly({
-    values$bradford=bradford(values$M)
-    plot.ly(values$bradford$graph,flip=FALSE, side="r", aspectratio=1.6, size=0.15)
+    values$bradford = bradford(values$M)
+    plot.ly(
+      values$bradford$graph,
+      flip = FALSE,
+      side = "r",
+      aspectratio = 1.6,
+      size = 0.15
+    )
   })
-  
+
   output$BLplot.save <- downloadHandler(
     filename = function() {
-      paste("BradfordLaws-", Sys.Date(), ".png", sep="")
+      paste("BradfordLaws-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$bradford$graph, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$bradford$graph,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$bradfordTable <- DT::renderDT({
-    DTformat(values$bradford$table , nrow=10, filename="Bradford_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      values$bradford$table,
+      nrow = 10,
+      filename = "Bradford_Law",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportBradford,{
-    if(!is.null(values$bradford$table)){
+
+  observeEvent(input$reportBradford, {
+    if (!is.null(values$bradford$table)) {
       list_df <- list(values$bradford$table)
       list_plot <- list(values$bradford$graph)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "BradfordLaw", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "BradfordLaw",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Core Sources by Bradford's Law", type="success")
+      popUp(title = "Core Sources by Bradford's Law", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Sources' Impact ----  
-  Hsource <- eventReactive(input$applyHsource,{
-    withProgress(message = 'Calculation in progress',
-                 value = 0, {
-                   res <- Hindex_plot(values,type="source", input)
-                 })
+
+  ### Sources' Impact ----
+  Hsource <- eventReactive(input$applyHsource, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      res <- Hindex_plot(values, type = "source", input)
+    })
     values$SIplot <- res$g
-    plot.ly(res$g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
+    plot.ly(res$g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$SIplot.save <- downloadHandler(
     filename = function() {
-      paste("SourceImpact-", Sys.Date(), ".png", sep="")
+      paste("SourceImpact-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$SIplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$SIplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$SourceHindexPlot <- renderPlotly({
     Hsource()
   })
-  
+
   output$SourceHindexTable <- DT::renderDT({
-    DTformat(values$H %>% rename(Source = Element) , nrow=10, filename="Source_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      values$H %>% rename(Source = Element),
+      nrow = 10,
+      filename = "Source_Impact",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 4,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportSI,{
-    if(!is.null(values$H)){
+
+  observeEvent(input$reportSI, {
+    if (!is.null(values$H)) {
       list_df <- list(values$H %>% rename(Source = Element))
       list_plot <- list(values$SIplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceLocImpact", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "SourceLocImpact",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Sources' Local Impact", type="success")
+      popUp(title = "Sources' Local Impact", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Source Growth ----  
-  SOGrowth <- eventReactive(input$applySOGrowth,{
-    
-    if (input$cumSO=="Cum"){
-      cdf=TRUE
-      laby="Cumulate occurrences"
-    }else{
-      cdf=FALSE
-      laby="Annual occurrences"} 
-    
-    values$PYSO=sourceGrowth(values$M,input$topSO[2], cdf=cdf)
-    if (input$topSO[1]>1){
+
+  ### Source Growth ----
+  SOGrowth <- eventReactive(input$applySOGrowth, {
+    if (input$cumSO == "Cum") {
+      cdf = TRUE
+      laby = "Cumulate occurrences"
+    } else {
+      cdf = FALSE
+      laby = "Annual occurrences"
+    }
+
+    values$PYSO = sourceGrowth(values$M, input$topSO[2], cdf = cdf)
+    if (input$topSO[1] > 1) {
       values$PYSO <- values$PYSO[-c(2:(input$topSO[1]))]
     }
-    
-    term=names(values$PYSO)[-1]
-    
-    term=rep(term,each=dim(values$PYSO)[1])
-    n=dim(values$PYSO)[1]*(dim(values$PYSO)[2]-1)
-    freq=matrix(as.matrix(values$PYSO[,-1]),n,1)
-    values$SODF=data.frame(Year=rep(values$PYSO$Year,(dim(values$PYSO)[2]-1)),Source=term, Freq=freq)
-    
-    Text <- paste(values$SODF$Source," (",values$SODF$Year,") ",values$SODF$Freq, sep="")
-    
+
+    term = names(values$PYSO)[-1]
+
+    term = rep(term, each = dim(values$PYSO)[1])
+    n = dim(values$PYSO)[1] * (dim(values$PYSO)[2] - 1)
+    freq = matrix(as.matrix(values$PYSO[, -1]), n, 1)
+    values$SODF = data.frame(
+      Year = rep(values$PYSO$Year, (dim(values$PYSO)[2] - 1)),
+      Source = term,
+      Freq = freq
+    )
+
+    Text <- paste(
+      values$SODF$Source,
+      " (",
+      values$SODF$Year,
+      ") ",
+      values$SODF$Freq,
+      sep = ""
+    )
+
     width_scale <- 1.7 * 26 / length(unique(values$SODF$Source))
-    
-    x <- c(max(values$SODF$Year)-0.02-diff(range(values$SODF$Year))*0.15, max(values$SODF$Year)-0.02)+1
-    y <- c(min(values$SODF$Freq),min(values$SODF$Freq)+diff(range(values$SODF$Freq))*0.15)
-    
-    g=ggplot(values$SODF, aes(x=values$SODF$Year,y=values$SODF$Freq, group=values$SODF$Source, color=values$SODF$Source, text=Text))+
-      geom_line()+
-      labs(x = 'Year'
-           , y = laby
-           , title = "Sources' Production over Time") +
-      scale_x_continuous(breaks= (values$PYSO$Year[seq(1,length(values$PYSO$Year),by=ceiling(length(values$PYSO$Year)/20))])) +
-      geom_hline(aes(yintercept=0), alpha=0.1)+
-      labs(color = "Source")+
-      theme(text = element_text(color = "#444444"),
-            legend.text=ggplot2::element_text(size=width_scale),
-            legend.box.margin = margin(6, 6, 6, 6),
-            legend.title=ggplot2::element_text(size=1.5*width_scale,face="bold"),
-            legend.position="bottom",
-            legend.direction = "vertical",
-            legend.key.size = grid::unit(width_scale/50, "inch"),
-            legend.key.width = grid::unit(width_scale/50, "inch")
-            ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
-            ,panel.background = element_rect(fill = '#FFFFFF')
-            ,panel.grid.minor = element_line(color = '#EFEFEF')
-            ,panel.grid.major = element_line(color = '#EFEFEF')
-            ,plot.title = element_text(size = 24)
-            ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 90)
-            ,axis.title.x = element_text(hjust = 0.95, angle = 0)
-            ,axis.text.x = element_text(size=10, angle = 90)
-            ,axis.line.x = element_line(color="black",linewidth=0.5)
-            ,axis.line.y = element_line(color="black",linewidth=0.5)
-      ) + annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
-    
+
+    x <- c(
+      max(values$SODF$Year) - 0.02 - diff(range(values$SODF$Year)) * 0.15,
+      max(values$SODF$Year) - 0.02
+    ) +
+      1
+    y <- c(
+      min(values$SODF$Freq),
+      min(values$SODF$Freq) + diff(range(values$SODF$Freq)) * 0.15
+    )
+
+    g = ggplot(
+      values$SODF,
+      aes(
+        x = values$SODF$Year,
+        y = values$SODF$Freq,
+        group = values$SODF$Source,
+        color = values$SODF$Source,
+        text = Text
+      )
+    ) +
+      geom_line() +
+      labs(x = 'Year', y = laby, title = "Sources' Production over Time") +
+      scale_x_continuous(
+        breaks = (values$PYSO$Year[seq(
+          1,
+          length(values$PYSO$Year),
+          by = ceiling(length(values$PYSO$Year) / 20)
+        )])
+      ) +
+      geom_hline(aes(yintercept = 0), alpha = 0.1) +
+      labs(color = "Source") +
+      theme(
+        text = element_text(color = "#444444"),
+        legend.text = ggplot2::element_text(size = width_scale),
+        legend.box.margin = margin(6, 6, 6, 6),
+        legend.title = ggplot2::element_text(
+          size = 1.5 * width_scale,
+          face = "bold"
+        ),
+        legend.position = "bottom",
+        legend.direction = "vertical",
+        legend.key.size = grid::unit(width_scale / 50, "inch"),
+        legend.key.width = grid::unit(width_scale / 50, "inch"),
+        plot.caption = element_text(
+          size = 9,
+          hjust = 0.5,
+          color = "black",
+          face = "bold"
+        ),
+        panel.background = element_rect(fill = '#FFFFFF'),
+        panel.grid.minor = element_line(color = '#EFEFEF'),
+        panel.grid.major = element_line(color = '#EFEFEF'),
+        plot.title = element_text(size = 24),
+        axis.title = element_text(size = 14, color = '#555555'),
+        axis.title.y = element_text(vjust = 1, angle = 90),
+        axis.title.x = element_text(hjust = 0.95, angle = 0),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.line.x = element_line(color = "black", linewidth = 0.5),
+        axis.line.y = element_line(color = "black", linewidth = 0.5)
+      ) +
+      annotation_custom(
+        values$logoGrid,
+        xmin = x[1],
+        xmax = x[2],
+        ymin = y[1],
+        ymax = y[2]
+      )
+
     values$SDplot <- g
     return(g)
-  }) 
-  
+  })
+
   output$SDplot.save <- downloadHandler(
     filename = function() {
-      paste("SourceDynamics-", Sys.Date(), ".png", sep="")
+      paste("SourceDynamics-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$SDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$SDplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$soGrowthPlot <- renderPlotly({
-    
     g <- SOGrowth()
-    
+
     leg <- list(
-      orientation = 'h', 
+      orientation = 'h',
       y = -0.15,
       font = list(
         family = "sans-serif",
         size = 10,
-        color = "#000"),
+        color = "#000"
+      ),
       bgcolor = "#FFFFFF",
       bordercolor = "#FFFFFF",
-      borderwidth = 2) 
-    
-    plot.ly(g, flip=FALSE, side="r", aspectratio=1.8, size=0.10) %>%
+      borderwidth = 2
+    )
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.8, size = 0.10) %>%
       layout(legend = leg) %>%
-      config(displaylogo = FALSE,
-             modeBarButtonsToRemove = c(
-               'toImage',
-               'sendDataToCloud',
-               'pan2d', 
-               'select2d', 
-               'lasso2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             ))  %>%
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          'toImage',
+          'sendDataToCloud',
+          'pan2d',
+          'select2d',
+          'lasso2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        )
+      ) %>%
       layout(hovermode = 'compare')
   })
-  
+
   output$soGrowthtable <- DT::renderDT({
-    
     g <- SOGrowth()
-    soData=values$PYSO
-    DTformat(soData , nrow=10, filename="Source_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    soData = values$PYSO
+    DTformat(
+      soData,
+      nrow = 10,
+      filename = "Source_Prod_over_Time",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportSD,{
-    if(!is.null(values$PYSO)){
+
+  observeEvent(input$reportSD, {
+    if (!is.null(values$PYSO)) {
       list_df <- list(values$PYSO)
       list_plot <- list(values$SDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "SourceProdOverTime", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "SourceProdOverTime",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Sources' Production over Time", type="success")
+      popUp(title = "Sources' Production over Time", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # AUTHORS MENU ----
   ## Authors ----
-  
+
   ### Author Profile ----
   observe({
     req(values$M)
     if (!is.null(values$M$AU)) {
       authors <- values$M %>%
-        select(AU,DI) %>% 
-        get_all_authors() 
-      updateSelectizeInput(session, "authorSearch",
-                           choices = c("", authors),
-                           selected = "",
-                           server = TRUE
+        select(AU, DI) %>%
+        get_all_authors()
+      updateSelectizeInput(
+        session,
+        "authorSearch",
+        choices = c("", authors),
+        selected = "",
+        server = TRUE
       )
     }
-    
   })
-  
+
   observeEvent(
     ignoreNULL = TRUE,
     eventExpr = {
@@ -2185,12 +4112,14 @@ To ensure the functionality of Biblioshiny,
     handlerExpr = {
       req(values$M)
       authors <- values$M %>%
-        select(AU,DI) %>% 
-        get_all_authors() 
-      updateSelectizeInput(session, "authorSearch",
-                           choices = c("", authors),
-                           selected = "",
-                           server = TRUE
+        select(AU, DI) %>%
+        get_all_authors()
+      updateSelectizeInput(
+        session,
+        "authorSearch",
+        choices = c("", authors),
+        selected = "",
+        server = TRUE
       )
       output$AuthorBioPageUI <- renderUI({
         create_empty_author_bio_card()
@@ -2200,11 +4129,11 @@ To ensure the functionality of Biblioshiny,
       })
     }
   )
-  
+
   output$AuthorBioPageUI <- renderUI({
     create_empty_author_bio_card()
   })
-  
+
   output$AuthorLocalProfileUI <- renderUI({
     create_empty_local_author_bio_card()
   })
@@ -2217,118 +4146,189 @@ To ensure the functionality of Biblioshiny,
     handlerExpr = {
       req(values$M)
       selected_author <- input$authorSearch
-      authorGlobalProfile <- authorCard(selected_author, values)
-      output$AuthorBioPageUI <- renderUI({
-        authorGlobalProfile
-      })
-      
-      local_author <- values$author_data %>%
-        filter(AUid == selected_author) %>%
-        pull(display_name)
-      
-      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
-        mutate(TI = to_title_case(TI),
-               SO= to_title_case(SO))
-               
-      authorLocalProfile <- create_local_author_bio_card(
-        local_author_data = local_data,
-        selected_author = local_author,
-        max_py = values$M$PY %>% max(na.rm = TRUE),
-        width = "100%",
-        show_trends = TRUE,
-        show_keywords = TRUE,
-        max_keywords = 20,
-        max_works_display = 50
+
+      # Show the spinner
+      shinyjs::show("authorFetchingSpinner")
+
+      # Use tryCatch to manage erros and the spinner
+      tryCatch(
+        {
+          # Fetch data
+          authorGlobalProfile <- authorCard(selected_author, values)
+
+          output$AuthorBioPageUI <- renderUI({
+            authorGlobalProfile
+          })
+
+          local_author <- values$author_data %>%
+            dplyr::filter(AUid == selected_author) %>%
+            pull(display_name)
+
+          local_data <- values$M[
+            gregexpr(selected_author, values$M$AU) > -1,
+          ] %>%
+            mutate(
+              TI = to_title_case(TI),
+              SO = to_title_case(SO)
+            )
+
+          authorLocalProfile <- create_local_author_bio_card(
+            local_author_data = local_data,
+            selected_author = local_author,
+            max_py = values$M$PY %>% max(na.rm = TRUE),
+            width = "100%",
+            show_trends = TRUE,
+            show_keywords = TRUE,
+            max_keywords = 20,
+            max_works_display = 50
+          )
+
+          output$AuthorLocalProfileUI <- renderUI({
+            authorLocalProfile
+          })
+        },
+        error = function(e) {
+          # Manage the error
+          showNotification(
+            paste("Error fetching author data:", e$message),
+            type = "error",
+            duration = 5
+          )
+        },
+        finally = {
+          # Hide the spinner
+          shinyjs::hide("authorFetchingSpinner")
+        }
       )
-      output$AuthorLocalProfileUI <- renderUI({
-        authorLocalProfile
-      })
     }
   )
-  
+
   ### Most Relevant Authors ----
-  MRAuthors <- eventReactive(input$applyMRAuthors,{
-    res <- descriptive(values,type="tab3")
-    values <-res$values
-    values$TABAu<-values$TAB
-    
-    xx=values$TABAu
-    switch(input$AuFreqMeasure,
-           t={
-             lab="N. of Documents"
-             xx=xx[,1:2]
-           },
-           p={xx=xx[,1:2]
-           xx[,2]=as.numeric(xx[,2])/dim(values$M)[1]*100
-           lab="N. of Documents (in %)"
-           },
-           f={
-             xx=xx[,c(1,3)]
-             lab="N. of Documents (Fractionalized)"
-           })
-    
-    xx[,2]=as.numeric(xx[,2])
-    
-    if (input$MostRelAuthorsK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostRelAuthorsK}
-    
-    xx=xx[1:k,]
-    xx[,2]=round(xx[,2],1)
-    xx <- xx[order(-xx[,2]),]
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Relevant Authors", values)
-    
+  MRAuthors <- eventReactive(input$applyMRAuthors, {
+    res <- descriptive(values, type = "tab3")
+    values <- res$values
+    values$TABAu <- values$TAB
+
+    xx = values$TABAu
+    switch(
+      input$AuFreqMeasure,
+      t = {
+        lab = "N. of Documents"
+        xx = xx[, 1:2]
+      },
+      p = {
+        xx = xx[, 1:2]
+        xx[, 2] = as.numeric(xx[, 2]) / dim(values$M)[1] * 100
+        lab = "N. of Documents (in %)"
+      },
+      f = {
+        xx = xx[, c(1, 3)]
+        lab = "N. of Documents (Fractionalized)"
+      }
+    )
+
+    xx[, 2] = as.numeric(xx[, 2])
+
+    if (input$MostRelAuthorsK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostRelAuthorsK
+    }
+
+    xx = xx[1:k, ]
+    xx[, 2] = round(xx[, 2], 1)
+    xx <- xx[order(-xx[, 2]), ]
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Authors",
+      textLabx = lab,
+      title = "Most Relevant Authors",
+      values
+    )
+
     values$MRAplot <- g
     return(g)
   })
-  
+
   output$MRAplot.save <- downloadHandler(
     filename = function() {
-      paste("MostRelevantAuthors-", Sys.Date(), ".png", sep="")
+      paste("MostRelevantAuthors-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRAplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MRAplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostRelAuthorsPlot <- renderPlotly({
-    
     g <- MRAuthors()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$MostRelAuthorsTable <- DT::renderDT({
-    
-    TAB <- values$TABAu %>% 
+    TAB <- values$TABAu %>%
       rename("Author" = Authors)
-    DTformat(TAB , nrow=10, filename="Most_Relevant_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE, summary = "authors")
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Relevant_Authors",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 3,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE,
+      summary = "authors"
+    )
   })
-  
-  observeEvent(input$reportMRA,{
-    if(!is.null(values$TABAu)){
+
+  observeEvent(input$reportMRA, {
+    if (!is.null(values$TABAu)) {
       list_df <- list(values$TABAu)
       list_plot <- list(values$MRAplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAuthors", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostRelAuthors",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Relevant Authors", type="success")
+      popUp(title = "Most Relevant Authors", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ### Author BIO Card ----
-  observeEvent(ignoreNULL = TRUE,
-               eventExpr ={input$selected_author},
-               handlerExpr = {
-                 if (input$selected_author != "null") {
-                   showModal(modalAuthorBio(session))
-                 }
-               }
+  observeEvent(
+    ignoreNULL = TRUE,
+    eventExpr = {
+      input$selected_author
+    },
+    handlerExpr = {
+      if (input$selected_author != "null") {
+        showModal(modalAuthorBio(session))
+      }
+    }
   )
 
   modalAuthorBio <- function(session) {
@@ -2350,7 +4350,9 @@ To ensure the functionality of Biblioshiny,
       easyClose = FALSE,
       footer = tagList(
         actionButton(
-          label = "Close", inputId = "closeModalAuthorBio", style = "color: #ffff;",
+          label = "Close",
+          inputId = "closeModalAuthorBio",
+          style = "color: #ffff;",
           icon = icon("remove", lib = "glyphicon")
         )
       ),
@@ -2361,7 +4363,7 @@ To ensure the functionality of Biblioshiny,
     removeModal(session = getDefaultReactiveDomain())
     resetModalButtons(session = getDefaultReactiveDomain())
   })
-  
+
   observeEvent(
     ignoreNULL = TRUE,
     eventExpr = {
@@ -2374,15 +4376,14 @@ To ensure the functionality of Biblioshiny,
       output$AuthorBioPageUI2 <- renderUI({
         authorGlobalProfile
       })
-      
+
       local_author <- values$author_data %>%
-        filter(AUid == selected_author) %>%
+        dplyr::filter(AUid == selected_author) %>%
         pull(display_name)
-      
-      local_data <- values$M[gregexpr(selected_author,values$M$AU)>-1,] %>%
-        mutate(TI = to_title_case(TI),
-               SO= to_title_case(SO))
-      
+
+      local_data <- values$M[gregexpr(selected_author, values$M$AU) > -1, ] %>%
+        mutate(TI = to_title_case(TI), SO = to_title_case(SO))
+
       authorLocalProfile <- create_local_author_bio_card(
         local_author_data = local_data,
         selected_author = local_author,
@@ -2398,612 +4399,996 @@ To ensure the functionality of Biblioshiny,
       })
     }
   )
-  
-  ### Most Cited Authors ----  
-  MLCAuthors <- eventReactive(input$applyMLCAuthors,{
-    res <- descriptive(values,type="tab13")
-    values <-res$values
-    values$TABAuCit<-values$TAB
-    
+
+  ### Most Cited Authors ----
+  MLCAuthors <- eventReactive(input$applyMLCAuthors, {
+    res <- descriptive(values, type = "tab13")
+    values <- res$values
+    values$TABAuCit <- values$TAB
+
     xx <- values$TABAuCit
     lab <- "Local Citations"
-    xx[,2]=as.numeric(xx[,2])
-    
-    if (input$MostCitAuthorsK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostCitAuthorsK}
-    
-    xx=xx[1:k,]
-    xx[,2]=round(xx[,2],1)
-    xx <- xx[order(-xx[,2]),]
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Authors", textLabx = lab, title = "Most Local Cited Authors", values)
-    
+    xx[, 2] = as.numeric(xx[, 2])
+
+    if (input$MostCitAuthorsK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostCitAuthorsK
+    }
+
+    xx = xx[1:k, ]
+    xx[, 2] = round(xx[, 2], 1)
+    xx <- xx[order(-xx[, 2]), ]
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Authors",
+      textLabx = lab,
+      title = "Most Local Cited Authors",
+      values
+    )
+
     values$MLCAplot <- g
     return(g)
   })
-  
+
   output$MLCAplot.save <- downloadHandler(
     filename = function() {
-      paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep="")
+      paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCAplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MLCAplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostCitAuthorsPlot <- renderPlotly({
-    
     g <- MLCAuthors()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$MostCitAuthorsTable <- DT::renderDT({
-    
     TAB <- values$TABAuCit
-    DTformat(TAB , nrow=10, filename="Most_Local_Cited_Authors", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Local_Cited_Authors",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMLCA,{
-    if(!is.null(values$TABAuCit)){
+
+  observeEvent(input$reportMLCA, {
+    if (!is.null(values$TABAuCit)) {
       list_df <- list(values$TABAuCit)
       list_plot <- list(values$MLCAplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitAuthors", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostLocCitAuthors",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Local Cited Authors", type="success")
+      popUp(title = "Most Local Cited Authors", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Authors' Impact ----  
-  HAuthors <- eventReactive(input$applyHAuthors,{
-    withProgress(message = 'Calculation in progress',
-                 value = 0, {
-                   res <- Hindex_plot(values,type="author", input)
-                 })
+
+  ### Authors' Impact ----
+  HAuthors <- eventReactive(input$applyHAuthors, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      res <- Hindex_plot(values, type = "author", input)
+    })
     values$AIplot <- res$g
     return(res)
   })
-  
+
   output$AIplot.save <- downloadHandler(
     filename = function() {
-      paste("AuthorImpact-", Sys.Date(), ".png", sep="")
+      paste("AuthorImpact-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AIplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$AIplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$AuthorHindexPlot <- renderPlotly({
     res <- HAuthors()
-    plot.ly(res$g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
+    plot.ly(res$g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$AuthorHindexTable <- DT::renderDT({
-    DTformat(values$H %>% rename(Author = Element), nrow=10, filename="Author_Impact", pagelength=TRUE, left=NULL, right=NULL, numeric=4, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      values$H %>% rename(Author = Element),
+      nrow = 10,
+      filename = "Author_Impact",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 4,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportAI,{
-    if(!is.null(values$H)){
+
+  observeEvent(input$reportAI, {
+    if (!is.null(values$H)) {
       list_df <- list(values$H %>% rename(Author = Element))
       list_plot <- list(values$AIplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorLocImpact", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "AuthorLocImpact",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Authors' Local Impact", type="success")
+      popUp(title = "Authors' Local Impact", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Authors Production Over Time ----  
-  AUoverTime <- eventReactive(input$applyAUoverTime,{
-    values$AUProdOverTime <- authorProdOverTime(values$M, k=input$TopAuthorsProdK, graph=FALSE)
+
+  ### Authors Production Over Time ----
+  AUoverTime <- eventReactive(input$applyAUoverTime, {
+    values$AUProdOverTime <- authorProdOverTime(
+      values$M,
+      k = input$TopAuthorsProdK,
+      graph = FALSE
+    )
   })
-  
+
   # gemini button for Apot
   output$ApotGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$ApotGemini, values)
-    
   })
 
   output$APOTplot.save <- downloadHandler(
     filename = function() {
-      paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep="")
+      paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AUProdOverTime$graph, dpi = values$dpi, height = values$h, width = values$h*2.5, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$AUProdOverTime$graph,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2.5,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$TopAuthorsProdPlot <- renderPlotly({
     AUoverTime()
-    plot.ly(values$AUProdOverTime$graph, flip=TRUE, side="l", aspectratio=1)
+    plot.ly(
+      values$AUProdOverTime$graph,
+      flip = TRUE,
+      side = "l",
+      aspectratio = 1
+    )
   })
-  
+
   output$TopAuthorsProdTable <- DT::renderDT({
     AUoverTime()
-    
+
     TAB <- values$AUProdOverTime$dfAU
-    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=5, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Author_Prod_over_Time",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TopAuthorsProdTablePapers <- DT::renderDT({
     AUoverTime()
     TAB <- values$AUProdOverTime$dfPapersAU
-    TAB$DOI=paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    DTformat(TAB , nrow=10, filename="Author_Prod_over_Time_Docs", pagelength=TRUE, left=NULL, right=NULL, numeric=7, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-    })
-  
-  observeEvent(input$reportAPOT,{
-    if(!is.null(values$AUProdOverTime$dfPapersAU)){
+    TAB$DOI = paste0(
+      '<a href=\"https://doi.org/',
+      TAB$DOI,
+      '\" target=\"_blank\">',
+      TAB$DOI,
+      '</a>'
+    )
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Author_Prod_over_Time_Docs",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 7,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  })
+
+  observeEvent(input$reportAPOT, {
+    if (!is.null(values$AUProdOverTime$dfPapersAU)) {
       list_df <- list(values$AUProdOverTime$dfPapersAU)
       list_plot <- list(values$AUProdOverTime$graph)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AuthorProdOverTime", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "AuthorProdOverTime",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Authors' Production over Time", type="success")
+      popUp(title = "Authors' Production over Time", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Lotka Law ----  
+
+  ### Lotka Law ----
   output$lotkaPlot <- renderPlotly({
     values$lotka <- lotka(values$M)
     values$LLplot <- values$lotka$g
-    plot.ly(values$lotka$g_shiny,flip=FALSE, side="r", aspectratio=1.4, size=0.10)
+    plot.ly(
+      values$lotka$g_shiny,
+      flip = FALSE,
+      side = "r",
+      aspectratio = 1.4,
+      size = 0.10
+    )
   })
-  
+
   output$LLplot.save <- downloadHandler(
     filename = function() {
-      paste("LotkaLaw-", Sys.Date(), ".png", sep="")
+      paste("LotkaLaw-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$LLplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$LLplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
-  output$lotkaTable <- DT::renderDT({
 
-    DTformat(values$lotka$AuthorProd, nrow=10, filename="Lotka_Law", pagelength=TRUE, left=NULL, right=NULL, numeric=c(3,4), dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+  output$lotkaTable <- DT::renderDT({
+    DTformat(
+      values$lotka$AuthorProd,
+      nrow = 10,
+      filename = "Lotka_Law",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(3, 4),
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportLotka,{
-    if(!is.null(values$lotka$AuthorProd)){
+
+  observeEvent(input$reportLotka, {
+    if (!is.null(values$lotka$AuthorProd)) {
       list_df <- list(values$lotka$AuthorProd)
       list_plot <- list(values$LLplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "LotkaLaw", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "LotkaLaw",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Author Productivity through Lotka's Law", type="success")
+      popUp(title = "Author Productivity through Lotka's Law", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # Affiliations ----
-  ### Most Relevant Affiliations ---- 
-  MRAffiliations <- eventReactive(input$applyMRAffiliations,{
-    if (input$disAff=="Y"){
-      res <- descriptive(values,type="tab11")
-    }else{
-      res <- descriptive(values,type="tab12")
+  ### Most Relevant Affiliations ----
+  MRAffiliations <- eventReactive(input$applyMRAffiliations, {
+    if (input$disAff == "Y") {
+      res <- descriptive(values, type = "tab11")
+    } else {
+      res <- descriptive(values, type = "tab12")
     }
-    xx=values$TAB
-    names(xx)=c("AFF","Freq")
-    values <-res$values
+    xx = values$TAB
+    names(xx) = c("AFF", "Freq")
+    values <- res$values
     values$TABAff <- values$TAB
-    
-    if (input$MostRelAffiliationsK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostRelAffiliationsK}
-    
-    xx=xx[1:k,]
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Affiliations", textLabx = "Articles", title = "Most Relevant Affiliations", values)
-    
+
+    if (input$MostRelAffiliationsK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostRelAffiliationsK
+    }
+
+    xx = xx[1:k, ]
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Affiliations",
+      textLabx = "Articles",
+      title = "Most Relevant Affiliations",
+      values
+    )
+
     values$AFFplot <- g
     return(g)
   })
-  
+
   output$AFFplot.save <- downloadHandler(
     filename = function() {
-      paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep="")
+      paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AFFplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$AFFplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostRelAffiliationsPlot <- renderPlotly({
-    
     g <- MRAffiliations()
-    
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.15)
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1, size = 0.15)
   })
-  
+
   output$MostRelAffiliationsTable <- DT::renderDT({
     g <- MRAffiliations()
-    
+
     TAB <- values$TABAff
-    DTformat(TAB, nrow=10, filename="Most_Relevant_Affiliations", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Relevant_Affiliations",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMRAFF,{
-    if(!is.null(values$TABAff)){
+
+  observeEvent(input$reportMRAFF, {
+    if (!is.null(values$TABAff)) {
       list_df <- list(values$TABAff)
       list_plot <- list(values$AFFplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostRelAffiliations", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostRelAffiliations",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Relevant Affiliations", type="success")
+      popUp(title = "Most Relevant Affiliations", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Affiliation OverTime ----  
-  AFFGrowth <- eventReactive(input$applyAFFGrowth,{
-    
-    values <- AffiliationOverTime(values,input$topAFF)
-    
-  }) 
-  
+
+  ### Affiliation OverTime ----
+  AFFGrowth <- eventReactive(input$applyAFFGrowth, {
+    values <- AffiliationOverTime(values, input$topAFF)
+  })
+
   output$AffOverTimeplot.save <- downloadHandler(
     filename = function() {
-      paste("AffiliationOverTime-", Sys.Date(), ".png", sep="")
+      paste("AffiliationOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$AffOverTimePlot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$AffOverTimePlot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$AffOverTimePlot <- renderPlotly({
-    
     AFFGrowth()
     g <- values$AffOverTimePlot
     leg <- list(
-      orientation = 'h', 
+      orientation = 'h',
       y = -0.15,
       font = list(
         family = "sans-serif",
         size = 10,
-        color = "#000"),
+        color = "#000"
+      ),
       bgcolor = "#FFFFFF",
       bordercolor = "#FFFFFF",
-      borderwidth = 2) 
-    
-    plot.ly(g, flip=FALSE, side="r", aspectratio=1.8, size=0.10) %>%
+      borderwidth = 2
+    )
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.8, size = 0.10) %>%
       layout(legend = leg) %>%
-      config(displaylogo = FALSE,
-             modeBarButtonsToRemove = c(
-               'sendDataToCloud',
-               'pan2d', 
-               'select2d', 
-               'lasso2d',
-               'toggleSpikelines'
-             )) %>%
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          'sendDataToCloud',
+          'pan2d',
+          'select2d',
+          'lasso2d',
+          'toggleSpikelines'
+        )
+      ) %>%
       layout(hovermode = 'compare')
   })
-  
+
   output$AffOverTimeTable <- DT::renderDT({
-    
     AFFGrowth()
     afftimeData <- values$AffOverTime
-    DTformat(afftimeData, nrow=10, filename="Affiliation_over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      afftimeData,
+      nrow = 10,
+      filename = "Affiliation_over_Time",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportAFFPOT,{
-    if(!is.null(values$AffOverTime)){
+
+  observeEvent(input$reportAFFPOT, {
+    if (!is.null(values$AffOverTime)) {
       list_df <- list(values$AffOverTime)
       list_plot <- list(values$AffOverTimePlot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "AffOverTime", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "AffOverTime",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Affiliations' Production over Time", type="success")
+      popUp(title = "Affiliations' Production over Time", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # Countries ----
-  ### Country by Corresponding Authors ----  
-  CAUCountries <- eventReactive(input$applyCAUCountries,{
-    res <- descriptive(values,type="tab5")
-    values <-res$values
+  ### Country by Corresponding Authors ----
+  CAUCountries <- eventReactive(input$applyCAUCountries, {
+    res <- descriptive(values, type = "tab5")
+    values <- res$values
     values$TABCo <- values$TAB
-    
-    k=input$MostRelCountriesK
-    xx <- values$TABCo %>% slice_head(n=k) %>% 
-      select(Country,SCP,MCP)
-    xx=xx[order(-(xx$SCP+xx$MCP)),]
-    xx1=cbind(xx[,1:2],rep("SCP",k))
-    names(xx1)=c("Country","Freq","Collaboration")
-    xx2=cbind(xx[,c(1,3)],rep("MCP",k))
-    names(xx2)=c("Country","Freq","Collaboration")
-    xx=rbind(xx2,xx1)
-    xx$Country=factor(xx$Country,levels=xx$Country[1:dim(xx2)[1]])
-    
-    xx2 <- xx %>% dplyr::group_by(Country) %>%
+
+    k = input$MostRelCountriesK
+    xx <- values$TABCo %>% slice_head(n = k) %>% select(Country, SCP, MCP)
+    xx = xx[order(-(xx$SCP + xx$MCP)), ]
+    xx1 = cbind(xx[, 1:2], rep("SCP", k))
+    names(xx1) = c("Country", "Freq", "Collaboration")
+    xx2 = cbind(xx[, c(1, 3)], rep("MCP", k))
+    names(xx2) = c("Country", "Freq", "Collaboration")
+    xx = rbind(xx2, xx1)
+    xx$Country = factor(xx$Country, levels = xx$Country[1:dim(xx2)[1]])
+
+    xx2 <- xx %>%
+      dplyr::group_by(Country) %>%
       dplyr::summarize(Freq = sum(Freq))
-    
-    x <- c(0.5,0.5+length(levels(xx2$Country))*0.125)+1
-    y <- c(max(xx2$Freq)-0.02-diff(range(xx2$Freq))*0.125,max(xx2$Freq)-0.02)
-    
-    g=suppressWarnings(ggplot2::ggplot(data=xx, aes(x=Country, y=Freq,fill=Collaboration, text=paste("Country: ",Country,"\nN.of Documents: ",Freq))) +
-                         geom_bar(aes(group="NA"),stat="identity")+
-                         scale_x_discrete(limits = rev(levels(xx$Country)))+
-                         scale_fill_discrete(name="Collaboration",
-                                             breaks=c("SCP","MCP"))+
-                         labs(title = "Corresponding Author's Countries", x = "Countries", y = "N. of Documents", 
-                              caption = "SCP: Single Country Publications, MCP: Multiple Country Publications")+
-                         theme(plot.caption = element_text(size = 9, hjust = 0.5,
-                                                           color = "blue", face = "italic")
-                               ,panel.background = element_rect(fill = '#FFFFFF')
-                               ,panel.grid.major.y  = element_line(color = '#EFEFEF')
-                               ,plot.title = element_text(size = 24)
-                               ,axis.title = element_text(size = 14, color = '#555555')
-                               ,axis.title.y = element_text(vjust = 1, angle = 0)
-                               ,axis.title.x = element_text(hjust = 0)
-                               ,axis.line.x = element_line(color="black",linewidth=0.5)
-                         ) +
-                         coord_flip()) + 
-      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
-    values$TABCo <- values$TABCo %>% 
-      mutate(Freq = Freq*100,
-             MCP_Ratio = MCP_Ratio*100) %>% 
-      rename("Articles %" = Freq,
-             "MCP %" = MCP_Ratio) %>% 
-      select(Country, "Articles","Articles %", SCP, MCP, "MCP %")
-      
+
+    x <- c(0.5, 0.5 + length(levels(xx2$Country)) * 0.125) + 1
+    y <- c(
+      max(xx2$Freq) - 0.02 - diff(range(xx2$Freq)) * 0.125,
+      max(xx2$Freq) - 0.02
+    )
+
+    g = suppressWarnings(
+      ggplot2::ggplot(
+        data = xx,
+        aes(
+          x = Country,
+          y = Freq,
+          fill = Collaboration,
+          text = paste("Country: ", Country, "\nN.of Documents: ", Freq)
+        )
+      ) +
+        geom_bar(aes(group = "NA"), stat = "identity") +
+        scale_x_discrete(limits = rev(levels(xx$Country))) +
+        scale_fill_discrete(name = "Collaboration", breaks = c("SCP", "MCP")) +
+        labs(
+          title = "Corresponding Author's Countries",
+          x = "Countries",
+          y = "N. of Documents",
+          caption = "SCP: Single Country Publications, MCP: Multiple Country Publications"
+        ) +
+        theme(
+          plot.caption = element_text(
+            size = 9,
+            hjust = 0.5,
+            color = "blue",
+            face = "italic"
+          ),
+          panel.background = element_rect(fill = '#FFFFFF'),
+          panel.grid.major.y = element_line(color = '#EFEFEF'),
+          plot.title = element_text(size = 24),
+          axis.title = element_text(size = 14, color = '#555555'),
+          axis.title.y = element_text(vjust = 1, angle = 0),
+          axis.title.x = element_text(hjust = 0),
+          axis.line.x = element_line(color = "black", linewidth = 0.5)
+        ) +
+        coord_flip()
+    ) +
+      annotation_custom(
+        values$logoGrid,
+        xmin = x[1],
+        xmax = x[2],
+        ymin = y[1],
+        ymax = y[2]
+      )
+    values$TABCo <- values$TABCo %>%
+      mutate(Freq = Freq * 100, MCP_Ratio = MCP_Ratio * 100) %>%
+      rename("Articles %" = Freq, "MCP %" = MCP_Ratio) %>%
+      select(Country, "Articles", "Articles %", SCP, MCP, "MCP %")
+
     values$MRCOplot <- g
     return(g)
-  }) 
-  
+  })
+
   # gemini button for word network
   output$MostRelCountriesGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$MostRelCountriesGemini, values)
-    
   })
-  
+
   output$MRCOplot.save <- downloadHandler(
     filename = function() {
-      paste("MostRelevantCountries-", Sys.Date(), ".png", sep="")
+      paste("MostRelevantCountries-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRCOplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MRCOplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostRelCountriesPlot <- renderPlotly({
     g <- CAUCountries()
-    plot.ly(g,flip=T, side="r", aspectratio=1.4, size=0.10, data.type=1)
+    plot.ly(
+      g,
+      flip = T,
+      side = "r",
+      aspectratio = 1.4,
+      size = 0.10,
+      data.type = 1
+    )
   })
-  
+
   output$MostRelCountriesTable <- DT::renderDT({
     g <- CAUCountries()
-    
+
     TAB <- values$TABCo
-    DTformat(TAB, nrow=10, filename="Most_Relevant_Countries_By_Corresponding_Author", pagelength=TRUE, left=NULL, right=NULL, numeric=c(3,6), dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=1, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Relevant_Countries_By_Corresponding_Author",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(3, 6),
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 1,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMRCO,{
-    if(!is.null(values$TABCo)){
+
+  observeEvent(input$reportMRCO, {
+    if (!is.null(values$TABCo)) {
       list_df <- list(values$TABCo)
       list_plot <- list(values$MRCOplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CorrAuthCountries", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "CorrAuthCountries",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Corresponding Author's Countries", type="success")
+      popUp(title = "Corresponding Author's Countries", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Country Production ----  
+
+  ### Country Production ----
   output$countryProdPlot <- renderPlotly({
-    values$mapworld<-mapworld(values$M, values)
-    plot.ly(values$mapworld$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
+    values$mapworld <- mapworld(values$M, values)
+    plot.ly(
+      values$mapworld$g,
+      flip = FALSE,
+      side = "r",
+      aspectratio = 1.7,
+      size = 0.07,
+      data.type = 1,
+      height = 15
+    )
   })
-  
+
   output$CSPplot.save <- downloadHandler(
     filename = function() {
-      paste("CountryScientificProduction-", Sys.Date(), ".png", sep="")
+      paste("CountryScientificProduction-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$mapworld$g, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$mapworld$g,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$countryProdTable <- DT::renderDT({
-    
     TAB <- values$mapworld$tab %>% rename(Country = region)
-    DTformat(TAB, nrow=10, filename="Country_Production", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Country_Production",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportCSP,{
-    if(!is.null(values$mapworld$tab)){
+
+  observeEvent(input$reportCSP, {
+    if (!is.null(values$mapworld$tab)) {
       list_df <- list(values$mapworld$tab)
       list_plot <- list(values$mapworld$g)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountrySciProd", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "CountrySciProd",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Countries' Scientific Production", type="success")
+      popUp(title = "Countries' Scientific Production", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Countries' Production Over Time ----  
-  COGrowth <- eventReactive(input$applyCOGrowth,{
-    
-    values <- CountryOverTime(values,input$topCO)
-    
-  }) 
-  
+
+  ### Countries' Production Over Time ----
+  COGrowth <- eventReactive(input$applyCOGrowth, {
+    values <- CountryOverTime(values, input$topCO)
+  })
+
   output$CountryOverTimeplot.save <- downloadHandler(
     filename = function() {
-      paste("CountryOverTime-", Sys.Date(), ".png", sep="")
+      paste("CountryOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CountryOverTimePlot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$CountryOverTimePlot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$CountryOverTimePlot <- renderPlotly({
-    
     COGrowth()
     g <- values$CountryOverTimePlot
     leg <- list(
-      orientation = 'h', 
+      orientation = 'h',
       y = -0.15,
       font = list(
         family = "sans-serif",
         size = 10,
-        color = "#000"),
+        color = "#000"
+      ),
       bgcolor = "#FFFFFF",
       bordercolor = "#FFFFFF",
-      borderwidth = 2) 
-    
-    plot.ly(g, flip=FALSE, side="r", aspectratio=1.8, size=0.10) %>%
+      borderwidth = 2
+    )
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.8, size = 0.10) %>%
       layout(legend = leg) %>%
-      config(displaylogo = FALSE,
-             modeBarButtonsToRemove = c(
-               'toImage',
-               'sendDataToCloud',
-               'pan2d', 
-               'select2d', 
-               'lasso2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             )) %>%
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          'toImage',
+          'sendDataToCloud',
+          'pan2d',
+          'select2d',
+          'lasso2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        )
+      ) %>%
       layout(hovermode = 'compare')
   })
-  
+
   output$CountryOverTimeTable <- DT::renderDT({
-    
     COGrowth()
-    cotimeData=values$CountryOverTime
-    DTformat(cotimeData, nrow=10, filename="Countries_Production_Over_Time", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    cotimeData = values$CountryOverTime
+    DTformat(
+      cotimeData,
+      nrow = 10,
+      filename = "Countries_Production_Over_Time",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportCPOT,{
-    if(!is.null(values$CountryOverTime)){
+
+  observeEvent(input$reportCPOT, {
+    if (!is.null(values$CountryOverTime)) {
       list_df <- list(values$CountryOverTime)
       list_plot <- list(values$CountryOverTimePlot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CountryProdOverTime", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "CountryProdOverTime",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Countries' Production over Time", type="success")
+      popUp(title = "Countries' Production over Time", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
-    
-    
-    
   })
-  
-  ### Most Cited Country ----    
-  MCCountries <- eventReactive(input$applyMCCountries,{
-    res <- descriptive(values,type="tab6")
-    values <-res$values
+
+  ### Most Cited Country ----
+  MCCountries <- eventReactive(input$applyMCCountries, {
+    res <- descriptive(values, type = "tab6")
+    values <- res$values
     values$TABCitCo <- values$TAB
-    
-    xx=values$TAB
-    xx[,2]=as.numeric(xx[,2])
-    xx[,3]=as.numeric(xx[,3])
-    if (input$MostCitCountriesK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostCitCountriesK}
-    if (input$CitCountriesMeasure=="TC"){
-      xx=xx[1:k,c(1,2)]
-      laby="N. of Citations"
+
+    xx = values$TAB
+    xx[, 2] = as.numeric(xx[, 2])
+    xx[, 3] = as.numeric(xx[, 3])
+    if (input$MostCitCountriesK > dim(xx)[1]) {
+      k = dim(xx)[1]
     } else {
-      xx=xx[order(-xx[,3]),]
-      xx=xx[1:k,c(1,3)]
-      laby="Average Article Citations"
+      k = input$MostCitCountriesK
     }
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Countries", textLabx = laby, title = "Most Cited Countries", values)
-    
+    if (input$CitCountriesMeasure == "TC") {
+      xx = xx[1:k, c(1, 2)]
+      laby = "N. of Citations"
+    } else {
+      xx = xx[order(-xx[, 3]), ]
+      xx = xx[1:k, c(1, 3)]
+      laby = "Average Article Citations"
+    }
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Countries",
+      textLabx = laby,
+      title = "Most Cited Countries",
+      values
+    )
+
     values$MCCplot <- g
     return(g)
   })
-  
+
   output$MCCplot.save <- downloadHandler(
     filename = function() {
-      paste("MostCitedCountries-", Sys.Date(), ".png", sep="")
+      paste("MostCitedCountries-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MCCplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MCCplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostCitCountriesPlot <- renderPlotly({
     g <- MCCountries()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1.3, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$MostCitCountriesTable <- DT::renderDT({
     g <- MCCountries()
     TAB <- values$TABCitCo
-    DTformat(TAB, nrow=10, filename="Most_Cited_Countries", pagelength=TRUE, left=NULL, right=NULL, numeric=3, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Cited_Countries",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 3,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMCCO,{
-    if(!is.null(values$TABCitCo)){
+
+  observeEvent(input$reportMCCO, {
+    if (!is.null(values$TABCitCo)) {
       list_df <- list(values$TABCitCo)
       list_plot <- list(values$MCCplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostCitCountries", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostCitCountries",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Cited Countries", type="success")
+      popUp(title = "Most Cited Countries", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # DOCUMENTS MENU ----
   ## Documents ----
-  
+
   ### function to show summary modal
   observeEvent(
     ignoreNULL = TRUE,
@@ -3016,44 +5401,54 @@ To ensure the functionality of Biblioshiny,
       }
     }
   )
-  
+
   modalDocSummary <- function(session) {
     ns <- session$ns
     modalDialog(
-      shinycssloaders::withSpinner(uiOutput(ns("DocSummary")), caption = HTML("<br><strong>Thinking...</strong>"),
-                                   image = "ai_small2.gif", color = "#466fc4"),
+      shinycssloaders::withSpinner(
+        uiOutput(ns("DocSummary")),
+        caption = HTML("<br><strong>Thinking...</strong>"),
+        image = "ai_small2.gif",
+        color = "#466fc4"
+      ),
       #uiOutput(ns("DocSummary")),
       size = "l",
       easyClose = FALSE,
       footer = tagList(
         actionButton(
-          label = "Close", inputId = "closeModalDocSummary", style = "color: #ffff;",
+          label = "Close",
+          inputId = "closeModalDocSummary",
+          style = "color: #ffff;",
           icon = icon("remove", lib = "glyphicon")
         )
       ),
     )
   }
-  
+
   observeEvent(input$closeModalDocSummary, {
     removeModal(session = getDefaultReactiveDomain())
     # session$sendCustomMessage("click", 'null') # reset input value to plot modal more times
     resetModalButtons(session = getDefaultReactiveDomain())
   })
-  
+
   output$DocSummary <- renderUI({
-    if (!is.null(input$button_id)) id <- input$button_id
+    if (!is.null(input$button_id)) {
+      id <- input$button_id
+    }
     i <- which(values$M$SR == id)
-    
+
     # Check if index is valid
-    if (length(i) == 0) return(NULL)
-    
-    res <- summaryAI(values, i=i, model=values$gemini_api_model)
-    
+    if (length(i) == 0) {
+      return(NULL)
+    }
+
+    res <- summaryAI(values, i = i, model = values$gemini_api_model)
+
     # Create HTML card
     div(
       class = "document-summary-card",
       style = "background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;",
-      
+
       # Card header
       div(
         style = "border-bottom: 2px solid #007bff; margin-bottom: 15px; padding-bottom: 10px;",
@@ -3063,12 +5458,12 @@ To ensure the functionality of Biblioshiny,
           " Document Summary"
         )
       ),
-      
+
       # Bibliographic information
       div(
         class = "bibliographic-info",
         style = "margin-bottom: 20px;",
-        
+
         # Title
         div(
           style = "margin-bottom: 12px;",
@@ -3076,10 +5471,14 @@ To ensure the functionality of Biblioshiny,
           br(),
           span(
             style = "font-size: 1.3em; color: #212529; line-height: 1.4;",
-            ifelse(is.na(values$M$TI[i]) || values$M$TI[i] == "", "Not available", to_title_case(values$M$TI[i]))
+            ifelse(
+              is.na(values$M$TI[i]) || values$M$TI[i] == "",
+              "Not available",
+              to_title_case(values$M$TI[i])
+            )
           )
         ),
-        
+
         # Authors
         div(
           style = "margin-bottom: 12px;",
@@ -3087,32 +5486,44 @@ To ensure the functionality of Biblioshiny,
           br(),
           span(
             style = "color: #6c757d; font-style: italic;",
-            ifelse(is.na(values$M$AU[i]) || values$M$AU[i] == "", "Not available", to_title_case(gsub(";","; ",values$M$AU[i])))
+            ifelse(
+              is.na(values$M$AU[i]) || values$M$AU[i] == "",
+              "Not available",
+              to_title_case(gsub(";", "; ", values$M$AU[i]))
+            )
           )
         ),
-        
+
         # Publication info in one row
         div(
           style = "display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 12px;",
-          
+
           div(
             strong("Journal:", style = "color: #495057; font-weight: 600;"),
             br(),
             span(
               style = "color: #28a745; font-weight: 500;",
-              ifelse(is.na(values$M$SO[i]) || values$M$SO[i] == "", "N/A",  to_title_case(values$M$SO[i]))
+              ifelse(
+                is.na(values$M$SO[i]) || values$M$SO[i] == "",
+                "N/A",
+                to_title_case(values$M$SO[i])
+              )
             )
           ),
-          
+
           div(
             strong("Year:", style = "color: #495057; font-weight: 600;"),
             br(),
             span(
               style = "color: #ffc107; font-weight: 600;",
-              ifelse(is.na(values$M$PY[i]) || values$M$PY[i] == "", "N/A", values$M$PY[i])
+              ifelse(
+                is.na(values$M$PY[i]) || values$M$PY[i] == "",
+                "N/A",
+                values$M$PY[i]
+              )
             )
           ),
-          
+
           div(
             strong("DOI:", style = "color: #495057; font-weight: 600;"),
             br(),
@@ -3122,7 +5533,11 @@ To ensure the functionality of Biblioshiny,
                 target = "_blank",
                 style = "color: #dc3545; text-decoration: none; font-weight: 500;",
                 values$M$DI[i],
-                icon("external-link-alt", class = "fa fa-external-link-alt", style = "margin-left: 5px; font-size: 0.8em;")
+                icon(
+                  "external-link-alt",
+                  class = "fa fa-external-link-alt",
+                  style = "margin-left: 5px; font-size: 0.8em;"
+                )
               )
             } else {
               span(style = "color: #6c757d;", "Not available")
@@ -3130,35 +5545,50 @@ To ensure the functionality of Biblioshiny,
           )
         )
       ),
-      
+
       # Abstract (if available)
       if (!is.na(values$M$AB[i]) && values$M$AB[i] != "") {
         div(
           style = "margin-bottom: 20px; padding: 15px; background-color: #e9ecef; border-radius: 6px; border-left: 4px solid #6c757d;",
           div(
             style = "display: flex; align-items: center; margin-bottom: 10px;",
-            strong("Abstract:", style = "color: #495057; font-weight: 600; font-size: 1.05em;"),
+            strong(
+              "Abstract:",
+              style = "color: #495057; font-weight: 600; font-size: 1.05em;"
+            ),
           ),
           # strong("Abstract:", style = "color: #495057; font-weight: 600; font-size: 1.05em;"),
           # br(), br(),
           div(
             style = "color: #495057; line-height: 1.5; text-align: justify;",
-            HTML(gemini_to_html(normalize_uppercase_text(values$M$AB[i]), font_size = "16px"))
+            HTML(gemini_to_html(
+              normalize_uppercase_text(values$M$AB[i]),
+              font_size = "16px"
+            ))
           )
         )
       },
-      
+
       # AI Summary
       div(
         style = "margin-bottom: 20px; padding: 15px; background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 6px; border-left: 4px solid #007bff;",
         div(
           style = "display: flex; align-items: center; margin-bottom: 10px;",
-          icon("robot", class = "fa fa-robot", style = "color: #007bff; margin-right: 8px; font-size: 1.2em;"),
-          strong("Biblio AI-Generated Summary:", style = "color: #007bff; font-weight: 600; font-size: 1.05em;")
+          icon(
+            "robot",
+            class = "fa fa-robot",
+            style = "color: #007bff; margin-right: 8px; font-size: 1.2em;"
+          ),
+          strong(
+            "Biblio AI-Generated Summary:",
+            style = "color: #007bff; font-weight: 600; font-size: 1.05em;"
+          )
         ),
         div(
           style = "color: #495057; line-height: 1.5; text-align: justify;",
-          if (is.null(res) || res == "" || grepl("Error", res, ignore.case = TRUE)) {
+          if (
+            is.null(res) || res == "" || grepl("Error", res, ignore.case = TRUE)
+          ) {
             span(
               style = "color: #dc3545; font-style: italic;",
               "Summary not available at the moment. Please try again later."
@@ -3168,1044 +5598,1842 @@ To ensure the functionality of Biblioshiny,
           }
         )
       ),
-      
+
       # Footer with timestamp
       div(
         style = "margin-top: 15px; padding-top: 10px; border-top: 1px solid #dee2e6; text-align: right; font-size: 0.85em; color: #6c757d;",
         icon("clock", class = "fa fa-clock", style = "margin-right: 5px;"),
-        "Generated on: ", format(Sys.time(), "%m/%d/%Y at %H:%M")
+        "Generated on: ",
+        format(Sys.time(), "%m/%d/%Y at %H:%M")
       )
     )
   })
-  
-  
+
   ### Most Global Cited Documents ----
-  
-  MGCDocuments <- eventReactive(input$applyMGCDocuments,{
-    res <- descriptive(values,type="tab4")
-    values <-res$values
+
+  MGCDocuments <- eventReactive(input$applyMGCDocuments, {
+    res <- descriptive(values, type = "tab4")
+    values <- res$values
     values$TABGlobDoc <- values$TAB
-    
-    if (input$CitDocsMeasure=="TC"){
-      xx <- values$TABGlobDoc %>% select(1,3)
-      lab="Global Citations"} else {
-        xx <- values$TABGlobDoc %>% select(1,4)
-        xx[,2] <- round(xx[,2],1)
-        lab="Global Citations per Year"
-      }
-    
-    if (input$MostCitDocsK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostCitDocsK}
-    
-    xx=xx[1:k,]
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "Documents", textLabx = lab, title = "Most Global Cited Documents", values)
-    
+
+    if (input$CitDocsMeasure == "TC") {
+      xx <- values$TABGlobDoc %>% select(1, 3)
+      lab = "Global Citations"
+    } else {
+      xx <- values$TABGlobDoc %>% select(1, 4)
+      xx[, 2] <- round(xx[, 2], 1)
+      lab = "Global Citations per Year"
+    }
+
+    if (input$MostCitDocsK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostCitDocsK
+    }
+
+    xx = xx[1:k, ]
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Documents",
+      textLabx = lab,
+      title = "Most Global Cited Documents",
+      values
+    )
+
     values$MGCDplot <- g
     return(g)
   })
-  
+
   output$MGCDplot.save <- downloadHandler(
     filename = function() {
-      paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep="")
+      paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MGCDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MGCDplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostCitDocsPlot <- renderPlotly({
     g <- MGCDocuments()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1, size = 0.10)
   })
-  
+
   output$MostCitDocsTable <- DT::renderDT({
     g <- MGCDocuments()
     TAB <- values$TABGlobDoc
-    TAB$DOI<- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    DTformat(TAB, nrow=10, filename="Most_Global_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=5:6, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE, summary="documents")
+    TAB$DOI <- paste0(
+      '<a href=\"https://doi.org/',
+      TAB$DOI,
+      '\" target=\"_blank\">',
+      TAB$DOI,
+      '</a>'
+    )
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Global_Cited_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:6,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE,
+      summary = "documents"
+    )
   })
-  
-  observeEvent(input$reportMCD,{
-    if(!is.null(values$TABGlobDoc)){
+
+  observeEvent(input$reportMCD, {
+    if (!is.null(values$TABGlobDoc)) {
       list_df <- list(values$TABGlobDoc)
       list_plot <- list(values$MGCDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostGlobCitDocs", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostGlobCitDocs",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Global Cited Documents", type="success")
+      popUp(title = "Most Global Cited Documents", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Most Local Cited Documents ----  
-  MLCDocuments <- eventReactive(input$applyMLCDocuments,{
-    withProgress(message = 'Calculation in progress',
-                 value = 0, {
-                   TAB <-localCitations(values$M, fast.search=FALSE, sep = input$LocCitSep)$Paper
-                   TAB <- TAB %>%
-                     group_by(Year) %>%
-                     mutate(Ratio = LCS/GCS*100,
-                            NLCS = LCS/mean(LCS),
-                            NGCS = GCS/mean(GCS)) %>%
-                     ungroup() %>%
-                     as.data.frame()
-                 })
-    
-    xx=data.frame(Document=as.character(TAB[,1]), DOI=as.character(TAB[,2]), Year=TAB[,3], 
-                  "Local Citations"=TAB[,4], "Global Citations"=TAB[,5],"LC/GC Ratio"=TAB[6], 
-                  "Normalized Local Citations"=TAB[,7],"Normalized Global Citations"=TAB[,8])
-    values$TABLocDoc=xx
-    
-    if (input$MostLocCitDocsK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostLocCitDocsK}
-    
-    xx=xx[1:k,]
-    
-    g <- freqPlot(xx,x=4,y=1, textLaby = "Documents", textLabx = "Local Citations", title = "Most Local Cited Documents", values)
-    
+
+  ### Most Local Cited Documents ----
+  MLCDocuments <- eventReactive(input$applyMLCDocuments, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      TAB <- localCitations(
+        values$M,
+        fast.search = FALSE,
+        sep = input$LocCitSep
+      )$Paper
+      TAB <- TAB %>%
+        group_by(Year) %>%
+        mutate(
+          Ratio = LCS / GCS * 100,
+          NLCS = LCS / mean(LCS),
+          NGCS = GCS / mean(GCS)
+        ) %>%
+        ungroup() %>%
+        as.data.frame()
+    })
+
+    xx = data.frame(
+      Document = as.character(TAB[, 1]),
+      DOI = as.character(TAB[, 2]),
+      Year = TAB[, 3],
+      "Local Citations" = TAB[, 4],
+      "Global Citations" = TAB[, 5],
+      "LC/GC Ratio" = TAB[6],
+      "Normalized Local Citations" = TAB[, 7],
+      "Normalized Global Citations" = TAB[, 8]
+    )
+    values$TABLocDoc = xx
+
+    if (input$MostLocCitDocsK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostLocCitDocsK
+    }
+
+    xx = xx[1:k, ]
+
+    g <- freqPlot(
+      xx,
+      x = 4,
+      y = 1,
+      textLaby = "Documents",
+      textLabx = "Local Citations",
+      title = "Most Local Cited Documents",
+      values
+    )
+
     values$MLCDplot <- g
     return(g)
   })
-  
+
   # gemini button for word network
   output$MostLocCitDocsGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$MostLocCitDocsGemini, values)
   })
 
   output$MLCDplot.save <- downloadHandler(
     filename = function() {
-      paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep="")
+      paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MLCDplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostLocCitDocsPlot <- renderPlotly({
     g <- MLCDocuments()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=1, size=0.10)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1, size = 0.10)
   })
-  
+
   output$MostLocCitDocsTable <- DT::renderDT({
-    
     TAB <- values$TABLocDoc
-    TAB$DOI <- paste0('<a href=\"https://doi.org/',TAB$DOI,'\" target=\"_blank\">',TAB$DOI,'</a>')
-    
-    names(TAB)[c(1,4:8)] <- c("Paper","Local Citations", "Global Citations","LC/GC Ratio (%)", "Normalized Local Citations","Normalized Global Citations")
-    DTformat(TAB, nrow=10, filename="Most_Local_Cited_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=7:9, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE, summary="documents")
+    TAB$DOI <- paste0(
+      '<a href=\"https://doi.org/',
+      TAB$DOI,
+      '\" target=\"_blank\">',
+      TAB$DOI,
+      '</a>'
+    )
+
+    names(TAB)[c(1, 4:8)] <- c(
+      "Paper",
+      "Local Citations",
+      "Global Citations",
+      "LC/GC Ratio (%)",
+      "Normalized Local Citations",
+      "Normalized Global Citations"
+    )
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Local_Cited_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 7:9,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE,
+      summary = "documents"
+    )
   })
-  
-  observeEvent(input$reportMLCD,{
-    if(!is.null(values$TABLocDoc)){
+
+  observeEvent(input$reportMLCD, {
+    if (!is.null(values$TABLocDoc)) {
       list_df <- list(values$TABLocDoc)
       list_plot <- list(values$MLCDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitDocs", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostLocCitDocs",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Local Cited Documents", type="success")
+      popUp(title = "Most Local Cited Documents", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ## Cited References ----
   ### Most Local Cited References ----
-  MLCReferences <- eventReactive(input$applyMLCReferences,{
-    CR <- citations(values$M,sep=input$CitRefsSep)$Cited
-    TAB <- data.frame(names(CR),as.numeric(CR))
+  MLCReferences <- eventReactive(input$applyMLCReferences, {
+    CR <- citations(values$M, sep = input$CitRefsSep)$Cited
+    TAB <- data.frame(names(CR), as.numeric(CR))
     names(TAB) <- c("Cited References", "Citations")
-    values$TABCitRef <- TAB %>% filter(`Cited References`!="ANONYMOUS, NO TITLE CAPTURED")
-    
-    xx=values$TABCitRef
-    if (input$MostCitRefsK>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostCitRefsK}
-    
-    xx=xx[1:k,]
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = "References", textLabx = "Local Citations", title = "Most Local Cited References", values, string.max=70)
-    
+    values$TABCitRef <- TAB %>%
+      dplyr::filter(`Cited References` != "ANONYMOUS, NO TITLE CAPTURED")
+
+    xx = values$TABCitRef
+    if (input$MostCitRefsK > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostCitRefsK
+    }
+
+    xx = xx[1:k, ]
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "References",
+      textLabx = "Local Citations",
+      title = "Most Local Cited References",
+      values,
+      string.max = 70
+    )
+
     values$MLCRplot <- g
     return(g)
   })
-  
+
   output$MLCRplot.save <- downloadHandler(
     filename = function() {
-      paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep="")
+      paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MLCRplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MLCRplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostCitRefsPlot <- renderPlotly({
     g <- MLCReferences()
-    plot.ly(g,flip=FALSE, side="r", aspectratio=0.6, size=0.20)
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 0.6, size = 0.20)
   })
-  
+
   output$MostCitRefsTable <- DT::renderDT({
     g <- MLCReferences()
     TAB <- values$TABCitRef
-    
-    TAB$link <- trimES(gsub("[[:punct:]]" , " ",reduceRefs(TAB[,1])))
-    TAB$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',TAB$link,'\" target=\"_blank\">','link','</a>')
-    
-    TAB=TAB[,c(3,1,2)]
-    names(TAB)[1]="Google Scholar"
-    DTformat(TAB, nrow=10, filename="Most_Local_Cited_References", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+
+    TAB$link <- trimES(gsub("[[:punct:]]", " ", reduceRefs(TAB[, 1])))
+    TAB$link <- paste0(
+      '<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',
+      TAB$link,
+      '\" target=\"_blank\">',
+      'link',
+      '</a>'
+    )
+
+    TAB = TAB[, c(3, 1, 2)]
+    names(TAB)[1] = "Google Scholar"
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Local_Cited_References",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMLCR,{
-    if(!is.null(values$TABCitRef)){
+
+  observeEvent(input$reportMLCR, {
+    if (!is.null(values$TABCitRef)) {
       list_df <- list(values$TABCitRef)
       list_plot <- list(values$MLCRplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostLocCitRefs", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostLocCitRefs",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Local Cited References", type="success")
+      popUp(title = "Most Local Cited References", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Reference Spectroscopy ---- 
-  RPYS <- eventReactive(input$applyRPYS,{
-    timespan <- c(max(values$M$PY, na.rm = TRUE)-100, max(values$M$PY, na.rm = TRUE)-3)
-    if (!is.na(input$rpysMinYear)){
+
+  ### Reference Spectroscopy ----
+  RPYS <- eventReactive(input$applyRPYS, {
+    timespan <- c(
+      max(values$M$PY, na.rm = TRUE) - 100,
+      max(values$M$PY, na.rm = TRUE) - 3
+    )
+    if (!is.na(input$rpysMinYear)) {
       timespan[1] <- input$rpysMinYear
     }
-    if (!is.na(input$rpysMaxYear)){
+    if (!is.na(input$rpysMaxYear)) {
       timespan[2] <- input$rpysMaxYear
     }
     timespan <- sort(timespan)
-    values$res <- rpys(values$M, sep=input$rpysSep, timespan=timespan, median.window = input$rpysMedianWindow, graph=FALSE)
-    values$res$peaks <- rpysPeaks(values$res, n=10)
+    values$res <- rpys(
+      values$M,
+      sep = input$rpysSep,
+      timespan = timespan,
+      median.window = input$rpysMedianWindow,
+      graph = FALSE
+    )
+    values$res$peaks <- rpysPeaks(values$res, n = 10)
   })
-  
+
   output$RSplot.save <- downloadHandler(
     filename = function() {
-      paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep="")
+      paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$res$spectroscopy, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$res$spectroscopy,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   # gemini button for rpys
   output$rpysGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$rpysGemini, values)
-    
   })
 
   output$rpysPlot <- renderPlotly({
     RPYS()
-    plot.ly(values$res$spectroscopy, side="l", aspectratio = 1.3, size=0.10)
+    plot.ly(values$res$spectroscopy, side = "l", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$rpysTable <- DT::renderDT({
     RPYS()
-    rpysData=values$res$rpysTable
-    DTformat(rpysData, nrow=10, filename="RPYS", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    rpysData = values$res$rpysTable
+    DTformat(
+      rpysData,
+      nrow = 10,
+      filename = "RPYS",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$crTable <- DT::renderDT({
     RPYS()
-    crData=values$res$CR
-    crData$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',crData$Reference,'\" target=\"_blank\">','link','</a>')
-    
-    crData=crData[order(-as.numeric(crData$Year),-crData$Freq),]
-    names(crData)=c("Year", "Reference", "Local Citations", "Google link")
-    crData <- crData[,c(1,4,2,3)] 
-    DTformat(crData, nrow=10, filename="RPYS_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    crData = values$res$CR
+    crData$link <- paste0(
+      '<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',
+      crData$Reference,
+      '\" target=\"_blank\">',
+      'link',
+      '</a>'
+    )
+
+    crData = crData[order(-as.numeric(crData$Year), -crData$Freq), ]
+    names(crData) = c("Year", "Reference", "Local Citations", "Google link")
+    crData <- crData[, c(1, 4, 2, 3)]
+    DTformat(
+      crData,
+      nrow = 10,
+      filename = "RPYS_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$rpysSequence <- DT::renderDT({
     RPYS()
-    paperClass <- ifelse(input$rpysInfluential=="Not Influent","",input$rpysInfluential)
-    crData <- values$res$Sequences %>% dplyr::filter(regexpr(paperClass,Class)>-1)
-    crData$link <- paste0('<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',crData$CR,'\" target=\"_blank\">','link','</a>')
+    paperClass <- ifelse(
+      input$rpysInfluential == "Not Influent",
+      "",
+      input$rpysInfluential
+    )
+    crData <- values$res$Sequences %>%
+      dplyr::filter(regexpr(paperClass, Class) > -1)
+    crData$link <- paste0(
+      '<a href=\"https://scholar.google.it/scholar?hl=en&as_sdt=0%2C5&q=',
+      crData$CR,
+      '\" target=\"_blank\">',
+      'link',
+      '</a>'
+    )
     crData <- crData %>% select(RPY, CR, Freq, link, sequence, Class)
-    names(crData)=c("Year", "Reference", "Local Citations", "Google link","Citation Sequence", "Sequence Type")
-    DTformat(crData, nrow=10, filename="RPYS_InfluentialReferences", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    names(crData) = c(
+      "Year",
+      "Reference",
+      "Local Citations",
+      "Google link",
+      "Citation Sequence",
+      "Sequence Type"
+    )
+    DTformat(
+      crData,
+      nrow = 10,
+      filename = "RPYS_InfluentialReferences",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$rpysPeaks <- DT::renderDT({
     RPYS()
     crData <- values$res$peaks
-    names(crData)=c("Year", "Reference", "Local Citations")
-    DTformat(crData, nrow=10, filename="RPYS_Top10Peaks", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    names(crData) = c("Year", "Reference", "Local Citations")
+    DTformat(
+      crData,
+      nrow = 10,
+      filename = "RPYS_Top10Peaks",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportRPYS,{
-    if(!is.null(values$res$CR)){
-      list_df <- list(values$res$CR, values$res$rpysTable,values$res$Sequences,values$res$peaksDF)
+
+  observeEvent(input$reportRPYS, {
+    if (!is.null(values$res$CR)) {
+      list_df <- list(
+        values$res$CR,
+        values$res$rpysTable,
+        values$res$Sequences,
+        values$res$peaks
+      )
       list_plot <- list(values$res$spectroscopy)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "RPYS", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "RPYS",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Reference Spectroscopy", type="success")
+      popUp(title = "Reference Spectroscopy", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ## Words ----
   ### Most Frequent Words ----
-  
-  observeEvent(input$MostRelWordsStop,{
-    values$MRWremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$MostRelWordsStop, sep=input$MostRelWordsSep)))
+
+  observeEvent(input$MostRelWordsStop, {
+    values$MRWremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$MostRelWordsStop,
+        sep = input$MostRelWordsSep
+      ))
+    )
     values$GenericSL <- values$MRWremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$MRWSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$MRWSyn, sep=input$MRWSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
-      }))
-    values$MRWsyn.terms <- data.frame(term=term, synonyms=synList)
+
+  observeEvent(input$MRWSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$MRWSyn,
+      sep = input$MRWSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
+    }))
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$MRWsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$MRWsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
+
   output$stopwordList <- renderDT({
-    DTformat(values$GenericSL, nrow=Inf, filename="Stopword_List", pagelength=FALSE, left=1, right=NULL, numeric=NULL, dom="none", 
-             size='90%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, 
-             selection=FALSE, scrollY=TRUE)
+    DTformat(
+      values$GenericSL,
+      nrow = Inf,
+      filename = "Stopword_List",
+      pagelength = FALSE,
+      left = 1,
+      right = NULL,
+      numeric = NULL,
+      dom = "none",
+      size = '90%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = FALSE,
+      escape = FALSE,
+      selection = FALSE,
+      scrollY = TRUE
+    )
   })
-  
+
   output$synonymList <- renderDT({
-    DTformat(values$GenericSYN, nrow=Inf, filename="Stopword_List", pagelength=FALSE, left=1, right=NULL, numeric=NULL, dom="none", 
-             size='90%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, 
-             selection=FALSE, scrollY=TRUE)
+    DTformat(
+      values$GenericSYN,
+      nrow = Inf,
+      filename = "Stopword_List",
+      pagelength = FALSE,
+      left = 1,
+      right = NULL,
+      numeric = NULL,
+      dom = "none",
+      size = '90%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = FALSE,
+      escape = FALSE,
+      selection = FALSE,
+      scrollY = TRUE
+    )
   })
-  
-  MFWords <- eventReactive(input$applyMFWords,{
-    if (input$MostRelWords %in% c("TI","AB")){
+
+  MFWords <- eventReactive(input$applyMFWords, {
+    if (input$MostRelWords %in% c("TI", "AB")) {
       ngrams <- as.numeric(input$MRWngrams)
-    }else{
+    } else {
       ngrams <- 1
     }
-    
+
     ### load file with terms to remove
-    if (input$MostRelWordsStopFile=="Y"){
+    if (input$MostRelWordsStopFile == "Y") {
       remove.terms <- trimws(values$MRWremove.terms$stopword)
-    }else{remove.terms <- NULL}
+    } else {
+      remove.terms <- NULL
+    }
     #values$MRWremove.terms <- remove.terms
     ### end of block
-    
+
     ### load file with synonyms
-    if (input$MRWSynFile=="Y"){
-      synonyms <- values$MRWsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    if (input$MRWSynFile == "Y") {
+      synonyms <- values$MRWsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
       synonyms <- synonyms$term
-    }else{synonyms <- NULL}
+    } else {
+      synonyms <- NULL
+    }
     #values$MRWsyn.terms <- synonyms
     ### end of block
-    
-    WR <- wordlist(values$M,Field=input$MostRelWords,n=Inf,measure="identity", ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)$v
-    
-    TAB <- data.frame(names(WR),as.numeric(WR))
+
+    WR <- wordlist(
+      values$M,
+      Field = input$MostRelWords,
+      n = Inf,
+      measure = "identity",
+      ngrams = ngrams,
+      remove.terms = remove.terms,
+      synonyms = synonyms
+    )$v
+
+    TAB <- data.frame(names(WR), as.numeric(WR))
     names(TAB) <- c("Words", "Occurrences")
     values$TABWord <- TAB
-    
-    xx=values$TABWord
-    if (input$MostRelWordsN>dim(xx)[1]){
-      k=dim(xx)[1]
-    } else {k=input$MostRelWordsN}
-    
-    xx=xx[1:k,]
-    switch(input$MostRelWords,
-           ID={lab="Keywords Plus"},
-           DE={lab="Author's Keywords"},
-           KW_Merged={lab="All Keywords"},
-           TI={lab="Title's Words"},
-           AB={lab="Abstract's Words"},
-           WC={lab="Subject Categories"})
-    
-    g <- freqPlot(xx,x=2,y=1, textLaby = lab, textLabx = "Occurrences", title = "Most Relevant Words", values)
-    
+
+    xx = values$TABWord
+    if (input$MostRelWordsN > dim(xx)[1]) {
+      k = dim(xx)[1]
+    } else {
+      k = input$MostRelWordsN
+    }
+
+    xx = xx[1:k, ]
+    switch(
+      input$MostRelWords,
+      ID = {
+        lab = "Keywords Plus"
+      },
+      DE = {
+        lab = "Author's Keywords"
+      },
+      KW_Merged = {
+        lab = "All Keywords"
+      },
+      TI = {
+        lab = "Title's Words"
+      },
+      AB = {
+        lab = "Abstract's Words"
+      },
+      WC = {
+        lab = "Subject Categories"
+      }
+    )
+
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = lab,
+      textLabx = "Occurrences",
+      title = "Most Relevant Words",
+      values
+    )
+
     values$MRWplot <- g
     return(g)
   })
-  
+
   output$MRWplot.save <- downloadHandler(
     filename = function() {
-      paste("MostRelevantWords-", Sys.Date(), ".png", sep="")
+      paste("MostRelevantWords-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$MRWplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$MRWplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$MostRelWordsPlot <- renderPlotly({
     g <- MFWords()
-    plot.ly(g, side="r", aspectratio = 1.3, size=0.10)
+    plot.ly(g, side = "r", aspectratio = 1.3, size = 0.10)
   })
-  
+
   output$MostRelWordsTable <- DT::renderDT({
     g <- MFWords()
-    
+
     TAB <- values$TABWord
-    DTformat(TAB, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      TAB,
+      nrow = 10,
+      filename = "Most_Frequent_Words",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportMFW,{
-    if(!is.null(values$TABWord)){
+
+  observeEvent(input$reportMFW, {
+    if (!is.null(values$TABWord)) {
       list_df <- list(values$TABWord)
       list_plot <- list(values$MRWplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "MostFreqWords", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "MostFreqWords",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Most Frequent Words", type="success")
+      popUp(title = "Most Frequent Words", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### WordCloud ----  
-  observeEvent(input$WCStop,{
-    values$WCremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$WCStop, sep=input$WCSep)))
+
+  ### WordCloud ----
+  observeEvent(input$WCStop, {
+    values$WCremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$WCStop,
+        sep = input$WCSep
+      ))
+    )
     values$GenericSL <- values$WCremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
 
-  observeEvent(input$WCSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$WCSyn, sep=input$WCSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+  observeEvent(input$WCSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$WCSyn,
+      sep = input$WCSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$WCsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$WCsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$WCsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
 
-  WordCloud <- eventReactive(input$applyWordCloud,{
-    if (input$summaryTerms %in% c("TI","AB")){
+  WordCloud <- eventReactive(input$applyWordCloud, {
+    if (input$summaryTerms %in% c("TI", "AB")) {
       ngrams <- as.numeric(input$summaryTermsngrams)
-    }else{
+    } else {
       ngrams <- 1
     }
-    
+
     ### load file with terms to remove
-    if (input$WCStopFile=="Y"){
+    if (input$WCStopFile == "Y") {
       remove.terms <- trimws(values$WCremove.terms$stopword)
-    }else{remove.terms <- NULL}
+    } else {
+      remove.terms <- NULL
+    }
     #values$WCremove.terms <- remove.terms
     ### end of block
-    
+
     ### load file with synonyms
-    if (input$WCSynFile=="Y"){
-      synonyms <- values$WCsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    if (input$WCSynFile == "Y") {
+      synonyms <- values$WCsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
       synonyms <- synonyms$term
       print(synonyms)
-    }else{synonyms <- NULL}
+    } else {
+      synonyms <- NULL
+    }
     #values$WCsyn.terms <- synonyms
     ### end of block
-    
-    resW=wordlist(M=values$M, Field=input$summaryTerms, n=input$n_words, measure=input$measure, ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
-    
-    W=resW$W
+
+    resW = wordlist(
+      M = values$M,
+      Field = input$summaryTerms,
+      n = input$n_words,
+      measure = input$measure,
+      ngrams = ngrams,
+      remove.terms = remove.terms,
+      synonyms = synonyms
+    )
+
+    W = resW$W
     values$Words <- resW$Words
-    
-    values$WordCloud <- wordcloud2::wordcloud2(W, size = input$scale, minSize = 0, gridSize =  input$padding,
-                           fontFamily = input$font, fontWeight = 'normal',
-                           color = input$wcCol, backgroundColor = "white", #input$wcBGCol,
-                           minRotation = 0, maxRotation = input$rotate/10, shuffle = TRUE,
-                           rotateRatio = 0.7, shape = input$wcShape, ellipticity = input$ellipticity,
-                           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+    values$WordCloud <- wordcloud2::wordcloud2(
+      W,
+      size = input$scale,
+      minSize = 0,
+      gridSize = input$padding,
+      fontFamily = input$font,
+      fontWeight = 'normal',
+      color = input$wcCol,
+      backgroundColor = "white", #input$wcBGCol,
+      minRotation = 0,
+      maxRotation = input$rotate / 10,
+      shuffle = TRUE,
+      rotateRatio = 0.7,
+      shape = input$wcShape,
+      ellipticity = input$ellipticity,
+      widgetsize = NULL,
+      figPath = NULL,
+      hoverFunction = NULL
+    )
   })
-  
+
   output$wordcloud <- wordcloud2::renderWordcloud2({
     WordCloud()
     values$WordCloud
   })
-  
-  observeEvent(input$reportWC,{
-    if(!is.null(values$Words)){
+
+  observeEvent(input$reportWC, {
+    if (!is.null(values$Words)) {
       sheetname <- "WordCloud"
       list_df <- list(values$Words)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$wb <- res$wb
       #values$fileTFP <- screenSh(selector = "#wordcloud") ## screenshot
-      values$fileWC <- screenSh(values$WordCloud, zoom = 2, type="plotly")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileWC,res$col))
-      popUp(title="WordCloud", type="success")
+      values$fileWC <- screenSh(values$WordCloud, zoom = 2, type = "plotly")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileWC, res$col)
+      )
+      popUp(title = "WordCloud", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### TreeMap ----  
-  observeEvent(input$TreeMapStop,{
-    values$TreeMapremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TreeMapStop, sep=input$TreeMapSep)))
+
+  ### TreeMap ----
+  observeEvent(input$TreeMapStop, {
+    values$TreeMapremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$TreeMapStop,
+        sep = input$TreeMapSep
+      ))
+    )
     values$GenericSL <- values$TreeMapremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$TreeMapSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$TreeMapSyn, sep=input$TreeMapSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+
+  observeEvent(input$TreeMapSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$TreeMapSyn,
+      sep = input$TreeMapSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$TreeMapsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$TreeMapsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$TreeMapsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
-  TreeMap <- eventReactive(input$applyTreeMap,{
-    if (input$treeTerms %in% c("TI","AB")){
+
+  TreeMap <- eventReactive(input$applyTreeMap, {
+    if (input$treeTerms %in% c("TI", "AB")) {
       ngrams <- as.numeric(input$treeTermsngrams)
-    }else{
+    } else {
       ngrams <- 1
     }
     ### load file with terms to remove
-    if (input$TreeMapStopFile=="Y"){
+    if (input$TreeMapStopFile == "Y") {
       remove.terms <- trimws(values$TreeMapremove.terms$stopword)
-    }else{remove.terms <- NULL}
+    } else {
+      remove.terms <- NULL
+    }
     #values$TreeMapremove.terms <- remove.terms
     ### end of block
     ### load file with synonyms
-    if (input$TreeMapSynFile=="Y"){
-      synonyms <- values$TreeMapsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    if (input$TreeMapSynFile == "Y") {
+      synonyms <- values$TreeMapsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
       synonyms <- synonyms$term
-    }else{synonyms <- NULL}
+    } else {
+      synonyms <- NULL
+    }
     #values$TreeMapsyn.terms <- synonyms
     ### end of block
-    
-    resW=wordlist(M=values$M, Field=input$treeTerms, n=input$treen_words, measure="identity", ngrams=ngrams, remove.terms=remove.terms, synonyms = synonyms)
-    
-    W=resW$W
+
+    resW = wordlist(
+      M = values$M,
+      Field = input$treeTerms,
+      n = input$treen_words,
+      measure = "identity",
+      ngrams = ngrams,
+      remove.terms = remove.terms,
+      synonyms = synonyms
+    )
+
+    W = resW$W
     values$TreeMap <- plot_ly(
-      type='treemap',
-      labels=W[,1],
-      parents="Tree",
-      values= W[,2],
-      textinfo="label+value+percent entry",
-      domain=list(column=0)) %>% 
-      config(displaylogo = FALSE,
-             modeBarButtonsToRemove = c(
-               'toImage',
-               'sendDataToCloud',
-               'pan2d', 
-               'select2d', 
-               'lasso2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             )) 
-    
-    values$WordsT=resW$Words
+      type = 'treemap',
+      labels = W[, 1],
+      parents = "Tree",
+      values = W[, 2],
+      textinfo = "label+value+percent entry",
+      domain = list(column = 0)
+    ) %>%
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          'toImage',
+          'sendDataToCloud',
+          'pan2d',
+          'select2d',
+          'lasso2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        )
+      )
+
+    values$WordsT = resW$Words
     return(resW$Words)
   })
-  
+
   output$treemap <- renderPlotly({
     TreeMap()
     values$TreeMap
   })
-  
-  
+
   output$wordTable <- DT::renderDT({
     WordCloud()
-    DTformat(values$Words, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      values$Words,
+      nrow = 10,
+      filename = "Most_Frequent_Words",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  output$treeTable <- DT::renderDT({
-    WordsT <- TreeMap()
-    DTformat(values$WordsT, nrow=10, filename="Most_Frequent_Words", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-  },height = 600, width = 900)
-  
-  observeEvent(input$reportTREEMAP,{
-    if(!is.null(values$WordsT)){
+
+  output$treeTable <- DT::renderDT(
+    {
+      WordsT <- TreeMap()
+      DTformat(
+        values$WordsT,
+        nrow = 10,
+        filename = "Most_Frequent_Words",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = NULL,
+        dom = FALSE,
+        size = '100%',
+        filter = "none",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 2,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
+    },
+    height = 600,
+    width = 900
+  )
+
+  observeEvent(input$reportTREEMAP, {
+    if (!is.null(values$WordsT)) {
       sheetname <- "TreeMap"
       list_df <- list(values$WordsT)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$wb <- res$wb
       #values$fileTFP <- screenSh(selector = "#treemap") ## screenshot
-      values$fileTreeMap <- screenSh(values$TreeMap, zoom = 2, type="plotly")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTreeMap,res$col))
-      popUp(title="TreeMap", type="success")
+      values$fileTreeMap <- screenSh(values$TreeMap, zoom = 2, type = "plotly")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileTreeMap, res$col)
+      )
+      popUp(title = "TreeMap", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
-  ### Words' Frequency over Time ----   
-  observeEvent(input$WDStop,{
-    values$WDremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$WDStop, sep=input$WDSep)))
+
+  ### Words' Frequency over Time ----
+  observeEvent(input$WDStop, {
+    values$WDremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$WDStop,
+        sep = input$WDSep
+      ))
+    )
     values$GenericSL <- values$WDremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$WDSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$WDSyn, sep=input$WDSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+
+  observeEvent(input$WDSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$WDSyn,
+      sep = input$WDSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$WDsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$WDsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$WDsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
-  WDynamics <- eventReactive(input$applyWD,{
-    if (input$cumTerms=="Cum"){
-      cdf=TRUE
-      laby="Cumulate occurrences"
-    }else{
-      cdf=FALSE
-      laby="Annual occurrences"}
-    
+
+  WDynamics <- eventReactive(input$applyWD, {
+    if (input$cumTerms == "Cum") {
+      cdf = TRUE
+      laby = "Cumulate occurrences"
+    } else {
+      cdf = FALSE
+      laby = "Annual occurrences"
+    }
+
     ### load file with terms to remove
-    if (input$WDStopFile=="Y"){
+    if (input$WDStopFile == "Y") {
       remove.terms <- trimws(values$WDremove.terms$stopword)
-    }else{remove.terms <- NULL}
+    } else {
+      remove.terms <- NULL
+    }
     #values$WDremove.terms <- remove.terms
     ### end of block
-    
+
     ### load file with synonyms
-    if (input$WDSynFile=="Y"){
-      synonyms <- values$WDsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    if (input$WDSynFile == "Y") {
+      synonyms <- values$WDsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
       synonyms <- synonyms$term
-    }else{synonyms <- NULL}
+    } else {
+      synonyms <- NULL
+    }
     #values$WDsyn.terms <- synonyms
     ### end of block
-    
-    switch(input$growthTerms,
-           ID={
-             KW=KeywordGrowth(values$M, Tag = "ID", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
-           },
-           DE={
-             KW=KeywordGrowth(values$M, Tag = "DE", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
-           },
-           KW_Merged={
-             KW=KeywordGrowth(values$M, Tag = "KW_Merged", sep = ";", top = input$topkw[2], cdf = cdf, remove.terms=remove.terms, synonyms = synonyms)
-           },
-           TI={
-             values$M=termExtraction(values$M,Field = "TI", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
-             KW=KeywordGrowth(values$M, Tag = "TI_TM", sep = ";", top = input$topkw[2], cdf = cdf)
-           },
-           AB={
-             values$M=termExtraction(values$M,Field = "AB", verbose=FALSE, ngrams=as.numeric(input$growthTermsngrams), remove.terms=remove.terms, synonyms = synonyms)
-             KW=KeywordGrowth(values$M, Tag = "AB_TM", sep = ";", top = input$topkw[2], cdf = cdf)
-           }
+
+    switch(
+      input$growthTerms,
+      ID = {
+        KW = KeywordGrowth(
+          values$M,
+          Tag = "ID",
+          sep = ";",
+          top = input$topkw[2],
+          cdf = cdf,
+          remove.terms = remove.terms,
+          synonyms = synonyms
+        )
+      },
+      DE = {
+        KW = KeywordGrowth(
+          values$M,
+          Tag = "DE",
+          sep = ";",
+          top = input$topkw[2],
+          cdf = cdf,
+          remove.terms = remove.terms,
+          synonyms = synonyms
+        )
+      },
+      KW_Merged = {
+        KW = KeywordGrowth(
+          values$M,
+          Tag = "KW_Merged",
+          sep = ";",
+          top = input$topkw[2],
+          cdf = cdf,
+          remove.terms = remove.terms,
+          synonyms = synonyms
+        )
+      },
+      TI = {
+        values$M = termExtraction(
+          values$M,
+          Field = "TI",
+          verbose = FALSE,
+          ngrams = as.numeric(input$growthTermsngrams),
+          remove.terms = remove.terms,
+          synonyms = synonyms
+        )
+        KW = KeywordGrowth(
+          values$M,
+          Tag = "TI_TM",
+          sep = ";",
+          top = input$topkw[2],
+          cdf = cdf
+        )
+      },
+      AB = {
+        values$M = termExtraction(
+          values$M,
+          Field = "AB",
+          verbose = FALSE,
+          ngrams = as.numeric(input$growthTermsngrams),
+          remove.terms = remove.terms,
+          synonyms = synonyms
+        )
+        KW = KeywordGrowth(
+          values$M,
+          Tag = "AB_TM",
+          sep = ";",
+          top = input$topkw[2],
+          cdf = cdf
+        )
+      }
     )
-    
-    values$KW=KW[,c(1,seq(input$topkw[1],input$topkw[2])+1)]
-    
-    term=names(values$KW)[-1]
-    term=rep(term,each=dim(values$KW)[1])
-    n=dim(values$KW)[1]*(dim(values$KW)[2]-1)
-    freq=matrix(as.matrix(values$KW[,-1]),n,1)
-    values$DF=data.frame(Year=rep(values$KW$Year,(dim(values$KW)[2]-1)),Term=term, Freq=freq)
-    
+
+    values$KW = KW[, c(1, seq(input$topkw[1], input$topkw[2]) + 1)]
+
+    term = names(values$KW)[-1]
+    term = rep(term, each = dim(values$KW)[1])
+    n = dim(values$KW)[1] * (dim(values$KW)[2] - 1)
+    freq = matrix(as.matrix(values$KW[, -1]), n, 1)
+    values$DF = data.frame(
+      Year = rep(values$KW$Year, (dim(values$KW)[2] - 1)),
+      Term = term,
+      Freq = freq
+    )
+
     width_scale <- 2.5 * 26 / length(unique(values$DF$Term))
-    
-    Text <- paste(values$DF$Term," (",values$DF$Year,") ",values$DF$Freq, sep="")
-    
-    x <- c(max(values$DF$Year)-0.02-diff(range(values$DF$Year))*0.20, max(values$DF$Year)-0.02)-1
-    y <- c(min(values$DF$Freq),min(values$DF$Freq)+diff(range(values$DF$Freq))*0.20)
-    
-    g <- ggplot(values$DF, aes(x=Year,y=Freq, group=Term, color=Term, text = Text))+
-      geom_line()+
-      labs(x = 'Year'
-           , y = laby
-           , title = "Words' Frequency over Time") +
-      scale_x_continuous(breaks= (values$KW$Year[seq(1,length(values$KW$Year),by=ceiling(length(values$KW$Year)/20))])) +
-      geom_hline(aes(yintercept=0), alpha=0.1)+
-      labs(color = "Term")+
-      theme(text = element_text(color = "#444444"),
-            legend.text=ggplot2::element_text(size=width_scale),
-            legend.box.margin = margin(6, 6, 6, 6),
-            legend.title=ggplot2::element_text(size=1.5*width_scale,face="bold"),
-            legend.position="bottom",
-            legend.direction = "vertical",
-            legend.key.size = grid::unit(width_scale/50, "inch"),
-            legend.key.width = grid::unit(width_scale/50, "inch")
-            ,plot.caption = element_text(size = 9, hjust = 0.5, color = "black", face = "bold")
-            ,panel.background = element_rect(fill = '#FFFFFF')
-            ,panel.grid.minor = element_line(color = '#EFEFEF')
-            ,panel.grid.major = element_line(color = '#EFEFEF')
-            ,plot.title = element_text(size = 24)
-            ,axis.title = element_text(size = 14, color = '#555555')
-            ,axis.title.y = element_text(vjust = 1, angle = 90)
-            ,axis.title.x = element_text(hjust = 0.95, angle = 0)
-            ,axis.text.x = element_text(size=10, angle = 90)
-            ,axis.line.x = element_line(color="black",linewidth=0.5)
-            ,axis.line.y = element_line(color="black",linewidth=0.5)
-      ) + 
-      annotation_custom(values$logoGrid, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2]) 
-    
+
+    Text <- paste(
+      values$DF$Term,
+      " (",
+      values$DF$Year,
+      ") ",
+      values$DF$Freq,
+      sep = ""
+    )
+
+    x <- c(
+      max(values$DF$Year) - 0.02 - diff(range(values$DF$Year)) * 0.20,
+      max(values$DF$Year) - 0.02
+    ) -
+      1
+    y <- c(
+      min(values$DF$Freq),
+      min(values$DF$Freq) + diff(range(values$DF$Freq)) * 0.20
+    )
+
+    g <- ggplot(
+      values$DF,
+      aes(x = Year, y = Freq, group = Term, color = Term, text = Text)
+    ) +
+      geom_line() +
+      labs(x = 'Year', y = laby, title = "Words' Frequency over Time") +
+      scale_x_continuous(
+        breaks = (values$KW$Year[seq(
+          1,
+          length(values$KW$Year),
+          by = ceiling(length(values$KW$Year) / 20)
+        )])
+      ) +
+      geom_hline(aes(yintercept = 0), alpha = 0.1) +
+      labs(color = "Term") +
+      theme(
+        text = element_text(color = "#444444"),
+        legend.text = ggplot2::element_text(size = width_scale),
+        legend.box.margin = margin(6, 6, 6, 6),
+        legend.title = ggplot2::element_text(
+          size = 1.5 * width_scale,
+          face = "bold"
+        ),
+        legend.position = "bottom",
+        legend.direction = "vertical",
+        legend.key.size = grid::unit(width_scale / 50, "inch"),
+        legend.key.width = grid::unit(width_scale / 50, "inch"),
+        plot.caption = element_text(
+          size = 9,
+          hjust = 0.5,
+          color = "black",
+          face = "bold"
+        ),
+        panel.background = element_rect(fill = '#FFFFFF'),
+        panel.grid.minor = element_line(color = '#EFEFEF'),
+        panel.grid.major = element_line(color = '#EFEFEF'),
+        plot.title = element_text(size = 24),
+        axis.title = element_text(size = 14, color = '#555555'),
+        axis.title.y = element_text(vjust = 1, angle = 90),
+        axis.title.x = element_text(hjust = 0.95, angle = 0),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.line.x = element_line(color = "black", linewidth = 0.5),
+        axis.line.y = element_line(color = "black", linewidth = 0.5)
+      ) +
+      annotation_custom(
+        values$logoGrid,
+        xmin = x[1],
+        xmax = x[2],
+        ymin = y[1],
+        ymax = y[2]
+      )
+
     values$WDplot <- g
     return(g)
   })
-  
+
   output$WDplot.save <- downloadHandler(
     filename = function() {
-      paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep="")
+      paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$WDplot, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$WDplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$kwGrowthPlot <- renderPlotly({
-    
     g <- WDynamics()
-    
+
     leg <- list(
-      orientation = 'h', 
+      orientation = 'h',
       y = -0.15,
       font = list(
         family = "sans-serif",
         size = 10,
-        color = "#000"),
+        color = "#000"
+      ),
       bgcolor = "#FFFFFF",
       bordercolor = "#FFFFFF",
-      borderwidth = 2) 
-    
-    plot.ly(g, flip=FALSE, side="r", aspectratio=1.6, size=0.10) %>%
+      borderwidth = 2
+    )
+
+    plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.6, size = 0.10) %>%
       layout(legend = leg) %>%
-      config(displaylogo = FALSE,
-             modeBarButtonsToRemove = c(
-               'toImage',
-               'sendDataToCloud',
-               'pan2d', 
-               'select2d', 
-               'lasso2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             ))  %>%
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          'toImage',
+          'sendDataToCloud',
+          'pan2d',
+          'select2d',
+          'lasso2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        )
+      ) %>%
       layout(hovermode = 'compare')
   })
-  
+
   output$kwGrowthtable <- DT::renderDT({
     g <- WDynamics()
     kwData <- values$KW
-    DTformat(kwData, nrow=10, filename="Word_Dynamics", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-  })
-  
-  observeEvent(input$reportWD,{
-    if(!is.null(values$KW)){
-      list_df <- list(values$KW)
-      list_plot <- list(values$WDplot)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "WordFreqOverTime", wb=values$wb)
-      values$wb <- wb
-      popUp(title="Words' Frequency over Time", type="success")
-      values$myChoices <- sheets(values$wb)
-    } else {
-      popUp(type="error")
-    }
-  })
-  
-  ### Trend Topics ----
-  
-  observeEvent(input$TTStop,{
-    values$TTremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TTStop, sep=input$TTSep)))
-    values$GenericSL <- values$TTremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
-  })
-  
-  observeEvent(input$TTSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$TTSyn, sep=input$TTSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
-    }))
-    values$TTsyn.terms <- data.frame(term=term, synonyms=synList)
-    values$GenericSYN <- values$TTsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
-  })
-  
-  output$trendSliderPY <- renderUI({
-    
-    sliderInput("trendSliderPY", "Timespan", min = min(values$M$PY,na.rm=T),sep="",
-                max = max(values$M$PY,na.rm=T), value = c(min(values$M$PY,na.rm=T),max(values$M$PY,na.rm=T)))
-  })
-  
-  TrendTopics <- eventReactive(input$applyTrendTopics,{
-    
-    ### load file with terms to remove
-    if (input$TTStopFile=="Y"){
-      remove.terms <- trimws(values$TTremove.terms$stopword)
-    }else{remove.terms <- NULL}
-    #values$TTremove.terms <- remove.terms
-    ### end of block
-    
-    ### load file with synonyms
-    if (input$TTSynFile=="Y"){
-      synonyms <- values$TTsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
-      synonyms <- synonyms$term
-    }else{synonyms <- NULL}
-    #values$TTsyn.terms <- synonyms
-    ### end of block
-    
-    if (input$trendTerms %in% c("TI","AB")){
-      values$M=termExtraction(values$M, Field = input$trendTerms, stemming = input$trendStemming, verbose = FALSE, ngrams=as.numeric(input$trendTermsngrams))
-      field=paste(input$trendTerms,"_TM",sep="")
-    } else {field=input$trendTerms}
-    values$trendTopics <- fieldByYear(values$M, field = field, timespan = input$trendSliderPY, min.freq = input$trendMinFreq,
-                                      n.items = input$trendNItems, remove.terms = remove.terms, synonyms = synonyms, 
-                                      dynamic.plot=TRUE, graph = FALSE)
-    values$trendTopics$params <- data.frame(description=c("Textual field", "N. of words per Year"),
-                                            value=c(field, input$trendNItems))
-    return(values$trendTopics$graph)
-  })
-  
-  # gemini button for word network
-  output$trendTopicsGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
-    geminiOutput(title = "", content = values$trendTopicsGemini, values)
-  })
-  
-  output$TTplot.save <- downloadHandler(
-    filename = function() {
-      paste("TrendTopics-", Sys.Date(), ".png", sep="")
-    },
-    content <- function(file) {
-      ggsave(filename = file, plot = values$trendTopics$graph, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
-    },
-    contentType = "png"
-  )
-  
-  output$trendTopicsPlot <- renderPlotly({
-    g <- TrendTopics()
-    plot.ly(g, flip=TRUE, side="r", size=0.1, aspectratio=1.3)
-  })
-  
-  output$trendTopicsTable <- DT::renderDT({
-    TrendTopics()
-    tpData=values$trendTopics$df_graph %>% 
-      rename(Term = item,
-             Frequency = freq,
-             "Year (Q1)" = year_q1,
-             "Year (Median)" = year_med,
-             "Year (Q3)" = year_q3)
-    DTformat(tpData, nrow=10, filename="TrendTopic", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-  })
-  
-  observeEvent(input$reportTT,{
-    if(!is.null(values$trendTopics$df_graph)){
-      list_df <- list(values$trendTopics$df_graph %>% 
-                        rename(Term = item,
-                               Frequency = freq,
-                               "Year (Q1)" = year_q1,
-                               "Year (Median)" = year_med,
-                               "Year (Q3)" = year_q3))
-      list_plot <- list(values$trendTopics$graph)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "TrendTopics", wb=values$wb)
-      values$wb <- wb
-      popUp(title="Trend Topics", type="success")
-      values$myChoices <- sheets(values$wb)
-    } else {
-      popUp(type="error")
-    }
-  })
-  
-  # CLUSTERING ----
-  ### Clustering by Coupling ----
-  CMMAP <- eventReactive(input$applyCM,{
-    
-    values$CM <- couplingMap(values$M, analysis=input$CManalysis, field=input$CMfield, 
-                             n=input$CMn, minfreq=input$CMfreq,
-                             ngrams=as.numeric(input$CMngrams),
-                             community.repulsion = input$CMrepulsion,
-                             impact.measure=input$CMimpact,
-                             stemming=input$CMstemming, size=input$sizeCM, 
-                             label.term = input$CMlabeling,
-                             n.labels=input$CMn.labels, repel=FALSE)
-    values$CM$data <- values$CM$data[,c(1,5,2)]
-    values$CM$clusters <- values$CM$clusters[,c(7,1:4,6)]
-    validate(
-      need(values$CM$nclust > 0, "\n\nNo clusters in one or more periods. Please select a different set of parameters.")
+    DTformat(
+      kwData,
+      nrow = 10,
+      filename = "Word_Dynamics",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
     )
   })
-  
-  output$CMPlot <- renderPlotly({
-    CMMAP()
-    plot.ly(values$CM$map, size=0.15, aspectratio = 1.3)
+
+  observeEvent(input$reportWD, {
+    if (!is.null(values$KW)) {
+      list_df <- list(values$KW)
+      list_plot <- list(values$WDplot)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "WordFreqOverTime",
+        wb = values$wb
+      )
+      values$wb <- wb
+      popUp(title = "Words' Frequency over Time", type = "success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type = "error")
+    }
   })
-  
-  output$CMNetPlot <- renderVisNetwork({
-    CMMAP()
-    values$networkCM<-igraph2vis(g=values$CM$net$graph,curved=(input$coc.curved=="Yes"), 
-                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape, net=values$CM$net,shadow=TRUE)
-    values$networkCM$VIS
+
+  ### Trend Topics ----
+
+  observeEvent(input$TTStop, {
+    values$TTremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$TTStop,
+        sep = input$TTSep
+      ))
+    )
+    values$GenericSL <- values$TTremove.terms
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  output$CMplot.save <- downloadHandler(
+
+  observeEvent(input$TTSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$TTSyn,
+      sep = input$TTSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
+    }))
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$TTsyn.terms <- data.frame(term = term, synonyms = synList)
+    values$GenericSYN <- values$TTsyn.terms
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
+  })
+
+  output$trendSliderPY <- renderUI({
+    sliderInput(
+      "trendSliderPY",
+      "Timespan",
+      min = min(values$M$PY, na.rm = T),
+      sep = "",
+      max = max(values$M$PY, na.rm = T),
+      value = c(min(values$M$PY, na.rm = T), max(values$M$PY, na.rm = T))
+    )
+  })
+
+  TrendTopics <- eventReactive(input$applyTrendTopics, {
+    ### load file with terms to remove
+    if (input$TTStopFile == "Y") {
+      remove.terms <- trimws(values$TTremove.terms$stopword)
+    } else {
+      remove.terms <- NULL
+    }
+    #values$TTremove.terms <- remove.terms
+    ### end of block
+
+    ### load file with synonyms
+    if (input$TTSynFile == "Y") {
+      synonyms <- values$TTsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
+      synonyms <- synonyms$term
+    } else {
+      synonyms <- NULL
+    }
+    #values$TTsyn.terms <- synonyms
+    ### end of block
+
+    if (input$trendTerms %in% c("TI", "AB")) {
+      values$M = termExtraction(
+        values$M,
+        Field = input$trendTerms,
+        stemming = input$trendStemming,
+        verbose = FALSE,
+        ngrams = as.numeric(input$trendTermsngrams)
+      )
+      field = paste(input$trendTerms, "_TM", sep = "")
+    } else {
+      field = input$trendTerms
+    }
+    values$trendTopics <- fieldByYear(
+      values$M,
+      field = field,
+      timespan = input$trendSliderPY,
+      min.freq = input$trendMinFreq,
+      n.items = input$trendNItems,
+      remove.terms = remove.terms,
+      synonyms = synonyms,
+      dynamic.plot = TRUE,
+      graph = FALSE
+    )
+    values$trendTopics$params <- data.frame(
+      description = c("Textual field", "N. of words per Year"),
+      value = c(field, input$trendNItems)
+    )
+    return(values$trendTopics$graph)
+  })
+
+  # gemini button for word network
+  output$trendTopicsGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
+    geminiOutput(title = "", content = values$trendTopicsGemini, values)
+  })
+
+  output$TTplot.save <- downloadHandler(
     filename = function() {
-      paste("CouplingMap-", Sys.Date(), ".png", sep="")
+      paste("TrendTopics-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$CM$map, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$trendTopics$graph,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
+  output$trendTopicsPlot <- renderPlotly({
+    g <- TrendTopics()
+    plot.ly(g, flip = TRUE, side = "r", size = 0.1, aspectratio = 1.3)
+  })
+
+  output$trendTopicsTable <- DT::renderDT({
+    TrendTopics()
+    tpData = values$trendTopics$df_graph %>%
+      rename(
+        Term = item,
+        Frequency = freq,
+        "Year (Q1)" = year_q1,
+        "Year (Median)" = year_med,
+        "Year (Q3)" = year_q3
+      )
+    DTformat(
+      tpData,
+      nrow = 10,
+      filename = "TrendTopic",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  })
+
+  observeEvent(input$reportTT, {
+    if (!is.null(values$trendTopics$df_graph)) {
+      list_df <- list(
+        values$trendTopics$df_graph %>%
+          rename(
+            Term = item,
+            Frequency = freq,
+            "Year (Q1)" = year_q1,
+            "Year (Median)" = year_med,
+            "Year (Q3)" = year_q3
+          )
+      )
+      list_plot <- list(values$trendTopics$graph)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "TrendTopics",
+        wb = values$wb
+      )
+      values$wb <- wb
+      popUp(title = "Trend Topics", type = "success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type = "error")
+    }
+  })
+
+  # CLUSTERING ----
+  ### Clustering by Coupling ----
+  CMMAP <- eventReactive(input$applyCM, {
+    values$CM <- couplingMap(
+      values$M,
+      analysis = input$CManalysis,
+      field = input$CMfield,
+      n = input$CMn,
+      minfreq = input$CMfreq,
+      ngrams = as.numeric(input$CMngrams),
+      community.repulsion = input$CMrepulsion,
+      impact.measure = input$CMimpact,
+      stemming = input$CMstemming,
+      size = input$sizeCM,
+      label.term = input$CMlabeling,
+      n.labels = input$CMn.labels,
+      repel = FALSE
+    )
+    values$CM$data <- values$CM$data[, c(1, 5, 2)]
+    values$CM$clusters <- values$CM$clusters[, c(7, 1:4, 6)]
+    validate(
+      need(
+        values$CM$nclust > 0,
+        "\n\nNo clusters in one or more periods. Please select a different set of parameters."
+      )
+    )
+  })
+
+  output$CMPlot <- renderPlotly({
+    CMMAP()
+    plot.ly(values$CM$map, size = 0.15, aspectratio = 1.3)
+  })
+
+  output$CMNetPlot <- renderVisNetwork({
+    CMMAP()
+    values$networkCM <- igraph2vis(
+      g = values$CM$net$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$CM$net,
+      shadow = TRUE
+    )
+    values$networkCM$VIS
+  })
+
+  output$CMplot.save <- downloadHandler(
+    filename = function() {
+      paste("CouplingMap-", Sys.Date(), ".png", sep = "")
+    },
+    content <- function(file) {
+      ggsave(
+        filename = file,
+        plot = values$CM$map,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
+    },
+    contentType = "png"
+  )
+
   output$CMTable <- DT::renderDT({
     CMMAP()
     #cmData=values$CM$data[,c(2,1,3,5)]
     cmData <- values$CM$data
-    DTformat(cmData, nrow=10, filename="CouplingMap", pagelength=TRUE, left=NULL, right=NULL, numeric=2, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      cmData,
+      nrow = 10,
+      filename = "CouplingMap",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$CMTableCluster <- DT::renderDT({
     CMMAP()
     #cmData=values$CM$clusters[,c(7,1:4,6)]
     cmData <- values$CM$clusters
-    DTformat(cmData, nrow=10, filename="CouplingMap_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=4:5, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      cmData,
+      nrow = 10,
+      filename = "CouplingMap_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 4:5,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportCM,{
-    if(!is.null(values$CM$data)){
-      popUp(title=NULL, type="waiting")
-      list_df <- list(values$CM$params,
-                      values$CM$data,
-                      values$CM$clusters)
-      list_plot <- list(values$CM$map,
-                        values$CM$net$graph)
-      wb <- addSheetToReport(list_df, list_plot, sheetname="CouplingMap", wb=values$wb)
+
+  observeEvent(input$reportCM, {
+    if (!is.null(values$CM$data)) {
+      popUp(title = NULL, type = "waiting")
+      list_df <- list(values$CM$params, values$CM$data, values$CM$clusters)
+      list_plot <- list(values$CM$map, values$CM$net$graph)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "CouplingMap",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Coupling Map", type="success")
+      popUp(title = "Coupling Map", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # CONCEPTUAL STRUCTURE ----
   ### Network approach ----
   #### Co-occurrences network ----
-  observeEvent(input$COCStop,{
-    values$COCremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$COCStop, sep=input$COCSep)))
+  observeEvent(input$COCStop, {
+    values$COCremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$COCStop,
+        sep = input$COCSep
+      ))
+    )
     values$GenericSL <- values$COCremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$COCSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$COCSyn, sep=input$COCSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+
+  observeEvent(input$COCSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$COCSyn,
+      sep = input$COCSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$COCsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$COCsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$COCsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
-  COCnetwork <- eventReactive(input$applyCoc,{
-    
-    values <- cocNetwork(input,values)
-    values$COCnetwork<-igraph2vis(g=values$cocnet$graph,curved=(input$coc.curved=="Yes"), 
-                               labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                               shape=input$coc.shape, net=values$cocnet, shadow=(input$coc.shadow=="Yes"), edgesize=input$edgesize, noOverlap=input$noOverlap)
+
+  COCnetwork <- eventReactive(input$applyCoc, {
+    values <- cocNetwork(input, values)
+    values$COCnetwork <- igraph2vis(
+      g = values$cocnet$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$cocnet,
+      shadow = (input$coc.shadow == "Yes"),
+      edgesize = input$edgesize,
+      noOverlap = input$noOverlap
+    )
     values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocnet)
     ## values for network over time
@@ -4215,24 +7443,34 @@ To ensure the functionality of Biblioshiny,
     values$playing_coc = FALSE
     values$paused_coc = FALSE
     values$current_year_coc = min(values$years_coc)
-    
+
     output$year_slider_cocUI <- renderUI({
-      sliderInput("year_slider_coc", "Year", min = min(values$years_coc), max = max(values$years_coc),
-                  value =min(values$years_coc), step = 1, animate = FALSE, width = "100%",
-                  ticks = FALSE, round = TRUE, sep="")
+      sliderInput(
+        "year_slider_coc",
+        "Year",
+        min = min(values$years_coc),
+        max = max(values$years_coc),
+        value = min(values$years_coc),
+        step = 1,
+        animate = FALSE,
+        width = "100%",
+        ticks = FALSE,
+        round = TRUE,
+        sep = ""
+      )
     })
   })
-  
-  output$cocPlot <- renderVisNetwork({  
+
+  output$cocPlot <- renderVisNetwork({
     COCnetwork()
     values$COCnetwork$VIS
   })
-  
+
   output$cocOverlay <- renderPlotly({
     COCnetwork()
     values$cocOverlay
   })
-  
+
   ## Co-Occurrence Network over Time ####
   observe({
     req(values$COCnetwork$VIS)
@@ -4240,43 +7478,91 @@ To ensure the functionality of Biblioshiny,
     isolate({
       #years <- sort(unique(c(values$COCnetwork$VIS$x$nodes$year_med)))
       # years <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
-      if (values$playing_coc && !values$paused_coc && values$index_coc < length(values$years_coc)) {
+      if (
+        values$playing_coc &&
+          !values$paused_coc &&
+          values$index_coc < length(values$years_coc)
+      ) {
         values$index_coc <- values$index_coc + 1
         yr <- values$years_coc[values$index_coc]
         values$current_year_coc <- yr
-        updateSliderInput(session, "year_slider_coc", value = yr, min = min(values$years_coc), max = max(values$years_coc))
+        updateSliderInput(
+          session,
+          "year_slider_coc",
+          value = yr,
+          min = min(values$years_coc),
+          max = max(values$years_coc)
+        )
       }
     })
   })
-  
+
   # funzione per creare la rete
   render_network_coc <- reactive({
     req(values$COCnetwork$VIS)
     selected_year <- values$current_year_coc
-    show_nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med <= selected_year) %>% mutate(title = paste(title,year_med, sep=" "))
-    show_edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
-    
+    show_nodes <- values$COCnetwork$VIS$x$nodes %>%
+      dplyr::filter(year_med <= selected_year) %>%
+      mutate(title = paste(title, year_med, sep = " "))
+    show_edges <- values$COCnetwork$VIS$x$edges %>%
+      dplyr::filter(from %in% show_nodes$id & to %in% show_nodes$id)
+
     coords <- show_nodes %>% select(x, y) %>% as.matrix()
-    
-    values$COCnetworkOverTime <- visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
-      visNetwork::visNodes(shadow = TRUE, shape = "dot", font = list(color = show_nodes$font.color, size = show_nodes$font.size, vadjust = show_nodes$font.vadjust)) %>%
-      visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
+
+    values$COCnetworkOverTime <- visNetwork::visNetwork(
+      nodes = show_nodes,
+      edges = show_edges,
+      type = "full",
+      smooth = TRUE,
+      physics = FALSE
+    ) %>%
+      visNetwork::visNodes(
+        shadow = TRUE,
+        shape = "dot",
+        font = list(
+          color = show_nodes$font.color,
+          size = show_nodes$font.size,
+          vadjust = show_nodes$font.vadjust
+        )
+      ) %>%
+      visNetwork::visIgraphLayout(
+        layout = "layout.norm",
+        layoutMatrix = coords,
+        type = "full"
+      ) %>%
       visNetwork::visEdges(smooth = list(type = "horizontal")) %>%
-      visNetwork::visOptions(highlightNearest = list(enabled = T, hover = T, degree = 1), nodesIdSelection = T) %>%
-      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
-      visNetwork::visOptions(manipulation = FALSE, height = "100%", width = "100%")
+      visNetwork::visOptions(
+        highlightNearest = list(enabled = T, hover = T, degree = 1),
+        nodesIdSelection = T
+      ) %>%
+      visNetwork::visInteraction(
+        dragNodes = TRUE,
+        navigationButtons = F,
+        hideEdgesOnDrag = TRUE,
+        zoomSpeed = 0.4
+      ) %>%
+      visNetwork::visOptions(
+        manipulation = FALSE,
+        height = "100%",
+        width = "100%"
+      )
     values$COCnetworkOverTime
   })
-  
+
   # aggiorna rete quando cambia lo slider
   observeEvent(input$year_slider_coc, {
     values$current_year_coc <- as.numeric(input$year_slider_coc)
-    output$cocOverTime <- renderVisNetwork({ render_network_coc() })
+    output$cocOverTime <- renderVisNetwork({
+      render_network_coc()
+    })
   })
-  
+
   output$cocYearUI <- renderUI({
     req(values$current_year_coc)
-    h3(paste(watchEmoji(values$current_year_coc), values$current_year_coc), style = "text-align: left; color: #0e4770; font-weight: bold;")
+    h3(
+      paste(watchEmoji(values$current_year_coc), values$current_year_coc),
+      style = "text-align: left; color: #0e4770; font-weight: bold;"
+    )
   })
 
   # start
@@ -4289,12 +7575,14 @@ To ensure the functionality of Biblioshiny,
     values$current_year_coc <- min(values$years_coc)
     #shinyjs::hide("export_coc")
     updateSliderInput(session, "year_slider_coc", value = min(values$years_coc))
-    output$cocOverTime <- renderVisNetwork({ render_network_coc() })
+    output$cocOverTime <- renderVisNetwork({
+      render_network_coc()
+    })
   })
-  
+
   observeEvent(input$pause_coc, {
     values$paused_coc <- !values$paused_coc
-      # if paused show the button "export_coc" else hide it
+    # if paused show the button "export_coc" else hide it
     if (values$paused_coc) {
       output$export_cocUI <- renderUI({
         actionButton("export_coc", "⬇ Export", width = "90%")
@@ -4303,7 +7591,7 @@ To ensure the functionality of Biblioshiny,
       output$export_cocUI <- renderUI({})
     }
   })
-  
+
   # reset
   observeEvent(input$reset_coc, {
     values$playing_coc <- FALSE
@@ -4314,36 +7602,41 @@ To ensure the functionality of Biblioshiny,
     values$current_year_coc <- min(values$years_coc)
     updateSliderInput(session, "year_slider_coc", value = min(values$years_coc))
     output$cocOverTime <- renderVisNetwork({
-      nodes <- values$COCnetwork$VIS$x$nodes %>% filter(year_med < 0)
-      edges <- values$COCnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
+      nodes <- values$COCnetwork$VIS$x$nodes %>% dplyr::filter(year_med < 0)
+      edges <- values$COCnetwork$VIS$x$edges %>%
+        dplyr::filter(from %in% nodes$id)
       visNetwork(nodes = nodes, edges = edges)
     })
   })
-  
+
   ### end Network over Time ----
-  
+
   # gemini button for word network
   output$cocGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$cocGemini, values)
   })
-  
+
   output$network.coc <- downloadHandler(
     filename = function() {
-      paste("Co_occurrence_network-", Sys.Date(), ".zip", sep="")
+      paste("Co_occurrence_network-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
       tmpdir <- tempdir()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
-      myfile <- paste("mynetwork-", Sys.Date(), sep="")
-      files <- paste0(myfile, c(".net",".vec",".clu"))
-      graph2Pajek(values$cocnet$graph, filename=myfile)
-      zip::zip(file,files)
+      myfile <- paste("mynetwork-", Sys.Date(), sep = "")
+      files <- paste0(myfile, c(".net", ".vec", ".clu"))
+      graph2Pajek(values$cocnet$graph, filename = myfile)
+      zip::zip(file, files)
     },
     contentType = "zip"
   )
-  
+
   ##### save coc network image as html ####
   output$networkCoc.fig <- downloadHandler(
     filename = "network.html",
@@ -4352,101 +7645,184 @@ To ensure the functionality of Biblioshiny,
     },
     contentType = "html"
   )
-  
+
   output$cocTable <- DT::renderDT({
     COCnetwork()
-    cocData=values$cocnet$cluster_res
-    names(cocData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
-    DTformat(cocData, nrow=10, filename="CoWord_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=3:5, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    cocData = values$cocnet$cluster_res
+    names(cocData) = c(
+      "Node",
+      "Cluster",
+      "Betweenness",
+      "Closeness",
+      "PageRank"
+    )
+    DTformat(
+      cocData,
+      nrow = 10,
+      filename = "CoWord_Network",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 3:5,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   ### Degree Plot Co-word analysis ----
   output$cocDegree <- renderPlotly({
     COCnetwork()
     #values$degreePlot <- degreePlot(values$cocnet)
     plot.ly(values$degreePlot)
   })
-  
-  observeEvent(input$reportCOC,{
-    if(!is.null(values$cocnet$cluster_res)){
-      names(values$cocnet$cluster_res)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+
+  observeEvent(input$reportCOC, {
+    if (!is.null(values$cocnet$cluster_res)) {
+      names(values$cocnet$cluster_res) = c(
+        "Node",
+        "Cluster",
+        "Betweenness",
+        "Closeness",
+        "PageRank"
+      )
       sheetname <- "CoWordNet"
       list_df <- list(values$cocnet$cluster_res)
       list_plot <- list(values$degreePlot)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, res$sheetname, col=res$col+16, width=10, height=7, dpi=75)
+      values$wb <- addGgplotsWb(
+        list_plot,
+        wb = res$wb,
+        res$sheetname,
+        col = res$col + 16,
+        width = 10,
+        height = 7,
+        dpi = 75
+      )
       #values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
-      values$fileCOC <- screenSh(values$COCnetwork$VIS, zoom = 2, type="vis")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOC,res$col))
-      popUp(title="Co-occurrence Network", type="success")
+      values$fileCOC <- screenSh(values$COCnetwork$VIS, zoom = 2, type = "vis")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileCOC, res$col)
+      )
+      popUp(title = "Co-occurrence Network", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ### Correspondence Analysis ----
-  observeEvent(input$CSStop,{
-    values$CSremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$CSStop, sep=input$CSSep)))
+  observeEvent(input$CSStop, {
+    values$CSremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$CSStop,
+        sep = input$CSSep
+      ))
+    )
     values$GenericSL <- values$CSremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$FASyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$FASyn, sep=input$FASynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+
+  observeEvent(input$FASyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$FASyn,
+      sep = input$FASynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$FAsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$FAsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$FAsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
-  CSfactorial <- eventReactive(input$applyCA,{
-    values <- CAmap(input,values)
-    values$plotCS <- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
-    values$dendCS <- dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
+
+  CSfactorial <- eventReactive(input$applyCA, {
+    values <- CAmap(input, values)
+    values$plotCS <- ca2plotly(
+      values$CS,
+      method = input$method,
+      dimX = 1,
+      dimY = 2,
+      topWordPlot = Inf,
+      threshold = 0.05,
+      labelsize = input$CSlabelsize * 2,
+      size = input$CSlabelsize * 1.5
+    )
+    values$dendCS <- dend2vis(
+      values$CS$km.res,
+      labelsize = input$CSlabelsize,
+      nclusters = as.numeric(input$nClustersCS),
+      community = FALSE
+    )
   })
-  
+
   # gemini button for correspondence analysis
   output$CSGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$CSGemini, values)
   })
-  
+
   output$FAplot.save <- downloadHandler(
     filename = function() {
       #
-      paste("FactorialAnalysis_", Sys.Date(), ".zip", sep="")
+      paste("FactorialAnalysis_", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
       #go to a temp dir to avoid permission issues
       owd <- setwd(tempdir())
       on.exit(setwd(owd))
-      files <- c(paste("FactorialMap_", Sys.Date(), ".png", sep=""),
-                 paste("Dendrogram_", Sys.Date(), ".png", sep="")
-                 #paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
-                 #paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
+      files <- c(
+        paste("FactorialMap_", Sys.Date(), ".png", sep = ""),
+        paste("Dendrogram_", Sys.Date(), ".png", sep = "")
+        #paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
+        #paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
       )
-      ggsave(filename = files[1], plot = values$CS$graph_terms, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-      png(filename = files[2],  height = values$h, width = values$h*2, units="in", res = values$dpi)
-          plot(values$CS$graph_dendogram)
+      ggsave(
+        filename = files[1],
+        plot = values$CS$graph_terms,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 1.5,
+        bg = "white"
+      )
+      png(
+        filename = files[2],
+        height = values$h,
+        width = values$h * 2,
+        units = "in",
+        res = values$dpi
+      )
+      plot(values$CS$graph_dendogram)
       dev.off()
-      zip::zip(file,files)
+      zip::zip(file, files)
     },
     contentType = "zip"
   )
@@ -4457,128 +7833,230 @@ To ensure the functionality of Biblioshiny,
     #save(CS,file="provaCS.rdata")
     values$plotCS #<- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
   })
-  
 
   output$CSPlot4 <- renderVisNetwork({
     CSfactorial()
-      #dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
-      values$dendCS
-      #values$CS$graph_dendogram)
+    #dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
+    values$dendCS
+    #values$CS$graph_dendogram)
   })
-  
+
   output$CSTableW <- DT::renderDT({
     CSfactorial()
     WData <- values$CS$WData
-    DTformat(WData, nrow=10, filename="CoWord_Factorial_Analysis_Words_By_Cluster", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      WData,
+      nrow = 10,
+      filename = "CoWord_Factorial_Analysis_Words_By_Cluster",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$CSTableD <- DT::renderDT({
     CSfactorial()
     CSData <- values$CS$CSData
-    DTformat(CSData, nrow=10, filename="CoWord_Factorial_Analysis_Articles_By_Cluster", pagelength=TRUE, left=NULL, right=NULL, numeric=2:4, dom=FALSE, 
-             size='100%', filter="none", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      CSData,
+      nrow = 10,
+      filename = "CoWord_Factorial_Analysis_Articles_By_Cluster",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:4,
+      dom = FALSE,
+      size = '100%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   # add to report
-  observeEvent(input$reportFA,{
-    if(!is.null(values$CS$params)){
+  observeEvent(input$reportFA, {
+    if (!is.null(values$CS$params)) {
       list_df <- list(values$CS$params, values$CS$WData, values$CS$CSData)
       list_plot <- list(values$CS$graph_terms, values$CS$graph_dendogram)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "FactorialAnalysis", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "FactorialAnalysis",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Factorial Analysis", type="success")
+      popUp(title = "Factorial Analysis", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ### Thematic Map ----
-  observeEvent(input$TMStop,{
-    values$TMremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TMStop, sep=input$TMSep)))
+  observeEvent(input$TMStop, {
+    values$TMremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$TMStop,
+        sep = input$TMSep
+      ))
+    )
     values$GenericSL <- values$TMremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$TMapSyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$TMapSyn, sep=input$TMapSynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+
+  observeEvent(input$TMapSyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$TMapSyn,
+      sep = input$TMapSynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$TMapsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$TMapsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$TMapsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
-  TMAP <- eventReactive(input$applyTM,{
-    if (input$TMfield %in% c("TI","AB")){
+
+  TMAP <- eventReactive(input$applyTM, {
+    if (input$TMfield %in% c("TI", "AB")) {
       ngrams <- as.numeric(input$TMngrams)
-    }else{
+    } else {
       ngrams <- 1
     }
-    
+
     ### load file with terms to remove
-    if (input$TMStopFile=="Y"){
+    if (input$TMStopFile == "Y") {
       remove.terms <- trimws(values$TMremove.terms$stopword)
-    }else{remove.terms <- NULL}
+    } else {
+      remove.terms <- NULL
+    }
     #values$TMremove.terms <- remove.terms
     ### end of block
-    
+
     ### load file with synonyms
-    if (input$TMapSynFile=="Y"){
-      synonyms <- values$TMapsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    if (input$TMapSynFile == "Y") {
+      synonyms <- values$TMapsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
       synonyms <- synonyms$term
-    }else{synonyms <- NULL}
+    } else {
+      synonyms <- NULL
+    }
     #values$TMapsyn.terms <- synonyms
     ### end of block
-    
-    values$TM <- thematicMap(values$M, field=input$TMfield, 
-                             n=input$TMn, minfreq=input$TMfreq, ngrams=ngrams,
-                             community.repulsion = input$TMrepulsion,
-                             stemming=input$TMstemming, size=input$sizeTM, cluster=input$TMCluster,
-                             n.labels=input$TMn.labels, repel=FALSE, remove.terms=remove.terms, synonyms=synonyms,
-                             subgraphs=TRUE)
-    values$TM$doc2clust <- values$TM$documentToClusters %>% select(Assigned_cluster, SR, pagerank) 
-    
-    values$TM$documentToClusters$DI<- paste0('<a href=\"https://doi.org/',values$TM$documentToClusters$DI,'\" target=\"_blank\">',values$TM$documentToClusters$DI,'</a>')
-    names(values$TM$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
-    
-    values$TM$words <- values$TM$words[,-c(4,6)]
+
+    values$TM <- thematicMap(
+      values$M,
+      field = input$TMfield,
+      n = input$TMn,
+      minfreq = input$TMfreq,
+      ngrams = ngrams,
+      community.repulsion = input$TMrepulsion,
+      stemming = input$TMstemming,
+      size = input$sizeTM,
+      cluster = input$TMCluster,
+      n.labels = input$TMn.labels,
+      repel = FALSE,
+      remove.terms = remove.terms,
+      synonyms = synonyms,
+      subgraphs = TRUE,
+      seed = values$random_seed
+    )
+    values$TM$doc2clust <- values$TM$documentToClusters %>%
+      select(Assigned_cluster, SR, pagerank)
+
+    values$TM$documentToClusters$DI <- paste0(
+      '<a href=\"https://doi.org/',
+      values$TM$documentToClusters$DI,
+      '\" target=\"_blank\">',
+      values$TM$documentToClusters$DI,
+      '</a>'
+    )
+    names(values$TM$documentToClusters)[1:9] <- c(
+      "DOI",
+      "Authors",
+      "Title",
+      "Source",
+      "Year",
+      "TotalCitation",
+      "TCperYear",
+      "NTC",
+      "SR"
+    )
+
+    values$TM$words <- values$TM$words[, -c(4, 6)]
     values$TM$clusters_orig <- values$TM$clusters
-    values$TM$clusters <- values$TM$clusters[,c(9,5:8,11)]
-    names(values$TM$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency") 
-    values$TMmap <- plot.ly(values$TM$map, size=0.07, aspectratio = 1.3, customdata=values$TM$clusters$color)
+    values$TM$clusters <- values$TM$clusters[, c(9, 5:8, 11)]
+    names(values$TM$clusters) <- c(
+      "Cluster",
+      "CallonCentrality",
+      "CallonDensity",
+      "RankCentrality",
+      "RankDensity",
+      "ClusterFrequency"
+    )
+    values$TMmap <- plot.ly(
+      values$TM$map,
+      size = 0.07,
+      aspectratio = 1.3,
+      customdata = values$TM$clusters$color
+    )
     validate(
-      need(values$TM$nclust > 0, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
+      need(
+        values$TM$nclust > 0,
+        "\n\nNo topics in one or more periods. Please select a different set of parameters."
+      )
     )
   })
   output$TMPlot <- renderPlotly({
     TMAP()
     values$TMmap
   })
-  
+
   # gemini button for Thematic Map
   output$TMGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$TMGemini, values)
   })
-  
+
   ### click cluster networks
-  
+
   plotModal <- function(session) {
     ns <- session$ns
     modalDialog(
@@ -4587,511 +8065,1103 @@ To ensure the functionality of Biblioshiny,
       size = "l",
       easyClose = TRUE,
       footer = tagList(
-        actionButton(label="Save", inputId = "cocPlotClust",
-                     icon = icon("camera", lib = "glyphicon")),
-        modalButton("Close")),
+        actionButton(
+          label = "Save",
+          inputId = "cocPlotClust",
+          icon = icon("camera", lib = "glyphicon")
+        ),
+        modalButton("Close")
+      ),
     )
   }
-  
-  observeEvent(input$cocPlotClust,{
+
+  observeEvent(input$cocPlotClust, {
     #Time <- format(Sys.time(),'%H%M%S')
-    filename = paste("TMClusterGraph-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$plotClust , filename=filename, type="vis")
+    filename = paste(
+      "TMClusterGraph-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$plotClust, filename = filename, type = "vis")
   })
-  
+
   observeEvent(event_data("plotly_click"), {
-    if (input$sidebarmenu=="thematicMap"){
+    if (input$sidebarmenu == "thematicMap") {
       showModal(plotModal(session))
     }
   })
-  
+
   output$cocPlotClust <- renderVisNetwork({
     values$d <- event_data("plotly_click")
-    coord <- values$d[c("x","y")]
-    color <- values$TM$clusters_orig %>% 
-      filter(rcentrality==coord$x,rdensity==coord$y) %>% 
-      select(color) %>% as.character()
+    coord <- values$d[c("x", "y")]
+    color <- values$TM$clusters_orig %>%
+      dplyr::filter(rcentrality == coord$x, rdensity == coord$y) %>%
+      select(color) %>%
+      as.character()
     g <- values$TM$subgraphs[[color]]
-    values$plotClust <- igraph2visClust(g,curved=F,labelsize=4,opacity=0.5,shape="dot", shadow=TRUE, edgesize=5)$VIS
-    values$plotClust 
+    values$plotClust <- igraph2visClust(
+      g,
+      curved = F,
+      labelsize = 4,
+      opacity = 0.5,
+      shape = "dot",
+      shadow = TRUE,
+      edgesize = 5
+    )$VIS
+    values$plotClust
   })
-  
+
   ### end click cluster subgraphs
-  
+
   output$NetPlot <- renderVisNetwork({
     TMAP()
-    values$networkTM<-igraph2vis(g=values$TM$net$graph,curved=(input$coc.curved=="Yes"), 
-                                 labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                 shape=input$coc.shape, net=values$TM$net, noOverlap=input$noOverlapTM)
+    values$networkTM <- igraph2vis(
+      g = values$TM$net$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$TM$net,
+      noOverlap = input$noOverlapTM
+    )
     values$networkTM$VIS
   })
-  
-  
+
   output$TMplot.save <- downloadHandler(
     filename = function() {
-      paste("ThematicMap-", Sys.Date(), ".png", sep="")
+      paste("ThematicMap-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(filename = file, plot = values$TM$map, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
+      ggsave(
+        filename = file,
+        plot = values$TM$map,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 1.5,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
+
   output$TMTable <- DT::renderDT({
     TMAP()
-    tmData=values$TM$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=FALSE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmData = values$TM$words
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Terms",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:7,
+      dom = FALSE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableCluster <- DT::renderDT({
     TMAP()
     tmData <- values$TM$clusters
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableDocument <- DT::renderDT({
     TMAP()
     tmDataDoc <- values$TM$documentToClusters
-    DTformat(tmDataDoc, nrow=10, filename="Thematic_Map_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=c(7:8,10:(ncol(tmDataDoc)-2),ncol(tmDataDoc)), dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      tmDataDoc,
+      nrow = 10,
+      filename = "Thematic_Map_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(tmDataDoc) - 2), ncol(tmDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportTM,{
-    if(!is.null(values$TM$words)){
-      popUp(title=NULL, type="waiting")
-      list_df <- list(values$TM$params,
-                      values$TM$words,
-                      values$TM$clusters,
-                      values$TM$documentToClusters)
-      list_plot <- list(values$TM$map,
-                        values$TM$net$graph)
-      wb <- addSheetToReport(list_df, list_plot, sheetname="ThematicMap", wb=values$wb)
+
+  observeEvent(input$reportTM, {
+    if (!is.null(values$TM$words)) {
+      popUp(title = NULL, type = "waiting")
+      list_df <- list(
+        values$TM$params,
+        values$TM$words,
+        values$TM$clusters,
+        values$TM$documentToClusters
+      )
+      list_plot <- list(values$TM$map, values$TM$net$graph)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "ThematicMap",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Thematic Map", type="success")
+      popUp(title = "Thematic Map", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ### Thematic Evolution ----
-  observeEvent(input$TEStop,{
-    values$TEremove.terms <- data.frame(stopword=trimws(readStopwordsFile(file=input$TEStop, sep=input$TESep)))
+  observeEvent(input$TEStop, {
+    values$TEremove.terms <- data.frame(
+      stopword = trimws(readStopwordsFile(
+        file = input$TEStop,
+        sep = input$TESep
+      ))
+    )
     values$GenericSL <- values$TEremove.terms
-    popUpGeneric(title="Stopword list", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("stopwordList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Stopword list",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("stopwordList"),
+      btn_labels = "OK"
+    )
   })
-  
-  observeEvent(input$TESyn,{
-    synonyms <- trimws(readSynWordsFile(file=input$TESyn, sep=input$TESynSep))
-    term <- unlist(lapply(strsplit(synonyms,";"),function(l){l[1]}))
-    synList <- unlist(lapply(strsplit(synonyms,";"),function(l){
-      paste0(trimws(l[-1]),collapse=";")
+
+  observeEvent(input$TESyn, {
+    synonyms <- trimws(readSynWordsFile(
+      file = input$TESyn,
+      sep = input$TESynSep
+    ))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      l[1]
     }))
-    values$TEsyn.terms <- data.frame(term=term, synonyms=synList)
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) {
+      paste0(trimws(l[-1]), collapse = ";")
+    }))
+    values$TEsyn.terms <- data.frame(term = term, synonyms = synList)
     values$GenericSYN <- values$TEsyn.terms
-    popUpGeneric(title="Synonym List", 
-                 type=NULL, 
-                 color=c("#1d8fe1"),
-                 subtitle=DTOutput("synonymList"),
-                 btn_labels="OK")
-    
+    popUpGeneric(
+      title = "Synonym List",
+      type = NULL,
+      color = c("#1d8fe1"),
+      subtitle = DTOutput("synonymList"),
+      btn_labels = "OK"
+    )
   })
-  
+
   output$sliders <- renderUI({
     numSlices <- as.integer(input$numSlices)
-    v=quantile(values$M$PY, seq(0,1,by=(1/(numSlices+1))), na.rm=TRUE)
-    v=round(v[-c(1,length(v))],0)
+    v = quantile(
+      values$M$PY,
+      seq(0, 1, by = (1 / (numSlices + 1))),
+      na.rm = TRUE
+    )
+    v = round(v[-c(1, length(v))], 0)
     lapply(1:numSlices, function(i) {
-      numericInput(inputId = paste0("Slice", i), label = paste("Cutting Year", i),value=v[i],min=min(values$M$PY, na.rm = TRUE)+1,max=max(values$M$PY, na.rm = TRUE)-1, step=1)
+      numericInput(
+        inputId = paste0("Slice", i),
+        label = paste("Cutting Year", i),
+        value = v[i],
+        min = min(values$M$PY, na.rm = TRUE) + 1,
+        max = max(values$M$PY, na.rm = TRUE) - 1,
+        step = 1
+      )
     })
   })
-  
-  TEMAP <- eventReactive(input$applyTE,{
-    if (input$TEfield %in% c("TI","AB")){
+
+  TEMAP <- eventReactive(input$applyTE, {
+    if (input$TEfield %in% c("TI", "AB")) {
       ngrams <- as.numeric(input$TEngrams)
-    }else{
+    } else {
       ngrams <- 1
     }
-    
+
     ### load file with terms to remove
-    if (input$TEStopFile=="Y"){
+    if (input$TEStopFile == "Y") {
       remove.terms <- trimws(values$TEremove.terms$stopword)
-    }else{remove.terms <- NULL}
+    } else {
+      remove.terms <- NULL
+    }
     #values$TEremove.terms <- remove.terms
     ### end of block
-    
+
     ### load file with synonyms
-    if (input$TESynFile=="Y"){
-      synonyms <- values$TEsyn.terms %>% group_by(term) %>% mutate(term=paste0(term,";",synonyms)) %>% select(term)
+    if (input$TESynFile == "Y") {
+      synonyms <- values$TEsyn.terms %>%
+        group_by(term) %>%
+        mutate(term = paste0(term, ";", synonyms)) %>%
+        select(term)
       synonyms <- synonyms$term
-    }else{synonyms <- NULL}
+    } else {
+      synonyms <- NULL
+    }
     #values$TEsyn.terms <- synonyms
     ### end of block
-    
+
     values$yearSlices <- as.numeric()
-    if (is.null(input$numSlices)){
-      values$yearSlices <- median(values$M$PY, na.rm=TRUE)
-    }else{
-      for (i in 1:as.integer(input$numSlices)){
-        if (length(input[[paste0("Slice", i)]])>0){values$yearSlices <- c(values$yearSlices,input[[paste0("Slice", i)]])}
+    if (is.null(input$numSlices)) {
+      values$yearSlices <- median(values$M$PY, na.rm = TRUE)
+    } else {
+      for (i in 1:as.integer(input$numSlices)) {
+        if (length(input[[paste0("Slice", i)]]) > 0) {
+          values$yearSlices <- c(values$yearSlices, input[[paste0("Slice", i)]])
+        }
       }
     }
-    
-    if (length(values$yearSlices)>0){
-      values$nexus <- thematicEvolution(values$M, field=input$TEfield, values$yearSlices, n = input$nTE, minFreq = input$fTE, size = input$sizeTE, 
-                                        cluster=input$TECluster,
-                                        n.labels=input$TEn.labels, repel=FALSE, ngrams=ngrams, remove.terms = remove.terms, synonyms = synonyms)
-      validate(
-        need(values$nexus$check != FALSE, "\n\nNo topics in one or more periods. Please select a different set of parameters.")
+
+    if (length(values$yearSlices) > 0) {
+      values$nexus <- thematicEvolution(
+        values$M,
+        field = input$TEfield,
+        values$yearSlices,
+        n = input$nTE,
+        minFreq = input$fTE,
+        size = input$sizeTE,
+        cluster = input$TECluster,
+        n.labels = input$TEn.labels,
+        repel = FALSE,
+        ngrams = ngrams,
+        remove.terms = remove.terms,
+        synonyms = synonyms,
+        seed = values$random_seed
       )
-      for (i in 1:(length(values$yearSlices)+1)){
-        values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[,-c(4,6)]
-        values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[,c(9,5:8,11)]
-        names(values$nexus$TM[[i]]$clusters) <- c("Cluster", "CallonCentrality","CallonDensity","RankCentrality","RankDensity","ClusterFrequency")
-        
-        values$nexus$TM[[i]]$documentToClusters$DI<- paste0('<a href=\"https://doi.org/',values$nexus$TM[[i]]$documentToClusters$DI,'\" target=\"_blank\">',values$nexus$TM[[i]]$documentToClusters$DI,'</a>')
-        names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR")
+      validate(
+        need(
+          values$nexus$check != FALSE,
+          "\n\nNo topics in one or more periods. Please select a different set of parameters."
+        )
+      )
+      for (i in 1:(length(values$yearSlices) + 1)) {
+        values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[, -c(4, 6)]
+        values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[, c(
+          9,
+          5:8,
+          11
+        )]
+        names(values$nexus$TM[[i]]$clusters) <- c(
+          "Cluster",
+          "CallonCentrality",
+          "CallonDensity",
+          "RankCentrality",
+          "RankDensity",
+          "ClusterFrequency"
+        )
+
+        values$nexus$TM[[i]]$documentToClusters$DI <- paste0(
+          '<a href=\"https://doi.org/',
+          values$nexus$TM[[i]]$documentToClusters$DI,
+          '\" target=\"_blank\">',
+          values$nexus$TM[[i]]$documentToClusters$DI,
+          '</a>'
+        )
+        names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c(
+          "DOI",
+          "Authors",
+          "Title",
+          "Source",
+          "Year",
+          "TotalCitation",
+          "TCperYear",
+          "NTC",
+          "SR"
+        )
       }
-      values$nexus$Data <- values$nexus$Data[values$nexus$Data$Inc_index>0,-c(4,8)]
-      values$TEplot <- plotThematicEvolution(Nodes = values$nexus$Nodes,Edges = values$nexus$Edges, measure = input$TEmeasure, min.flow = input$minFlowTE, label_size = input$sizeTE*20)
+      values$nexus$Data <- values$nexus$Data[
+        values$nexus$Data$Inc_index > 0,
+        -c(4, 8)
+      ]
+      values$TEplot <- plotThematicEvolution(
+        Nodes = values$nexus$Nodes,
+        Edges = values$nexus$Edges,
+        measure = input$TEmeasure,
+        min.flow = input$minFlowTE,
+        label_size = input$sizeTE * 20
+      )
     }
   })
-  
+
   output$TEPlot <- visNetwork::renderVisNetwork({
     TEMAP()
     values$TEplot
   })
-  
+
   # gemini button for word network
   output$TEGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$TEGemini, values)
   })
- 
+
   session$onFlushed(function() {
     shinyjs::runjs("$('#TEPlot').trigger('resize');")
   })
-  
+
   output$TEplot.save <- downloadHandler(
     filename = function() {
       #
-      paste("ThematicEvolution-", Sys.Date(), ".zip", sep="")
+      paste("ThematicEvolution-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
       #go to a temp dir to avoid permission issues
       tmpdir <- tempdir()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
-      files <- filenameTE <- paste("ThematicEvolution_", Sys.Date(), ".png", sep="")
-      
-      for (i in 1:length(values$nexus$TM)){
-        fileName <- paste("ThematicEvolution-Map_",i,"_",Sys.Date(), ".png", sep="")
-        ggsave(filename = fileName, plot = values$nexus$TM[[i]]$map, dpi = values$dpi, height = values$h, width = values$h*1.5, bg="white")
-        files <- c(fileName,files)
+      files <- filenameTE <- paste(
+        "ThematicEvolution_",
+        Sys.Date(),
+        ".png",
+        sep = ""
+      )
+
+      for (i in 1:length(values$nexus$TM)) {
+        fileName <- paste(
+          "ThematicEvolution-Map_",
+          i,
+          "_",
+          Sys.Date(),
+          ".png",
+          sep = ""
+        )
+        ggsave(
+          filename = fileName,
+          plot = values$nexus$TM[[i]]$map,
+          dpi = values$dpi,
+          height = values$h,
+          width = values$h * 1.5,
+          bg = "white"
+        )
+        files <- c(fileName, files)
       }
-      plot2png(values$TEplot, filename= filenameTE, 
-               zoom = 2, type="vis", tmpdir=tmpdir)
-      zip::zip(file,files)
+      plot2png(
+        values$TEplot,
+        filename = filenameTE,
+        zoom = 2,
+        type = "vis",
+        tmpdir = tmpdir
+      )
+      zip::zip(file, files)
     },
     contentType = "zip"
   )
-  
+
   output$TETable <- DT::renderDT({
     TEMAP()
-    TEData=values$nexus$Data
-    names(TEData)=c("From", "To", "Words", "Weighted Inclusion Index", "Inclusion Index", "Occurrences", "Stability Index")
-    DTformat(TEData, nrow=10, filename="Thematic_Evolution", pagelength=TRUE, left=NULL, right=NULL, numeric=c(4,5,7), dom=TRUE, 
-             size='85%', filter="top", columnShort=NULL, columnSmall=NULL, round=2, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    TEData = values$nexus$Data
+    names(TEData) = c(
+      "From",
+      "To",
+      "Words",
+      "Weighted Inclusion Index",
+      "Inclusion Index",
+      "Occurrences",
+      "Stability Index"
+    )
+    DTformat(
+      TEData,
+      nrow = 10,
+      filename = "Thematic_Evolution",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(4, 5, 7),
+      dom = TRUE,
+      size = '85%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  output$TMPlot1 <-  renderPlotly({
+
+  output$TMPlot1 <- renderPlotly({
     TEMAP()
-    if (length(values$nexus$TM)>=1){
-      plot.ly(values$nexus$TM[[1]]$map, size=0.07, aspectratio = 1.3)
-    } else {emptyPlot("You have selected fewer periods!")}
+    if (length(values$nexus$TM) >= 1) {
+      plot.ly(values$nexus$TM[[1]]$map, size = 0.07, aspectratio = 1.3)
+    } else {
+      emptyPlot("You have selected fewer periods!")
+    }
   })
-  
-  output$TMPlot2 <-  renderPlotly({
+
+  output$TMPlot2 <- renderPlotly({
     TEMAP()
-    if (length(values$nexus$TM)>=2){
-      plot.ly(values$nexus$TM[[2]]$map, size=0.07, aspectratio = 1.3)
-    } else {emptyPlot("You have selected fewer periods!")}
+    if (length(values$nexus$TM) >= 2) {
+      plot.ly(values$nexus$TM[[2]]$map, size = 0.07, aspectratio = 1.3)
+    } else {
+      emptyPlot("You have selected fewer periods!")
+    }
   })
-  
-  output$TMPlot3 <-  renderPlotly({
+
+  output$TMPlot3 <- renderPlotly({
     TEMAP()
-    if (length(values$nexus$TM)>=3){
-      plot.ly(values$nexus$TM[[3]]$map, size=0.07, aspectratio = 1.3)
-    } else {emptyPlot("You have selected fewer periods!")}
+    if (length(values$nexus$TM) >= 3) {
+      plot.ly(values$nexus$TM[[3]]$map, size = 0.07, aspectratio = 1.3)
+    } else {
+      emptyPlot("You have selected fewer periods!")
+    }
   })
-  
-  output$TMPlot4 <-  renderPlotly({
+
+  output$TMPlot4 <- renderPlotly({
     TEMAP()
-    if (length(values$nexus$TM)>=4){
-      plot.ly(values$nexus$TM[[4]]$map, size=0.07, aspectratio = 1.3)
-    } else (emptyPlot("You have selected fewer periods!"))
+    if (length(values$nexus$TM) >= 4) {
+      plot.ly(values$nexus$TM[[4]]$map, size = 0.07, aspectratio = 1.3)
+    } else {
+      (emptyPlot("You have selected fewer periods!"))
+    }
   })
-  
-  output$TMPlot5 <-  renderPlotly({
+
+  output$TMPlot5 <- renderPlotly({
     TEMAP()
-    if (length(values$nexus$TM)>=5){
-      plot.ly(values$nexus$TM[[5]]$map, size=0.07, aspectratio = 1.3)
-    } else (emptyPlot("You have selected fewer periods!"))
+    if (length(values$nexus$TM) >= 5) {
+      plot.ly(values$nexus$TM[[5]]$map, size = 0.07, aspectratio = 1.3)
+    } else {
+      (emptyPlot("You have selected fewer periods!"))
+    }
   })
-  
+
   output$NetPlot1 <- renderVisNetwork({
     TEMAP()
-    k=1
-    values$network1<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
-                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
+    k = 1
+    values$network1 <- igraph2vis(
+      g = values$nexus$Net[[k]]$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$nexus$Net[[k]],
+      noOverlap = input$noOverlapTE
+    )
     values$network1$VIS
   })
-  
+
   output$NetPlot2 <- renderVisNetwork({
     TEMAP()
-    k=2
-    values$network2<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
-                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
+    k = 2
+    values$network2 <- igraph2vis(
+      g = values$nexus$Net[[k]]$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$nexus$Net[[k]],
+      noOverlap = input$noOverlapTE
+    )
     values$network2$VIS
   })
-  
+
   output$NetPlot3 <- renderVisNetwork({
     TEMAP()
-    k=3
-    values$network3<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
-                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
+    k = 3
+    values$network3 <- igraph2vis(
+      g = values$nexus$Net[[k]]$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$nexus$Net[[k]],
+      noOverlap = input$noOverlapTE
+    )
     values$network3$VIS
   })
-  
+
   output$NetPlot4 <- renderVisNetwork({
     TEMAP()
-    k=4
-    values$network4<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
-                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
+    k = 4
+    values$network4 <- igraph2vis(
+      g = values$nexus$Net[[k]]$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$nexus$Net[[k]],
+      noOverlap = input$noOverlapTE
+    )
     values$network4$VIS
   })
-  
+
   output$NetPlot5 <- renderVisNetwork({
     TEMAP()
-    k=5
-    values$network5<-igraph2vis(g=values$nexus$Net[[k]]$graph,curved=(input$coc.curved=="Yes"), 
-                                labelsize=input$labelsize, opacity=input$cocAlpha,type=input$layout,
-                                shape=input$coc.shape, net=values$nexus$Net[[k]], noOverlap=input$noOverlapTE)
+    k = 5
+    values$network5 <- igraph2vis(
+      g = values$nexus$Net[[k]]$graph,
+      curved = (input$coc.curved == "Yes"),
+      labelsize = input$labelsize,
+      opacity = input$cocAlpha,
+      type = input$layout,
+      shape = input$coc.shape,
+      net = values$nexus$Net[[k]],
+      noOverlap = input$noOverlapTE
+    )
     values$network5$VIS
   })
-  
+
   output$TMTable1 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[1]]$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_1_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmData = values$nexus$TM[[1]]$words
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_1_Terms",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:7,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTable2 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[2]]$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_2_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmData = values$nexus$TM[[2]]$words
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_2_Terms",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:7,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTable3 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[3]]$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_3_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmData = values$nexus$TM[[3]]$words
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_3_Terms",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:7,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTable4 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[4]]$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_4_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmData = values$nexus$TM[[4]]$words
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_4_Terms",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:7,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTable5 <- DT::renderDT({
     TEMAP()
-    tmData=values$nexus$TM[[5]]$words
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_5_Terms", pagelength=TRUE, left=NULL, right=NULL, numeric=5:7, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmData = values$nexus$TM[[5]]$words
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_5_Terms",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 5:7,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableCluster1 <- DT::renderDT({
     TEMAP()
     tmData <- values$nexus$TM[[1]]$clusters
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_1_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_1_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableCluster2 <- DT::renderDT({
     TEMAP()
     tmData <- values$nexus$TM[[2]]$clusters
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_2_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_2_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableCluster3 <- DT::renderDT({
     TEMAP()
     tmData <- values$nexus$TM[[3]]$clusters
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_3_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_3_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableCluster4 <- DT::renderDT({
     TEMAP()
     tmData <- values$nexus$TM[[4]]$clusters
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_4_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE) 
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_4_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableCluster5 <- DT::renderDT({
     TEMAP()
     tmData <- values$nexus$TM[[5]]$clusters
-    DTformat(tmData, nrow=10, filename="Thematic_Map_Period_5_Clusters", pagelength=TRUE, left=NULL, right=NULL, numeric=2:3, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE) 
+    DTformat(
+      tmData,
+      nrow = 10,
+      filename = "Thematic_Map_Period_5_Clusters",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2:3,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  output$TMTableDocument1 <- DT::renderDT(server=TRUE,{
+
+  output$TMTableDocument1 <- DT::renderDT(server = TRUE, {
     TEMAP()
     tmDataDoc <- values$nexus$TM[[1]]$documentToClusters
-    DTformat(tmDataDoc, nrow=10, filename="Thematic_Map_Period_1_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=c(7:8,10:(ncol(tmDataDoc)-2),ncol(tmDataDoc)), dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    DTformat(
+      tmDataDoc,
+      nrow = 10,
+      filename = "Thematic_Map_Period_1_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(tmDataDoc) - 2), ncol(tmDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableDocument2 <- DT::renderDT({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[2]]$documentToClusters
-    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
-    names(tmDataDoc)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
-    DTformat(tmDataDoc, nrow=10, filename="Thematic_Map_Period_2_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=c(7:8,10:(ncol(tmDataDoc)-2),ncol(tmDataDoc)), dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmDataDoc$DI <- paste0(
+      '<a href=\"https://doi.org/',
+      tmDataDoc$DI,
+      '\" target=\"_blank\">',
+      tmDataDoc$DI,
+      '</a>'
+    )
+    names(tmDataDoc)[1:9] <- c(
+      "DOI",
+      "Authors",
+      "Title",
+      "Source",
+      "Year",
+      "TotalCitation",
+      "TCperYear",
+      "NTC",
+      "SR"
+    )
+    DTformat(
+      tmDataDoc,
+      nrow = 10,
+      filename = "Thematic_Map_Period_2_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(tmDataDoc) - 2), ncol(tmDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableDocument3 <- DT::renderDT({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[3]]$documentToClusters
-    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
-    names(tmDataDoc)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
-    
-    DTformat(tmDataDoc, nrow=10, filename="Thematic_Map_Period_3_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=c(7:8,10:(ncol(tmDataDoc)-2),ncol(tmDataDoc)), dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmDataDoc$DI <- paste0(
+      '<a href=\"https://doi.org/',
+      tmDataDoc$DI,
+      '\" target=\"_blank\">',
+      tmDataDoc$DI,
+      '</a>'
+    )
+    names(tmDataDoc)[1:9] <- c(
+      "DOI",
+      "Authors",
+      "Title",
+      "Source",
+      "Year",
+      "TotalCitation",
+      "TCperYear",
+      "NTC",
+      "SR"
+    )
+
+    DTformat(
+      tmDataDoc,
+      nrow = 10,
+      filename = "Thematic_Map_Period_3_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(tmDataDoc) - 2), ncol(tmDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableDocument4 <- DT::renderDT({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[4]]$documentToClusters
-    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
-    names(tmDataDoc)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
-    
-    DTformat(tmDataDoc, nrow=10, filename="Thematic_Map_Period_4_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=c(7:8,10:(ncol(tmDataDoc)-2),ncol(tmDataDoc)), dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmDataDoc$DI <- paste0(
+      '<a href=\"https://doi.org/',
+      tmDataDoc$DI,
+      '\" target=\"_blank\">',
+      tmDataDoc$DI,
+      '</a>'
+    )
+    names(tmDataDoc)[1:9] <- c(
+      "DOI",
+      "Authors",
+      "Title",
+      "Source",
+      "Year",
+      "TotalCitation",
+      "TCperYear",
+      "NTC",
+      "SR"
+    )
+
+    DTformat(
+      tmDataDoc,
+      nrow = 10,
+      filename = "Thematic_Map_Period_4_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(tmDataDoc) - 2), ncol(tmDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   output$TMTableDocument5 <- DT::renderDT({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[5]]$documentToClusters
-    tmDataDoc$DI<- paste0('<a href=\"https://doi.org/',tmDataDoc$DI,'\" target=\"_blank\">',tmDataDoc$DI,'</a>')
-    names(tmDataDoc)[1:9] <- c("DOI", "Authors","Title","Source","Year","TotalCitation","TCperYear","NTC","SR") 
-    
-    DTformat(tmDataDoc, nrow=10, filename="Thematic_Map_Period_5_Documents", pagelength=TRUE, left=NULL, right=NULL, numeric=c(7:8,10:(ncol(tmDataDoc)-2),ncol(tmDataDoc)), dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    tmDataDoc$DI <- paste0(
+      '<a href=\"https://doi.org/',
+      tmDataDoc$DI,
+      '\" target=\"_blank\">',
+      tmDataDoc$DI,
+      '</a>'
+    )
+    names(tmDataDoc)[1:9] <- c(
+      "DOI",
+      "Authors",
+      "Title",
+      "Source",
+      "Year",
+      "TotalCitation",
+      "TCperYear",
+      "NTC",
+      "SR"
+    )
+
+    DTformat(
+      tmDataDoc,
+      nrow = 10,
+      filename = "Thematic_Map_Period_5_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(tmDataDoc) - 2), ncol(tmDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
-  observeEvent(input$reportTE,{
-    if(!is.null(values$nexus$Data)){
-      popUp(title=NULL, type="waiting")
+
+  observeEvent(input$reportTE, {
+    if (!is.null(values$nexus$Data)) {
+      popUp(title = NULL, type = "waiting")
       sheetname <- "ThematicEvolution"
       list_df <- list(values$nexus$params, values$nexus$Data)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       #values$wb <- res$wb
       #values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
-      values$fileTEplot <- screenSh(values$TEplot, zoom = 2, type="plotly")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileTEplot,res$col))
-      
+      values$fileTEplot <- screenSh(values$TEplot, zoom = 2, type = "plotly")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileTEplot, res$col)
+      )
+
       ## Periods
       L <- length(values$nexus$TM)
       wb <- res$wb
-      for (l in 1:L){
-        if(!is.null(values$nexus$TM[[l]]$words)){
-          
-          list_df <- list(values$nexus$TM[[l]]$params,
-                          values$nexus$TM[[l]]$words,
-                          values$nexus$TM[[l]]$clusters,
-                          values$nexus$TM[[l]]$documentToClusters)
-          list_plot <- list(values$nexus$TM[[l]]$map,
-                            values$nexus$TM[[l]]$net$graph)
-          wb <- addSheetToReport(list_df, list_plot, sheetname=paste("TE_Period_",l,sep=""), wb=wb)
+      for (l in 1:L) {
+        if (!is.null(values$nexus$TM[[l]]$words)) {
+          list_df <- list(
+            values$nexus$TM[[l]]$params,
+            values$nexus$TM[[l]]$words,
+            values$nexus$TM[[l]]$clusters,
+            values$nexus$TM[[l]]$documentToClusters
+          )
+          list_plot <- list(
+            values$nexus$TM[[l]]$map,
+            values$nexus$TM[[l]]$net$graph
+          )
+          wb <- addSheetToReport(
+            list_df,
+            list_plot,
+            sheetname = paste("TE_Period_", l, sep = ""),
+            wb = wb
+          )
           #
         }
       }
       values$wb <- wb
-      popUp(title="Thematic Evolution", type="success")
+      popUp(title = "Thematic Evolution", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # INTELLECTUAL STRUCTURE ####
   ### Co-citation network ----
-  COCITnetwork <- eventReactive(input$applyCocit,{
-    values <- intellectualStructure(input,values)
-    values$COCITnetwork<-igraph2vis(g=values$cocitnet$graph,curved=(input$cocit.curved=="Yes"), 
-                               labelsize=input$citlabelsize, opacity=0.7,type=input$citlayout,
-                               shape=input$cocit.shape, net=values$cocitnet, shadow=(input$cocit.shadow=="Yes"),
-                               noOverlap=input$citNoOverlap)
+  COCITnetwork <- eventReactive(input$applyCocit, {
+    values <- intellectualStructure(input, values)
+    values$COCITnetwork <- igraph2vis(
+      g = values$cocitnet$graph,
+      curved = (input$cocit.curved == "Yes"),
+      labelsize = input$citlabelsize,
+      opacity = 0.7,
+      type = input$citlayout,
+      shape = input$cocit.shape,
+      net = values$cocitnet,
+      shadow = (input$cocit.shadow == "Yes"),
+      noOverlap = input$citNoOverlap
+    )
     values$cocitOverlay <- overlayPlotly(values$COCITnetwork$VIS)
     values$degreePlot <- degreePlot(values$cocitnet)
   })
-  
-  output$cocitPlot <- renderVisNetwork({  
+
+  output$cocitPlot <- renderVisNetwork({
     COCITnetwork()
     isolate(values$COCITnetwork$VIS)
   })
-  
+
   output$cocitOverlay <- renderPlotly({
     COCITnetwork()
     values$cocitOverlay
   })
-  
+
   # gemini button for co-citation network
   output$cocitGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$cocitGemini, values)
   })
-  
+
   output$network.cocit <- downloadHandler(
     filename = function() {
-      paste("Co_citation_network-", Sys.Date(), ".zip", sep="")
+      paste("Co_citation_network-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
       tmpdir <- tempdir()
@@ -5099,25 +9169,47 @@ To ensure the functionality of Biblioshiny,
       on.exit(setwd(owd))
       # print(tmpdir)
       #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
-      myfile <- paste("mynetwork-", Sys.Date(), sep="")
-      files <- paste0(myfile, c(".net",".vec",".clu"))
-      graph2Pajek(values$cocitnet$graph, filename=myfile)
+      myfile <- paste("mynetwork-", Sys.Date(), sep = "")
+      files <- paste0(myfile, c(".net", ".vec", ".clu"))
+      graph2Pajek(values$cocitnet$graph, filename = myfile)
       # print(files)
       # print(dir())
-      zip::zip(file,files)
+      zip::zip(file, files)
     },
     contentType = "zip"
   )
-  
+
   output$cocitTable <- DT::renderDT({
     COCITnetwork()
-    cocitData=values$cocitnet$cluster_res
-    names(cocitData)=c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
-    DTformat(cocitData, nrow=10, filename="CoCitation_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=3:5, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
+    cocitData = values$cocitnet$cluster_res
+    names(cocitData) = c(
+      "Node",
+      "Cluster",
+      "Betweenness",
+      "Closeness",
+      "PageRank"
+    )
+    DTformat(
+      cocitData,
+      nrow = 10,
+      filename = "CoCitation_Network",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 3:5,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
   })
-  
+
   #### save coc network image as html ----
   output$networkCocit.fig <- downloadHandler(
     filename = "network.html",
@@ -5126,182 +9218,307 @@ To ensure the functionality of Biblioshiny,
     },
     contentType = "html"
   )
-  
+
   ### Degree Plot Co-citation analysis ####
   output$cocitDegree <- renderPlotly({
     COCITnetwork()
     #p <- degreePlot(values$cocitnet)
     plot.ly(values$degreePlot)
   })
-  
-  observeEvent(input$reportCOCIT,{
-    
-    if(!is.null(values$cocitnet$cluster_res)){
-      names(values$cocitnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+
+  observeEvent(input$reportCOCIT, {
+    if (!is.null(values$cocitnet$cluster_res)) {
+      names(values$cocitnet$cluster_res) <- c(
+        "Node",
+        "Cluster",
+        "Betweenness",
+        "Closeness",
+        "PageRank"
+      )
       sheetname <- "CoCitNet"
       list_df <- list(values$cocitnet$cluster_res)
       list_plot <- list(values$degreePlot)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       #values$wb <- res$wb
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, res$sheetname, col=res$col+15, width=12, height=8, dpi=75)
+      values$wb <- addGgplotsWb(
+        list_plot,
+        wb = res$wb,
+        res$sheetname,
+        col = res$col + 15,
+        width = 12,
+        height = 8,
+        dpi = 75
+      )
       #values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
-      values$fileCOCIT <- screenSh(values$COCITnetwork$VIS, zoom = 2, type="vis")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOCIT,res$col))
-      popUp(title="Co-citation Network", type="success")
+      values$fileCOCIT <- screenSh(
+        values$COCITnetwork$VIS,
+        zoom = 2,
+        type = "vis"
+      )
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileCOCIT, res$col)
+      )
+      popUp(title = "Co-citation Network", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ### Historiograph ----
-  Hist <- eventReactive(input$applyHist,{
-    withProgress(message = 'Calculation in progress',
-                 value = 0, {
-                   values <- historiograph(input,values)
-                 })
+  Hist <- eventReactive(input$applyHist, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      values <- historiograph(input, values)
+    })
   })
-  
-  output$histPlotVis <- renderVisNetwork({  
+
+  output$histPlotVis <- renderVisNetwork({
     g <- Hist()
-    values$histPlotVis<-hist2vis(values$histPlot,curved=TRUE, 
-                                 labelsize=input$histlabelsize, 
-                                 nodesize=input$histsize,
-                                 opacity=0.7,
-                                 shape="dot",
-                                 labeltype=input$titlelabel,
-                                 timeline=FALSE)
+    values$histPlotVis <- hist2vis(
+      values$histPlot,
+      curved = TRUE,
+      labelsize = input$histlabelsize,
+      nodesize = input$histsize,
+      opacity = 0.7,
+      shape = "dot",
+      labeltype = input$titlelabel,
+      timeline = FALSE
+    )
     values$histPlotVis$VIS
   })
-  
+
   output$histTable <- DT::renderDT({
     g <- Hist()
     Data <- values$histResults$histData
-    DTformat(Data, nrow=10, filename="Historiograph_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE, summary="historiograph")
+    DTformat(
+      Data,
+      nrow = 10,
+      filename = "Historiograph_Network",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE,
+      summary = "historiograph"
+    )
   })
-  
+
   # gemini button for word network
   output$histGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$histGemini, values)
   })
-  
- observeEvent(input$reportHIST,{
-    if(!is.null(values$histResults$histData)){
+
+  observeEvent(input$reportHIST, {
+    if (!is.null(values$histResults$histData)) {
       sheetname <- "Historiograph"
       list_df <- list(values$histResults$histData)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       #values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
-      values$fileHIST <- screenSh(values$histPlotVis$VIS, zoom = 2, type="vis")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileHIST,res$col))
-      popUp(title="Historiograph", type="success")
+      values$fileHIST <- screenSh(
+        values$histPlotVis$VIS,
+        zoom = 2,
+        type = "vis"
+      )
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileHIST, res$col)
+      )
+      popUp(title = "Historiograph", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   # SOCIAL STRUCTURE ####
   ### Collaboration network ----
-  COLnetwork <- eventReactive(input$applyCol,{
-    values <- socialStructure(input,values)
-    values$COLnetwork<-igraph2vis(g=values$colnet$graph,curved=(input$soc.curved=="Yes"), 
-                               labelsize=input$collabelsize, opacity=input$colAlpha,type=input$collayout,
-                               shape=input$col.shape, net=values$colnet, shadow=(input$col.shadow=="Yes"),
-                               noOverlap=input$colNoOverlap)
+  COLnetwork <- eventReactive(input$applyCol, {
+    values <- socialStructure(input, values)
+    values$COLnetwork <- igraph2vis(
+      g = values$colnet$graph,
+      curved = (input$soc.curved == "Yes"),
+      labelsize = input$collabelsize,
+      opacity = input$colAlpha,
+      type = input$collayout,
+      shape = input$col.shape,
+      net = values$colnet,
+      shadow = (input$col.shadow == "Yes"),
+      noOverlap = input$colNoOverlap
+    )
     values$colOverlay <- overlayPlotly(values$COLnetwork$VIS)
-    values$degreePlot <-degreePlot(values$colnet)
+    values$degreePlot <- degreePlot(values$colnet)
     # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
     values$years_col <- sort(unique(c(values$M %>% drop_na(PY) %>% pull(PY))))
     values$index_col <- 0
     values$playing_col <- FALSE
     values$paused_col <- FALSE
     values$current_year_col <- min(values$years_col)
-    
-    if (is.null(dim(values$colnet$cluster_res))){
-      values$colnet$cluster_res <- data.frame(Node=NA, Cluster=NA, Betweenness=NA, 
-                                                                             Closeness = NA, PageRank = NA)
-    
-    }else{
-      names(values$colnet$cluster_res) <- c("Node", "Cluster", "Betweenness", "Closeness", "PageRank")
+
+    if (is.null(dim(values$colnet$cluster_res))) {
+      values$colnet$cluster_res <- data.frame(
+        Node = NA,
+        Cluster = NA,
+        Betweenness = NA,
+        Closeness = NA,
+        PageRank = NA
+      )
+    } else {
+      names(values$colnet$cluster_res) <- c(
+        "Node",
+        "Cluster",
+        "Betweenness",
+        "Closeness",
+        "PageRank"
+      )
     }
-    
+
     output$year_slider_colUI <- renderUI({
-      sliderInput("year_slider_col", "Year", min = min(values$years_col), max = max(values$years_col),
-                  value =min(values$years_col), step = 1, animate = FALSE, width = "100%",
-                  ticks = FALSE, round = TRUE, sep="")
+      sliderInput(
+        "year_slider_col",
+        "Year",
+        min = min(values$years_col),
+        max = max(values$years_col),
+        value = min(values$years_col),
+        step = 1,
+        animate = FALSE,
+        width = "100%",
+        ticks = FALSE,
+        round = TRUE,
+        sep = ""
+      )
     })
-    
   })
-  output$colPlot <- renderVisNetwork({  
+  output$colPlot <- renderVisNetwork({
     COLnetwork()
     values$COLnetwork$VIS
   })
-  
+
   output$colOverlay <- renderPlotly({
     COLnetwork()
     values$colOverlay
   })
-  
+
   ## Collaboration Network over Time ####
   observe({
     req(values$COLnetwork$VIS)
     invalidateLater(as.numeric(input$speed_col), session)
     isolate({
       # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
-      if (values$playing_col && !values$paused_col && values$index_col < length(values$years_col)) {
+      if (
+        values$playing_col &&
+          !values$paused_col &&
+          values$index_col < length(values$years_col)
+      ) {
         values$index_col <- values$index_col + 1
         yr <- values$years_col[values$index_col]
         values$current_year_col <- yr
-        updateSliderInput(session, "year_slider_col", value = yr, min = min(values$years_col), max = max(values$years_col))
+        updateSliderInput(
+          session,
+          "year_slider_col",
+          value = yr,
+          min = min(values$years_col),
+          max = max(values$years_col)
+        )
       }
     })
   })
-  
+
   # funzione per creare la rete
   render_network_col <- reactive({
     req(values$COLnetwork$VIS)
     selected_year_col <- values$current_year_col
-    show_nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med <= selected_year_col) %>% mutate(title = paste(title,year_med, sep=" "))
-    show_edges <- values$COLnetwork$VIS$x$edges %>% filter(from %in% show_nodes$id & to %in% show_nodes$id)
-    
+    show_nodes <- values$COLnetwork$VIS$x$nodes %>%
+      dplyr::filter(year_med <= selected_year_col) %>%
+      mutate(title = paste(title, year_med, sep = " "))
+    show_edges <- values$COLnetwork$VIS$x$edges %>%
+      dplyr::filter(from %in% show_nodes$id & to %in% show_nodes$id)
+
     coords <- show_nodes %>% select(x, y) %>% as.matrix()
-    
-    values$COLnetworkOverTime <- visNetwork::visNetwork(nodes = show_nodes, edges = show_edges, type = "full", smooth = TRUE, physics = FALSE) %>%
-      visNetwork::visNodes(shadow = TRUE, shape = "dot", font = list(color = show_nodes$font.color, size = show_nodes$font.size, vadjust = show_nodes$font.vadjust)) %>%
-      visNetwork::visIgraphLayout(layout = "layout.norm", layoutMatrix = coords, type = "full") %>%
+
+    values$COLnetworkOverTime <- visNetwork::visNetwork(
+      nodes = show_nodes,
+      edges = show_edges,
+      type = "full",
+      smooth = TRUE,
+      physics = FALSE
+    ) %>%
+      visNetwork::visNodes(
+        shadow = TRUE,
+        shape = "dot",
+        font = list(
+          color = show_nodes$font.color,
+          size = show_nodes$font.size,
+          vadjust = show_nodes$font.vadjust
+        )
+      ) %>%
+      visNetwork::visIgraphLayout(
+        layout = "layout.norm",
+        layoutMatrix = coords,
+        type = "full"
+      ) %>%
       visNetwork::visEdges(smooth = list(type = "horizontal")) %>%
-      visNetwork::visOptions(highlightNearest = list(enabled = T, hover = T, degree = 1), nodesIdSelection = T) %>%
-      visNetwork::visInteraction(dragNodes = TRUE, navigationButtons = F, hideEdgesOnDrag = TRUE, zoomSpeed = 0.4) %>%
-      visNetwork::visOptions(manipulation = FALSE, height = "100%", width = "100%")
-    
+      visNetwork::visOptions(
+        highlightNearest = list(enabled = T, hover = T, degree = 1),
+        nodesIdSelection = T
+      ) %>%
+      visNetwork::visInteraction(
+        dragNodes = TRUE,
+        navigationButtons = F,
+        hideEdgesOnDrag = TRUE,
+        zoomSpeed = 0.4
+      ) %>%
+      visNetwork::visOptions(
+        manipulation = FALSE,
+        height = "100%",
+        width = "100%"
+      )
+
     values$COLnetworkOverTime
   })
-  
+
   # aggiorna rete quando cambia lo slider
   observeEvent(input$year_slider_col, {
     values$current_year_col <- as.numeric(input$year_slider_col)
-    output$colOverTime<- renderVisNetwork({ render_network_col() })
+    output$colOverTime <- renderVisNetwork({
+      render_network_col()
+    })
   })
-  
+
   output$colYearUI <- renderUI({
     req(values$current_year_col)
-    h3(paste(watchEmoji(values$current_year_col), values$current_year_col), style = "text-align: left; color: #0e4770; font-weight: bold;")
+    h3(
+      paste(watchEmoji(values$current_year_col), values$current_year_col),
+      style = "text-align: left; color: #0e4770; font-weight: bold;"
+    )
   })
-  
+
   # start
   observeEvent(input$start_col, {
-    # years <- sort(unique(c(values$COLnetwork$VIS$x$nodes$year_med)))
     values$index_col <- 0
     values$playing_col <- TRUE
     values$paused_col <- FALSE
     values$current_year_col <- min(values$years_col)
     updateSliderInput(session, "year_slider_col", value = min(values$years_col))
-    output$colOverTime <- renderVisNetwork({ render_network_col() })
+    output$colOverTime <- renderVisNetwork({
+      render_network_col()
+    })
   })
-  
+
   # pausa
   observeEvent(input$pause_col, {
     values$paused_col <- !values$paused_col
@@ -5313,7 +9530,7 @@ To ensure the functionality of Biblioshiny,
       output$export_colUI <- renderUI({})
     }
   })
-  
+
   # reset
   observeEvent(input$reset_col, {
     values$playing_col <- FALSE
@@ -5323,21 +9540,26 @@ To ensure the functionality of Biblioshiny,
     values$current_year_col <- min(values$years_col)
     updateSliderInput(session, "year_slider_col", value = min(values$years_col))
     output$colOverTime <- renderVisNetwork({
-      nodes <- values$COLnetwork$VIS$x$nodes %>% filter(year_med < 0)
-      edges <- values$COLnetwork$VIS$x$edges %>% filter(from %in% nodes$id)
+      nodes <- values$COLnetwork$VIS$x$nodes %>% dplyr::filter(year_med < 0)
+      edges <- values$COLnetwork$VIS$x$edges %>%
+        dplyr::filter(from %in% nodes$id)
       visNetwork(nodes = nodes, edges = edges)
     })
   })
-  
+
   # gemini button for word network
   output$colGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$colGemini, values)
   })
 
-   output$network.col <- downloadHandler(
+  output$network.col <- downloadHandler(
     filename = function() {
-      paste("Collaboration_network-", Sys.Date(), ".zip", sep="")
+      paste("Collaboration_network-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
       tmpdir <- tempdir()
@@ -5345,25 +9567,40 @@ To ensure the functionality of Biblioshiny,
       on.exit(setwd(owd))
       # print(tmpdir)
       #igraph::write.graph(values$obj$graph_pajek,file=file, format="pajek")
-      myfile <- paste("mynetwork-", Sys.Date(), sep="")
-      files <- paste0(myfile, c(".net",".vec",".clu"))
-      graph2Pajek(values$colnet$graph, filename=myfile)
+      myfile <- paste("mynetwork-", Sys.Date(), sep = "")
+      files <- paste0(myfile, c(".net", ".vec", ".clu"))
+      graph2Pajek(values$colnet$graph, filename = myfile)
       # print(files)
       # print(dir())
-      zip::zip(file,files)
+      zip::zip(file, files)
     },
     contentType = "zip"
   )
-  
+
   output$colTable <- DT::renderDT({
     COLnetwork()
-    colData=values$colnet$cluster_res
-    DTformat(colData, nrow=10, filename="Collaboration_Network", pagelength=TRUE, left=NULL, right=NULL, numeric=3:5, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-  })   
-  
-  
+    colData = values$colnet$cluster_res
+    DTformat(
+      colData,
+      nrow = 10,
+      filename = "Collaboration_Network",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 3:5,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  })
+
   #### save coc network image as html ####
   output$networkCol.fig <- downloadHandler(
     filename = "network.html",
@@ -5372,110 +9609,181 @@ To ensure the functionality of Biblioshiny,
     },
     contentType = "html"
   )
-  
+
   ### Degree Plot Collaboration analysis ####
   output$colDegree <- renderPlotly({
     COLnetwork()
     p <- degreePlot(values$colnet)
     plot.ly(p)
   })
-  
-  observeEvent(input$reportCOL,{
-    if(!is.null(values$colnet$cluster_res)){
+
+  observeEvent(input$reportCOL, {
+    if (!is.null(values$colnet$cluster_res)) {
       sheetname <- "CollabNet"
       list_df <- list(values$colnet$params, values$colnet$cluster_res)
       list_plot <- list(values$degreePlot)
-      res <- addDataScreenWb(list_df, wb=values$wb, sheetname=sheetname)
-      values$wb <- addGgplotsWb(list_plot, wb=res$wb, res$sheetname, col=res$col+15, width=12, height=8, dpi=75)
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
+      values$wb <- addGgplotsWb(
+        list_plot,
+        wb = res$wb,
+        res$sheetname,
+        col = res$col + 15,
+        width = 12,
+        height = 8,
+        dpi = 75
+      )
       #values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
-      values$fileCOL <- screenSh(values$COLnetwork$VIS, zoom = 2, type="vis")
-      values$list_file <- rbind(values$list_file, c(sheetname=res$sheetname,values$fileCOL,res$col))
-      popUp(title="Collaboration Network", type="success")
+      values$fileCOL <- screenSh(values$COLnetwork$VIS, zoom = 2, type = "vis")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname = res$sheetname, values$fileCOL, res$col)
+      )
+      popUp(title = "Collaboration Network", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
   ### WPPlot ----
-  WMnetwork<- eventReactive(input$applyWM,{
-    values$WMmap <- countrycollaboration(values$M,label=FALSE,edgesize=input$WMedgesize/2,min.edges=input$WMedges.min, values)
-    values$WMmap$tab <- values$WMmap$tab[,c(1,2,9)]
-    names(values$WMmap$tab)=c("From","To","Frequency")
-    
+  WMnetwork <- eventReactive(input$applyWM, {
+    values$WMmap <- countrycollaboration(
+      values$M,
+      label = FALSE,
+      edgesize = input$WMedgesize / 2,
+      min.edges = input$WMedges.min,
+      values
+    )
+    values$WMmap$tab <- values$WMmap$tab[, c(1, 2, 9)]
+    names(values$WMmap$tab) = c("From", "To", "Frequency")
   })
-  
+
   # gemini button for World Map
   output$WMGeminiUI <- renderUI({
-    values$gemini_model_parameters <- geminiParameterPrompt(values, input$sidebarmenu, input)
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
     geminiOutput(title = "", content = values$WMGemini, values)
   })
- 
+
   output$CCplot.save <- downloadHandler(
     filename = function() {
-      paste("CountryCollaborationMap-", Sys.Date(), ".png", sep="")
+      paste("CountryCollaborationMap-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
       g <- values$WMmap$g + labs(title = "Country Collaboration Map")
-      ggsave(filename = file, plot = g, dpi = values$dpi, height = values$h, width = values$h*2, bg="white")
+      ggsave(
+        filename = file,
+        plot = g,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * 2,
+        bg = "white"
+      )
     },
     contentType = "png"
   )
-  
-  output$WMPlot<- renderPlotly({
-    WMnetwork()  
-    plot.ly(values$WMmap$g,flip=FALSE, side="r", aspectratio=1.7, size=0.07, data.type=1,height=15)
+
+  output$WMPlot <- renderPlotly({
+    WMnetwork()
+    plot.ly(
+      values$WMmap$g,
+      flip = FALSE,
+      side = "r",
+      aspectratio = 1.7,
+      size = 0.07,
+      data.type = 1,
+      height = 15
+    )
     #plot(values$WMmap$g)
   })
-  
+
   output$WMTable <- DT::renderDT({
-    WMnetwork()  
-    colData=values$WMmap$tab
-    DTformat(colData, nrow=10, filename="Collaboration_WorldMap", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=TRUE, 
-             size='100%', filter="top", columnShort=NULL, columnSmall=NULL, round=3, title="", button=TRUE, escape=FALSE, 
-             selection=FALSE)
-  }) 
-  
-  observeEvent(input$reportCOLW,{
-    if(!is.null(values$WMmap$tab)){
+    WMnetwork()
+    colData = values$WMmap$tab
+    DTformat(
+      colData,
+      nrow = 10,
+      filename = "Collaboration_WorldMap",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  })
+
+  observeEvent(input$reportCOLW, {
+    if (!is.null(values$WMmap$tab)) {
       list_df <- list(values$WMmap$tab)
       list_plot <- list(values$WMmap$g)
-      wb <- addSheetToReport(list_df,list_plot,sheetname = "CollabWorldMap", wb=values$wb)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "CollabWorldMap",
+        wb = values$wb
+      )
       values$wb <- wb
-      popUp(title="Countries' Collaboration World Map", type="success")
+      popUp(title = "Countries' Collaboration World Map", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
-      popUp(type="error")
+      popUp(type = "error")
     }
   })
-  
+
+  # CONTENT ANALYSIS ----
+  content_analysis_server(input, output, session, values)
+
   # REPORT ----
   ### Report Save xlsx ----
   output$report.save <- downloadHandler(
     filename = function() {
-      paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep="")
+      paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep = "")
     },
     content <- function(file) {
       wb_export <- copyWorkbook(values$wb)
-      if (nrow(values$list_file)>0){
-        wb_export <- addScreenWb(df=values$list_file, wb=wb_export)#, width=10, height=7, dpi=300)
+      if (nrow(values$list_file) > 0) {
+        wb_export <- addScreenWb(df = values$list_file, wb = wb_export) #, width=10, height=7, dpi=300)
       }
-      sheetToRemove <- setdiff(sheets(wb_export),input$reportSheets)
-      if (length(sheetToRemove)>0) for (i in sheetToRemove) removeWorksheet(wb_export,i)
+      sheetToRemove <- setdiff(sheets(wb_export), input$reportSheets)
+      if (length(sheetToRemove) > 0) {
+        for (i in sheetToRemove) {
+          removeWorksheet(wb_export, i)
+        }
+      }
       sheetToAdd <- sheets(wb_export)
-      for (i in sheetToAdd) setColWidths(wb_export,sheet=i,cols=1,widths = 30, hidden = FALSE)
+      for (i in sheetToAdd) {
+        setColWidths(
+          wb_export,
+          sheet = i,
+          cols = 1,
+          widths = 30,
+          hidden = FALSE
+        )
+      }
       openxlsx::saveWorkbook(wb_export, file = file)
     },
     contentType = "xlsx"
   )
-  
+
   ### Report UI elements
   observe({
     output$reportSheets <- renderUI({
       prettyCheckboxGroup(
         inputId = "reportSheets",
         label = NULL, #short2long(df=values$dfLabel, myC=values$myChoices),
-        choices = short2long(df=values$dfLabel, myC=values$myChoices),
+        choices = short2long(df = values$dfLabel, myC = values$myChoices),
         selected = values$myChoices,
         icon = icon("check"),
         animation = "pulse",
@@ -5485,14 +9793,14 @@ To ensure the functionality of Biblioshiny,
       )
     })
   })
-  
+
   observe({
     updatePrettyCheckboxGroup(
-      session = getDefaultReactiveDomain(), 
+      session = getDefaultReactiveDomain(),
       inputId = "reportSheets",
       #label = short2long(df=values$dfLabel, myC=values$myChoices),
-      choices = short2long(df=values$dfLabel, myC=values$myChoices),
-      selected = if(!input$noSheets) values$myChoices,
+      choices = short2long(df = values$dfLabel, myC = values$myChoices),
+      selected = if (!input$noSheets) values$myChoices,
       prettyOptions = list(
         animation = "pulse",
         status = "info",
@@ -5500,13 +9808,13 @@ To ensure the functionality of Biblioshiny,
       )
     )
   })
-  
+
   observe({
     updatePrettyCheckboxGroup(
-      session = getDefaultReactiveDomain(), 
+      session = getDefaultReactiveDomain(),
       inputId = "reportSheets",
-      choices = short2long(df=values$dfLabel, myC=values$myChoices),
-      selected = if(input$allSheets) values$myChoices,
+      choices = short2long(df = values$dfLabel, myC = values$myChoices),
+      selected = if (input$allSheets) values$myChoices,
       prettyOptions = list(
         animation = "pulse",
         status = "info",
@@ -5514,7 +9822,7 @@ To ensure the functionality of Biblioshiny,
       )
     )
   })
-  
+
   observeEvent(input$deleteAll, {
     ask_confirmation(
       inputId = "delete_confirmation",
@@ -5524,169 +9832,322 @@ To ensure the functionality of Biblioshiny,
       btn_labels = c("CANCEL", "CONFIRM"),
     )
   })
-  
-  observeEvent(input$delete_confirmation, {
-    if (isTRUE(input$delete_confirmation)) {
-      values$myChoices <- "Empty Report"
-      values$list_file <- data.frame(sheet=NULL,file=NULL,n=NULL) 
-      values$wb <-  openxlsx::createWorkbook()
-    }
-  }, ignoreNULL = TRUE
+
+  observeEvent(
+    input$delete_confirmation,
+    {
+      if (isTRUE(input$delete_confirmation)) {
+        values$myChoices <- "Empty Report"
+        values$list_file <- data.frame(sheet = NULL, file = NULL, n = NULL)
+        values$wb <- openxlsx::createWorkbook()
+      }
+    },
+    ignoreNULL = TRUE
   )
-  
+
   ### screenshot buttons ----
-  observeEvent(input$screenTFP,{
-    filename = paste("ThreeFieldPlot-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$TFP, filename=filename, type="plotly")
+  observeEvent(input$screenTFP, {
+    filename = paste(
+      "ThreeFieldPlot-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$TFP, filename = filename, type = "plotly")
   })
-  
-  observeEvent(input$screenWC,{
-    filename = paste("WordCloud-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$WordCloud, filename=filename, type="plotly")
+
+  observeEvent(input$screenWC, {
+    filename = paste(
+      "WordCloud-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$WordCloud, filename = filename, type = "plotly")
   })
-  
-  observeEvent(input$screenTREEMAP,{
-    filename = paste("TreeMap-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$TreeMap, filename=filename, type="plotly")
+
+  observeEvent(input$screenTREEMAP, {
+    filename = paste(
+      "TreeMap-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$TreeMap, filename = filename, type = "plotly")
   })
-  
-  observeEvent(input$screenCOC,{
-    filename = paste("Co_occurrenceNetwork-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$COCnetwork$VIS, filename=filename, type="vis")
+
+  observeEvent(input$screenCOC, {
+    filename = paste(
+      "Co_occurrenceNetwork-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$COCnetwork$VIS, filename = filename, type = "vis")
   })
-  
-  observeEvent(input$export_coc,{
-    filename = paste("Co_occurrenceNetwork-Year-",values$current_year_coc, "__",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$COCnetworkOverTime, filename=filename, type="vis")
+
+  observeEvent(input$export_coc, {
+    filename = paste(
+      "Co_occurrenceNetwork-Year-",
+      values$current_year_coc,
+      "__",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$COCnetworkOverTime, filename = filename, type = "vis")
   })
-  
-  observeEvent(input$screenCOCIT,{
-    filename = paste("Co_citationNetwork-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$COCITnetwork$VIS, filename=filename, type="vis")
+
+  observeEvent(input$screenCOCIT, {
+    filename = paste(
+      "Co_citationNetwork-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$COCITnetwork$VIS, filename = filename, type = "vis")
   })
-  
-  observeEvent(input$screenHIST,{
-    filename = paste("Historiograph-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$histPlotVis$VIS, filename=filename, type="vis")
+
+  observeEvent(input$screenHIST, {
+    filename = paste(
+      "Historiograph-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$histPlotVis$VIS, filename = filename, type = "vis")
   })
-  
-  observeEvent(input$screenCOL,{
-    filename = paste("Collaboration_Network-", "_",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$COLnetwork$VIS, filename=filename, type="vis")
+
+  observeEvent(input$screenCOL, {
+    filename = paste(
+      "Collaboration_Network-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$COLnetwork$VIS, filename = filename, type = "vis")
   })
-  
-  observeEvent(input$export_col,{
-    filename = paste("Collaboration_Network-Year-",values$current_year_col, "__",  gsub(" |:","",Sys.time()), ".png", sep="")
-    screenShot(values$COLnetworkOverTime, filename=filename, type="vis")
+
+  observeEvent(input$export_col, {
+    filename = paste(
+      "Collaboration_Network-Year-",
+      values$current_year_col,
+      "__",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$COLnetworkOverTime, filename = filename, type = "vis")
   })
-  
+
   ## TALL EXPORT ----
   observe({
     req(values$M)
     ind <- which(values$corpusCol %in% names(values$M))
     corpusCol <- values$corpusCol[ind]
-    updateMultiInput(session, 'tallFields',
-                     selected = character(0),
-                     choices = names(corpusCol))
+    updateMultiInput(
+      session,
+      'tallFields',
+      selected = character(0),
+      choices = names(corpusCol)
+    )
   })
-  
+
   observe({
     req(values$M)
     ind <- which(values$metadataCol %in% names(values$M))
     metadataCol <- values$metadataCol[ind]
-    updateMultiInput(session, 'tallMetadata',
-                     selected = character(0),
-                     choices = names(metadataCol))
+    updateMultiInput(
+      session,
+      'tallMetadata',
+      selected = character(0),
+      choices = names(metadataCol)
+    )
   })
-  
-  observeEvent(eventExpr = {input$tallRun},
-               handlerExpr = {
-                 req(input$tallFields)
-    values$tallDf <- tallExport(values$M, input$tallFields, input$tallMetadata, values$metadataCol)
-    
-  })
-  
+
+  observeEvent(
+    eventExpr = {
+      input$tallRun
+    },
+    handlerExpr = {
+      req(input$tallFields)
+      values$tallDf <- tallExport(
+        values$M,
+        input$tallFields,
+        input$tallMetadata,
+        values$metadataCol
+      )
+    }
+  )
+
   output$tallTable <- renderDT({
     req(values$tallDf)
-      DTformat(values$tallDf, nrow=3, filename="tallDf", pagelength=TRUE, left=NULL, right=NULL, numeric=NULL, dom=FALSE, size='70%', filter="none",
-               columnShort=NULL, columnSmall=NULL, round=2, title="", button=FALSE, escape=FALSE, selection=FALSE,scrollX=TRUE)
+    DTformat(
+      values$tallDf,
+      nrow = 3,
+      filename = "tallDf",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = NULL,
+      dom = FALSE,
+      size = '70%',
+      filter = "none",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 2,
+      title = "",
+      button = FALSE,
+      escape = FALSE,
+      selection = FALSE,
+      scrollX = TRUE
+    )
   })
-  
+
   output$tall.save <- downloadHandler(
     filename = function() {
-      paste("tallFile-", Sys.Date(), ".csv", sep="")
+      paste("tallFile-", Sys.Date(), ".csv", sep = "")
     },
     content <- function(file) {
-      write.csv(values$tallDf, file=file, row.names = FALSE)
+      write.csv(values$tallDf, file = file, row.names = FALSE)
     },
     contentType = "csv"
   )
-  
-  observeEvent(eventExpr = {values$TALLmissing},
-               handlerExpr = {
-                 if (values$TALLmissing){
-                   output$tallBttn1 <- renderUI({
-                     div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
-                         align = "center",
-                         width="100%",
-                         actionBttn(inputId = "installTall", label = strong("Install TALL"),
-                                    width = "100%", style = "pill", color = "danger",
-                                    icon = icon(name ="cloud-download", lib="glyphicon"))
-                     )
-                   })
-                   output$tallBttn2 <- renderUI("")
-                 } else {
-                   output$tallBttn1 <- renderUI("")
-                   output$tallBttn2 <- renderUI({
-                     if (require("tall", quietly = TRUE)){
-                       div(style ="border-radius: 10px; border-width: 3px; font-size: 15px;",
-                           align = "center",
-                           width="100%",
-                           actionBttn(inputId = "launchTall", label = strong("Launch TALL"),
-                                      width = "100%", style = "pill", color = "primary",
-                                      icon = icon(name ="play", lib="glyphicon")))
-                     }
-                   })
-                 }
-  })
-  
-  
-  observeEvent(eventExpr = {input$installTall},
-               handlerExpr = {
-                 pak::pkg_install("tall")
-                 popUpGeneric(title=NULL, type="success", color=c("#1d8fe1"),
-                              subtitle="TALL has been successfully installed",
-                              btn_labels="OK", size="40%")
-                 if (suppressMessages(require("tall", quietly = TRUE))) values$TALLmissing <- FALSE
-               })
 
-  observeEvent(eventExpr = {input$launchTall},
-               handlerExpr = {
-                 system('Rscript -e "tall::tall()"')
-               })
-  
+  observeEvent(
+    eventExpr = {
+      values$TALLmissing
+    },
+    handlerExpr = {
+      if (values$TALLmissing) {
+        output$tallBttn1 <- renderUI({
+          div(
+            style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+            align = "center",
+            width = "100%",
+            actionBttn(
+              inputId = "installTall",
+              label = strong("Install TALL"),
+              width = "100%",
+              style = "pill",
+              color = "danger",
+              icon = icon(name = "cloud-download", lib = "glyphicon")
+            )
+          )
+        })
+        output$tallBttn2 <- renderUI("")
+      } else {
+        output$tallBttn1 <- renderUI("")
+        output$tallBttn2 <- renderUI({
+          if (require("tall", quietly = TRUE)) {
+            div(
+              style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
+              align = "center",
+              width = "100%",
+              actionBttn(
+                inputId = "launchTall",
+                label = strong("Launch TALL"),
+                width = "100%",
+                style = "pill",
+                color = "primary",
+                icon = icon(name = "play", lib = "glyphicon")
+              )
+            )
+          }
+        })
+      }
+    }
+  )
+
+  observeEvent(
+    eventExpr = {
+      input$installTall
+    },
+    handlerExpr = {
+      pak::pkg_install("tall")
+      popUpGeneric(
+        title = NULL,
+        type = "success",
+        color = c("#1d8fe1"),
+        subtitle = "TALL has been successfully installed",
+        btn_labels = "OK",
+        size = "40%"
+      )
+      if (suppressMessages(require("tall", quietly = TRUE))) {
+        values$TALLmissing <- FALSE
+      }
+    }
+  )
+
+  observeEvent(
+    eventExpr = {
+      input$launchTall
+    },
+    handlerExpr = {
+      system('Rscript -e "tall::tall()"')
+    }
+  )
+
   ## SETTING ----
   observeEvent(input$dpi, {
     values$dpi <- as.numeric(input$dpi)
   })
-  
-  observeEvent(input$h,{
+
+  observeEvent(input$h, {
     values$h <- as.numeric(input$h)
   })
-  
+
+  # Server code for randomize seed button
+  observeEvent(input$randomize_seed, {
+    # Generate a random seed between 1 and 999999
+    new_seed <- sample(1:999999, 1)
+
+    # Update the random_seed input with the new value
+    updateNumericInput(session, "random_seed", value = new_seed)
+
+    # Optional: Show notification
+    showNotification(
+      paste("Random seed set to:", new_seed),
+      type = "message",
+      duration = 2
+    )
+  })
+
+  # Optional: Observer to apply the seed globally when it changes
+  observe({
+    req(input$random_seed)
+
+    # Set the global random seed for reproducibility
+    set.seed(input$random_seed)
+
+    # Store in reactive values for access across the app
+    values$random_seed <- input$random_seed
+  })
+
   output$apiStatus <- renderUI({
-    if (values$geminiAPI){
+    if (values$geminiAPI) {
       last <- showGeminiAPI()
-      output$status <- renderText(paste0("✅ API key has been set: ",last))
+      output$status <- renderText(paste0("✅ API key has been set: ", last))
     }
   })
-  
+
   output$geminiOutputSize <- renderUI({
-      list(
+    list(
       selectInput(
         inputId = "gemini_output_size",
         label = "Max Output (in tokens)",
-        selected = ifelse(is.null(values$gemini_output_size), "medium", values$gemini_output_size),
+        selected = ifelse(
+          is.null(values$gemini_output_size),
+          "medium",
+          values$gemini_output_size
+        ),
         choices = c("Medium" = "medium", "Large" = "large")
       ),
       conditionalPanel(
@@ -5699,9 +10160,9 @@ To ensure the functionality of Biblioshiny,
         helpText(strong("Free Tier Output:")),
         helpText(em("Large -> 32768 Tokens"))
       )
-      )
-    })
-  
+    )
+  })
+
   output$geminiModelChoice <- renderUI({
     list(
       selectInput(
@@ -5715,95 +10176,130 @@ To ensure the functionality of Biblioshiny,
           "Gemini 1.5 Flash" = "1.5-flash",
           "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
         ),
-        selected = ifelse(is.null(values$gemini_api_model), "2.0-flash", values$gemini_api_model)
+        selected = ifelse(
+          is.null(values$gemini_api_model),
+          "2.0-flash",
+          values$gemini_api_model
+        )
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.5-flash'",
         helpText(strong("Free Tier Rate Limits:")),
-        helpText(em("Request per Minutes: 10", tags$br(),
-                    "Requests per Day: 500", tags$br(),
-                    "Latency time: High"))
+        helpText(em(
+          "Request per Minutes: 10",
+          tags$br(),
+          "Requests per Day: 500",
+          tags$br(),
+          "Latency time: High"
+        ))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.5-flash-lite'",
         helpText(strong("Free Tier Rate Limits:")),
-        helpText(em("Request per Minutes: 15", tags$br(),
-                    "Requests per Day: 500", tags$br(),
-                    "Latency time: Low"))
+        helpText(em(
+          "Request per Minutes: 15",
+          tags$br(),
+          "Requests per Day: 500",
+          tags$br(),
+          "Latency time: Low"
+        ))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.0-flash-lite'",
         helpText(strong("Free Tier Rate Limits:")),
-        helpText(em("Request per Minutes: 30", tags$br(),
-                    "Requests per Day: 1500",tags$br(),
-                    "Latency time: Low"))
+        helpText(em(
+          "Request per Minutes: 30",
+          tags$br(),
+          "Requests per Day: 1500",
+          tags$br(),
+          "Latency time: Low"
+        ))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.0-flash'",
         helpText(strong("Free Tier Rate Limits:")),
-        helpText(em("Request per Minutes: 15", tags$br(),
-                    "Requests per Day: 1500",tags$br(),
-                    "Latency time: Medium"))
+        helpText(em(
+          "Request per Minutes: 15",
+          tags$br(),
+          "Requests per Day: 1500",
+          tags$br(),
+          "Latency time: Medium"
+        ))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '1.5-flash'",
         helpText(strong("Free Tier Rate Limits:")),
-        helpText(em("Request per Minutes: 15", tags$br(),
-                    "Requests per Day: 1500",tags$br(),
-                    "Latency time: Medium"))
+        helpText(em(
+          "Request per Minutes: 15",
+          tags$br(),
+          "Requests per Day: 1500",
+          tags$br(),
+          "Latency time: Medium"
+        ))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '1.5-flash-8b'",
         helpText(strong("Free Tier Rate Limits:")),
-        helpText(em("Request per Minutes: 15", tags$br(),
-                    "Requests per Day: 1500",tags$br(),
-                    "Latency time: Low"))
+        helpText(em(
+          "Request per Minutes: 15",
+          tags$br(),
+          "Requests per Day: 1500",
+          tags$br(),
+          "Latency time: Low"
+        ))
       )
     )
   })
-  
+
   observeEvent(input$gemini_api_model, {
-    if (!is.null(input$gemini_api_model)){
-      saveGeminiModel(model=c(input$gemini_api_model,input$gemini_output_model), file=paste0(homeFolder(),"/.biblio_gemini_model.txt", collapse=""))
+    if (!is.null(input$gemini_api_model)) {
+      saveGeminiModel(
+        model = c(input$gemini_api_model, input$gemini_output_model),
+        file = paste0(homeFolder(), "/.biblio_gemini_model.txt", collapse = "")
+      )
       values$gemini_api_model <- input$gemini_api_model
       values$gemini_output_size <- input$gemini_output_size
     }
   })
 
   observeEvent(input$gemini_output_size, {
-    if (!is.null(input$gemini_output_size)){
-      saveGeminiModel(model=c(input$gemini_api_model,input$gemini_output_size), file=paste0(homeFolder(),"/.biblio_gemini_model.txt", collapse=""))
+    if (!is.null(input$gemini_output_size)) {
+      saveGeminiModel(
+        model = c(input$gemini_api_model, input$gemini_output_size),
+        file = paste0(homeFolder(), "/.biblio_gemini_model.txt", collapse = "")
+      )
       values$gemini_api_model <- input$gemini_api_model
       values$gemini_output_size <- input$gemini_output_size
     }
   })
-  
-  
+
   observeEvent(input$set_key, {
     key <- input$api_key
     last <- setGeminiAPI(key)
-    
-    if (!last$valid){
+
+    if (!last$valid) {
       output$apiStatus <- renderUI({
         output$status <- renderText(last$message)
       })
       values$geminiAPI <- FALSE
     } else {
       output$apiStatus <- renderUI({
-        output$status <- renderText(paste0("✅ API key has been set: ",last$message))
+        output$status <- renderText(paste0(
+          "✅ API key has been set: ",
+          last$message
+        ))
       })
       values$geminiAPI <- TRUE
       home <- homeFolder()
-      path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
+      path_gemini_key <- paste0(home, "/.biblio_gemini_key.txt", collapse = "")
       writeLines(Sys.getenv("GEMINI_API_KEY"), path_gemini_key)
     }
-    
   })
-  
+
   observeEvent(input$remove_key, {
-    if (values$geminiAPI){
+    if (values$geminiAPI) {
       home <- homeFolder()
-      path_gemini_key <- paste0(home,"/.biblio_gemini_key.txt", collapse="")
+      path_gemini_key <- paste0(home, "/.biblio_gemini_key.txt", collapse = "")
       file.remove(path_gemini_key)
       values$geminiAPI <- FALSE
       output$apiStatus <- renderUI({
@@ -5811,7 +10307,6 @@ To ensure the functionality of Biblioshiny,
       })
     }
   })
-  
 }
 
 # END ####

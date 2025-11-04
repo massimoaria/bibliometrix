@@ -15,8 +15,8 @@ mergeKeywords(M, force = FALSE)
 A dataframe with an added (or updated) `KW_Merged` column containing deduplicated and cleaned keyword strings.
 }
 \description{
-This function creates a new column `KW_Merged` by combining the contents of the `DE` (author keywords) and `ID` (keywords plus) fields 
-in a bibliographic dataframe. Duplicate keywords within each record are removed, and leading/trailing spaces are trimmed. 
+This function creates a new column `KW_Merged` by combining the contents of the `DE` (author keywords) and `ID` (keywords plus) fields
+in a bibliographic dataframe. Duplicate keywords within each record are removed, and leading/trailing spaces are trimmed.
 The merged keywords are separated by a semicolon (`;`).
 }
 \details{

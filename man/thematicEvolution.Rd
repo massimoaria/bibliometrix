@@ -17,7 +17,8 @@ thematicEvolution(
   repel = TRUE,
   remove.terms = NULL,
   synonyms = NULL,
-  cluster = "walktrap"
+  cluster = "louvain",
+  seed = 1234
 )
 }
 \arguments{
@@ -47,6 +48,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{synonyms}{is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.}
 
 \item{cluster}{is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
+
+\item{seed}{is numerical. It indicates the seed for random number generator to obtain always the same results. Default value is \code{seed = 1234}.}
 }
 \value{
 a list containing:

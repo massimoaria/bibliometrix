@@ -8408,13 +8408,12 @@ To ensure the functionality of Biblioshiny,
         Nodes = values$nexus$Nodes,
         Edges = values$nexus$Edges,
         measure = input$TEmeasure,
-        min.flow = input$minFlowTE,
-        label_size = input$sizeTE * 20
+        min.flow = input$minFlowTE
       )
     }
   })
 
-  output$TEPlot <- visNetwork::renderVisNetwork({
+  output$TEPlot <- plotly::renderPlotly({
     TEMAP()
     values$TEplot
   })
@@ -8473,7 +8472,7 @@ To ensure the functionality of Biblioshiny,
         values$TEplot,
         filename = filenameTE,
         zoom = 2,
-        type = "vis",
+        type = "plotly",
         tmpdir = tmpdir
       )
       zip::zip(file, files)

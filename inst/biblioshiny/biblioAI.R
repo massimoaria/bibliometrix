@@ -1463,7 +1463,7 @@ TE2Gemini <- function(nexus, plotTE) {
   }))
   files <- c(paste0(tempdir(), "/Evolution_Plot.png"), files)
 
-  plot2pngGemini(plotTE, filename = files[1], type = "vis")
+  plot2pngGemini(plotTE, filename = files[1], type = "plotly")
 
   for (k in 2:(K + 1)) {
     suppressMessages(ggsave(

@@ -7033,13 +7033,31 @@ body <- dashboardBody(
               fluidRow(
                 column(
                   2,
-                  actionButton("start_coc", "â–¶ Start", width = "90%")
+                  actionButton(
+                    "start_coc",
+                    "Start",
+                    icon = icon("play"),
+                    width = "90%"
+                  )
                 ),
                 column(
                   2,
-                  actionButton("pause_coc", "â¸ Pause / Resume", width = "90%")
+                  actionButton(
+                    "pause_coc",
+                    "Pause / Resume",
+                    icon = icon("pause"),
+                    width = "90%"
+                  )
                 ),
-                column(2, actionButton("reset_coc", "â¹ Reset", width = "90%")),
+                column(
+                  2,
+                  actionButton(
+                    "reset_coc",
+                    "Reset",
+                    icon = icon("rotate-left"),
+                    width = "90%"
+                  )
+                ),
                 column(2, uiOutput("export_cocUI")),
                 column(1, div(style = "text-align:right;", "Speed (ms)")),
                 column(
@@ -7898,10 +7916,9 @@ body <- dashboardBody(
                 type = "tabs",
                 tabPanel(
                   "Map",
-                  shinycssloaders::withSpinner(visNetworkOutput(
+                  shinycssloaders::withSpinner(plotlyOutput(
                     outputId = "TEPlot",
-                    height = "75vh",
-                    width = "100%"
+                    height = "75vh"
                   ))
                 ),
                 tabPanel(
@@ -9670,13 +9687,31 @@ body <- dashboardBody(
               fluidRow(
                 column(
                   2,
-                  actionButton("start_col", "â–¶ Start", width = "90%")
+                  actionButton(
+                    "start_col",
+                    "Start",
+                    icon = icon("play"),
+                    width = "90%"
+                  )
                 ),
                 column(
                   2,
-                  actionButton("pause_col", "â¸ Pause / Resume", width = "90%")
+                  actionButton(
+                    "pause_col",
+                    "Pause / Resume",
+                    icon = icon("pause"),
+                    width = "90%"
+                  )
                 ),
-                column(2, actionButton("reset_col", "â¹ Reset", width = "90%")),
+                column(
+                  2,
+                  actionButton(
+                    "reset_col",
+                    "Reset",
+                    icon = icon("rotate-left"),
+                    width = "90%"
+                  )
+                ),
                 column(2, uiOutput("export_colUI")),
                 column(1, div(style = "text-align:right;", "Speed (ms)")),
                 column(

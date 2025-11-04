@@ -490,21 +490,11 @@ The **AuthorBio** function retrieves and displays biographical
 information about authors using OpenAlex data:
 
 ``` r
-require(dplyr)
-#> Loading required package: dplyr
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 # Example: Get biographical information for an author
 authorInfo <- authorBio(author_position = 1, 
                         doi = "10.1016/j.joi.2017.08.007")
 
-glimpse(authorInfo)
+dplyr::glimpse(authorInfo)
 #> Rows: 1
 #> Columns: 25
 #> $ id                          <chr> "https://openalex.org/A5069892096"
@@ -531,7 +521,7 @@ glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2025-11-04 10:55:20
+#> $ query_timestamp             <dttm> 2025-11-04 11:00:39
 ```
 
 This function provides comprehensive author profiles including:

@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   out.width = "100%",
   dpi = 300
 )
+library(dplyr)
 ```
 
 # bibliometrix
@@ -231,12 +232,11 @@ plot(x = results, k = 10, pause = FALSE)
 The **AuthorBio** function retrieves and displays biographical information about authors using OpenAlex data:
 
 ```{r eval=TRUE}
-require(dplyr)
 # Example: Get biographical information for an author
 authorInfo <- authorBio(author_position = 1, 
                         doi = "10.1016/j.joi.2017.08.007")
 
-glimpse(authorInfo)
+dplyr::glimpse(authorInfo)
 ```
 
 This function provides comprehensive author profiles including:

@@ -187,67 +187,73 @@ extract_authors <- function(article) {
         author_id = if (!is.null(.x$author$id)) {
           gsub("https://openalex.org/", "", .x$author$id)
         } else {
-          NA
+          NA_character_
         },
-
         # Author's name
         name = if (!is.null(.x$author$display_name)) {
           .x$author$display_name
         } else {
-          NA
+          NA_character_
         },
-
         # ORCID (if available)
-        orcid = if (!is.null(.x$author$orcid)) .x$author$orcid else NA,
-
+        orcid = if (!is.null(.x$author$orcid)) {
+          .x$author$orcid
+        } else {
+          NA_character_
+        },
         # Author's position
-        position = if (!is.null(.x$author_position)) .x$author_position else NA,
-
+        position = if (!is.null(.x$author_position)) {
+          .x$author_position
+        } else {
+          NA_character_
+        },
         # Affiliations: Names of institutions
         institutions = if (
           !is.null(.x$institutions) && length(.x$institutions) > 0
         ) {
-          paste(
-            map_chr(.x$institutions, "display_name", .default = NA),
-            collapse = "; "
-          )
+          inst_names <- map_chr(.x$institutions, function(inst) {
+            if (!is.null(inst$display_name)) {
+              inst$display_name
+            } else {
+              NA_character_
+            }
+          })
+          paste(inst_names, collapse = "; ")
         } else {
-          NA
+          NA_character_
         },
-
         # Affiliations: Institution IDs (removing prefix)
         institution_ids = if (
           !is.null(.x$institutions) && length(.x$institutions) > 0
         ) {
-          paste(
-            map_chr(
-              .x$institutions,
-              ~ gsub("https://openalex.org/", "", .x$id),
-              .default = NA
-            ),
-            collapse = "; "
-          )
+          inst_ids <- map_chr(.x$institutions, function(inst) {
+            if (!is.null(inst$id)) {
+              gsub("https://openalex.org/", "", inst$id)
+            } else {
+              NA_character_
+            }
+          })
+          paste(inst_ids, collapse = "; ")
         } else {
-          NA
+          NA_character_
         },
-
         # Countries of affiliations
         countries = if (!is.null(.x$countries) && length(.x$countries) > 0) {
           paste(.x$countries, collapse = "; ")
         } else {
-          NA
+          NA_character_
         }
       )
     )
   } else {
     tibble(
-      author_id = NA,
-      name = NA,
-      orcid = NA,
-      position = NA,
-      institutions = NA,
-      institution_ids = NA,
-      countries = NA
+      author_id = NA_character_,
+      name = NA_character_,
+      orcid = NA_character_,
+      position = NA_character_,
+      institutions = NA_character_,
+      institution_ids = NA_character_,
+      countries = NA_character_
     )
   }
 }

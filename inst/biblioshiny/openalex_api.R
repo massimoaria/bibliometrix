@@ -637,19 +637,20 @@ openAlexServer <- function(input, output, session, values) {
 
         # Add advanced filters if visible
         if (showAdvanced()) {
-          if (
-            !is.null(input$oaDocType) &&
-              length(input$oaDocType) > 0 &&
-              input$oaDocType != ""
-          ) {
-            search_filters$type <- input$oaDocType
+          if (!is.null(input$oaDocType) && length(input$oaDocType) > 0) {
+            # Rimuovi eventuali stringhe vuote
+            doc_types <- input$oaDocType[input$oaDocType != ""]
+            if (length(doc_types) > 0) {
+              search_filters$type <- doc_types
+            }
           }
-          if (
-            !is.null(input$oaLanguage) &&
-              length(input$oaLanguage) > 0 &&
-              input$oaLanguage != ""
-          ) {
-            search_filters$language <- input$oaLanguage
+
+          if (!is.null(input$oaLanguage) && length(input$oaLanguage) > 0) {
+            # Rimuovi eventuali stringhe vuote
+            languages <- input$oaLanguage[input$oaLanguage != ""]
+            if (length(languages) > 0) {
+              search_filters$language <- languages
+            }
           }
         }
 
@@ -752,19 +753,20 @@ openAlexServer <- function(input, output, session, values) {
 
         # Add advanced filters if visible
         if (showAdvanced()) {
-          if (
-            !is.null(input$oaDocType) &&
-              length(input$oaDocType) > 0 &&
-              input$oaDocType != ""
-          ) {
-            search_filters$type <- input$oaDocType
+          if (!is.null(input$oaDocType) && length(input$oaDocType) > 0) {
+            # Rimuovi eventuali stringhe vuote
+            doc_types <- input$oaDocType[input$oaDocType != ""]
+            if (length(doc_types) > 0) {
+              search_filters$type <- doc_types
+            }
           }
-          if (
-            !is.null(input$oaLanguage) &&
-              length(input$oaLanguage) > 0 &&
-              input$oaLanguage != ""
-          ) {
-            search_filters$language <- input$oaLanguage
+
+          if (!is.null(input$oaLanguage) && length(input$oaLanguage) > 0) {
+            # Rimuovi eventuali stringhe vuote
+            languages <- input$oaLanguage[input$oaLanguage != ""]
+            if (length(languages) > 0) {
+              search_filters$language <- languages
+            }
           }
         }
 

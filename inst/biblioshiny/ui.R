@@ -4850,7 +4850,7 @@ body <- dashboardBody(
                     )
                   ),
                   selectInput(
-                    "MostRelWordsSynFile",
+                    "MRWSynFile",
                     "Load a list of synonyms",
                     choices = c(
                       "Yes" = "Y",
@@ -4859,7 +4859,7 @@ body <- dashboardBody(
                     selected = "N"
                   ),
                   conditionalPanel(
-                    condition = "input.MostRelWordsSynFile == 'Y'",
+                    condition = "input.MRWSynFile == 'Y'",
                     helpText(
                       h5(strong(
                         "Upload a TXT or CSV file containing terms and their respective synonyms."
@@ -4869,7 +4869,7 @@ body <- dashboardBody(
                       )
                     ),
                     fileInput(
-                      "MostRelWordsSyn",
+                      "MRWSyn",
                       "",
                       multiple = FALSE,
                       accept = c(
@@ -4880,7 +4880,7 @@ body <- dashboardBody(
                       )
                     ),
                     selectInput(
-                      "MostRelWordsSynSep",
+                      "MRWSynSep",
                       "File Separator",
                       choices = c(
                         'Comma ","' = ",",

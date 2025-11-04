@@ -578,39 +578,38 @@ pubmedServer <- function(input, output, session, values) {
         }
 
         # Add document type filter
-        if (
-          showAdvanced() &&
-            !is.null(input$pmDocType) &&
-            length(input$pmDocType) > 0 &&
-            input$pmDocType != ""
-        ) {
-          type_filters <- sapply(input$pmDocType, function(t) {
-            paste0("\"", t, "\"[Publication Type]")
-          })
-          type_filter <- paste0(
-            " AND (",
-            paste(type_filters, collapse = " OR "),
-            ")"
-          )
-          query <- paste0(query, type_filter)
-        }
-
-        # Add language filter
-        if (
-          showAdvanced() &&
-            !is.null(input$pmLanguage) &&
-            length(input$pmLanguage) > 0 &&
-            input$pmLanguage != ""
-        ) {
-          lang_filters <- sapply(input$pmLanguage, function(l) {
-            paste0(l, "[Language]")
-          })
-          lang_filter <- paste0(
-            " AND (",
-            paste(lang_filters, collapse = " OR "),
-            ")"
-          )
-          query <- paste0(query, lang_filter)
+        if (showAdvanced()) {
+          if (!is.null(input$pmDocType) && length(input$pmDocType) > 0) {
+            # Rimuovi eventuali stringhe vuote
+            doc_types <- input$pmDocType[input$pmDocType != ""]
+            if (length(doc_types) > 0) {
+              type_filters <- sapply(doc_types, function(t) {
+                paste0("\"", t, "\"[Publication Type]")
+              })
+              type_filter <- paste0(
+                " AND (",
+                paste(type_filters, collapse = " OR "),
+                ")"
+              )
+              query <- paste0(query, type_filter)
+            }
+          }
+          # Add language filter
+          if (!is.null(input$pmLanguage) && length(input$pmLanguage) > 0) {
+            # Rimuovi eventuali stringhe vuote
+            languages <- input$pmLanguage[input$pmLanguage != ""]
+            if (length(languages) > 0) {
+              lang_filters <- sapply(input$pmLanguage, function(l) {
+                paste0(l, "[Language]")
+              })
+              lang_filter <- paste0(
+                " AND (",
+                paste(lang_filters, collapse = " OR "),
+                ")"
+              )
+              query <- paste0(query, lang_filter)
+            }
+          }
         }
 
         # Get count from PubMed
@@ -686,39 +685,38 @@ pubmedServer <- function(input, output, session, values) {
     }
 
     # Add document type filter
-    if (
-      showAdvanced() &&
-        !is.null(input$pmDocType) &&
-        length(input$pmDocType) > 0 &&
-        input$pmDocType != ""
-    ) {
-      type_filters <- sapply(input$pmDocType, function(t) {
-        paste0("\"", t, "\"[Publication Type]")
-      })
-      type_filter <- paste0(
-        " AND (",
-        paste(type_filters, collapse = " OR "),
-        ")"
-      )
-      query <- paste0(query, type_filter)
-    }
-
-    # Add language filter
-    if (
-      showAdvanced() &&
-        !is.null(input$pmLanguage) &&
-        length(input$pmLanguage) > 0 &&
-        input$pmLanguage != ""
-    ) {
-      lang_filters <- sapply(input$pmLanguage, function(l) {
-        paste0(l, "[Language]")
-      })
-      lang_filter <- paste0(
-        " AND (",
-        paste(lang_filters, collapse = " OR "),
-        ")"
-      )
-      query <- paste0(query, lang_filter)
+    if (showAdvanced()) {
+      if (!is.null(input$pmDocType) && length(input$pmDocType) > 0) {
+        # Rimuovi eventuali stringhe vuote
+        doc_types <- input$pmDocType[input$pmDocType != ""]
+        if (length(doc_types) > 0) {
+          type_filters <- sapply(doc_types, function(t) {
+            paste0("\"", t, "\"[Publication Type]")
+          })
+          type_filter <- paste0(
+            " AND (",
+            paste(type_filters, collapse = " OR "),
+            ")"
+          )
+          query <- paste0(query, type_filter)
+        }
+      }
+      # Add language filter
+      if (!is.null(input$pmLanguage) && length(input$pmLanguage) > 0) {
+        # Rimuovi eventuali stringhe vuote
+        languages <- input$pmLanguage[input$pmLanguage != ""]
+        if (length(languages) > 0) {
+          lang_filters <- sapply(input$pmLanguage, function(l) {
+            paste0(l, "[Language]")
+          })
+          lang_filter <- paste0(
+            " AND (",
+            paste(lang_filters, collapse = " OR "),
+            ")"
+          )
+          query <- paste0(query, lang_filter)
+        }
+      }
     }
 
     max_records <- input$pmMaxRecords
@@ -726,24 +724,17 @@ pubmedServer <- function(input, output, session, values) {
     print("PubMed Query:")
     print(query)
 
-    # Show progress modal
+    # Show progress modal with dynamic content
     showModal(modalDialog(
       title = "Downloading from PubMed",
       div(
-        shinyWidgets::progressBar(
-          id = "pm-download-progress",
-          value = 0,
-          total = 100,
-          display_pct = TRUE,
-          status = "info",
-          striped = TRUE,
-          title = NULL,
-          style = "width: 100%",
-          "Searching PubMed..."
+        div(
+          style = "text-align: center; margin: 20px 0;",
+          icon("spinner", class = "fa-spin fa-3x")
         ),
         div(
           id = "pm-download-progress-text",
-          style = "margin-top: 15px; text-align: center;",
+          style = "text-align: center; font-size: 14px;",
           "Initializing search..."
         )
       ),

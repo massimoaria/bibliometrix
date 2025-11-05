@@ -384,8 +384,8 @@ assignEvolutionColors <- function(
 
     # using clusters, replace color_original with color in edges
     old_edge_colors <- data.frame(
-      from = as.character(as_edgelist(g)[, 1]),
-      to = as.character(as_edgelist(g)[, 2]),
+      from = as.character(igraph::as_edgelist(g)[, 1]),
+      to = as.character(igraph::as_edgelist(g)[, 2]),
       color_original = E(g)$color
     )
     new_edge_colors <- old_edge_colors %>%

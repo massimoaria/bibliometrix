@@ -113,6 +113,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom igraph graph_from_data_frame
 #' @importFrom igraph as_adjacency_matrix
 #' @importFrom igraph graph.adjacency
+#' @importFrom igraph as_edgelist
 #' @importFrom igraph degree
 #' @importFrom igraph plot.igraph
 #' @importFrom igraph delete.vertices

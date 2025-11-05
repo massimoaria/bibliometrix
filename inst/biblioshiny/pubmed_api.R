@@ -128,7 +128,7 @@ pubmedUI <- function() {
                     numericInput(
                       "pmYearFrom",
                       "From Year:",
-                      value = 2020,
+                      value = 1985,
                       min = 1800,
                       max = as.integer(format(Sys.Date(), "%Y"))
                     )

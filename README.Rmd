@@ -1,5 +1,8 @@
 ---
 output: github_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -19,78 +22,117 @@ library(dplyr)
 
 ## An R-tool for comprehensive science mapping analysis
 
-[![bibliometrix: An R-tool for comprehensive science mapping analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007) [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![R-CMD-check](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml) [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix) [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app) `r badger::badge_cran_download("bibliometrix", "grand-total")`
+[![bibliometrix: An R-tool for comprehensive science mapping
+analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
+[![Project Status: Active - The project has reached a stable, usable
+state and is being actively
+developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![R-CMD-check](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml)
+[![cran
+version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
+[![rstudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
+`r badger::badge_cran_download("bibliometrix", "grand-total")`
 
 <p align="center">
 
 <img src="https://raw.githubusercontent.com/massimoaria/bibliometrix/master/inst/biblioshiny/www/logoAI.jpg" width="400"/>
+
 </p>
 
 ## Overview
 
-**bibliometrix** provides a comprehensive set of tools for quantitative research in bibliometrics and scientometrics.
+**bibliometrix** provides a comprehensive set of tools for quantitative
+research in bibliometrics and scientometrics.
 
-Bibliometrics applies quantitative analysis and statistics to scientific publications and their citation patterns. It has become essential across all scientific fields for evaluating growth, maturity, leading authors, conceptual and intellectual maps, and emerging trends within research communities.
+Bibliometrics applies quantitative analysis and statistics to scientific
+publications and their citation patterns. It has become essential across
+all scientific fields for evaluating growth, maturity, leading authors,
+conceptual and intellectual maps, and emerging trends within research
+communities.
 
-Today, bibliometrics is widely used in research performance evaluation by universities, government laboratories, policymakers, research directors, information specialists, librarians, and scholars themselves.
+Today, bibliometrics is widely used in research performance evaluation
+by universities, government laboratories, policymakers, research
+directors, information specialists, librarians, and scholars themselves.
 
 **bibliometrix** supports scholars in three key phases of analysis:
 
--   **Data importing and conversion** to R format from major bibliographic databases;
+-   **Data importing and conversion** to R format from major
+    bibliographic databases;
 
--   **Bibliometric analysis** of publication datasets, including descriptive statistics, author productivity, and source impact;
+-   **Bibliometric analysis** of publication datasets, including
+    descriptive statistics, author productivity, and source impact;
 
--   **Building and visualizing matrices** for co-citation, coupling, collaboration, and co-word analysis. These matrices serve as input for network analysis, multiple correspondence analysis, and other data reduction techniques.
+-   **Building and visualizing matrices** for co-citation, coupling,
+    collaboration, and co-word analysis. These matrices serve as input
+    for network analysis, multiple correspondence analysis, and other
+    data reduction techniques.
 
 ## biblioshiny
 
 **bibliometrix** includes **biblioshiny: bibliometrix for no-coders**
 
-**biblioshiny** is a *shiny web application providing an intuitive interface for bibliometrix*.
+**biblioshiny** is a *shiny web application providing an intuitive
+interface for bibliometrix*.
 
-It enables scholars to easily access the main features of bibliometrix through an interactive workflow:
+It enables scholars to easily access the main features of bibliometrix
+through an interactive workflow:
 
 ### Data Management
 
--   **Import and convert** data from multiple bibliographic databases (Web of Science, Scopus, PubMed, OpenAlex, Cochrane CDSR, Lens.org)
+-   **Import and convert** data from multiple bibliographic databases
+    (Web of Science, Scopus, PubMed, OpenAlex, Cochrane CDSR, Lens.org)
 
--   **Filter data** by various criteria including publication years, journals, countries, citation counts, and custom journal rankings
+-   **Filter data** by various criteria including publication years,
+    journals, countries, citation counts, and custom journal rankings
 
 -   **Merge collections** from different databases
 
--   **API Integration** for direct data retrieval from OpenAlex and PubMed
+-   **API Integration** for direct data retrieval from OpenAlex and
+    PubMed
 
 ### Analytics and Visualization
 
 -   **Three-level metrics** for comprehensive analysis:
 
     -   **Sources**: journal performance, impact metrics, Bradford's law
-    
-    -   **Authors**: productivity analysis, h-index, collaboration patterns, author profiles with biographical information
-    
-    -   **Documents**: citation analysis, most relevant papers, reference publication year spectroscopy (RPYS)
+
+    -   **Authors**: productivity analysis, h-index, collaboration
+        patterns, author profiles with biographical information
+
+    -   **Documents**: citation analysis, most relevant papers,
+        reference publication year spectroscopy (RPYS)
 
 ### Knowledge Structure Analysis
 
--   **Conceptual Structure**: analyzing the topics and themes through co-word analysis, thematic mapping, and thematic evolution
+-   **Conceptual Structure**: analyzing the topics and themes through
+    co-word analysis, thematic mapping, and thematic evolution
 
--   **Intellectual Structure**: examining the citation networks through co-citation analysis, historiograph, and document coupling
+-   **Intellectual Structure**: examining the citation networks through
+    co-citation analysis, historiograph, and document coupling
 
--   **Social Structure**: exploring collaboration patterns through co-authorship networks at author, institution, and country levels
+-   **Social Structure**: exploring collaboration patterns through
+    co-authorship networks at author, institution, and country levels
 
 ### Advanced Features
 
--   **Biblio AI**: An integrated AI assistant to help interpret results, generate insights, and provide context-aware recommendations
+-   **Biblio AI**: An integrated AI assistant to help interpret results,
+    generate insights, and provide context-aware recommendations
 
--   **Life Cycle Analysis**: Track and visualize the evolution of research topics, authors, and documents over time
+-   **Life Cycle Analysis**: Track and visualize the evolution of
+    research topics, authors, and documents over time
 
--   **Animated Networks**: Dynamic visualization of diachronic networks showing temporal evolution
+-   **Animated Networks**: Dynamic visualization of diachronic networks
+    showing temporal evolution
 
--   **Content Analysis**: Advanced text mining using natural language processing for deeper content exploration
+-   **Content Analysis**: Advanced text mining using natural language
+    processing for deeper content exploration
 
--   **Citation Matching**: Intelligent algorithm to match and reconcile citations across different databases
+-   **Citation Matching**: Intelligent algorithm to match and reconcile
+    citations across different databases
 
--   **Interactive Reports**: Generate comprehensive Excel reports combining multiple analyses
+-   **Interactive Reports**: Generate comprehensive Excel reports
+    combining multiple analyses
 
 ### How to use biblioshiny
 
@@ -101,27 +143,32 @@ library(bibliometrix)
 biblioshiny()
 ```
 
-For detailed tutorials and guides, visit the bibliometrix website: https://www.bibliometrix.org/
+For detailed tutorials and guides, visit the bibliometrix website:
+<https://www.bibliometrix.org/>
 
 ## How to cite bibliometrix
 
 If you use this package for your research, please cite it as:
 
-Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for comprehensive science mapping analysis**, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
+Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for
+comprehensive science mapping analysis**, *Journal of Informetrics*,
+11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
 
 ## Community
 
-Official website: https://www.bibliometrix.org
+Official website: <https://www.bibliometrix.org>
 
-CRAN page: https://cran.r-project.org/package=bibliometrix
+CRAN page: <https://cran.r-project.org/package=bibliometrix>
 
-GitHub repository: https://github.com/massimoaria/bibliometrix
+GitHub repository: <https://github.com/massimoaria/bibliometrix>
 
 ### Tutorials
 
-Introduction to bibliometrix: https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html
+Introduction to bibliometrix:
+<https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html>
 
-Data importing and converting: https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html
+Data importing and converting:
+<https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html>
 
 ## Installation
 
@@ -146,11 +193,17 @@ library(bibliometrix)
 
 ## Data loading and converting
 
-Export files from bibliographic databases can be imported into R using the function **convert2df**:
+Export files from bibliographic databases can be imported into R using
+the function **convert2df**:
 
 **convert2df**(*file*, *dbsource*, *format*)
 
-The argument *file* is a character vector containing the names of export files downloaded from SCOPUS, Clarivate Analytics WoS, OpenAlex, Digital Science Dimensions, PubMed, Lens.org, or Cochrane CDSR. The *file* argument can also contain JSON/XML objects downloaded using OpenAlex, Digital Science Dimensions, or PubMed APIs (through the packages *openalexR*, *dimensionsR*, and *pubmedR*).
+The argument *file* is a character vector containing the names of export
+files downloaded from SCOPUS, Clarivate Analytics WoS, OpenAlex, Digital
+Science Dimensions, PubMed, Lens.org, or Cochrane CDSR. The *file*
+argument can also contain JSON/XML objects downloaded using OpenAlex,
+Digital Science Dimensions, or PubMed APIs (through the packages
+*openalexR*, *dimensionsR*, and *pubmedR*).
 
 Example:
 
@@ -169,19 +222,26 @@ data(management, package = "bibliometrixData")
 M <- management
 ```
 
-The **convert2df** function creates a bibliographic data frame where rows correspond to manuscripts and columns to metadata fields.
+The **convert2df** function creates a bibliographic data frame where
+rows correspond to manuscripts and columns to metadata fields.
 
-Each manuscript contains multiple elements including authors' names, title, keywords, abstract, and other bibliographic information. All these elements constitute the metadata of a document.
+Each manuscript contains multiple elements including authors' names,
+title, keywords, abstract, and other bibliographic information. All
+these elements constitute the metadata of a document.
 
-Data frame columns are named using the standard Clarivate Analytics WoS Field Tag codes: [(Field Tags documentation)](https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf)
+Data frame columns are named using the standard Clarivate Analytics WoS
+Field Tag codes: [(Field Tags
+documentation)](https://www.bibliometrix.org/documents/Field_Tags_bibliometrix.pdf)
 
 ## Checking metadata completeness
 
-After importing a bibliographic data frame, you can assess the completeness of metadata using **missingData()**:
+After importing a bibliographic data frame, you can assess the
+completeness of metadata using **missingData()**:
 
 **missingData**(*M*)
 
-The argument *M* is a bibliographic data frame obtained by the **convert2df** function.
+The argument *M* is a bibliographic data frame obtained by the
+**convert2df** function.
 
 ```{r Completeness of metadata}
 ## An example from bibliometrix vignettes
@@ -193,25 +253,28 @@ com$mandatoryTags
 
 ## Bibliometric Analysis
 
-The function **biblioAnalysis** performs a comprehensive bibliometric analysis of a dataset, calculating main bibliometric measures.
+The function **biblioAnalysis** performs a comprehensive bibliometric
+analysis of a dataset, calculating main bibliometric measures.
 
 **biblioAnalysis**(*M*, *sep = ";"*)
 
-The argument *sep* indicates the field separator character used in the data frame.
+The argument *sep* indicates the field separator character used in the
+data frame.
 
 ```{r biblioAnalysis}
 results <- biblioAnalysis(M, sep = ";")
 ```
 
-The **biblioAnalysis** function returns an object of class "bibliometrix" containing:
+The **biblioAnalysis** function returns an object of class
+"bibliometrix" containing:
 
-- Annual scientific production
-- Most productive authors
-- Most cited manuscripts
-- Most productive countries
-- Total citations per country  
-- Most relevant sources (journals)
-- Most frequent keywords
+-   Annual scientific production
+-   Most productive authors
+-   Most cited manuscripts
+-   Most productive countries
+-   Total citations per country\
+-   Most relevant sources (journals)
+-   Most frequent keywords
 
 Use the generic function **summary** to display main results:
 
@@ -219,7 +282,9 @@ Use the generic function **summary** to display main results:
 S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
-The *k* parameter specifies the number of rows to display in each table (top k authors, sources, etc.). The *pause* parameter controls whether to pause between tables.
+The *k* parameter specifies the number of rows to display in each table
+(top k authors, sources, etc.). The *pause* parameter controls whether
+to pause between tables.
 
 Basic visualizations can be generated using the **plot** function:
 
@@ -229,7 +294,8 @@ plot(x = results, k = 10, pause = FALSE)
 
 ## Author Bio Cards
 
-The **AuthorBio** function retrieves and displays biographical information about authors using OpenAlex data:
+The **AuthorBio** function retrieves and displays biographical
+information about authors using OpenAlex data:
 
 ```{r eval=TRUE}
 # Example: Get biographical information for an author
@@ -241,15 +307,16 @@ dplyr::glimpse(authorInfo)
 
 This function provides comprehensive author profiles including:
 
-- Institutional affiliations
-- Research areas and topics
-- Publication history
-- Citation metrics
-- Co-author networks
+-   Institutional affiliations
+-   Research areas and topics
+-   Publication history
+-   Citation metrics
+-   Co-author networks
 
 ## Citation Matching
 
-The **applyCitationMatching** function implements an intelligent algorithm to match and reconcile citations across different databases:
+The **applyCitationMatching** function implements an intelligent
+algorithm to match and reconcile citations across different databases:
 
 ```{r eval=FALSE}
 # Apply citation matching to improve reference consistency
@@ -258,14 +325,15 @@ results <- applyCitationMatching(management, threshold = 0.85)
 
 This feature is particularly useful when:
 
-- Merging datasets from multiple databases
-- Identifying duplicate or variant citations
-- Building accurate citation networks
-- Conducting historiographic analysis
+-   Merging datasets from multiple databases
+-   Identifying duplicate or variant citations
+-   Building accurate citation networks
+-   Conducting historiographic analysis
 
 ## Life Cycle Analysis
 
-The **lifeCycle** function analyzes the temporal evolution of research topics, identifying different phases in their development:
+The **lifeCycle** function analyzes the temporal evolution of research
+topics, identifying different phases in their development:
 
 ```{r eval=TRUE}
 # Perform life cycle analysis
@@ -277,38 +345,43 @@ print(LC$parameters)
 print(LC$metrics)
 ```
 
-The **Life Cycle of Scientific Production* function implements a logistic growth model to analyze the temporal dynamics of research topics. This approach, grounded in the theory of scientific paradigms and innovation diffusion, allows researchers to identify the current developmental stage of a field, predict future trends, and estimate when a topic will reach maturity or saturation.
+The \*\*Life Cycle of Scientific Production\* function implements a
+logistic growth model to analyze the temporal dynamics of research
+topics. This approach, grounded in the theory of scientific paradigms
+and innovation diffusion, allows researchers to identify the current
+developmental stage of a field, predict future trends, and estimate when
+a topic will reach maturity or saturation.
 
-By fitting a logistic curve to the annual publication counts in your collection, this analysis reveals whether a research area is in its emergence phase, rapid growth phase, maturity phase, or decline phase.
-
+By fitting a logistic curve to the annual publication counts in your
+collection, this analysis reveals whether a research area is in its
+emergence phase, rapid growth phase, maturity phase, or decline phase.
 
 ## Bibliographic network matrices
 
-Manuscript attributes are interconnected through the publications themselves: authors link to journals, keywords to publication dates, and references create citation networks.
+Manuscript attributes are interconnected through the publications
+themselves: authors link to journals, keywords to publication dates, and
+references create citation networks.
 
-These connections form bipartite networks that can be represented as rectangular matrices (Manuscripts × Attributes).
+These connections form bipartite networks that can be represented as
+rectangular matrices (Manuscripts × Attributes).
 
-Additionally, scientific publications regularly cite other works, generating co-citation and coupling networks that reveal the intellectual structure of research fields.
+Additionally, scientific publications regularly cite other works,
+generating co-citation and coupling networks that reveal the
+intellectual structure of research fields.
 
 ### biblioNetwork function
 
-The **biblioNetwork** function calculates the most frequently used bibliometric networks from a bibliographic data frame:
+The **biblioNetwork** function calculates the most frequently used
+bibliometric networks from a bibliographic data frame:
 
-**Analysis types:**
-- **Coupling**: Documents sharing references
-- **Co-citation**: References cited together
-- **Co-occurrences**: Keywords or terms appearing together  
+**Analysis types:** - **Coupling**: Documents sharing references -
+**Co-citation**: References cited together - **Co-occurrences**:
+Keywords or terms appearing together\
 - **Collaboration**: Co-authorship patterns
 
-**Network levels:**
-- Authors
-- References
-- Sources (journals)
-- Countries
-- Universities
-- Keywords (Author keywords or Keywords Plus)
-- Titles
-- Abstracts
+**Network levels:** - Authors - References - Sources (journals) -
+Countries - Universities - Keywords (Author keywords or Keywords Plus) -
+Titles - Abstracts
 
 Example - classical co-citation network:
 
@@ -318,9 +391,12 @@ NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", 
 
 ## Visualizing bibliographic networks
 
-Bibliographic networks can be visualized and analyzed using the **networkPlot** function, which offers multiple layout algorithms and customization options.
+Bibliographic networks can be visualized and analyzed using the
+**networkPlot** function, which offers multiple layout algorithms and
+customization options.
 
-The main argument *type* specifies the network layout: circle, kamada-kawai, fruchterman-reingold, mds, etc.
+The main argument *type* specifies the network layout: circle,
+kamada-kawai, fruchterman-reingold, mds, etc.
 
 ### Country Scientific Collaboration
 
@@ -335,7 +411,8 @@ net <- networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaborat
                    type = "circle", size = TRUE, remove.multiple = FALSE, labelsize = 0.8)
 ```
 
-This visualization reveals international research collaborations, highlighting countries with strong scientific partnerships.
+This visualization reveals international research collaborations,
+highlighting countries with strong scientific partnerships.
 
 ### Co-Citation Network
 
@@ -349,7 +426,9 @@ net <- networkPlot(NetMatrix, Title = "Co-Citation Network", type = "fruchterman
                    size = TRUE, remove.multiple = FALSE, labelsize = 0.7, edgesize = 5)
 ```
 
-Co-citation analysis identifies the intellectual foundations of a research field by revealing which references are frequently cited together.
+Co-citation analysis identifies the intellectual foundations of a
+research field by revealing which references are frequently cited
+together.
 
 ### Keyword Co-occurrences
 
@@ -364,20 +443,117 @@ net <- networkPlot(NetMatrix, normalize = "association", weighted = TRUE, n = 30
                    size = TRUE, edgesize = 5, labelsize = 0.7)
 ```
 
-Keyword co-occurrence networks reveal the conceptual structure of a research field, identifying main themes and their relationships.
+Keyword co-occurrence networks reveal the conceptual structure of a
+research field, identifying main themes and their relationships.
+
+### Thematic Map
+
+The thematicMap function creates a **strategic diagram** based on
+co-word network analysis and clustering. It plots themes in a
+two-dimensional space according to their centrality (measure of
+importance) and density (measure of development).
+
+This visualization helps identify:
+
+\- Motor Themes (well-developed and central),
+
+\- Niche Themes (well-developed but peripheral),
+
+\- Emerging or Declining Themes (weakly developed), and
+
+\- Basic Themes (important but not well-developed).
+
+The methodology is based on Cobo et al. (2011) co-word analysis
+approach.
+
+```{r fig.height=7, fig.width=7}
+# Create a Thematic Map
+thematicMapResults <- thematicMap(M, field = "DE", n = 250, minfreq = 5, 
+                                  stemming = FALSE, size = 0.3, n.labels = 3, 
+                                  repel = TRUE, cluster="louvain")
+plot(thematicMapResults$map)
+plot(thematicMapResults$net$graph)
+```
+
+### Thematic Evolution
+
+The thematicEvolution function analyzes how themes evolve over time by
+dividing the collection into multiple time periods and tracking thematic
+changes across them.
+It performs a thematic map analysis for each period and measures the
+conceptual relationships between themes in consecutive periods using
+inclusion indexes and stability measures. This longitudinal analysis
+reveals emerging topics, declining themes, stable research areas, and
+thematic transformations.
+
+The function produces an interactive Sankey-like diagram showing
+thematic flows between periods, along with strategic maps for each time
+slice.
+
+```{r fig.height=9, fig.width=9}
+# Thematic Evolution
+TEResults <- thematicEvolution(M, field = "DE", n = 250, 
+                                              minFreq = 5, stemming = FALSE, 
+                                              size = 0.3, n.labels = 1, 
+                                              repel = TRUE, cluster="louvain", 
+                                              years = c(2004, 2008, 2015))
+plotThematicEvolution(TEResults$Nodes, TEResults$Edges, measure="weighted")
+
+```
+
+#### 1985-2004
+
+```{r fig.height=9, fig.width=9}
+# 1985-2004
+plot(TEResults$TM[[1]]$map)
+
+```
+
+#### 2005-2008
+
+```{r fig.height=9, fig.width=9}
+
+# 2005-2008
+plot(TEResults$TM[[2]]$map)
+
+```
+
+#### 2009-2015
+
+```{r fig.height=9, fig.width=9}
+
+
+# 2009-2015
+plot(TEResults$TM[[3]]$map)
+
+```
+
+#### 2016-2020
+
+```{r fig.height=9, fig.width=9}
+
+# 2016-2020
+plot(TEResults$TM[[4]]$map)
+```
 
 ## Co-Word Analysis: The conceptual structure of a field
 
-Co-word analysis maps the conceptual structure of a research domain by examining word co-occurrences in a bibliographic collection.
+Co-word analysis maps the conceptual structure of a research domain by
+examining word co-occurrences in a bibliographic collection.
 
-The analysis employs dimensionality reduction techniques including:
-- **Multiple Correspondence Analysis (MCA)**
-- **Correspondence Analysis (CA)**
-- **Multidimensional Scaling (MDS)**
+The analysis employs dimensionality reduction techniques including: -
+**Multiple Correspondence Analysis (MCA)** - **Correspondence Analysis
+(CA)** - **Multidimensional Scaling (MDS)**
 
-The **conceptualStructure** function performs CA or MCA to visualize the conceptual structure and uses K-means clustering to identify document clusters sharing common themes. Results are displayed on two-dimensional maps.
+The **conceptualStructure** function performs CA or MCA to visualize the
+conceptual structure and uses K-means clustering to identify document
+clusters sharing common themes. Results are displayed on two-dimensional
+maps.
 
-The function includes natural language processing (NLP) routines (see **termExtraction**) to extract terms from titles and abstracts, and implements Porter's stemming algorithm to reduce words to their root form.
+The function includes natural language processing (NLP) routines (see
+**termExtraction**) to extract terms from titles and abstracts, and
+implements Porter's stemming algorithm to reduce words to their root
+form.
 
 ```{r Co-Word Analysis, fig.height=9, fig.width=9, warning=FALSE}
 # Conceptual Structure using keywords (method="MCA")
@@ -390,15 +566,15 @@ plot(CS$graph_terms)
 plot(CS$graph_dendogram)
 ```
 
-This analysis helps identify:
-- Main research themes and sub-themes
-- Relationships between concepts
-- Evolution of research focus
-- Emerging topics and declining areas
+This analysis helps identify: - Main research themes and sub-themes -
+Relationships between concepts - Evolution of research focus - Emerging
+topics and declining areas
 
 ## Referenced Publication Years Spectroscopy (RPYS)
 
-RPYS analysis examines the age distribution of cited references to identify seminal works and breakthrough moments in a research field. The **rpys** function provides advanced capabilities for detecting:
+RPYS analysis examines the age distribution of cited references to
+identify seminal works and breakthrough moments in a research field. The
+**rpys** function provides advanced capabilities for detecting:
 
 ```{r eval=TRUE}
 # Perform RPYS analysis
@@ -409,22 +585,28 @@ print(rpysResults$Sequences %>% filter(Class!="") %>% group_by(Class) %>% slice_
 
 The analysis identifies four types of influential references:
 
-- **Hot Papers**: Recently published works receiving immediate, intense attention
-- **Constant Performers**: Works consistently cited over extended periods
-- **Life Cycles**: Publications showing typical rise and fall patterns in citation frequency
-- **Sleeping Beauties**: Works initially overlooked but later recognized as significant contributions
+-   **Hot Papers**: Recently published works receiving immediate,
+    intense attention
+-   **Constant Performers**: Works consistently cited over extended
+    periods
+-   **Life Cycles**: Publications showing typical rise and fall patterns
+    in citation frequency
+-   **Sleeping Beauties**: Works initially overlooked but later
+    recognized as significant contributions
 
-RPYS helps researchers:
-- Identify foundational works in a field
-- Detect breakthrough moments and paradigm shifts
-- Understand citation patterns over time
-- Discover underappreciated but important contributions
+RPYS helps researchers: - Identify foundational works in a field -
+Detect breakthrough moments and paradigm shifts - Understand citation
+patterns over time - Discover underappreciated but important
+contributions
 
 ## Historical Direct Citation Network
 
-The historiograph, proposed by Eugene Garfield, represents a chronological network of the most relevant direct citations in a bibliographic collection.
+The historiograph, proposed by Eugene Garfield, represents a
+chronological network of the most relevant direct citations in a
+bibliographic collection.
 
-The **histNetwork** function generates a chronological direct citation network matrix that can be visualized using **histPlot**:
+The **histNetwork** function generates a chronological direct citation
+network matrix that can be visualized using **histPlot**:
 
 ```{r Historical Co-citation network, fig.height=9, fig.width=9, warning=FALSE}
 # Create a historical citation network
@@ -435,44 +617,82 @@ histResults <- histNetwork(M, sep = ";")
 net <- histPlot(histResults, n = 20, size = FALSE, label = "short")
 ```
 
-The historiograph reveals:
-- The chronological development of ideas in a field
-- Key publications and their influence over time
-- Citation paths showing knowledge flow
-- Temporal relationships between foundational works
+The historiograph reveals: - The chronological development of ideas in a
+field - Key publications and their influence over time - Citation paths
+showing knowledge flow - Temporal relationships between foundational
+works
 
-This visualization is particularly valuable for understanding how scientific knowledge evolves and builds upon previous research.
+This visualization is particularly valuable for understanding how
+scientific knowledge evolves and builds upon previous research.
 
 ## Main Authors' References
 
 ### Core bibliometrix publication
 
-Aria, M. & Cuccurullo, C. (2017). **bibliometrix: An R-tool for comprehensive science mapping analysis**, *Journal of Informetrics*, 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007 (https://doi.org/10.1016/j.joi.2017.08.007)
+Aria, M. & Cuccurullo, C. (2017). **bibliometrix: An R-tool for
+comprehensive science mapping analysis**, *Journal of Informetrics*,
+11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
+(<https://doi.org/10.1016/j.joi.2017.08.007>)
 
 ### Recent methodological advances
 
-M. Aria, C. Cuccurullo, L. D'Aniello, M. Misuraca, M. Spano (2024). **Comparative science mapping: a novel conceptual structure analysis with metadata**, *Scientometrics*. (https://doi.org/10.1007/s11192-024-05161-6)
+M. Aria, C. Cuccurullo, L. D'Aniello, M. Misuraca, M. Spano (2024).
+**Comparative science mapping: a novel conceptual structure analysis
+with metadata**, *Scientometrics*.
+(<https://doi.org/10.1007/s11192-024-05161-6>)
 
-Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024). **openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex**. *The R Journal*, [DOI: 10.32614/RJ-2023-089](https://doi.org/10.32614/RJ-2023-089).
+Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024).
+**openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex**.
+*The R Journal*, [DOI:
+10.32614/RJ-2023-089](https://doi.org/10.32614/RJ-2023-089).
 
 ### Applications in various domains
 
-Aria, M., D’Aniello, L., Grassia, M. G., Marino, M., Mazza, R., & Stavolo, A. (2024). **Mapping the evolution of gender dysphoria research: a comprehensive bibliometric study**. *Quality & Quantity*, 58(6), 5351-5375. 
+Aria, M., D’Aniello, L., Grassia, M. G., Marino, M., Mazza, R., &
+Stavolo, A. (2024). **Mapping the evolution of gender dysphoria
+research: a comprehensive bibliometric study**. *Quality & Quantity*,
+58(6), 5351-5375.
 
-Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2022). **Thematic Analysis as a New Culturomic Tool: The Social Media Coverage on COVID-19 Pandemic in Italy**. *Sustainability*, 14(6), 3643, (https://doi.org/10.3390/su14063643)
+Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M.
+(2022). **Thematic Analysis as a New Culturomic Tool: The Social Media
+Coverage on COVID-19 Pandemic in Italy**. *Sustainability*, 14(6), 3643,
+(<https://doi.org/10.3390/su14063643>)
 
-Aria M., Misuraca M., Spano M. (2020) **Mapping the evolution of social research and data science on 30 years of Social Indicators Research**, *Social Indicators Research*. (https://doi.org/10.1007/s11205-020-02281-3)
+Aria M., Misuraca M., Spano M. (2020) **Mapping the evolution of social
+research and data science on 30 years of Social Indicators Research**,
+*Social Indicators Research*.
+(<https://doi.org/10.1007/s11205-020-02281-3>)
 
-Aria M., Alterisio A., Scandurra A, Pinelli C., D'Aniello B, (2021) **The scholar's best friend: research trends in dog cognitive and behavioural studies**, *Animal Cognition*. (https://doi.org/10.1007/s10071-020-01448-2)
+Aria M., Alterisio A., Scandurra A, Pinelli C., D'Aniello B, (2021)
+**The scholar's best friend: research trends in dog cognitive and
+behavioural studies**, *Animal Cognition*.
+(<https://doi.org/10.1007/s10071-020-01448-2>)
 
-Angelelli, M., Ciavolino, E., Ringle, C. M., Sarstedt, M., & Aria, M. (2025). **Conceptual structure and thematic evolution in partial least squares structural equation modeling research**. *Quality & Quantity*, 1-46.
+Angelelli, M., Ciavolino, E., Ringle, C. M., Sarstedt, M., & Aria, M.
+(2025). **Conceptual structure and thematic evolution in partial least
+squares structural equation modeling research**. *Quality & Quantity*,
+1-46.
 
-Belfiore, A., Cuccurullo, C., & Aria, M. (2022). **IoT in healthcare: A scientometric analysis**. *Technological Forecasting and Social Change*, 184, 122001. (https://doi.org/10.1016/j.techfore.2022.122001)
+Belfiore, A., Cuccurullo, C., & Aria, M. (2022). **IoT in healthcare: A
+scientometric analysis**. *Technological Forecasting and Social Change*,
+184, 122001. (<https://doi.org/10.1016/j.techfore.2022.122001>)
 
-Ciavolino, E., Aria, M., Cheah, J. H., & Roldán, J. L. (2022). **A tale of PLS structural equation modelling: episode I—a bibliometrix citation analysis**. *Social Indicators Research*, 164(3), 1323-1348 (https://doi.org/10.1007/s11205-022-02994-7).
+Ciavolino, E., Aria, M., Cheah, J. H., & Roldán, J. L. (2022). **A tale
+of PLS structural equation modelling: episode I—a bibliometrix citation
+analysis**. *Social Indicators Research*, 164(3), 1323-1348
+(<https://doi.org/10.1007/s11205-022-02994-7>).
 
-D'Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). **Academic Health Centers' configurations, scientific productivity, and impact: insights from the Italian setting**. *Health Policy*. (https://doi.org/10.1016/j.healthpol.2022.09.007)
+D'Aniello, L., Spano, M., Cuccurullo, C., & Aria, M. (2022). **Academic
+Health Centers' configurations, scientific productivity, and impact:
+insights from the Italian setting**. *Health Policy*.
+(<https://doi.org/10.1016/j.healthpol.2022.09.007>)
 
-Sarto, F., Cuccurullo, C., & Aria, M. (2014). **Exploring healthcare governance literature: systematic review and paths for future research**. *Mecosan* (https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en)
+Sarto, F., Cuccurullo, C., & Aria, M. (2014). **Exploring healthcare
+governance literature: systematic review and paths for future
+research**. *Mecosan*
+(<https://www.francoangeli.it/Riviste/Scheda_Rivista.aspx?IDarticolo=52780&lingua=en>)
 
-Scarano, A., Aria, M., Mauriello, F., Riccardi, M. R., & Montella, A. (2023). **Systematic literature review of 10 years of cyclist safety research**. *Accident Analysis & Prevention*, 184, 106996 (https://doi.org/10.1016/j.aap.2023.106996).
+Scarano, A., Aria, M., Mauriello, F., Riccardi, M. R., & Montella, A.
+(2023). **Systematic literature review of 10 years of cyclist safety
+research**. *Accident Analysis & Prevention*, 184, 106996
+(<https://doi.org/10.1016/j.aap.2023.106996>).

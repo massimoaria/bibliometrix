@@ -45,6 +45,8 @@ utils::globalVariables(c(
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @param seed is numerical. It indicates the seed for random number generator to obtain always the same results. Default value is \code{seed = 1234}.
+#' @param assign.evolution.colors is a list. If \code{assignEvolutionColors = list(assign = TRUE)}, colors are assigned to lineages based on the highest weighted inclusion value. If a list is provided, it must contain the arguments \code{assignEvolutionColors = list(assign = c(TRUE, FALSE), measure=("inclusion","stability", "weighted"))}.
+#' Default is \code{assign.evolution.colors = list(assign=TRUE, measure="weighted")}. If assign = FALSE, measure argument is ignored.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
@@ -79,7 +81,8 @@ thematicEvolution <- function(
   remove.terms = NULL,
   synonyms = NULL,
   cluster = "louvain",
-  seed = 1234
+  seed = 1234,
+  assign.evolution.colors = list(assign = TRUE, measure = "weighted")
 ) {
   list_df <- timeslice(M, breaks = years)
   K <- length(list_df)
@@ -235,7 +238,7 @@ thematicEvolution <- function(
       )
     )
   }
-  ################
+
   # Preparing data for plot
   Nodes$id <- 0:(nrow(Nodes) - 1)
   Nodes <- Nodes %>%
@@ -252,7 +255,6 @@ thematicEvolution <- function(
     group_by(slice) %>%
     mutate(sum = sum / sum(sum, na.rm = T)) %>%
     ungroup()
-  ###############
 
   params <- list(
     field = field,
@@ -275,14 +277,54 @@ thematicEvolution <- function(
     row.names = NULL
   )
 
-  results <- list(
+  periods <- sort(unique(Nodes$group))
+
+  clusters <- data.frame(name = NULL, freq = NULL, group = NULL)
+
+  for (i in 1:length(res)) {
+    df <- res[[i]]$clusters %>%
+      select(name, freq)
+    df$group <- periods[i]
+    clusters <- bind_rows(clusters, df)
+  }
+
+  Nodes <- Nodes %>%
+    left_join(clusters, by = c("group", "name"))
+
+  edges$color <- "#D3D3D380"
+
+  nexus <- list(
     Nodes = Nodes,
     Edges = edges,
+    clusters = clusters,
     Data = INC[, -c(1, 2)],
     check = TRUE,
     TM = res,
     Net = net,
     params = params
   )
-  return(results)
+
+  if (!is.list(assign.evolution.colors)) {
+    assign.evolution.colors <- list(assign = TRUE, measure = "weighted")
+  }
+
+  if (is.null(assign.evolution.colors$assign)) {
+    assign.evolution.colors <- list(assign = TRUE, measure = "weighted")
+  }
+
+  if (is.null(assign.evolution.colors$measure)) {
+    assign.evolution.colors$measure <- "weighted"
+  }
+
+  if (assign.evolution.colors$assign) {
+    ## Assign colors based on lineages
+    nexus <- assignEvolutionColors(
+      nexus = nexus,
+      threshold = 0.5,
+      palette = NULL,
+      use_measure = assign.evolution.colors$measure
+    )
+  }
+
+  return(nexus)
 }

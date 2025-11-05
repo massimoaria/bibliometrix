@@ -20,6 +20,7 @@ downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/m
 <p align="center">
 
 <img src="https://raw.githubusercontent.com/massimoaria/bibliometrix/master/inst/biblioshiny/www/logoAI.jpg" width="400"/>
+
 </p>
 
 ## Overview
@@ -500,12 +501,12 @@ dplyr::glimpse(authorInfo)
 #> $ id                          <chr> "https://openalex.org/A5069892096"
 #> $ display_name                <chr> "Massimo Aria"
 #> $ display_name_alternatives   <list> <"Massimo Aria", "Aria, Massimo", "M Aria", "M Aría", "M. Aria", "M. Qasem Aria", …
-#> $ ids                         <list> "https://openalex.org/A5069892096"
+#> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411">
 #> $ orcid                       <chr> "https://orcid.org/0000-0002-8517-9411"
-#> $ works_count                 <int> 226
-#> $ cited_by_count              <int> 16064
+#> $ works_count                 <int> 227
+#> $ cited_by_count              <int> 16124
 #> $ counts_by_year              <list> [<data.frame[23 x 4]>]
-#> $ `2yr_mean_citedness`        <dbl> 3.983333
+#> $ `2yr_mean_citedness`        <dbl> 3.983607
 #> $ h_index                     <int> 35
 #> $ i10_index                   <int> 93
 #> $ last_known_institutions     <list> [<data.frame[2 x 6]>]
@@ -521,7 +522,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2025-11-04 11:00:39
+#> $ query_timestamp             <dttm> 2025-11-05 21:19:07
 ```
 
 This function provides comprehensive author profiles including:
@@ -680,6 +681,108 @@ net <- networkPlot(NetMatrix, normalize = "association", weighted = TRUE, n = 30
 Keyword co-occurrence networks reveal the conceptual structure of a
 research field, identifying main themes and their relationships.
 
+### Thematic Map
+
+The thematicMap function creates a **strategic diagram** based on
+co-word network analysis and clustering. It plots themes in a
+two-dimensional space according to their centrality (measure of
+importance) and density (measure of development).
+
+This visualization helps identify:
+
+\- Motor Themes (well-developed and central),
+
+\- Niche Themes (well-developed but peripheral),
+
+\- Emerging or Declining Themes (weakly developed), and
+
+\- Basic Themes (important but not well-developed).
+
+The methodology is based on Cobo et al. (2011) co-word analysis
+approach.
+
+``` r
+# Create a Thematic Map
+thematicMapResults <- thematicMap(M, field = "DE", n = 250, minfreq = 5, 
+                                  stemming = FALSE, size = 0.3, n.labels = 3, 
+                                  repel = TRUE, cluster="louvain")
+plot(thematicMapResults$map)
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+``` r
+plot(thematicMapResults$net$graph)
+```
+
+<img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
+
+### Thematic Evolution
+
+The thematicEvolution function analyzes how themes evolve over time by
+dividing the collection into multiple time periods and tracking thematic
+changes across them. It performs a thematic map analysis for each period
+and measures the conceptual relationships between themes in consecutive
+periods using inclusion indexes and stability measures. This
+longitudinal analysis reveals emerging topics, declining themes, stable
+research areas, and thematic transformations.
+
+The function produces an interactive Sankey-like diagram showing
+thematic flows between periods, along with strategic maps for each time
+slice.
+
+``` r
+# Thematic Evolution
+TEResults <- thematicEvolution(M, field = "DE", n = 250, 
+                                              minFreq = 5, stemming = FALSE, 
+                                              size = 0.3, n.labels = 1, 
+                                              repel = TRUE, cluster="louvain", 
+                                              years = c(2004, 2008, 2015))
+plotThematicEvolution(TEResults$Nodes, TEResults$Edges, measure="weighted")
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+
+#### 1985-2004
+
+``` r
+# 1985-2004
+plot(TEResults$TM[[1]]$map)
+```
+
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+
+#### 2005-2008
+
+``` r
+
+# 2005-2008
+plot(TEResults$TM[[2]]$map)
+```
+
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+
+#### 2009-2015
+
+``` r
+
+
+# 2009-2015
+plot(TEResults$TM[[3]]$map)
+```
+
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+
+#### 2016-2020
+
+``` r
+
+# 2016-2020
+plot(TEResults$TM[[4]]$map)
+```
+
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+
 ## Co-Word Analysis: The conceptual structure of a field
 
 Co-word analysis maps the conceptual structure of a research domain by
@@ -732,7 +835,7 @@ identify seminal works and breakthrough moments in a research field. The
 rpysResults <- rpys(M, sep = ";", timespan = NULL, graph = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 ``` r
 

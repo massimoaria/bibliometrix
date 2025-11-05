@@ -347,76 +347,16 @@ thematicMap <- function(
     )
   }
 
-  g <- ggplot(df, aes(x = rcentrality, y = rdensity, text = c(words))) +
-    geom_point(
-      group = "NA",
-      aes(size = log(as.numeric(freq))),
-      shape = 20,
-      col = adjustcolor(df$color, alpha.f = 0.5)
-    ) # Use hollow circles
-  if (size > 0) {
-    if (isTRUE(repel)) {
-      g <- g +
-        geom_label_repel(
-          aes(
-            group = "NA",
-            label = ifelse(freq > 1, unlist(tolower(name_full)), '')
-          ),
-          size = 3 * (1 + size),
-          angle = 0
-        )
-    } else {
-      g <- g +
-        geom_text(
-          aes(
-            group = "NA",
-            label = ifelse(freq > 1, unlist(tolower(name_full)), '')
-          ),
-          color = adjustcolor("black", alpha.f = 0.7),
-          size = 3 * (1 + size),
-          angle = 0
-        )
-    }
-  }
-
-  g <- g +
-    geom_hline(
-      yintercept = meandens,
-      linetype = 2,
-      color = adjustcolor("black", alpha.f = 0.7)
-    ) +
-    geom_vline(
-      xintercept = meancentr,
-      linetype = 2,
-      color = adjustcolor("black", alpha.f = 0.7)
-    ) +
-    theme(legend.position = "none") +
-    scale_radius(range = c(5 * (1 + size), 30 * (1 + size))) +
-    labs(
-      x = "Relevance degree\n(Centrality)",
-      y = "Development degree\n(Density)"
-    ) +
-    xlim(xlimits) +
-    ylim(ylimits) +
-    annotate(
-      "text",
-      x = annotations$xpos,
-      y = annotations$ypos,
-      hjust = annotations$hjustvar,
-      vjust = annotations$vjustvar,
-      label = annotations$words,
-      color = adjustcolor("gray20", alpha.f = 0.5),
-      size = 3 * (1 + size)
-    ) +
-    theme(
-      axis.text.x = element_blank(),
-      panel.background = element_rect(fill = '#FFFFFF'),
-      axis.line.x = element_line(color = "black", linewidth = 0.5),
-      axis.line.y = element_line(color = "black", linewidth = 0.5),
-      axis.ticks.x = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
-    ) +
+  g <- buildTMPlot(
+    df,
+    meandens,
+    meancentr,
+    xlimits,
+    ylimits,
+    annotations,
+    size,
+    repel
+  ) +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2])
 
   names(df_lab) = c(
@@ -489,6 +429,9 @@ thematicMap <- function(
 
   results = list(
     map = g,
+    axisOrigin = c(meancentr, meandens),
+    axisLimits = c(xlimits, ylimits),
+    annotations = annotations,
     clusters = df,
     words = df_lab,
     nclust = dim(df)[1],
@@ -500,7 +443,7 @@ thematicMap <- function(
   return(results)
 }
 
-# Probability calculation for cluster assignment
+# Probability calculation for cluster assignment ----
 clusterAssignment <- function(
   M,
   words,
@@ -598,4 +541,134 @@ clusterAssignment <- function(
     arrange(desc(TC), .by_group = TRUE)
 
   return(TERMS)
+}
+
+# Build TM Plot -----
+
+#' Build Thematic Map Plot
+#'
+#' Internal function to generate a strategic diagram (thematic map) visualization
+#' plotting themes according to their centrality and density dimensions.
+#'
+#' @param df A data.frame containing the thematic structure with columns:
+#'   \itemize{
+#'     \item \code{rcentrality}: Relevance degree (normalized centrality values)
+#'     \item \code{rdensity}: Development degree (normalized density values)
+#'     \item \code{freq}: Frequency of each theme
+#'     \item \code{words}: Theme labels for hover text
+#'     \item \code{name_full}: Full theme names for labels
+#'     \item \code{color}: Color assignments for each theme
+#'   }
+#' @param size Numeric. Label size multiplier. If 0, labels are not displayed.
+#'   Values > 0 increase label size proportionally.
+#' @param repel Logical. If \code{TRUE}, uses \code{ggrepel::geom_label_repel()}
+#'   to prevent label overlapping. If \code{FALSE}, uses standard \code{geom_text()}.
+#'
+#' @return A ggplot object representing the thematic map with:
+#'   \itemize{
+#'     \item Themes plotted as points sized by log-frequency
+#'     \item Quadrant divisions at mean centrality and density
+#'     \item Optional theme labels (frequency > 1)
+#'     \item Quadrant annotations
+#'   }
+#'
+#' @details
+#' The function creates a strategic diagram dividing the thematic space into four
+#' quadrants based on mean centrality (x-axis) and mean density (y-axis):
+#' \itemize{
+#'   \item \strong{Upper-right}: Motor themes (high centrality, high density)
+#'   \item \strong{Upper-left}: Niche themes (low centrality, high density)
+#'   \item \strong{Lower-right}: Basic themes (high centrality, low density)
+#'   \item \strong{Lower-left}: Emerging/declining themes (low centrality, low density)
+#' }
+#'
+#' The function uses several variables from the parent environment:
+#' \code{meandens}, \code{meancentr}, \code{xlimits}, \code{ylimits}, and
+#' \code{annotations}.
+#'
+#' @keywords internal
+#' @noRd
+buildTMPlot <- function(
+  df,
+  meandens,
+  meancentr,
+  xlimits,
+  ylimits,
+  annotations,
+  size,
+  repel
+) {
+  g <- ggplot(df, aes(x = rcentrality, y = rdensity, text = c(words))) +
+    geom_point(
+      group = "NA",
+      aes(size = log(as.numeric(freq))),
+      shape = 20,
+      col = adjustcolor(df$color, alpha.f = 0.5)
+    ) # Use hollow circles
+  if (size > 0) {
+    if (isTRUE(repel)) {
+      g <- g +
+        geom_label_repel(
+          aes(
+            group = "NA",
+            label = ifelse(freq > 1, unlist(tolower(name_full)), '')
+          ),
+          size = 3 * (1 + size),
+          angle = 0
+        )
+    } else {
+      g <- g +
+        geom_text(
+          aes(
+            group = "NA",
+            label = ifelse(freq > 1, unlist(tolower(name_full)), '')
+          ),
+          color = adjustcolor("black", alpha.f = 0.7),
+          size = 3 * (1 + size),
+          angle = 0
+        )
+    }
+  }
+
+  g <- g +
+    geom_hline(
+      yintercept = meandens,
+      linetype = 2,
+      color = adjustcolor("black", alpha.f = 0.7)
+    ) +
+    geom_vline(
+      xintercept = meancentr,
+      linetype = 2,
+      color = adjustcolor("black", alpha.f = 0.7)
+    ) +
+    theme(legend.position = "none") +
+    scale_radius(range = c(5 * (1 + size), 30 * (1 + size))) +
+    labs(
+      x = "Relevance degree\n(Centrality)",
+      y = "Development degree\n(Density)"
+    ) +
+    xlim(xlimits) +
+    ylim(ylimits) +
+    annotate(
+      "text",
+      x = annotations$xpos,
+      y = annotations$ypos,
+      hjust = annotations$hjustvar,
+      vjust = annotations$vjustvar,
+      label = annotations$words,
+      color = adjustcolor("gray20", alpha.f = 0.5),
+      size = 3 * (1 + size)
+    ) +
+    theme(
+      axis.text.x = element_blank(),
+      panel.background = element_rect(fill = '#FFFFFF'),
+      axis.line.x = element_line(color = "black", linewidth = 0.5),
+      axis.line.y = element_line(color = "black", linewidth = 0.5),
+      axis.ticks.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    ) #+
+  #annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2])
+
+  return(g)
 }

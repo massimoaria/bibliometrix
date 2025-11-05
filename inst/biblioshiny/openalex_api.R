@@ -127,7 +127,7 @@ openAlexUI <- function() {
                     numericInput(
                       "oaYearFrom",
                       "From Year:",
-                      value = 2020,
+                      value = 1985,
                       min = 1900,
                       max = as.integer(format(Sys.Date(), "%Y"))
                     )

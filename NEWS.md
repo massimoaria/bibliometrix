@@ -3,6 +3,8 @@
 Features:
 
 * Added Author Bio Card (new function AuthorBio())
+* Added new plot layout in plotThematicEvolution()
+* Added automatic identification of continuous flows in plotThematicEvolution()
 * Added seed argument to networkPlot(), ThematicMap(), and ThematicEvolution() functions
 * Improved OpenAlex data conversion process
 * Enhanced Community Repulsion algorithm in networkPlot(), ThematicMap(), and ThematicEvolution() functions

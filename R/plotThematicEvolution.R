@@ -6,6 +6,7 @@ utils::globalVariables(c(
   "color_from",
   "color_lineage",
   "color_to",
+  "freq",
   "measure",
   "total_in",
   "weight"
@@ -157,6 +158,19 @@ plotThematicEvolution <- function(
     Edges$color <- "#D3D3D380"
   }
 
+  # Prepare custom data for node tooltips showing name and freq
+  if ("freq" %in% names(Nodes)) {
+    node_customdata <- Nodes$freq
+    node_hovertemplate <- paste0(
+      "<b>%{label}</b><br>",
+      "Tot Occurrences: %{customdata}<br>",
+      "<extra></extra>"
+    )
+  } else {
+    node_customdata <- NULL
+    node_hovertemplate <- NULL
+  }
+
   # Plotly margins
   m <- list(
     l = 50,
@@ -174,7 +188,9 @@ plotThematicEvolution <- function(
       x = Nodes$coordX,
       y = Nodes$coordY,
       color = Nodes$color,
-      pad = 4
+      pad = 4,
+      customdata = node_customdata,
+      hovertemplate = node_hovertemplate
     ),
     link = list(
       source = Edges$from,
@@ -228,7 +244,7 @@ assignEvolutionColors <- function(
     }
   )
 
-  # Initialize palette
+  # Initialize palette with enough unique colors
   if (is.null(palette)) {
     palette <- c(
       "#E41A1C",
@@ -285,7 +301,6 @@ assignEvolutionColors <- function(
   # PHASE 1: Identify lineages starting from the first period
   periods <- unique(Nodes$group)
   lineage_id <- 1
-  color_map <- list()
 
   for (i in 1:(length(periods) - 1)) {
     current_period <- periods[i]
@@ -370,23 +385,53 @@ assignEvolutionColors <- function(
     }
   }
 
-  # PHASE 2: Assign colors to identified lineages
+  # PHASE 2: Assign unique colors to lineages (no color reuse)
   unique_lineages <- unique(na.omit(Nodes$color_lineage))
 
   for (i in seq_along(unique_lineages)) {
     lineage <- unique_lineages[i]
-    color_idx <- ((i - 1) %% length(palette)) + 1
-    color <- paste0(palette[color_idx], "80") # Add transparency
+
+    # Get next available color from palette (each lineage gets unique color)
+    if (i <= length(palette)) {
+      color <- paste0(palette[i], "80")
+    } else {
+      # Generate random color if palette exhausted
+      color <- paste0(
+        sprintf(
+          "#%02X%02X%02X",
+          sample(50:255, 1),
+          sample(50:255, 1),
+          sample(50:255, 1)
+        ),
+        "80"
+      )
+    }
 
     Nodes$color_final[Nodes$color_lineage == lineage] <- color
   }
 
-  # PHASE 3: Assign colors to isolated nodes (without lineage)
+  # PHASE 3: Assign unique colors to isolated nodes (no color reuse)
   isolated_nodes <- which(is.na(Nodes$color_lineage))
+  color_idx <- length(unique_lineages) + 1
+
   for (idx in isolated_nodes) {
-    color_idx <- ((lineage_id - 1) %% length(palette)) + 1
-    Nodes$color_final[idx] <- paste0(palette[color_idx], "80")
-    lineage_id <- lineage_id + 1
+    if (color_idx <= length(palette)) {
+      color <- paste0(palette[color_idx], "80")
+    } else {
+      # Generate random color if palette exhausted
+      color <- paste0(
+        sprintf(
+          "#%02X%02X%02X",
+          sample(50:255, 1),
+          sample(50:255, 1),
+          sample(50:255, 1)
+        ),
+        "80"
+      )
+    }
+
+    Nodes$color_final[idx] <- color
+    color_idx <- color_idx + 1
   }
 
   # PHASE 4: Assign colors to edges

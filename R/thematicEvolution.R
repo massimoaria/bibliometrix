@@ -275,9 +275,24 @@ thematicEvolution <- function(
     row.names = NULL
   )
 
+  periods <- sort(unique(Nodes$group))
+
+  clusters <- data.frame(name = NULL, freq = NULL, group = NULL)
+
+  for (i in 1:length(res)) {
+    df <- res[[i]]$clusters %>%
+      select(name, freq)
+    df$group <- periods[i]
+    clusters <- bind_rows(clusters, df)
+  }
+
+  Nodes <- Nodes %>%
+    left_join(clusters, by = c("group", "name"))
+
   results <- list(
     Nodes = Nodes,
     Edges = edges,
+    clusters = clusters,
     Data = INC[, -c(1, 2)],
     check = TRUE,
     TM = res,

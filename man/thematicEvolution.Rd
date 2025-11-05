@@ -18,7 +18,8 @@ thematicEvolution(
   remove.terms = NULL,
   synonyms = NULL,
   cluster = "louvain",
-  seed = 1234
+  seed = 1234,
+  assign.evolution.colors = list(assign = TRUE, measure = "weighted")
 )
 }
 \arguments{
@@ -50,6 +51,9 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{cluster}{is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 
 \item{seed}{is numerical. It indicates the seed for random number generator to obtain always the same results. Default value is \code{seed = 1234}.}
+
+\item{assign.evolution.colors}{is a list. If \code{assignEvolutionColors = list(assign = TRUE)}, colors are assigned to lineages based on the highest weighted inclusion value. If a list is provided, it must contain the arguments \code{assignEvolutionColors = list(assign = c(TRUE, FALSE), measure=("inclusion","stability", "weighted"))}.
+Default is \code{assign.evolution.colors = list(assign=TRUE, measure="weighted")}. If assign = FALSE, measure argument is ignored.}
 }
 \value{
 a list containing:

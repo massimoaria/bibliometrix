@@ -1160,7 +1160,7 @@ authorCard <- function(selected_author, values) {
     }
 
     if (selected_author %in% author_data$AUid) {
-      AU_data <- author_data %>% filter(AUid == selected_author)
+      AU_data <- author_data %>% dplyr::filter(AUid == selected_author)
     } else {
       suppressWarnings(
         AU_data <- tryCatch(

@@ -2476,45 +2476,100 @@ reduceRefs <- function(A) {
   return(A)
 }
 
-check_online <- function(host = "8.8.8.8", min_success = 1) {
-  # Use ping command to test connectivity (works on Windows, Linux, Mac)
-  ping_cmd <- if (.Platform$OS.type == "windows") {
-    sprintf("ping -n %d %s", min_success, host)
-  } else {
-    sprintf("ping -c %d %s", min_success, host)
-  }
+check_online <- function(
+  host = "8.8.8.8",
+  timeout = 5,
+  # min_success = 1,
+  method = "ping" # method = c("ping", "socket", "http")
+) {
+  method <- match.arg(method)
 
-  result <- suppressWarnings(system(
-    ping_cmd,
-    intern = TRUE,
-    ignore.stderr = TRUE
-  ))
-
-  success <- any(grepl("time=", result, ignore.case = TRUE))
-
-  if (success) {
-    # message("✅ Host is reachable.")
-    # Extract average latency (optional)
-    latency_line <- result[grepl("time=", result)]
-    times <- as.numeric(sub(".*time=([0-9.]+).*", "\\1", latency_line))
-    avg_time <- mean(times, na.rm = TRUE)
-    # message(sprintf("📶 Average latency: %.1f ms", avg_time))
-    if (avg_time < 200) {
-      return(TRUE)
+  if (method == "ping") {
+    # Usa solo il codice di ritorno, non analizza l'output
+    ping_cmd <- if (.Platform$OS.type == "windows") {
+      sprintf("ping -n 1 -w %d %s", timeout * 1000, host)
     } else {
-      return(FALSE)
+      sprintf("ping -c 1 -W %d %s", timeout, host)
     }
-    #return(TRUE)
-  } else {
-    #message(FALSE)
-    return(FALSE)
+    exit_code <- suppressWarnings(system(
+      ping_cmd,
+      ignore.stdout = TRUE,
+      ignore.stderr = TRUE
+    ))
+    return(exit_code == 0)
+  } else if (method == "socket") {
+    # Connessione TCP a DNS Google (porta 53)
+    tryCatch(
+      {
+        con <- socketConnection(
+          host = host,
+          port = 53,
+          blocking = TRUE,
+          open = "r+",
+          timeout = timeout
+        )
+        close(con)
+        return(TRUE)
+      },
+      error = function(e) {
+        return(FALSE)
+      }
+    )
+  } else if (method == "http") {
+    # Richiesta HTTP
+    tryCatch(
+      {
+        con <- url("https://www.google.com", open = "rb")
+        on.exit(close(con))
+        readLines(con, n = 1, warn = FALSE)
+        return(TRUE)
+      },
+      error = function(e) {
+        return(FALSE)
+      }
+    )
   }
 }
+
+# check_online <- function(host = "8.8.8.8", min_success = 1) {
+#   # Use ping command to test connectivity (works on Windows, Linux, Mac)
+#   ping_cmd <- if (.Platform$OS.type == "windows") {
+#     sprintf("ping -n %d %s", min_success, host)
+#   } else {
+#     sprintf("ping -c %d %s", min_success, host)
+#   }
+#
+#   result <- suppressWarnings(system(
+#     ping_cmd,
+#     intern = TRUE,
+#     ignore.stderr = TRUE
+#   ))
+#
+#   success <- any(grepl("time=", result, ignore.case = TRUE))
+#
+#   if (success) {
+#     # message("✅ Host is reachable.")
+#     # Extract average latency (optional)
+#     latency_line <- result[grepl("time=", result)]
+#     times <- as.numeric(sub(".*time=([0-9.]+).*", "\\1", latency_line))
+#     avg_time <- mean(times, na.rm = TRUE)
+#     # message(sprintf("📶 Average latency: %.1f ms", avg_time))
+#     if (avg_time < 200) {
+#       return(TRUE)
+#     } else {
+#       return(FALSE)
+#     }
+#     #return(TRUE)
+#   } else {
+#     #message(FALSE)
+#     return(FALSE)
+#   }
+# }
 
 notifications <- function() {
   ## check connection and download notifications
   #online <- is_online()
-  online <- check_online(host = "www.bibliometrix.org", min_success = 1)
+  online <- check_online(host = "www.bibliometrix.org")
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   notifOnline <- NULL
   if (isTRUE(online)) {

@@ -490,7 +490,7 @@ The function produces an interactive Sankey-like diagram showing
 thematic flows between periods, along with strategic maps for each time
 slice.
 
-```{r fig.height=9, fig.width=9}
+```{r fig.height=7, fig.width=9}
 # Thematic Evolution
 TEResults <- thematicEvolution(M, field = "DE", n = 250, 
                                               minFreq = 5, stemming = FALSE, 

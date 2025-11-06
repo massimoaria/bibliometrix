@@ -82,7 +82,7 @@ assignEvolutionColors <- function(
   nexus,
   threshold = 0.5,
   palette = NULL,
-  use_measure = "inclusion"
+  use_measure = "weighted"
 ) {
   # Prepare data structure
   Nodes <- nexus$Nodes %>%
@@ -374,6 +374,7 @@ assignEvolutionColors <- function(
         by = "name"
       ) %>%
       left_join(newdf, by = "name")
+
     add_colors <- setdiff(palette, substr(clusters$color, 1, 7))
     clusters$color[is.na(clusters$color)] <- paste0(
       add_colors[1:length(which(is.na(clusters$color)))],
@@ -397,7 +398,7 @@ assignEvolutionColors <- function(
       ) %>%
       mutate(
         color = ifelse(is.na(color), "#B3B3B380", color),
-        color = ifelse(color == "#B3B3B340", "#B3B3B380", color)
+        color = ifelse(color_original == "#B3B3B340", "#B3B3B380", color)
       )
 
     # Create a color map

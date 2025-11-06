@@ -8,7 +8,7 @@ assignEvolutionColors(
   nexus,
   threshold = 0.5,
   palette = NULL,
-  use_measure = "inclusion"
+  use_measure = "weighted"
 )
 }
 \arguments{

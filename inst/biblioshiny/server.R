@@ -278,6 +278,15 @@ To ensure the functionality of Biblioshiny,
     updateTabItems(session, "sidebarmenu", "pubmedMenu")
   })
 
+  # Settings button handler
+  observeEvent(
+    input$go_to_settings,
+    {
+      updateTabItems(session, "sidebarmenu", "settings")
+    },
+    ignoreInit = TRUE
+  )
+
   # observeEvent(input$apiApply, {
   #   updateTabItems(session, "sidebarmenu", "gathData")
   # })

@@ -145,6 +145,22 @@ header <- shinydashboardPlus::dashboardHeader(
       icon = fa_i(name = "github")
     )
   ),
+  # Settings Button - uses actionLink to trigger server-side tab change
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      inputId = "go_to_settings",
+      label = NULL,
+      icon = icon("gear", lib = "font-awesome"),
+      style = "background: transparent; 
+               border: none; 
+               color: #fff; 
+               font-size: 20px;  /* Increased from 16px to 20px */
+               margin-top: 7px; 
+               cursor: pointer;",
+      title = "Settings"
+    )
+  ),
   tags$li(
     class = "dropdown",
     tags$style(".main-header .logo {height: 53px}")
@@ -181,6 +197,32 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
         icon = fa_i(name = "book")
       )
     ),
+    tags$div(
+      style = "display: flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px;
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #4FC3F7;
+          letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #4FC3F7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 12px;",
+        icon("magnifying-glass")
+      ),
+      "SEARCH"
+    ),
+
+    # tags$li(
+    #   class = "search-item treeview", # Aggiungi classe personalizzata
+
     menuItem(
       "Data",
       tabName = "uploadData",
@@ -203,11 +245,6 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
           tabName = "pubmedMenu",
           icon = icon("chevron-right", lib = "glyphicon")
         )
-        # ,menuSubItem(
-        #   "PubMed & DS Dimensions",
-        #   tabName = "gathData",
-        #   icon = icon("chevron-right", lib = "glyphicon")
-        # )
       ),
       menuSubItem(
         "Merge Collections",
@@ -221,12 +258,39 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       )
     ),
     menuItemOutput("rest_of_sidebar"),
+    tags$div(
+      style = "display: flex; 
+          align-items: center;
+          font-size: 14px; 
+          font-weight: 600; 
+          color: #FFFFFF; 
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px; 
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #AB47BC;
+          letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #AB47BC; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            margin-right: 10px;
+            font-size: 12px;",
+        icon("file-lines")
+      ),
+      "CONTENT ANALYSIS"
+    ),
     menuItem(
       "Content Analysis",
       tabName = "content_analysis",
       icon = icon("quote-right")
     ),
-    menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
+
+    # Keep Settings menuItem for navigation but hide it with CSS
+    tags$div(
+      style = "display: none;", # Hide the menu item
+      menuItem("Settings", tabName = "settings", icon = icon("gear"))
+    )
   ),
   textOutput("res"),
   width = 300
@@ -240,6 +304,34 @@ data("customTheme", envir = environment())
 body <- dashboardBody(
   customTheme,
   cssTags(), # function containing all the css tags
+  # SAAS sections toggle script
+  #   tags$script(HTML(
+  #     "
+  #   function toggleSection(sectionId) {
+  #     // Seleziona tutti i menuItem con la classe corrispondente
+  #     var items = $('.' + sectionId + '-item');
+  #     var chevron = document.getElementById(sectionId + '-chevron');
+  #
+  #     if (items.is(':visible')) {
+  #       items.slideUp(300);
+  #       chevron.style.transform = 'rotate(-90deg)';
+  #     } else {
+  #       items.slideDown(300);
+  #       chevron.style.transform = 'rotate(0deg)';
+  #     }
+  #   }
+  #
+  #   $(document).ready(function() {
+  #     // Chiudi le altre sezioni all'avvio (opzionale)
+  #     $('.appraisal-item').hide();
+  #     $('#appraisal-chevron').css('transform', 'rotate(-90deg)');
+  #     $('.analysis-item').hide();
+  #     $('#analysis-chevron').css('transform', 'rotate(-90deg)');
+  #     $('.synthesis-item').hide();
+  #     $('#synthesis-chevron').css('transform', 'rotate(-90deg)');
+  #   });
+  # "
+  #   )),
 
   tabItems(
     #### Homepage ----
@@ -2151,6 +2243,20 @@ body <- dashboardBody(
                       color = "#466fc4"
                     )
                   )
+                )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$threeFieldPlot)
+                  ),
+                  column(1)
                 )
               )
             )

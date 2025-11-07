@@ -6033,8 +6033,73 @@ menuList <- function(values) {
 
   L <- list()
 
+  # APPRAISAL
   L[[length(L) + 1]] <-
-    menuItem("Filters", tabName = "filters", icon = fa_i(name = "filter"))
+    tags$div(
+      id = "appraisal-header",
+      style = "display: flex; 
+          align-items: center;
+          justify-content: space-between;
+          font-size: 14px; 
+          font-weight: 600; 
+          color: #FFFFFF; 
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px; 
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #66BB6A;
+          letter-spacing: 0.8px;
+          cursor: pointer;",
+      onclick = "toggleSection('appraisal')",
+      tags$div(
+        style = "display: flex; align-items: center;",
+        tags$span(
+          style = "background: #66BB6A; 
+              padding: 4px 8px; 
+              border-radius: 4px; 
+              margin-right: 10px;
+              font-size: 12px;",
+          icon("filter")
+        ),
+        "APPRAISAL"
+      ),
+      tags$i(
+        id = "appraisal-chevron",
+        class = "fa fa-chevron-down",
+        style = "transition: transform 0.3s; font-size: 12px;"
+      )
+    )
+
+  L[[length(L) + 1]] <-
+    tags$li(
+      class = "appraisal-item treeview",
+      menuItem("Filters", tabName = "filters", icon = fa_i(name = "filter"))
+    )
+
+  # ANALYSIS
+  L[[length(L) + 1]] <-
+    tags$div(
+      style = "display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #FFFFFF;
+        background: rgba(255,255,255,0.1);
+        padding: 10px 10px;
+        margin: 15px 8px 8px 8px;
+        border-radius: 6px;
+        border-left: 3px solid #FFA726;
+        letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #FFA726;
+          padding: 4px 8px;
+          border-radius: 4px;
+          margin-right: 10px;
+          font-size: 12px;",
+        icon("chart-line")
+      ),
+      "ANALYSIS"
+    )
 
   L[[length(L) + 1]] <-
     menuItem(
@@ -6271,6 +6336,31 @@ menuList <- function(values) {
 
   L[[length(L) + 1]] <- DOC
 
+  # SYNTHESIS
+  L[[length(L) + 1]] <-
+    tags$div(
+      style = "display: flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px;
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #EC407A;
+          letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #EC407A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 12px;",
+        icon("project-diagram")
+      ),
+      "SYNTHESIS"
+    )
+
   L[[length(L) + 1]] <-
     menuItem(
       "Clustering",
@@ -6356,7 +6446,14 @@ menuList <- function(values) {
       }
     )
 
-  # L[[length(L) + 1]] <-
+  # L[[length(L) + 1]] <- tags$hr(
+  #   style = "border: 0;
+  #                border-top: 1px solid rgba(255,255,255,0.15);
+  #                margin: 15px 15px 10px 15px;"
+  # )
+
+  L[[length(L) + 1]] <- tags$div(style = "margin-top: 20px;")
+
   #   menuItem("Content Analysis",
   #                        tabName = "content_analysis",
   #                        icon = icon("quote-right"))

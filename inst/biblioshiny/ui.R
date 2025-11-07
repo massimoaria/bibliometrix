@@ -167,11 +167,64 @@ header <- shinydashboardPlus::dashboardHeader(
   )
 )
 
-## Side Bar ----
+## New Sidebar ----
 sidebar <- shinydashboardPlus::dashboardSidebar(
+  width = 300,
   useShinyjs(),
+
+  # JavaScript to add IDs and hide menu items on load
+  tags$script(HTML(
+    "
+    $(document).ready(function() {
+      // Wait for Shiny to finish rendering
+      setTimeout(function() {
+        // Function to find and add ID to menu item by text
+        function addIdToMenuItem(text, id) {
+          $('.sidebar-menu > li.treeview').each(function() {
+            var menuText = $(this).find('> a > span').first().text().trim();
+            if (menuText === text) {
+              $(this).attr('id', id);
+              $(this).hide(); // Hide initially
+            }
+          });
+        }
+        
+        // Function to add ID to simple menu items (non-treeview)
+        function addIdToSimpleMenuItem(text, id) {
+          $('.sidebar-menu > li:not(.treeview)').each(function() {
+            var menuText = $(this).find('> a > span').text().trim();
+            if (menuText === text) {
+              $(this).attr('id', id);
+              $(this).hide(); // Hide initially
+            }
+          });
+        }
+        
+        // Add IDs to menu items and hide them
+        addIdToSimpleMenuItem('Filters', 'menu-filters');
+        addIdToMenuItem('Overview', 'menu-overview');
+        addIdToMenuItem('Sources', 'menu-sources');
+        addIdToMenuItem('Authors', 'menu-authors');
+        addIdToMenuItem('Documents', 'menu-documents');
+        addIdToMenuItem('Clustering', 'menu-clustering');
+        addIdToMenuItem('Conceptual Structure', 'menu-conceptual');
+        addIdToMenuItem('Intellectual Structure', 'menu-intellectual');
+        addIdToMenuItem('Social Structure', 'menu-social');
+        addIdToSimpleMenuItem('Report', 'menu-report');
+        addIdToSimpleMenuItem('TALL Export', 'menu-tall');
+        
+        // NOTE: Section headers are NOT hidden - they stay visible
+        
+        console.log('Menu items hidden on initialization');
+      }, 100);
+    });
+  "
+  )),
+
   sidebarMenu(
     id = "sidebarmenu",
+
+    # Always visible menu items
     menuItem(
       "biblioshiny",
       tabName = "biblioshinyy",
@@ -197,6 +250,8 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
         icon = fa_i(name = "book")
       )
     ),
+
+    ### SEARCH SECTION ----
     tags$div(
       style = "display: flex;
           align-items: center;
@@ -219,9 +274,6 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       ),
       "SEARCH"
     ),
-
-    # tags$li(
-    #   class = "search-item treeview", # Aggiungi classe personalizzata
 
     menuItem(
       "Data",
@@ -257,10 +309,15 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
         icon = icon("chevron-right", lib = "glyphicon")
       )
     ),
-    menuItemOutput("rest_of_sidebar"),
+
+    # === SECTION HEADERS (VISIBLE) + MENU ITEMS (HIDDEN) === #
+
+    # APPRAISAL SECTION HEADER (always visible) ----
     tags$div(
-      style = "display: flex; 
+      id = "appraisal-header",
+      style = "display: flex;
           align-items: center;
+          justify-content: space-between;
           font-size: 14px; 
           font-weight: 600; 
           color: #FFFFFF; 
@@ -268,14 +325,386 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
           padding: 10px 10px; 
           margin: 15px 8px 8px 8px;
           border-radius: 6px;
-          border-left: 3px solid #AB47BC;
+          border-left: 3px solid #66BB6A;
+          letter-spacing: 0.8px;",
+      tags$div(
+        style = "display: flex; align-items: center;",
+        tags$span(
+          style = "background: #66BB6A; 
+              padding: 4px 8px; 
+              border-radius: 4px; 
+              margin-right: 10px;
+              font-size: 12px;",
+          icon("filter")
+        ),
+        "APPRAISAL"
+      )
+    ),
+
+    # Filters - will get ID 'menu-filters' via JavaScript (hidden initially)
+    menuItem(
+      "Filters",
+      tabName = "filters",
+      icon = fa_i(name = "filter")
+    ),
+
+    # ANALYSIS SECTION HEADER (always visible) ----
+    tags$div(
+      id = "analysis-header",
+      style = "display: flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px;
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #FFA726;
           letter-spacing: 0.8px;",
       tags$span(
-        style = "background: #AB47BC; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
+        style = "background: #FFA726;
+            padding: 4px 8px;
+            border-radius: 4px;
             margin-right: 10px;
             font-size: 12px;",
+        icon("chart-line")
+      ),
+      "ANALYSIS"
+    ),
+
+    # Overview - will get ID 'menu-overview' via JavaScript (hidden initially)
+    menuItem(
+      "Overview",
+      tabName = "overview",
+      icon = fa_i(name = "table"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Main Information",
+        tabName = "mainInfo",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Annual Scientific Production",
+        tabName = "annualScPr",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Average Citations per Year",
+        tabName = "averageCitPerYear",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Life Cycle",
+        tabName = "lifeCycle",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Three-Field Plot",
+        tabName = "threeFieldPlot",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Sources - will get ID 'menu-sources' via JavaScript (hidden initially)
+    menuItem(
+      "Sources",
+      tabName = "sources",
+      icon = fa_i(name = "book"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Most Relevant Sources",
+        tabName = "relevantSources",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Most Local Cited Sources",
+        tabName = "localCitedSources",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Bradford's Law",
+        tabName = "bradford",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Sources' Local Impact",
+        tabName = "sourceImpact",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Sources' Production over Time",
+        tabName = "sourceDynamics",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Authors - will get ID 'menu-authors' via JavaScript (hidden initially)
+    menuItem(
+      "Authors",
+      tabName = "authors",
+      icon = fa_i(name = "user"),
+      startExpanded = FALSE,
+      "Authors",
+      menuSubItem(
+        "Author Profile",
+        tabName = "AuthorPage",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Most Relevant Authors",
+        tabName = "mostRelAuthors",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Most Local Cited Authors",
+        tabName = "mostLocalCitedAuthors",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Authors' Production over Time",
+        tabName = "authorsProdOverTime",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Lotka's Law",
+        tabName = "lotka",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Authors' Local Impact",
+        tabName = "authorImpact",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      "Affiliations",
+      menuSubItem(
+        "Most Relevant Affiliations",
+        tabName = "mostRelAffiliations",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Affiliations' Production over Time",
+        tabName = "AffOverTime",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      "Countries",
+      menuSubItem(
+        "Corresponding Author's Countries",
+        tabName = "correspAuthorCountry",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Countries' Scientific Production",
+        tabName = "countryScientProd",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Countries' Production over Time",
+        tabName = "COOverTime",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Most Cited Countries",
+        tabName = "mostCitedCountries",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Documents - will get ID 'menu-documents' via JavaScript (hidden initially)
+    menuItem(
+      "Documents",
+      tabName = "documents",
+      icon = fa_i(name = "layer-group"),
+      startExpanded = FALSE,
+      "Documents",
+      menuSubItem(
+        "Most Global Cited Documents",
+        tabName = "mostGlobalCitDoc",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Most Local Cited Documents",
+        tabName = "mostLocalCitDoc",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      "Cited References",
+      menuSubItem(
+        "Most Local Cited References",
+        tabName = "mostLocalCitRef",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "References Spectroscopy",
+        tabName = "ReferenceSpect",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      "Words",
+      menuSubItem(
+        "Most Frequent Words",
+        tabName = "mostFreqWords",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "WordCloud",
+        tabName = "wcloud",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "TreeMap",
+        tabName = "treemap",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Words' Frequency over Time",
+        tabName = "wordDynamics",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Trend Topics",
+        tabName = "trendTopic",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # SYNTHESIS SECTION HEADER (always visible) ----
+    tags$div(
+      id = "synthesis-header",
+      style = "display: flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px;
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #EC407A;
+          letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #EC407A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 12px;",
+        icon("project-diagram")
+      ),
+      "SYNTHESIS"
+    ),
+
+    # Clustering - will get ID 'menu-clustering' via JavaScript (hidden initially)
+    menuItem(
+      "Clustering",
+      tabName = "clustering",
+      icon = fa_i(name = "spinner"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Clustering by Coupling",
+        tabName = "coupling",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Conceptual Structure - will get ID 'menu-conceptual' via JavaScript (hidden initially)
+    menuItem(
+      "Conceptual Structure",
+      tabName = "concepStructure",
+      icon = fa_i(name = "spell-check"),
+      startExpanded = FALSE,
+      "Network Approach",
+      menuSubItem(
+        "Co-occurence Network",
+        tabName = "coOccurenceNetwork",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Thematic Map",
+        tabName = "thematicMap",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Thematic Evolution",
+        tabName = "thematicEvolution",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      "Factorial Approach",
+      menuSubItem(
+        "Factorial Analysis",
+        tabName = "factorialAnalysis",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Intellectual Structure - will get ID 'menu-intellectual' via JavaScript (hidden initially)
+    menuItem(
+      "Intellectual Structure",
+      tabName = "intStruct",
+      icon = fa_i(name = "gem"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Co-citation Network",
+        tabName = "coCitationNetwork",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Historiograph",
+        tabName = "historiograph",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Social Structure - will get ID 'menu-social' via JavaScript (hidden initially)
+    menuItem(
+      "Social Structure",
+      tabName = "socialStruct",
+      icon = fa_i("users"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Collaboration Network",
+        tabName = "collabNetwork",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Countries' Collaboration World Map",
+        tabName = "collabWorldMap",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    tags$div(style = "margin-top: 20px;"),
+
+    # Report - will get ID 'menu-report' via JavaScript (hidden initially)
+    menuItem(
+      "Report",
+      tabName = "report",
+      icon = fa_i(name = "list-alt")
+    ),
+
+    # TALL Export - will get ID 'menu-tall' via JavaScript (hidden initially)
+    menuItem(
+      "TALL Export",
+      tabName = "tall",
+      icon = icon("text-size", lib = "glyphicon")
+    ),
+
+    # CONTENT ANALYSIS (always visible) ----
+    tags$div(
+      style = "display: flex;
+              align-items: center;
+              font-size: 14px;
+              font-weight: 600;
+              color: #FFFFFF;
+              background: rgba(255,255,255,0.1);
+              padding: 10px 10px;
+              margin: 15px 8px 8px 8px;
+              border-radius: 6px;
+              border-left: 3px solid #AB47BC;
+              letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #AB47BC;
+                padding: 4px 8px;
+                border-radius: 4px;
+                margin-right: 10px;
+                font-size: 12px;",
         icon("file-lines")
       ),
       "CONTENT ANALYSIS"
@@ -286,14 +715,12 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       icon = icon("quote-right")
     ),
 
-    # Keep Settings menuItem for navigation but hide it with CSS
+    # SETTINGS menu item (hidden) ----
     tags$div(
-      style = "display: none;", # Hide the menu item
+      style = "display: none;",
       menuItem("Settings", tabName = "settings", icon = icon("gear"))
     )
-  ),
-  textOutput("res"),
-  width = 300
+  )
 )
 
 ## Body ####
@@ -304,35 +731,6 @@ data("customTheme", envir = environment())
 body <- dashboardBody(
   customTheme,
   cssTags(), # function containing all the css tags
-  # SAAS sections toggle script
-  #   tags$script(HTML(
-  #     "
-  #   function toggleSection(sectionId) {
-  #     // Seleziona tutti i menuItem con la classe corrispondente
-  #     var items = $('.' + sectionId + '-item');
-  #     var chevron = document.getElementById(sectionId + '-chevron');
-  #
-  #     if (items.is(':visible')) {
-  #       items.slideUp(300);
-  #       chevron.style.transform = 'rotate(-90deg)';
-  #     } else {
-  #       items.slideDown(300);
-  #       chevron.style.transform = 'rotate(0deg)';
-  #     }
-  #   }
-  #
-  #   $(document).ready(function() {
-  #     // Chiudi le altre sezioni all'avvio (opzionale)
-  #     $('.appraisal-item').hide();
-  #     $('#appraisal-chevron').css('transform', 'rotate(-90deg)');
-  #     $('.analysis-item').hide();
-  #     $('#analysis-chevron').css('transform', 'rotate(-90deg)');
-  #     $('.synthesis-item').hide();
-  #     $('#synthesis-chevron').css('transform', 'rotate(-90deg)');
-  #   });
-  # "
-  #   )),
-
   tabItems(
     #### Homepage ----
     ##### home ----

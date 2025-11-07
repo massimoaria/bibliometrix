@@ -5998,261 +5998,479 @@ overlayPlotly <- function(VIS) {
 }
 
 
-# MENU VISIBILITY MANAGEMENT ----
-# This function updates visibility of submenu items based on metadata availability
-updateMenuVisibility <- function(session, values) {
-  # Extract metadata availability flags
-  TC <- !("TC" %in% values$missTags)
-  MLCS <- MLCA <- ("ISI" %in% values$M$DB[1] & !"CR" %in% values$missTags)
-  ISI <- ("ISI" %in% values$M$DB[1])
-  AFF <- !("C1" %in% values$missTags)
-  CR <- !("CR" %in% values$missTags)
-  MCC <- (!"TC" %in% values$missTags & !"C1" %in% values$missTags)
-  DB_CR <- (sum(c("SCOPUS", "ISI") %in% values$M$DB[1]) > 0)
-  DB_TC <- (sum(c("SCOPUS", "ISI", "OPENALEX", "LENS") %in% values$M$DB[1]) > 0)
-
-  # Build JavaScript code to show/hide submenu items based on metadata
-  js_code <- "
-    // Helper function to find submenu item by text within a parent
-    function findSubmenuItem(parentText, itemText) {
-      var parent = null;
-      $('.sidebar-menu > .treeview').each(function() {
-        if ($(this).find('> a > span').first().text().trim() === parentText) {
-          parent = $(this);
-          return false;
-        }
-      });
-      
-      if (parent) {
-        var found = null;
-        parent.find('ul.treeview-menu > li').each(function() {
-          var text = $(this).find('a span').first().text().trim();
-          if (text === itemText) {
-            found = $(this);
-            return false;
-          }
-        });
-        return found;
-      }
-      return null;
-    }
-    
-    // Helper function to find section header (text-only li)
-    function findSectionHeader(parentText, headerText) {
-      var parent = null;
-      $('.sidebar-menu > .treeview').each(function() {
-        if ($(this).find('> a > span').first().text().trim() === parentText) {
-          parent = $(this);
-          return false;
-        }
-      });
-      
-      if (parent) {
-        var found = null;
-        parent.find('ul.treeview-menu > li').each(function() {
-          if ($(this).children('a').length === 0 && $(this).text().trim() === headerText) {
-            found = $(this);
-            return false;
-          }
-        });
-        return found;
-      }
-      return null;
-    }
-  "
-
-  # Add conditional visibility for Sources submenu items
-  if (MLCS) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Sources', 'Most Local Cited Sources')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Sources', 'Most Local Cited Sources')?.hide();"
-    )
+menuList <- function(values) {
+  TC <- ISI <- MLCS <- MLCA <- AFF <- MCC <- DB_TC <- DB_CR <- CR <- FALSE
+  if (!"TC" %in% values$missTags) {
+    TC <- TRUE
+  }
+  if ("ISI" %in% values$M$DB[1] & !"CR" %in% values$missTags) {
+    MLCS <- TRUE
+  }
+  if ("ISI" %in% values$M$DB[1] & !"CR" %in% values$missTags) {
+    MLCA <- TRUE
+  }
+  if ("ISI" %in% values$M$DB[1]) {
+    ISI <- TRUE
+  }
+  if (!"C1" %in% values$missTags) {
+    AFF <- TRUE
+  }
+  if (!"CR" %in% values$missTags) {
+    CR <- TRUE
+  }
+  if (!"TC" %in% values$missTags & !"C1" %in% values$missTags) {
+    MCC <- TRUE
+  }
+  if (sum(c("SCOPUS", "ISI") %in% values$M$DB[1]) > 0) {
+    DB_CR <- TRUE
+  }
+  if (sum(c("SCOPUS", "ISI", "OPENALEX", "LENS") %in% values$M$DB[1]) > 0) {
+    DB_TC <- TRUE
   }
 
-  if (TC) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Sources', 'Sources\\' Local Impact')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Sources', 'Sources\\' Local Impact')?.hide();"
-    )
-  }
+  # out <- list(TC,ISI,MLCS,AFF,MCC,DB_TC,DB_CR,CR)
+  out <- NULL
 
-  # Add conditional visibility for Authors submenu items
-  if (MLCA) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Authors', 'Most Local Cited Authors')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Authors', 'Most Local Cited Authors')?.hide();"
-    )
-  }
+  L <- list()
 
-  if (TC) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Authors', 'Authors\\' Local Impact')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Authors', 'Authors\\' Local Impact')?.hide();"
-    )
-  }
-
-  # Affiliations section
-  if (AFF) {
-    js_code <- paste0(
-      js_code,
-      "
-    findSectionHeader('Authors', 'Affiliations')?.show();
-    findSubmenuItem('Authors', 'Most Relevant Affiliations')?.show();
-    findSubmenuItem('Authors', 'Affiliations\\' Production over Time')?.show();
-    findSectionHeader('Authors', 'Countries')?.show();
-    findSubmenuItem('Authors', 'Corresponding Author\\'s Countries')?.show();
-    findSubmenuItem('Authors', 'Countries\\' Scientific Production')?.show();
-    findSubmenuItem('Authors', 'Countries\\' Production over Time')?.show();
-    "
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "
-    findSectionHeader('Authors', 'Affiliations')?.hide();
-    findSubmenuItem('Authors', 'Most Relevant Affiliations')?.hide();
-    findSubmenuItem('Authors', 'Affiliations\\' Production over Time')?.hide();
-    findSectionHeader('Authors', 'Countries')?.hide();
-    findSubmenuItem('Authors', 'Corresponding Author\\'s Countries')?.hide();
-    findSubmenuItem('Authors', 'Countries\\' Scientific Production')?.hide();
-    findSubmenuItem('Authors', 'Countries\\' Production over Time')?.hide();
-    "
-    )
-  }
-
-  if (MCC) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Authors', 'Most Cited Countries')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Authors', 'Most Cited Countries')?.hide();"
-    )
-  }
-
-  # Documents submenu items
-  if (TC) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Documents', 'Most Global Cited Documents')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Documents', 'Most Global Cited Documents')?.hide();"
-    )
-  }
-
-  if (DB_TC && CR && TC) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Documents', 'Most Local Cited Documents')?.show();"
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Documents', 'Most Local Cited Documents')?.hide();"
-    )
-  }
-
-  # Cited References section
-  if (DB_CR) {
-    js_code <- paste0(
-      js_code,
-      "
-    findSectionHeader('Documents', 'Cited References')?.show();
-    findSubmenuItem('Documents', 'Most Local Cited References')?.show();
-    findSubmenuItem('Documents', 'References Spectroscopy')?.show();
-    "
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "
-    findSectionHeader('Documents', 'Cited References')?.hide();
-    findSubmenuItem('Documents', 'Most Local Cited References')?.hide();
-    findSubmenuItem('Documents', 'References Spectroscopy')?.hide();
-    "
-    )
-  }
-
-  # Intellectual Structure - hide entire menu if no CR
-  if (!CR) {
-    js_code <- paste0(
-      js_code,
-      "
-    $('.sidebar-menu .treeview').each(function() {
-      if ($(this).find('> a > span').first().text().trim() === 'Intellectual Structure') {
-        $(this).hide();
-      }
-    });
-    "
-    )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "
-    $('.sidebar-menu .treeview').each(function() {
-      if ($(this).find('> a > span').first().text().trim() === 'Intellectual Structure') {
-        $(this).show();
-      }
-    });
-    "
-    )
-
-    if (DB_TC && CR) {
-      js_code <- paste0(
-        js_code,
-        "\nfindSubmenuItem('Intellectual Structure', 'Historiograph')?.show();"
+  # APPRAISAL
+  L[[length(L) + 1]] <-
+    tags$div(
+      id = "appraisal-header",
+      style = "display: flex; 
+          align-items: center;
+          justify-content: space-between;
+          font-size: 14px; 
+          font-weight: 600; 
+          color: #FFFFFF; 
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px; 
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #66BB6A;
+          letter-spacing: 0.8px;
+          cursor: pointer;",
+      onclick = "toggleSection('appraisal')",
+      tags$div(
+        style = "display: flex; align-items: center;",
+        tags$span(
+          style = "background: #66BB6A; 
+              padding: 4px 8px; 
+              border-radius: 4px; 
+              margin-right: 10px;
+              font-size: 12px;",
+          icon("filter")
+        ),
+        "APPRAISAL"
+      ),
+      tags$i(
+        id = "appraisal-chevron",
+        class = "fa fa-chevron-down",
+        style = "transition: transform 0.3s; font-size: 12px;"
       )
-    } else {
-      js_code <- paste0(
-        js_code,
-        "\nfindSubmenuItem('Intellectual Structure', 'Historiograph')?.hide();"
+    )
+
+  L[[length(L) + 1]] <-
+    tags$li(
+      class = "appraisal-item treeview",
+      menuItem("Filters", tabName = "filters", icon = fa_i(name = "filter"))
+    )
+
+  # ANALYSIS
+  L[[length(L) + 1]] <-
+    tags$div(
+      style = "display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #FFFFFF;
+        background: rgba(255,255,255,0.1);
+        padding: 10px 10px;
+        margin: 15px 8px 8px 8px;
+        border-radius: 6px;
+        border-left: 3px solid #FFA726;
+        letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #FFA726;
+          padding: 4px 8px;
+          border-radius: 4px;
+          margin-right: 10px;
+          font-size: 12px;",
+        icon("chart-line")
+      ),
+      "ANALYSIS"
+    )
+
+  L[[length(L) + 1]] <-
+    menuItem(
+      "Overview",
+      tabName = "overview",
+      icon = fa_i(name = "table"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Main Information",
+        tabName = "mainInfo",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Annual Scientific Production",
+        tabName = "annualScPr",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      if (isTRUE(TC)) {
+        menuSubItem(
+          "Average Citations per Year",
+          tabName = "averageCitPerYear",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      menuSubItem(
+        "Life Cycle",
+        tabName = "lifeCycle",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Three-Field Plot",
+        tabName = "threeFieldPlot",
+        icon = icon("chevron-right", lib = "glyphicon")
       )
-    }
+    )
+
+  L[[length(L) + 1]] <-
+    menuItem(
+      "Sources",
+      tabName = "sources",
+      icon = fa_i(name = "book"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Most Relevant Sources",
+        tabName = "relevantSources",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      if (isTRUE(MLCS)) {
+        menuSubItem(
+          "Most Local Cited Sources",
+          tabName = "localCitedSources",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      menuSubItem(
+        "Bradford's Law",
+        tabName = "bradford",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      if (isTRUE(TC)) {
+        menuSubItem(
+          "Sources' Local Impact",
+          tabName = "sourceImpact",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      menuSubItem(
+        "Sources' Production over Time",
+        tabName = "sourceDynamics",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    )
+
+  AU <-
+    menuItem(
+      "Authors",
+      tabName = "authors",
+      icon = fa_i(name = "user"),
+      startExpanded = FALSE,
+      "Authors",
+      menuSubItem(
+        "Author Profile",
+        tabName = "AuthorPage",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Most Relevant Authors",
+        tabName = "mostRelAuthors",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      if (isTRUE(MLCA)) {
+        menuSubItem(
+          "Most Local Cited Authors",
+          tabName = "mostLocalCitedAuthors",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      menuSubItem(
+        "Authors' Production over Time",
+        tabName = "authorsProdOverTime",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Lotka's Law",
+        tabName = "lotka",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      if (isTRUE(TC)) {
+        menuSubItem(
+          "Authors' Local Impact",
+          tabName = "authorImpact",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(AFF)) {
+        "Affiliations"
+      },
+      if (isTRUE(AFF)) {
+        menuSubItem(
+          "Most Relevant Affiliations",
+          tabName = "mostRelAffiliations",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(AFF)) {
+        menuSubItem(
+          "Affiliations' Production over Time",
+          tabName = "AffOverTime",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(AFF)) {
+        "Countries"
+      },
+      if (isTRUE(AFF)) {
+        menuSubItem(
+          "Corresponding Author's Countries",
+          tabName = "correspAuthorCountry",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(AFF)) {
+        menuSubItem(
+          "Countries' Scientific Production",
+          tabName = "countryScientProd",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(AFF)) {
+        menuSubItem(
+          "Countries' Production over Time",
+          tabName = "COOverTime",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(MCC)) {
+        menuSubItem(
+          "Most Cited Countries",
+          tabName = "mostCitedCountries",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      }
+    )
+
+  L[[length(L) + 1]] <- AU
+
+  DOC <-
+    menuItem(
+      "Documents",
+      tabName = "documents",
+      icon = fa_i(name = "layer-group"),
+      startExpanded = FALSE,
+      if (isTRUE(TC) | isTRUE(DB_TC)) {
+        "Documents"
+      },
+      if (isTRUE(TC)) {
+        menuSubItem(
+          "Most Global Cited Documents",
+          tabName = "mostGlobalCitDoc",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(DB_TC) & isTRUE(CR) & isTRUE(TC)) {
+        menuSubItem(
+          "Most Local Cited Documents",
+          tabName = "mostLocalCitDoc",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(DB_CR)) {
+        "Cited References"
+      },
+      if (isTRUE(DB_CR)) {
+        menuSubItem(
+          "Most Local Cited References",
+          tabName = "mostLocalCitRef",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      if (isTRUE(DB_CR)) {
+        menuSubItem(
+          "References Spectroscopy",
+          tabName = "ReferenceSpect",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      },
+      "Words",
+      menuSubItem(
+        "Most Frequent Words",
+        tabName = "mostFreqWords",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "WordCloud",
+        tabName = "wcloud",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "TreeMap",
+        tabName = "treemap",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Words' Frequency over Time",
+        tabName = "wordDynamics",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Trend Topics",
+        tabName = "trendTopic",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    )
+
+  L[[length(L) + 1]] <- DOC
+
+  # SYNTHESIS
+  L[[length(L) + 1]] <-
+    tags$div(
+      style = "display: flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: rgba(255,255,255,0.1);
+          padding: 10px 10px;
+          margin: 15px 8px 8px 8px;
+          border-radius: 6px;
+          border-left: 3px solid #EC407A;
+          letter-spacing: 0.8px;",
+      tags$span(
+        style = "background: #EC407A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 12px;",
+        icon("project-diagram")
+      ),
+      "SYNTHESIS"
+    )
+
+  L[[length(L) + 1]] <-
+    menuItem(
+      "Clustering",
+      tabName = "clustering",
+      icon = fa_i(name = "spinner"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Clustering by Coupling",
+        tabName = "coupling",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    )
+
+  L[[length(L) + 1]] <-
+    menuItem(
+      "Conceptual Structure",
+      tabName = "concepStructure",
+      icon = fa_i(name = "spell-check"),
+      startExpanded = FALSE,
+      "Network Approach",
+      menuSubItem(
+        "Co-occurence Network",
+        tabName = "coOccurenceNetwork",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Thematic Map",
+        tabName = "thematicMap",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Thematic Evolution",
+        tabName = "thematicEvolution",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      "Factorial Approach",
+      menuSubItem(
+        "Factorial Analysis",
+        tabName = "factorialAnalysis",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    )
+
+  if (!"CR" %in% values$missTags) {
+    L[[length(L) + 1]] <-
+      menuItem(
+        "Intellectual Structure",
+        tabName = "intStruct",
+        icon = fa_i(name = "gem"),
+        startExpanded = FALSE,
+        menuSubItem(
+          "Co-citation Network",
+          tabName = "coCitationNetwork",
+          icon = icon("chevron-right", lib = "glyphicon")
+        ),
+        if (isTRUE(DB_TC) & isTRUE(CR)) {
+          menuSubItem(
+            "Historiograph",
+            tabName = "historiograph",
+            icon = icon("chevron-right", lib = "glyphicon")
+          )
+        }
+      )
   }
 
-  # Social Structure
-  if (AFF) {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Social Structure', 'Countries\\' Collaboration World Map')?.show();"
+  L[[length(L) + 1]] <-
+    menuItem(
+      "Social Structure",
+      tabName = "socialStruct",
+      icon = fa_i("users"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Collaboration Network",
+        tabName = "collabNetwork",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      if (isTRUE(AFF)) {
+        menuSubItem(
+          "Countries' Collaboration World Map",
+          tabName = "collabWorldMap",
+          icon = icon("chevron-right", lib = "glyphicon")
+        )
+      }
     )
-  } else {
-    js_code <- paste0(
-      js_code,
-      "\nfindSubmenuItem('Social Structure', 'Countries\\' Collaboration World Map')?.hide();"
-    )
-  }
 
-  # Execute the JavaScript code
-  shinyjs::runjs(js_code)
+  # L[[length(L) + 1]] <- tags$hr(
+  #   style = "border: 0;
+  #                border-top: 1px solid rgba(255,255,255,0.15);
+  #                margin: 15px 15px 10px 15px;"
+  # )
 
-  # Update list of disabled menu items for navigation control
-  out <- character(0)
+  L[[length(L) + 1]] <- tags$div(style = "margin-top: 20px;")
+
+  #   menuItem("Content Analysis",
+  #                        tabName = "content_analysis",
+  #                        icon = icon("quote-right"))
+
+  L[[length(L) + 1]] <- menuItem(
+    "Report",
+    tabName = "report",
+    icon = fa_i(name = "list-alt")
+  )
+
+  L[[length(L) + 1]] <- menuItem(
+    "TALL Export",
+    tabName = "tall",
+    icon = icon("text-size", lib = "glyphicon")
+  )
+
+  # L[[length(L) + 1]] <- menuItem("Settings", tabName = "settings", icon = fa_i(name = "sliders"))
 
   if (!isTRUE(TC)) {
     out <- c(
@@ -6297,7 +6515,10 @@ updateMenuVisibility <- function(session, values) {
   }
 
   values$out <- out
+
+  return(L)
 }
+
 
 # find home folder
 homeFolder <- function() {

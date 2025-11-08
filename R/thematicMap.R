@@ -84,9 +84,10 @@ utils::globalVariables(c(
 #' @examples
 #'
 #' \dontrun{
-#' data(scientometrics, package = "bibliometrixData")
-#' res <- thematicMap(scientometrics, field = "ID", n = 250, minfreq = 5, size = 0.5, repel = TRUE)
+#' data(management, package = "bibliometrixData")
+#' res <- thematicMap(management, field = "ID", n = 250, minfreq = 5, size = 0.5, repel = TRUE)
 #' plot(res$map)
+#' plot(res$net$graph)
 #' }
 #'
 #' @seealso \code{\link{biblioNetwork}} function to compute a bibliographic network.

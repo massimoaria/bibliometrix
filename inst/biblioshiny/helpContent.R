@@ -1461,6 +1461,96 @@ helpContent <- function() {
   </div>
   </body>"
 
+  ## Three Field Plot ----
+  threeFieldPlot <-
+    "<body>
+    <div class='container'>
+    <h3>🔀 Three-Field Plot</h3>
+    
+    <p>The <strong>Three-Field Plot</strong> is an advanced visualization tool that reveals the relationships among three distinct bibliographic dimensions through an interactive <strong>Sankey diagram</strong>. This plot enables researchers to explore the complex connections between different metadata fields, making it particularly useful for understanding how research topics, authors, sources, and references are interconnected within a scientific domain.</p>
+    
+    <h4>🎯 Purpose and Application</h4>
+    <p>The Three-Field Plot serves multiple analytical purposes:</p>
+    <ul>
+      <li><strong>Relationship Mapping:</strong> Visualizes how elements from three different bibliographic fields are associated with each other</li>
+      <li><strong>Knowledge Flow:</strong> Tracks the flow of ideas and citations across different dimensions (e.g., from cited references through authors to keywords)</li>
+      <li><strong>Thematic Connections:</strong> Identifies which keywords or topics are most strongly associated with specific authors or sources</li>
+      <li><strong>Author-Topic Associations:</strong> Shows which authors are working on which topics and citing which foundational works</li>
+    </ul>
+    
+    <h4>📊 How It Works</h4>
+    <p>The visualization consists of three vertical columns representing different bibliographic fields:</p>
+    <ul>
+      <li><strong>Left Field:</strong> Typically represents sources (cited references, journals) or temporal information</li>
+      <li><strong>Middle Field:</strong> Usually displays authors or intermediary elements that connect the other two fields</li>
+      <li><strong>Right Field:</strong> Often shows keywords, topics, or other thematic elements</li>
+    </ul>
+    
+    <p>The width of each flow (colored band) is proportional to the frequency of co-occurrence between elements. Thicker flows indicate stronger associations, while thinner ones represent weaker connections.</p>
+    
+    <h4>⚙️ Configuration Options</h4>
+    <p>The <strong>Options</strong> panel allows you to customize the plot:</p>
+    <ul>
+      <li><strong>Left Field:</strong> Select from available metadata fields (e.g., Cited References, Sources, Authors' Countries)</li>
+      <li><strong>Middle Field:</strong> Choose the central connecting field (e.g., Authors, Sources, Keywords)</li>
+      <li><strong>Right Field:</strong> Define the destination field (e.g., Author's Keywords, Keywords Plus, Subject Categories)</li>
+      <li><strong>Number of Items:</strong> Control how many top elements to display for each field (typically 10-30 items per field)</li>
+    </ul>
+    
+    <h4>💡 Common Field Combinations</h4>
+    <p>Some particularly insightful field combinations include:</p>
+    <ul>
+      <li><strong>References → Authors → Keywords:</strong> Shows which foundational works are cited by which authors working on which topics</li>
+      <li><strong>Sources → Authors → Countries:</strong> Maps the geographical distribution of authors publishing in specific journals</li>
+      <li><strong>Keywords → Authors → Cited References:</strong> Reveals the intellectual foundations of different research themes</li>
+      <li><strong>Authors' Countries → Authors → Keywords:</strong> Identifies national research specializations and thematic focuses</li>
+      <li><strong>Publication Year → Authors → Keywords:</strong> Tracks temporal evolution of author productivity and topic emergence</li>
+    </ul>
+    
+    <h4>🔍 Interpretation Guidelines</h4>
+    <ul>
+      <li><strong>Flow Thickness:</strong> A thick flow between two elements indicates a strong association (high co-occurrence frequency)</li>
+      <li><strong>Multiple Connections:</strong> Elements with many outgoing or incoming flows are central nodes in the network</li>
+      <li><strong>Isolated Flows:</strong> Thin, isolated connections may represent niche specializations or emerging topics</li>
+      <li><strong>Color Coding:</strong> Colors help distinguish different elements in the left field, making it easier to trace specific flows</li>
+      <li><strong>Cross-field Patterns:</strong> Look for patterns where multiple elements from one field connect to the same element in another field, indicating convergence or interdisciplinarity</li>
+    </ul>
+    
+    <h4>📌 Best Practices</h4>
+    <ul>
+      <li><strong>Start Simple:</strong> Begin with a small number of items (10-15 per field) to avoid visual clutter, then increase if needed</li>
+      <li><strong>Logical Sequences:</strong> Arrange fields in a logical flow (e.g., past → present, source → output, context → content)</li>
+      <li><strong>Interactive Exploration:</strong> Hover over flows and nodes to see exact frequencies and connections</li>
+      <li><strong>Export Results:</strong> Use the plot in presentations to illustrate complex relationships in an accessible way</li>
+      <li><strong>Combine with Networks:</strong> Use Three-Field Plots alongside network analyses for complementary perspectives on your data</li>
+      <li><strong>Context Matters:</strong> Always interpret the plot in the context of your research question and domain knowledge</li>
+    </ul>
+    
+    <h4>⚠️ Limitations</h4>
+    <ul>
+      <li><strong>Aggregation Effects:</strong> The plot shows aggregate patterns and may obscure individual document-level details</li>
+      <li><strong>Top-N Selection:</strong> Only the most frequent items are displayed; rare but potentially important connections may be hidden</li>
+      <li><strong>Direction Ambiguity:</strong> While flows suggest relationships, they don't always imply causal or temporal direction</li>
+      <li><strong>Visual Complexity:</strong> With too many items, the plot can become difficult to interpret; reduce the number of items if necessary</li>
+    </ul>
+    
+    <h4>🤖 Biblio AI Integration</h4>
+    <p>When <strong>Biblio AI</strong> is enabled, you can generate automatic interpretations of the Three-Field Plot. The AI will:</p>
+    <ul>
+      <li>Identify the most important flows and connections</li>
+      <li>Highlight dominant patterns and relationships</li>
+      <li>Provide narrative explanations suitable for research reports and presentations</li>
+      <li>Suggest potential interpretations based on the observed patterns</li>
+    </ul>
+    
+    <h4>📚 Key References</h4>
+    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    
+    <p><strong>Chen, C. (2017).</strong> <i>Science Mapping: A Systematic Review of the Literature.</i> <strong>Journal of Data and Information Science</strong>, 2(2), 1–40. <a href='https://doi.org/10.1515/jdis-2017-0006' target='_blank'>https://doi.org/10.1515/jdis-2017-0006</a></p>
+    
+    </div>
+    </body>"
+
   ## Content Analysis ----
   contentAnalysis <-
     "<body>
@@ -1948,6 +2038,7 @@ helpContent <- function() {
     mergeCollections = mergeCollections,
     mainInformation = mainInformation,
     lifeCycle = lifeCycle,
+    threeFieldPlot = threeFieldPlot,
     contentAnalysis = contentAnalysis
   ))
 }

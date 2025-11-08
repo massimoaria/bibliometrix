@@ -26,10 +26,10 @@ utils::globalVariables(c(
 #' @examples
 #'
 #' \dontrun{
-#' data(scientometrics, package = "bibliometrixData")
-#' years=c(2000)
+#' data(management, package = "bibliometrixData")
+#' years=c(2004,2008,2015)
 #'
-#' nexus <- thematicEvolution(scientometrics,field="ID",years=years,n=100,minFreq=2)
+#' nexus <- thematicEvolution(management,field="DE",years=years,n=100,minFreq=2)
 #'
 #' plotThematicEvolution(nexus$Nodes,nexus$Edges)
 #' }

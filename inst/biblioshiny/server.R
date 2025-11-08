@@ -168,6 +168,71 @@ To ensure the functionality of Biblioshiny,
   values$gemini_api_model <- gemini_api_model[1]
   values$gemini_output_size <- gemini_api_model[2]
 
+  # Show analysis menu items when data is loaded
+  observeEvent(
+    values$M,
+    {
+      if (!is.null(values$M) && ncol(values$M) > 4) {
+        # Section headers are already visible, so we only show menu items
+
+        # Show menu items (IDs were added by JavaScript)
+        shinyjs::show(
+          "menu-filters",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-overview",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-sources",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-authors",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-documents",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-clustering",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-conceptual",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
+          "menu-intellectual",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show("menu-social", anim = TRUE, animType = "fade", time = 0.3)
+        shinyjs::show("menu-report", anim = TRUE, animType = "fade", time = 0.3)
+        shinyjs::show("menu-tall", anim = TRUE, animType = "fade", time = 0.3)
+      }
+    },
+    ignoreInit = TRUE,
+    once = TRUE
+  )
+
   ## NOTIFICATION ITEM ----
   output$notificationMenu <- renderMenu({
     notifTot <- notifications()
@@ -256,15 +321,16 @@ To ensure the functionality of Biblioshiny,
   })
 
   ## SIDEBAR MENU ----
-  ### Apply Data----
 
-  output$rest_of_sidebar <- renderMenu({
-    if (isTRUE(values$rest_sidebar)) {
-      sidebarMenu(.list = values$menu)
-    } else {
-      sidebarMenu()
-    }
-  })
+  # Initialize menu IDs when app starts
+  observeEvent(
+    input$menu_init_trigger,
+    {
+      session$sendCustomMessage("initMenuIds", list())
+    },
+    ignoreInit = FALSE,
+    once = TRUE
+  )
 
   observeEvent(input$applyLoad, {
     updateTabItems(session, "sidebarmenu", "loadData")
@@ -277,6 +343,15 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$pmFetchData, {
     updateTabItems(session, "sidebarmenu", "pubmedMenu")
   })
+
+  # Settings button handler
+  observeEvent(
+    input$go_to_settings,
+    {
+      updateTabItems(session, "sidebarmenu", "settings")
+    },
+    ignoreInit = TRUE
+  )
 
   # observeEvent(input$apiApply, {
   #   updateTabItems(session, "sidebarmenu", "gathData")
@@ -304,6 +379,12 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$applyMerge, {
     updateTabItems(session, "sidebarmenu", "mergeData")
   })
+
+  # Flag to control menu visibility
+  output$dataLoaded <- reactive({
+    return(!is.null(values$M) && nrow(values$M) > 0)
+  })
+  outputOptions(output, "dataLoaded", suspendWhenHidden = FALSE)
 
   ## observe Gemini copy2clipboard button
   observeEvent(input$copy_btn, {
@@ -418,7 +499,8 @@ To ensure the functionality of Biblioshiny,
       values$rest_sidebar <- TRUE
       values$missingdf <- df <- missingData(values$M)$mandatoryTags
       values$missTags <- NULL
-      values$menu <- menuList(values)
+      # values$menu <- menuList(values)
+      updateMenuVisibility(session, values)
       values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
       #"Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
 
@@ -830,7 +912,8 @@ To ensure the functionality of Biblioshiny,
   output$missingDataTable <- DT::renderDT({
     values$missingdf <- df <- missingData(values$M)$mandatoryTags
     values$missTags <- df$tag[df$missing_pct > 50]
-    values$menu <- menuList(values)
+    # values$menu <- menuList(values)
+    updateMenuVisibility(session, values)
 
     names(df) <- c(
       "Metadata",

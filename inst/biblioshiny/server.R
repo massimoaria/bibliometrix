@@ -321,15 +321,6 @@ To ensure the functionality of Biblioshiny,
   })
 
   ## SIDEBAR MENU ----
-  ### Apply Data----
-
-  # output$rest_of_sidebar <- renderMenu({
-  #   if (isTRUE(values$rest_sidebar)) {
-  #     sidebarMenu(.list = values$menu)
-  #   } else {
-  #     sidebarMenu()
-  #   }
-  # })
 
   # Initialize menu IDs when app starts
   observeEvent(

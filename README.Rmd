@@ -26,12 +26,12 @@ library(dplyr)
 analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
 [![Project Status: Active - The project has reached a stable, usable
 state and is being actively
-developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+developed.](http://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml)
 [![cran
 version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 [![rstudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
+downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/r-hub/cranlogs.app)
 `r badger::badge_cran_download("bibliometrix", "grand-total")`
 
 <p align="center">
@@ -479,12 +479,11 @@ plot(thematicMapResults$net$graph)
 
 The thematicEvolution function analyzes how themes evolve over time by
 dividing the collection into multiple time periods and tracking thematic
-changes across them.
-It performs a thematic map analysis for each period and measures the
-conceptual relationships between themes in consecutive periods using
-inclusion indexes and stability measures. This longitudinal analysis
-reveals emerging topics, declining themes, stable research areas, and
-thematic transformations.
+changes across them. It performs a thematic map analysis for each period
+and measures the conceptual relationships between themes in consecutive
+periods using inclusion indexes and stability measures. This
+longitudinal analysis reveals emerging topics, declining themes, stable
+research areas, and thematic transformations.
 
 The function produces an interactive Sankey-like diagram showing
 thematic flows between periods, along with strategic maps for each time

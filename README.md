@@ -9,12 +9,12 @@
 analysis.](https://www.bibliometrix.org/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
 [![Project Status: Active - The project has reached a stable, usable
 state and is being actively
-developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+developed.](http://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/massimoaria/bibliometrix/actions/workflows/R-CMD-check.yaml)
 [![cran
 version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 [![rstudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
+downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/r-hub/cranlogs.app)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 <p align="center">
@@ -522,7 +522,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2025-11-05 21:23:33
+#> $ query_timestamp             <dttm> 2025-11-07 18:40:48
 ```
 
 This function provides comprehensive author profiles including:

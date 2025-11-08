@@ -5037,7 +5037,7 @@ body <- dashboardBody(
                       "Centered (Marx et al., 2014)" = "centered",
                       "Backward (bibliometrix)" = "backward"
                     ),
-                    selected = "centered"
+                    selected = "backward"
                   ),
 
                   # Field Separator

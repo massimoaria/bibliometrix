@@ -75,9 +75,9 @@ and visualizing the evolution of a research field: A practical application to th
 \examples{
 \dontrun{
 data(management, package = "bibliometrixData")
-years <- c(2004, 2015)
+years=c(2004,2008,2015)
 
-nexus <- thematicEvolution(management, field = "ID", years = years, n = 100, minFreq = 2)
+nexus <- thematicEvolution(management,field="DE",years=years,n=100,minFreq=2)
 }
 
 }

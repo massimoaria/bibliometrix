@@ -44,7 +44,10 @@ total_downloads <- function(
     pkg_name
   )
 
-  if (!is_Online(timeout = 1, url)) {
+  # if (!is_Online(timeout = 1, url)) {
+  #   return(NA)
+  # }
+  if (!check_online(host = url, timeout = 1, method = "http")) {
     return(NA)
   }
 
@@ -2482,7 +2485,7 @@ check_online <- function(
   # min_success = 1,
   method = "ping" # method = c("ping", "socket", "http")
 ) {
-  method <- match.arg(method)
+  #method <- match.arg(method)
 
   if (method == "ping") {
     # Usa solo il codice di ritorno, non analizza l'output
@@ -2519,7 +2522,13 @@ check_online <- function(
     # Richiesta HTTP
     tryCatch(
       {
-        con <- url("https://www.google.com", open = "rb")
+        # check if host start with http or https and add if missing
+        if (!grepl("^https?://", host)) {
+          host <- paste0("https://", host)
+        }
+
+        # con <- url("https://www.google.com", open = "rb")
+        con <- url(host, open = "rb")
         on.exit(close(con))
         readLines(con, n = 1, warn = FALSE)
         return(TRUE)
@@ -2618,11 +2627,11 @@ notifications <- function() {
       # notifOnline <- notifOnline %>%
       #   dplyr::slice_head(n = 5)
       notifTot <- notifOnline %>%
-        filter(action == TRUE) %>%
+        dplyr::filter(action == TRUE) %>%
         mutate(status = "danger") %>%
         dplyr::slice_head(n = 5)
       notifOnline %>%
-        filter(action == TRUE) %>%
+        dplyr::filter(action == TRUE) %>%
         write.csv(file = file, quote = FALSE, row.names = FALSE)
     },
     # both files exist.
@@ -2639,7 +2648,7 @@ notifications <- function() {
         ) %>%
         select(nots, href, action, status) %>%
         arrange(status) %>%
-        filter(action == TRUE) %>%
+        dplyr::filter(action == TRUE) %>%
         dplyr::slice_head(n = 5)
       notifTot %>%
         select(-status) %>%

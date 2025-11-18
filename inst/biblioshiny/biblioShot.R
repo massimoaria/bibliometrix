@@ -1,12 +1,12 @@
 # Acknowledgment
-# This function is based on the source code of the webshot2 package. 
-# We would like to acknowledge and express our gratitude to the authors 
-# and contributors of webshot2 for their valuable work in developing tools 
-# for web content capture. 
+# This function is based on the source code of the webshot2 package.
+# We would like to acknowledge and express our gratitude to the authors
+# and contributors of webshot2 for their valuable work in developing tools
+# for web content capture.
 #
-# In this implementation, we have adapted and modified parts of the original 
-# webshot2 code to address an issue where PNG files were being generated as 
-# empty images when used on Windows systems. Our modifications aim to improve 
+# In this implementation, we have adapted and modified parts of the original
+# webshot2 code to address an issue where PNG files were being generated as
+# empty images when used on Windows systems. Our modifications aim to improve
 # compatibility and ensure reliable output across different platforms.
 #
 # Reference:
@@ -26,12 +26,12 @@ biblioShot <- function(
   max_concurrent = getOption("biblioShot.concurrent", default = 6),
   verbose = FALSE
 ) {
-
   if (length(url) == 0) {
     stop("Need url.")
   }
 
-  url <- vapply(url,
+  url <- vapply(
+    url,
     function(x) {
       if (!is_url(x)) {
         file_url(x)
@@ -42,9 +42,15 @@ biblioShot <- function(
     character(1)
   )
 
-  if (!is.null(cliprect) && !is.list(cliprect)) cliprect <- list(cliprect)
-  if (!is.null(selector) && !is.list(selector)) selector <- list(selector)
-  if (!is.null(expand)   && !is.list(expand))   expand   <- list(expand)
+  if (!is.null(cliprect) && !is.list(cliprect)) {
+    cliprect <- list(cliprect)
+  }
+  if (!is.null(selector) && !is.list(selector)) {
+    selector <- list(selector)
+  }
+  if (!is.null(expand) && !is.list(expand)) {
+    expand <- list(expand)
+  }
 
   if (is.null(selector)) {
     selector <- "html"
@@ -58,21 +64,23 @@ biblioShot <- function(
   }
 
   args_all <- list(
-    url       = url,
-    file      = file,
-    vwidth    = vwidth,
-    vheight   = vheight,
-    selector  = selector,
-    cliprect  = cliprect,
-    expand    = expand,
-    delay     = delay,
-    zoom      = zoom,
+    url = url,
+    file = file,
+    vwidth = vwidth,
+    vheight = vheight,
+    selector = selector,
+    cliprect = cliprect,
+    expand = expand,
+    delay = delay,
+    zoom = zoom,
     useragent = useragent,
     verbose = verbose
   )
 
   n_urls <- length(url)
-  args_all <- mapply(args_all, names(args_all),
+  args_all <- mapply(
+    args_all,
+    names(args_all),
     FUN = function(arg, name) {
       if (length(arg) == 0) {
         return(vector(mode = "list", n_urls))
@@ -81,7 +89,11 @@ biblioShot <- function(
       } else if (length(arg) == n_urls) {
         return(arg)
       } else {
-        stop("Argument `", name, "` should be NULL, length 1, or same length as `url`.")
+        stop(
+          "Argument `",
+          name,
+          "` should be NULL, length 1, or same length as `url`."
+        )
       }
     },
     SIMPLIFY = FALSE
@@ -92,15 +104,22 @@ biblioShot <- function(
   cm <- default_chromote_object()
 
   # A list of promises for the screenshots
-  res <- lapply(args_all,
-    function(args) {
-      new_session_screenshot(cm,
-        args$url, args$file, args$vwidth, args$vheight, args$selector,
-        args$cliprect, args$expand, args$delay, args$zoom, args$useragent,
-        verbose
-      )
-    }
-  )
+  res <- lapply(args_all, function(args) {
+    new_session_screenshot(
+      cm,
+      args$url,
+      args$file,
+      args$vwidth,
+      args$vheight,
+      args$selector,
+      args$cliprect,
+      args$expand,
+      args$delay,
+      args$zoom,
+      args$useragent,
+      verbose
+    )
+  })
 
   p <- promises::promise_all(.list = res)
   res <- cm$wait_for(p)
@@ -123,7 +142,6 @@ new_session_screenshot <- function(
   useragent,
   verbose = FALSE
 ) {
-
   filetype <- tolower(tools::file_ext(file))
   if (filetype != "png" && filetype != "pdf") {
     stop("File extension must be 'png' or 'pdf'")
@@ -140,60 +158,65 @@ new_session_screenshot <- function(
       stop("Invalid value for cliprect: ", cliprect)
     }
   } else {
-    if (!is.null(cliprect) && !(is.numeric(cliprect) && length(cliprect) == 4)) {
-      stop("`cliprect` must be a vector with four numbers, or a list of such vectors")
+    if (
+      !is.null(cliprect) && !(is.numeric(cliprect) && length(cliprect) == 4)
+    ) {
+      stop(
+        "`cliprect` must be a vector with four numbers, or a list of such vectors"
+      )
     }
   }
 
   s <- NULL
 
-  p <- chromote$new_session(wait_ = FALSE,
-      width = vwidth,
-      height = vheight
-    )$
-    then(function(session) {
-      s <<- session
+  p <- chromote$new_session(
+    wait_ = FALSE,
+    width = vwidth,
+    height = vheight
+  )$then(function(session) {
+    s <<- session
 
-      if (!is.null(useragent)) {
-        s$Network$setUserAgentOverride(userAgent = useragent)
-      }
-      res <- s$Page$loadEventFired(wait_ = FALSE)
-      s$Page$navigate(url, wait_ = FALSE)
-      res
-    })$
-    then(function(value) {
-      if (delay > 0) {
-        promises::promise(function(resolve, reject) {
-          later::later(
-            function() {
-              resolve(value)
-            },
-            delay
-          )
-        })
-      } else {
-        value
-      }
-    })$
-    then(function(value) {
-      if (filetype == "png") {
-        s$screenshot(
-          filename = file, selector = selector, cliprect = cliprect,
-          expand = expand, scale = zoom,
-          show = FALSE, wait_ = FALSE
+    if (!is.null(useragent)) {
+      s$Network$setUserAgentOverride(userAgent = useragent)
+    }
+    res <- s$Page$loadEventFired(wait_ = FALSE)
+    s$Page$navigate(url, wait_ = FALSE)
+    res
+  })$then(function(value) {
+    if (delay > 0) {
+      promises::promise(function(resolve, reject) {
+        later::later(
+          function() {
+            resolve(value)
+          },
+          delay
         )
-
-      } else if (filetype == "pdf") {
-        s$screenshot_pdf(filename = file, wait_ = FALSE)
-      }
-    })$
-    then(function(value) {
-      if (verbose) message(url, " screenshot completed")
-      normalizePath(value)
-    })$
-    finally(function() {
-      s$close()
-    })
+      })
+    } else {
+      value
+    }
+  })$then(function(value) {
+    if (filetype == "png") {
+      s$screenshot(
+        filename = file,
+        selector = selector,
+        cliprect = cliprect,
+        expand = expand,
+        scale = zoom,
+        show = FALSE,
+        wait_ = FALSE
+      )
+    } else if (filetype == "pdf") {
+      s$screenshot_pdf(filename = file, wait_ = FALSE)
+    }
+  })$then(function(value) {
+    if (verbose) {
+      message(url, " screenshot completed")
+    }
+    normalizePath(value)
+  })$finally(function() {
+    s$close()
+  })
 
   p
 }
@@ -207,7 +230,10 @@ file_url <- function(filename) {
   if (is_windows()) {
     paste0("file://", normalizePath(filename, mustWork = TRUE))
   } else {
-    enc2utf8(paste0("file:///", normalizePath(filename, winslash = "/", mustWork = TRUE)))
+    enc2utf8(paste0(
+      "file:///",
+      normalizePath(filename, winslash = "/", mustWork = TRUE)
+    ))
   }
 }
 
@@ -218,8 +244,9 @@ is_mac <- function() Sys.info()[["sysname"]] == "Darwin"
 is_linux <- function() Sys.info()[["sysname"]] == "Linux"
 
 long_to_wide <- function(x) {
-  if (length(x) == 0)
+  if (length(x) == 0) {
     return(x)
+  }
 
   lapply(seq_along(x[[1]]), function(n) {
     lapply(stats::setNames(names(x), names(x)), function(name) {
@@ -227,4 +254,3 @@ long_to_wide <- function(x) {
     })
   })
 }
-

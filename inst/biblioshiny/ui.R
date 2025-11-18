@@ -7,7 +7,8 @@ source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
 
 suppressMessages(libraries())
-
+# conflicted::conflict_prefer("span", "shiny")
+# conflicted::conflict_prefer("messageItem", "shinydashboardPlus")
 # UI components ----
 ## Title ----
 mytitle <- tags$link(
@@ -10320,11 +10321,27 @@ body <- dashboardBody(
             column(
               1,
               do.call(
-                "downloadBttn",
-                c(export_bttn, list(outputId = "CCplot.save"))
+                "actionBttn",
+                c(
+                  export_bttn,
+                  list(
+                    inputId = "CCplot.save"
+                  )
+                )
               )
             )
           ),
+          # div(
+          #   style = style_bttn,
+          #   title = t_export,
+          #   column(
+          #     1,
+          #     do.call(
+          #       "downloadBttn",
+          #       c(export_bttn, list(outputId = "CCplot.save"))
+          #     )
+          #   )
+          # ),
 
           div(
             column(
@@ -10963,14 +10980,28 @@ body <- dashboardBody(
 )
 
 ## UI ####
-ui <- shinydashboardPlus::dashboardPage(
-  # shinyjs::useShinyjs(),
-  header = header,
-  sidebar = sidebar,
-  body = body,
-  # controlbar = controlbar,
-  footer = NULL,
-  options = list(sidebarExpandOnHover = TRUE),
-  scrollToTop = TRUE
+ui <- tagList(
+  shinydashboardPlus::dashboardPage(
+    # shinyjs::useShinyjs(),
+    header = header,
+    sidebar = sidebar,
+    body = body,
+    # controlbar = controlbar,
+    footer = NULL,
+    options = list(sidebarExpandOnHover = TRUE),
+    #scrollToTop = TRUE
+  ),
+  scrollToTopButton()
 )
+
+# ui <- shinydashboardPlus::dashboardPage(
+#   # shinyjs::useShinyjs(),
+#   header = header,
+#   sidebar = sidebar,
+#   body = body,
+#   # controlbar = controlbar,
+#   footer = NULL,
+#   options = list(sidebarExpandOnHover = TRUE),
+#   #scrollToTop = TRUE
+# )
 # END ----

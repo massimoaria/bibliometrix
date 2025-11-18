@@ -801,7 +801,7 @@ geminiGenerate <- function(
     "collabWorldMap" = {
       values$WMGemini <- geminiPromptImage(
         obj = values$WMmap$g,
-        type = "ggplot2",
+        type = "plotly",
         prompt = prompt,
         key = values$geminiAPI,
         desc = desc,

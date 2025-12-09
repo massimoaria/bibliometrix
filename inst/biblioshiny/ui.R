@@ -10994,14 +10994,4 @@ ui <- tagList(
   scrollToTopButton()
 )
 
-# ui <- shinydashboardPlus::dashboardPage(
-#   # shinyjs::useShinyjs(),
-#   header = header,
-#   sidebar = sidebar,
-#   body = body,
-#   # controlbar = controlbar,
-#   footer = NULL,
-#   options = list(sidebarExpandOnHover = TRUE),
-#   #scrollToTop = TRUE
-# )
 # END ----

@@ -10248,10 +10248,10 @@ To ensure the functionality of Biblioshiny,
         choices = c(
           "Gemini 2.5 Flash" = "2.5-flash",
           "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
-          "Gemini 2.0 Flash" = "2.0-flash",
-          "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
-          "Gemini 1.5 Flash" = "1.5-flash",
-          "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
+          # "Gemini 2.0 Flash" = "2.0-flash",
+          # "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
+          # "Gemini 1.5 Flash" = "1.5-flash",
+          # "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
         ),
         selected = ifelse(
           is.null(values$gemini_api_model),
@@ -10280,51 +10280,51 @@ To ensure the functionality of Biblioshiny,
           tags$br(),
           "Latency time: Low"
         ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '2.0-flash-lite'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 30",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Low"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '2.0-flash'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Medium"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '1.5-flash'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Medium"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '1.5-flash-8b'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Low"
-        ))
-      )
+      ) #,
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '2.0-flash-lite'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 30",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Low"
+      #   ))
+      # ),
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '2.0-flash'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 15",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Medium"
+      #   ))
+      # ),
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '1.5-flash'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 15",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Medium"
+      #   ))
+      # ),
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '1.5-flash-8b'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 15",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Low"
+      #   ))
+      # )
     )
   })
 

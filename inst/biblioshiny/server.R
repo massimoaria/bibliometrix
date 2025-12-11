@@ -10,6 +10,7 @@ source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
 
 suppressMessages(res <- libraries())
+
 if (!res) {
   stop(
     "Biblioshiny cannot be loaded, some packages are missing. Please check your internet connection and try again."
@@ -9729,14 +9730,14 @@ To ensure the functionality of Biblioshiny,
 
   ### WPPlot ----
   WMnetwork <- eventReactive(input$applyWM, {
-    values$WMmap <- countrycollaboration(
+    values$WMmap <- countrycollaboration_plotly(
       values$M,
-      label = FALSE,
-      edgesize = input$WMedgesize / 2,
       min.edges = input$WMedges.min,
-      values
+      edge_opacity = 0.4,
+      edgesize = input$WMedgesize * 2,
+      min_edgesize = 1
     )
-    values$WMmap$tab <- values$WMmap$tab[, c(1, 2, 9)]
+    values$WMmap$tab <- values$WMmap$tab[, c(1, 2, 11)]
     names(values$WMmap$tab) = c("From", "To", "Frequency")
   })
 
@@ -9750,36 +9751,20 @@ To ensure the functionality of Biblioshiny,
     geminiOutput(title = "", content = values$WMGemini, values)
   })
 
-  output$CCplot.save <- downloadHandler(
-    filename = function() {
-      paste("CountryCollaborationMap-", Sys.Date(), ".png", sep = "")
-    },
-    content <- function(file) {
-      g <- values$WMmap$g + labs(title = "Country Collaboration Map")
-      ggsave(
-        filename = file,
-        plot = g,
-        dpi = values$dpi,
-        height = values$h,
-        width = values$h * 2,
-        bg = "white"
-      )
-    },
-    contentType = "png"
-  )
+  observeEvent(input$CCplot.save, {
+    filename = paste(
+      "CountryCollaborationMap-",
+      "_",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(values$WMmap$g, filename = filename, type = "plotly")
+  })
 
   output$WMPlot <- renderPlotly({
     WMnetwork()
-    plot.ly(
-      values$WMmap$g,
-      flip = FALSE,
-      side = "r",
-      aspectratio = 1.7,
-      size = 0.07,
-      data.type = 1,
-      height = 15
-    )
-    #plot(values$WMmap$g)
+    values$WMmap$g
   })
 
   output$WMTable <- DT::renderDT({
@@ -9809,11 +9794,21 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$reportCOLW, {
     if (!is.null(values$WMmap$tab)) {
       list_df <- list(values$WMmap$tab)
-      list_plot <- list(values$WMmap$g)
+      sheetname <- "CollabWorldMap"
+      ind <- which(regexpr(sheetname, values$wb$sheet_names) > -1)
+      if (length(ind) > 0) {
+        sheetname <- paste(sheetname, "(", length(ind) + 1, ")", sep = "")
+      }
+      values$fileWMap <- screenSh(values$WMmap$g, zoom = 2, type = "plotly")
+      values$list_file <- rbind(
+        values$list_file,
+        c(sheetname, values$fileWMap, 1)
+      )
+      #list_plot <- list(values$WMmap$g)
       wb <- addSheetToReport(
         list_df,
-        list_plot,
-        sheetname = "CollabWorldMap",
+        list_plot = NULL,
+        sheetname = sheetname,
         wb = values$wb
       )
       values$wb <- wb
@@ -10252,11 +10247,11 @@ To ensure the functionality of Biblioshiny,
         label = "Select the Gemini Model",
         choices = c(
           "Gemini 2.5 Flash" = "2.5-flash",
-          "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
-          "Gemini 2.0 Flash" = "2.0-flash",
-          "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
-          "Gemini 1.5 Flash" = "1.5-flash",
-          "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
+          "Gemini 2.5 Flash Lite" = "2.5-flash-lite"
+          # "Gemini 2.0 Flash" = "2.0-flash",
+          # "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
+          # "Gemini 1.5 Flash" = "1.5-flash",
+          # "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
         ),
         selected = ifelse(
           is.null(values$gemini_api_model),
@@ -10285,51 +10280,51 @@ To ensure the functionality of Biblioshiny,
           tags$br(),
           "Latency time: Low"
         ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '2.0-flash-lite'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 30",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Low"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '2.0-flash'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Medium"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '1.5-flash'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Medium"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '1.5-flash-8b'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 1500",
-          tags$br(),
-          "Latency time: Low"
-        ))
-      )
+      ) #,
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '2.0-flash-lite'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 30",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Low"
+      #   ))
+      # ),
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '2.0-flash'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 15",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Medium"
+      #   ))
+      # ),
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '1.5-flash'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 15",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Medium"
+      #   ))
+      # ),
+      # conditionalPanel(
+      #   condition = "input.gemini_api_model == '1.5-flash-8b'",
+      #   helpText(strong("Free Tier Rate Limits:")),
+      #   helpText(em(
+      #     "Request per Minutes: 15",
+      #     tags$br(),
+      #     "Requests per Day: 1500",
+      #     tags$br(),
+      #     "Latency time: Low"
+      #   ))
+      # )
     )
   })
 

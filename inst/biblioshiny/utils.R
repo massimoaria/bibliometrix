@@ -1,5 +1,89 @@
 ### COMMON FUNCTIONS ####
 
+# Scroll to Top Button (Font Awesome version)
+
+scrollToTopButton <- function() {
+  tags$div(
+    # CSS per il pulsante
+    tags$head(
+      tags$style(HTML(
+        "
+        #scrollToTopBtn {
+          display: none;
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 99999;
+          border: none;
+          outline: none;
+          background-color: rgba(68, 68, 68, 0.7);
+          color: white;
+          cursor: pointer;
+          padding: 12px;
+          border-radius: 4px;
+          font-size: 16px;
+          width: 45px;
+          height: 45px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.3s ease;
+          backdrop-filter: blur(4px);
+        }
+
+        #scrollToTopBtn:hover {
+          background-color: rgba(29, 143, 225, 0.85);
+          transform: translateY(-3px);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        #scrollToTopBtn:active {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #scrollToTopBtn i {
+          margin: 0;
+          padding: 0;
+          line-height: 1;
+        }
+      "
+      ))
+    ),
+
+    # Il pulsante HTML
+    tags$button(
+      id = "scrollToTopBtn",
+      icon("arrow-up", lib = "glyphicon"),
+      onclick = "scrollToTop()",
+      title = "Back to top"
+    ),
+
+    # JavaScript per gestire lo scroll
+    tags$script(HTML(
+      "
+      // Funzione per mostrare/nascondere il pulsante
+      window.onscroll = function() {scrollFunction()};
+
+      function scrollFunction() {
+        var btn = document.getElementById('scrollToTopBtn');
+        if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+          btn.style.display = 'block';
+        } else {
+          btn.style.display = 'none';
+        }
+      }
+
+      // Funzione per scrollare in alto con animazione smooth
+      function scrollToTop() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    "
+    ))
+  )
+}
+
 # Number format abbreviated
 format_abbreviated <- function(x) {
   if (is.na(x)) {
@@ -44,9 +128,6 @@ total_downloads <- function(
     pkg_name
   )
 
-  # if (!is_Online(timeout = 1, url)) {
-  #   return(NA)
-  # }
   if (!check_online(host = url, timeout = 1, method = "http")) {
     return(NA)
   }
@@ -2577,7 +2658,6 @@ check_online <- function(
 
 notifications <- function() {
   ## check connection and download notifications
-  #online <- is_online()
   online <- check_online(host = "www.bibliometrix.org")
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   notifOnline <- NULL
@@ -2660,7 +2740,8 @@ notifications <- function() {
 }
 
 is_Online <- function(timeout = 3, url = "https://www.bibliometrix.org") {
-  RCurl::url.exists(url, timeout = timeout)
+  #RCurl::url.exists(url, timeout = timeout)
+  check_online(host = url, timeout = timeout, method = "http")
 }
 
 initial <- function(values) {
@@ -4233,6 +4314,142 @@ socialStructure <- function(input, values) {
   values$colnet$graph <- g
 
   return(values)
+}
+
+countrycollaboration_plotly <- function(
+  M,
+  min.edges = 1,
+  edge_opacity = 0.4,
+  edgesize = 5,
+  min_edgesize = 0.5
+) {
+  if (!requireNamespace("geosphere", quietly = TRUE)) {
+    install.packages("geosphere")
+  }
+  # library(plotly)
+  # library(geosphere)
+
+  # Prepara i dati
+  M <- metaTagExtraction(M, "AU_CO")
+  net <- biblioNetwork(M, analysis = "collaboration", network = "countries")
+  CO <- data.frame(Tab = rownames(net), Freq = diag(net))
+  bsk.network <- igraph::graph_from_adjacency_matrix(net, mode = "undirected")
+  COedges <- as.data.frame(igraph::ends(
+    bsk.network,
+    igraph::E(bsk.network),
+    names = TRUE
+  ))
+
+  # Carica coordinate
+  data("countries", envir = environment())
+  names(countries)[1] <- "Tab"
+
+  # Prepara i paesi
+  CO <- dplyr::inner_join(CO, countries, by = "Tab")
+
+  # Prepara gli edge
+  COedges <- dplyr::inner_join(COedges, countries, by = c("V1" = "Tab"))
+  COedges <- dplyr::inner_join(COedges, countries, by = c("V2" = "Tab"))
+  COedges <- COedges[COedges$V1 != COedges$V2, ]
+  COedges <- tab <- count.duplicates(COedges)
+  COedges <- COedges[COedges$count >= min.edges, ]
+
+  # Calcola gli spessori degli edge normalizzati
+  edge_weights <- sqrt(COedges$count)
+  # Normalizza tra min_edgesize e edgesize
+  if (length(unique(edge_weights)) > 1) {
+    COedges$width <- min_edgesize +
+      (edge_weights - min(edge_weights)) /
+        (max(edge_weights) - min(edge_weights)) *
+        (edgesize - min_edgesize)
+  } else {
+    # Se tutti gli edge hanno lo stesso peso, usa il valore medio
+    COedges$width <- (min_edgesize + edgesize) / 2
+  }
+
+  # Crea la mappa base con choropleth (SENZA legenda)
+  fig <- plotly::plot_geo(CO) %>%
+    add_trace(
+      type = "choropleth",
+      locations = ~Tab,
+      locationmode = "country names",
+      z = ~ log1p(Freq),
+      colorscale = list(
+        c(0, "#FFFFFF"), # Bianco
+        c(0.2, "#fee5d9"), # Rosa pallido
+        c(0.4, "#fcae91"), # Salmone
+        c(0.6, "#fb6a4a"), # Arancione/rosso
+        c(0.8, "#de2d26"), # Rosso
+        c(1, "#a50f15") # Bordeaux scuro
+      ),
+      text = ~ paste0("<b>", Tab, "</b><br>Publications: ", Freq),
+      hoverinfo = "text",
+      marker = list(line = list(color = "white", width = 0.8)),
+      showscale = FALSE,
+      showlegend = FALSE
+    )
+
+  # Aggiungi le linee di collaborazione curve con spessore controllato
+  for (i in 1:nrow(COedges)) {
+    # Crea arco geodetico
+    path <- geosphere::gcIntermediate(
+      c(COedges$Longitude.x[i], COedges$Latitude.x[i]),
+      c(COedges$Longitude.y[i], COedges$Latitude.y[i]),
+      n = 100,
+      addStartEnd = TRUE,
+      sp = FALSE
+    )
+
+    fig <- fig %>%
+      add_trace(
+        type = "scattergeo",
+        lon = path[, 1],
+        lat = path[, 2],
+        mode = "lines",
+        line = list(
+          width = COedges$width[i], # USA LO SPESSORE NORMALIZZATO
+          color = "#4A90E2"
+        ),
+        opacity = edge_opacity,
+        hoverinfo = "text",
+        text = paste0(
+          "<b>",
+          COedges$V1[i],
+          " ↔ ",
+          COedges$V2[i],
+          "</b>",
+          "<br>Collaborations: ",
+          COedges$count[i]
+        ),
+        showlegend = FALSE
+      )
+  }
+
+  # Layout migliorato
+  fig <- fig %>%
+    layout(
+      # title = list(
+      #   text = "International Scientific Collaboration Network",
+      #   font = list(size = 18, color = "#333333")
+      # ),
+      geo = list(
+        projection = list(type = "natural earth"),
+        showland = TRUE,
+        landcolor = "#f5f5f5",
+        coastlinecolor = "#999999",
+        showocean = TRUE,
+        oceancolor = "#d4e6f1",
+        showlakes = TRUE,
+        lakecolor = "#d4e6f1",
+        showcountries = TRUE,
+        countrycolor = "white",
+        countrywidth = 1
+      ),
+      paper_bgcolor = "white",
+      plot_bgcolor = "white"
+    )
+
+  return(list(g = fig, tab = tab))
 }
 
 countrycollaboration <- function(M, label, edgesize, min.edges, values) {

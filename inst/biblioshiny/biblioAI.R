@@ -3,7 +3,7 @@ gemini_ai <- function(
   image = NULL,
   docs = NULL,
   prompt = "Explain these images",
-  model = "2.0-flash",
+  model = "2.5-flash",
   image_type = "png",
   retry_503 = 5,
   api_key = NULL,
@@ -259,7 +259,7 @@ setGeminiAPI <- function(api_key) {
   apiCheck <- gemini_ai(
     image = NULL,
     prompt = "Hello",
-    model = "2.0-flash",
+    model = "2.5-flash",
     image_type = "png",
     retry_503 = 5,
     api_key = api_key
@@ -341,7 +341,7 @@ loadGeminiModel = function(file) {
   if (file.exists(file)) {
     model <- readLines(file, warn = FALSE)
   } else {
-    model <- c("2.0-flash", "medium")
+    model <- c("2.5-flash", "medium")
   }
   if (length(model == 1)) {
     model <- c(model, "medium")
@@ -801,7 +801,7 @@ geminiGenerate <- function(
     "collabWorldMap" = {
       values$WMGemini <- geminiPromptImage(
         obj = values$WMmap$g,
-        type = "ggplot2",
+        type = "plotly",
         prompt = prompt,
         key = values$geminiAPI,
         desc = desc,

@@ -111,6 +111,203 @@ helpContent <- function() {
     </div>
     </body>"
 
+  ## SAAS ----
+  saas <- "<body>
+  <div class='container'>
+    <h1>SAAS Workflow</h1>
+    <p class='subtitle'>Search - Appraisal - Analysis - Synthesis</p>
+      
+      <svg viewBox='0 0 1240 800' xmlns='http://www.w3.org/2000/svg'>
+        <defs>
+        <!-- Gradients -->
+        <linearGradient id='searchGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+          <stop offset='0%' style='stop-color:#4A90E2;stop-opacity:1' />
+            <stop offset='100%' style='stop-color:#357ABD;stop-opacity:1' />
+              </linearGradient>
+              <linearGradient id='appraisalGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                <stop offset='0%' style='stop-color:#66BB6A;stop-opacity:1' />
+                  <stop offset='100%' style='stop-color:#4CAF50;stop-opacity:1' />
+                    </linearGradient>
+                    <linearGradient id='analysisGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                      <stop offset='0%' style='stop-color:#FFA726;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#FB8C00;stop-opacity:1' />
+                          </linearGradient>
+                          <linearGradient id='synthesisGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                            <stop offset='0%' style='stop-color:#AB47BC;stop-opacity:1' />
+                              <stop offset='100%' style='stop-color:#8E24AA;stop-opacity:1' />
+                                </linearGradient>
+                                
+                                <!-- Arrow marker -->
+                                <marker id='arrowhead' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto'>
+                                  <polygon points='0 0, 10 3, 0 6' fill='#666' />
+                                    </marker>
+                                    </defs>
+                                    
+                                    <!-- Central Flow Arrows -->
+                                    <path d='M 300 150 L 340 150' stroke='#666' stroke-width='3' fill='none' marker-end='url(#arrowhead)' />
+                                      <path d='M 600 150 L 640 150' stroke='#666' stroke-width='3' fill='none' marker-end='url(#arrowhead)' />
+                                        <path d='M 900 150 L 940 150' stroke='#666' stroke-width='3' fill='none' marker-end='url(#arrowhead)' />
+                                          
+                                          <!-- Circular feedback arrow from Synthesis to Search -->
+                                          <path d='M 1100 200 Q 1210 400 620 650 Q 50 650 140 200' 
+                                          stroke='#9C27B0' stroke-width='3' fill='none' 
+                                          stroke-dasharray='8,5' marker-end='url(#arrowhead)' opacity='0.6'/>
+                                            
+                                            <!-- SEARCH Box -->
+                                            <g id='search'>
+                                            <rect x='40' y='50' width='260' height='200' rx='15' fill='url(#searchGrad)' />
+                                            <circle cx='170' cy='100' r='30' fill='white' opacity='0.3'/>
+                                            <path d='M 160 90 Q 170 80 180 90 L 185 95 L 190 90' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/>
+                                            <text x='170' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>SEARCH</text>
+                                            <text x='170' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Data Collection</text>
+                                            <text x='50' y='290' font-size='13' fill='#333'>• API Integration</text>
+                                            <text x='50' y='310' font-size='13' fill='#333'>• Database Export</text>
+                                            <text x='50' y='330' font-size='13' fill='#333'>• Query Design</text>
+                                            <text x='50' y='350' font-size='13' fill='#333'>• PubMed, OpenAlex</text>
+                                            <text x='50' y='370' font-size='13' fill='#333'>• Web of Science</text>
+                                            </g>
+                                            
+                                            <!-- APPRAISAL Box -->
+                                            <g id='appraisal'>
+                                            <rect x='340' y='50' width='260' height='200' rx='15' fill='url(#appraisalGrad)' />
+                                            <circle cx='470' cy='100' r='30' fill='white' opacity='0.3'/>
+                                            <path d='M 455 100 L 465 110 L 485 85' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/>
+                                            <text x='470' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>APPRAISAL</text>
+                                            <text x='470' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Quality Assessment</text>
+                                            <text x='350' y='290' font-size='13' fill='#333'>• Data Filtering</text>
+                                            <text x='350' y='310' font-size='13' fill='#333'>• Quality Control</text>
+                                            <text x='350' y='330' font-size='13' fill='#333'>• Duplicate Removal</text>
+                                            <text x='350' y='350' font-size='13' fill='#333'>• Field Validation</text>
+                                            <text x='350' y='370' font-size='13' fill='#333'>• Data Cleaning</text>
+                                            </g>
+                                            
+                                            <!-- ANALYSIS Box -->
+                                            <g id='analysis'>
+                                            <rect x='640' y='50' width='260' height='200' rx='15' fill='url(#analysisGrad)' />
+                                            <circle cx='770' cy='100' r='30' fill='white' opacity='0.3'/>
+                                            <path d='M 755 115 L 770 90 L 785 115 M 770 90 L 770 110' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/>
+                                            <text x='770' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>ANALYSIS</text>
+                                            <text x='770' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Deep Investigation</text>
+                                            <text x='650' y='290' font-size='13' fill='#333'>• Bibliometric Analysis</text>
+                                            <text x='650' y='310' font-size='13' fill='#333'>• Network Analysis</text>
+                                            <text x='650' y='330' font-size='13' fill='#333'>• Citation Analysis</text>
+                                            <text x='650' y='350' font-size='13' fill='#333'>• Conceptual Structure</text>
+                                            <text x='650' y='370' font-size='13' fill='#333'>• Content Analysis</text>
+                                            </g>
+                                            
+                                            <!-- SYNTHESIS Box -->
+                                            <g id='synthesis'>
+                                            <rect x='940' y='50' width='260' height='200' rx='15' fill='url(#synthesisGrad)' />
+                                            <circle cx='1070' cy='100' r='30' fill='white' opacity='0.3'/>
+                                            <text x='1070' y='108' font-size='32' fill='white' text-anchor='middle' font-weight='bold'>∑</text>
+                                            <text x='1070' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>SYNTHESIS</text>
+                                            <text x='1070' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Results & Reporting</text>
+                                            <text x='950' y='290' font-size='13' fill='#333'>• Report Generation</text>
+                                            <text x='950' y='310' font-size='13' fill='#333'>• Key Insights</text>
+                                            <text x='950' y='330' font-size='13' fill='#333'>• Visualization</text>
+                                            <text x='950' y='350' font-size='13' fill='#333'>• AI Summary</text>
+                                            <text x='950' y='370' font-size='13' fill='#333'>• Publication Output</text>
+                                            </g>
+                                            
+                                            <!-- Bottom Tools and Features -->
+                                            <g id='tools'>
+                                            <rect x='40' y='420' width='1160' height='350' rx='15' fill='#f8f9fa' stroke='#dee2e6' stroke-width='2'/>
+                                            <text x='620' y='455' font-size='22' font-weight='bold' fill='#495057' text-anchor='middle'>Integrated Tools & Features</text>
+                                            
+                                            <!-- Column 1 -->
+                                            <g transform='translate(60, 480)'>
+                                            <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
+                                            <text x='130' y='30' font-size='16' font-weight='bold' fill='#667eea' text-anchor='middle'>Science Mapping</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Co-citation Analysis</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Bibliographic Coupling</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>✓ Co-word Analysis</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Thematic Evolution</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Trend Topics</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Three Fields Plot</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Historiograph</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Factorial Analysis</text>
+                                            </g>
+                                            
+                                            <!-- Column 2 -->
+                                            <g transform='translate(340, 480)'>
+                                            <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
+                                            <text x='130' y='30' font-size='16' font-weight='bold' fill='#66BB6A' text-anchor='middle'>Network Analysis</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Collaboration Networks</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Country Collaboration</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>✓ Institution Networks</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Author Networks</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Citation Networks</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Co-occurrence Networks</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Community Detection</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Centrality Measures</text>
+                                            </g>
+                                            
+                                            <!-- Column 3 -->
+                                            <g transform='translate(620, 480)'>
+                                            <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
+                                            <text x='130' y='30' font-size='16' font-weight='bold' fill='#FFA726' text-anchor='middle'>AI-Enhanced Analysis</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Biblio AI Assistant</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Document Summarization</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>✓ PDF Content Analysis</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Citation Context Extraction</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Reference Matching</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Readability Metrics</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Topic Modeling</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Natural Language Processing</text>
+                                            </g>
+                                            
+                                            <!-- Column 4 -->
+                                            <g transform='translate(900, 480)'>
+                                            <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
+                                            <text x='130' y='30' font-size='16' font-weight='bold' fill='#AB47BC' text-anchor='middle'>Visualization</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Interactive Plots</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Network Graphs</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>✓ Thematic Maps</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Word Clouds</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Sankey Diagrams</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Heatmaps</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Time Series Plots</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Export Options</text>
+                                            </g>
+                                            </g>
+                                            
+                                            <!-- Feedback Loop Label -->
+                                            <text x='1110' y='300' font-size='13' fill='#9C27B0' font-style='italic'>Iterative</text>
+                                            <text x='1110' y='318' font-size='13' fill='#9C27B0' font-style='italic'>Refinement</text>
+                                            </svg>
+                                            
+                                            <div style='margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea;'>
+                                            <h3 style='color: #667eea; margin-top: 0;'>About the SAAS Workflow</h3>
+                                            <p style='color: #495057; line-height: 1.6;'>
+                                            The SAAS workflow represents the comprehensive process of <strong>bibliometrix</strong> and <strong>biblioshiny</strong> for conducting 
+                                          scientific bibliometric analysis. Each phase is designed to ensure methodological rigor and reliable results:
+                                            </p>
+                                            <ul style='color: #495057; line-height: 1.8;'>
+                                            <li><strong style='color: #4A90E2;'>Search:</strong> Systematic collection of bibliographic data from academic databases</li>
+                                            <li><strong style='color: #66BB6A;'>Appraisal:</strong> Quality assessment and filtering of collected data</li>
+                                            <li><strong style='color: #FFA726;'>Analysis:</strong> Application of advanced bibliometric techniques and AI</li>
+                                            <li><strong style='color: #AB47BC;'>Synthesis:</strong> Results synthesis and scientific report generation</li>
+                                            </ul>
+                                            <p style='color: #6c757d; font-size: 0.9em; margin-top: 15px; font-style: italic;'>
+                                            The iterative cycle allows continuous refinement of the analysis by returning to previous phases based on obtained results.
+                                          </p>
+                                            </div>
+                                            
+                                            <div style='margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; text-align: center;'>
+                                            <p style='color: white; margin: 0; font-size: 0.95em;'>
+                                            <strong>SAAS Workflow developed by:</strong><br>
+                                            Massimo Aria & Corrado Cuccurullo<br>
+                                            <span style='font-size: 0.85em; opacity: 0.9;'>University of Naples Federico II, Italy</span>
+                                            </p>
+                                            <p style='color: white; margin: 10px 0 0 0; font-size: 0.85em; opacity: 0.9;'>
+                                            Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. 
+                                          <em>Journal of Informetrics</em>, 11(4), 959-975.
+                                          </p>
+                                            </div>
+                                            </div>
+                                            </body>
+                                            "
+
   ## Filters ----
   filters <-
     "<body>
@@ -2028,6 +2225,7 @@ helpContent <- function() {
 
   return(list(
     biblioAI = biblioAI,
+    saas = saas,
     info = info,
     publications = publications,
     filters = filters,

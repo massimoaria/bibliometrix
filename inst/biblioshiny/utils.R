@@ -128,9 +128,6 @@ total_downloads <- function(
     pkg_name
   )
 
-  # if (!is_Online(timeout = 1, url)) {
-  #   return(NA)
-  # }
   if (!check_online(host = url, timeout = 1, method = "http")) {
     return(NA)
   }
@@ -2661,7 +2658,6 @@ check_online <- function(
 
 notifications <- function() {
   ## check connection and download notifications
-  #online <- is_online()
   online <- check_online(host = "www.bibliometrix.org")
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   notifOnline <- NULL
@@ -2744,7 +2740,8 @@ notifications <- function() {
 }
 
 is_Online <- function(timeout = 3, url = "https://www.bibliometrix.org") {
-  RCurl::url.exists(url, timeout = timeout)
+  #RCurl::url.exists(url, timeout = timeout)
+  check_online(host = url, timeout = timeout, method = "http")
 }
 
 initial <- function(values) {

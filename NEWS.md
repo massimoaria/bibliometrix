@@ -1,6 +1,9 @@
-# bibliometrix (development version)
+# bibliometrix V.5.2.1 (Release date: 2025-12-11)
 
-# bibliometrix 5.2.0
+Changes:
+
+* Removed old geemini models 1.5 and 2.0 from biblioAI
+* Solved issue with internet connection checking in MS Windows systems
 
 # bibliometrix V.5.2.0 (Release date: 2025-11-04)
 

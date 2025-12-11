@@ -236,6 +236,11 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       tabName = "info",
       icon = fa_i(name = "circle-info"),
       menuSubItem(
+        "SAAS Workflow",
+        tabName = "saas",
+        icon = fa_i("project-diagram")
+      ),
+      menuSubItem(
         "Biblio AI",
         tabName = "biblioAI",
         icon = fa_i(name = "microchip")
@@ -805,6 +810,19 @@ body <- dashboardBody(
               style = "text-align:center; font-size:18px;"
             )),
           )
+        )
+      )
+    ),
+    tabItem(
+      "saas",
+      fluidPage(
+        fluidRow(
+          column(1),
+          column(
+            10,
+            HTML(helpContent()$saas)
+          ),
+          column(1)
         )
       )
     ),

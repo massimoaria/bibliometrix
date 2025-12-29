@@ -940,7 +940,7 @@ pubmedServer <- function(input, output, session, values) {
       req(values$data_source == "PubMed")
 
       # Write data to Excel file
-      writexl::write_xlsx(values$M, path = file)
+      openxlsx::write.xlsx(values$M, file = file)
     }
   )
 

@@ -519,7 +519,13 @@ To ensure the functionality of Biblioshiny,
             ext,
             ###  WoS ZIP Files
             zip = {
-              D <- utils::unzip(inFile$datapath)
+              # Crea un percorso per una cartella temporanea specifica per questa sessione
+              temp_exdir <- file.path(tempdir(), "unzipped_files")
+
+              # Estrae i file nella cartella temporanea
+              # (exdir viene creata automaticamente se non esiste)
+              D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
+              #D <- utils::unzip(inFile$datapath)
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   D,
@@ -528,6 +534,7 @@ To ensure the functionality of Biblioshiny,
                 )
                 M <- authorNameFormat(M, input$authorName)
               })
+              on.exit(unlink(temp_exdir, recursive = TRUE))
             },
             ### WoS Txt/Bib Files
             {
@@ -547,18 +554,29 @@ To ensure the functionality of Biblioshiny,
             ext,
             ###  Scopus ZIP Files
             zip = {
-              D <- utils::unzip(inFile$datapath)
+              # Crea un percorso per una cartella temporanea specifica per questa sessione
+              temp_exdir <- file.path(tempdir(), "unzipped_files")
+
+              # Estrae i file nella cartella temporanea
+              # (exdir viene creata automaticamente se non esiste)
+              D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
+
               withProgress(message = 'Conversion in progress', value = 0, {
+                # Usiamo i percorsi dei file estratti (contenuti in D)
                 M <- convert2df(
                   D,
                   dbsource = input$dbsource,
                   format = formatDB(D)
                 )
+
                 M <- authorNameFormat(M, input$authorName)
+
                 if (formatDB(D) == "csv" & input$authorName == "AF") {
                   M <- AuthorNameMerge(M)
                 }
               })
+
+              on.exit(unlink(temp_exdir, recursive = TRUE))
             },
             ### Scopus CSV/Bib Files
             csv = {
@@ -605,7 +623,12 @@ To ensure the functionality of Biblioshiny,
             ext,
             ###  Lens.org ZIP Files
             zip = {
-              D <- utils::unzip(inFile$datapath)
+              # Crea un percorso per una cartella temporanea specifica per questa sessione
+              temp_exdir <- file.path(tempdir(), "unzipped_files")
+              # Estrae i file nella cartella temporanea
+              # (exdir viene creata automaticamente se non esiste)
+              D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
+              # D <- utils::unzip(inFile$datapath)
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   D,
@@ -613,6 +636,7 @@ To ensure the functionality of Biblioshiny,
                   format = formatDB(D)
                 )
               })
+              on.exit(unlink(temp_exdir, recursive = TRUE))
             },
             ### Lens.org CSV Files
             {
@@ -631,7 +655,13 @@ To ensure the functionality of Biblioshiny,
             ext,
             ###  Cochrane ZIP Files
             zip = {
-              D <- utils::unzip(inFile$datapath)
+              # D <- utils::unzip(inFile$datapath)
+              # Crea un percorso per una cartella temporanea specifica per questa sessione
+              temp_exdir <- file.path(tempdir(), "unzipped_files")
+
+              # Estrae i file nella cartella temporanea
+              # (exdir viene creata automaticamente se non esiste)
+              D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   D,
@@ -639,6 +669,7 @@ To ensure the functionality of Biblioshiny,
                   format = formatDB(D)
                 )
               })
+              on.exit(unlink(temp_exdir, recursive = TRUE))
             },
             ### Cochrane txt files
             {
@@ -657,10 +688,17 @@ To ensure the functionality of Biblioshiny,
             ext,
             ###  Pubmed ZIP Files
             zip = {
-              D <- utils::unzip(inFile$datapath)
+              # D <- utils::unzip(inFile$datapath)
+              # Crea un percorso per una cartella temporanea specifica per questa sessione
+              temp_exdir <- file.path(tempdir(), "unzipped_files")
+
+              # Estrae i file nella cartella temporanea
+              # (exdir viene creata automaticamente se non esiste)
+              D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(D, dbsource = input$dbsource, format = "pubmed")
               })
+              on.exit(unlink(temp_exdir, recursive = TRUE))
             },
             ### Pubmed txt Files
             txt = {
@@ -679,11 +717,18 @@ To ensure the functionality of Biblioshiny,
             ext,
             ###  Dimensions ZIP Files
             zip = {
-              D = utils::unzip(inFile$datapath)
+              # D = utils::unzip(inFile$datapath)
+              # Crea un percorso per una cartella temporanea specifica per questa sessione
+              temp_exdir <- file.path(tempdir(), "unzipped_files")
+
+              # Estrae i file nella cartella temporanea
+              # (exdir viene creata automaticamente se non esiste)
+              D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <-
                   convert2df(D, dbsource = input$dbsource, format = formatDB(D))
               })
+              on.exit(unlink(temp_exdir, recursive = TRUE))
             },
             ### Dimensions Xlsx/csv Files
             xlsx = {

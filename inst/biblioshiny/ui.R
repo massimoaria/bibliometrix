@@ -10679,9 +10679,9 @@ body <- dashboardBody(
                 helpText(
                   "Select at least one textual field to export, click 'Play' to generate the dataset, then save and import it into TALL.",
                   style = "font-size: 16px"
-                ),
-                uiOutput("tallBttn1"),
-                uiOutput("tallBttn2")
+                ) #,
+                #uiOutput("tallBttn1"),
+                #uiOutput("tallBttn2")
                 # fluidRow(
                 #   # column(6,
                 #   #        uiOutput("tallBttn1")),

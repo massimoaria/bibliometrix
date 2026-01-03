@@ -1002,48 +1002,67 @@ To ensure the functionality of Biblioshiny,
       "Missing %",
       "Status"
     )
-    values$missingDataTable <- DT::datatable(
-      df,
-      escape = FALSE,
-      rownames = FALSE, #extensions = c("Buttons"),
-      class = 'cell-border stripe',
-      selection = 'none',
-      options = list(
-        pageLength = nrow(df),
-        info = FALSE,
-        autoWidth = FALSE,
-        scrollX = TRUE,
-        dom = 'rti',
-        ordering = F,
-        columnDefs = list(
-          list(
-            targets = ncol(df) - 1,
-            createdCell = JS(
-              "function(td, cellData, rowData, row, col) {",
-              "  if (cellData === 'Completely missing') {",
-              "    $(td).css('background-color', '#b22222');",
-              "  } else if (cellData === 'Critical') {",
-              "    $(td).css('background-color', '#f08080');",
-              "  } else if (cellData === 'Poor') {",
-              "    $(td).css('background-color', 'lightgrey');",
-              "  } else if (cellData === 'Acceptable') {",
-              "    $(td).css('background-color', '#f0e68c');",
-              "  } else if (cellData === 'Good') {",
-              "    $(td).css('background-color', '#90ee90');",
-              "  } else if (cellData === 'Excellent') {",
-              "    $(td).css('background-color', '#32cd32');",
-              "  }",
-              "}"
-            )
-          )
+
+    # Pre-processing del dataframe per aggiungere colori e formattazione
+    df_formatted <- df %>%
+      mutate(
+        # Arrotonda la colonna "Missing %" a 2 decimali
+        `Missing %` = round(`Missing %`, 2),
+
+        # Aggiungi colori di background alla colonna Status basandosi sul valore
+        Status = case_when(
+          Status == "Completely missing" ~
+            paste0(
+              '<span style="display: block; background-color: #b22222; color: white; padding: 5px; text-align: center; border-radius: 3px;">',
+              Status,
+              '</span>'
+            ),
+          Status == "Critical" ~
+            paste0(
+              '<span style="display: block; background-color: #f08080; color: white; padding: 5px; text-align: center; border-radius: 3px;">',
+              Status,
+              '</span>'
+            ),
+          Status == "Poor" ~
+            paste0(
+              '<span style="display: block; background-color: lightgrey; color: black; padding: 5px; text-align: center; border-radius: 3px;">',
+              Status,
+              '</span>'
+            ),
+          Status == "Acceptable" ~
+            paste0(
+              '<span style="display: block; background-color: #f0e68c; color: black; padding: 5px; text-align: center; border-radius: 3px;">',
+              Status,
+              '</span>'
+            ),
+          Status == "Good" ~
+            paste0(
+              '<span style="display: block; background-color: #90ee90; color: black; padding: 5px; text-align: center; border-radius: 3px;">',
+              Status,
+              '</span>'
+            ),
+          Status == "Excellent" ~
+            paste0(
+              '<span style="display: block; background-color: #32cd32; color: white; padding: 5px; text-align: center; border-radius: 3px;">',
+              Status,
+              '</span>'
+            ),
+          TRUE ~ Status
         )
       )
-    ) %>%
-      formatRound("Missing %", digits = 2) %>%
-      formatStyle(
-        "Status",
-        textAlign = 'center'
-      )
+
+    # Crea la tabella con htmlBoxFormat
+    values$missingDataTable <- renderBibliobox(
+      df = df_formatted,
+      nrow = nrow(df_formatted), # Mostra tutte le righe
+      escape = FALSE, # Permette HTML nelle celle
+      scrollX = TRUE, # Scroll orizzontale
+      dom = FALSE, # Nasconde controlli DOM extra
+      filter = "none", # Nessun filtro
+      pagelength = FALSE, # Nasconde menu lunghezza pagina
+      button = FALSE, # Nessun bottone export
+      round = 2 # Arrotondamento generale a 2 decimali
+    )
     values$missingDataTable
   })
 

@@ -282,7 +282,7 @@ openAlexUI <- function() {
             # Data table output
             div(
               style = "margin-top: 15px;",
-              DT::dataTableOutput("oaDataTable")
+              uiOutput("oaDataTable")
             )
           )
         )
@@ -915,7 +915,7 @@ openAlexServer <- function(input, output, session, values) {
   })
 
   # Render data table
-  output$oaDataTable <- DT::renderDataTable({
+  output$oaDataTable <- renderUI({
     req(values$M)
     req(values$data_source == "OpenAlex")
 
@@ -932,7 +932,7 @@ openAlexServer <- function(input, output, session, values) {
       )
     nome = c("DOI", names(MData)[-length(names(MData))])
     MData = MData[nome]
-    DTformat(
+    renderBibliobox(
       MData,
       nrow = 3,
       filename = "Table",
@@ -1008,7 +1008,7 @@ openAlexServer <- function(input, output, session, values) {
     ns <- session$ns
     modalDialog(
       uiOutput("missingTitle"),
-      DT::DTOutput(ns("missingDataTable")),
+      uiOutput(ns("missingDataTable")),
       size = "l",
       easyClose = TRUE,
       footer = tagList(

@@ -385,7 +385,6 @@ resetModalButtons <- function(session) {
   return(session)
 }
 
-
 # DATA TABLE FORMAT ----
 DTformat <- function(
   df,

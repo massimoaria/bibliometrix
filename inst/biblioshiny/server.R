@@ -8,6 +8,7 @@ source("article_summary.R", local = TRUE)
 source("lifeCycleUI.R", local = TRUE)
 source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
+source("Htmlboxformat.R", local = TRUE)
 
 suppressMessages(res <- libraries())
 
@@ -826,7 +827,7 @@ To ensure the functionality of Biblioshiny,
     }
   })
 
-  output$contents <- DT::renderDT({
+  output$contents <- renderUI({
     DATAloading()
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
@@ -841,7 +842,7 @@ To ensure the functionality of Biblioshiny,
       )
     nome = c("DOI", names(MData)[-length(names(MData))])
     MData = MData[nome]
-    DTformat(
+    renderBibliobox(
       MData,
       nrow = 3,
       filename = "Table",
@@ -859,8 +860,41 @@ To ensure the functionality of Biblioshiny,
       button = FALSE,
       escape = FALSE,
       selection = FALSE,
-      scrollX = TRUE
+      scrollX = TRUE,
+      scrollY = TRUE
     )
+    # out <- tryCatch(
+    #   {
+    #     HTML(htmlBoxFormat(
+    #       MData,
+    #       nrow = 3,
+    #       filename = "Table",
+    #       pagelength = TRUE,
+    #       left = NULL,
+    #       right = NULL,
+    #       numeric = NULL,
+    #       dom = TRUE,
+    #       size = '70%',
+    #       filter = "top",
+    #       columnShort = NULL,
+    #       columnSmall = NULL,
+    #       round = 2,
+    #       title = "",
+    #       button = FALSE,
+    #       escape = FALSE,
+    #       selection = FALSE,
+    #       scrollX = TRUE,
+    #       scrollY = TRUE
+    #     ))
+    #   },
+    #   error = function(e) {
+    #     # In caso di errore nella tua funzione, mostra l'errore nel box invece di bloccare tutto
+    #     tags$div(
+    #       style = "color:red; padding:20px;",
+    #       paste("Errore htmlBoxFormat:", e$message)
+    #     )
+    #   }
+    # )
   })
 
   ## Openalex API Query Sample Size ----
@@ -904,7 +938,7 @@ To ensure the functionality of Biblioshiny,
     }
   })
 
-  output$contentsMerge <- DT::renderDT({
+  output$contentsMerge <- renderUI({
     DATAmerging()
     MData = as.data.frame(apply(values$M, 2, function(x) {
       substring(x, 1, 150)
@@ -919,7 +953,7 @@ To ensure the functionality of Biblioshiny,
       )
     nome = c("DOI", names(MData)[-length(names(MData))])
     MData = MData[nome]
-    DTformat(
+    renderBibliobox(
       MData,
       nrow = 3,
       filename = "Table",
@@ -955,7 +989,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   ### Missing Data in Metadata ----
-  output$missingDataTable <- DT::renderDT({
+  output$missingDataTable <- renderUI({
     values$missingdf <- df <- missingData(values$M)$mandatoryTags
     values$missTags <- df$tag[df$missing_pct > 50]
     # values$menu <- menuList(values)
@@ -1096,7 +1130,7 @@ To ensure the functionality of Biblioshiny,
     ns <- session$ns
     modalDialog(
       uiOutput("missingTitle"),
-      DT::DTOutput(ns("missingDataTable")),
+      uiOutput(ns("missingDataTable")),
       size = "l",
       easyClose = TRUE,
       footer = tagList(
@@ -1659,7 +1693,7 @@ To ensure the functionality of Biblioshiny,
   #   )
   # })
   #
-  # output$apiContents <- DT::renderDT({
+  # output$apiContents <- renderUI({
   #   APIDOWNLOAD()
   #   contentTable(values)
   # })
@@ -1679,7 +1713,7 @@ To ensure the functionality of Biblioshiny,
   #     )
   #   nome = c("DOI", names(MData)[-length(names(MData))])
   #   MData = MData[nome]
-  #   DTformat(
+  #   renderBibliobox(
   #     MData,
   #     nrow = 3,
   #     filename = "Table",
@@ -2251,7 +2285,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   # Top citations table
-  output$refMatch_topCitations <- renderDT({
+  output$refMatch_topCitations <- renderUI({
     req(refMatch_results())
 
     # Don't depend on refMatch_selected_for_merge() to avoid re-rendering
@@ -2303,7 +2337,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   # Variants table
-  output$refMatch_variantsTable <- renderDT({
+  output$refMatch_variantsTable <- renderUI({
     req(refMatch_results())
     req(input$refMatch_topCitations_rows_selected)
 
@@ -2975,7 +3009,7 @@ To ensure the functionality of Biblioshiny,
     showModal(modalDialog(
       title = "Filtered Data",
       size = "l",
-      DT::DTOutput("dataFiltered"),
+      uiOutput("dataFiltered"),
       footer = tagList(
         #downloadButton("collection.save", "Save Filtered Data"),
         modalButton("Close")
@@ -2983,14 +3017,14 @@ To ensure the functionality of Biblioshiny,
     ))
   })
 
-  output$dataFiltered <- DT::renderDT({
+  output$dataFiltered <- renderUI({
     DTfiltered()
     Mdisp <- values$M %>%
       select(SR, AU, TI, SO, PY, LA, DT, TC, TCpY, DI) %>%
       as.data.frame()
 
     if (dim(Mdisp)[1] > 0) {
-      DTformat(
+      renderBibliobox(
         Mdisp,
         nrow = 3,
         filename = "Filtered_DataTable",
@@ -3017,8 +3051,8 @@ To ensure the functionality of Biblioshiny,
 
   # OVERVIEW ----
   ### Main Info ----
-  output$MainInfo <- DT::renderDT({
-    DTformat(
+  output$MainInfo <- renderUI({
+    renderBibliobox(
       values$TABvb,
       nrow = 50,
       filename = "Main_Information",
@@ -3383,9 +3417,9 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$AnnualProdTable <- DT::renderDT({
+  output$AnnualProdTable <- renderUI({
     TAB <- values$TAB
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Annual_Production",
@@ -3508,9 +3542,9 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$AnnualTotCitperYearTable <- DT::renderDT({
+  output$AnnualTotCitperYearTable <- renderUI({
     TAB <- values$AnnualTotCitperYear
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Annual_Total_Citation_per_Year",
@@ -3734,11 +3768,11 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.1, size = 0.10)
   })
 
-  output$MostRelSourcesTable <- DT::renderDT({
+  output$MostRelSourcesTable <- renderUI({
     g <- MRSources()
 
     TAB <- values$TABSo %>% drop_na()
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Relevant_Sources",
@@ -3830,10 +3864,10 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
 
-  output$MostRelCitSourcesTable <- DT::renderDT({
+  output$MostRelCitSourcesTable <- renderUI({
     g <- MLCSources()
     TAB <- values$TABSoCit
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Cited_Sources",
@@ -3901,8 +3935,8 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$bradfordTable <- DT::renderDT({
-    DTformat(
+  output$bradfordTable <- renderUI({
+    renderBibliobox(
       values$bradford$table,
       nrow = 10,
       filename = "Bradford_Law",
@@ -3971,8 +4005,8 @@ To ensure the functionality of Biblioshiny,
     Hsource()
   })
 
-  output$SourceHindexTable <- DT::renderDT({
-    DTformat(
+  output$SourceHindexTable <- renderUI({
+    renderBibliobox(
       values$H %>% rename(Source = Element),
       nrow = 10,
       filename = "Source_Impact",
@@ -4171,10 +4205,10 @@ To ensure the functionality of Biblioshiny,
       layout(hovermode = 'compare')
   })
 
-  output$soGrowthtable <- DT::renderDT({
+  output$soGrowthtable <- renderUI({
     g <- SOGrowth()
     soData = values$PYSO
-    DTformat(
+    renderBibliobox(
       soData,
       nrow = 10,
       filename = "Source_Prod_over_Time",
@@ -4404,10 +4438,10 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
 
-  output$MostRelAuthorsTable <- DT::renderDT({
+  output$MostRelAuthorsTable <- renderUI({
     TAB <- values$TABAu %>%
       rename("Author" = Authors)
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Relevant_Authors",
@@ -4585,9 +4619,9 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
 
-  output$MostCitAuthorsTable <- DT::renderDT({
+  output$MostCitAuthorsTable <- renderUI({
     TAB <- values$TABAuCit
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Local_Cited_Authors",
@@ -4657,8 +4691,8 @@ To ensure the functionality of Biblioshiny,
     plot.ly(res$g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
 
-  output$AuthorHindexTable <- DT::renderDT({
-    DTformat(
+  output$AuthorHindexTable <- renderUI({
+    renderBibliobox(
       values$H %>% rename(Author = Element),
       nrow = 10,
       filename = "Author_Impact",
@@ -4743,11 +4777,11 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TopAuthorsProdTable <- DT::renderDT({
+  output$TopAuthorsProdTable <- renderUI({
     AUoverTime()
 
     TAB <- values$AUProdOverTime$dfAU
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Author_Prod_over_Time",
@@ -4768,7 +4802,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TopAuthorsProdTablePapers <- DT::renderDT({
+  output$TopAuthorsProdTablePapers <- renderUI({
     AUoverTime()
     TAB <- values$AUProdOverTime$dfPapersAU
     TAB$DOI = paste0(
@@ -4778,7 +4812,7 @@ To ensure the functionality of Biblioshiny,
       TAB$DOI,
       '</a>'
     )
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Author_Prod_over_Time_Docs",
@@ -4847,8 +4881,8 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$lotkaTable <- DT::renderDT({
-    DTformat(
+  output$lotkaTable <- renderUI({
+    renderBibliobox(
       values$lotka$AuthorProd,
       nrow = 10,
       filename = "Lotka_Law",
@@ -4945,11 +4979,11 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1, size = 0.15)
   })
 
-  output$MostRelAffiliationsTable <- DT::renderDT({
+  output$MostRelAffiliationsTable <- renderUI({
     g <- MRAffiliations()
 
     TAB <- values$TABAff
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Relevant_Affiliations",
@@ -5041,10 +5075,10 @@ To ensure the functionality of Biblioshiny,
       layout(hovermode = 'compare')
   })
 
-  output$AffOverTimeTable <- DT::renderDT({
+  output$AffOverTimeTable <- renderUI({
     AFFGrowth()
     afftimeData <- values$AffOverTime
-    DTformat(
+    renderBibliobox(
       afftimeData,
       nrow = 10,
       filename = "Affiliation_over_Time",
@@ -5201,11 +5235,11 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$MostRelCountriesTable <- DT::renderDT({
+  output$MostRelCountriesTable <- renderUI({
     g <- CAUCountries()
 
     TAB <- values$TABCo
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Relevant_Countries_By_Corresponding_Author",
@@ -5275,9 +5309,9 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$countryProdTable <- DT::renderDT({
+  output$countryProdTable <- renderUI({
     TAB <- values$mapworld$tab %>% rename(Country = region)
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Country_Production",
@@ -5372,10 +5406,10 @@ To ensure the functionality of Biblioshiny,
       layout(hovermode = 'compare')
   })
 
-  output$CountryOverTimeTable <- DT::renderDT({
+  output$CountryOverTimeTable <- renderUI({
     COGrowth()
     cotimeData = values$CountryOverTime
-    DTformat(
+    renderBibliobox(
       cotimeData,
       nrow = 10,
       filename = "Countries_Production_Over_Time",
@@ -5473,10 +5507,10 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.3, size = 0.10)
   })
 
-  output$MostCitCountriesTable <- DT::renderDT({
+  output$MostCitCountriesTable <- renderUI({
     g <- MCCountries()
     TAB <- values$TABCitCo
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Cited_Countries",
@@ -5798,7 +5832,7 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1, size = 0.10)
   })
 
-  output$MostCitDocsTable <- DT::renderDT({
+  output$MostCitDocsTable <- renderUI({
     g <- MGCDocuments()
     TAB <- values$TABGlobDoc
     TAB$DOI <- paste0(
@@ -5808,7 +5842,7 @@ To ensure the functionality of Biblioshiny,
       TAB$DOI,
       '</a>'
     )
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Global_Cited_Documents",
@@ -5933,7 +5967,7 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1, size = 0.10)
   })
 
-  output$MostLocCitDocsTable <- DT::renderDT({
+  output$MostLocCitDocsTable <- renderUI({
     TAB <- values$TABLocDoc
     TAB$DOI <- paste0(
       '<a href=\"https://doi.org/',
@@ -5951,7 +5985,7 @@ To ensure the functionality of Biblioshiny,
       "Normalized Local Citations",
       "Normalized Global Citations"
     )
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Local_Cited_Documents",
@@ -6046,7 +6080,7 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 0.6, size = 0.20)
   })
 
-  output$MostCitRefsTable <- DT::renderDT({
+  output$MostCitRefsTable <- renderUI({
     g <- MLCReferences()
     TAB <- values$TABCitRef
 
@@ -6061,7 +6095,7 @@ To ensure the functionality of Biblioshiny,
 
     TAB = TAB[, c(3, 1, 2)]
     names(TAB)[1] = "Google Scholar"
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Local_Cited_References",
@@ -6155,10 +6189,10 @@ To ensure the functionality of Biblioshiny,
     plot.ly(values$res$spectroscopy, side = "l", aspectratio = 1.3, size = 0.10)
   })
 
-  output$rpysTable <- DT::renderDT({
+  output$rpysTable <- renderUI({
     RPYS()
     rpysData = values$res$rpysTable
-    DTformat(
+    renderBibliobox(
       rpysData,
       nrow = 10,
       filename = "RPYS",
@@ -6179,7 +6213,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$crTable <- DT::renderDT({
+  output$crTable <- renderUI({
     RPYS()
     crData = values$res$CR
     crData$link <- paste0(
@@ -6193,7 +6227,7 @@ To ensure the functionality of Biblioshiny,
     crData = crData[order(-as.numeric(crData$Year), -crData$Freq), ]
     names(crData) = c("Year", "Reference", "Local Citations", "Google link")
     crData <- crData[, c(1, 4, 2, 3)]
-    DTformat(
+    renderBibliobox(
       crData,
       nrow = 10,
       filename = "RPYS_Documents",
@@ -6214,7 +6248,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$rpysSequence <- DT::renderDT({
+  output$rpysSequence <- renderUI({
     RPYS()
     paperClass <- ifelse(
       input$rpysInfluential == "Not Influent",
@@ -6239,7 +6273,7 @@ To ensure the functionality of Biblioshiny,
       "Citation Sequence",
       "Sequence Type"
     )
-    DTformat(
+    renderBibliobox(
       crData,
       nrow = 10,
       filename = "RPYS_InfluentialReferences",
@@ -6260,11 +6294,11 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$rpysPeaks <- DT::renderDT({
+  output$rpysPeaks <- renderUI({
     RPYS()
     crData <- values$res$peaks
     names(crData) = c("Year", "Reference", "Local Citations")
-    DTformat(
+    renderBibliobox(
       crData,
       nrow = 10,
       filename = "RPYS_Top10Peaks",
@@ -6350,8 +6384,8 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$stopwordList <- renderDT({
-    DTformat(
+  output$stopwordList <- renderUI({
+    renderBibliobox(
       values$GenericSL,
       nrow = Inf,
       filename = "Stopword_List",
@@ -6373,8 +6407,8 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$synonymList <- renderDT({
-    DTformat(
+  output$synonymList <- renderUI({
+    renderBibliobox(
       values$GenericSYN,
       nrow = Inf,
       filename = "Stopword_List",
@@ -6505,11 +6539,11 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, side = "r", aspectratio = 1.3, size = 0.10)
   })
 
-  output$MostRelWordsTable <- DT::renderDT({
+  output$MostRelWordsTable <- renderUI({
     g <- MFWords()
 
     TAB <- values$TABWord
-    DTformat(
+    renderBibliobox(
       TAB,
       nrow = 10,
       filename = "Most_Frequent_Words",
@@ -6785,9 +6819,9 @@ To ensure the functionality of Biblioshiny,
     values$TreeMap
   })
 
-  output$wordTable <- DT::renderDT({
+  output$wordTable <- renderUI({
     WordCloud()
-    DTformat(
+    renderBibliobox(
       values$Words,
       nrow = 10,
       filename = "Most_Frequent_Words",
@@ -6808,10 +6842,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$treeTable <- DT::renderDT(
+  output$treeTable <- renderUI(
     {
       WordsT <- TreeMap()
-      DTformat(
+      renderBibliobox(
         values$WordsT,
         nrow = 10,
         filename = "Most_Frequent_Words",
@@ -6830,9 +6864,9 @@ To ensure the functionality of Biblioshiny,
         escape = FALSE,
         selection = FALSE
       )
-    },
-    height = 600,
-    width = 900
+    } #,
+    #height = 600,
+    #width = 900
   )
 
   observeEvent(input$reportTREEMAP, {
@@ -7136,10 +7170,10 @@ To ensure the functionality of Biblioshiny,
       layout(hovermode = 'compare')
   })
 
-  output$kwGrowthtable <- DT::renderDT({
+  output$kwGrowthtable <- renderUI({
     g <- WDynamics()
     kwData <- values$KW
-    DTformat(
+    renderBibliobox(
       kwData,
       nrow = 10,
       filename = "Word_Dynamics",
@@ -7315,7 +7349,7 @@ To ensure the functionality of Biblioshiny,
     plot.ly(g, flip = TRUE, side = "r", size = 0.1, aspectratio = 1.3)
   })
 
-  output$trendTopicsTable <- DT::renderDT({
+  output$trendTopicsTable <- renderUI({
     TrendTopics()
     tpData = values$trendTopics$df_graph %>%
       rename(
@@ -7325,7 +7359,7 @@ To ensure the functionality of Biblioshiny,
         "Year (Median)" = year_med,
         "Year (Q3)" = year_q3
       )
-    DTformat(
+    renderBibliobox(
       tpData,
       nrow = 10,
       filename = "TrendTopic",
@@ -7438,11 +7472,11 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$CMTable <- DT::renderDT({
+  output$CMTable <- renderUI({
     CMMAP()
     #cmData=values$CM$data[,c(2,1,3,5)]
     cmData <- values$CM$data
-    DTformat(
+    renderBibliobox(
       cmData,
       nrow = 10,
       filename = "CouplingMap",
@@ -7463,11 +7497,11 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$CMTableCluster <- DT::renderDT({
+  output$CMTableCluster <- renderUI({
     CMMAP()
     #cmData=values$CM$clusters[,c(7,1:4,6)]
     cmData <- values$CM$clusters
-    DTformat(
+    renderBibliobox(
       cmData,
       nrow = 10,
       filename = "CouplingMap_Clusters",
@@ -7775,7 +7809,7 @@ To ensure the functionality of Biblioshiny,
     contentType = "html"
   )
 
-  output$cocTable <- DT::renderDT({
+  output$cocTable <- renderUI({
     COCnetwork()
     cocData = values$cocnet$cluster_res
     names(cocData) = c(
@@ -7785,7 +7819,7 @@ To ensure the functionality of Biblioshiny,
       "Closeness",
       "PageRank"
     )
-    DTformat(
+    renderBibliobox(
       cocData,
       nrow = 10,
       filename = "CoWord_Network",
@@ -7970,10 +8004,10 @@ To ensure the functionality of Biblioshiny,
     #values$CS$graph_dendogram)
   })
 
-  output$CSTableW <- DT::renderDT({
+  output$CSTableW <- renderUI({
     CSfactorial()
     WData <- values$CS$WData
-    DTformat(
+    renderBibliobox(
       WData,
       nrow = 10,
       filename = "CoWord_Factorial_Analysis_Words_By_Cluster",
@@ -7994,10 +8028,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$CSTableD <- DT::renderDT({
+  output$CSTableD <- renderUI({
     CSfactorial()
     CSData <- values$CS$CSData
-    DTformat(
+    renderBibliobox(
       CSData,
       nrow = 10,
       filename = "CoWord_Factorial_Analysis_Articles_By_Cluster",
@@ -8276,10 +8310,10 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
-  output$TMTable <- DT::renderDT({
+  output$TMTable <- renderUI({
     TMAP()
     tmData = values$TM$words
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Terms",
@@ -8300,10 +8334,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableCluster <- DT::renderDT({
+  output$TMTableCluster <- renderUI({
     TMAP()
     tmData <- values$TM$clusters
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Clusters",
@@ -8324,10 +8358,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableDocument <- DT::renderDT({
+  output$TMTableDocument <- renderUI({
     TMAP()
     tmDataDoc <- values$TM$documentToClusters
-    DTformat(
+    renderBibliobox(
       tmDataDoc,
       nrow = 10,
       filename = "Thematic_Map_Documents",
@@ -8609,7 +8643,7 @@ To ensure the functionality of Biblioshiny,
     contentType = "zip"
   )
 
-  output$TETable <- DT::renderDT({
+  output$TETable <- renderUI({
     TEMAP()
     TEData = values$nexus$Data
     names(TEData) = c(
@@ -8621,7 +8655,7 @@ To ensure the functionality of Biblioshiny,
       "Occurrences",
       "Stability Index"
     )
-    DTformat(
+    renderBibliobox(
       TEData,
       nrow = 10,
       filename = "Thematic_Evolution",
@@ -8767,10 +8801,10 @@ To ensure the functionality of Biblioshiny,
     values$network5$VIS
   })
 
-  output$TMTable1 <- DT::renderDT({
+  output$TMTable1 <- renderUI({
     TEMAP()
     tmData = values$nexus$TM[[1]]$words
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_1_Terms",
@@ -8791,10 +8825,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTable2 <- DT::renderDT({
+  output$TMTable2 <- renderUI({
     TEMAP()
     tmData = values$nexus$TM[[2]]$words
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_2_Terms",
@@ -8815,10 +8849,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTable3 <- DT::renderDT({
+  output$TMTable3 <- renderUI({
     TEMAP()
     tmData = values$nexus$TM[[3]]$words
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_3_Terms",
@@ -8839,10 +8873,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTable4 <- DT::renderDT({
+  output$TMTable4 <- renderUI({
     TEMAP()
     tmData = values$nexus$TM[[4]]$words
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_4_Terms",
@@ -8863,10 +8897,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTable5 <- DT::renderDT({
+  output$TMTable5 <- renderUI({
     TEMAP()
     tmData = values$nexus$TM[[5]]$words
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_5_Terms",
@@ -8887,10 +8921,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableCluster1 <- DT::renderDT({
+  output$TMTableCluster1 <- renderUI({
     TEMAP()
     tmData <- values$nexus$TM[[1]]$clusters
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_1_Clusters",
@@ -8911,10 +8945,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableCluster2 <- DT::renderDT({
+  output$TMTableCluster2 <- renderUI({
     TEMAP()
     tmData <- values$nexus$TM[[2]]$clusters
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_2_Clusters",
@@ -8935,10 +8969,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableCluster3 <- DT::renderDT({
+  output$TMTableCluster3 <- renderUI({
     TEMAP()
     tmData <- values$nexus$TM[[3]]$clusters
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_3_Clusters",
@@ -8959,10 +8993,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableCluster4 <- DT::renderDT({
+  output$TMTableCluster4 <- renderUI({
     TEMAP()
     tmData <- values$nexus$TM[[4]]$clusters
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_4_Clusters",
@@ -8983,10 +9017,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableCluster5 <- DT::renderDT({
+  output$TMTableCluster5 <- renderUI({
     TEMAP()
     tmData <- values$nexus$TM[[5]]$clusters
-    DTformat(
+    renderBibliobox(
       tmData,
       nrow = 10,
       filename = "Thematic_Map_Period_5_Clusters",
@@ -9007,10 +9041,10 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableDocument1 <- DT::renderDT(server = TRUE, {
+  output$TMTableDocument1 <- renderUI({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[1]]$documentToClusters
-    DTformat(
+    renderBibliobox(
       tmDataDoc,
       nrow = 10,
       filename = "Thematic_Map_Period_1_Documents",
@@ -9031,7 +9065,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableDocument2 <- DT::renderDT({
+  output$TMTableDocument2 <- renderUI({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[2]]$documentToClusters
     tmDataDoc$DI <- paste0(
@@ -9052,7 +9086,7 @@ To ensure the functionality of Biblioshiny,
       "NTC",
       "SR"
     )
-    DTformat(
+    renderBibliobox(
       tmDataDoc,
       nrow = 10,
       filename = "Thematic_Map_Period_2_Documents",
@@ -9073,7 +9107,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableDocument3 <- DT::renderDT({
+  output$TMTableDocument3 <- renderUI({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[3]]$documentToClusters
     tmDataDoc$DI <- paste0(
@@ -9095,7 +9129,7 @@ To ensure the functionality of Biblioshiny,
       "SR"
     )
 
-    DTformat(
+    renderBibliobox(
       tmDataDoc,
       nrow = 10,
       filename = "Thematic_Map_Period_3_Documents",
@@ -9116,7 +9150,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableDocument4 <- DT::renderDT({
+  output$TMTableDocument4 <- renderUI({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[4]]$documentToClusters
     tmDataDoc$DI <- paste0(
@@ -9138,7 +9172,7 @@ To ensure the functionality of Biblioshiny,
       "SR"
     )
 
-    DTformat(
+    renderBibliobox(
       tmDataDoc,
       nrow = 10,
       filename = "Thematic_Map_Period_4_Documents",
@@ -9159,7 +9193,7 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
-  output$TMTableDocument5 <- DT::renderDT({
+  output$TMTableDocument5 <- renderUI({
     TEMAP()
     tmDataDoc <- values$nexus$TM[[5]]$documentToClusters
     tmDataDoc$DI <- paste0(
@@ -9181,7 +9215,7 @@ To ensure the functionality of Biblioshiny,
       "SR"
     )
 
-    DTformat(
+    renderBibliobox(
       tmDataDoc,
       nrow = 10,
       filename = "Thematic_Map_Period_5_Documents",
@@ -9307,7 +9341,7 @@ To ensure the functionality of Biblioshiny,
     contentType = "zip"
   )
 
-  output$cocitTable <- DT::renderDT({
+  output$cocitTable <- renderUI({
     COCITnetwork()
     cocitData = values$cocitnet$cluster_res
     names(cocitData) = c(
@@ -9317,7 +9351,7 @@ To ensure the functionality of Biblioshiny,
       "Closeness",
       "PageRank"
     )
-    DTformat(
+    renderBibliobox(
       cocitData,
       nrow = 10,
       filename = "CoCitation_Network",
@@ -9416,10 +9450,10 @@ To ensure the functionality of Biblioshiny,
     values$histPlotVis$VIS
   })
 
-  output$histTable <- DT::renderDT({
+  output$histTable <- renderUI({
     g <- Hist()
     Data <- values$histResults$histData
-    DTformat(
+    renderBibliobox(
       Data,
       nrow = 10,
       filename = "Historiograph_Network",
@@ -9705,10 +9739,10 @@ To ensure the functionality of Biblioshiny,
     contentType = "zip"
   )
 
-  output$colTable <- DT::renderDT({
+  output$colTable <- renderUI({
     COLnetwork()
     colData = values$colnet$cluster_res
-    DTformat(
+    renderBibliobox(
       colData,
       nrow = 10,
       filename = "Collaboration_Network",
@@ -9812,10 +9846,10 @@ To ensure the functionality of Biblioshiny,
     values$WMmap$g
   })
 
-  output$WMTable <- DT::renderDT({
+  output$WMTable <- renderUI({
     WMnetwork()
     colData = values$WMmap$tab
-    DTformat(
+    renderBibliobox(
       colData,
       nrow = 10,
       filename = "Collaboration_WorldMap",
@@ -10109,9 +10143,9 @@ To ensure the functionality of Biblioshiny,
     }
   )
 
-  output$tallTable <- renderDT({
+  output$tallTable <- renderUI({
     req(values$tallDf)
-    DTformat(
+    renderBibliobox(
       values$tallDf,
       nrow = 3,
       filename = "tallDf",

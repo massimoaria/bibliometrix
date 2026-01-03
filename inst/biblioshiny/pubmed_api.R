@@ -284,7 +284,7 @@ pubmedUI <- function() {
             # Data table output
             div(
               style = "margin-top: 15px;",
-              DT::dataTableOutput("pmDataTable")
+              uiOutput("pmDataTable")
             )
           )
         )
@@ -866,7 +866,7 @@ pubmedServer <- function(input, output, session, values) {
   })
 
   # Render data table
-  output$pmDataTable <- DT::renderDataTable({
+  output$pmDataTable <- renderUI({
     req(values$M)
     req(values$data_source == "PubMed")
 
@@ -887,7 +887,7 @@ pubmedServer <- function(input, output, session, values) {
       MData <- MData[nome]
     }
 
-    DTformat(
+    renderBibliobox(
       MData,
       nrow = 3,
       filename = "Table",
@@ -964,7 +964,7 @@ pubmedServer <- function(input, output, session, values) {
     ns <- session$ns
     modalDialog(
       uiOutput("missingTitle"),
-      DT::DTOutput(ns("missingDataTable")),
+      uiOutput(ns("missingDataTable")),
       size = "l",
       easyClose = TRUE,
       footer = tagList(

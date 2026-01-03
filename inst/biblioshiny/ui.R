@@ -5,6 +5,7 @@ source("contentAnalysisUI.R", local = TRUE)
 source("cssTags.R", local = TRUE)
 source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
+source("Htmlboxformat.R", local = TRUE)
 
 suppressMessages(libraries())
 # conflicted::conflict_prefer("span", "shiny")
@@ -900,7 +901,7 @@ body <- dashboardBody(
                   9,
                   uiOutput("collection_descriptionUI"),
                   shinycssloaders::withSpinner(
-                    DT::DTOutput("contents"),
+                    uiOutput("contents"),
                     caption = HTML(
                       "<br><strong>Converting data to Bibliometrix format</strong>"
                     )
@@ -1185,7 +1186,7 @@ body <- dashboardBody(
     #           ),
     #           column(
     #             9,
-    #             shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
+    #             shinycssloaders::withSpinner(uiOutput("apiContents"))
     #           ),
     #           column(
     #             3,
@@ -1347,7 +1348,7 @@ body <- dashboardBody(
                 column(
                   9,
                   uiOutput("collection_description_mergeUI"),
-                  shinycssloaders::withSpinner(DT::DTOutput("contentsMerge"))
+                  shinycssloaders::withSpinner(uiOutput("contentsMerge"))
                 ),
                 column(
                   3,
@@ -1575,7 +1576,7 @@ body <- dashboardBody(
                   "Click on a row to view its citation variants below."
                 ),
 
-                DTOutput("refMatch_topCitations")
+                uiOutput("refMatch_topCitations")
               ),
 
               # Variants Example Box
@@ -1590,7 +1591,7 @@ body <- dashboardBody(
                 p(
                   "The table below shows all variants of the selected citation that were matched together."
                 ),
-                DTOutput("refMatch_variantsTable")
+                uiOutput("refMatch_variantsTable")
               )
             ),
 
@@ -2118,7 +2119,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "MainInfo",
                 width = 700
               )),
@@ -2218,7 +2219,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
+              shinycssloaders::withSpinner(uiOutput("AnnualProdTable"))
             )
           )
         )
@@ -2279,7 +2280,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "AnnualTotCitperYearTable"
               ))
             )
@@ -2786,7 +2787,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
+              shinycssloaders::withSpinner(uiOutput("MostRelSourcesTable"))
             )
           )
         )
@@ -2896,7 +2897,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostRelCitSourcesTable"
               ))
             )
@@ -2959,7 +2960,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
+              shinycssloaders::withSpinner(uiOutput("bradfordTable"))
             )
           )
         )
@@ -3087,7 +3088,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "SourceHindexTable"
               ))
             )
@@ -3217,7 +3218,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "soGrowthtable"
               ))
             )
@@ -3351,7 +3352,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostRelAuthorsTable"))
             )
           )
         )
@@ -3579,7 +3580,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostCitAuthorsTable"))
             )
           )
         )
@@ -3689,11 +3690,11 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table - Production per Year",
-              shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
+              shinycssloaders::withSpinner(uiOutput("TopAuthorsProdTable"))
             ),
             tabPanel(
               "Table - Documents",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "TopAuthorsProdTablePapers"
               ))
             ),
@@ -3778,7 +3779,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
+              shinycssloaders::withSpinner(uiOutput("lotkaTable"))
             )
           )
         )
@@ -3906,7 +3907,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "AuthorHindexTable"
               ))
             )
@@ -4034,7 +4035,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostRelAffiliationsTable"
               ))
             )
@@ -4148,7 +4149,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "AffOverTimeTable"
               ))
             )
@@ -4262,7 +4263,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostRelCountriesTable"
               ))
             ),
@@ -4344,7 +4345,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
+              shinycssloaders::withSpinner(uiOutput("countryProdTable"))
             )
           )
         )
@@ -4456,7 +4457,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "CountryOverTimeTable"
               ))
             )
@@ -4584,7 +4585,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostCitCountriesTable"
               ))
             )
@@ -4713,7 +4714,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostCitDocsTable"))
             )
           )
         )
@@ -4840,7 +4841,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostLocCitDocsTable"))
             ),
             tabPanel(
               title = tagList(
@@ -4970,7 +4971,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostCitRefsTable"))
             )
           )
         )
@@ -5135,13 +5136,13 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table - RPYS",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "rpysTable"
               ))
             ),
             tabPanel(
               "Table - Cited References",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "crTable"
               ))
             ),
@@ -5165,13 +5166,13 @@ body <- dashboardBody(
                   )
                 )
               ),
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "rpysSequence"
               ))
             ),
             tabPanel(
               "Table - Top 10 Peaks",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "rpysPeaks"
               ))
             ),
@@ -5441,7 +5442,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostRelWordsTable"))
             )
           )
         )
@@ -5844,7 +5845,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
+              shinycssloaders::withSpinner(uiOutput("wordTable"))
             )
           )
         )
@@ -6091,7 +6092,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("treeTable"))
+              shinycssloaders::withSpinner(uiOutput("treeTable"))
             )
           )
         )
@@ -6364,7 +6365,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "kwGrowthtable"
               ))
             )
@@ -6674,7 +6675,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "trendTopicsTable"
               ))
             ),
@@ -6956,11 +6957,11 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "CMTable"))
             ),
             tabPanel(
               "Clusters",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "CMTableCluster"
               ))
             )
@@ -7608,7 +7609,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "cocTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "cocTable"))
             ),
             tabPanel(
               "Degree Plot",
@@ -8014,17 +8015,17 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "TMTable"))
             ),
             tabPanel(
               "Clusters",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "TMTableCluster"
               ))
             ),
             tabPanel(
               "Documents",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "TMTableDocument"
               ))
             ),
@@ -8446,7 +8447,7 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TETable"
                   ))
                 )
@@ -8472,19 +8473,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable1"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster1"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument1"
                   ))
                 )
@@ -8510,19 +8511,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable2"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster2"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument2"
                   ))
                 )
@@ -8548,19 +8549,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable3"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster3"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument3"
                   ))
                 )
@@ -8586,19 +8587,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable4"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster4"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument4"
                   ))
                 )
@@ -8624,19 +8625,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable5"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster5"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument5"
                   ))
                 )
@@ -8993,11 +8994,11 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Words by Cluster",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "CSTableW"))
             ),
             tabPanel(
               "Articles by Cluster",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "CSTableD"))
             ),
             tabPanel(
               title = tagList(
@@ -9458,7 +9459,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "cocitTable"
               ))
             ),
@@ -9659,7 +9660,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "histTable"))
             ),
             tabPanel(
               title = tagList(
@@ -10268,7 +10269,7 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(
-                DT::DTOutput(outputId = "colTable")
+                uiOutput(outputId = "colTable")
               )
             ),
 
@@ -10449,7 +10450,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "WMTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "WMTable"))
             ),
             tabPanel(
               title = tagList(
@@ -10604,7 +10605,7 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "tallTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "tallTable"))
             )
           ),
           column(

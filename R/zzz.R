@@ -100,9 +100,6 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom grDevices pdf
 #' @importFrom grDevices chull
 #' @importFrom grDevices heat.colors
-#' @importFrom DT DTOutput
-#' @importFrom DT renderDT
-#' @importFrom DT datatable
 #' @importFrom stringdist stringdistmatrix
 #' @importFrom rscopus affiliation_retrieval
 #' @importFrom rscopus author_df_orig

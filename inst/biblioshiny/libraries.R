@@ -56,7 +56,6 @@ libraries <- function() {
     "zip",
     "shiny",
     "igraph",
-    "DT",
     "stringr",
     "contentanalysis",
     "ggplot2",

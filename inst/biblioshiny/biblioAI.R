@@ -1459,9 +1459,9 @@ TE2Gemini <- function(nexus, plotTE) {
   K <- length(nexus$TM)
   periods <- nexus$Nodes %>% select(group) %>% distinct() %>% pull()
   files <- unlist(lapply(periods, function(x) {
-    paste0(tempdir(), "/", x, "_period.png")
+    file.path(tempdir(), paste0(x, "_period.png"))
   }))
-  files <- c(paste0(tempdir(), "/Evolution_Plot.png"), files)
+  files <- c(file.path(tempdir(), "Evolution_Plot.png"), files)
 
   plot2pngGemini(plotTE, filename = files[1], type = "plotly")
 

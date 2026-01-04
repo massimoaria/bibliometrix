@@ -2357,7 +2357,7 @@ notifications <- function() {
   ## check if a file exists on the local machine and load it
   home <- homeFolder()
 
-  file <- paste(home, "/biblioshiny_notifications.csv", sep = "")
+  file <- file.path(home, "biblioshiny_notifications.csv")
   fileTrue <- file.exists(file)
   if (isTRUE(fileTrue)) {
     suppressWarnings(notifLocal <- read.csv(file, header = TRUE, sep = ","))

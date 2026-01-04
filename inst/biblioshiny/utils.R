@@ -1,7 +1,71 @@
 ### COMMON FUNCTIONS ####
 
-# Scroll to Top Button (Font Awesome version)
+# Funzione helper aggiornata con titolo e affiliazione
+createAuthorCard <- function(
+  name,
+  title,
+  affiliation,
+  url,
+  photo,
+  scholar = FALSE
+) {
+  tags$a(
+    href = url,
+    target = "_blank",
+    style = "text-decoration: none;",
+    div(
+      style = "text-align: center; transition: transform 0.3s; cursor: pointer; padding: 15px; background: #f9f9f9; border-radius: 10px;",
+      onmouseover = "this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)';",
+      onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='none';",
 
+      # Foto circolare con bordo
+      div(
+        style = sprintf(
+          "width: 110px; height: 110px; border-radius: 50%%; background-image: url('%s'); background-size: cover; background-position: center; margin: 0 auto 15px; border: 4px solid #3c8dbc; box-shadow: 0 4px 15px rgba(0,0,0,0.2);",
+          photo
+        )
+      ),
+
+      # Nome
+      div(
+        name,
+        style = "font-weight: bold; color: #2c3e50; font-size: 16px; margin-bottom: 8px;"
+      ),
+
+      # Titolo
+      div(
+        title,
+        style = "color: #7f8c8d; font-size: 13px; font-weight: 500; margin-bottom: 5px;"
+      ),
+
+      # Affiliazione
+      div(
+        icon("university", style = "margin-right: 5px;"),
+        affiliation,
+        style = "color: #95a5a6; font-size: 12px; line-height: 1.4; margin-bottom: 10px;"
+      ),
+
+      # Link icon
+      div(
+        if (scholar) {
+          tagList(
+            icon("graduation-cap", style = "margin-right: 3px;"),
+            "Google Scholar"
+          )
+        } else {
+          tagList(
+            icon("link", style = "margin-right: 3px;"),
+            "Website"
+          )
+        },
+        style = "color: #3c8dbc; font-size: 12px; font-weight: 600;"
+      )
+    )
+  )
+}
+
+
+# Scroll to Top Button (Font Awesome version)
 scrollToTopButton <- function() {
   tags$div(
     # CSS per il pulsante

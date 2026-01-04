@@ -234,6 +234,556 @@ To ensure the functionality of Biblioshiny,
     ignoreInit = TRUE,
     once = TRUE
   )
+  # Help Menu URLs and Version
+  intro <- "https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html"
+  importData <- "https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html"
+  slides <- "https://bibliometrix.org/biblioshiny/assets/player/KeynoteDHTMLPlayer.html#0"
+  biblioshinyVersion <- as.character(packageVersion("bibliometrix"))
+  ## Donation Card ----
+  observeEvent(input$show_donate, {
+    showModal(modalDialog(
+      title = div(
+        style = "text-align: center; margin-bottom: 10px;",
+        icon("heart", style = "color: #e74c3c; font-size: 26px;"),
+        span(
+          " Support Bibliometrix and Biblioshiny",
+          style = "font-size: 24px; font-weight: bold; color: #2c3e50; margin-left: 10px;"
+        )
+      ),
+      size = "m",
+      easyClose = TRUE,
+      footer = modalButton("Close"),
+
+      div(
+        style = "padding: 20px;",
+
+        # Messaggio principale
+        div(
+          style = "text-align: center; margin-bottom: 30px;",
+
+          div(
+            style = "font-size: 16px; color: #2c3e50; line-height: 1.8; margin-bottom: 20px;",
+            "Bibliometrix and Biblioshiny are free and open-source tools developed with passion by our research team.",
+            tags$br(),
+            "Your support helps us maintain and improve the project."
+          ),
+
+          div(
+            style = "font-size: 18px; color: #e74c3c; font-weight: bold; margin-bottom: 25px;",
+            icon("heart", style = "margin-right: 8px;"),
+            "Help us keep Bibliometrix and Biblioshiny free for everyone"
+          )
+        ),
+
+        # Card donazione principale
+        tags$a(
+          href = "https://www.bibliometrix.org/home/index.php/donation",
+          target = "_blank",
+          style = "text-decoration: none; display: block;",
+          div(
+            style = "background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(231, 76, 60, 0.3); transition: all 0.3s; cursor: pointer;",
+            onmouseover = "this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(231, 76, 60, 0.4)';",
+            onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(231, 76, 60, 0.3)';",
+
+            div(
+              style = "text-align: center;",
+
+              # Icona grande
+              div(
+                style = "width: 80px; height: 80px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);",
+                icon(
+                  "hand-holding-heart",
+                  style = "color: #e74c3c; font-size: 35px;"
+                )
+              ),
+
+              # Titolo
+              div(
+                "Make a Donation",
+                style = "color: white; font-size: 24px; font-weight: bold; margin-bottom: 12px;"
+              ),
+
+              # Descrizione
+              div(
+                "Support the development and maintenance of Bibliometrix and Biblioshiny",
+                style = "color: rgba(255,255,255,0.95); font-size: 14px; margin-bottom: 20px; line-height: 1.6;"
+              ),
+
+              # Button
+              div(
+                icon("external-link-alt", style = "margin-right: 8px;"),
+                "Donate Now",
+                style = "color: #e74c3c; font-size: 16px; font-weight: 700; display: inline-block; padding: 12px 30px; background: white; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);"
+              )
+            )
+          )
+        ),
+
+        # Info aggiuntive
+        div(
+          style = "margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #e74c3c;",
+
+          div(
+            icon("info-circle", style = "color: #3498db; margin-right: 8px;"),
+            strong("Why donate?", style = "color: #2c3e50; font-size: 14px;")
+          ),
+
+          div(
+            style = "margin-top: 10px; color: #7f8c8d; font-size: 13px; line-height: 1.6;",
+            tags$ul(
+              style = "margin: 10px 0; padding-left: 20px;",
+              tags$li("Keep the tool free and accessible"),
+              tags$li("Fund new features and improvements"),
+              tags$li("Support open-source research software"),
+              tags$li("Enable continuous maintenance and updates")
+            )
+          )
+        )
+      )
+    ))
+  })
+
+  ## Team Card ----
+  observeEvent(input$show_team, {
+    showModal(modalDialog(
+      title = div(
+        style = "text-align: center; margin-bottom: 10px;",
+        icon("users", style = "color: #3c8dbc; font-size: 26px;"),
+        span(
+          " Bibliometrix Creators",
+          style = "font-size: 24px; font-weight: bold; color: #2c3e50; margin-left: 10px;"
+        )
+      ),
+      size = "l",
+      easyClose = TRUE,
+      footer = modalButton("Close"),
+
+      # Creators Section
+      div(
+        style = "padding: 20px;",
+
+        div(
+          style = "margin-bottom: 35px;",
+          div(
+            style = "display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-bottom: 10px;",
+
+            createAuthorCard(
+              name = "Massimo Aria",
+              title = "Full Professor of Statistics for Social Sciences",
+              affiliation = "University of Naples Federico II",
+              url = "https://www.massimoaria.com",
+              photo = "images/team/massimo_aria.jpg",
+              scholar = FALSE
+            ),
+
+            createAuthorCard(
+              name = "Corrado Cuccurullo",
+              title = "Full Professor of Corporate Governance",
+              affiliation = "University of Campania Luigi Vanvitelli",
+              url = "https://www.corradocuccurullo.com/",
+              photo = "images/team/corrado_cuccurullo.jpg",
+              scholar = FALSE
+            )
+          )
+        )
+      )
+    ))
+  })
+
+  ## Link Card ----
+  observeEvent(input$show_credits, {
+    showModal(modalDialog(
+      title = div(
+        style = "text-align: center; margin-bottom: 10px;",
+        icon("cube", style = "color: #667eea; font-size: 26px;"),
+        span(
+          " Credits",
+          style = "font-size: 24px; font-weight: bold; color: #2c3e50; margin-left: 10px;"
+        )
+      ),
+      size = "l",
+      easyClose = TRUE,
+      footer = modalButton("Close"),
+
+      div(
+        style = "padding: 15px; max-height: 70vh; overflow-y: auto;",
+
+        # Container con layout a griglia
+        div(
+          style = "display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;",
+
+          # Bibliometrix Website Card
+          tags$a(
+            href = "https://www.bibliometrix.org",
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(33, 147, 176, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(33, 147, 176, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(33, 147, 176, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon(
+                    "project-diagram",
+                    style = "color: #2193b0; font-size: 24px;"
+                  )
+                ),
+                div(
+                  div(
+                    "Bibliometrix",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Official Website",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Comprehensive R-Tool for Science Mapping and Bibliometric Analysis. Documentation, tutorials, and case studies."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "Visit Website",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          ),
+
+          # Summer School Card
+          tags$a(
+            href = "https://www.bibliometrix.org/sssm",
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(245, 87, 108, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 87, 108, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon(
+                    "graduation-cap",
+                    style = "color: #f5576c; font-size: 24px;"
+                  )
+                ),
+                div(
+                  div(
+                    "SSSM",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Summer School & Seminars",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Summer School in Science Mapping. Advanced training courses, workshops, and seminars on bibliometric analysis and research evaluation."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "Learn More",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          ),
+
+          # K-Synth Card
+          tags$a(
+            href = "https://www.k-synth.com",
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon(
+                    "watchman-monitoring",
+                    style = "color: #667eea; font-size: 24px;"
+                  )
+                ),
+                div(
+                  div(
+                    "K-Synth srl",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Academic Spin-Off - Univ. Naples",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Science-centric information & intelligence Specialist Firm. Research, consulting, and knowledge production through data science methods."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "Visit K-Synth",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          ),
+
+          # GitHub Card
+          tags$a(
+            href = "https://github.com/massimoaria/bibliometrix",
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #24292e 0%, #000000 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon("github", style = "color: #24292e; font-size: 24px;")
+                ),
+                div(
+                  div(
+                    "GitHub",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Open Source Repository",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Access the source code, report issues, contribute to development, and stay updated with the latest releases."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "View Repository",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          )
+        )
+      )
+    ))
+  })
+
+  ## Help Menu ----
+  observeEvent(input$show_help, {
+    showModal(modalDialog(
+      title = div(
+        style = "text-align: center; margin-bottom: 10px;",
+        icon("question-circle", style = "color: #3498db; font-size: 26px;"),
+        span(
+          " Help Menu",
+          style = "font-size: 24px; font-weight: bold; color: #2c3e50; margin-left: 10px;"
+        )
+      ),
+      size = "l",
+      easyClose = TRUE,
+      footer = modalButton("Close"),
+
+      div(
+        style = "padding: 15px;",
+
+        # Container con layout a griglia
+        div(
+          style = "display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;",
+
+          # Package Tutorial Card
+          tags$a(
+            href = intro,
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon(
+                    "play-circle",
+                    style = "color: #667eea; font-size: 24px;"
+                  )
+                ),
+                div(
+                  div(
+                    "Package Tutorial",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Getting Started Guide",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Learn the basics of bibliometrix with our comprehensive interactive tutorial. Perfect for beginners."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "Start Tutorial",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          ),
+
+          # Convert and Import Data Card
+          tags$a(
+            href = importData,
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(56, 239, 125, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(56, 239, 125, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon(
+                    "file-import",
+                    style = "color: #11998e; font-size: 24px;"
+                  )
+                ),
+                div(
+                  div(
+                    "Import Data",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Data Conversion Guide",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Step-by-step instructions on how to convert and import bibliographic data from various sources into bibliometrix."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "View Guide",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          ),
+
+          # biblioshiny Tutorial Card
+          tags$a(
+            href = slides,
+            target = "_blank",
+            style = "text-decoration: none; display: block;",
+            div(
+              style = "background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3); transition: all 0.3s; cursor: pointer; height: 100%;",
+              onmouseover = "this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(245, 87, 108, 0.4)';",
+              onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 87, 108, 0.3)';",
+
+              div(
+                style = "display: flex; align-items: center; margin-bottom: 10px;",
+                div(
+                  style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                  icon(
+                    "file-powerpoint",
+                    style = "color: #f5576c; font-size: 24px;"
+                  )
+                ),
+                div(
+                  div(
+                    "biblioshiny Tutorial",
+                    style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                  ),
+                  div(
+                    "Interactive Slides",
+                    style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                  )
+                )
+              ),
+
+              div(
+                style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+                "Complete walkthrough of biblioshiny's web interface with practical examples and best practices for your analysis."
+              ),
+
+              div(
+                icon("external-link-alt", style = "margin-right: 5px;"),
+                "View Slides",
+                style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+              )
+            )
+          ),
+
+          # Version Info Card
+          div(
+            style = "background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); padding: 18px; border-radius: 10px; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); height: 100%;",
+
+            div(
+              style = "display: flex; align-items: center; margin-bottom: 10px;",
+              div(
+                style = "width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);",
+                icon("info-circle", style = "color: #3498db; font-size: 24px;")
+              ),
+              div(
+                div(
+                  "Version Info",
+                  style = "color: white; font-size: 20px; font-weight: bold; margin-bottom: 3px;"
+                ),
+                div(
+                  "Current Release",
+                  style = "color: rgba(255,255,255,0.9); font-size: 12px;"
+                )
+              )
+            ),
+
+            div(
+              style = "color: rgba(255,255,255,0.95); font-size: 12px; line-height: 1.5; margin-bottom: 10px;",
+              paste0(
+                "You are currently using biblioshiny version ",
+                biblioshinyVersion,
+                ". Check our GitHub repository for the latest updates and release notes."
+              )
+            ),
+
+            div(
+              icon("code-branch", style = "margin-right: 5px;"),
+              paste0("v", biblioshinyVersion),
+              style = "color: white; font-size: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 5px;"
+            )
+          )
+        )
+      )
+    ))
+  })
 
   ## NOTIFICATION ITEM ----
   output$notificationMenu <- renderMenu({

@@ -21,16 +21,6 @@ mytitle <- tags$link(
   strong("bibliometrix")
 )
 
-intro <- "https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html"
-importData <- "https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html"
-slides <- "https://bibliometrix.org/biblioshiny/assets/player/KeynoteDHTMLPlayer.html#0"
-donation <- "https://www.bibliometrix.org/home/index.php/donation"
-bibliometrixWeb <- "https://www.bibliometrix.org/"
-k_synth <- "https://www.k-synth.unina.it"
-github_aria <- "https://github.com/massimoaria/bibliometrix"
-
-biblioshinyVersion <- substr(packageVersion("bibliometrix"), 1, 7)
-
 style_opt <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
 style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
 t_report <- "Add Results to the Report"
@@ -81,72 +71,107 @@ header <- shinydashboardPlus::dashboardHeader(
     )
   ),
   dropdownMenuOutput("notificationMenu"),
-  dropdownMenu(
-    type = "messages",
-    icon = icon("question"),
-    badgeStatus = NULL,
-    headerText = strong("Help Menu"),
-    messageItem2(
-      from = "Package Tutorial",
-      message = "",
-      href = intro,
-      icon = icon("play-circle", lib = "glyphicon")
-    ),
-    messageItem2(
-      from = "Convert and Import Data",
-      message = "",
-      icon = icon("info-sign", lib = "glyphicon"),
-      href = importData
-    ),
-    messageItem2(
-      icon = icon("play", lib = "glyphicon"),
-      from = "biblioshiny Tutorial",
-      message = "",
-      href = slides
-    ),
-    messageItem(
-      icon = icon("info-circle"),
-      from = paste0("Version ", biblioshinyVersion),
-      message = "",
-      href = NULL
+  # dropdownMenu(
+  #   type = "messages",
+  #   icon = icon("question"),
+  #   badgeStatus = NULL,
+  #   headerText = strong("Help Menu"),
+  #   messageItem2(
+  #     from = "Package Tutorial",
+  #     message = "",
+  #     href = intro,
+  #     icon = icon("play-circle", lib = "glyphicon")
+  #   ),
+  #   messageItem2(
+  #     from = "Convert and Import Data",
+  #     message = "",
+  #     icon = icon("info-sign", lib = "glyphicon"),
+  #     href = importData
+  #   ),
+  #   messageItem2(
+  #     icon = icon("play", lib = "glyphicon"),
+  #     from = "biblioshiny Tutorial",
+  #     message = "",
+  #     href = slides
+  #   ),
+  #   messageItem(
+  #     icon = icon("info-circle"),
+  #     from = paste0("Version ", biblioshinyVersion),
+  #     message = "",
+  #     href = NULL
+  #   )
+  # ),
+  # help CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_help",
+      label = NULL,
+      icon = icon("question-circle"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0; transition: background 0.3s;",
+      onmouseover = "this.style.background='rgba(0,0,0,0.1)';",
+      onmouseout = "this.style.background='none';"
     )
   ),
-  dropdownMenu(
-    type = "messages",
-    icon = icon("comment-dollar", lib = "font-awesome"),
-    badgeStatus = NULL,
-    headerText = strong("Donate"),
-    messageItem2(
-      from = "Donation",
-      message = "",
-      href = donation,
-      icon = icon("share-alt", lib = "glyphicon")
+  # Donation CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_donate",
+      label = NULL,
+      icon = icon("heart"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0; transition: background 0.3s;",
+      onmouseover = "this.style.background='rgba(0,0,0,0.1)';",
+      onmouseout = "this.style.background='none';"
     )
   ),
-  dropdownMenu(
-    type = "messages",
-    icon = fa_i(name = "cube"),
-    badgeStatus = NULL,
-    headerText = strong("Credits"),
-    messageItem2(
-      from = "Bibliometrix",
-      message = "",
-      href = bibliometrixWeb,
-      icon = fa_i(name = "globe")
-    ),
-    messageItem2(
-      from = "K-Synth",
-      message = "",
-      href = k_synth,
-      icon = fa_i(name = "watchman-monitoring")
-    ),
-    messageItem2(
-      from = "Github",
-      message = "",
-      href = github_aria,
-      icon = fa_i(name = "github")
+  # Author CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_team",
+      label = NULL,
+      icon = icon("users"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0;"
     )
   ),
+  # Credits CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_credits",
+      label = NULL,
+      icon = icon("cube"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0; transition: background 0.3s;",
+      onmouseover = "this.style.background='rgba(0,0,0,0.1)';",
+      onmouseout = "this.style.background='none';"
+    )
+  ),
+
+  # dropdownMenu(
+  #   type = "messages",
+  #   icon = fa_i(name = "cube"),
+  #   badgeStatus = NULL,
+  #   headerText = strong("Credits"),
+  #   messageItem2(
+  #     from = "Bibliometrix",
+  #     message = "",
+  #     href = bibliometrixWeb,
+  #     icon = fa_i(name = "globe")
+  #   ),
+  #   messageItem2(
+  #     from = "K-Synth",
+  #     message = "",
+  #     href = k_synth,
+  #     icon = fa_i(name = "watchman-monitoring")
+  #   ),
+  #   messageItem2(
+  #     from = "Github",
+  #     message = "",
+  #     href = github_aria,
+  #     icon = fa_i(name = "github")
+  #   )
+  # ),
   # Settings Button - uses actionLink to trigger server-side tab change
   tags$li(
     class = "dropdown",

@@ -380,7 +380,7 @@ To ensure the functionality of Biblioshiny,
               name = "Corrado Cuccurullo",
               title = "Full Professor of Corporate Governance",
               affiliation = "University of Campania Luigi Vanvitelli",
-              url = "https://www.corradocuccurullo.com/",
+              url = "https://scholar.google.com/citations?user=mfW3fRwAAAAJ&hl=it",
               photo = "images/team/corrado_cuccurullo.jpg",
               scholar = FALSE
             )

@@ -71,36 +71,6 @@ header <- shinydashboardPlus::dashboardHeader(
     )
   ),
   dropdownMenuOutput("notificationMenu"),
-  # dropdownMenu(
-  #   type = "messages",
-  #   icon = icon("question"),
-  #   badgeStatus = NULL,
-  #   headerText = strong("Help Menu"),
-  #   messageItem2(
-  #     from = "Package Tutorial",
-  #     message = "",
-  #     href = intro,
-  #     icon = icon("play-circle", lib = "glyphicon")
-  #   ),
-  #   messageItem2(
-  #     from = "Convert and Import Data",
-  #     message = "",
-  #     icon = icon("info-sign", lib = "glyphicon"),
-  #     href = importData
-  #   ),
-  #   messageItem2(
-  #     icon = icon("play", lib = "glyphicon"),
-  #     from = "biblioshiny Tutorial",
-  #     message = "",
-  #     href = slides
-  #   ),
-  #   messageItem(
-  #     icon = icon("info-circle"),
-  #     from = paste0("Version ", biblioshinyVersion),
-  #     message = "",
-  #     href = NULL
-  #   )
-  # ),
   # help CARD ----
   tags$li(
     class = "dropdown",
@@ -766,75 +736,297 @@ body <- dashboardBody(
   tabItems(
     #### Homepage ----
     ##### home ----
+    # tabItem(
+    #   "biblioshinyy",
+    #   fluidPage(
+    #     fluidRow(
+    #       column(
+    #         12,
+    #         div(h1(
+    #           "biblioshiny: the shiny app for bibliometrix",
+    #           style = "text-align:center; font-size:50px;"
+    #         )),
+    #         br()
+    #       ),
+    #       column(
+    #         12,
+    #         div(
+    #           img(src = "logoAI.jpg", height = "35%", width = "35%"),
+    #           style = "text-align: center;"
+    #         )
+    #       ),
+    #       column(
+    #         12,
+    #         div(h3(
+    #           em(
+    #             "Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
+    #             #   em(a("bibliometrix website.",
+    #             #     href = "https://www.bibliometrix.org", target = "_blank"
+    #             #   )),
+    #           ),
+    #           style = "text-align:center; font-size:24px;"
+    #         )),
+    #         br(),
+    #         hr()
+    #       ),
+    #       column(
+    #         12,
+    #         div(h6(
+    #           "biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.",
+    #           style = "text-align:center; font-size:19px;"
+    #         )),
+    #         div(h6(
+    #           "When they are used in a publication, we ask that authors to cite the following reference:",
+    #           style = "text-align:center; font-size:19px;"
+    #         )),
+    #         div(h6(
+    #           "Aria, M., & Cuccurullo, C. (2017).",
+    #           strong(" bibliometrix: An R-tool for comprehensive"),
+    #           style = "text-align:center; font-size:22px;"
+    #         )),
+    #         div(h6(
+    #           strong("science mapping analysis."),
+    #           em("Journal of Informetrics"),
+    #           ", 11(4), 959-975.",
+    #           style = "text-align:center; font-size:22px;"
+    #         )),
+    #         br(),
+    #         div(h6(
+    #           "Failure to properly cite the software is considered a violation of the license.",
+    #           style = "text-align:center; font-size:19px;"
+    #         )),
+    #         br(),
+    #         div(p(
+    #           "For an introduction and live examples, visit the ",
+    #           em(a(
+    #             "bibliometrix website.",
+    #             href = "https://www.bibliometrix.org",
+    #             target = "_blank"
+    #           )),
+    #           style = "text-align:center; font-size:18px;"
+    #         )),
+    #       )
+    #     )
+    #   )
+    # ),
+    ##### home ----
     tabItem(
       "biblioshinyy",
       fluidPage(
-        fluidRow(
-          column(
-            12,
-            div(h1(
-              "biblioshiny: the shiny app for bibliometrix",
-              style = "text-align:center; font-size:50px;"
-            )),
-            br()
-          ),
-          column(
-            12,
+        # CSS personalizzato
+        tags$style(HTML(
+          "
+      .compact-home {
+        padding: 30px;
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+      .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 50px;
+        margin-bottom: 40px;
+      }
+      .logo-container img {
+        height: 380px;
+        width: auto;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+      .title-container {
+        text-align: left;
+      }
+      .main-title {
+        font-size: 80px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0 0 15px 0;
+        line-height: 1;
+        letter-spacing: -1px;
+      }
+      .subtitle {
+        font-size: 28px;
+        color: #7f8c8d;
+        margin: 0 0 18px 0;
+        font-weight: 400;
+      }
+      .ai-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 15px;
+        font-weight: 700;
+        display: inline-block;
+        margin-bottom: 15px;
+        letter-spacing: 0.5px;
+      }
+      .ai-description {
+        font-size: 22px;
+        color: #495057;
+        margin-top: 10px;
+        line-height: 1.5;
+        font-weight: 400;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+      }
+      .citation-box {
+        background: linear-gradient(135deg, #8b9dc3 0%, #a8b5d1 100%);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 6px 25px rgba(139, 157, 195, 0.3);
+        color: #1a1a2e;
+      }
+      .citation-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1a1a2e;
+      }
+      .citation-text {
+        font-size: 16px;
+        line-height: 1.8;
+        background: rgba(255,255,255,0.7);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid rgba(26, 26, 46, 0.3);
+        color: #1a1a2e;
+        font-weight: 400;
+      }
+      .citation-warning {
+        margin-top: 15px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #1a1a2e;
+        font-weight: 600;
+      }
+      .info-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .info-card {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #667eea;
+        font-size: 16px;
+        color: #495057;
+        line-height: 1.6;
+      }
+      .info-card-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+      }
+      .website-link {
+        color: #667eea;
+        font-weight: 700;
+        text-decoration: none;
+        border-bottom: 2px solid #667eea;
+      }
+      .website-link:hover {
+        color: #764ba2;
+        border-bottom-color: #764ba2;
+      }
+    "
+        )),
+
+        div(
+          class = "compact-home",
+
+          # Header con logo e titolo affiancati
+          div(
+            class = "header-section",
             div(
-              img(src = "logoAI.jpg", height = "35%", width = "35%"),
-              style = "text-align: center;"
+              class = "logo-container",
+              img(src = "logoAI.jpg")
+            ),
+            div(
+              class = "title-container",
+              h1("biblioshiny", class = "main-title"),
+              p("The shiny app for bibliometrix", class = "subtitle"),
+              br(),
+              span("NEW IN VERSION 5", class = "ai-badge"),
+              p(
+                class = "ai-description",
+                strong("Biblio AI"),
+                " – A powerful AI assistant for science mapping"
+              )
             )
           ),
-          column(
-            12,
-            div(h3(
-              em(
-                "Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
-                #   em(a("bibliometrix website.",
-                #     href = "https://www.bibliometrix.org", target = "_blank"
-                #   )),
+
+          # Grid con citazione e info
+          div(
+            class = "content-grid",
+
+            # Citation Box
+            div(
+              class = "citation-box",
+              div(
+                class = "citation-title",
+                icon("quote-left"),
+                "How to Cite"
               ),
-              style = "text-align:center; font-size:24px;"
-            )),
-            br(),
-            hr()
-          ),
-          column(
-            12,
-            div(h6(
-              "biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.",
-              style = "text-align:center; font-size:19px;"
-            )),
-            div(h6(
-              "When they are used in a publication, we ask that authors to cite the following reference:",
-              style = "text-align:center; font-size:19px;"
-            )),
-            div(h6(
-              "Aria, M., & Cuccurullo, C. (2017).",
-              strong(" bibliometrix: An R-tool for comprehensive"),
-              style = "text-align:center; font-size:22px;"
-            )),
-            div(h6(
-              strong("science mapping analysis."),
-              em("Journal of Informetrics"),
-              ", 11(4), 959-975.",
-              style = "text-align:center; font-size:22px;"
-            )),
-            br(),
-            div(h6(
-              "Failure to properly cite the software is considered a violation of the license.",
-              style = "text-align:center; font-size:19px;"
-            )),
-            br(),
-            div(p(
-              "For an introduction and live examples, visit the ",
-              em(a(
-                "bibliometrix website.",
-                href = "https://www.bibliometrix.org",
-                target = "_blank"
-              )),
-              style = "text-align:center; font-size:18px;"
-            )),
+              div(
+                class = "citation-text",
+                strong("Aria, M., & Cuccurullo, C."),
+                " (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. ",
+                em("Journal of Informetrics"),
+                ", 11(4), 959-975."
+              ),
+              div(
+                class = "citation-warning",
+                icon("exclamation-triangle"),
+                "Failure to cite is a license violation"
+              )
+            ),
+
+            # Info Panel
+            div(
+              class = "info-panel",
+
+              div(
+                class = "info-card",
+                div(
+                  class = "info-card-title",
+                  icon("certificate"),
+                  "Open Source & Free"
+                ),
+                "Distributed under the MIT license. Free for academic and commercial use."
+              ),
+
+              div(
+                class = "info-card",
+                div(
+                  class = "info-card-title",
+                  icon("book"),
+                  "Documentation"
+                ),
+                "Visit the ",
+                tags$a(
+                  "bibliometrix website",
+                  href = "https://www.bibliometrix.org",
+                  target = "_blank",
+                  class = "website-link"
+                ),
+                " for tutorials and examples."
+              )
+            )
           )
         )
       )

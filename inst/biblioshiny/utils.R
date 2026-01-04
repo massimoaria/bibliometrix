@@ -5447,11 +5447,10 @@ screenShot <- function(p, filename, type) {
   home <- homeFolder()
 
   # setting up the main directory
-  # filename <- paste0(file.path(home,"downloads/"),filename)
   if ("downloads" %in% tolower(dir(home))) {
-    filename <- paste0(file.path(home, "downloads"), "/", filename)
+    filename <- file.path(home, "downloads", filename)
   } else {
-    filename <- paste0(home, "/", filename)
+    filename <- file.path(home, filename)
   }
 
   plot2png(p, filename, zoom = 2, type = type, tmpdir = tempdir())

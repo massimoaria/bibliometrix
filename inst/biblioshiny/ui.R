@@ -736,80 +736,6 @@ body <- dashboardBody(
   tabItems(
     #### Homepage ----
     ##### home ----
-    # tabItem(
-    #   "biblioshinyy",
-    #   fluidPage(
-    #     fluidRow(
-    #       column(
-    #         12,
-    #         div(h1(
-    #           "biblioshiny: the shiny app for bibliometrix",
-    #           style = "text-align:center; font-size:50px;"
-    #         )),
-    #         br()
-    #       ),
-    #       column(
-    #         12,
-    #         div(
-    #           img(src = "logoAI.jpg", height = "35%", width = "35%"),
-    #           style = "text-align: center;"
-    #         )
-    #       ),
-    #       column(
-    #         12,
-    #         div(h3(
-    #           em(
-    #             "Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
-    #             #   em(a("bibliometrix website.",
-    #             #     href = "https://www.bibliometrix.org", target = "_blank"
-    #             #   )),
-    #           ),
-    #           style = "text-align:center; font-size:24px;"
-    #         )),
-    #         br(),
-    #         hr()
-    #       ),
-    #       column(
-    #         12,
-    #         div(h6(
-    #           "biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.",
-    #           style = "text-align:center; font-size:19px;"
-    #         )),
-    #         div(h6(
-    #           "When they are used in a publication, we ask that authors to cite the following reference:",
-    #           style = "text-align:center; font-size:19px;"
-    #         )),
-    #         div(h6(
-    #           "Aria, M., & Cuccurullo, C. (2017).",
-    #           strong(" bibliometrix: An R-tool for comprehensive"),
-    #           style = "text-align:center; font-size:22px;"
-    #         )),
-    #         div(h6(
-    #           strong("science mapping analysis."),
-    #           em("Journal of Informetrics"),
-    #           ", 11(4), 959-975.",
-    #           style = "text-align:center; font-size:22px;"
-    #         )),
-    #         br(),
-    #         div(h6(
-    #           "Failure to properly cite the software is considered a violation of the license.",
-    #           style = "text-align:center; font-size:19px;"
-    #         )),
-    #         br(),
-    #         div(p(
-    #           "For an introduction and live examples, visit the ",
-    #           em(a(
-    #             "bibliometrix website.",
-    #             href = "https://www.bibliometrix.org",
-    #             target = "_blank"
-    #           )),
-    #           style = "text-align:center; font-size:18px;"
-    #         )),
-    #       )
-    #     )
-    #   )
-    # ),
-    ##### home ----
     tabItem(
       "biblioshinyy",
       fluidPage(
@@ -844,6 +770,17 @@ body <- dashboardBody(
         margin: 0 0 15px 0;
         line-height: 1;
         letter-spacing: -1px;
+      }
+      .main-title sup {
+        font-size: 35px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-left: 5px;
+        position: relative;
+        top: -15px;
       }
       .subtitle {
         font-size: 28px;
@@ -958,10 +895,13 @@ body <- dashboardBody(
             ),
             div(
               class = "title-container",
-              h1("biblioshiny", class = "main-title"),
+              h1(
+                "Biblioshiny",
+                class = "main-title"
+              ),
               p("The shiny app for bibliometrix", class = "subtitle"),
               br(),
-              span("NEW IN VERSION 5", class = "ai-badge"),
+              span("NEW IN VERSION 5.0", class = "ai-badge"),
               p(
                 class = "ai-description",
                 strong("Biblio AI"),

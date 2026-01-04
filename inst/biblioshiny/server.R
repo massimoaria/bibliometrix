@@ -114,7 +114,7 @@ To ensure the functionality of Biblioshiny,
   values$dpi <- 300
   values$h <- 7
   #values$w <- 14
-  values$path <- paste(getwd(), "/", sep = "")
+  values$path <- paste0(getwd(), .Platform$file.sep)
   ###
 
   values$results <- list("NA")
@@ -159,13 +159,13 @@ To ensure the functionality of Biblioshiny,
 
   ## gemini api and model
   home <- homeFolder()
-  path_gemini_key <- paste0(home, "/.biblio_gemini_key.txt", collapse = "")
+  path_gemini_key <- file.path(home, ".biblio_gemini_key.txt")
   # check if sub directory exists
   values$geminiAPI <- load_api_key(path_gemini_key)
   values$collection_description <- NULL
   values$gemini_additional <- NULL
 
-  path_gemini_model <- paste0(home, "/.biblio_gemini_model.txt", collapse = "")
+  path_gemini_model <- file.path(home, ".biblio_gemini_model.txt")
   gemini_api_model <- loadGeminiModel(path_gemini_model)
   values$gemini_api_model <- gemini_api_model[1]
   values$gemini_output_size <- gemini_api_model[2]

@@ -1051,6 +1051,8 @@ To ensure the functionality of Biblioshiny,
         )
       )
 
+    values$missingdf_formatted <- df_formatted
+
     # Crea la tabella con htmlBoxFormat
     values$missingDataTable <- renderBibliobox(
       df = df_formatted,
@@ -1125,7 +1127,7 @@ To ensure the functionality of Biblioshiny,
         " duplicated docs"
       )
     } else {
-      DB <- firstup(values$M$DB[1])
+      DB <- bibliometrix:::firstup(values$M$DB[1])
       txt1 <- paste0(
         "Completeness of metadata -- ",
         strong(ndocs),
@@ -1165,7 +1167,7 @@ To ensure the functionality of Biblioshiny,
         ),
         actionButton(
           label = "Save",
-          inputId = "missingDataTable",
+          inputId = "missingDataSave",
           icon = icon("camera", lib = "glyphicon")
         ),
         modalButton(label = "Close")
@@ -1173,34 +1175,19 @@ To ensure the functionality of Biblioshiny,
     )
   }
 
-  observeEvent(input$missingDataTable, {
-    filename = paste(
-      "missingDataTable-",
-      "_",
-      gsub(" |:", "", Sys.time()),
-      ".png",
-      sep = ""
-    )
-    screenShot(values$missingDataTable, filename = filename, type = "plotly")
-  })
-
   observeEvent(input$missingReport, {
-    if (!is.null(values$missingDataTable)) {
+    if (!is.null(values$missingdf_formatted)) {
       sheetname <- "MissingData"
-      ind <- which(regexpr(sheetname, values$wb$sheet_names) > -1)
-      if (length(ind) > 0) {
-        sheetname <- paste(sheetname, length(ind) + 1, sep = "")
-      }
-      addWorksheet(wb = values$wb, sheetName = sheetname, gridLines = FALSE)
-      #values$fileTFP <- screenSh(selector = "#ThreeFieldsPlot") ## screenshot
-      values$fileMissingData <- screenSh(
-        values$missingDataTable,
+      list_df <- list(values$missingdf_formatted[, -5])
+      res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
+      values$fileMDT <- screenSh(
+        values$missingdf_formatted,
         zoom = 2,
-        type = "plotly"
+        type = "df2html"
       )
       values$list_file <- rbind(
         values$list_file,
-        c(sheetname, values$fileMissingData, 1)
+        c(sheetname, values$fileMDT, res$col)
       )
       popUp(title = "Missing Data Table", type = "success")
       values$myChoices <- sheets(values$wb)
@@ -10021,6 +10008,20 @@ To ensure the functionality of Biblioshiny,
   )
 
   ### screenshot buttons ----
+  observeEvent(input$missingDataSave, {
+    filename = paste(
+      "missingDataTable-",
+      gsub(" |:", "", Sys.time()),
+      ".png",
+      sep = ""
+    )
+    screenShot(
+      values$missingdf_formatted,
+      filename = filename,
+      type = "df2html"
+    )
+  })
+
   observeEvent(input$screenTFP, {
     filename = paste(
       "ThreeFieldPlot-",
@@ -10378,51 +10379,7 @@ To ensure the functionality of Biblioshiny,
           tags$br(),
           "Latency time: Low"
         ))
-      ) #,
-      # conditionalPanel(
-      #   condition = "input.gemini_api_model == '2.0-flash-lite'",
-      #   helpText(strong("Free Tier Rate Limits:")),
-      #   helpText(em(
-      #     "Request per Minutes: 30",
-      #     tags$br(),
-      #     "Requests per Day: 1500",
-      #     tags$br(),
-      #     "Latency time: Low"
-      #   ))
-      # ),
-      # conditionalPanel(
-      #   condition = "input.gemini_api_model == '2.0-flash'",
-      #   helpText(strong("Free Tier Rate Limits:")),
-      #   helpText(em(
-      #     "Request per Minutes: 15",
-      #     tags$br(),
-      #     "Requests per Day: 1500",
-      #     tags$br(),
-      #     "Latency time: Medium"
-      #   ))
-      # ),
-      # conditionalPanel(
-      #   condition = "input.gemini_api_model == '1.5-flash'",
-      #   helpText(strong("Free Tier Rate Limits:")),
-      #   helpText(em(
-      #     "Request per Minutes: 15",
-      #     tags$br(),
-      #     "Requests per Day: 1500",
-      #     tags$br(),
-      #     "Latency time: Medium"
-      #   ))
-      # ),
-      # conditionalPanel(
-      #   condition = "input.gemini_api_model == '1.5-flash-8b'",
-      #   helpText(strong("Free Tier Rate Limits:")),
-      #   helpText(em(
-      #     "Request per Minutes: 15",
-      #     tags$br(),
-      #     "Requests per Day: 1500",
-      #     tags$br(),
-      #     "Latency time: Low"
-      #   ))
-      # )
+      )
     )
   })
 

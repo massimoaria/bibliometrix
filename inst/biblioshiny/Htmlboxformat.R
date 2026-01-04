@@ -4,7 +4,6 @@ renderBibliobox <- function(df, title = "", ...) {
     req(df)
     tryCatch(
       {
-        # If df is a reactive, we invoke it; otherwise, use it as is
         data <- if (is.reactive(df)) df() else df
         HTML(htmlBoxFormat(data, title = title, ...))
       },
@@ -18,35 +17,7 @@ renderBibliobox <- function(df, title = "", ...) {
   })
 }
 
-
-#' HTML Box Format
-#'
-#' Creates a custom HTML box to display data frames.
-#' Replaces DT format by eliminating column name glitches.
-#'
-#' @param df Data frame to display
-#' @param nrow Number of rows per page (default: 10)
-#' @param filename Filename for export (default: "Table")
-#' @param pagelength Show page length menu (default: TRUE)
-#' @param left Column indices to align left (default: NULL)
-#' @param right Column indices to align right (default: NULL)
-#' @param numeric Numeric column indices to format (default: NULL)
-#' @param dom Show DOM elements (default: TRUE)
-#' @param size Font size (default: "85%")
-#' @param filter Filter position: "top", "bottom", "none" (default: "top")
-#' @param columnShort Column indices to truncate (default: NULL)
-#' @param columnSmall Column indices with reduced font (default: NULL)
-#' @param round Number of decimal places (default: 2)
-#' @param title Table title (default: "")
-#' @param button Show Excel export button (default: FALSE)
-#' @param escape Escape HTML (default: FALSE)
-#' @param selection Enable row selection (default: FALSE)
-#' @param scrollX Horizontal scroll (default: FALSE)
-#' @param scrollY Vertical scroll (default: FALSE)
-#' @param summary Summary type: FALSE, "documents", "historiograph", "authors" (default: FALSE)
-#'
-#' @return HTML character string
-#'
+#' HTML Box Format with Filter-Aware Excel Export
 htmlBoxFormat <- function(
   df,
   nrow = 10,
@@ -69,7 +40,6 @@ htmlBoxFormat <- function(
   scrollY = FALSE,
   summary = FALSE
 ) {
-  # Check if data exists
   if (is.null(df) || (is.data.frame(df) && nrow(df) == 0)) {
     return(as.character(tags$div(
       class = "alert alert-info",
@@ -77,14 +47,12 @@ htmlBoxFormat <- function(
     )))
   }
 
-  # Generate a unique ID for the table instance
   table_id <- sprintf(
     "htmlbox_%s",
     paste(sample(c(0:9, letters), 8, replace = TRUE), collapse = "")
   )
   col_names <- colnames(df)
 
-  # Helper function for CSS alignment
   get_align <- function(i) {
     if (i %in% left) {
       return("text-align: left;")
@@ -98,8 +66,7 @@ htmlBoxFormat <- function(
     return("text-align: left;")
   }
 
-  # HEADER: white-space: nowrap used here to prevent column name breaks.
-  # Added right padding (25px) to accommodate the sorting icon.
+  # Header
   header_html <- paste0(
     "<thead><tr style='cursor: pointer;'>",
     paste0(
@@ -114,7 +81,6 @@ htmlBoxFormat <- function(
     "</tr>"
   )
 
-  # Add filter row if requested
   if (filter == "top") {
     filter_html <- paste0(
       '<tr class="filter-row">',
@@ -132,25 +98,20 @@ htmlBoxFormat <- function(
   }
   header_html <- paste0(header_html, "</thead>")
 
-  # BODY: Clean data handling for sorting and filtering (data-sort)
-  # Uses gsub to strip HTML tags from the sorting value (e.g., from DOI links)
+  # Body
   body_rows <- apply(df, 1, function(row) {
     cells <- sapply(1:length(row), function(i) {
       val <- row[i]
       is_num <- i %in% numeric
-
-      # Clean value for sorting/filtering (removes tags like <a href...>)
       sort_val <- gsub("<.*?>", "", as.character(val))
       if (is_num) {
         sort_val <- as.numeric(sort_val)
       }
-
       display_val <- if (is_num) {
         format(round(as.numeric(sort_val), round), nsmall = round)
       } else {
         val
       }
-
       sprintf(
         '<td data-sort="%s" style="%s padding: 8px; border-bottom: 1px solid #eee;">%s</td>',
         sort_val,
@@ -162,54 +123,96 @@ htmlBoxFormat <- function(
   })
   tbody_html <- paste0("<tbody>", paste(body_rows, collapse = ""), "</tbody>")
 
-  # Assemble the UI Structure
-  html_out <- tags$div(
-    id = paste0("container_", table_id),
-    style = sprintf(
-      "font-size: %s; background: white; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px; font-family: sans-serif;",
-      size
+  # UI Structure
+  html_out <- tagList(
+    tags$script(
+      src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
     ),
 
-    # Box Header
     tags$div(
-      style = "padding: 10px 15px; background: #fdfdfd; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;",
-      tags$strong(title, style = "font-size: 1.1em; color: #333;"),
-      if (button) {
-        tags$button(
-          "Excel",
-          class = "btn btn-xs btn-success",
-          onclick = sprintf("exportToExcel('%s', '%s')", table_id, filename)
+      id = paste0("container_", table_id),
+      style = sprintf(
+        "font-size: %s; background: white; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px; font-family: sans-serif;",
+        size
+      ),
+
+      tags$div(
+        style = "padding: 10px 15px; background: #fdfdfd; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;",
+        tags$strong(title, style = "font-size: 1.1em; color: #333;"),
+        if (button) {
+          tags$button(
+            "Excel",
+            class = "btn btn-xs btn-success",
+            onclick = sprintf("exportToExcel('%s', '%s')", table_id, filename)
+          )
+        } else {
+          ""
+        }
+      ),
+
+      tags$div(
+        style = if (scrollX) "overflow-x: auto;" else "",
+        tags$table(
+          id = table_id,
+          class = "table table-hover",
+          style = "width: 100%; margin-bottom: 0; table-layout: auto;",
+          HTML(header_html),
+          HTML(tbody_html)
         )
-      } else {
-        ""
-      }
-    ),
+      ),
 
-    # Table Container
-    tags$div(
-      style = if (scrollX) "overflow-x: auto;" else "",
-      tags$table(
-        id = table_id,
-        class = "table table-hover",
-        style = "width: 100%; margin-bottom: 0; table-layout: auto;",
-        HTML(header_html),
-        HTML(tbody_html)
+      tags$div(
+        style = "padding: 10px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;",
+        tags$div(
+          id = paste0("info_", table_id),
+          style = "color: #777; font-size: 12px;"
+        ),
+        tags$div(class = "btn-group", id = paste0("pager_", table_id))
       )
     ),
 
-    # Footer (Pagination and Info)
-    tags$div(
-      style = "padding: 10px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;",
-      tags$div(
-        id = paste0("info_", table_id),
-        style = "color: #777; font-size: 12px;"
-      ),
-      tags$div(class = "btn-group", id = paste0("pager_", table_id))
-    ),
-
-    # Inline JavaScript for client-side sorting, filtering, and pagination
     tags$script(HTML(sprintf(
       '
+      if (typeof window.exportToExcel !== "function") {
+        window.exportToExcel = function(tid, fname) {
+          const table = document.getElementById(tid);
+          if (!table) return;
+          
+          const data = [];
+          const headers = [];
+          
+          // 1. Get headers (ignoring sorting icons)
+          const headerCells = table.querySelectorAll("thead tr:first-child th");
+          headerCells.forEach(th => headers.push(th.innerText.replace("⇅", "").trim()));
+          data.push(headers);
+          
+          // 2. Get rows (exporting ALL or FILTERED rows)
+          // We look for rows that do NOT have the "filtered-out" logic applied by JS
+          const allRows = table.querySelectorAll("tbody tr");
+          allRows.forEach(row => {
+            // Se la riga ha un attributo custom o classe che indica che è filtrata, la saltiamo.
+            // Nella nostra logica di updateTable, le righe filtrate non hanno display "" ma rimangono nascoste.
+            // Tuttavia, usiamo la variabile visibleRows definita nello scope della tabella se possibile, 
+            // ma qui siamo in una funzione globale. Quindi controlliamo una proprietà della riga.
+            
+            if (row.getAttribute("data-is-filtered") === "false") return;
+
+            const rowData = [];
+            Array.from(row.cells).forEach(cell => {
+              let val = cell.getAttribute("data-sort") || cell.innerText;
+              if (!isNaN(val) && val !== "") val = parseFloat(val);
+              rowData.push(val);
+            });
+            data.push(rowData);
+          });
+          
+          const ws = XLSX.utils.aoa_to_sheet(data);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Data");
+          XLSX.writeFile(wb, fname + "_" + new Date().toISOString().split("T")[0] + ".xlsx");
+        };
+      }
+
       (function() {
         const tid = "%s";
         const pageSize = %d;
@@ -228,11 +231,16 @@ htmlBoxFormat <- function(
           function updateTable() {
             const start = currentPage * pageSize;
             const end = start + pageSize;
+            
+            // Nascondi tutto fisicamente
             allRows.forEach(r => r.style.display = "none");
+            
+            // Mostra solo le righe della pagina corrente tra quelle filtrate
             visibleRows.slice(start, end).forEach(r => {
                 r.style.display = "";
                 tbody.appendChild(r); 
             });
+            
             document.getElementById("info_" + tid).innerText = 
               "Showing " + (visibleRows.length > 0 ? start + 1 : 0) + 
               "-" + Math.min(end, visibleRows.length) + " of " + visibleRows.length;
@@ -263,7 +271,6 @@ htmlBoxFormat <- function(
             createBtn("»", Math.min(pageCount - 1, currentPage + 1), false, currentPage === pageCount - 1);
           }
 
-          // Sorting logic
           table.querySelectorAll(".sortable-header").forEach(th => {
             th.onclick = function() {
               const col = parseInt(this.getAttribute("data-col"));
@@ -285,27 +292,33 @@ htmlBoxFormat <- function(
             };
           });
 
-          // Filtering logic (uses data-sort to ignore HTML tags)
           const filters = document.querySelectorAll(".table-filter-" + tid);
           filters.forEach(input => {
             input.addEventListener("input", () => {
               const fVals = Array.from(filters).map(f => f.value.toUpperCase());
-              visibleRows = allRows.filter(row => {
-                return fVals.every((val, idx) => {
+              
+              // Applica il filtro e segna le righe
+              allRows.forEach(row => {
+                const isMatch = fVals.every((val, idx) => {
                   if (!val) return true;
-                  const cellText = row.cells[idx].getAttribute("data-sort").toUpperCase();
-                  return cellText.includes(val);
+                  return row.cells[idx].getAttribute("data-sort").toUpperCase().includes(val);
                 });
+                row.setAttribute("data-is-filtered", isMatch ? "true" : "false");
               });
+
+              visibleRows = allRows.filter(r => r.getAttribute("data-is-filtered") === "true");
               currentPage = 0;
               updateTable();
             });
           });
-          updateTable();
-        }
-        init();
-      })();
-    ',
+          
+          // Segna inizialmente tutte le righe come "visibili" per export
+                             allRows.forEach(r => r.setAttribute("data-is-filtered", "true"));
+                             updateTable();
+}
+init();
+})();
+',
       table_id,
       nrow
     )))

@@ -414,17 +414,17 @@ content_analysis_tab <- function(id = "content_analysis") {
                           class = "box-title",
                           style = "color: #2E86AB;"
                         ),
-                        DT::dataTableOutput("frequent_words_table")
+                        uiOutput("frequent_words_table")
                       ),
                       column(
                         4,
                         h5("Top Bigrams", style = "color: #2E86AB;"),
-                        DT::dataTableOutput("bigrams_table")
+                        uiOutput("bigrams_table")
                       ),
                       column(
                         4,
                         h5("Top Trigrams", style = "color: #2E86AB;"),
-                        DT::dataTableOutput("trigrams_table")
+                        uiOutput("trigrams_table")
                       )
                     )
                   ),
@@ -449,7 +449,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                 class = "box-header with-border",
                                 div(
                                   class = "box-body",
-                                  DT::dataTableOutput("citation_types_table")
+                                  uiOutput("citation_types_table")
                                 )
                               )
                             )
@@ -467,7 +467,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                                 class = "box-header with-border",
                                 div(
                                   class = "box-body",
-                                  DT::dataTableOutput("citation_sections_table")
+                                  uiOutput("citation_sections_table")
                                 )
                               )
                             )
@@ -672,7 +672,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                           class = "box-body",
                           conditionalPanel(
                             condition = "output.trends_available",
-                            DT::dataTableOutput("word_trends_table")
+                            uiOutput("word_trends_table")
                           ),
                           conditionalPanel(
                             condition = "!output.trends_available",
@@ -926,7 +926,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                         ),
                         div(
                           class = "box-body",
-                          DT::dataTableOutput("strongest_connections")
+                          uiOutput("strongest_connections")
                         )
                       )
                     )

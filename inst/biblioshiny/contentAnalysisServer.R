@@ -1157,8 +1157,8 @@ Avg sentence length: %.1f words",
   })
 
   # Citation types table
-  output$citation_types_table <- DT::renderDataTable(
-    {
+  output$citation_types_table <- renderBibliobox(
+    df = reactive({
       if (
         !is.null(values$analysis_results) &&
           !is.null(values$analysis_results$citation_metrics$type_distribution)
@@ -1171,18 +1171,16 @@ Avg sentence length: %.1f words",
           percentage = numeric(0)
         )
       }
-    },
-    options = list(
-      pageLength = 10,
-      dom = 't',
-      ordering = FALSE,
-      searching = FALSE
-    )
+    }),
+    title = "Citation Types",
+    nrow = 10,
+    filter = "none",
+    round = 2
   )
 
   # Citation sections table
-  output$citation_sections_table <- DT::renderDataTable(
-    {
+  output$citation_sections_table <- renderBibliobox(
+    df = reactive({
       if (
         !is.null(values$analysis_results) &&
           !is.null(
@@ -1198,18 +1196,16 @@ Avg sentence length: %.1f words",
           percentage = numeric(0)
         )
       }
-    },
-    options = list(
-      pageLength = 10,
-      dom = 't',
-      ordering = FALSE,
-      searching = FALSE
-    )
+    }),
+    title = "Citation Sections",
+    nrow = 10,
+    filter = "none",
+    round = 2
   )
 
   # Frequent words table
-  output$frequent_words_table <- DT::renderDataTable(
-    {
+  output$frequent_words_table <- renderBibliobox(
+    df = reactive({
       if (!is.null(values$analysis_results)) {
         values$analysis_results$word_frequencies %>%
           slice_head(n = 15) %>%
@@ -1217,18 +1213,16 @@ Avg sentence length: %.1f words",
       } else {
         data.frame(word = character(0), n = numeric(0))
       }
-    },
-    options = list(
-      pageLength = 15,
-      dom = 't',
-      ordering = FALSE,
-      searching = FALSE
-    )
+    }),
+    title = "Frequent Words",
+    nrow = 15,
+    filter = "none",
+    round = 0
   )
 
   # Bigrams table
-  output$bigrams_table <- DT::renderDataTable(
-    {
+  output$bigrams_table <- renderBibliobox(
+    df = reactive({
       if (
         !is.null(values$analysis_results) &&
           "2gram" %in% names(values$analysis_results$ngrams)
@@ -1239,18 +1233,16 @@ Avg sentence length: %.1f words",
       } else {
         data.frame(ngram = character(0), n = numeric(0))
       }
-    },
-    options = list(
-      pageLength = 15,
-      dom = 't',
-      ordering = FALSE,
-      searching = FALSE
-    )
+    }),
+    title = "Bigrams (2-grams)",
+    nrow = 15,
+    filter = "none",
+    round = 0
   )
 
   # Trigrams table
-  output$trigrams_table <- DT::renderDataTable(
-    {
+  output$trigrams_table <- renderBibliobox(
+    df = reactive({
       if (
         !is.null(values$analysis_results) &&
           "3gram" %in% names(values$analysis_results$ngrams)
@@ -1261,13 +1253,11 @@ Avg sentence length: %.1f words",
       } else {
         data.frame(ngram = character(0), n = numeric(0))
       }
-    },
-    options = list(
-      pageLength = 15,
-      dom = 't',
-      ordering = FALSE,
-      searching = FALSE
-    )
+    }),
+    title = "Trigrams (3-grams)",
+    nrow = 15,
+    filter = "none",
+    round = 0
   )
 
   # Text statistics
@@ -1753,8 +1743,8 @@ Avg sentence length: %.1f words",
   })
 
   # Strongest connections table
-  output$strongest_connections <- DT::renderDataTable(
-    {
+  output$strongest_connections <- renderBibliobox(
+    df = reactive({
       if (
         !is.null(values$analysis_results) &&
           !is.null(values$analysis_results$network_data) &&
@@ -1776,13 +1766,11 @@ Avg sentence length: %.1f words",
           distance = character(0)
         )
       }
-    },
-    options = list(
-      pageLength = 8,
-      dom = 't',
-      ordering = FALSE,
-      searching = FALSE
-    )
+    }),
+    title = "Strongest Connections",
+    nrow = 8,
+    filter = "none",
+    round = 0
   )
 
   # ===========================================
@@ -2031,41 +2019,52 @@ Avg sentence length: %.1f words",
   })
 
   # Render word trends statistics table
-  output$word_trends_table <- DT::renderDataTable({
-    req(values$word_trends_data)
+  output$word_trends_table <- renderBibliobox(
+    df = reactive({
+      req(values$word_trends_data)
 
-    # Create summary statistics
-    stats_table <- values$word_trends_data %>%
-      group_by(word) %>%
-      summarise(
-        `Total Occurrences` = sum(count),
-        `Avg Frequency` = paste0(round(mean(relative_frequency) * 100, 3), "%"),
-        `Min Frequency` = paste0(round(min(relative_frequency) * 100, 3), "%"),
-        `Max Frequency` = paste0(round(max(relative_frequency) * 100, 3), "%"),
-        `Std Dev` = round(sd(relative_frequency) * 100, 3),
-        `Peak Segment` = segment_name[which.max(relative_frequency)],
-        .groups = "drop"
-      ) %>%
-      arrange(desc(`Total Occurrences`))
+      # Create summary statistics
+      stats_table <- values$word_trends_data %>%
+        group_by(word) %>%
+        summarise(
+          `Total Occurrences` = sum(count),
+          `Avg Frequency` = paste0(
+            round(mean(relative_frequency) * 100, 3),
+            "%"
+          ),
+          `Min Frequency` = paste0(
+            round(min(relative_frequency) * 100, 3),
+            "%"
+          ),
+          `Max Frequency` = paste0(
+            round(max(relative_frequency) * 100, 3),
+            "%"
+          ),
+          `Std Dev` = round(sd(relative_frequency) * 100, 3),
+          `Peak Segment` = segment_name[which.max(relative_frequency)],
+          .groups = "drop"
+        ) %>%
+        arrange(desc(`Total Occurrences`))
 
-    DT::datatable(
-      stats_table,
-      options = list(
-        pageLength = 10,
-        dom = 'ftip',
-        ordering = TRUE,
-        searching = FALSE,
-        scrollX = TRUE
-      ),
-      rownames = FALSE,
-      class = 'cell-border stripe'
-    ) %>%
-      DT::formatStyle(
-        'word',
-        fontWeight = 'bold',
-        color = '#2E86AB'
-      )
-  })
+      # Apply HTML styling to word column (replaces formatStyle)
+      stats_table <- stats_table %>%
+        mutate(
+          word = paste0(
+            '<span style="font-weight: bold; color: #2E86AB;">',
+            word,
+            '</span>'
+          )
+        )
+
+      stats_table
+    }),
+    title = "Word Trends Statistics",
+    nrow = 10,
+    filter = "none",
+    scrollX = TRUE,
+    escape = FALSE, # Important: allows HTML in cells
+    round = 3
+  )
 
   # Download handler for word trends
   output$download_word_trends <- downloadHandler(

@@ -5485,6 +5485,58 @@ plot2png <- function(p, filename, zoom = 2, type = "vis", tmpdir) {
   )
 }
 
+## screenshot of html objects
+screenHtml <- function(df, html_file) {
+  # Genera l'HTML direttamente usando htmlBoxFormat
+  html_content <- htmlBoxFormat(
+    df = df,
+    title = "Missing Data Analysis",
+    nrow = nrow(df),
+    escape = FALSE,
+    scrollX = TRUE,
+    dom = FALSE,
+    filter = "none",
+    pagelength = FALSE,
+    button = FALSE,
+    round = 2
+  )
+
+  # Crea una pagina HTML completa con stili
+  html_page <- sprintf(
+    '
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Missing Data Table</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body {
+      padding: 20px;
+      background-color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .container-fluid {
+      max-width: 100%%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    %s
+  </div>
+</body>
+</html>
+    ',
+    html_content
+  )
+
+  # Salva il file HTML
+  writeLines(html_page, html_file, useBytes = TRUE)
+}
+
 addScreenWb <- function(df, wb, width = 14, height = 8, dpi = 75) {
   names(df) <- c("sheet", "file", "n")
   if (nrow(df) > 0) {

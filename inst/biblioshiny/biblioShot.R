@@ -62,6 +62,6 @@ biblioShot <- function(
     wait_ = TRUE
   )
 
-  message(paste("Screenshot salvato:", normalizePath(file)))
+  #message(paste("Screenshot salvato:", normalizePath(file)))
   return(invisible(normalizePath(file)))
 }

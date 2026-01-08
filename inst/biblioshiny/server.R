@@ -1062,7 +1062,7 @@ To ensure the functionality of Biblioshiny,
     inFile <- input$file1
 
     if (!is.null(inFile) & input$load == "import") {
-      ext <- tools::getFileNameExtension(inFile$datapath)
+      ext <- tools::file_ext(inFile$datapath)
       switch(
         input$dbsource,
         isi = {
@@ -1306,7 +1306,7 @@ To ensure the functionality of Biblioshiny,
         }
       )
     } else if (!is.null(inFile) & input$load == "load") {
-      ext <- tolower(tools::getFileNameExtension(inFile$datapath))
+      ext <- tolower(tools::file_ext(inFile$datapath))
       switch(
         ext,
         ### excel format

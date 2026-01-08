@@ -223,6 +223,21 @@ total_downloads <- function(
   return(as.integer(downloads))
 }
 
+# getFileNameExtension <- function(fn) {
+#   # remove a path
+#   splitted <- strsplit(x = fn, split = "/")[[1]]
+#   # or use .Platform$file.sep in stead of '/'
+#   fn <- splitted[length(splitted)]
+#   ext <- ""
+#   splitted <- strsplit(x = fn, split = "\\.")[[1]]
+#   l <- length(splitted)
+#   if (l > 1 && sum(splitted[1:(l - 1)] != "")) {
+#     ext <- splitted[l]
+#   }
+#   # the extention must be the suffix of a non-empty name
+#   ext
+# }
+
 # FILTER FUNCTIONS ----
 read_journal_ranking <- function(file_path) {
   ext <- tools::file_ext(file_path)
@@ -379,7 +394,7 @@ merge_files <- function(files) {
   ## load xlsx or rdata bibliometrix files
   if ("datapath" %in% names(files)) {
     file <- files$datapath
-    ext <- unlist(lapply(file, tools::getFileNameExtension))
+    ext <- unlist(lapply(file, tools::file_ext))
   }
 
   Mfile <- list()

@@ -1062,7 +1062,7 @@ To ensure the functionality of Biblioshiny,
     inFile <- input$file1
 
     if (!is.null(inFile) & input$load == "import") {
-      ext <- getFileNameExtension(inFile$datapath)
+      ext <- tools::getFileNameExtension(inFile$datapath)
       switch(
         input$dbsource,
         isi = {
@@ -1306,7 +1306,7 @@ To ensure the functionality of Biblioshiny,
         }
       )
     } else if (!is.null(inFile) & input$load == "load") {
-      ext <- tolower(getFileNameExtension(inFile$datapath))
+      ext <- tolower(tools::getFileNameExtension(inFile$datapath))
       switch(
         ext,
         ### excel format
@@ -6913,7 +6913,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -6935,7 +6935,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -7151,7 +7151,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -7173,7 +7173,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -7279,7 +7279,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -7301,7 +7301,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -7457,7 +7457,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -7479,7 +7479,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -7782,7 +7782,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -7804,7 +7804,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -8112,7 +8112,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -8134,7 +8134,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -8452,7 +8452,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -8474,7 +8474,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -8640,7 +8640,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -8662,7 +8662,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })
@@ -8975,7 +8975,7 @@ To ensure the functionality of Biblioshiny,
       title = "Stopword list",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("stopwordList"),
+      subtitle = uiOutput("stopwordList"),
       btn_labels = "OK"
     )
   })
@@ -8997,7 +8997,7 @@ To ensure the functionality of Biblioshiny,
       title = "Synonym List",
       type = NULL,
       color = c("#1d8fe1"),
-      subtitle = DTOutput("synonymList"),
+      subtitle = uiOutput("synonymList"),
       btn_labels = "OK"
     )
   })

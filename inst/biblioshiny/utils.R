@@ -379,7 +379,7 @@ merge_files <- function(files) {
   ## load xlsx or rdata bibliometrix files
   if ("datapath" %in% names(files)) {
     file <- files$datapath
-    ext <- unlist(lapply(file, getFileNameExtension))
+    ext <- unlist(lapply(file, tools::getFileNameExtension))
   }
 
   Mfile <- list()

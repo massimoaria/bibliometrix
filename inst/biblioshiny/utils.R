@@ -931,7 +931,7 @@ authorCard <- function(selected_author, values) {
   }
   author_position <- works_exact$author_position[1]
   doi <- works_exact$doi[1]
-  on_line <- check_online()
+  on_line <- check_online(method = "http")
 
   if (on_line) {
     if (!is.null(values$author_data)) {
@@ -2261,7 +2261,7 @@ check_online <- function(
   host = "8.8.8.8",
   timeout = 5,
   # min_success = 1,
-  method = "ping" # method = c("ping", "socket", "http")
+  method = "http" # method = c("ping", "socket", "http")
 ) {
   #method <- match.arg(method)
 
@@ -2355,7 +2355,7 @@ check_online <- function(
 
 notifications <- function() {
   ## check connection and download notifications
-  online <- check_online(host = "www.bibliometrix.org")
+  online <- check_online(host = "www.bibliometrix.org", method = "http")
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   notifOnline <- NULL
   if (isTRUE(online)) {

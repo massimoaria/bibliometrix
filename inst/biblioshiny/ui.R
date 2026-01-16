@@ -8,8 +8,7 @@ source("pubmed_api.R", local = TRUE)
 source("Htmlboxformat.R", local = TRUE)
 
 suppressMessages(libraries())
-# conflicted::conflict_prefer("span", "shiny")
-# conflicted::conflict_prefer("messageItem", "shinydashboardPlus")
+
 # UI components ----
 ## Title ----
 mytitle <- tags$link(

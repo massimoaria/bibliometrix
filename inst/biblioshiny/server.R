@@ -1054,7 +1054,6 @@ To ensure the functionality of Biblioshiny,
       # values$menu <- menuList(values)
       updateMenuVisibility(session, values)
       values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
-      #"Dataset 'Management':\nA collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020."
 
       showModal(missingModal(session))
       return()

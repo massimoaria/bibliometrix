@@ -17,6 +17,5 @@ inst/doc
 inst/biblioshiny/__MACOSX
 inst/biblioshiny/rsconnect
 _gh-pages
-
-
 /.quarto/
+.RDataTmp

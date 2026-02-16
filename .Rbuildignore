@@ -13,6 +13,7 @@
 ^.*\.xls
 ^.*\.xml
 ^.*\.png
+^\.claude$
 LICENCE.*$
 Rubbish
 ^_gh-pages$

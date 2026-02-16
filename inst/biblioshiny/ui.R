@@ -44,7 +44,7 @@ export_bttn <- list(
   icon = icon(name = "download", lib = "glyphicon")
 )
 
-## load content of Info page
+## load content of Info pages ----
 biblioAI <- helpContent()$biblioAI
 info <- helpContent()$info
 pubs <- helpContent()$publications
@@ -69,7 +69,7 @@ header <- shinydashboardPlus::dashboardHeader(
       )
     )
   ),
-  dropdownMenuOutput("notificationMenu"),
+  #dropdownMenuOutput("notificationMenu"),
   # help CARD ----
   tags$li(
     class = "dropdown",
@@ -148,13 +148,33 @@ header <- shinydashboardPlus::dashboardHeader(
       inputId = "go_to_settings",
       label = NULL,
       icon = icon("gear", lib = "font-awesome"),
-      style = "background: transparent; 
-               border: none; 
-               color: #fff; 
+      style = "background: transparent;
+               border: none;
+               color: #fff;
                font-size: 20px;  /* Increased from 16px to 20px */
-               margin-top: 7px; 
+               margin-top: 7px;
                cursor: pointer;",
       title = "Settings"
+    )
+  ),
+  # Stop App Button
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      inputId = "stop_app",
+      label = NULL,
+      icon = icon("power-off", lib = "font-awesome"),
+      style = "background: transparent;
+               border: none;
+               color: #ff6b6b;
+               font-size: 18px;
+               padding: 15px;
+               margin: 0;
+               cursor: pointer;
+               transition: color 0.3s;",
+      title = "Stop Biblioshiny",
+      onmouseover = "this.style.color='#ff0000';",
+      onmouseout = "this.style.color='#ff6b6b';"
     )
   ),
   tags$li(
@@ -1569,7 +1589,7 @@ body <- dashboardBody(
 
                 helpText(
                   icon("mouse-pointer"),
-                  "Click on a row to view its citation variants below."
+                  "Click on a row to view its citation variants below and to select it for manual merge."
                 ),
 
                 uiOutput("refMatch_topCitations")
@@ -7894,6 +7914,19 @@ body <- dashboardBody(
                           )
                         )
                       )
+                    ),
+                    fluidRow(
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          "TMalpha",
+                          label = "α Parameter (Balancing Occurrence vs. Centrality)",
+                          value = 0.5,
+                          min = 0,
+                          max = 1,
+                          step = 0.1
+                        )
+                      )
                     )
                   ),
                   div(
@@ -8305,16 +8338,14 @@ body <- dashboardBody(
                       column(
                         6,
                         div(
-                          style = "padding-right: 8px;",
-                          selectInput(
-                            "TEmeasure",
-                            label = "Weight Index",
-                            choices = c(
-                              "Inclusion Index" = "inclusion",
-                              "Inclusion Index weighted by Word-Occurrences" = "weighted",
-                              "Stability Index" = "stability"
-                            ),
-                            selected = "weighted"
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "TEalpha",
+                            label = "α Parameter (Balancing Occurrence vs. Centrality)",
+                            value = 0.5,
+                            min = 0,
+                            max = 1,
+                            step = 0.1
                           )
                         )
                       ),

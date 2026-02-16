@@ -829,7 +829,7 @@ openAlexServer <- function(input, output, session, values) {
         )
 
         # Create temporary directory if it doesn't exist
-        temp_dir <- tempdir()
+        temp_dir <- getWD()
         temp_file <- file.path(
           temp_dir,
           paste0("openalex_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".rdata")

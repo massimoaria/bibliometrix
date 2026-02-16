@@ -18,7 +18,7 @@ utils::globalVariables(c(
 #'
 #' @param Nodes is a list of nodes obtained by \code{\link{thematicEvolution}} function.
 #' @param Edges is a list of edges obtained by \code{\link{thematicEvolution}} function.
-#' @param measure is a character. It can be \code{measure=("inclusion","stability", "weighted")}.
+#' @param measure is a character. It is deprecated and has no effect. The weight of the flows is always calculated using lineage_strength.
 #' @param min.flow is numerical. It indicates the minimum value of measure to plot a flow.
 #' @return a sankeyPlot
 #'
@@ -43,135 +43,123 @@ utils::globalVariables(c(
 plotThematicEvolution <- function(
   Nodes,
   Edges,
-  measure = "inclusion",
+  measure = "lineage_strength",
   min.flow = 0
 ) {
+  # Calculate relative frequency for nodes if not already present
+  if (!"rel_freq" %in% names(Nodes)) {
+    Nodes <- Nodes %>%
+      group_by(group) %>%
+      mutate(rel_freq = freq / sum(freq, na.rm = TRUE) * 100) %>%
+      ungroup()
+  } else {
+    # Convert to percentage if in [0,1] range
+    if (max(Nodes$rel_freq, na.rm = TRUE) <= 1) {
+      Nodes <- Nodes %>%
+        mutate(rel_freq = rel_freq * 100)
+    }
+  }
+
+  # Calculate lineage_strength if not present in Edges
+  if (!"lineage_strength" %in% names(Edges)) {
+    Edges <- Edges %>%
+      # left_join(node_rel_freq, by = c("from" = "id")) %>%
+      mutate(lineage_strength = Inc_Weighted)
+  }
+
+  # Store original lineage_strength for tooltips
+  Edges$lineage_strength_display <- Edges$lineage_strength
+
+  # Filter by threshold
+  Edges <- Edges %>%
+    dplyr::filter(lineage_strength >= min.flow)
+
+  # Use lineage_strength as weight
+  Edges <- Edges %>%
+    mutate(weight = lineage_strength)
+
+  # Calculate coordinates
   Kx <- length(unique(Nodes$group))
-  Ky <- nrow(Nodes)
+  group_coords <- setNames(
+    seq(from = 0, to = 1, length.out = Kx),
+    sort(unique(Nodes$group))
+  )
+
   Nodes <- Nodes %>%
     mutate(
-      coordX = rep(
-        seq(from = 0, to = 1, by = 1 / (Kx - 0.8)),
-        as.numeric(table(.data$group))
-      ),
-      coordY = rep(0.1, Ky)
+      coordX = group_coords[as.character(group)],
+      coordY = 0.1
     )
 
-  switch(
-    measure,
-    inclusion = {
-      Edges = Edges[-c(4, 5)]
-    },
-    stability = {
-      Edges = Edges[-c(3, 4)]
-    },
-    weighted = {
-      Edges = Edges[, -c(3, 5)]
-    }
-  )
-  names(Edges)[3] = "weight"
-  Edges = Edges[Edges$weight >= min.flow, ]
+  # Scale weights for visualization
+  Edges$weight <- Edges$weight * 100
 
-  # Before multiplying by 100, balance edges with sum
-  if ("sum" %in% names(Nodes)) {
-    # For each node, calculate the sum of incoming edges
-    in_flow <- Edges %>%
-      group_by(to) %>%
-      summarise(total_in = sum(weight), .groups = "drop")
-
-    # For the last period, add the necessary difference
-    periods <- unique(Nodes$group)
-    last_period <- tail(periods, 1)
-    last_nodes <- Nodes %>% dplyr::filter(group == last_period)
-
-    for (i in 1:nrow(last_nodes)) {
-      node_id <- last_nodes$id[i]
-      node_sum <- last_nodes$sum[i]
-
-      # Sum of incoming edges for this node
-      current_in <- in_flow %>% dplyr::filter(to == node_id) %>% pull(total_in)
-      if (length(current_in) == 0) {
-        current_in <- 0
-      }
-
-      # If there's a discrepancy, add a balancing edge from the previous period
-      diff <- node_sum - current_in
-      if (abs(diff) > 0.001) {
-        # Find a node from the previous period to start the flow from
-        prev_period <- periods[length(periods) - 1]
-        prev_nodes <- Nodes %>% dplyr::filter(group == prev_period)
-
-        if (nrow(prev_nodes) > 0) {
-          # Use the largest node from the previous period
-          source_node <- prev_nodes %>%
-            arrange(desc(sum)) %>%
-            slice(1) %>%
-            pull(id)
-
-          balance_edge <- data.frame(
-            from = source_node,
-            to = node_id,
-            weight = diff,
-            group = paste0("balance_", node_id),
-            color = "rgba(211,211,211,0.1)",
-            stringsAsFactors = FALSE
-          )
-          Edges <- bind_rows(Edges, balance_edge)
-        }
-      }
-    }
-  }
-
-  Edges$weight = Edges$weight * 100
-
+  # NOW reassign node IDs for plotly
+  Nodes$old_id <- Nodes$id
   Nodes$id <- (1:nrow(Nodes)) - 1
 
-  ## Identify and remove nodes with empty edges
-  ind <- setdiff(Nodes$id, unique(c(Edges$from, Edges$to)))
-  if (length(ind) > 0) {
-    Nodes <- Nodes[-(ind + 1), ]
-    Nodes$idnew <- (1:nrow(Nodes)) - 1
-    ## Replace old edge ids with new ones
-    for (i in 1:nrow(Nodes)) {
-      old <- Nodes$id[i]
-      new <- Nodes$idnew[i]
-      Edges$from[Edges$from == old] <- new
-      Edges$to[Edges$to == old] <- new
-    }
-  }
+  # Create mapping old_id -> new_id
+  id_mapping <- setNames(Nodes$id, Nodes$old_id)
 
-  # If color column doesn't exist in edges, use grey
+  # Update edge references using the mapping
+  Edges$from <- id_mapping[as.character(Edges$from)]
+  Edges$to <- id_mapping[as.character(Edges$to)]
+
+  # Remove any edges with NA
+  Edges <- Edges[!is.na(Edges$from) & !is.na(Edges$to), ]
+
+  # Default edge color if not present
   if (!"color" %in% names(Edges)) {
     Edges$color <- "#D3D3D380"
   }
 
-  # Prepare custom data for node tooltips showing name and freq
-  if ("freq" %in% names(Nodes)) {
-    node_customdata <- Nodes$freq
-    node_hovertemplate <- paste0(
-      "<b>%{label}</b><br>",
-      "Tot Occurrences: %{customdata}<br>",
-      "<extra></extra>"
-    )
-  } else {
-    node_customdata <- NULL
-    node_hovertemplate <- NULL
-  }
+  node_labels <- Nodes$name
 
-  # Plotly margins
-  m <- list(
-    l = 50,
-    r = 50,
-    b = 100,
-    t = 100,
-    pad = 4
+  # Prepare tooltips
+  node_customdata <- matrix(
+    c(Nodes$freq, Nodes$rel_freq),
+    nrow = nrow(Nodes),
+    ncol = 2
   )
 
-  plotly::plot_ly(
+  node_hovertemplate <- paste0(
+    "<b>%{label}</b><br>",
+    "Frequency: %{customdata[0]:.0f}<br>",
+    "Relative Frequency: %{customdata[1]:.2f}%<br>",
+    "<extra></extra>"
+  )
+
+  # Prepare edge labels
+  edge_labels <- character(nrow(Edges))
+  edge_lineage <- numeric(nrow(Edges))
+
+  for (i in 1:nrow(Edges)) {
+    from_idx <- which(Nodes$id == Edges$from[i])[1]
+    to_idx <- which(Nodes$id == Edges$to[i])[1]
+
+    if (!is.na(from_idx) && !is.na(to_idx)) {
+      edge_labels[i] <- paste0(
+        Nodes$name[from_idx],
+        " \u2192 ",
+        Nodes$name[to_idx]
+      )
+      edge_lineage[i] <- Edges$lineage_strength_display[i]
+    }
+  }
+
+  edge_customdata <- lapply(1:nrow(Edges), function(i) {
+    list(edge_labels[i], edge_lineage[i])
+  })
+
+  # Plotly margins
+  m <- list(l = 50, r = 50, b = 100, t = 100, pad = 4)
+
+  # Create Sankey
+  fig <- plotly::plot_ly(
     type = "sankey",
     arrangement = "snap",
     node = list(
-      label = Nodes$name,
+      label = node_labels,
       x = Nodes$coordX,
       y = Nodes$coordY,
       color = Nodes$color,
@@ -183,15 +171,23 @@ plotThematicEvolution <- function(
       source = Edges$from,
       target = Edges$to,
       value = Edges$weight,
-      color = Edges$color
+      color = Edges$color,
+      customdata = edge_customdata,
+      hovertemplate = paste0(
+        "<b>%{customdata[0]}</b><br>",
+        "Lineage Strength: %{customdata[1]:.4f}<br>",
+        "<extra></extra>"
+      )
     )
-  ) %>%
+  )
+
+  fig <- fig %>%
     layout(margin = m) %>%
     plotly::add_annotations(
-      x = Nodes$coordX,
+      x = unique(Nodes$coordX),
       y = 1.08,
-      text = factor(Nodes$group),
-      showarrow = F,
+      text = sort(unique(Nodes$group)),
+      showarrow = FALSE,
       xanchor = "center",
       font = list(color = 'Dark', family = "TimesNewRoman", size = 18)
     ) %>%
@@ -208,4 +204,6 @@ plotThematicEvolution <- function(
         'hoverCompareCartesian'
       )
     )
+
+  return(fig)
 }

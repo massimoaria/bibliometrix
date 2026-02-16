@@ -1,5 +1,132 @@
 ### COMMON FUNCTIONS ####
 
+## Count records in a bibliographic file without full conversion ----
+#' @description Lightweight record counter for bibliographic files.
+#'   Returns the number of publications contained in one or more files
+#'   without performing the full convert2df() conversion.
+#' @param file Character vector of file paths (or a single ZIP path).
+#' @param dbsource Character. The database source
+#'   ("isi","scopus","openalex","openalex_api","lens","cochrane","pubmed","dimensions").
+#' @param format Character. The file format
+#'   ("plaintext","bibtex","csv","pubmed","excel","api","endnote").
+#'   If NULL, it is auto-detected from the file extension.
+#' @return Integer. The total number of records across all files.
+countRecords <- function(file, dbsource = "isi", format = NULL) {
+
+  ## ---- helper: count lines matching a pattern ----
+  count_lines_matching <- function(paths, pattern) {
+    n <- 0L
+    for (f in paths) {
+      lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
+      n <- n + sum(grepl(pattern, lines, perl = TRUE))
+    }
+    n
+  }
+
+  ## ---- helper: count CSV rows (data rows only, excluding header) ----
+  count_csv_rows <- function(paths) {
+    n <- 0L
+    for (f in paths) {
+      # Count total lines minus 1 for header
+      total <- length(readLines(f, warn = FALSE))
+      n <- n + max(0L, total - 1L)
+    }
+    n
+  }
+
+  ## ---- handle ZIP: extract to temp dir ----
+  paths <- file
+  if (length(file) == 1 && tolower(tools::file_ext(file)) == "zip") {
+    temp_exdir <- tempfile("countRecords_")
+    paths <- utils::unzip(file, exdir = temp_exdir)
+    on.exit(unlink(temp_exdir, recursive = TRUE), add = TRUE)
+  }
+
+  ## ---- auto-detect format from file extension if not provided ----
+  if (is.null(format)) {
+    ext <- tolower(tools::file_ext(paths[1]))
+    format <- switch(ext,
+      txt  = if (dbsource == "pubmed") "pubmed" else "plaintext",
+      csv  = "csv",
+      bib  = "bibtex",
+      ciw  = "plaintext",
+      xlsx = "excel",
+      rdata = "rdata", rda = "rdata", rds = "rds",
+      "plaintext"
+    )
+  }
+
+  ## ---- count records by format ----
+  n <- switch(format,
+    plaintext = ,
+    endnote = {
+      if (dbsource == "cochrane") {
+        count_lines_matching(paths, "^Record #")
+      } else {
+        # WoS: each record starts with "PT "
+        count_lines_matching(paths, "^PT ")
+      }
+    },
+    bibtex = {
+      count_lines_matching(paths, "^@")
+    },
+    csv = {
+      count_csv_rows(paths)
+    },
+    pubmed = {
+      count_lines_matching(paths, "^PMID- ")
+    },
+    excel = {
+      n <- 0L
+      for (f in paths) {
+        df <- readxl::read_excel(f, col_types = "text",
+                                 range = readxl::cell_cols(1))
+        n <- n + nrow(df)
+      }
+      n
+    },
+    api = ,
+    rdata = {
+      n <- 0L
+      for (f in paths) {
+        env <- new.env(parent = emptyenv())
+        var <- load(f, envir = env)
+        obj <- get(var[1], envir = env)
+        n <- n + if (is.data.frame(obj)) nrow(obj) else length(obj)
+      }
+      n
+    },
+    rds = {
+      n <- 0L
+      for (f in paths) {
+        obj <- readRDS(f)
+        n <- n + if (is.data.frame(obj)) nrow(obj) else length(obj)
+      }
+      n
+    },
+    0L
+  )
+
+  as.integer(n)
+}
+
+## Cache helper: lightweight fingerprint of a data.frame
+data_fingerprint <- function(M) {
+  nr <- nrow(M)
+  if (nr == 0) return("empty")
+  paste(nr, ncol(M),
+        M$SR[1], M$SR[nr],
+        sep = "||")
+}
+
+## Cache helper: build a cache key from a named list of params
+make_cache_key <- function(...) {
+  args <- list(...)
+  lapply(args, function(x) {
+    if (is.null(x)) "<<NULL>>" else x
+  })
+}
+
 # Funzione helper aggiornata con titolo e affiliazione
 createAuthorCard <- function(
   name,
@@ -5459,9 +5586,9 @@ addGgplotsWb <- function(
   l <- length(list_plot)
   startRow <- 1
   for (i in 1:l) {
-    fileName <- tempfile(
-      pattern = "figureImage",
-      fileext = ".png"
+    fileName <- file.path(
+      getWD(),
+      paste0("figureImage_", i, "_", Sys.time(), ".png")
     )
     if (inherits(list_plot[[i]], "ggplot")) {
       ggsave(
@@ -5514,36 +5641,40 @@ addGgplotsWb <- function(
 }
 
 screenSh <- function(p, zoom = 2, type = "vis") {
-  tmpdir <- tempdir()
-  fileName <- tempfile(
-    pattern = "figureImage",
-    tmpdir = tmpdir,
-    fileext = ".png"
-  ) # %>% substr(.,2,nchar(.))
+  #tmpdir <- getWD()
 
-  plot2png(p, filename = fileName, zoom = zoom, type = type, tmpdir = tmpdir)
+  fileName <- file.path(
+    getWD(),
+    paste0("figureImage_", Sys.time(), ".png")
+  )
+
+  plot2png(p, filename = fileName, zoom = zoom, type = type)
 
   return(fileName)
 }
 
 screenShot <- function(p, filename, type) {
-  home <- homeFolder()
+  #home <- homeFolder()
 
-  # setting up the main directory
-  if ("downloads" %in% tolower(dir(home))) {
-    filename <- file.path(home, "downloads", filename)
-  } else {
-    filename <- file.path(home, filename)
-  }
+  # # setting up the main directory
+  # if ("downloads" %in% tolower(dir(home))) {
+  #   filename <- file.path(home, "downloads", filename)
+  # } else {
+  #   filename <- file.path(home, filename)
+  # }
 
-  plot2png(p, filename, zoom = 2, type = type, tmpdir = tempdir())
+  plot2png(p, filename, zoom = 2, type = type)
+  filename_html <- paste0(tools::file_path_sans_ext(filename), ".html")
+  file.remove(filename_html)
+  unlink(
+    paste0(tools::file_path_sans_ext(filename), "_files"),
+    recursive = TRUE
+  )
 }
 
-plot2png <- function(p, filename, zoom = 2, type = "vis", tmpdir) {
-  html_name <- tempfile(
-    fileext = ".html",
-    tmpdir = tmpdir
-  )
+plot2png <- function(p, filename, zoom = 2, type = "vis") {
+  filename_html <- tools::file_path_sans_ext(filename)
+  html_name <- paste0(filename_html, ".html")
   switch(
     type,
     vis = {
@@ -5562,7 +5693,7 @@ plot2png <- function(p, filename, zoom = 2, type = "vis", tmpdir) {
     title = NULL,
     type = "success",
     color = c("#1d8fe1"),
-    subtitle = paste0("Plot was saved in the following path: ", filename),
+    subtitle = paste0("Plot saved to file:\n", basename(filename)),
     btn_labels = "OK",
     size = "40%"
   )
@@ -5618,6 +5749,34 @@ screenHtml <- function(df, html_file) {
 
   # Salva il file HTML
   writeLines(html_page, html_file, useBytes = TRUE)
+}
+
+## export screen to browser download
+screen2export <- function(filename = "file", obj, type) {
+  JScode_screenshot <- "
+    var link = document.createElement('a');
+    link.href = '%s';
+    link.download = '%s';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  "
+
+  base_name <- paste0(
+    filename,
+    "-",
+    gsub(" |:", "", Sys.time()),
+    ".png",
+    sep = ""
+  )
+  full_path <- file.path(getWD(), base_name)
+  screenShot(
+    obj,
+    filename = full_path,
+    type = type
+  )
+  img_data <- base64enc::dataURI(file = full_path, mime = "image/png")
+  shinyjs::runjs(sprintf(JScode_screenshot, img_data, base_name))
 }
 
 addScreenWb <- function(df, wb, width = 14, height = 8, dpi = 75) {

@@ -83,7 +83,9 @@ libraries <- function() {
     "tidyr",
     "sparkline",
     "tidygraph",
-    "ggraph"
+    "ggraph",
+    "future",
+    "promises"
   )
 
   suppressPackageStartupMessages({

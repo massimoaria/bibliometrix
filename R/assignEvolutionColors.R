@@ -24,14 +24,7 @@ utils::globalVariables(c(
 #' @param palette Character vector. Optional custom color palette as hex codes. If NULL,
 #'   uses a default palette of 50+ distinct colors. Colors are assigned sequentially
 #'   without reuse.
-#' @param use_measure Character. The measure to use for determining edge strength.
-#'   Can be one of:
-#'   \itemize{
-#'     \item \code{"inclusion"}: uses the Inclusion measure (column 3 of Edges)
-#'     \item \code{"stability"}: uses the Stability measure (column 5 of Edges)
-#'     \item \code{"weighted"}: uses the weighted Inclusion measure (column 4 of Edges)
-#'   }
-#'   Default is "inclusion".
+#' @param alpha Numeric. Balancing parameters between inclusion and importance measures. Default value is 0.5.
 #'
 #' @return Returns the modified \code{nexus} object with updated colors:
 #'   \itemize{
@@ -82,32 +75,40 @@ assignEvolutionColors <- function(
   nexus,
   threshold = 0.5,
   palette = NULL,
-  use_measure = "weighted"
+  alpha = 0.5
 ) {
   # Prepare data structure
   Nodes <- nexus$Nodes %>%
     mutate(
       color_assigned = FALSE,
       color_lineage = NA_integer_,
-      color_final = NA_character_
+      color_final = NA_character_,
+      has_natural_successor = FALSE,
+      is_natural_lineage = FALSE # NUOVO FLAG
     )
 
   Edges <- nexus$Edges
 
-  switch(
-    use_measure,
-    inclusion = {
-      Edges$measure = Edges[, 3]
-    },
-    stability = {
-      Edges$measure = Edges[, 5]
-    },
-    weighted = {
-      Edges$measure = Edges[, 4]
-    }
-  )
+  # # Calculate relative frequency for each node
+  # Nodes <- Nodes %>%
+  #   group_by(group) %>%
+  #   mutate(rel_freq = freq / sum(freq, na.rm = TRUE)) %>%
+  #   ungroup()
 
-  # Initialize palette with enough unique colors
+  # Add lineage strength to edges
+  Edges <- Edges %>%
+    # left_join(
+    #   Nodes %>% select(id, rel_freq_from = rel_freq),
+    #   by = c("from" = "id")
+    # ) %>%
+    mutate(
+      lineage_strength = (alpha * Inc_Weighted) + (1 - alpha) * PageRankIndex
+    )
+
+  strong_edges <- Edges %>%
+    dplyr::filter(Inc_Weighted >= threshold) %>%
+    select(from, to, weight = lineage_strength, inc_weighted = Inc_Weighted)
+
   if (is.null(palette)) {
     palette <- c(
       "#E41A1C",
@@ -117,14 +118,12 @@ assignEvolutionColors <- function(
       "#FF7F00",
       "#A65628",
       "#F781BF",
-      # "#999999",
       "#66C2A5",
       "#FC8D62",
       "#8DA0CB",
       "#E78AC3",
       "#A6D854",
       "#FFD92F",
-      # "#B3B3B3",
       "#A6CEE3",
       "#1F78B4",
       "#B2DF8A",
@@ -142,7 +141,6 @@ assignEvolutionColors <- function(
       "#80B1D3",
       "#FDB462",
       "#B3DE69",
-      # "#D9D9D9",  # rimosso grigio
       "#BC80BD",
       "#CCEBC5",
       "#FFB6C1",
@@ -163,109 +161,121 @@ assignEvolutionColors <- function(
     )
   }
 
-  # Extract strong connections
-  strong_edges <- Edges %>%
-    dplyr::filter(measure >= threshold) %>%
-    select(from, to, weight = measure)
-
-  # PHASE 1: Identify lineages starting from the first period
   periods <- unique(Nodes$group)
   lineage_id <- 1
+
+  # ============================================================================
+  # PHASE 1: Natural lineages (same label across periods)
+  # ============================================================================
+
+  unique_names <- unique(Nodes$name)
+
+  for (node_name in unique_names) {
+    same_name_nodes <- Nodes %>%
+      dplyr::filter(name == node_name) %>%
+      arrange(group)
+
+    if (nrow(same_name_nodes) > 1) {
+      # Assign the same lineage to all nodes with this name
+      Nodes$color_lineage[Nodes$name == node_name] <- lineage_id
+      Nodes$is_natural_lineage[Nodes$name == node_name] <- TRUE # NUOVO
+
+      # Mark nodes that have a natural successor
+      for (j in 1:(nrow(same_name_nodes) - 1)) {
+        node_id <- same_name_nodes$id[j]
+        Nodes$has_natural_successor[Nodes$id == node_id] <- TRUE
+      }
+
+      lineage_id <- lineage_id + 1
+    }
+  }
+
+  # ============================================================================
+  # PHASE 2: Algorithm-based lineages using lineage strength
+  # ============================================================================
 
   for (i in 1:(length(periods) - 1)) {
     current_period <- periods[i]
     next_period <- periods[i + 1]
 
     current_nodes <- Nodes %>% dplyr::filter(group == current_period)
-    next_nodes <- Nodes %>% dplyr::filter(group == next_period)
 
     for (node_id in current_nodes$id) {
-      # Find strong connections for this node
+      # SKIP nodes that already have a natural successor
+      if (Nodes$has_natural_successor[Nodes$id == node_id]) {
+        next
+      }
+
       connections <- strong_edges %>%
         dplyr::filter(from == node_id) %>%
         arrange(desc(weight))
 
       if (nrow(connections) > 0) {
-        # Take the successor with the highest weight
         main_successor <- connections$to[1]
+        main_weight <- connections$weight[1]
 
-        # If the current node already has a lineage, propagate it
         current_lineage <- Nodes$color_lineage[Nodes$id == node_id]
+        successor_idx <- which(Nodes$id == main_successor)
+        successor_lineage <- Nodes$color_lineage[successor_idx]
+        successor_is_natural <- Nodes$is_natural_lineage[successor_idx] # NUOVO
 
         if (is.na(current_lineage)) {
-          # New lineage
-          Nodes$color_lineage[Nodes$id == node_id] <- lineage_id
-          current_lineage <- lineage_id
-          lineage_id <- lineage_id + 1
-        }
-
-        # Propagate to successor (if it doesn't already have a stronger lineage)
-        successor_idx <- which(Nodes$id == main_successor)
-        if (is.na(Nodes$color_lineage[successor_idx])) {
-          Nodes$color_lineage[successor_idx] <- current_lineage
+          if (is.na(successor_lineage)) {
+            Nodes$color_lineage[Nodes$id == node_id] <- lineage_id
+            Nodes$color_lineage[successor_idx] <- lineage_id
+            lineage_id <- lineage_id + 1
+          } else {
+            # NON sovrascrivere se il successore ha un lineage naturale
+            if (!successor_is_natural) {
+              # MODIFICATO
+              Nodes$color_lineage[Nodes$id == node_id] <- successor_lineage
+            }
+          }
         } else {
-          # Conflict: check which connection is stronger
-          existing_lineage <- Nodes$color_lineage[successor_idx]
-          existing_weight <- strong_edges %>%
-            dplyr::filter(
-              to == main_successor,
-              from %in%
-                (Nodes %>%
-                  dplyr::filter(color_lineage == existing_lineage) %>%
-                  pull(id))
-            ) %>%
-            pull(weight) %>%
-            max(na.rm = TRUE)
-
-          if (connections$weight[1] > existing_weight) {
+          if (is.na(successor_lineage)) {
             Nodes$color_lineage[successor_idx] <- current_lineage
+          } else if (successor_lineage != current_lineage) {
+            # NON sovrascrivere se il successore ha un lineage naturale
+            if (!successor_is_natural) {
+              # NUOVO CONTROLLO
+              competing_edges <- strong_edges %>%
+                dplyr::filter(to == main_successor)
+
+              if (nrow(competing_edges) > 0) {
+                existing_weight <- max(competing_edges$weight, na.rm = TRUE)
+
+                if (
+                  main_weight > existing_weight ||
+                    (main_weight == existing_weight &&
+                      !any(
+                        competing_edges$from[
+                          competing_edges$weight == existing_weight
+                        ] !=
+                          node_id
+                      ))
+                ) {
+                  Nodes$color_lineage[successor_idx] <- current_lineage
+                }
+              }
+            }
           }
         }
       }
     }
   }
 
-  # PHASE 1.5: Assign same lineage to nodes with same name across periods
-  # (only if they don't have strong edges to other nodes)
-  unique_names <- unique(Nodes$name)
+  # ============================================================================
+  # PHASE 3: Assign unique colors to lineages
+  # ============================================================================
 
-  for (node_name in unique_names) {
-    # Get all nodes with this name across all periods
-    same_name_nodes <- Nodes %>% dplyr::filter(name == node_name)
-
-    if (nrow(same_name_nodes) > 1) {
-      # Check which nodes already have a lineage assigned
-      assigned_lineages <- unique(na.omit(same_name_nodes$color_lineage))
-
-      if (length(assigned_lineages) == 0) {
-        # No lineage assigned yet: create a new one for all
-        new_lineage <- lineage_id
-        lineage_id <- lineage_id + 1
-        Nodes$color_lineage[Nodes$name == node_name] <- new_lineage
-      } else if (length(assigned_lineages) == 1) {
-        # One lineage already assigned: propagate to unassigned nodes
-        target_lineage <- assigned_lineages[1]
-        unassigned_indices <- which(
-          Nodes$name == node_name & is.na(Nodes$color_lineage)
-        )
-        Nodes$color_lineage[unassigned_indices] <- target_lineage
-      }
-      # If length(assigned_lineages) > 1: nodes have different strong connections,
-      # keep them separate
-    }
-  }
-
-  # PHASE 2: Assign unique colors to lineages (no color reuse)
   unique_lineages <- unique(na.omit(Nodes$color_lineage))
 
   for (i in seq_along(unique_lineages)) {
     lineage <- unique_lineages[i]
 
-    # Get next available color from palette (each lineage gets unique color)
     if (i <= length(palette)) {
       color <- paste0(palette[i], "80")
     } else {
-      # Generate random color if palette exhausted
       color <- paste0(
         sprintf(
           "#%02X%02X%02X",
@@ -280,7 +290,10 @@ assignEvolutionColors <- function(
     Nodes$color_final[Nodes$color_lineage == lineage] <- color
   }
 
-  # PHASE 3: Assign unique colors to isolated nodes (no color reuse)
+  # ============================================================================
+  # PHASE 4: Assign unique colors to isolated nodes
+  # ============================================================================
+
   isolated_nodes <- which(is.na(Nodes$color_lineage))
   color_idx <- length(unique_lineages) + 1
 
@@ -288,7 +301,6 @@ assignEvolutionColors <- function(
     if (color_idx <= length(palette)) {
       color <- paste0(palette[color_idx], "80")
     } else {
-      # Generate random color if palette exhausted
       color <- paste0(
         sprintf(
           "#%02X%02X%02X",
@@ -304,7 +316,10 @@ assignEvolutionColors <- function(
     color_idx <- color_idx + 1
   }
 
-  # PHASE 4: Assign colors to edges
+  # ============================================================================
+  # PHASE 5: Assign colors to edges
+  # ============================================================================
+
   Edges <- Edges %>%
     left_join(
       Nodes %>% select(id, color_from = color_final),
@@ -314,32 +329,31 @@ assignEvolutionColors <- function(
       Nodes %>% select(id, color_to = color_final),
       by = c("to" = "id")
     ) %>%
-    mutate(
-      color = if_else(color_from == color_to, color_from, "#D3D3D380")
-    ) %>%
-    select(-color_from, -color_to, -measure)
+    mutate(color = if_else(color_from == color_to, color_from, "#D3D3D380")) %>%
+    select(-color_from, -color_to)
 
-  # Return Nodes with updated color column
   Nodes <- Nodes %>%
     mutate(color = color_final) %>%
-    select(-color_assigned, -color_lineage, -color_final)
+    select(
+      -color_assigned,
+      -color_lineage,
+      -color_final,
+      # -rel_freq,
+      -has_natural_successor,
+      -is_natural_lineage
+    ) # AGGIORNATO
 
   nexus$Nodes <- Nodes
   nexus$Edges <- Edges
 
+  # ============================================================================
+  # Update Thematic Maps
+  # ============================================================================
+
   for (i in 1:length(nexus$TM)) {
     res <- nexus$TM[[i]]
-
-    ## Update Thematic Maps with new colors
-    newdf <- Nodes %>%
-      dplyr::filter(slice == i) %>%
-      select(name, color)
-
-    df <- res$clusters %>%
-      select(-color) %>%
-      left_join(newdf, by = "name")
-
-    ## replace color NA with light grey
+    newdf <- Nodes %>% dplyr::filter(slice == i) %>% select(name, color)
+    df <- res$clusters %>% select(-color) %>% left_join(newdf, by = "name")
     df$color[is.na(df$color)] <- "#D3D3D3"
 
     gplot <- buildTMPlot(
@@ -361,8 +375,6 @@ assignEvolutionColors <- function(
     nexus$TM[[i]]$map <- gplot
 
     g <- nexus$Net[[i]]$graph
-    # net <- nexus$TM[[i]]$net
-
     clusters <- nexus$Net[[i]]$cluster_res %>%
       group_by(cluster) %>%
       slice_head(n = 1) %>%
@@ -383,7 +395,6 @@ assignEvolutionColors <- function(
 
     V(g)$color <- clusters$color[match(V(g)$community, clusters$slice)]
 
-    # using clusters, replace color_original with color in edges
     old_edge_colors <- data.frame(
       from = as.character(igraph::as_edgelist(g)[, 1]),
       to = as.character(igraph::as_edgelist(g)[, 2]),
@@ -401,15 +412,12 @@ assignEvolutionColors <- function(
         color = ifelse(color_original == "#B3B3B340", "#B3B3B380", color)
       )
 
-    # Create a color map
     color_map <- setNames(
       paste0(substr(new_edge_colors$color, 1, 7), "40"),
       new_edge_colors$color_original
     )
 
-    # Replace original
     E(g)$color <- color_map[E(g)$color]
-
     nexus$Net[[i]]$graph <- g
   }
 

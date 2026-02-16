@@ -74,61 +74,75 @@ htmlBoxFormat <- function(
     return("text-align: left;")
   }
 
+  # Determine if summary button column is needed
+  has_summary <- is.character(summary) && summary == "documents"
+
   # Header
-  header_html <- paste0(
-    "<thead><tr style='cursor: pointer;'>",
-    paste0(
-      sprintf(
-        '<th class="sortable-header" data-col="%d" style="%s background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%%; transform: translateY(-50%%);">⇅</span></th>',
-        0:(ncol(df) - 1),
-        sapply(1:ncol(df), get_align),
-        col_names
-      ),
-      collapse = ""
+  header_cols <- paste0(
+    sprintf(
+      '<th class="sortable-header" data-col="%d" style="%s background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%%; transform: translateY(-50%%);">⇅</span></th>',
+      0:(ncol(df) - 1),
+      sapply(1:ncol(df), get_align),
+      col_names
     ),
-    "</tr>"
+    collapse = ""
   )
+  if (has_summary) {
+    header_cols <- paste0(
+      header_cols,
+      '<th style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 10px; text-align: center; white-space: nowrap;">AI Summary</th>'
+    )
+  }
+  header_html <- paste0("<thead><tr style='cursor: pointer;'>", header_cols, "</tr>")
 
   if (filter == "top") {
-    filter_html <- paste0(
-      '<tr class="filter-row">',
-      paste0(
-        sprintf(
-          '<td><input type="text" class="form-control table-filter-%s" data-col="%d" placeholder="Filter..." style="width:100%%; font-size:11px; height:24px; padding:2px 5px;"></td>',
-          table_id,
-          0:(ncol(df) - 1)
-        ),
-        collapse = ""
+    filter_cells <- paste0(
+      sprintf(
+        '<td><input type="text" class="form-control table-filter-%s" data-col="%d" placeholder="Filter..." style="width:100%%; font-size:11px; height:24px; padding:2px 5px;"></td>',
+        table_id,
+        0:(ncol(df) - 1)
       ),
-      "</tr>"
+      collapse = ""
     )
+    if (has_summary) {
+      filter_cells <- paste0(filter_cells, "<td></td>")
+    }
+    filter_html <- paste0('<tr class="filter-row">', filter_cells, "</tr>")
     header_html <- paste0(header_html, filter_html)
   }
   header_html <- paste0(header_html, "</thead>")
 
-  # Body
-  body_rows <- apply(df, 1, function(row) {
-    cells <- sapply(1:length(row), function(i) {
-      val <- row[i]
-      is_num <- i %in% numeric
-      sort_val <- gsub("<.*?>", "", as.character(val))
-      if (is_num) {
-        sort_val <- as.numeric(sort_val)
-      }
-      display_val <- if (is_num) {
-        format(round(as.numeric(sort_val), round), nsmall = round)
-      } else {
-        val
-      }
-      sprintf(
-        '<td data-sort="%s" style="%s padding: 8px; border-bottom: 1px solid #eee;">%s</td>',
-        sort_val,
-        get_align(i),
-        display_val
-      )
-    })
-    paste0("<tr>", paste(cells, collapse = ""), "</tr>")
-  })
+  # Body (vectorized column-by-column instead of row-by-row apply)
+  n_cols <- ncol(df)
+  aligns <- sapply(1:n_cols, get_align)
+  cell_cols <- vector("list", n_cols)
+  for (j in 1:n_cols) {
+    vals <- as.character(df[[j]])
+    sort_vals <- gsub("<.*?>", "", vals)
+    if (j %in% numeric) {
+      num_vals <- as.numeric(sort_vals)
+      display_vals <- format(round(num_vals, round), nsmall = round)
+      sort_vals <- as.character(num_vals)
+    } else {
+      display_vals <- vals
+    }
+    cell_cols[[j]] <- sprintf(
+      '<td data-sort="%s" style="%s padding: 8px; border-bottom: 1px solid #eee;">%s</td>',
+      sort_vals, aligns[j], display_vals
+    )
+  }
+  row_contents <- do.call(paste0, cell_cols)
+
+  if (has_summary) {
+    sr_vals <- gsub("'", "\\\\'", as.character(df[[1]]))
+    summary_cells <- sprintf(
+      '<td style="text-align: center; padding: 8px; border-bottom: 1px solid #eee;"><button class="btn btn-xs btn-info" onclick="Shiny.setInputValue(\'button_id\', \'%s\', {priority: \'event\'})" title="AI Summary"><i class="fa fa-robot"></i></button></td>',
+      sr_vals
+    )
+    row_contents <- paste0(row_contents, summary_cells)
+  }
+
+  body_rows <- paste0("<tr>", row_contents, "</tr>")
   tbody_html <- paste0("<tbody>", paste(body_rows, collapse = ""), "</tbody>")
 
   # UI Structure

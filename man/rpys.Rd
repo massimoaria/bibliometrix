@@ -16,7 +16,7 @@ column of the data frame. The default is \code{sep = ";"}.}
 
 \item{timespan}{is a numeric vector c(min year,max year). The default value is NULL (the entire timespan is considered).}
 
-\item{median.window}{is a character string that can be "centered" or "backward". It indicates the type of median to be used. 
+\item{median.window}{is a character string that can be "centered" or "backward". It indicates the type of median to be used.
 "centered" is the default value and it uses the centered 5-year median (t-2 to t+2) as proposed by Marx et al. (2014). "backward" uses the backward 5-year median (t-4 to t) as proposed by Aria and Cuccurullo (2017).}
 
 \item{graph}{is a logical. If TRUE the function plot the spectroscopy otherwise the plot is created but not drawn down.}
@@ -36,8 +36,8 @@ Marx, W., Bornmann, L., Barth, A., & Leydesdorff, L. (2014).
 Detecting the historical roots of research fields by reference publication
 year spectroscopy (RPYS). Journal of the Association for Information Science and Technology,
 65(4), 751-764.\cr\cr
-Thor A., Bornmann L., Mark W. & Mutz R.(2018). 
-Identifying single influential publications in a research field: new analysis opportunities of the CRExplorer. 
+Thor A., Bornmann L., Mark W. & Mutz R.(2018).
+Identifying single influential publications in a research field: new analysis opportunities of the CRExplorer.
 Scientometrics, 116:591–608 https://doi.org/10.1007/s11192-018-2733-7\cr\cr
 }
 \examples{

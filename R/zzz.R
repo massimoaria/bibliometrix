@@ -19,6 +19,7 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @import openalexR
 #' @import ca
 #' @import visNetwork
+#' @importFrom methods new
 #' @importFrom purrr map2_dfr
 #' @importFrom purrr map_dfr
 #' @importFrom purrr map_df

@@ -23,5 +23,6 @@ Rubbish
 ^inst/biblioshiny/rsconnect
 ^rsconnect
 
+^data-raw$
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$

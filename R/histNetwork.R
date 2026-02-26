@@ -51,7 +51,9 @@ histNetwork <- function(M, min.citations, sep = ";", network = TRUE, verbose = T
   } else {
     M$DI[is.na(M$DI)] <- ""
   }
-  if (!("CR" %in% names(M))) {
+  has_cr <- "CR" %in% names(M) && any(!is.na(M$CR) & M$CR != "")
+  has_crids <- "CRids" %in% names(M) && any(!is.na(M$CRids) & M$CRids != "")
+  if (!has_cr && !has_crids) {
     cat("\nYour collection does not contain Cited References metadata (Field CR is missing)\n")
     return(NA)
   }
@@ -292,10 +294,18 @@ scopus <- function(M, min.citations, sep, network, verbose) {
 }
 
 openalex <- function(M, min.citations = min.citations, sep = sep, network = network, verbose = verbose) {
-  M$CR[is.na(M$CR) | M$CR == ""] <- "none"
   ids <- M$id_oa
-  CR <- strsplit(M$CR, ";")
-  CR <- data.frame(id_oa = rep(M$id_oa, lengths(CR)), ref = unlist(CR)) %>%
+
+  # Use CRids (OpenAlex IDs) if available, otherwise fall back to CR
+  if ("CRids" %in% names(M) && any(!is.na(M$CRids) & M$CRids != "")) {
+    cr_col <- M$CRids
+  } else {
+    cr_col <- M$CR
+  }
+  cr_col[is.na(cr_col) | cr_col == ""] <- "none"
+
+  CR <- strsplit(cr_col, ";")
+  CR <- data.frame(id_oa = rep(M$id_oa, lengths(CR)), ref = trimws(unlist(CR))) %>%
     dplyr::filter(ref %in% ids)
 
   LCS <- CR %>%

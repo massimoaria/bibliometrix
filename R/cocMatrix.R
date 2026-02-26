@@ -191,42 +191,33 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
     return(NA)
   }
 
-  if (type == "matrix" | !isTRUE(binary)) {
-    # Initialization of WA matrix
-    WF <- matrix(0, size[1], length(uniqueField))
-  } else if (type == "sparse") {
-    WF <- Matrix(0, size[1], length(uniqueField))
+  # Build sparse matrix directly from (i, j, x) triplets — O(total_references)
+  doc_ids <- rep(seq_along(Fi), lengths(Fi))
+  terms <- unlist(Fi)
+  col_ids <- match(terms, uniqueField)
+  valid <- !is.na(col_ids)
+  doc_ids <- doc_ids[valid]
+  col_ids <- col_ids[valid]
+
+  if (isTRUE(binary)) {
+    # Remove duplicate (doc, term) pairs for binary counting
+    dup <- duplicated(paste(doc_ids, col_ids, sep = "_"))
+    WF <- Matrix::sparseMatrix(
+      i = doc_ids[!dup], j = col_ids[!dup],
+      x = 1, dims = c(size[1], length(uniqueField)),
+      dimnames = list(rownames(M), uniqueField)
+    )
   } else {
-    print("error in type argument")
-    return()
-  }
-  colnames(WF) <- uniqueField
-  rownames(WF) <- rownames(M)
-  # Population of WA matrix
-  for (i in 1:size[1]) {
-    if (length(Fi[[i]]) > 0 & !is.na(Fi[[i]][1])) {
-      # print(i)
-      # if (Field=="CR"){Fi[[i]]=reduceRefs(Fi[[i]])}
-      if (isTRUE(binary)) {
-        ## binary counting
-        ind <- uniqueField %in% Fi[[i]]
-        if (sum(ind) > 0) {
-          WF[i, ind] <- 1
-        }
-      } else {
-        ## full counting
-        tab <- table(Fi[[i]])
-        name <- names(tab)[names(tab) %in% uniqueField]
-        name <- name[nchar(name) > 0]
-        if (length(name) > 0) {
-          WF[i, name] <- tab[name]
-        }
-      }
-    }
+    # Full counting: aggregate duplicates by summing
+    WF <- Matrix::sparseMatrix(
+      i = doc_ids, j = col_ids,
+      x = 1, dims = c(size[1], length(uniqueField)),
+      dimnames = list(rownames(M), uniqueField)
+    )
   }
 
-  if (type == "sparse" & !isTRUE(binary)) {
-    WF <- Matrix(WF)
+  if (type == "matrix") {
+    WF <- as.matrix(WF)
   }
 
 

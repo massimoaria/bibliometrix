@@ -136,18 +136,34 @@ rpys <- function(
   years <- RPYS_full$citedYears
   counts <- RPYS_full$n
 
-  # Compute backward-looking 5-year median (t-4 to t)
-  median_t4_t <- sapply(seq_along(years), function(i) {
-    start <- pmax(1, i - 4)
-    median(counts[start:i])
-  })
+  # Vectorized rolling medians using stats::runmed
+  n_years <- length(counts)
 
-  # Compute centered 5-year median (t-2 to t+2)
-  median_t2_t2 <- sapply(seq_along(years), function(i) {
-    start <- pmax(1, i - 2)
-    end <- pmin(length(counts), i + 2)
-    median(counts[start:end])
-  })
+  # Backward-looking 5-year median (t-4 to t)
+  # runmed requires odd k and uses "median of available" at edges
+  if (n_years >= 5) {
+    # Pad front with first value to simulate backward window, then take centered median
+    padded <- c(rep(counts[1], 4), counts)
+    median_t4_t <- vapply(seq_along(counts), function(i) {
+      median(padded[i:(i + 4)])
+    }, numeric(1))
+  } else {
+    median_t4_t <- sapply(seq_along(years), function(i) {
+      start <- pmax(1, i - 4)
+      median(counts[start:i])
+    })
+  }
+
+  # Centered 5-year median (t-2 to t+2) using runmed with endrule
+  if (n_years >= 5) {
+    median_t2_t2 <- as.numeric(stats::runmed(counts, k = 5, endrule = "median"))
+  } else {
+    median_t2_t2 <- sapply(seq_along(years), function(i) {
+      start <- pmax(1, i - 2)
+      end <- pmin(length(counts), i + 2)
+      median(counts[start:end])
+    })
+  }
 
   # Add the results to the data frame
   RPYS <- RPYS_full %>%
@@ -315,25 +331,11 @@ reduceRefs <- function(A) {
 
 refCleaning <- function(l, db) {
   if (db == "ISI") {
-    # ref<-unlist(lapply(Fi, function(l){
     l <- gsub("\\).*", ")", l)
-    l <- gsub(",", " ", l)
-    l <- gsub(";", " ", l)
-    l <- gsub("\\.", " ", l)
-    l <- trimws(trimES(l))
-    l <- l[nchar(l) > 0]
-    # return(l)
-    # }))
-  } else {
-    # ref<-unlist(lapply(Fi, function(l){
-    l <- gsub(",", " ", l)
-    l <- gsub(";", " ", l)
-    l <- gsub("\\.", " ", l)
-    l <- trimws(trimES(l))
-    l <- l[nchar(l) > 0]
-    return(l)
-    # }))
   }
+  l <- gsub("[,;.]", " ", l)
+  l <- trimws(trimES(l))
+  l <- l[nchar(l) > 0]
   return(l)
 }
 

@@ -2223,6 +2223,419 @@ helpContent <- function() {
   </div>
   </body>"
 
+  ## Co-occurrence Network ----
+  coOccurrenceNetwork <-
+    "<body>
+    <div class='container'>
+    <h3>&#128279; Co-occurrence Network</h3>
+
+    <p>The <strong>Co-occurrence Network</strong> is a powerful tool for mapping the <strong>conceptual structure</strong> of a research field. It builds a network where nodes represent terms (keywords, title words, or abstract terms) and edges connect terms that appear together in the same document. The strength of an edge reflects how frequently two terms co-occur, revealing the thematic relationships within a scientific domain.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>Co-occurrence analysis is rooted in the idea that terms appearing together in scientific documents are semantically related. When two keywords frequently co-occur across multiple publications, they are likely associated with the same research theme or concept. This principle has been widely used in scientometrics since the pioneering work of <strong>Callon et al. (1983)</strong> on co-word analysis.</p>
+    <p>The resulting network provides a map of the <strong>knowledge structure</strong> of a field, highlighting:</p>
+    <ul>
+      <li><strong>Research themes:</strong> Clusters of densely connected terms represent distinct research topics</li>
+      <li><strong>Interdisciplinary bridges:</strong> Terms connecting different clusters indicate cross-topic relationships</li>
+      <li><strong>Central concepts:</strong> Highly connected nodes represent foundational or widely used concepts</li>
+    </ul>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <p>The analysis can be configured through several parameters:</p>
+    <ul>
+      <li><strong>Field:</strong> Choose between Author's Keywords (DE), Keywords Plus (ID), Title words, or Abstract words as the unit of analysis</li>
+      <li><strong>Network layout:</strong> Select from various layout algorithms (e.g., Fruchterman-Reingold, Kamada-Kawai) to optimize the visual representation</li>
+      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Inclusion, Salton's cosine, or Equivalence index to normalize co-occurrence frequencies</li>
+      <li><strong>Clustering algorithm:</strong> Choose between Louvain, Walktrap, or other community detection algorithms to identify thematic groups</li>
+      <li><strong>Number of nodes:</strong> Control how many top terms to include in the network</li>
+      <li><strong>Minimum edges:</strong> Filter weak connections to focus on meaningful associations</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Node size:</strong> Proportional to the term's frequency (larger nodes = more frequently used terms)</li>
+      <li><strong>Edge thickness:</strong> Proportional to the co-occurrence strength between two terms</li>
+      <li><strong>Node color:</strong> Indicates cluster membership; terms in the same cluster belong to the same thematic group</li>
+      <li><strong>Centrality measures:</strong> Betweenness centrality identifies terms that bridge different clusters, while closeness centrality highlights terms central to the overall network</li>
+      <li><strong>Isolated clusters:</strong> Disconnected groups of terms may represent niche or emerging topics</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Callon, M., Courtial, J.-P., Turner, W. A., & Bauin, S. (1983).</strong> <i>From translations to problematic networks: An introduction to co-word analysis.</i> <strong>Social Science Information</strong>, 22(2), 191-235. <a href='https://doi.org/10.1177/053901883022002003' target='_blank'>https://doi.org/10.1177/053901883022002003</a></p>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Van Eck, N. J., & Waltman, L. (2010).</strong> <i>Software survey: VOSviewer, a computer program for bibliometric mapping.</i> <strong>Scientometrics</strong>, 84(2), 523-538. <a href='https://doi.org/10.1007/s11192-009-0146-3' target='_blank'>https://doi.org/10.1007/s11192-009-0146-3</a></p>
+
+    <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
+
+    </div>
+    </body>"
+
+  ## Thematic Map ----
+  thematicMap <-
+    "<body>
+    <div class='container'>
+    <h3>&#128506; Thematic Map</h3>
+
+    <p>The <strong>Thematic Map</strong> (also known as the <strong>Strategic Diagram</strong>) is a two-dimensional visualization that classifies research themes according to their <strong>centrality</strong> (importance within the field) and <strong>density</strong> (internal coherence of the theme). Originally proposed by <strong>Callon et al. (1991)</strong> and further developed by <strong>Cobo et al. (2011)</strong>, it provides a comprehensive snapshot of the thematic landscape of a scientific domain.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>The Thematic Map is built from a co-occurrence network of terms. After applying a clustering algorithm (e.g., Louvain or Walktrap) to identify thematic groups, each cluster is characterized by two metrics:</p>
+    <ul>
+      <li><strong>Centrality (Callon's centrality):</strong> Measures the strength of external ties between a cluster and other clusters. High centrality indicates that a theme is strongly connected to other themes, making it central to the field.</li>
+      <li><strong>Density (Callon's density):</strong> Measures the strength of internal ties within a cluster. High density indicates that a theme is well-developed and internally coherent.</li>
+    </ul>
+
+    <h4>&#128203; Fuzzy Publication-to-Cluster Assignment</h4>
+    <p>Following the framework proposed by <strong>Aria et al. (2025)</strong>, publications are not assigned to a single cluster through hard partitioning. Instead, each publication receives a <strong>graded membership degree</strong> across all thematic clusters, reflecting the multithematic nature of scientific documents. The membership score is based on the overlap between a publication's terms and each cluster's vocabulary, weighted by the <em>PageRank centrality</em> of shared terms within the cluster. This means that a publication's affiliation with a cluster is stronger when its terms are central (high PageRank) and distinctive (low global frequency) within that cluster's semantic structure. The resulting fuzzy membership is then normalised to produce a distribution over clusters summing to one.</p>
+    <p>This approach has two key advantages:</p>
+    <ul>
+      <li><strong>Multithematic representation:</strong> A publication working at the intersection of two research themes contributes proportionally to both, rather than being forced into a single category</li>
+      <li><strong>Fuzzy cardinality:</strong> The effective size of each theme is computed as the sum of membership degrees (rather than a simple document count), providing a more accurate measure of the substantive weight of each theme</li>
+    </ul>
+
+    <h4>&#128200; The Four Quadrants</h4>
+    <p>These two dimensions define four quadrants, each with a distinct strategic interpretation:</p>
+    <ul>
+      <li><strong>Upper-right (Motor themes):</strong> High centrality + High density. These are well-developed themes that are central to the field. They drive the research agenda and are both internally mature and externally relevant.</li>
+      <li><strong>Lower-right (Basic/Transversal themes):</strong> High centrality + Low density. These themes are important to the field but not yet well-developed. They represent general, transversal topics that cut across many research areas.</li>
+      <li><strong>Upper-left (Niche themes):</strong> Low centrality + High density. These are well-developed but peripheral themes. They represent specialized topics with a strong internal structure but limited connections to the broader field.</li>
+      <li><strong>Lower-left (Emerging/Declining themes):</strong> Low centrality + Low density. These themes are both peripheral and underdeveloped. They may represent either newly emerging topics or themes that are fading from the research landscape.</li>
+    </ul>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Field:</strong> Choose the bibliographic field to analyze (Keywords, Title words, Abstract terms, etc.)</li>
+      <li><strong>Number of terms:</strong> Set how many top terms to include in the analysis</li>
+      <li><strong>Minimum cluster frequency:</strong> Filter out small clusters below a given size threshold</li>
+      <li><strong>Clustering algorithm:</strong> Select between Louvain, Walktrap, or other community detection methods</li>
+      <li><strong>Label size:</strong> Adjust the size of theme labels for readability</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Bubble size:</strong> Proportional to the fuzzy cardinality of the cluster (the sum of publication membership degrees), reflecting the substantive weight of the theme rather than a simple document count</li>
+      <li><strong>Bubble position:</strong> Determined by the centrality (x-axis) and density (y-axis) of the cluster</li>
+      <li><strong>Theme labels:</strong> Show the most representative keywords of each cluster</li>
+      <li><strong>Quadrant analysis:</strong> Focus on the strategic position of each theme to understand the field's structure</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2025).</strong> <i>Rethinking Thematic Evolution in Science Mapping: An Integrated Framework for Longitudinal Analysis.</i> Working Paper.</p>
+
+    <p><strong>Callon, M., Courtial, J.-P., & Laville, F. (1991).</strong> <i>Co-word analysis as a tool for describing the network of interactions between basic and technological research: The case of polymer chemistry.</i> <strong>Scientometrics</strong>, 22(1), 155-205. <a href='https://doi.org/10.1007/BF02019280' target='_blank'>https://doi.org/10.1007/BF02019280</a></p>
+
+    <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2012).</strong> <i>SciMAT: A new science mapping analysis software tool.</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 63(8), 1609-1630. <a href='https://doi.org/10.1002/asi.22688' target='_blank'>https://doi.org/10.1002/asi.22688</a></p>
+
+    </div>
+    </body>"
+
+  ## Thematic Evolution ----
+  thematicEvolution <-
+    "<body>
+    <div class='container'>
+    <h3>&#128336; Thematic Evolution</h3>
+
+    <p>The <strong>Thematic Evolution</strong> analysis tracks how research themes emerge, grow, merge, split, and decline over time. By dividing the publication timeline into consecutive <strong>time slices</strong> and performing co-occurrence analysis within each slice, this method reveals the dynamic evolution of a field's conceptual structure. The implementation in bibliometrix adopts the integrated framework proposed by <strong>Aria et al. (2025)</strong>, which reconceptualises thematic evolution as a fully network-based process where cross-sectional thematic detection, graded document affiliation, and inter-temporal linkage are jointly modelled within a coherent relational architecture.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>This approach extends static thematic mapping into a <strong>longitudinal framework</strong>. It was originally formalised by <strong>Cobo et al. (2011)</strong>, who introduced overlap-based similarity measures to identify continuities, splits, and mergers between themes across consecutive periods. <strong>Aria et al. (2025)</strong> further developed the methodology by addressing a key structural asymmetry in existing approaches: while cross-sectional theme detection is explicitly relational (based on weighted co-occurrence networks), lineage construction was traditionally reduced to set-theoretic comparisons of term lists, discarding the relational structure that defines a theme's semantic core.</p>
+    <p>The integrated framework resolves this asymmetry through three key innovations:</p>
+    <ul>
+      <li><strong>Fuzzy publication-to-cluster assignment:</strong> Instead of hard partitioning, each publication receives a graded membership degree across all thematic clusters, computed using <em>PageRank centrality</em> of shared terms. This captures the multithematic nature of publications, particularly relevant in interdisciplinary research.</li>
+      <li><strong>Network-based lineage strength:</strong> Inter-temporal connections are quantified through a <em>lineage strength</em> measure that integrates two complementary dimensions: a <em>weighted inclusion index</em> (directional coverage weighted by PageRank centrality) and an <em>importance index</em> (mutual structural relevance of shared terms). This ensures that lineage reflects the preservation of structural relations, not merely lexical overlap.</li>
+      <li><strong>Automatic lineage detection:</strong> Significant evolutionary connections are identified through a dual-thresholding approach combining absolute and relative (top-k) criteria, preventing the loss of important evolutionary paths while filtering noise.</li>
+    </ul>
+
+    <h4>&#128200; How It Works</h4>
+    <ol>
+      <li><strong>Time slicing:</strong> The publication period is divided into consecutive time windows (e.g., 2000-2005, 2006-2010, 2011-2015)</li>
+      <li><strong>Thematic identification:</strong> Within each slice, a co-occurrence matrix is built and normalised using association strength. Community detection is applied to identify thematic clusters, characterised by centrality and density measures</li>
+      <li><strong>Fuzzy document assignment:</strong> Each publication is assigned graded membership degrees to all clusters, based on the PageRank centrality of the terms it shares with each cluster</li>
+      <li><strong>Lineage computation:</strong> For each pair of consecutive periods, a lineage strength matrix is computed combining weighted inclusion (directional coverage) and importance (mutual structural relevance) of shared terms</li>
+      <li><strong>Automatic lineage detection:</strong> Significant evolutionary connections are identified using dual thresholding (absolute strength + top-k per source cluster)</li>
+      <li><strong>Evolution mapping:</strong> The result is a temporally ordered directed graph visualised as a Sankey-like flow diagram, where edge thickness reflects lineage strength</li>
+    </ol>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Field:</strong> Choose the bibliographic field (Keywords, Title words, etc.)</li>
+      <li><strong>Time slices:</strong> Define the number and boundaries of time periods for the analysis</li>
+      <li><strong>Number of terms:</strong> Set how many top terms to include per time slice</li>
+      <li><strong>Minimum cluster frequency:</strong> Filter out small or insignificant clusters</li>
+      <li><strong>Clustering algorithm:</strong> Select the community detection method (Louvain, Walktrap, etc.)</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Node size:</strong> Proportional to the fuzzy cardinality of the cluster (cumulative partial memberships), reflecting the substantive weight of the theme</li>
+      <li><strong>Edge thickness:</strong> Proportional to the lineage strength between themes across consecutive time slices, capturing both the extent of term overlap and the centrality of shared content</li>
+      <li><strong>Continuation:</strong> A one-to-one link (single incoming and single outgoing edge) indicates a stable thematic trajectory across consecutive periods</li>
+      <li><strong>Splitting themes:</strong> A theme with multiple outgoing edges suggests differentiation or thematic specialisation</li>
+      <li><strong>Merging themes:</strong> A theme with multiple incoming edges indicates thematic consolidation</li>
+      <li><strong>Emerging themes:</strong> Clusters with no incoming edges represent newly appearing topics</li>
+      <li><strong>Disappearing themes:</strong> Clusters with no outgoing edges represent themes that are fading from the research landscape</li>
+      <li><strong>Evolutionary pathways:</strong> Maximal directed sequences through the evolution graph represent coherent thematic trajectories spanning multiple periods, characterised by pathway strength, length, and cumulative size</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2025).</strong> <i>Rethinking Thematic Evolution in Science Mapping: An Integrated Framework for Longitudinal Analysis.</i> Working Paper.</p>
+
+    <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Callon, M., Courtial, J.-P., & Laville, F. (1991).</strong> <i>Co-word analysis as a tool for describing the network of interactions between basic and technological research: The case of polymer chemistry.</i> <strong>Scientometrics</strong>, 22(1), 155-205. <a href='https://doi.org/10.1007/BF02019280' target='_blank'>https://doi.org/10.1007/BF02019280</a></p>
+
+    <p><strong>Morris, S. A., & Van der Veer Martens, B. (2008).</strong> <i>The cognitive structure of scientific revolutions.</i> <strong>Scientometrics</strong>, 75(3), 423-442. <a href='https://doi.org/10.1007/s11192-007-1804-x' target='_blank'>https://doi.org/10.1007/s11192-007-1804-x</a></p>
+
+    </div>
+    </body>"
+
+  ## Factorial Analysis ----
+  factorialAnalysis <-
+    "<body>
+    <div class='container'>
+    <h3>&#128202; Factorial Analysis</h3>
+
+    <p><strong>Factorial Analysis</strong> applies dimensionality reduction techniques to bibliometric data, projecting high-dimensional document-term relationships onto a low-dimensional space for visualization and interpretation. The primary method used is <strong>Correspondence Analysis (CA)</strong>, a multivariate statistical technique particularly suited to analyzing contingency tables and categorical data.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p><strong>Correspondence Analysis (CA)</strong> decomposes a document-term matrix to identify the principal dimensions of variation in the data. It simultaneously represents both documents (rows) and terms (columns) in the same factorial space, revealing the associations between them.</p>
+    <p>Key concepts include:</p>
+    <ul>
+      <li><strong>Inertia:</strong> The total variance in the data. Each factorial dimension (axis) explains a portion of this inertia.</li>
+      <li><strong>Chi-square distance:</strong> CA uses chi-square distances rather than Euclidean distances, making it particularly appropriate for frequency data.</li>
+      <li><strong>Dual representation:</strong> Both rows (documents/authors) and columns (terms) are projected onto the same axes, enabling direct comparison.</li>
+    </ul>
+    <p>When applied to bibliometric data, CA reveals the <strong>intellectual structure</strong> of a field by identifying the main dimensions along which research topics and authors are organized.</p>
+
+    <h4>&#128200; How It Works</h4>
+    <ol>
+      <li><strong>Matrix construction:</strong> A document-term (or author-term) co-occurrence matrix is built from the bibliographic data</li>
+      <li><strong>Decomposition:</strong> Correspondence Analysis decomposes this matrix into factorial axes that capture the most important dimensions of variation</li>
+      <li><strong>Projection:</strong> Documents and terms are projected onto the first two or three factorial axes</li>
+      <li><strong>Clustering:</strong> Hierarchical clustering can be applied to the factorial coordinates to group similar documents or terms</li>
+    </ol>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Field:</strong> Choose the bibliographic field to analyze (Keywords, Title words, Abstract terms, etc.)</li>
+      <li><strong>Method:</strong> Select from Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA), or related techniques</li>
+      <li><strong>Number of terms:</strong> Control how many terms to include in the analysis</li>
+      <li><strong>Number of clusters:</strong> Define the number of groups for hierarchical clustering on factorial coordinates</li>
+      <li><strong>Axes:</strong> Choose which factorial dimensions to display on the x and y axes</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Proximity:</strong> Points that are close together in the factorial space have similar profiles (they tend to co-occur with the same terms)</li>
+      <li><strong>Opposition:</strong> Points on opposite sides of an axis represent contrasting profiles or research themes</li>
+      <li><strong>Origin:</strong> Points near the origin have average profiles and are not strongly associated with any particular dimension</li>
+      <li><strong>Axis interpretation:</strong> Each axis represents a dimension of variation; examine which terms are most strongly associated with each axis to interpret its meaning</li>
+      <li><strong>Cluster colors:</strong> Terms grouped by the same color belong to the same hierarchical cluster, representing a coherent thematic group</li>
+      <li><strong>Explained inertia:</strong> Check the percentage of inertia explained by each axis to assess how well the 2D representation captures the overall structure</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Greenacre, M. J. (2007).</strong> <i>Correspondence Analysis in Practice</i> (2nd ed.). London: Chapman and Hall/CRC. <a href='https://doi.org/10.1201/9781420011234' target='_blank'>https://doi.org/10.1201/9781420011234</a></p>
+
+    <p><strong>Benzecri, J.-P. (1973).</strong> <i>L'Analyse des Donnees. Volume II: L'Analyse des Correspondances.</i> Paris: Dunod.</p>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Cuccurullo, C., Aria, M., & Sarto, F. (2016).</strong> <i>Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains.</i> <strong>Scientometrics</strong>, 108(2), 595-611. <a href='https://doi.org/10.1007/s11192-016-1948-8' target='_blank'>https://doi.org/10.1007/s11192-016-1948-8</a></p>
+
+    </div>
+    </body>"
+
+  ## Co-Citation Network ----
+  coCitationNetwork <-
+    "<body>
+    <div class='container'>
+    <h3>&#128209; Co-Citation Network</h3>
+
+    <p>The <strong>Co-Citation Network</strong> maps the <strong>intellectual structure</strong> of a research field by analyzing patterns in how documents cite the same references. Two references are <strong>co-cited</strong> when they are both cited by the same document. The more frequently two references are co-cited, the stronger their intellectual relationship. This technique, introduced by <strong>Small (1973)</strong>, is one of the foundational methods of bibliometric analysis.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>Co-citation analysis rests on two complementary approaches:</p>
+    <ul>
+      <li><strong>Co-citation (Small, 1973):</strong> Measures how often two references are cited together by subsequent publications. Highly co-cited references are perceived as intellectually related by the citing community. This method identifies the <strong>knowledge base</strong> of a field.</li>
+      <li><strong>Bibliographic coupling (Kessler, 1963):</strong> Measures the overlap in the reference lists of two documents. Documents that share many cited references are likely working on similar topics. This method identifies current <strong>research fronts</strong>.</li>
+    </ul>
+    <p>Both approaches build networks where:</p>
+    <ul>
+      <li><strong>Nodes</strong> represent cited references (co-citation) or citing documents (bibliographic coupling)</li>
+      <li><strong>Edges</strong> represent the strength of co-citation or bibliographic coupling between two nodes</li>
+      <li><strong>Clusters</strong> represent distinct schools of thought, theoretical frameworks, or research traditions</li>
+    </ul>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Analysis type:</strong> Choose between co-citation analysis or bibliographic coupling</li>
+      <li><strong>Network layout:</strong> Select the layout algorithm for network visualization</li>
+      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Salton's cosine, or other normalization methods</li>
+      <li><strong>Clustering algorithm:</strong> Choose community detection method (Louvain, Walktrap, etc.)</li>
+      <li><strong>Number of nodes:</strong> Control how many top references or documents to include</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Node size:</strong> Proportional to citation frequency (co-citation) or number of references (coupling)</li>
+      <li><strong>Edge thickness:</strong> Proportional to the co-citation or coupling strength</li>
+      <li><strong>Clusters:</strong> Groups of co-cited references represent distinct intellectual traditions or theoretical perspectives</li>
+      <li><strong>Central nodes:</strong> Highly connected references represent foundational works that are widely cited across the field</li>
+      <li><strong>Bridge nodes:</strong> References connecting different clusters represent interdisciplinary or integrative works</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Small, H. (1973).</strong> <i>Co-citation in the scientific literature: A new measure of the relationship between two documents.</i> <strong>Journal of the American Society for Information Science</strong>, 24(4), 265-269. <a href='https://doi.org/10.1002/asi.4630240406' target='_blank'>https://doi.org/10.1002/asi.4630240406</a></p>
+
+    <p><strong>Kessler, M. M. (1963).</strong> <i>Bibliographic coupling between scientific papers.</i> <strong>American Documentation</strong>, 14(1), 10-25. <a href='https://doi.org/10.1002/asi.5090140103' target='_blank'>https://doi.org/10.1002/asi.5090140103</a></p>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Small, H. (1999).</strong> <i>Visualizing science by citation mapping.</i> <strong>Journal of the American Society for Information Science</strong>, 50(9), 799-813. <a href='https://doi.org/10.1002/(SICI)1097-4571(1999)50:9<799::AID-ASI9>3.0.CO;2-G' target='_blank'>DOI link</a></p>
+
+    </div>
+    </body>"
+
+  ## Historiograph ----
+  historiograph <-
+    "<body>
+    <div class='container'>
+    <h3>&#128218; Historiograph</h3>
+
+    <p>The <strong>Historiograph</strong> (or <strong>Historiographic Map</strong>) is a chronological visualization of a research field's evolution based on <strong>direct citation relationships</strong>. Introduced by <strong>Garfield (2004)</strong> and further developed by <strong>Garfield, Pudovkin, and Istomin (2003)</strong>, this method constructs a time-based network where documents are positioned along a timeline and connected by citation links, identifying the most influential works and the intellectual pathways of a field.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>Unlike co-citation analysis, which measures indirect relationships, the historiograph uses <strong>direct citations</strong> to map the intellectual development of a field. The underlying idea is that the citation chain from a foundational paper through successive works traces the evolution of ideas and methodologies over time.</p>
+    <p>Key principles:</p>
+    <ul>
+      <li><strong>Direct citation:</strong> A link exists from document A to document B if A cites B (or B cites A)</li>
+      <li><strong>Chronological ordering:</strong> Documents are positioned along the x-axis by publication year, creating a temporal map</li>
+      <li><strong>Milestone identification:</strong> Highly cited documents at key temporal junctions represent turning points in the field's evolution</li>
+    </ul>
+
+    <h4>&#128200; How It Works</h4>
+    <ol>
+      <li><strong>Local citation analysis:</strong> The algorithm identifies citation links among the documents in your collection</li>
+      <li><strong>Network construction:</strong> A directed citation network is built where edges represent citation relationships</li>
+      <li><strong>Chronological layout:</strong> Documents are arranged on a timeline based on their publication year</li>
+      <li><strong>Path identification:</strong> The main citation paths through the network reveal the intellectual evolution of the field</li>
+    </ol>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Number of nodes:</strong> Control how many top documents (by local citations) to include in the historiograph</li>
+      <li><strong>Minimum citations:</strong> Filter documents based on their local citation count</li>
+      <li><strong>Network layout:</strong> Choose the layout algorithm for positioning nodes</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Node position (x-axis):</strong> Publication year of the document</li>
+      <li><strong>Node size:</strong> Proportional to the number of local citations received</li>
+      <li><strong>Directed edges:</strong> Arrows indicate the direction of citation (from citing to cited document)</li>
+      <li><strong>Citation paths:</strong> Following the arrows traces the intellectual lineage from foundational works to recent developments</li>
+      <li><strong>Hub documents:</strong> Nodes with many incoming or outgoing edges represent milestone papers that either built on many predecessors or inspired many successors</li>
+      <li><strong>Temporal gaps:</strong> Large horizontal gaps between connected nodes may indicate paradigm shifts or periods of dormancy</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Garfield, E. (2004).</strong> <i>Historiographic mapping of knowledge domains literature.</i> <strong>Journal of Information Science</strong>, 30(2), 119-145. <a href='https://doi.org/10.1177/0165551504042802' target='_blank'>https://doi.org/10.1177/0165551504042802</a></p>
+
+    <p><strong>Garfield, E., Pudovkin, A. I., & Istomin, V. S. (2003).</strong> <i>Why do we need algorithmic historiography?</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 54(5), 400-412. <a href='https://doi.org/10.1002/asi.10226' target='_blank'>https://doi.org/10.1002/asi.10226</a></p>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Lucio-Arias, D., & Leydesdorff, L. (2008).</strong> <i>Main-path analysis and path-dependent transitions in HistCite-based historiograms.</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 59(12), 1948-1962. <a href='https://doi.org/10.1002/asi.20903' target='_blank'>https://doi.org/10.1002/asi.20903</a></p>
+
+    </div>
+    </body>"
+
+  ## Trend Topics ----
+  trendTopics <-
+    "<body>
+    <div class='container'>
+    <h3>&#128200; Trend Topics</h3>
+
+    <p>The <strong>Trend Topics</strong> analysis identifies and visualises the temporal dynamics of key terms within a bibliometric collection. By tracking the frequency of keywords (or other terms) across publication years, this tool reveals which topics are gaining momentum, which have reached maturity, and which are declining, providing a clear picture of the <strong>evolution of research interests</strong> over time.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>Trend analysis in bibliometrics is based on the observation that the vocabulary used in scientific publications reflects the intellectual priorities of a research community at a given point in time. By monitoring the rise and fall of specific terms across successive years, it is possible to detect shifts in research focus, the emergence of new paradigms, and the obsolescence of older topics.</p>
+    <p>This approach complements other temporal analyses (such as thematic evolution) by focusing on <strong>individual terms</strong> rather than thematic clusters, offering a more granular view of how specific concepts gain or lose traction within a field.</p>
+
+    <h4>&#128200; How It Works</h4>
+    <ol>
+      <li><strong>Term extraction:</strong> Keywords or other terms (Author's Keywords, Keywords Plus, title words, etc.) are extracted from each document in the collection</li>
+      <li><strong>Temporal aggregation:</strong> For each term, the frequency of occurrence is computed for each publication year</li>
+      <li><strong>Term selection:</strong> The top terms are selected based on their overall frequency or their trend characteristics</li>
+      <li><strong>Visualisation:</strong> The selected terms are plotted along a timeline, showing for each term the year range in which it appears and its frequency peak</li>
+    </ol>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Field:</strong> Choose the bibliographic field to analyze (Author's Keywords, Keywords Plus, Title words, Abstract words, etc.)</li>
+      <li><strong>Number of terms:</strong> Set how many top terms to display in the trend plot</li>
+      <li><strong>Minimum word frequency:</strong> Filter out rare terms that appear below a given threshold</li>
+      <li><strong>Number of words per year:</strong> Control how many terms to display for each year</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Horizontal bars:</strong> Each bar represents the <strong>interquartile range</strong> (from the first quartile Q1 to the third quartile Q3) of the temporal distribution of a term. This captures the central period of activity, filtering out sporadic early or late occurrences</li>
+      <li><strong>Bubble position:</strong> The bubble is placed at the <strong>median year</strong> of the term's temporal distribution, indicating the central tendency of its usage over time</li>
+      <li><strong>Bubble size:</strong> Proportional to the overall <strong>frequency</strong> of the term across the entire collection; larger bubbles indicate more frequently used terms</li>
+      <li><strong>Rising terms:</strong> Terms whose median year and interquartile range fall in the recent period represent emerging research interests</li>
+      <li><strong>Declining terms:</strong> Terms whose median and IQR are concentrated in earlier years indicate topics losing relevance</li>
+      <li><strong>Persistent terms:</strong> Terms with a wide interquartile range spanning most of the time window represent the stable core of the field</li>
+      <li><strong>Temporal clustering:</strong> Groups of terms with similar median years may indicate the rise of a new research paradigm or the impact of an external event</li>
+    </ul>
+
+    <h4>&#128161; Tips for Analysis</h4>
+    <ul>
+      <li><strong>Combine with Thematic Evolution:</strong> Use Trend Topics for a term-level view and Thematic Evolution for a cluster-level perspective to obtain a comprehensive understanding of temporal dynamics</li>
+      <li><strong>Field comparison:</strong> Compare trends across different fields (e.g., Author's Keywords vs. Keywords Plus) to distinguish author-driven terminology from indexer-assigned categories</li>
+      <li><strong>Context matters:</strong> A sudden spike in a keyword may reflect external events (e.g., a pandemic, a policy change) rather than purely intellectual evolution</li>
+    </ul>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
+
+    <p><strong>Noyons, E. C. M., Moed, H. F., & van Raan, A. F. J. (1999).</strong> <i>Integrating research performance analysis and science mapping.</i> <strong>Scientometrics</strong>, 46(3), 591-604. <a href='https://doi.org/10.1007/BF02459614' target='_blank'>https://doi.org/10.1007/BF02459614</a></p>
+
+    </div>
+    </body>"
+
   return(list(
     biblioAI = biblioAI,
     saas = saas,
@@ -2237,6 +2650,13 @@ helpContent <- function() {
     mainInformation = mainInformation,
     lifeCycle = lifeCycle,
     threeFieldPlot = threeFieldPlot,
-    contentAnalysis = contentAnalysis
+    contentAnalysis = contentAnalysis,
+    coOccurrenceNetwork = coOccurrenceNetwork,
+    thematicMap = thematicMap,
+    thematicEvolution = thematicEvolution,
+    factorialAnalysis = factorialAnalysis,
+    coCitationNetwork = coCitationNetwork,
+    historiograph = historiograph,
+    trendTopics = trendTopics
   ))
 }

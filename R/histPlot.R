@@ -142,6 +142,11 @@ histPlot <- function(histResults, n = 20, size = 5, labelsize = 5, remove.isolat
 
   if (isTRUE(remove.isolates)) bsk.network <- delete.isolates(bsk.network)
 
+  if (length(V(bsk.network)) == 0) {
+    if (isTRUE(verbose)) cat("\nNo direct citations found among the documents in the collection.\n")
+    return(list(net = bsk.network, g = NULL, graph.data = NULL, layout = NULL, axis = NULL, params = params))
+  }
+
   dg <- decompose.graph(bsk.network)
 
   layout_m <- as.data.frame(layout.fruchterman.reingold(bsk.network))

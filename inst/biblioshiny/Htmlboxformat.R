@@ -112,40 +112,36 @@ htmlBoxFormat <- function(
   }
   header_html <- paste0(header_html, "</thead>")
 
-  # Body (vectorized column-by-column instead of row-by-row apply)
+  # Body: prepare data as JSON for client-side rendering (only visible page in DOM)
   n_cols <- ncol(df)
   aligns <- sapply(1:n_cols, get_align)
-  cell_cols <- vector("list", n_cols)
+
+  # Build column-oriented vectors (fast R serialization, reconstruct rows in JS)
+  sort_cols <- vector("list", n_cols)
+  disp_cols <- vector("list", n_cols)
   for (j in 1:n_cols) {
     vals <- as.character(df[[j]])
     sort_vals <- gsub("<.*?>", "", vals)
     if (j %in% numeric) {
       num_vals <- as.numeric(sort_vals)
-      display_vals <- format(round(num_vals, round), nsmall = round)
-      sort_vals <- as.character(num_vals)
+      disp_cols[[j]] <- format(round(num_vals, round), nsmall = round)
+      sort_cols[[j]] <- as.character(num_vals)
     } else {
-      display_vals <- vals
+      disp_cols[[j]] <- vals
+      sort_cols[[j]] <- sort_vals
     }
-    cell_cols[[j]] <- sprintf(
-      '<td data-sort="%s" style="%s padding: 8px; border-bottom: 1px solid #eee;">%s</td>',
-      sort_vals, aligns[j], display_vals
-    )
-  }
-  row_contents <- do.call(paste0, cell_cols)
-
-  if (has_summary) {
-    sr_vals <- gsub("'", "\\\\'", as.character(df[[1]]))
-    summary_cells <- sprintf(
-      '<td style="text-align: center; padding: 8px; border-bottom: 1px solid #eee;"><button class="btn btn-xs btn-info" onclick="Shiny.setInputValue(\'button_id\', \'%s\', {priority: \'event\'})" title="AI Summary"><i class="fa fa-robot"></i></button></td>',
-      sr_vals
-    )
-    row_contents <- paste0(row_contents, summary_cells)
   }
 
-  body_rows <- paste0("<tr>", row_contents, "</tr>")
-  tbody_html <- paste0("<tbody>", paste(body_rows, collapse = ""), "</tbody>")
+  # Column-oriented JSON: {s: [[col1_vals], [col2_vals], ...], d: [[col1_vals], [col2_vals], ...], n: nrow}
+  # jsonlite serializes character vectors very efficiently in C — no nested R list overhead
+  data_json <- jsonlite::toJSON(
+    list(s = sort_cols, d = disp_cols, n = nrow(df)),
+    auto_unbox = TRUE
+  )
 
-  # UI Structure
+  # UI Structure — empty tbody, data delivered via JSON script tag
+  aligns_json <- jsonlite::toJSON(aligns, auto_unbox = TRUE)
+
   html_out <- tagList(
     tags$script(
       src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
@@ -179,7 +175,7 @@ htmlBoxFormat <- function(
           class = "table table-hover",
           style = "width: 100%; margin-bottom: 0; table-layout: auto;",
           HTML(header_html),
-          HTML(tbody_html)
+          HTML("<tbody></tbody>")
         )
       ),
 
@@ -193,150 +189,179 @@ htmlBoxFormat <- function(
       )
     ),
 
+    # Embed data as JSON in a script tag (not executed, just storage)
+    tags$script(
+      id = paste0("data_", table_id),
+      type = "application/json",
+      HTML(as.character(data_json))
+    ),
+
     tags$script(HTML(sprintf(
       '
       if (typeof window.exportToExcel !== "function") {
         window.exportToExcel = function(tid, fname) {
-          const table = document.getElementById(tid);
-          if (!table) return;
-          
-          const data = [];
-          const headers = [];
-          
-          // 1. Get headers (ignoring sorting icons)
-          const headerCells = table.querySelectorAll("thead tr:first-child th");
-          headerCells.forEach(th => headers.push(th.innerText.replace("⇅", "").trim()));
-          data.push(headers);
-          
-          // 2. Get rows (exporting ALL or FILTERED rows)
-          const allRows = table.querySelectorAll("tbody tr");
-          allRows.forEach(row => {
-            if (row.getAttribute("data-is-filtered") === "false") return;
+          var state = window["__bb_" + tid];
+          if (!state) return;
 
-            const rowData = [];
-            Array.from(row.cells).forEach(cell => {
-              let val = cell.getAttribute("data-sort") || cell.innerText;
+          var headers = [];
+          var table = document.getElementById(tid);
+          var headerCells = table.querySelectorAll("thead tr:first-child th");
+          headerCells.forEach(function(th) { headers.push(th.innerText.replace("\\u21C5", "").trim()); });
+
+          var data = [headers];
+          var rows = state.filteredData;
+          for (var i = 0; i < rows.length; i++) {
+            var rowData = [];
+            for (var j = 0; j < rows[i].length; j++) {
+              var val = rows[i][j].s;
               if (!isNaN(val) && val !== "") val = parseFloat(val);
               rowData.push(val);
-            });
+            }
             data.push(rowData);
-          });
-          
-          const ws = XLSX.utils.aoa_to_sheet(data);
-          const wb = XLSX.utils.book_new();
+          }
+
+          var ws = XLSX.utils.aoa_to_sheet(data);
+          var wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, "Data");
           XLSX.writeFile(wb, fname + "_" + new Date().toISOString().split("T")[0] + ".xlsx");
         };
       }
 
       (function() {
-        const tid = "%s";
-        const pageSize = %d;
-        let currentPage = 0;
-        let visibleRows = [];
-        let sortCol = -1;
-        let sortAsc = true;
+        var tid = "%s";
+        var pageSize = %d;
+        var hasSummary = %s;
+        var aligns = %s;
 
         function init() {
-          const table = document.getElementById(tid);
+          var table = document.getElementById(tid);
           if (!table) { setTimeout(init, 100); return; }
-          const tbody = table.querySelector("tbody");
-          const allRows = Array.from(tbody.querySelectorAll("tr"));
-          visibleRows = allRows;
 
-          function updateTable() {
-            const start = currentPage * pageSize;
-            const end = start + pageSize;
-            
-            // Nascondi tutto fisicamente
-            allRows.forEach(r => r.style.display = "none");
-            
-            // Mostra solo le righe della pagina corrente tra quelle filtrate
-            visibleRows.slice(start, end).forEach(r => {
-                r.style.display = "";
-                tbody.appendChild(r); 
-            });
-            
-            document.getElementById("info_" + tid).innerText = 
-              "Showing " + (visibleRows.length > 0 ? start + 1 : 0) + 
-              "-" + Math.min(end, visibleRows.length) + " of " + visibleRows.length;
+          var dataEl = document.getElementById("data_" + tid);
+          var raw = JSON.parse(dataEl.textContent);
+          // Transform column-oriented {s:[[col1],[col2],...], d:[[col1],[col2],...], n:nrow}
+          // into row-oriented [{s:sortVal, d:dispVal}, ...] per row — fast in JS
+          var nCols = raw.s.length;
+          var allData = new Array(raw.n);
+          for (var r = 0; r < raw.n; r++) {
+            var row = new Array(nCols);
+            for (var c = 0; c < nCols; c++) {
+              row[c] = {s: raw.s[c][r], d: raw.d[c][r]};
+            }
+            allData[r] = row;
+          }
+          raw = null; // free column-oriented data
+          var filteredData = allData.slice();
+          var currentPage = 0;
+          var sortCol = -1;
+          var sortAsc = true;
+          var tbody = table.querySelector("tbody");
+
+          // Expose state for Excel export
+          window["__bb_" + tid] = { filteredData: filteredData };
+
+          function renderPage() {
+            var start = currentPage * pageSize;
+            var end = Math.min(start + pageSize, filteredData.length);
+            tbody.innerHTML = "";
+            for (var i = start; i < end; i++) {
+              var row = filteredData[i];
+              var tr = document.createElement("tr");
+              for (var j = 0; j < row.length; j++) {
+                var td = document.createElement("td");
+                td.setAttribute("data-sort", row[j].s);
+                td.style.cssText = aligns[j] + " padding: 8px; border-bottom: 1px solid #eee;";
+                td.innerHTML = row[j].d;
+                tr.appendChild(td);
+              }
+              if (hasSummary) {
+                var tdS = document.createElement("td");
+                tdS.style.cssText = "text-align: center; padding: 8px; border-bottom: 1px solid #eee;";
+                var safeVal = row[0].s.replace(/\x27/g, "\\\x27");
+                tdS.innerHTML = "<button class=\\"btn btn-xs btn-info\\" onclick=\\"Shiny.setInputValue(\\x27button_id\\x27, \\x27" + safeVal + "\\x27, {priority: \\x27event\\x27})\\" title=\\"AI Summary\\"><i class=\\"fa fa-robot\\"></i></button>";
+                tr.appendChild(tdS);
+              }
+              tbody.appendChild(tr);
+            }
+            document.getElementById("info_" + tid).innerText =
+              "Showing " + (filteredData.length > 0 ? start + 1 : 0) +
+              "-" + end + " of " + filteredData.length;
             renderPager();
           }
 
           function renderPager() {
-            const pager = document.getElementById("pager_" + tid);
-            const pageCount = Math.ceil(visibleRows.length / pageSize);
+            var pager = document.getElementById("pager_" + tid);
+            var pageCount = Math.ceil(filteredData.length / pageSize);
             pager.innerHTML = "";
-            if (pageCount <= 1 && visibleRows.length <= pageSize) return;
-            const createBtn = (label, target, active = false, disabled = false) => {
-              const b = document.createElement("button");
+            if (pageCount <= 1) return;
+            var createBtn = function(label, target, active, disabled) {
+              var b = document.createElement("button");
               b.className = "btn btn-default btn-xs" + (active ? " active" : "");
-              b.innerText = label; b.disabled = disabled;
-              b.onclick = () => { currentPage = target; updateTable(); };
+              b.innerText = label;
+              b.disabled = disabled;
+              b.onclick = function() { currentPage = target; renderPage(); };
               pager.appendChild(b);
             };
-            createBtn("«", Math.max(0, currentPage - 1), false, currentPage === 0);
-            for (let i = 0; i < pageCount; i++) {
+            createBtn("\\u00AB", Math.max(0, currentPage - 1), false, currentPage === 0);
+            for (var i = 0; i < pageCount; i++) {
               if (i === 0 || i === pageCount - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                createBtn(i + 1, i, i === currentPage);
+                createBtn(i + 1, i, i === currentPage, false);
               } else if (i === currentPage - 2 || i === currentPage + 2) {
-                const s = document.createElement("span"); s.innerText = "..."; s.style.padding = "0 5px";
+                var s = document.createElement("span");
+                s.innerText = "...";
+                s.style.padding = "0 5px";
                 pager.appendChild(s);
               }
             }
-            createBtn("»", Math.min(pageCount - 1, currentPage + 1), false, currentPage === pageCount - 1);
+            createBtn("\\u00BB", Math.min(pageCount - 1, currentPage + 1), false, currentPage === pageCount - 1);
           }
 
-          table.querySelectorAll(".sortable-header").forEach(th => {
+          table.querySelectorAll(".sortable-header").forEach(function(th) {
             th.onclick = function() {
-              const col = parseInt(this.getAttribute("data-col"));
+              var col = parseInt(this.getAttribute("data-col"));
               sortAsc = (sortCol === col) ? !sortAsc : true;
               sortCol = col;
-              table.querySelectorAll(".sort-icon").forEach(si => { si.innerText = "⇅"; si.style.color = "#ccc"; });
-              this.querySelector(".sort-icon").innerText = sortAsc ? "▲" : "▼";
+              table.querySelectorAll(".sort-icon").forEach(function(si) { si.innerText = "\\u21C5"; si.style.color = "#ccc"; });
+              this.querySelector(".sort-icon").innerText = sortAsc ? "\\u25B2" : "\\u25BC";
               this.querySelector(".sort-icon").style.color = "#333";
-              visibleRows.sort((a, b) => {
-                let valA = a.cells[col].getAttribute("data-sort").trim();
-                let valB = b.cells[col].getAttribute("data-sort").trim();
+              filteredData.sort(function(a, b) {
+                var valA = a[col].s.trim();
+                var valB = b[col].s.trim();
                 if (!isNaN(valA) && !isNaN(valB) && valA !== "" && valB !== "") {
                   return sortAsc ? parseFloat(valA) - parseFloat(valB) : parseFloat(valB) - parseFloat(valA);
                 }
                 return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
               });
               currentPage = 0;
-              updateTable();
+              renderPage();
             };
           });
 
-          const filters = document.querySelectorAll(".table-filter-" + tid);
-          filters.forEach(input => {
-            input.addEventListener("input", () => {
-              const fVals = Array.from(filters).map(f => f.value.toUpperCase());
-              
-              // Applica il filtro e segna le righe
-              allRows.forEach(row => {
-                const isMatch = fVals.every((val, idx) => {
+          var filters = document.querySelectorAll(".table-filter-" + tid);
+          filters.forEach(function(input) {
+            input.addEventListener("input", function() {
+              var fVals = Array.from(filters).map(function(f) { return f.value.toUpperCase(); });
+              filteredData = allData.filter(function(row) {
+                return fVals.every(function(val, idx) {
                   if (!val) return true;
-                  return row.cells[idx].getAttribute("data-sort").toUpperCase().includes(val);
+                  return row[idx].s.toUpperCase().indexOf(val) > -1;
                 });
-                row.setAttribute("data-is-filtered", isMatch ? "true" : "false");
               });
-
-              visibleRows = allRows.filter(r => r.getAttribute("data-is-filtered") === "true");
+              window["__bb_" + tid].filteredData = filteredData;
               currentPage = 0;
-              updateTable();
+              renderPage();
             });
           });
-          
-          // Segna inizialmente tutte le righe come "visibili" per export
-          allRows.forEach(r => r.setAttribute("data-is-filtered", "true"));
-          updateTable();
+
+          renderPage();
         }
         init();
       })();
       ',
       table_id,
-      nrow
+      nrow,
+      ifelse(has_summary, "true", "false"),
+      as.character(aligns_json)
     )))
   )
 

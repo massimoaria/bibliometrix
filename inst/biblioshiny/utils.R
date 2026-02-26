@@ -1141,7 +1141,9 @@ authorCard <- function(selected_author, values) {
       suppressWarnings(
         AU_data <- tryCatch(
           {
-            authorBio(author_position = author_position, doi = doi)
+            oa_email <- Sys.getenv("openalexR.mailto", unset = "")
+            authorBio(author_position = author_position, doi = doi,
+                      mailto = if (nchar(oa_email) > 0) oa_email else NULL)
           },
           error = function(e) {
             NULL

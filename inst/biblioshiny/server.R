@@ -283,6 +283,36 @@ To ensure the functionality of Biblioshiny,
   values$collection_description <- NULL
   values$gemini_additional <- NULL
 
+  ## OpenAlex polite pool email
+  path_oa_email <- file.path(home, ".biblio_openalex_email.txt")
+  if (file.exists(path_oa_email)) {
+    oa_saved_email <- trimws(readLines(path_oa_email, warn = FALSE)[1])
+    if (!is.na(oa_saved_email) && nchar(oa_saved_email) >= 5) {
+      Sys.setenv(openalexR.mailto = oa_saved_email)
+      options(openalexR.mailto = oa_saved_email)
+      values$oaPoliteEmail <- oa_saved_email
+    } else {
+      values$oaPoliteEmail <- NULL
+    }
+  } else {
+    values$oaPoliteEmail <- NULL
+  }
+
+  ## OpenAlex API key
+  path_oa_apikey <- file.path(home, ".biblio_openalex_apikey.txt")
+  if (file.exists(path_oa_apikey)) {
+    oa_saved_apikey <- trimws(readLines(path_oa_apikey, warn = FALSE)[1])
+    if (!is.na(oa_saved_apikey) && nchar(oa_saved_apikey) >= 10) {
+      Sys.setenv(openalexR.apikey = oa_saved_apikey)
+      options(openalexR.apikey = oa_saved_apikey)
+      values$oaApiKey <- oa_saved_apikey
+    } else {
+      values$oaApiKey <- NULL
+    }
+  } else {
+    values$oaApiKey <- NULL
+  }
+
   path_gemini_model <- file.path(home, ".biblio_gemini_model.txt")
   gemini_api_model <- loadGeminiModel(path_gemini_model)
   values$gemini_api_model <- gemini_api_model[1]
@@ -1368,6 +1398,247 @@ To ensure the functionality of Biblioshiny,
               format = "csv"
             )
           })
+
+          # Resolve cited references if requested
+          if (isTRUE(input$importFetchRefs)) {
+            # Check if CR column has actual reference IDs (old format) or is empty/NA (new format)
+            has_cr_ids <- "CR" %in% names(M) && any(!is.na(M$CR) & M$CR != "")
+            only_multiple <- isTRUE(input$importRefsFilter == "multiple")
+
+            showModal(modalDialog(
+              title = "Resolving Cited References",
+              div(
+                div(
+                  style = "text-align: center; margin: 20px 0;",
+                  icon("spinner", class = "fa-spin fa-3x")
+                ),
+                div(
+                  id = "import-ref-progress",
+                  style = "text-align: center; font-size: 14px;",
+                  if (has_cr_ids) {
+                    "Collecting reference IDs..."
+                  } else {
+                    "Fetching references from OpenAlex API..."
+                  }
+                ),
+                div(
+                  style = "margin-top: 10px; background-color: #e9ecef; border-radius: 4px; height: 20px; width: 100%;",
+                  div(
+                    id = "import-ref-bar",
+                    style = "background-color: #007bff; height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s ease;"
+                  )
+                ),
+                div(
+                  id = "import-ref-pct",
+                  style = "text-align: center; margin-top: 5px; font-size: 12px; color: #666;",
+                  "0%"
+                )
+              ),
+              footer = NULL,
+              easyClose = FALSE
+            ))
+
+            tryCatch(
+              {
+                if (has_cr_ids) {
+                  # Old format: CR column contains OpenAlex reference IDs
+                  all_cr <- M$CR[!is.na(M$CR) & M$CR != ""]
+                  all_ref_ids <- unique(trimws(unlist(strsplit(all_cr, ";"))))
+                  all_ref_ids <- all_ref_ids[grepl(
+                    "^https://openalex\\.org/W",
+                    all_ref_ids
+                  )]
+
+                  if (length(all_ref_ids) > 0) {
+                    shinyjs::html(
+                      "import-ref-progress",
+                      sprintf(
+                        "Resolving %s unique references...",
+                        format(length(all_ref_ids), big.mark = ",")
+                      )
+                    )
+
+                    oa_data_fake <- lapply(seq_len(nrow(M)), function(i) {
+                      cr <- M$CR[i]
+                      if (is.na(cr) || cr == "") {
+                        list(referenced_works = character(0))
+                      } else {
+                        refs <- trimws(unlist(strsplit(cr, ";")))
+                        refs <- refs[grepl("^https://openalex\\.org/W", refs)]
+                        list(referenced_works = refs)
+                      }
+                    })
+
+                    ref_lookup <- resolve_openalex_references(
+                      oa_data_fake,
+                      progress_id = "import-ref-progress",
+                      progress_bar_id = "import-ref-bar",
+                      progress_pct_id = "import-ref-pct",
+                      only_multiple = only_multiple
+                    )
+
+                    if (length(ref_lookup) > 0) {
+                      shinyjs::html(
+                        "import-ref-progress",
+                        "Building citation strings..."
+                      )
+                      cr_col <- build_cr_column(oa_data_fake, ref_lookup)
+                      M$CRids <- M$CR
+                      M$CR <- cr_col
+                    }
+                  }
+                } else {
+                  # New format: no CR in CSV, fetch referenced_works via API using id_oa
+                  work_ids <- M$id_oa[!is.na(M$id_oa) & M$id_oa != ""]
+                  if (length(work_ids) > 0) {
+                    shinyjs::html(
+                      "import-ref-progress",
+                      sprintf(
+                        "Fetching referenced works for %s publications...",
+                        format(length(work_ids), big.mark = ",")
+                      )
+                    )
+
+                    # Fetch referenced_works for each publication in batches of 50
+                    batch_size <- 50
+                    n_batches <- ceiling(length(work_ids) / batch_size)
+                    ref_map <- setNames(
+                      vector("list", length(work_ids)),
+                      work_ids
+                    )
+
+                    for (b in seq_len(n_batches)) {
+                      start_idx <- (b - 1) * batch_size + 1
+                      end_idx <- min(b * batch_size, length(work_ids))
+                      batch_ids <- work_ids[start_idx:end_idx]
+
+                      pct <- round(b / n_batches * 50) # first half: 0-50%
+                      shinyjs::runjs(sprintf(
+                        "$('#import-ref-bar').css('width', '%d%%');",
+                        pct
+                      ))
+                      shinyjs::html(
+                        "import-ref-pct",
+                        sprintf(
+                          "Fetching references... batch %d/%d (%d%%)",
+                          b,
+                          n_batches,
+                          pct
+                        )
+                      )
+
+                      tryCatch(
+                        {
+                          result <- openalexR::oa_fetch(
+                            entity = "works",
+                            openalex_id = paste(batch_ids, collapse = "|"),
+                            output = "list",
+                            verbose = FALSE
+                          )
+                          if (is.list(result)) {
+                            for (work in result) {
+                              wid <- gsub("https://openalex.org/", "", work$id)
+                              if (
+                                !is.null(wid) && !is.null(work$referenced_works)
+                              ) {
+                                ref_map[[wid]] <- work$referenced_works
+                              }
+                            }
+                          }
+                        },
+                        error = function(e) {
+                          # Skip failed batches silently
+                        }
+                      )
+                    }
+
+                    # Build oa_data_fake structure from fetched referenced_works
+                    oa_data_fake <- lapply(seq_len(nrow(M)), function(i) {
+                      refs <- ref_map[[M$id_oa[i]]]
+                      if (is.null(refs) || length(refs) == 0) {
+                        list(referenced_works = character(0))
+                      } else {
+                        list(referenced_works = refs)
+                      }
+                    })
+
+                    # Collect all unique ref IDs and resolve them
+                    all_ref_ids <- unique(unlist(lapply(
+                      oa_data_fake,
+                      function(w) w$referenced_works
+                    )))
+                    all_ref_ids <- all_ref_ids[
+                      !is.na(all_ref_ids) & all_ref_ids != ""
+                    ]
+
+                    if (length(all_ref_ids) > 0) {
+                      shinyjs::html(
+                        "import-ref-progress",
+                        sprintf(
+                          "Resolving %s unique references...",
+                          format(length(all_ref_ids), big.mark = ",")
+                        )
+                      )
+
+                      ref_lookup <- resolve_openalex_references(
+                        oa_data_fake,
+                        progress_id = "import-ref-progress",
+                        progress_bar_id = "import-ref-bar",
+                        progress_pct_id = "import-ref-pct",
+                        only_multiple = only_multiple
+                      )
+
+                      if (length(ref_lookup) > 0) {
+                        shinyjs::html(
+                          "import-ref-progress",
+                          "Building citation strings..."
+                        )
+                        cr_col <- build_cr_column(oa_data_fake, ref_lookup)
+                        # Save OpenAlex IDs for direct citation analysis (histNetwork)
+                        M$CRids <- vapply(
+                          oa_data_fake,
+                          function(w) {
+                            ids <- gsub(
+                              "https://openalex.org/",
+                              "",
+                              w$referenced_works
+                            )
+                            if (length(ids) == 0) {
+                              NA_character_
+                            } else {
+                              paste(ids, collapse = ";")
+                            }
+                          },
+                          character(1)
+                        )
+                        M$CR <- cr_col
+                        M$NR <- vapply(
+                          oa_data_fake,
+                          function(w) length(w$referenced_works),
+                          integer(1)
+                        )
+                      }
+                    }
+                  }
+                }
+
+                removeModal()
+              },
+              error = function(e) {
+                removeModal()
+                showModal(modalDialog(
+                  title = "Warning",
+                  paste(
+                    "Reference resolution failed:",
+                    e$message,
+                    "\nThe collection was imported without resolved references."
+                  ),
+                  easyClose = TRUE,
+                  footer = modalButton("OK")
+                ))
+              }
+            )
+          }
         },
         openalex_api = {
           M <- convert2df(
@@ -2669,7 +2940,9 @@ To ensure the functionality of Biblioshiny,
     refMatch_selected_for_merge(character(0))
 
     # Update table visuals without re-rendering
-    shinyjs::runjs("if (window.refMatchTable) window.refMatchTable.clearAllSelections();")
+    shinyjs::runjs(
+      "if (window.refMatchTable) window.refMatchTable.clearAllSelections();"
+    )
 
     showNotification("Selection cleared", type = "message", duration = 3)
   })
@@ -3091,13 +3364,17 @@ To ensure the functionality of Biblioshiny,
     # Header
     header_cols <- paste0(
       sprintf(
-        '<th class="sortable-header" data-col="%d" style="text-align: left; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%%; transform: translateY(-50%%);">&#8693;</span></th>',
+        '<th class="sortable-header" data-col="%d" style="text-align: left; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%; transform: translateY(-50%);">&#8693;</span></th>',
         0:(n_cols - 1),
         col_names
       ),
       collapse = ""
     )
-    header_html <- paste0("<thead><tr style='cursor: pointer;'>", header_cols, "</tr>")
+    header_html <- paste0(
+      "<thead><tr style='cursor: pointer;'>",
+      header_cols,
+      "</tr>"
+    )
 
     # Filter row
     filter_cells <- paste0(
@@ -3120,28 +3397,40 @@ To ensure the functionality of Biblioshiny,
       if (j == 1) {
         # Selected column - special styling
         is_sel <- vals == "TRUE"
-        cell_bg <- ifelse(is_sel, "background-color: #28a745; color: #ffffff;", "background-color: #ffffff; color: #000000;")
+        cell_bg <- ifelse(
+          is_sel,
+          "background-color: #28a745; color: #ffffff;",
+          "background-color: #ffffff; color: #000000;"
+        )
         cell_cols[[j]] <- sprintf(
           '<td class="sel-cell" data-sort="%s" style="%s padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; text-align: center;">%s</td>',
-          sort_vals, cell_bg, vals
+          sort_vals,
+          cell_bg,
+          vals
         )
       } else if (j %in% c(3, 4)) {
         # Numeric columns (Times Cited, Variants Found)
         cell_cols[[j]] <- sprintf(
           '<td data-sort="%s" style="text-align: right; padding: 8px; border-bottom: 1px solid #eee;">%s</td>',
-          sort_vals, vals
+          sort_vals,
+          vals
         )
       } else {
         cell_cols[[j]] <- sprintf(
           '<td data-sort="%s" style="text-align: left; padding: 8px; border-bottom: 1px solid #eee;">%s</td>',
-          sort_vals, vals
+          sort_vals,
+          vals
         )
       }
     }
     row_contents <- do.call(paste0, cell_cols)
 
     # Row background based on selection
-    row_bg <- ifelse(top_table$Selected == "TRUE", "background-color: #d4edda;", "")
+    row_bg <- ifelse(
+      top_table$Selected == "TRUE",
+      "background-color: #d4edda;",
+      ""
+    )
 
     body_rows <- sprintf(
       '<tr data-orig-row="%d" style="cursor: pointer; %s" onclick="Shiny.setInputValue(\'refMatch_row_clicked\', %d, {priority: \'event\'})">%s</tr>',
@@ -4806,7 +5095,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -4901,7 +5190,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -4970,7 +5259,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -5058,7 +5347,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 4,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -5260,7 +5549,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -5530,7 +5819,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 3,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -5741,7 +6030,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -5824,7 +6113,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 4,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -5913,7 +6202,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 5,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -6164,7 +6453,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -6259,7 +6548,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -6460,7 +6749,7 @@ To ensure the functionality of Biblioshiny,
       numeric = c(3, 6),
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 1,
@@ -6532,7 +6821,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -6630,7 +6919,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -6780,7 +7069,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 3,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -7212,7 +7501,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 5:6,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -7355,7 +7644,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 7:9,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -7465,7 +7754,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -7601,7 +7890,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -7952,7 +8241,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -8230,7 +8519,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -8254,7 +8543,7 @@ To ensure the functionality of Biblioshiny,
         numeric = NULL,
         dom = FALSE,
         size = '100%',
-        filter = "none",
+        filter = "top",
         columnShort = NULL,
         columnSmall = NULL,
         round = 2,
@@ -8582,7 +8871,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -8768,7 +9057,7 @@ To ensure the functionality of Biblioshiny,
       numeric = NULL,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -8919,7 +9208,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 2,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -8944,7 +9233,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 4:5,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -9477,7 +9766,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 3:5,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 3,
@@ -9793,7 +10082,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 2:3,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -9817,7 +10106,7 @@ To ensure the functionality of Biblioshiny,
       numeric = 2:4,
       dom = FALSE,
       size = '100%',
-      filter = "none",
+      filter = "top",
       columnShort = NULL,
       columnSmall = NULL,
       round = 2,
@@ -11527,6 +11816,11 @@ To ensure the functionality of Biblioshiny,
           min.citations = 0,
           sep = ";"
         )
+        if (!is.list(histResults) || is.null(histResults$histData)) {
+          stop(
+            "No direct citations found among the documents in the collection."
+          )
+        }
         histResults$histData <- histResults$histData %>%
           tibble::rownames_to_column(var = "SR")
         histPlot <- bibliometrix::histPlot(
@@ -11538,6 +11832,11 @@ To ensure the functionality of Biblioshiny,
           label = hist_titlelabel,
           verbose = FALSE
         )
+        if (is.null(histPlot$layout)) {
+          stop(
+            "No direct citations found among the documents in the collection."
+          )
+        }
         list(histResults = histResults, histPlot = histPlot)
       },
       seed = TRUE,
@@ -12799,6 +13098,174 @@ To ensure the functionality of Biblioshiny,
         output$status <- renderText(paste0("❌ API key has been removed"))
       })
     }
+  })
+
+  # ============================================
+  # OpenAlex API Key
+  # ============================================
+
+  # Show API key status on load
+  output$oaApiKeyStatus <- renderUI({
+    if (!is.null(values$oaApiKey) && nchar(values$oaApiKey) >= 10) {
+      masked_key <- paste0("...", substr(values$oaApiKey, nchar(values$oaApiKey) - 3, nchar(values$oaApiKey)))
+      div(
+        style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("check-circle"),
+        sprintf(" API key active: %s", masked_key)
+      )
+    } else {
+      div(
+        style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("exclamation-triangle"),
+        " No API key set. Limited to 100 credits/day (testing only)."
+      )
+    }
+  })
+
+  # Pre-fill API key input if already saved
+  observeEvent(
+    TRUE,
+    {
+      if (!is.null(values$oaApiKey) && nchar(values$oaApiKey) >= 10) {
+        updateTextInput(session, "oaApiKey", value = values$oaApiKey)
+      }
+    },
+    once = TRUE
+  )
+
+  # Save API key
+  observeEvent(input$oaSetApiKey, {
+    key <- trimws(input$oaApiKey)
+    if (is.null(key) || nchar(key) < 10) {
+      output$oaApiKeyStatus <- renderUI({
+        div(
+          style = "color: #721c24; background-color: #f8d7da; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+          icon("times-circle"),
+          " Please enter a valid API key (at least 10 characters)."
+        )
+      })
+      return()
+    }
+
+    home <- homeFolder()
+    path_oa_apikey <- file.path(home, ".biblio_openalex_apikey.txt")
+    writeLines(key, path_oa_apikey)
+    Sys.setenv(openalexR.apikey = key)
+    options(openalexR.apikey = key)
+    values$oaApiKey <- key
+
+    masked_key <- paste0("...", substr(key, nchar(key) - 3, nchar(key)))
+    output$oaApiKeyStatus <- renderUI({
+      div(
+        style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("check-circle"),
+        sprintf(" API key saved: %s", masked_key)
+      )
+    })
+  })
+
+  # Remove API key
+  observeEvent(input$oaRemoveApiKey, {
+    home <- homeFolder()
+    path_oa_apikey <- file.path(home, ".biblio_openalex_apikey.txt")
+    if (file.exists(path_oa_apikey)) {
+      file.remove(path_oa_apikey)
+    }
+    Sys.unsetenv("openalexR.apikey")
+    options(openalexR.apikey = NULL)
+    values$oaApiKey <- NULL
+    updateTextInput(session, "oaApiKey", value = "")
+
+    output$oaApiKeyStatus <- renderUI({
+      div(
+        style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("exclamation-triangle"),
+        " API key removed. Limited to 100 credits/day (testing only)."
+      )
+    })
+  })
+
+  # ============================================
+  # OpenAlex Polite Pool Email
+  # ============================================
+
+  # Show status on load
+  output$oaEmailStatus <- renderUI({
+    if (!is.null(values$oaPoliteEmail) && nchar(values$oaPoliteEmail) >= 5) {
+      div(
+        style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("check-circle"),
+        sprintf(" Polite pool active: %s", values$oaPoliteEmail)
+      )
+    } else {
+      div(
+        style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("exclamation-triangle"),
+        " No email set. Using common pool (slower rate limits)."
+      )
+    }
+  })
+
+  # Pre-fill email input if already saved
+  observeEvent(
+    TRUE,
+    {
+      if (!is.null(values$oaPoliteEmail) && nchar(values$oaPoliteEmail) >= 5) {
+        updateTextInput(session, "oaPoliteEmail", value = values$oaPoliteEmail)
+      }
+    },
+    once = TRUE
+  )
+
+  # Save email
+  observeEvent(input$oaSetEmail, {
+    email <- trimws(input$oaPoliteEmail)
+    if (is.null(email) || !grepl("^[^@]+@[^@]+\\.[^@]+$", email)) {
+      output$oaEmailStatus <- renderUI({
+        div(
+          style = "color: #721c24; background-color: #f8d7da; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+          icon("times-circle"),
+          " Please enter a valid email address."
+        )
+      })
+      return()
+    }
+
+    home <- homeFolder()
+    path_oa_email <- file.path(home, ".biblio_openalex_email.txt")
+    writeLines(email, path_oa_email)
+    Sys.setenv(openalexR.mailto = email)
+    options(openalexR.mailto = email)
+    values$oaPoliteEmail <- email
+
+    output$oaEmailStatus <- renderUI({
+      div(
+        style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("check-circle"),
+        sprintf(" Email saved. Polite pool active: %s", email)
+      )
+    })
+  })
+
+  # Remove email
+  observeEvent(input$oaRemoveEmail, {
+    home <- homeFolder()
+    path_oa_email <- file.path(home, ".biblio_openalex_email.txt")
+    if (file.exists(path_oa_email)) {
+      file.remove(path_oa_email)
+    }
+    Sys.unsetenv("openalexR.mailto")
+    options(openalexR.mailto = NULL)
+    values$oaPoliteEmail <- NULL
+    updateTextInput(session, "oaPoliteEmail", value = "")
+
+    output$oaEmailStatus <- renderUI({
+      div(
+        style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("exclamation-triangle"),
+        " Email removed. Using common pool (slower rate limits)."
+      )
+    })
   })
 }
 

@@ -613,17 +613,17 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
     ),
 
     # Clustering - will get ID 'menu-clustering' via JavaScript (hidden initially)
-    menuItem(
-      "Clustering",
-      tabName = "clustering",
-      icon = fa_i(name = "spinner"),
-      startExpanded = FALSE,
-      menuSubItem(
-        "Clustering by Coupling",
-        tabName = "coupling",
-        icon = icon("chevron-right", lib = "glyphicon")
-      )
-    ),
+    # menuItem(
+    #   "Clustering",
+    #   tabName = "clustering",
+    #   icon = fa_i(name = "spinner"),
+    #   startExpanded = FALSE,
+    #   menuSubItem(
+    #     "Clustering by Coupling",
+    #     tabName = "coupling",
+    #     icon = icon("chevron-right", lib = "glyphicon")
+    #   )
+    # ),
 
     # Conceptual Structure - will get ID 'menu-conceptual' via JavaScript (hidden initially)
     menuItem(
@@ -1189,6 +1189,43 @@ body <- dashboardBody(
                             ),
                             selected = "AU",
                             width = "100%"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.dbsource == 'openalex'",
+                          div(
+                            style = "margin-bottom: 15px; padding: 12px; background-color: #d6eaf8; border-radius: 5px; border-left: 4px solid #3498db;",
+                            checkboxInput(
+                              "importFetchRefs",
+                              tags$span(
+                                icon(
+                                  "quote-right",
+                                  style = "margin-right: 5px;"
+                                ),
+                                "Download and resolve cited references from OpenAlex"
+                              ),
+                              value = FALSE
+                            ),
+                            conditionalPanel(
+                              condition = "input.importFetchRefs == true",
+                              div(
+                                style = "margin-left: 25px; margin-top: 5px;",
+                                radioButtons(
+                                  "importRefsFilter",
+                                  NULL,
+                                  choices = c(
+                                    "Only references cited more than once (faster)" = "multiple",
+                                    "All references (complete but slower)" = "all"
+                                  ),
+                                  selected = "multiple",
+                                  inline = FALSE
+                                )
+                              )
+                            ),
+                            tags$small(
+                              style = "color: #1a5276; display: block; margin-top: -5px; margin-left: 25px;",
+                              "References will be fetched via the OpenAlex API and converted to standard WoS format."
+                            )
                           )
                         )
                       ),
@@ -6714,6 +6751,21 @@ body <- dashboardBody(
                   )
                 )
               )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$trendTopics)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -7649,6 +7701,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$coOccurrenceNetwork)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -8073,6 +8140,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$thematicMap)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -8685,6 +8767,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$thematicEvolution)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -9042,6 +9139,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$factorialAnalysis)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -9512,6 +9624,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$coCitationNetwork)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -9704,6 +9831,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$historiograph)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -11012,6 +11154,213 @@ body <- dashboardBody(
                       helpText(
                         "Configure the maximum output length for AI responses.",
                         style = "margin-top: 8px; color: #666; font-size: 12px;"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+
+        # ============================================
+        # SECTION 4: OPENALEX API SETTINGS
+        # ============================================
+        fluidRow(
+          column(
+            12,
+            div(
+              class = "box box-primary",
+              div(
+                class = "box-header with-border",
+                h4(
+                  icon("database", style = "margin-right: 8px;"),
+                  "OpenAlex API - Configuration",
+                  class = "box-title",
+                  style = "color: #3498db; font-weight: 600;"
+                )
+              ),
+              div(
+                class = "box-body",
+
+                # Description
+                div(
+                  style = "margin-bottom: 20px; padding: 15px; background-color: #d6eaf8; border-radius: 5px; border-left: 4px solid #3498db;",
+                  icon(
+                    "info-circle",
+                    style = "color: #2980b9; margin-right: 8px; font-size: 18px;"
+                  ),
+                  tags$span(
+                    style = "color: #1a5276; font-size: 14px;",
+                    HTML(
+                      "OpenAlex requires an <strong>API key</strong> for significant use of their API. Without an API key, you are limited to <strong>100 credits/day</strong> (testing only). A free API key provides <strong>100,000 credits/day</strong>. Get your free key at "
+                    ),
+                    tags$a(
+                      href = "https://openalex.org/settings/api",
+                      target = "_blank",
+                      style = "color: #1a5276; font-weight: bold; text-decoration: underline;",
+                      "openalex.org/settings/api"
+                    ),
+                    HTML(". Optionally, you can also set an email for the <strong>polite pool</strong> (faster, more reliable access).")
+                  )
+                ),
+
+                # API Key Configuration
+                fluidRow(
+                  column(
+                    6,
+                    div(
+                      style = "padding-right: 15px;",
+                      tags$label(
+                        "API Key",
+                        style = "font-weight: 600; color: #3498db; margin-bottom: 8px; display: block;"
+                      ),
+                      passwordInput(
+                        "oaApiKey",
+                        label = NULL,
+                        placeholder = "Enter your OpenAlex API key",
+                        value = "",
+                        width = "100%"
+                      ),
+
+                      # Status Display
+                      div(
+                        style = "margin: 10px 0;",
+                        uiOutput("oaApiKeyStatus")
+                      ),
+
+                      # Action Buttons
+                      fluidRow(
+                        column(
+                          6,
+                          actionButton(
+                            "oaSetApiKey",
+                            "Save API Key",
+                            icon = icon("check"),
+                            class = "btn-primary btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        ),
+                        column(
+                          6,
+                          actionButton(
+                            "oaRemoveApiKey",
+                            "Remove API Key",
+                            icon = icon("trash"),
+                            class = "btn-danger btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  column(
+                    6,
+                    div(
+                      style = "padding-left: 15px; margin-top: 28px; color: #555; font-size: 13px;",
+                      p(
+                        icon(
+                          "key",
+                          style = "color: #3498db; margin-right: 5px;"
+                        ),
+                        "Your API key is stored locally and used to authenticate with the OpenAlex API."
+                      ),
+                      p(
+                        icon(
+                          "bolt",
+                          style = "color: #f39c12; margin-right: 5px;"
+                        ),
+                        "Without key: 100 credits/day. With free key: 100,000 credits/day."
+                      ),
+                      p(
+                        icon(
+                          "link",
+                          style = "color: #3498db; margin-right: 5px;"
+                        ),
+                        tags$a(
+                          href = "https://openalex.org/settings/api",
+                          target = "_blank",
+                          style = "color: #3498db; text-decoration: underline;",
+                          "Get your free API key here"
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Separator
+                tags$hr(style = "margin: 20px 0; border-color: #ddd;"),
+
+                # Email Configuration (optional)
+                fluidRow(
+                  column(
+                    6,
+                    div(
+                      style = "padding-right: 15px;",
+                      tags$label(
+                        "Email Address",
+                        tags$span(
+                          style = "font-weight: 400; color: #888; font-size: 12px; margin-left: 8px;",
+                          "(Optional - not required when API key is set)"
+                        ),
+                        style = "font-weight: 600; color: #3498db; margin-bottom: 8px; display: block;"
+                      ),
+                      textInput(
+                        "oaPoliteEmail",
+                        label = NULL,
+                        placeholder = "Enter your email for the polite pool",
+                        value = "",
+                        width = "100%"
+                      ),
+
+                      # Status Display
+                      div(
+                        style = "margin: 10px 0;",
+                        uiOutput("oaEmailStatus")
+                      ),
+
+                      # Action Buttons
+                      fluidRow(
+                        column(
+                          6,
+                          actionButton(
+                            "oaSetEmail",
+                            "Save Email",
+                            icon = icon("check"),
+                            class = "btn-primary btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        ),
+                        column(
+                          6,
+                          actionButton(
+                            "oaRemoveEmail",
+                            "Remove Email",
+                            icon = icon("trash"),
+                            class = "btn-danger btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  column(
+                    6,
+                    div(
+                      style = "padding-left: 15px; margin-top: 28px; color: #555; font-size: 13px;",
+                      p(
+                        icon(
+                          "shield-halved",
+                          style = "color: #3498db; margin-right: 5px;"
+                        ),
+                        "Your email is stored locally and only sent to OpenAlex for polite pool access."
+                      ),
+                      p(
+                        icon(
+                          "bolt",
+                          style = "color: #f39c12; margin-right: 5px;"
+                        ),
+                        "Polite pool users get faster responses and are not affected by rate limits."
                       )
                     )
                   )

@@ -20,6 +20,8 @@ get_authors_summary(
 \item{sleep_time}{Numeric. Seconds to wait before API call (default: 0.2)}
 
 \item{max_retries}{Integer. Maximum number of retry attempts (default: 3)}
+
+\item{mailto}{Character. Email address for the OpenAlex API polite pool (default: NULL)}
 }
 \value{
 A data frame with summary information for all authors including:

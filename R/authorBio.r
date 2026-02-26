@@ -394,6 +394,7 @@ analyze_all_authors <- function(doi, verbose = FALSE, sleep_time = 0.2, max_retr
 #' @param verbose Logical. Print informative messages during execution (default: FALSE)
 #' @param sleep_time Numeric. Seconds to wait before API call (default: 0.2)
 #' @param max_retries Integer. Maximum number of retry attempts (default: 3)
+#' @param mailto Character. Email address for the OpenAlex API polite pool (default: NULL)
 #'
 #' @return A data frame with summary information for all authors including:
 #'   \itemize{

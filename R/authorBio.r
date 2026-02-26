@@ -2,14 +2,15 @@ utils::globalVariables(c("max_retries", "retry_delay", "sleep_time", "verbose"))
 
 # Helper function to make API calls with retry logic - STANDALONE VERSION
 #' @keywords internal
-safe_oa_fetch <- function(entity, 
-                          identifier = NULL, 
-                          doi = NULL, 
+safe_oa_fetch <- function(entity,
+                          identifier = NULL,
+                          doi = NULL,
                           attempt = 1,
                           sleep_time = 0.5,
                           retry_delay = 2,
                           max_retries = 3,
-                          verbose = FALSE) {
+                          verbose = FALSE,
+                          mailto = NULL) {
   
   if (attempt > 1 && verbose) {
     cat("Retry attempt", attempt, "of", max_retries, "\n")
@@ -22,19 +23,19 @@ safe_oa_fetch <- function(entity,
     Sys.sleep(wait_time)
   }
   
+  # Build common arguments for oa_fetch
+  fetch_args <- list(entity = entity, output = "tibble")
+  if (!is.null(mailto) && nchar(mailto) > 0) {
+    fetch_args$mailto <- mailto
+  }
+
   result <- tryCatch({
     if (!is.null(identifier)) {
-      openalexR::oa_fetch(
-        entity = entity,
-        identifier = identifier,
-        output = "tibble"
-      )
+      fetch_args$identifier <- identifier
+      do.call(openalexR::oa_fetch, fetch_args)
     } else if (!is.null(doi)) {
-      openalexR::oa_fetch(
-        entity = entity,
-        doi = doi,
-        output = "tibble"
-      )
+      fetch_args$doi <- doi
+      do.call(openalexR::oa_fetch, fetch_args)
     }
   }, error = function(e) {
     error_msg <- as.character(e$message)
@@ -45,8 +46,8 @@ safe_oa_fetch <- function(entity,
         if (verbose) {
           cat("Rate limit hit (HTTP 429). Retrying with exponential backoff...\n")
         }
-        return(safe_oa_fetch(entity, identifier, doi, attempt + 1, 
-                             sleep_time, retry_delay, max_retries, verbose))
+        return(safe_oa_fetch(entity, identifier, doi, attempt + 1,
+                             sleep_time, retry_delay, max_retries, verbose, mailto))
       } else {
         stop("Rate limit exceeded after ", max_retries, " attempts. ",
              "Please wait a few minutes or set an OpenAlex API key for higher rate limits. ",
@@ -61,7 +62,7 @@ safe_oa_fetch <- function(entity,
           cat("Temporary server error. Retrying...\n")
         }
         return(safe_oa_fetch(entity, identifier, doi, attempt + 1,
-                             sleep_time, retry_delay, max_retries, verbose))
+                             sleep_time, retry_delay, max_retries, verbose, mailto))
       }
     }
     
@@ -86,6 +87,7 @@ safe_oa_fetch <- function(entity,
 #' @param sleep_time Numeric. Seconds to wait between API calls to respect rate limits (default: 1)
 #' @param max_retries Integer. Maximum number of retry attempts for failed API calls (default: 3)
 #' @param retry_delay Numeric. Base delay in seconds before retrying after an error (default: 2)
+#' @param mailto Character. Email address for OpenAlex polite pool (default: NULL, uses openalexR.mailto option if set)
 #'
 #' @return If \code{return_all_authors = FALSE}, returns a tibble with comprehensive information 
 #'   about the specified author including:
@@ -135,13 +137,14 @@ safe_oa_fetch <- function(entity,
 #'
 #' @export
 #'
-authorBio <- function(author_position = 1, 
-                      doi = "10.1016/j.joi.2017.08.007", 
+authorBio <- function(author_position = 1,
+                      doi = "10.1016/j.joi.2017.08.007",
                       verbose = FALSE,
                       return_all_authors = FALSE,
                       sleep_time = 1,
                       max_retries = 3,
-                      retry_delay = 2) {
+                      retry_delay = 2,
+                      mailto = NULL) {
   
   # Input validation
   if (is.null(doi) || !is.character(doi) || nchar(trimws(doi)) == 0) {
@@ -177,9 +180,10 @@ authorBio <- function(author_position = 1,
   
   # Retrieve article information with error handling and retry logic
   au_work <- tryCatch({
-    safe_oa_fetch(entity = "works", doi = doi, 
+    safe_oa_fetch(entity = "works", doi = doi,
                   sleep_time = sleep_time, retry_delay = retry_delay,
-                  max_retries = max_retries, verbose = verbose)
+                  max_retries = max_retries, verbose = verbose,
+                  mailto = mailto)
   }, error = function(e) {
     stop("Error retrieving article: ", e$message, 
          "\nPlease verify that the DOI is correct and OpenAlex is accessible")
@@ -234,7 +238,8 @@ authorBio <- function(author_position = 1,
         author_info <- tryCatch({
           safe_oa_fetch(entity = "authors", identifier = clean_id,
                         sleep_time = sleep_time, retry_delay = retry_delay,
-                        max_retries = max_retries, verbose = verbose)
+                        max_retries = max_retries, verbose = verbose,
+                        mailto = mailto)
         }, error = function(e) {
           if (verbose) cat("Error for author", i, ":", e$message, "\n")
           failed_authors <<- failed_authors + 1
@@ -322,7 +327,8 @@ authorBio <- function(author_position = 1,
   au_info <- tryCatch({
     safe_oa_fetch(entity = "authors", identifier = clean_id,
                   sleep_time = sleep_time, retry_delay = retry_delay,
-                  max_retries = max_retries, verbose = verbose)
+                  max_retries = max_retries, verbose = verbose,
+                  mailto = mailto)
   }, error = function(e) {
     stop("Error retrieving author information: ", e$message)
   })
@@ -408,10 +414,11 @@ analyze_all_authors <- function(doi, verbose = FALSE, sleep_time = 0.2, max_retr
 #' }
 #'
 #' @export
-get_authors_summary <- function(doi = "10.1016/j.joi.2017.08.007", 
+get_authors_summary <- function(doi = "10.1016/j.joi.2017.08.007",
                                 verbose = FALSE,
                                 sleep_time = 0.2,
-                                max_retries = 3) {
+                                max_retries = 3,
+                                mailto = NULL) {
   if (verbose) cat("Retrieving author summary for DOI:", doi, "\n")
   
   # Helper function with retry logic (simplified for single call)
@@ -423,7 +430,9 @@ get_authors_summary <- function(doi = "10.1016/j.joi.2017.08.007",
     }
     
     tryCatch({
-      openalexR::oa_fetch(entity = "works", doi = doi, output = "tibble")
+      fetch_args <- list(entity = "works", doi = doi, output = "tibble")
+      if (!is.null(mailto) && nchar(mailto) > 0) fetch_args$mailto <- mailto
+      do.call(openalexR::oa_fetch, fetch_args)
     }, error = function(e) {
       if ((grepl("429", e$message) || grepl("Too Many Requests", e$message)) && 
           attempt < max_retries) {

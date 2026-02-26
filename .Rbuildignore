@@ -13,6 +13,7 @@
 ^.*\.xls
 ^.*\.xml
 ^.*\.png
+^\.claude$
 LICENCE.*$
 Rubbish
 ^_gh-pages$
@@ -22,5 +23,6 @@ Rubbish
 ^inst/biblioshiny/rsconnect
 ^rsconnect
 
+^data-raw$
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$

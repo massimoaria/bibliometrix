@@ -8,7 +8,8 @@ get_authors_summary(
   doi = "10.1016/j.joi.2017.08.007",
   verbose = FALSE,
   sleep_time = 0.2,
-  max_retries = 3
+  max_retries = 3,
+  mailto = NULL
 )
 }
 \arguments{

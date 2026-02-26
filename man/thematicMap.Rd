@@ -19,6 +19,7 @@ thematicMap(
   synonyms = NULL,
   cluster = "louvain",
   subgraphs = FALSE,
+  alpha = 0.5,
   seed = 1234
 )
 }
@@ -52,6 +53,8 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 \item{cluster}{is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").}
 
 \item{subgraphs}{is a logical. If TRUE cluster subgraphs are returned.}
+
+\item{alpha}{is a real. it indicates the balancing between word frequency and pagerank centrality to identify cluster labels. Default is \code{alpha = 0.5}.}
 
 \item{seed}{is an integer. It indicates the seed for random number generation. Default is \code{seed = 1234}.}
 }

@@ -1,7 +1,198 @@
 ### COMMON FUNCTIONS ####
 
-# Scroll to Top Button (Font Awesome version)
+## Count records in a bibliographic file without full conversion ----
+#' @description Lightweight record counter for bibliographic files.
+#'   Returns the number of publications contained in one or more files
+#'   without performing the full convert2df() conversion.
+#' @param file Character vector of file paths (or a single ZIP path).
+#' @param dbsource Character. The database source
+#'   ("isi","scopus","openalex","openalex_api","lens","cochrane","pubmed","dimensions").
+#' @param format Character. The file format
+#'   ("plaintext","bibtex","csv","pubmed","excel","api","endnote").
+#'   If NULL, it is auto-detected from the file extension.
+#' @return Integer. The total number of records across all files.
+countRecords <- function(file, dbsource = "isi", format = NULL) {
 
+  ## ---- helper: count lines matching a pattern ----
+  count_lines_matching <- function(paths, pattern) {
+    n <- 0L
+    for (f in paths) {
+      lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
+      n <- n + sum(grepl(pattern, lines, perl = TRUE))
+    }
+    n
+  }
+
+  ## ---- helper: count CSV rows (data rows only, excluding header) ----
+  count_csv_rows <- function(paths) {
+    n <- 0L
+    for (f in paths) {
+      # Count total lines minus 1 for header
+      total <- length(readLines(f, warn = FALSE))
+      n <- n + max(0L, total - 1L)
+    }
+    n
+  }
+
+  ## ---- handle ZIP: extract to temp dir ----
+  paths <- file
+  if (length(file) == 1 && tolower(tools::file_ext(file)) == "zip") {
+    temp_exdir <- tempfile("countRecords_")
+    paths <- utils::unzip(file, exdir = temp_exdir)
+    on.exit(unlink(temp_exdir, recursive = TRUE), add = TRUE)
+  }
+
+  ## ---- auto-detect format from file extension if not provided ----
+  if (is.null(format)) {
+    ext <- tolower(tools::file_ext(paths[1]))
+    format <- switch(ext,
+      txt  = if (dbsource == "pubmed") "pubmed" else "plaintext",
+      csv  = "csv",
+      bib  = "bibtex",
+      ciw  = "plaintext",
+      xlsx = "excel",
+      rdata = "rdata", rda = "rdata", rds = "rds",
+      "plaintext"
+    )
+  }
+
+  ## ---- count records by format ----
+  n <- switch(format,
+    plaintext = ,
+    endnote = {
+      if (dbsource == "cochrane") {
+        count_lines_matching(paths, "^Record #")
+      } else {
+        # WoS: each record starts with "PT "
+        count_lines_matching(paths, "^PT ")
+      }
+    },
+    bibtex = {
+      count_lines_matching(paths, "^@")
+    },
+    csv = {
+      count_csv_rows(paths)
+    },
+    pubmed = {
+      count_lines_matching(paths, "^PMID- ")
+    },
+    excel = {
+      n <- 0L
+      for (f in paths) {
+        df <- readxl::read_excel(f, col_types = "text",
+                                 range = readxl::cell_cols(1))
+        n <- n + nrow(df)
+      }
+      n
+    },
+    api = ,
+    rdata = {
+      n <- 0L
+      for (f in paths) {
+        env <- new.env(parent = emptyenv())
+        var <- load(f, envir = env)
+        obj <- get(var[1], envir = env)
+        n <- n + if (is.data.frame(obj)) nrow(obj) else length(obj)
+      }
+      n
+    },
+    rds = {
+      n <- 0L
+      for (f in paths) {
+        obj <- readRDS(f)
+        n <- n + if (is.data.frame(obj)) nrow(obj) else length(obj)
+      }
+      n
+    },
+    0L
+  )
+
+  as.integer(n)
+}
+
+## Cache helper: lightweight fingerprint of a data.frame
+data_fingerprint <- function(M) {
+  nr <- nrow(M)
+  if (nr == 0) return("empty")
+  paste(nr, ncol(M),
+        M$SR[1], M$SR[nr],
+        sep = "||")
+}
+
+## Cache helper: build a cache key from a named list of params
+make_cache_key <- function(...) {
+  args <- list(...)
+  lapply(args, function(x) {
+    if (is.null(x)) "<<NULL>>" else x
+  })
+}
+
+# Funzione helper aggiornata con titolo e affiliazione
+createAuthorCard <- function(
+  name,
+  title,
+  affiliation,
+  url,
+  photo,
+  scholar = FALSE
+) {
+  tags$a(
+    href = url,
+    target = "_blank",
+    style = "text-decoration: none;",
+    div(
+      style = "text-align: center; transition: transform 0.3s; cursor: pointer; padding: 15px; background: #f9f9f9; border-radius: 10px;",
+      onmouseover = "this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)';",
+      onmouseout = "this.style.transform='translateY(0)'; this.style.boxShadow='none';",
+
+      # Foto circolare con bordo
+      div(
+        style = sprintf(
+          "width: 110px; height: 110px; border-radius: 50%%; background-image: url('%s'); background-size: cover; background-position: center; margin: 0 auto 15px; border: 4px solid #3c8dbc; box-shadow: 0 4px 15px rgba(0,0,0,0.2);",
+          photo
+        )
+      ),
+
+      # Nome
+      div(
+        name,
+        style = "font-weight: bold; color: #2c3e50; font-size: 16px; margin-bottom: 8px;"
+      ),
+
+      # Titolo
+      div(
+        title,
+        style = "color: #7f8c8d; font-size: 13px; font-weight: 500; margin-bottom: 5px;"
+      ),
+
+      # Affiliazione
+      div(
+        icon("university", style = "margin-right: 5px;"),
+        affiliation,
+        style = "color: #95a5a6; font-size: 12px; line-height: 1.4; margin-bottom: 10px;"
+      ),
+
+      # Link icon
+      div(
+        if (scholar) {
+          tagList(
+            icon("graduation-cap", style = "margin-right: 3px;"),
+            "Google Scholar"
+          )
+        } else {
+          tagList(
+            icon("link", style = "margin-right: 3px;"),
+            "Website"
+          )
+        },
+        style = "color: #3c8dbc; font-size: 12px; font-weight: 600;"
+      )
+    )
+  )
+}
+
+
+# Scroll to Top Button (Font Awesome version)
 scrollToTopButton <- function() {
   tags$div(
     # CSS per il pulsante
@@ -159,6 +350,21 @@ total_downloads <- function(
   return(as.integer(downloads))
 }
 
+# getFileNameExtension <- function(fn) {
+#   # remove a path
+#   splitted <- strsplit(x = fn, split = "/")[[1]]
+#   # or use .Platform$file.sep in stead of '/'
+#   fn <- splitted[length(splitted)]
+#   ext <- ""
+#   splitted <- strsplit(x = fn, split = "\\.")[[1]]
+#   l <- length(splitted)
+#   if (l > 1 && sum(splitted[1:(l - 1)] != "")) {
+#     ext <- splitted[l]
+#   }
+#   # the extention must be the suffix of a non-empty name
+#   ext
+# }
+
 # FILTER FUNCTIONS ----
 read_journal_ranking <- function(file_path) {
   ext <- tools::file_ext(file_path)
@@ -315,7 +521,7 @@ merge_files <- function(files) {
   ## load xlsx or rdata bibliometrix files
   if ("datapath" %in% names(files)) {
     file <- files$datapath
-    ext <- unlist(lapply(file, getFileNameExtension))
+    ext <- unlist(lapply(file, tools::file_ext))
   }
 
   Mfile <- list()
@@ -375,286 +581,7 @@ watchEmoji <- function(i) {
   emoji[i]
 }
 
-## RESET MODAL DIALOG INPUTS
-resetModalButtons <- function(session) {
-  session$sendCustomMessage("button_id", "null")
-  session$sendCustomMessage("button_id2", "null")
-  # session$sendCustomMessage("click", "null")
-  # session$sendCustomMessage("click-dend", "null")
-  # runjs("Shiny.setInputValue('plotly_click-A', null);")
-  return(session)
-}
-
-
-# DATA TABLE FORMAT ----
-DTformat <- function(
-  df,
-  nrow = 10,
-  filename = "Table",
-  pagelength = TRUE,
-  left = NULL,
-  right = NULL,
-  numeric = NULL,
-  dom = TRUE,
-  size = "85%",
-  filter = "top",
-  columnShort = NULL,
-  columnSmall = NULL,
-  round = 2,
-  title = "",
-  button = FALSE,
-  escape = FALSE,
-  selection = FALSE,
-  scrollX = FALSE,
-  scrollY = FALSE,
-  summary = FALSE
-) {
-  if ("text" %in% names(df)) {
-    df <- df %>%
-      mutate(text = gsub("<|>", "", text))
-  }
-
-  if (length(columnShort) > 0) {
-    columnDefs <- list(
-      list(
-        className = "dt-center",
-        targets = 0:(length(names(df)) - 1)
-      ),
-      list(
-        targets = columnShort - 1,
-        render = JS(
-          "function(data, type, row, meta) {",
-          "return type === 'display' && data.length > 500 ?",
-          "'<span title=\"' + data + '\">' + data.substr(0, 500) + '...</span>' : data;",
-          "}"
-        )
-      )
-    )
-  } else {
-    columnDefs <- list(list(
-      className = "dt-center",
-      targets = 0:(length(names(df)) - 1)
-    ))
-  }
-
-  initComplete <- NULL
-  # Summary Button
-  if (summary == "documents" & "Paper" %in% names(df)) {
-    df <- df %>%
-      mutate(
-        Summary = paste0(
-          '<div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">',
-          '<button id="custom_btn" style="',
-          'width: 24px; height: 24px; ',
-          'border-radius: 50%; ',
-          'border: none; ',
-          'background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%); ',
-          'color: white; ',
-          'cursor: pointer; ',
-          'display: flex; ',
-          'align-items: center; ',
-          'justify-content: center; ',
-          'box-shadow: 0 2px 4px rgba(0,0,0,0.2); ',
-          'transition: all 0.3s ease; ',
-          '" ',
-          'onmouseover="this.style.transform=\'scale(1.1)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.3)\';" ',
-          'onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.2)\';" ',
-          'onclick="Shiny.onInputChange(\'button_id\', \'',
-          Paper,
-          '\')">',
-          '<i class="fas fa-search-plus" style="font-size: 14px;"></i>',
-          '</button>',
-          '</div>'
-        )
-      ) %>%
-      select(Summary, everything())
-  } else if (summary == "historiograph" & "Paper" %in% names(df)) {
-    df <- df %>%
-      mutate(
-        Summary = paste0(
-          '<div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">',
-          '<button id="custom_btn" style="',
-          'width: 32px; height: 32px; ',
-          'border-radius: 50%; ',
-          'border: none; ',
-          'background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%); ',
-          'color: white; ',
-          'cursor: pointer; ',
-          'display: flex; ',
-          'align-items: center; ',
-          'justify-content: center; ',
-          'box-shadow: 0 2px 4px rgba(0,0,0,0.2); ',
-          'transition: all 0.3s ease; ',
-          '" ',
-          'onmouseover="this.style.transform=\'scale(1.1)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.3)\';" ',
-          'onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.2)\';" ',
-          'onclick="Shiny.onInputChange(\'button_id\', \'',
-          SR,
-          '\')">',
-          '<i class="fas fa-search-plus" style="font-size: 14px;"></i>',
-          '</button>',
-          '</div>'
-        )
-      ) %>%
-      select(Summary, everything()) %>%
-      select(-SR)
-  } else if (summary == "authors" & "Author" %in% names(df)) {
-    df <- df %>%
-      # mutate(Bio = paste0('<button id="custom_btn2" onclick="Shiny.onInputChange(\'button_id2\', \'', Author, '\')">▶️</button>')) %>%
-      # select(Bio, everything()) %>%
-      mutate(
-        Author = paste0(
-          '<span class="author-link" onclick="show_author_modal(\'',
-          gsub("'", "\\\\'", Author),
-          '\')">',
-          Author,
-          '</span>'
-        )
-      )
-    initComplete = JS(
-      "function(settings, json) {",
-      "  window.show_author_modal = function(author) {",
-      "    Shiny.setInputValue('selected_author', author, {priority: 'event'});",
-      "  };",
-      "}"
-    )
-    escape = FALSE
-  }
-
-  if (isTRUE(button)) {
-    if (isTRUE(pagelength)) {
-      buttons <- list(
-        list(extend = "pageLength"),
-        list(
-          extend = "excel",
-          filename = paste0(filename, "_bibliometrix_", Sys.Date()),
-          title = " ",
-          header = TRUE,
-          exportOptions = list(
-            modifier = list(page = "all")
-          )
-        )
-      )
-    } else {
-      buttons <- list(
-        list(
-          extend = "excel",
-          filename = paste0(filename, "_bibliometrix_", Sys.Date()),
-          title = " ",
-          header = TRUE,
-          exportOptions = list(
-            modifier = list(page = "all")
-          )
-        )
-      )
-    }
-  } else {
-    buttons <- list(list(extend = "pageLength"))
-  }
-
-  if (isTRUE(dom)) {
-    dom <- "Brtip"
-  } else if (dom == FALSE) {
-    dom <- "Bftp"
-  } else {
-    dom <- "t"
-  }
-
-  if (nchar(title) > 0) {
-    caption <- htmltools::tags$caption(
-      style = "caption-side: top; text-align: center; color:black;  font-size:140% ;",
-      title
-    )
-  } else {
-    caption <- htmltools::tags$caption(
-      style = "caption-side: top; text-align: center; color:black;  font-size:140% ;",
-      ""
-    )
-  }
-
-  if (isTRUE(selection)) {
-    extensions <- c("Buttons", "Select", "ColReorder", "FixedHeader")
-    buttons <- c(buttons, c("selectAll", "selectNone"))
-    select <- list(style = "multiple", items = "row", selected = 1:nrow(df))
-    # selection = list(mode = 'multiple', selected = 1:nrow(df), target = 'row')
-  } else {
-    extensions <- c("Buttons", "ColReorder", "FixedHeader")
-    select <- NULL
-    # selection = "none"
-  }
-
-  tab <- DT::datatable(
-    df,
-    escape = escape,
-    rownames = FALSE,
-    caption = caption,
-    selection = "none",
-    extensions = extensions,
-    filter = filter,
-    options = list(
-      headerCallback = DT::JS(
-        "function(thead) {",
-        "  $(thead).css('font-size', '1em');",
-        "}"
-      ),
-      initComplete = initComplete,
-      colReorder = TRUE,
-      fixedHeader = TRUE,
-      pageLength = nrow,
-      autoWidth = TRUE,
-      scrollX = scrollX,
-      scrollY = scrollY,
-      dom = dom,
-      buttons = buttons,
-      select = select,
-      lengthMenu = list(
-        c(10, 25, 50, -1),
-        c("10 rows", "25 rows", "50 rows", "Show all")
-      ),
-      columnDefs = columnDefs
-    ),
-    class = "cell-border compact stripe"
-  ) %>%
-    DT::formatStyle(
-      names(df),
-      backgroundColor = "white",
-      textAlign = "center",
-      fontSize = size
-    )
-
-  ## left aligning
-
-  if (!is.null(left)) {
-    tab <- tab %>%
-      DT::formatStyle(
-        names(df)[left],
-        backgroundColor = "white",
-        textAlign = "left",
-        fontSize = size
-      )
-  }
-
-  # right aligning
-  if (!is.null(right)) {
-    tab <- tab %>%
-      DT::formatStyle(
-        names(df)[right],
-        backgroundColor = "white",
-        textAlign = "right",
-        fontSize = size
-      )
-  }
-
-  # numeric round
-  if (!is.null(numeric)) {
-    tab <- tab %>%
-      formatRound(names(df)[c(numeric)], digits = round)
-  }
-
-  tab
-}
-
-
+## Author Name Format (Fullname or Surname, N.) ----
 authorNameFormat <- function(M, format) {
   if (format == "AF" & "AF" %in% names(M)) {
     M <- M %>%
@@ -722,50 +649,15 @@ AuthorNameMerge <- function(M) {
   return(M)
 }
 
-getFileNameExtension <- function(fn) {
-  # remove a path
-  splitted <- strsplit(x = fn, split = "/")[[1]]
-  # or use .Platform$file.sep in stead of '/'
-  fn <- splitted[length(splitted)]
-  ext <- ""
-  splitted <- strsplit(x = fn, split = "\\.")[[1]]
-  l <- length(splitted)
-  if (l > 1 && sum(splitted[1:(l - 1)] != "")) {
-    ext <- splitted[l]
-  }
-  # the extention must be the suffix of a non-empty name
-  ext
+## RESET MODAL DIALOG INPUTS
+resetModalButtons <- function(session) {
+  session$sendCustomMessage("button_id", "null")
+  session$sendCustomMessage("button_id2", "null")
+  # session$sendCustomMessage("click", "null")
+  # session$sendCustomMessage("click-dend", "null")
+  # runjs("Shiny.setInputValue('plotly_click-A', null);")
+  return(session)
 }
-
-# Initial to upper case
-firstup <- function(x) {
-  x <- tolower(x)
-  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
-  x
-}
-
-
-# string preview (stopwords)
-strPreview <- function(string, sep = ",") {
-  str1 <- unlist(strsplit(string, sep))
-  str1 <- str1[1:min(c(length(str1), 5))]
-  str1 <- paste(str1, collapse = sep)
-  HTML(paste("<pre>", "File Preview: ", str1, "</pre>", sep = "<br/>"))
-}
-
-# string preview (synonyms)
-strSynPreview <- function(string) {
-  string <- string[1]
-  str1 <- unlist(strsplit(string, ";"))
-  str1 <- str1[1:min(c(length(str1), 5))]
-  str1 <- paste(
-    paste(str1[1], " <- ", collapse = ""),
-    paste(str1[-1], collapse = ";"),
-    collapse = ""
-  )
-  HTML(paste("<pre>", "File Preview: ", str1, "</pre>", sep = "<br/>"))
-}
-
 
 ### LIFE CYCLE PLOTLY FUNCTION ----
 
@@ -1234,7 +1126,7 @@ authorCard <- function(selected_author, values) {
   }
   author_position <- works_exact$author_position[1]
   doi <- works_exact$doi[1]
-  on_line <- check_online()
+  on_line <- check_online(method = "http")
 
   if (on_line) {
     if (!is.null(values$author_data)) {
@@ -1249,7 +1141,9 @@ authorCard <- function(selected_author, values) {
       suppressWarnings(
         AU_data <- tryCatch(
           {
-            authorBio(author_position = author_position, doi = doi)
+            oa_email <- Sys.getenv("openalexR.mailto", unset = "")
+            authorBio(author_position = author_position, doi = doi,
+                      mailto = if (nchar(oa_email) > 0) oa_email else NULL)
           },
           error = function(e) {
             NULL
@@ -2564,7 +2458,7 @@ check_online <- function(
   host = "8.8.8.8",
   timeout = 5,
   # min_success = 1,
-  method = "ping" # method = c("ping", "socket", "http")
+  method = "http" # method = c("ping", "socket", "http")
 ) {
   #method <- match.arg(method)
 
@@ -2658,7 +2552,7 @@ check_online <- function(
 
 notifications <- function() {
   ## check connection and download notifications
-  online <- check_online(host = "www.bibliometrix.org")
+  online <- check_online(host = "www.bibliometrix.org", method = "http")
   location <- "https://www.bibliometrix.org/bs_notifications/biblioshiny_notifications.csv"
   notifOnline <- NULL
   if (isTRUE(online)) {
@@ -2675,7 +2569,7 @@ notifications <- function() {
   ## check if a file exists on the local machine and load it
   home <- homeFolder()
 
-  file <- paste(home, "/biblioshiny_notifications.csv", sep = "")
+  file <- file.path(home, "biblioshiny_notifications.csv")
   fileTrue <- file.exists(file)
   if (isTRUE(fileTrue)) {
     suppressWarnings(notifLocal <- read.csv(file, header = TRUE, sep = ","))
@@ -5694,9 +5588,9 @@ addGgplotsWb <- function(
   l <- length(list_plot)
   startRow <- 1
   for (i in 1:l) {
-    fileName <- tempfile(
-      pattern = "figureImage",
-      fileext = ".png"
+    fileName <- file.path(
+      getWD(),
+      paste0("figureImage_", i, "_", Sys.time(), ".png")
     )
     if (inherits(list_plot[[i]], "ggplot")) {
       ggsave(
@@ -5749,37 +5643,40 @@ addGgplotsWb <- function(
 }
 
 screenSh <- function(p, zoom = 2, type = "vis") {
-  tmpdir <- tempdir()
-  fileName <- tempfile(
-    pattern = "figureImage",
-    tmpdir = tmpdir,
-    fileext = ".png"
-  ) # %>% substr(.,2,nchar(.))
+  #tmpdir <- getWD()
 
-  plot2png(p, filename = fileName, zoom = zoom, type = type, tmpdir = tmpdir)
+  fileName <- file.path(
+    getWD(),
+    paste0("figureImage_", Sys.time(), ".png")
+  )
+
+  plot2png(p, filename = fileName, zoom = zoom, type = type)
 
   return(fileName)
 }
 
 screenShot <- function(p, filename, type) {
-  home <- homeFolder()
+  #home <- homeFolder()
 
-  # setting up the main directory
-  # filename <- paste0(file.path(home,"downloads/"),filename)
-  if ("downloads" %in% tolower(dir(home))) {
-    filename <- paste0(file.path(home, "downloads"), "/", filename)
-  } else {
-    filename <- paste0(home, "/", filename)
-  }
+  # # setting up the main directory
+  # if ("downloads" %in% tolower(dir(home))) {
+  #   filename <- file.path(home, "downloads", filename)
+  # } else {
+  #   filename <- file.path(home, filename)
+  # }
 
-  plot2png(p, filename, zoom = 2, type = type, tmpdir = tempdir())
+  plot2png(p, filename, zoom = 2, type = type)
+  filename_html <- paste0(tools::file_path_sans_ext(filename), ".html")
+  file.remove(filename_html)
+  unlink(
+    paste0(tools::file_path_sans_ext(filename), "_files"),
+    recursive = TRUE
+  )
 }
 
-plot2png <- function(p, filename, zoom = 2, type = "vis", tmpdir) {
-  html_name <- tempfile(
-    fileext = ".html",
-    tmpdir = tmpdir
-  )
+plot2png <- function(p, filename, zoom = 2, type = "vis") {
+  filename_html <- tools::file_path_sans_ext(filename)
+  html_name <- paste0(filename_html, ".html")
   switch(
     type,
     vis = {
@@ -5787,6 +5684,9 @@ plot2png <- function(p, filename, zoom = 2, type = "vis", tmpdir) {
     },
     plotly = {
       htmlwidgets::saveWidget(p, file = html_name)
+    },
+    df2html = {
+      screenHtml(p, html_name)
     }
   )
   biblioShot(url = html_name, zoom = zoom, file = filename) # , verbose=FALSE)
@@ -5795,10 +5695,90 @@ plot2png <- function(p, filename, zoom = 2, type = "vis", tmpdir) {
     title = NULL,
     type = "success",
     color = c("#1d8fe1"),
-    subtitle = paste0("Plot was saved in the following path: ", filename),
+    subtitle = paste0("Plot saved to file:\n", basename(filename)),
     btn_labels = "OK",
     size = "40%"
   )
+}
+
+## screenshot of html objects
+screenHtml <- function(df, html_file) {
+  # Genera l'HTML direttamente usando htmlBoxFormat
+  html_content <- htmlBoxFormat(
+    df = df,
+    title = "Missing Data Analysis",
+    nrow = nrow(df),
+    escape = FALSE,
+    scrollX = TRUE,
+    dom = FALSE,
+    filter = "none",
+    pagelength = FALSE,
+    button = FALSE,
+    round = 2
+  )
+
+  # Crea una pagina HTML completa con stili
+  html_page <- sprintf(
+    '
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Missing Data Table</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body {
+      padding: 20px;
+      background-color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .container-fluid {
+      max-width: 100%%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    %s
+  </div>
+</body>
+</html>
+    ',
+    html_content
+  )
+
+  # Salva il file HTML
+  writeLines(html_page, html_file, useBytes = TRUE)
+}
+
+## export screen to browser download
+screen2export <- function(filename = "file", obj, type) {
+  JScode_screenshot <- "
+    var link = document.createElement('a');
+    link.href = '%s';
+    link.download = '%s';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  "
+
+  base_name <- paste0(
+    filename,
+    "-",
+    gsub(" |:", "", Sys.time()),
+    ".png",
+    sep = ""
+  )
+  full_path <- file.path(getWD(), base_name)
+  screenShot(
+    obj,
+    filename = full_path,
+    type = type
+  )
+  img_data <- base64enc::dataURI(file = full_path, mime = "image/png")
+  shinyjs::runjs(sprintf(JScode_screenshot, img_data, base_name))
 }
 
 addScreenWb <- function(df, wb, width = 14, height = 8, dpi = 75) {

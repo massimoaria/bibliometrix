@@ -5,10 +5,10 @@ source("contentAnalysisUI.R", local = TRUE)
 source("cssTags.R", local = TRUE)
 source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
+source("Htmlboxformat.R", local = TRUE)
 
 suppressMessages(libraries())
-# conflicted::conflict_prefer("span", "shiny")
-# conflicted::conflict_prefer("messageItem", "shinydashboardPlus")
+
 # UI components ----
 ## Title ----
 mytitle <- tags$link(
@@ -19,16 +19,6 @@ mytitle <- tags$link(
   ),
   strong("bibliometrix")
 )
-
-intro <- "https://www.bibliometrix.org/vignettes/Introduction_to_bibliometrix.html"
-importData <- "https://www.bibliometrix.org/vignettes/Data-Importing-and-Converting.html"
-slides <- "https://bibliometrix.org/biblioshiny/assets/player/KeynoteDHTMLPlayer.html#0"
-donation <- "https://www.bibliometrix.org/home/index.php/donation"
-bibliometrixWeb <- "https://www.bibliometrix.org/"
-k_synth <- "https://www.k-synth.unina.it"
-github_aria <- "https://github.com/massimoaria/bibliometrix"
-
-biblioshinyVersion <- substr(packageVersion("bibliometrix"), 1, 7)
 
 style_opt <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (option button)
 style_bttn <- "border-radius: 10px; border-width: 3px; font-size: 15px; margin-top: 15px;" # (action buttons)
@@ -54,7 +44,7 @@ export_bttn <- list(
   icon = icon(name = "download", lib = "glyphicon")
 )
 
-## load content of Info page
+## load content of Info pages ----
 biblioAI <- helpContent()$biblioAI
 info <- helpContent()$info
 pubs <- helpContent()$publications
@@ -79,73 +69,78 @@ header <- shinydashboardPlus::dashboardHeader(
       )
     )
   ),
-  dropdownMenuOutput("notificationMenu"),
-  dropdownMenu(
-    type = "messages",
-    icon = icon("question"),
-    badgeStatus = NULL,
-    headerText = strong("Help Menu"),
-    messageItem2(
-      from = "Package Tutorial",
-      message = "",
-      href = intro,
-      icon = icon("play-circle", lib = "glyphicon")
-    ),
-    messageItem2(
-      from = "Convert and Import Data",
-      message = "",
-      icon = icon("info-sign", lib = "glyphicon"),
-      href = importData
-    ),
-    messageItem2(
-      icon = icon("play", lib = "glyphicon"),
-      from = "biblioshiny Tutorial",
-      message = "",
-      href = slides
-    ),
-    messageItem(
-      icon = icon("info-circle"),
-      from = paste0("Version ", biblioshinyVersion),
-      message = "",
-      href = NULL
+  #dropdownMenuOutput("notificationMenu"),
+  # help CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_help",
+      label = NULL,
+      icon = icon("question-circle"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0; transition: background 0.3s;",
+      onmouseover = "this.style.background='rgba(0,0,0,0.1)';",
+      onmouseout = "this.style.background='none';"
     )
   ),
-  dropdownMenu(
-    type = "messages",
-    icon = icon("comment-dollar", lib = "font-awesome"),
-    badgeStatus = NULL,
-    headerText = strong("Donate"),
-    messageItem2(
-      from = "Donation",
-      message = "",
-      href = donation,
-      icon = icon("share-alt", lib = "glyphicon")
+  # Donation CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_donate",
+      label = NULL,
+      icon = icon("heart"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0; transition: background 0.3s;",
+      onmouseover = "this.style.background='rgba(0,0,0,0.1)';",
+      onmouseout = "this.style.background='none';"
     )
   ),
-  dropdownMenu(
-    type = "messages",
-    icon = fa_i(name = "cube"),
-    badgeStatus = NULL,
-    headerText = strong("Credits"),
-    messageItem2(
-      from = "Bibliometrix",
-      message = "",
-      href = bibliometrixWeb,
-      icon = fa_i(name = "globe")
-    ),
-    messageItem2(
-      from = "K-Synth",
-      message = "",
-      href = k_synth,
-      icon = fa_i(name = "watchman-monitoring")
-    ),
-    messageItem2(
-      from = "Github",
-      message = "",
-      href = github_aria,
-      icon = fa_i(name = "github")
+  # Author CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_team",
+      label = NULL,
+      icon = icon("users"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0;"
     )
   ),
+  # Credits CARD ----
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      "show_credits",
+      label = NULL,
+      icon = icon("cube"),
+      style = "background: none; border: none; color: white; font-size: 15px; padding: 15px; margin: 0; transition: background 0.3s;",
+      onmouseover = "this.style.background='rgba(0,0,0,0.1)';",
+      onmouseout = "this.style.background='none';"
+    )
+  ),
+
+  # dropdownMenu(
+  #   type = "messages",
+  #   icon = fa_i(name = "cube"),
+  #   badgeStatus = NULL,
+  #   headerText = strong("Credits"),
+  #   messageItem2(
+  #     from = "Bibliometrix",
+  #     message = "",
+  #     href = bibliometrixWeb,
+  #     icon = fa_i(name = "globe")
+  #   ),
+  #   messageItem2(
+  #     from = "K-Synth",
+  #     message = "",
+  #     href = k_synth,
+  #     icon = fa_i(name = "watchman-monitoring")
+  #   ),
+  #   messageItem2(
+  #     from = "Github",
+  #     message = "",
+  #     href = github_aria,
+  #     icon = fa_i(name = "github")
+  #   )
+  # ),
   # Settings Button - uses actionLink to trigger server-side tab change
   tags$li(
     class = "dropdown",
@@ -153,13 +148,33 @@ header <- shinydashboardPlus::dashboardHeader(
       inputId = "go_to_settings",
       label = NULL,
       icon = icon("gear", lib = "font-awesome"),
-      style = "background: transparent; 
-               border: none; 
-               color: #fff; 
+      style = "background: transparent;
+               border: none;
+               color: #fff;
                font-size: 20px;  /* Increased from 16px to 20px */
-               margin-top: 7px; 
+               margin-top: 7px;
                cursor: pointer;",
       title = "Settings"
+    )
+  ),
+  # Stop App Button
+  tags$li(
+    class = "dropdown",
+    actionButton(
+      inputId = "stop_app",
+      label = NULL,
+      icon = icon("power-off", lib = "font-awesome"),
+      style = "background: transparent;
+               border: none;
+               color: #ff6b6b;
+               font-size: 18px;
+               padding: 15px;
+               margin: 0;
+               cursor: pointer;
+               transition: color 0.3s;",
+      title = "Stop Biblioshiny",
+      onmouseover = "this.style.color='#ff0000';",
+      onmouseout = "this.style.color='#ff6b6b';"
     )
   ),
   tags$li(
@@ -598,17 +613,17 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
     ),
 
     # Clustering - will get ID 'menu-clustering' via JavaScript (hidden initially)
-    menuItem(
-      "Clustering",
-      tabName = "clustering",
-      icon = fa_i(name = "spinner"),
-      startExpanded = FALSE,
-      menuSubItem(
-        "Clustering by Coupling",
-        tabName = "coupling",
-        icon = icon("chevron-right", lib = "glyphicon")
-      )
-    ),
+    # menuItem(
+    #   "Clustering",
+    #   tabName = "clustering",
+    #   icon = fa_i(name = "spinner"),
+    #   startExpanded = FALSE,
+    #   menuSubItem(
+    #     "Clustering by Coupling",
+    #     tabName = "coupling",
+    #     icon = icon("chevron-right", lib = "glyphicon")
+    #   )
+    # ),
 
     # Conceptual Structure - will get ID 'menu-conceptual' via JavaScript (hidden initially)
     menuItem(
@@ -743,72 +758,234 @@ body <- dashboardBody(
     tabItem(
       "biblioshinyy",
       fluidPage(
-        fluidRow(
-          column(
-            12,
-            div(h1(
-              "biblioshiny: the shiny app for bibliometrix",
-              style = "text-align:center; font-size:50px;"
-            )),
-            br()
-          ),
-          column(
-            12,
+        # CSS personalizzato
+        tags$style(HTML(
+          "
+      .compact-home {
+        padding: 30px;
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+      .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 50px;
+        margin-bottom: 40px;
+      }
+      .logo-container img {
+        height: 380px;
+        width: auto;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+      .title-container {
+        text-align: left;
+      }
+      .main-title {
+        font-size: 80px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0 0 15px 0;
+        line-height: 1;
+        letter-spacing: -1px;
+      }
+      .main-title sup {
+        font-size: 35px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-left: 5px;
+        position: relative;
+        top: -15px;
+      }
+      .subtitle {
+        font-size: 28px;
+        color: #7f8c8d;
+        margin: 0 0 18px 0;
+        font-weight: 400;
+      }
+      .ai-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 15px;
+        font-weight: 700;
+        display: inline-block;
+        margin-bottom: 15px;
+        letter-spacing: 0.5px;
+      }
+      .ai-description {
+        font-size: 22px;
+        color: #495057;
+        margin-top: 10px;
+        line-height: 1.5;
+        font-weight: 400;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+      }
+      .citation-box {
+        background: linear-gradient(135deg, #8b9dc3 0%, #a8b5d1 100%);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 6px 25px rgba(139, 157, 195, 0.3);
+        color: #1a1a2e;
+      }
+      .citation-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1a1a2e;
+      }
+      .citation-text {
+        font-size: 16px;
+        line-height: 1.8;
+        background: rgba(255,255,255,0.7);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid rgba(26, 26, 46, 0.3);
+        color: #1a1a2e;
+        font-weight: 400;
+      }
+      .citation-warning {
+        margin-top: 15px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #1a1a2e;
+        font-weight: 600;
+      }
+      .info-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .info-card {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #667eea;
+        font-size: 16px;
+        color: #495057;
+        line-height: 1.6;
+      }
+      .info-card-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+      }
+      .website-link {
+        color: #667eea;
+        font-weight: 700;
+        text-decoration: none;
+        border-bottom: 2px solid #667eea;
+      }
+      .website-link:hover {
+        color: #764ba2;
+        border-bottom-color: #764ba2;
+      }
+    "
+        )),
+
+        div(
+          class = "compact-home",
+
+          # Header con logo e titolo affiancati
+          div(
+            class = "header-section",
             div(
-              img(src = "logoAI.jpg", height = "35%", width = "35%"),
-              style = "text-align: center;"
+              class = "logo-container",
+              img(src = "logoAI.jpg")
+            ),
+            div(
+              class = "title-container",
+              h1(
+                "Biblioshiny",
+                class = "main-title"
+              ),
+              p("The shiny app for bibliometrix", class = "subtitle"),
+              br(),
+              span("NEW IN VERSION 5.0", class = "ai-badge"),
+              p(
+                class = "ai-description",
+                strong("Biblio AI"),
+                " – A powerful AI assistant for science mapping"
+              )
             )
           ),
-          column(
-            12,
-            div(h3(
-              em(
-                "Biblioshiny 5.0 now includes Biblio AI – a powerful AI assistant for your science mapping analyses.",
-                #   em(a("bibliometrix website.",
-                #     href = "https://www.bibliometrix.org", target = "_blank"
-                #   )),
+
+          # Grid con citazione e info
+          div(
+            class = "content-grid",
+
+            # Citation Box
+            div(
+              class = "citation-box",
+              div(
+                class = "citation-title",
+                icon("quote-left"),
+                "How to Cite"
               ),
-              style = "text-align:center; font-size:24px;"
-            )),
-            br(),
-            hr()
-          ),
-          column(
-            12,
-            div(h6(
-              "biblioshiny and bibliometrix are open-source and freely available for use, distributed under the MIT license.",
-              style = "text-align:center; font-size:19px;"
-            )),
-            div(h6(
-              "When they are used in a publication, we ask that authors to cite the following reference:",
-              style = "text-align:center; font-size:19px;"
-            )),
-            div(h6(
-              "Aria, M., & Cuccurullo, C. (2017).",
-              strong(" bibliometrix: An R-tool for comprehensive"),
-              style = "text-align:center; font-size:22px;"
-            )),
-            div(h6(
-              strong("science mapping analysis."),
-              em("Journal of Informetrics"),
-              ", 11(4), 959-975.",
-              style = "text-align:center; font-size:22px;"
-            )),
-            br(),
-            div(h6(
-              "Failure to properly cite the software is considered a violation of the license.",
-              style = "text-align:center; font-size:19px;"
-            )),
-            br(),
-            div(p(
-              "For an introduction and live examples, visit the ",
-              em(a(
-                "bibliometrix website.",
-                href = "https://www.bibliometrix.org",
-                target = "_blank"
-              )),
-              style = "text-align:center; font-size:18px;"
-            )),
+              div(
+                class = "citation-text",
+                strong("Aria, M., & Cuccurullo, C."),
+                " (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. ",
+                em("Journal of Informetrics"),
+                ", 11(4), 959-975."
+              ),
+              div(
+                class = "citation-warning",
+                icon("exclamation-triangle"),
+                "Failure to cite is a license violation"
+              )
+            ),
+
+            # Info Panel
+            div(
+              class = "info-panel",
+
+              div(
+                class = "info-card",
+                div(
+                  class = "info-card-title",
+                  icon("certificate"),
+                  "Open Source & Free"
+                ),
+                "Distributed under the MIT license. Free for academic and commercial use."
+              ),
+
+              div(
+                class = "info-card",
+                div(
+                  class = "info-card-title",
+                  icon("book"),
+                  "Documentation"
+                ),
+                "Visit the ",
+                tags$a(
+                  "bibliometrix website",
+                  href = "https://www.bibliometrix.org",
+                  target = "_blank",
+                  class = "website-link"
+                ),
+                " for tutorials and examples."
+              )
+            )
           )
         )
       )
@@ -900,7 +1077,7 @@ body <- dashboardBody(
                   9,
                   uiOutput("collection_descriptionUI"),
                   shinycssloaders::withSpinner(
-                    DT::DTOutput("contents"),
+                    uiOutput("contents"),
                     caption = HTML(
                       "<br><strong>Converting data to Bibliometrix format</strong>"
                     )
@@ -1012,6 +1189,43 @@ body <- dashboardBody(
                             ),
                             selected = "AU",
                             width = "100%"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.dbsource == 'openalex'",
+                          div(
+                            style = "margin-bottom: 15px; padding: 12px; background-color: #d6eaf8; border-radius: 5px; border-left: 4px solid #3498db;",
+                            checkboxInput(
+                              "importFetchRefs",
+                              tags$span(
+                                icon(
+                                  "quote-right",
+                                  style = "margin-right: 5px;"
+                                ),
+                                "Download and resolve cited references from OpenAlex"
+                              ),
+                              value = FALSE
+                            ),
+                            conditionalPanel(
+                              condition = "input.importFetchRefs == true",
+                              div(
+                                style = "margin-left: 25px; margin-top: 5px;",
+                                radioButtons(
+                                  "importRefsFilter",
+                                  NULL,
+                                  choices = c(
+                                    "Only references cited more than once (faster)" = "multiple",
+                                    "All references (complete but slower)" = "all"
+                                  ),
+                                  selected = "multiple",
+                                  inline = FALSE
+                                )
+                              )
+                            ),
+                            tags$small(
+                              style = "color: #1a5276; display: block; margin-top: -5px; margin-left: 25px;",
+                              "References will be fetched via the OpenAlex API and converted to standard WoS format."
+                            )
                           )
                         )
                       ),
@@ -1158,166 +1372,6 @@ body <- dashboardBody(
       tabPanel("Pubmed Collection", value = "pubmed", pubmedUI())
     ),
 
-    # ##### gather Data ----
-    # tabItem(
-    #   "gathData",
-    #   tabsetPanel(
-    #     type = "tabs",
-    #     tabPanel(
-    #       "APIs",
-    #       icon = fa_i(name = "cloud-arrow-down"),
-    #       fluidPage(
-    #         fluidRow(
-    #           tags$head(tags$style(
-    #             HTML(
-    #               "table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
-    #                               background-color: #9c4242 !important;
-    #                               }
-    #                               "
-    #             )
-    #           )),
-    #           tags$style(
-    #             HTML(
-    #               ".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing,.dataTables_wrapper .dataTables_paginate .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-    #               color: #000000 !important;
-    #               }"
-    #             )
-    #           ),
-    #           column(
-    #             9,
-    #             shinycssloaders::withSpinner(DT::DTOutput("apiContents"))
-    #           ),
-    #           column(
-    #             3,
-    #             box(
-    #               width = "100%",
-    #               h3(strong(
-    #                 "Gather data using APIs "
-    #               )),
-    #               br(),
-    #               selectInput(
-    #                 "dbapi",
-    #                 label = "Database",
-    #                 choices = c(
-    #                   "DS Dimensions" = "ds",
-    #                   "PubMed" = "pubmed"
-    #                 ),
-    #                 selected = "pubmed"
-    #               ),
-    #               ## Dimenions API
-    #               conditionalPanel(
-    #                 condition = "input.dbapi == 'ds'",
-    #                 br(),
-    #                 fluidRow(column(
-    #                   12,
-    #                   div(
-    #                     style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-    #                     align = "center",
-    #                     width = "100%",
-    #                     actionBttn(
-    #                       inputId = "dsShow",
-    #                       label = "1. Configure API",
-    #                       style = "pill",
-    #                       color = "primary",
-    #                       icon = icon(name = "sliders")
-    #                     )
-    #                   )
-    #                 )),
-    #                 # h5(tags$b("Your Query")),
-    #                 verbatimTextOutput("queryLog2", placeholder = FALSE),
-    #                 h5(tags$b("Documents returned using your query")),
-    #                 verbatimTextOutput("sampleLog2", placeholder = FALSE)
-    #               ),
-    #               ### Pubmed API
-    #               conditionalPanel(
-    #                 condition = "input.dbapi == 'pubmed'",
-    #                 br(),
-    #                 fluidRow(column(
-    #                   12,
-    #                   div(
-    #                     style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-    #                     align = "center",
-    #                     width = "100%",
-    #                     actionBttn(
-    #                       inputId = "pmShow",
-    #                       label = "1. Configure API",
-    #                       style = "pill",
-    #                       color = "primary",
-    #                       icon = icon(name = "sliders")
-    #                     )
-    #                   )
-    #                 )),
-    #                 # h5(tags$b("Your Query")),
-    #                 verbatimTextOutput("pmQueryLog2", placeholder = FALSE),
-    #                 h5(tags$b("Documents returned using your query")),
-    #                 verbatimTextOutput("pmSampleLog2", placeholder = FALSE),
-    #               ),
-    #               tags$hr(),
-    #               fluidRow(column(
-    #                 12,
-    #                 div(
-    #                   style = "border-radius: 10px; border-width: 3px; font-size: 10px;",
-    #                   align = "center",
-    #                   width = "100%",
-    #                   actionBttn(
-    #                     inputId = "apiApply",
-    #                     label = "2. Download",
-    #                     style = "pill",
-    #                     color = "primary",
-    #                     icon(name = "download")
-    #                   )
-    #                 )
-    #               )),
-    #               tags$hr(),
-    #               h3(strong("Export a bibliometrix file ")),
-    #               br(),
-    #               selectInput(
-    #                 "save_file_api",
-    #                 "Save as:",
-    #                 choices = c(
-    #                   " " = "null",
-    #                   "Excel" = "xlsx",
-    #                   "R Data Format" = "RData"
-    #                 ),
-    #                 selected = "null"
-    #               ),
-    #               conditionalPanel(
-    #                 condition = "input.save_file_api != 'null'",
-    #                 fluidRow(column(
-    #                   12,
-    #                   div(
-    #                     style = "border-radius: 10px; border-width: 3px; font-size: 15px;",
-    #                     align = "center",
-    #                     width = "100%",
-    #                     downloadBttn(
-    #                       outputId = "collection.save_api",
-    #                       label = strong("Export"),
-    #                       style = "pill",
-    #                       color = "primary"
-    #                     )
-    #                   )
-    #                 ))
-    #               )
-    #             )
-    #           )
-    #         )
-    #       )
-    #     ),
-    #     tabPanel(
-    #       "Info & References",
-    #       icon = fa_i(name = "info-circle"),
-    #       br(),
-    #       fluidRow(
-    #         column(1),
-    #         column(
-    #           10,
-    #           HTML(helpContent()$api)
-    #         ),
-    #         column(1)
-    #       )
-    #     )
-    #   )
-    # ),
     ##### merge Data ----
     tabItem(
       "mergeData",
@@ -1347,7 +1401,7 @@ body <- dashboardBody(
                 column(
                   9,
                   uiOutput("collection_description_mergeUI"),
-                  shinycssloaders::withSpinner(DT::DTOutput("contentsMerge"))
+                  shinycssloaders::withSpinner(uiOutput("contentsMerge"))
                 ),
                 column(
                   3,
@@ -1572,10 +1626,10 @@ body <- dashboardBody(
 
                 helpText(
                   icon("mouse-pointer"),
-                  "Click on a row to view its citation variants below."
+                  "Click on a row to view its citation variants below and to select it for manual merge."
                 ),
 
-                DTOutput("refMatch_topCitations")
+                uiOutput("refMatch_topCitations")
               ),
 
               # Variants Example Box
@@ -1590,7 +1644,7 @@ body <- dashboardBody(
                 p(
                   "The table below shows all variants of the selected citation that were matched together."
                 ),
-                DTOutput("refMatch_variantsTable")
+                uiOutput("refMatch_variantsTable")
               )
             ),
 
@@ -2118,7 +2172,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "MainInfo",
                 width = 700
               )),
@@ -2218,7 +2272,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("AnnualProdTable"))
+              shinycssloaders::withSpinner(uiOutput("AnnualProdTable"))
             )
           )
         )
@@ -2279,7 +2333,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "AnnualTotCitperYearTable"
               ))
             )
@@ -2786,7 +2840,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelSourcesTable"))
+              shinycssloaders::withSpinner(uiOutput("MostRelSourcesTable"))
             )
           )
         )
@@ -2896,7 +2950,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostRelCitSourcesTable"
               ))
             )
@@ -2959,7 +3013,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("bradfordTable"))
+              shinycssloaders::withSpinner(uiOutput("bradfordTable"))
             )
           )
         )
@@ -3087,7 +3141,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "SourceHindexTable"
               ))
             )
@@ -3217,7 +3271,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "soGrowthtable"
               ))
             )
@@ -3351,7 +3405,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelAuthorsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostRelAuthorsTable"))
             )
           )
         )
@@ -3579,7 +3633,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostCitAuthorsTable"))
             )
           )
         )
@@ -3689,11 +3743,11 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table - Production per Year",
-              shinycssloaders::withSpinner(DT::DTOutput("TopAuthorsProdTable"))
+              shinycssloaders::withSpinner(uiOutput("TopAuthorsProdTable"))
             ),
             tabPanel(
               "Table - Documents",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "TopAuthorsProdTablePapers"
               ))
             ),
@@ -3778,7 +3832,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("lotkaTable"))
+              shinycssloaders::withSpinner(uiOutput("lotkaTable"))
             )
           )
         )
@@ -3906,7 +3960,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "AuthorHindexTable"
               ))
             )
@@ -4034,7 +4088,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostRelAffiliationsTable"
               ))
             )
@@ -4148,7 +4202,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "AffOverTimeTable"
               ))
             )
@@ -4262,7 +4316,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostRelCountriesTable"
               ))
             ),
@@ -4344,7 +4398,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("countryProdTable"))
+              shinycssloaders::withSpinner(uiOutput("countryProdTable"))
             )
           )
         )
@@ -4456,7 +4510,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "CountryOverTimeTable"
               ))
             )
@@ -4584,7 +4638,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 "MostCitCountriesTable"
               ))
             )
@@ -4713,7 +4767,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitDocsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostCitDocsTable"))
             )
           )
         )
@@ -4840,7 +4894,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostLocCitDocsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostLocCitDocsTable"))
             ),
             tabPanel(
               title = tagList(
@@ -4970,7 +5024,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostCitRefsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostCitRefsTable"))
             )
           )
         )
@@ -5135,13 +5189,13 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table - RPYS",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "rpysTable"
               ))
             ),
             tabPanel(
               "Table - Cited References",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "crTable"
               ))
             ),
@@ -5165,13 +5219,13 @@ body <- dashboardBody(
                   )
                 )
               ),
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "rpysSequence"
               ))
             ),
             tabPanel(
               "Table - Top 10 Peaks",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "rpysPeaks"
               ))
             ),
@@ -5441,7 +5495,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("MostRelWordsTable"))
+              shinycssloaders::withSpinner(uiOutput("MostRelWordsTable"))
             )
           )
         )
@@ -5844,7 +5898,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("wordTable"))
+              shinycssloaders::withSpinner(uiOutput("wordTable"))
             )
           )
         )
@@ -6091,7 +6145,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput("treeTable"))
+              shinycssloaders::withSpinner(uiOutput("treeTable"))
             )
           )
         )
@@ -6364,7 +6418,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "kwGrowthtable"
               ))
             )
@@ -6674,7 +6728,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "trendTopicsTable"
               ))
             ),
@@ -6695,6 +6749,21 @@ body <- dashboardBody(
                       color = "#466fc4"
                     )
                   )
+                )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$trendTopics)
+                  ),
+                  column(1)
                 )
               )
             )
@@ -6956,11 +7025,11 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CMTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "CMTable"))
             ),
             tabPanel(
               "Clusters",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "CMTableCluster"
               ))
             )
@@ -7608,7 +7677,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "cocTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "cocTable"))
             ),
             tabPanel(
               "Degree Plot",
@@ -7632,6 +7701,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$coOccurrenceNetwork)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -7897,6 +7981,19 @@ body <- dashboardBody(
                           )
                         )
                       )
+                    ),
+                    fluidRow(
+                      div(
+                        style = "padding-left: 8px;",
+                        numericInput(
+                          "TMalpha",
+                          label = "α Parameter (Balancing Occurrence vs. Centrality)",
+                          value = 0.5,
+                          min = 0,
+                          max = 1,
+                          step = 0.1
+                        )
+                      )
                     )
                   ),
                   div(
@@ -8014,17 +8111,17 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "TMTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "TMTable"))
             ),
             tabPanel(
               "Clusters",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "TMTableCluster"
               ))
             ),
             tabPanel(
               "Documents",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "TMTableDocument"
               ))
             ),
@@ -8043,6 +8140,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$thematicMap)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -8308,16 +8420,14 @@ body <- dashboardBody(
                       column(
                         6,
                         div(
-                          style = "padding-right: 8px;",
-                          selectInput(
-                            "TEmeasure",
-                            label = "Weight Index",
-                            choices = c(
-                              "Inclusion Index" = "inclusion",
-                              "Inclusion Index weighted by Word-Occurrences" = "weighted",
-                              "Stability Index" = "stability"
-                            ),
-                            selected = "weighted"
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "TEalpha",
+                            label = "α Parameter (Balancing Occurrence vs. Centrality)",
+                            value = 0.5,
+                            min = 0,
+                            max = 1,
+                            step = 0.1
                           )
                         )
                       ),
@@ -8446,7 +8556,7 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TETable"
                   ))
                 )
@@ -8472,19 +8582,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable1"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster1"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument1"
                   ))
                 )
@@ -8510,19 +8620,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable2"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster2"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument2"
                   ))
                 )
@@ -8548,19 +8658,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable3"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster3"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument3"
                   ))
                 )
@@ -8586,19 +8696,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable4"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster4"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument4"
                   ))
                 )
@@ -8624,19 +8734,19 @@ body <- dashboardBody(
                 ),
                 tabPanel(
                   "Table",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTable5"
                   ))
                 ),
                 tabPanel(
                   "Clusters",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableCluster5"
                   ))
                 ),
                 tabPanel(
                   "Documents",
-                  shinycssloaders::withSpinner(DT::DTOutput(
+                  shinycssloaders::withSpinner(uiOutput(
                     outputId = "TMTableDocument5"
                   ))
                 )
@@ -8657,6 +8767,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$thematicEvolution)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -8993,11 +9118,11 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Words by Cluster",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableW"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "CSTableW"))
             ),
             tabPanel(
               "Articles by Cluster",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "CSTableD"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "CSTableD"))
             ),
             tabPanel(
               title = tagList(
@@ -9014,6 +9139,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$factorialAnalysis)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -9458,7 +9598,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(
+              shinycssloaders::withSpinner(uiOutput(
                 outputId = "cocitTable"
               ))
             ),
@@ -9484,6 +9624,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$coCitationNetwork)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -9659,7 +9814,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "histTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "histTable"))
             ),
             tabPanel(
               title = tagList(
@@ -9676,6 +9831,21 @@ body <- dashboardBody(
                   color = "#466fc4"
                 )
               )))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$historiograph)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -10268,7 +10438,7 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(
-                DT::DTOutput(outputId = "colTable")
+                uiOutput(outputId = "colTable")
               )
             ),
 
@@ -10449,7 +10619,7 @@ body <- dashboardBody(
             ),
             tabPanel(
               "Table",
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "WMTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "WMTable"))
             ),
             tabPanel(
               title = tagList(
@@ -10604,7 +10774,7 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              shinycssloaders::withSpinner(DT::DTOutput(outputId = "tallTable"))
+              shinycssloaders::withSpinner(uiOutput(outputId = "tallTable"))
             )
           ),
           column(
@@ -10679,9 +10849,9 @@ body <- dashboardBody(
                 helpText(
                   "Select at least one textual field to export, click 'Play' to generate the dataset, then save and import it into TALL.",
                   style = "font-size: 16px"
-                ),
-                uiOutput("tallBttn1"),
-                uiOutput("tallBttn2")
+                ) #,
+                #uiOutput("tallBttn1"),
+                #uiOutput("tallBttn2")
                 # fluidRow(
                 #   # column(6,
                 #   #        uiOutput("tallBttn1")),
@@ -10984,6 +11154,213 @@ body <- dashboardBody(
                       helpText(
                         "Configure the maximum output length for AI responses.",
                         style = "margin-top: 8px; color: #666; font-size: 12px;"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+
+        # ============================================
+        # SECTION 4: OPENALEX API SETTINGS
+        # ============================================
+        fluidRow(
+          column(
+            12,
+            div(
+              class = "box box-primary",
+              div(
+                class = "box-header with-border",
+                h4(
+                  icon("database", style = "margin-right: 8px;"),
+                  "OpenAlex API - Configuration",
+                  class = "box-title",
+                  style = "color: #3498db; font-weight: 600;"
+                )
+              ),
+              div(
+                class = "box-body",
+
+                # Description
+                div(
+                  style = "margin-bottom: 20px; padding: 15px; background-color: #d6eaf8; border-radius: 5px; border-left: 4px solid #3498db;",
+                  icon(
+                    "info-circle",
+                    style = "color: #2980b9; margin-right: 8px; font-size: 18px;"
+                  ),
+                  tags$span(
+                    style = "color: #1a5276; font-size: 14px;",
+                    HTML(
+                      "OpenAlex requires an <strong>API key</strong> for significant use of their API. Without an API key, you are limited to <strong>100 credits/day</strong> (testing only). A free API key provides <strong>100,000 credits/day</strong>. Get your free key at "
+                    ),
+                    tags$a(
+                      href = "https://openalex.org/settings/api",
+                      target = "_blank",
+                      style = "color: #1a5276; font-weight: bold; text-decoration: underline;",
+                      "openalex.org/settings/api"
+                    ),
+                    HTML(". Optionally, you can also set an email for the <strong>polite pool</strong> (faster, more reliable access).")
+                  )
+                ),
+
+                # API Key Configuration
+                fluidRow(
+                  column(
+                    6,
+                    div(
+                      style = "padding-right: 15px;",
+                      tags$label(
+                        "API Key",
+                        style = "font-weight: 600; color: #3498db; margin-bottom: 8px; display: block;"
+                      ),
+                      passwordInput(
+                        "oaApiKey",
+                        label = NULL,
+                        placeholder = "Enter your OpenAlex API key",
+                        value = "",
+                        width = "100%"
+                      ),
+
+                      # Status Display
+                      div(
+                        style = "margin: 10px 0;",
+                        uiOutput("oaApiKeyStatus")
+                      ),
+
+                      # Action Buttons
+                      fluidRow(
+                        column(
+                          6,
+                          actionButton(
+                            "oaSetApiKey",
+                            "Save API Key",
+                            icon = icon("check"),
+                            class = "btn-primary btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        ),
+                        column(
+                          6,
+                          actionButton(
+                            "oaRemoveApiKey",
+                            "Remove API Key",
+                            icon = icon("trash"),
+                            class = "btn-danger btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  column(
+                    6,
+                    div(
+                      style = "padding-left: 15px; margin-top: 28px; color: #555; font-size: 13px;",
+                      p(
+                        icon(
+                          "key",
+                          style = "color: #3498db; margin-right: 5px;"
+                        ),
+                        "Your API key is stored locally and used to authenticate with the OpenAlex API."
+                      ),
+                      p(
+                        icon(
+                          "bolt",
+                          style = "color: #f39c12; margin-right: 5px;"
+                        ),
+                        "Without key: 100 credits/day. With free key: 100,000 credits/day."
+                      ),
+                      p(
+                        icon(
+                          "link",
+                          style = "color: #3498db; margin-right: 5px;"
+                        ),
+                        tags$a(
+                          href = "https://openalex.org/settings/api",
+                          target = "_blank",
+                          style = "color: #3498db; text-decoration: underline;",
+                          "Get your free API key here"
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Separator
+                tags$hr(style = "margin: 20px 0; border-color: #ddd;"),
+
+                # Email Configuration (optional)
+                fluidRow(
+                  column(
+                    6,
+                    div(
+                      style = "padding-right: 15px;",
+                      tags$label(
+                        "Email Address",
+                        tags$span(
+                          style = "font-weight: 400; color: #888; font-size: 12px; margin-left: 8px;",
+                          "(Optional - not required when API key is set)"
+                        ),
+                        style = "font-weight: 600; color: #3498db; margin-bottom: 8px; display: block;"
+                      ),
+                      textInput(
+                        "oaPoliteEmail",
+                        label = NULL,
+                        placeholder = "Enter your email for the polite pool",
+                        value = "",
+                        width = "100%"
+                      ),
+
+                      # Status Display
+                      div(
+                        style = "margin: 10px 0;",
+                        uiOutput("oaEmailStatus")
+                      ),
+
+                      # Action Buttons
+                      fluidRow(
+                        column(
+                          6,
+                          actionButton(
+                            "oaSetEmail",
+                            "Save Email",
+                            icon = icon("check"),
+                            class = "btn-primary btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        ),
+                        column(
+                          6,
+                          actionButton(
+                            "oaRemoveEmail",
+                            "Remove Email",
+                            icon = icon("trash"),
+                            class = "btn-danger btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  column(
+                    6,
+                    div(
+                      style = "padding-left: 15px; margin-top: 28px; color: #555; font-size: 13px;",
+                      p(
+                        icon(
+                          "shield-halved",
+                          style = "color: #3498db; margin-right: 5px;"
+                        ),
+                        "Your email is stored locally and only sent to OpenAlex for polite pool access."
+                      ),
+                      p(
+                        icon(
+                          "bolt",
+                          style = "color: #f39c12; margin-right: 5px;"
+                        ),
+                        "Polite pool users get faster responses and are not affected by rate limits."
                       )
                     )
                   )

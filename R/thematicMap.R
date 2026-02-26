@@ -40,7 +40,13 @@ utils::globalVariables(c(
   "TCpY",
   "NTC",
   ".",
-  "wordlist"
+  "wordlist",
+  "vertexID",
+  "score",
+  "PageRank",
+  "rel_freq",
+  "vertexPageRank",
+  "old_combined"
 ))
 #' Create a thematic map
 #'
@@ -71,6 +77,7 @@ utils::globalVariables(c(
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @param subgraphs is a logical. If TRUE cluster subgraphs are returned.
+#' @param alpha is a real. it indicates the balancing between word frequency and pagerank centrality to identify cluster labels. Default is \code{alpha = 0.5}.
 #' @param seed is an integer. It indicates the seed for random number generation. Default is \code{seed = 1234}.
 #' @return a list containing:
 #' \tabular{lll}{
@@ -111,6 +118,7 @@ thematicMap <- function(
   synonyms = NULL,
   cluster = "louvain",
   subgraphs = FALSE,
+  alpha = 0.5,
   seed = 1234
 ) {
   minfreq <- max(2, floor(minfreq * nrow(M) / 1000))
@@ -247,20 +255,29 @@ thematicMap <- function(
   label_cluster = unique(group)
   word_cluster = word[group]
 
-  centr <- networkStat(Net$graph, stat = "all", type = "closeness")$vertex
+  centr <- networkStat(Net$graph, stat = "all", type = "pagerank")$vertex %>%
+    rename(pagerank = vertexPageRank)
   df_lab <- data.frame(
     sC = sC,
     words = word,
     groups = group,
     color = color,
     cluster_label = "NA"
-  )
+  ) %>%
+    left_join(
+      centr %>% select(vertexID, pagerank),
+      by = c("words" = "vertexID")
+    ) %>%
+    group_by(groups) %>%
+    mutate(rel_freq = sC / sum(sC)) %>%
+    ungroup() %>%
+    mutate(score = (alpha * rel_freq + (1 - alpha) * pagerank) * 100)
 
   ## new code using tidyvverse
   df_lab <- df_lab %>%
     dplyr::filter(sC >= minfreq) %>%
     group_by(groups) %>%
-    mutate(freq = sum(sC), cluster_label = words[which.max(sC)])
+    mutate(freq = sum(sC), cluster_label = words[which.max(score)])
 
   sEij <- triu(sEij)
   df_lab_top <- df_lab %>% select(words, groups)
@@ -304,10 +321,10 @@ thematicMap <- function(
 
   df <- df_lab %>%
     group_by(groups) %>% #dplyr::filter(sC>1) %>%
-    arrange(-sC, .by_group = TRUE) %>%
-    dplyr::slice_max(n = 10, sC, with_ties = FALSE) %>%
+    arrange(desc(score), .by_group = TRUE) %>%
+    dplyr::slice_max(n = 10, score, with_ties = FALSE) %>%
     summarise(
-      wordlist = paste(words, sC, collapse = "\n"),
+      wordlist = paste(words, round(score, 1), collapse = "\n"),
       name_full = paste(words[1:min(n.labels, n())], collapse = "\n")
     ) %>%
     right_join(., df, by = "groups") %>%
@@ -366,7 +383,10 @@ thematicMap <- function(
     "Cluster",
     "Color",
     "Cluster_Label",
-    "Cluster_Frequency"
+    "Cluster_Frequency",
+    "PageRank",
+    "Score",
+    "Freq"
   )
 
   df_lab <- df_lab %>%
@@ -434,7 +454,10 @@ thematicMap <- function(
     axisLimits = c(xlimits, ylimits),
     annotations = annotations,
     clusters = df,
-    words = df_lab,
+    words = df_lab %>%
+      rename(
+        Cluster_PageRank = PageRank
+      ),
     nclust = dim(df)[1],
     net = Net,
     subgraphs = gcl,
@@ -453,95 +476,116 @@ clusterAssignment <- function(
   synonyms,
   threshold
 ) {
-  #### integrate stopwords and synonyms in M original field
+  # 1. Normalizzazione campo di input
   if (field %in% c("AB", "TI")) {
     field <- paste0(field, "_TM")
   }
-  Fi <- strsplit(M[, field], ";")
-  nf <- lengths(Fi)
-  allField <- data.frame(terms = trim.leading(unlist(Fi)), SR = rep(M$SR, nf))
-  # remove terms
+
+  # 2. Tokenizzazione
+  allField <- M %>%
+    select(SR, terms = !!sym(field)) %>%
+    separate_rows(terms, sep = ";") %>%
+    mutate(terms = trimws(terms)) %>%
+    dplyr::filter(terms != "" & !is.na(terms))
+
+  # 3. Pulizia termini
   if (!is.null(remove.terms)) {
-    allField <- anti_join(
-      allField,
-      data.frame(terms = trimws(toupper(remove.terms))),
-      by = "terms"
-    )
+    remove_vec <- toupper(trimws(remove.terms))
+    allField <- allField %>%
+      dplyr::filter(!(toupper(terms) %in% remove_vec))
   }
-  # Merge synonyms in the vector synonyms
+
+  # 4. Gestione Sinonimi
   if (!is.null(synonyms)) {
-    s <- strsplit(toupper(synonyms), ";")
-    snew <- unlist(lapply(s, function(l) l[1]))
-    sold <- lapply(s, function(l) trim.leading(l[-1]))
-    syn <- data.frame(new = rep(snew, lengths(sold)), terms = unlist(sold))
-    allField <- allField %>% left_join(syn, by = "terms")
-    ind <- which(!is.na(allField$new))
-    allField$terms[ind] <- allField$new[ind]
-    allField <- allField[c("SR", "terms")]
+    syn_df <- tibble(raw = synonyms) %>%
+      separate(
+        raw,
+        into = c("new", "old_combined"),
+        sep = ";",
+        extra = "merge"
+      ) %>%
+      separate_rows(old_combined, sep = ";") %>%
+      mutate(across(everything(), ~ trimws(toupper(.x)))) %>%
+      rename(old = old_combined)
+
+    allField <- allField %>%
+      left_join(syn_df, by = c("terms" = "old")) %>%
+      mutate(terms = coalesce(new, terms)) %>%
+      select(SR, terms)
   }
-  ### stop integration in M
 
-  words <- words %>%
-    mutate(p_w = 1 / Occurrences) %>%
-    group_by(Cluster) %>%
-    rename(p_c = pagerank_centrality)
-  #mutate(p_c = 1/length(Cluster))
+  # 5. Preparazione tabella 'words'
+  words_clean <- words %>%
+    mutate(
+      terms = tolower(Words),
+      p_w = pagerank_centrality / Occurrences #1 / Occurrences
+    ) %>%
+    select(terms, Cluster_Label, p_w, p_c = pagerank_centrality)
 
-  TERMS <- allField %>%
-    mutate(terms = terms %>% tolower()) %>%
-    left_join(words, by = c("terms" = "Words"))
-
-  TERMS <- TERMS %>%
+  # 6. Calcolo Probabilità
+  TERMS_processed <- allField %>%
+    mutate(terms = tolower(terms)) %>%
+    inner_join(words_clean, by = "terms") %>%
     group_by(SR) %>%
-    mutate(pagerank = sum(p_c, na.rm = T)) %>%
+    mutate(total_pagerank = sum(p_c, na.rm = TRUE)) %>%
     group_by(SR, Cluster_Label) %>%
-    summarize(weigth = sum(p_w), pagerank = max(pagerank, na.rm = TRUE)) %>%
-    mutate(p = weigth / sum(weigth, na.rm = T)) %>%
-    drop_na(Cluster_Label) %>%
+    summarise(
+      weight = sum(p_w),
+      pagerank = first(total_pagerank),
+      .groups = "drop_last"
+    ) %>%
+    group_by(SR) %>%
+    mutate(p = weight / sum(weight, na.rm = TRUE)) %>%
     ungroup()
 
-  TERMS <- TERMS %>%
-    select(-weigth) %>%
-    group_by(SR)
-
-  ## Assign docs to cluser with p_max>=threshold
-  TERMS_Max <- TERMS %>%
+  # 7. Assegnazione Cluster
+  TERMS_Max <- TERMS_processed %>%
     dplyr::filter(p >= threshold) %>%
     group_by(SR) %>%
-    slice_max(order_by = p, n = 1) %>%
-    summarize(Assigned_cluster = paste(Cluster_Label, collapse = ";"))
+    slice_max(p, n = 1, with_ties = FALSE) %>%
+    select(
+      SR,
+      Assigned_cluster = Cluster_Label,
+      pagerank_assigned = pagerank
+    ) %>%
+    ungroup()
 
-  ### doc pagerank centrality for the assigned cluster
-  TERMS_pagerank <- TERMS %>%
-    select(!p) %>%
-    left_join(TERMS_Max, by = "SR") %>%
-    dplyr::filter(Cluster_Label == Assigned_cluster) %>%
-    select(SR, pagerank)
-
-  TERMS <- TERMS %>%
-    select(!pagerank) %>%
-    pivot_wider(names_from = Cluster_Label, values_from = p) %>%
-    left_join(TERMS_Max, by = "SR") %>%
-    left_join(TERMS_pagerank, by = "SR")
-
-  if (!("DI" %in% names(M))) {
-    M$DI <- NA
+  # 8. Preparazione M
+  if (!"DI" %in% names(M)) {
+    M$DI <- NA_character_
   }
 
-  year <- as.numeric(substr(Sys.time(), 1, 4)) + 1
+  current_year <- as.numeric(format(Sys.Date(), "%Y")) + 1
 
-  TERMS <- M %>%
-    mutate(TCpY = TC / (year - PY)) %>%
-    group_by(PY) %>%
-    mutate(NTC = TC / mean(TC, na.rm = TRUE)) %>%
-    ungroup() %>%
-    select(DI, AU, TI, SO, PY, TC, TCpY, NTC, SR) %>%
-    left_join(TERMS, by = "SR") %>%
-    mutate_if(is.numeric, ~ replace_na(., 0)) %>%
+  # 9. Join Finale e Gestione NA Tipizzata (Risolve l'errore)
+  TERMS_final <- M %>%
+    select(DI, AU, TI, SO, PY, TC, SR) %>%
+    mutate(
+      TCpY = TC / (current_year - PY),
+      NTC = if_else(TC == 0, 0, TC / mean(TC, na.rm = TRUE))
+    ) %>%
+    left_join(
+      TERMS_processed %>%
+        select(SR, Cluster_Label, p) %>%
+        pivot_wider(
+          names_from = Cluster_Label,
+          values_from = p,
+          values_fill = 0
+        ) %>%
+        left_join(TERMS_Max, by = "SR"),
+      by = "SR"
+    ) %>%
+    # Sostituzione NA sicura per tipo di dato
+    mutate(
+      across(where(is.numeric), ~ replace_na(.x, 0)),
+      across(where(is.character), ~ replace_na(.x, "n.a."))
+    ) %>%
     group_by(Assigned_cluster) %>%
-    arrange(desc(TC), .by_group = TRUE)
+    arrange(desc(TC), desc(PY), desc(SR), .by_group = TRUE) %>%
+    ungroup() %>%
+    rename(pagerank = pagerank_assigned)
 
-  return(TERMS)
+  return(TERMS_final)
 }
 
 # Build TM Plot -----

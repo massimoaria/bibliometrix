@@ -56,7 +56,6 @@ libraries <- function() {
     "zip",
     "shiny",
     "igraph",
-    "DT",
     "stringr",
     "contentanalysis",
     "ggplot2",
@@ -84,7 +83,9 @@ libraries <- function() {
     "tidyr",
     "sparkline",
     "tidygraph",
-    "ggraph"
+    "ggraph",
+    "future",
+    "promises"
   )
 
   suppressPackageStartupMessages({

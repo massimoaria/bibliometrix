@@ -1,9 +1,12 @@
-cssTags <- function(){
+cssTags <- function() {
   ## workaround to solve visualization issues in Data Table
   tagList(
-    tags$head(tags$style(HTML(".has-feedback .form-control { padding-right: 0px;}"))),
+    tags$head(tags$style(HTML(
+      ".has-feedback .form-control { padding-right: 0px;}"
+    ))),
     ### animation for filter results box
-    tags$head(tags$style(HTML("
+    tags$head(tags$style(HTML(
+      "
   .fade-in {
     animation: fadeInAnim 0.8s ease-in-out;
   }
@@ -12,26 +15,49 @@ cssTags <- function(){
     from { opacity: 0; transform: scale(0.98); }
     to { opacity: 1; transform: scale(1); }
   }
-"))),
+"
+    ))),
+    ## clipboard ubuntu
+    tags$head(
+      tags$script(HTML(
+        "
+    Shiny.addCustomMessageHandler('copy_to_clipboard_js', function(message) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        // Metodo moderno (Clipboard API)
+        navigator.clipboard.writeText(message).then(function() {
+          alert('Content sent to clipboard!');
+        }, function(err) {
+          console.error('Error: ', err);
+        });
+      } else {
+        // Fallback per browser vecchi o connessioni non HTTPS
+        const el = document.createElement('textarea');
+        el.value = message;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('Content sent to clipboard (fallback)!');
+      }
+    });
+  "
+      ))
+    ),
+
     ### css for citation matching
     tags$head(
-      tags$style(HTML("
-    .dataTables_wrapper .dataTable tbody tr.selected {
-      background-color: #d4edda !important;
-    }
-    
-    .dataTables_wrapper .dataTable tbody tr.selected td {
-      font-weight: bold;
-    }
-    
-    #refMatch_topCitations tbody tr:hover {
+      tags$style(HTML(
+        "
+    #refMatch_htmlTable tbody tr:hover {
       background-color: #e9ecef;
       cursor: pointer;
     }
-  "))
+  "
+      ))
     ),
     tags$head(
-      tags$style(HTML("
+      tags$style(HTML(
+        "
     /* Manual merge buttons styling */
     #refMatch_toggleSelection,
     #refMatch_clearSelection,
@@ -55,10 +81,12 @@ cssTags <- function(){
         padding: 6px 10px;
       }
     }
-  "))
+  "
+      ))
     ),
     tags$head(
-      tags$style(HTML("
+      tags$style(HTML(
+        "
     /* Loading indicator animation */
     @keyframes pulse {
       0% { opacity: 1; }
@@ -73,11 +101,13 @@ cssTags <- function(){
     #refMatch_loadingIndicator h4 {
       animation: pulse 1.5s ease-in-out infinite;
     }
-  "))
+  "
+      ))
     ),
-    
+
     ### css for life cycle summary
-    tags$style(shiny::HTML("
+    tags$style(shiny::HTML(
+      "
       .lifecycle-tabs .nav-tabs {
         border-bottom: 2px solid #dee2e6;
       }
@@ -106,8 +136,10 @@ cssTags <- function(){
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin-bottom: 20px;
       }
-    ")),
-    shiny::tags$style(shiny::HTML("
+    "
+    )),
+    shiny::tags$style(shiny::HTML(
+      "
       .lifecycle-summary {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         color: #333;
@@ -247,11 +279,13 @@ cssTags <- function(){
         background: #fff4e6;
         border-left-color: #ff7f0e;
       }
-    ")),
-    
+    "
+    )),
+
     ### css for author link
     tags$head(
-      tags$style(HTML("
+      tags$style(HTML(
+        "
       .author-link {
         color: #337ab7;
         text-decoration: underline;
@@ -264,16 +298,20 @@ cssTags <- function(){
       ))
     ),
     ## script to open more times the same modal ####
-    tags$script("
+    tags$script(
+      "
     Shiny.addCustomMessageHandler('button_id', function(value) {
     Shiny.setInputValue('button_id', value);
     });
-  "),
-    tags$script("
+  "
+    ),
+    tags$script(
+      "
     Shiny.addCustomMessageHandler('selected_author', function(value) {
     Shiny.setInputValue('selected_author', value);
     });
-  "),
+  "
+    ),
     ## script to get the dimensions of the page ####
     ###
     tags$head(

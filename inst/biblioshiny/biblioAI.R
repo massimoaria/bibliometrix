@@ -1,3 +1,92 @@
+## OpenRouter AI function
+openrouter_ai <- function(
+  image = NULL,
+  docs = NULL,
+  prompt = "Explain these images",
+  model = "google/gemma-3-27b-it:free", # Nota: usa 27b, il 32b potrebbe avere ID diverso
+  image_type = "png",
+  retry_503 = 5,
+  api_key = NULL,
+  outputSize = "medium"
+) {
+  library(httr2)
+  library(base64enc)
+
+  # 1. Setup API Key
+  if (is.null(api_key)) {
+    api_key <- Sys.getenv("OPENROUTER_API_KEY")
+  }
+
+  # 2. Configurazione Tokens (Semplificata per evitare 400)
+  # Molti modelli free falliscono se chiedi troppi token in uscita
+  max_val <- switch(
+    outputSize,
+    "small" = 1000,
+    "medium" = 2000,
+    "large" = 4000,
+    2000
+  )
+
+  # 3. Costruzione Content (Standard rigoroso OpenAI)
+  content_list <- list(
+    list(type = "text", text = prompt)
+  )
+
+  if (!is.null(image)) {
+    for (img_path in as.vector(image)) {
+      if (file.exists(img_path)) {
+        # Importante: usiamo una compressione base64 pulita
+        img_b64 <- base64encode(img_path)
+        content_list <- append(
+          content_list,
+          list(
+            list(
+              type = "image_url",
+              image_url = list(
+                url = paste0("data:image/", image_type, ";base64,", img_b64)
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  # 4. Request Body
+  # Rimosso 'seed' e altri parametri opzionali che possono causare 400 su certi provider
+  request_body <- list(
+    model = model,
+    messages = list(
+      list(role = "user", content = content_list)
+    ),
+    max_tokens = max_val,
+    temperature = 0.7
+  )
+
+  # 5. Invio Richiesta
+  url <- "https://openrouter.ai/api/v1/chat/completions"
+
+  req <- request(url) |>
+    req_headers(
+      "Authorization" = paste("Bearer", api_key),
+      "HTTP-Referer" = "https://github.com/massimoaria/bibliometrix", # Referer specifico
+      "X-Title" = "Biblioshiny Client",
+      "Content-Type" = "application/json"
+    ) |>
+    req_body_json(request_body) |>
+    req_timeout(120) |>
+    req_retry(max_tries = retry_503)
+
+  resp <- req_perform(req) |>
+    resp_body_json()
+
+  if (!is.null(resp$choices)) {
+    return(resp$choices[[1]]$message$content)
+  } else {
+    return(paste("❌ Errore API:", resp$error$message))
+  }
+}
+
 ## gemini AI tools
 gemini_ai <- function(
   image = NULL,
@@ -173,7 +262,8 @@ gemini_ai <- function(
     req <- request(url) |>
       req_url_query(key = api_key) |>
       req_headers("Content-Type" = "application/json") |>
-      req_body_json(request_body)
+      req_body_json(request_body) |>
+      req_timeout(120)
 
     resp <- tryCatch(
       req_perform(req),
@@ -202,7 +292,7 @@ gemini_ai <- function(
           retry_503,
           ")..."
         ))
-        Sys.sleep(2)
+        Sys.sleep(min(2^attempt, 16))
         next
       } else {
         return(
@@ -249,7 +339,7 @@ gemini_ai <- function(
     # Successful response
     candidates <- httr2::resp_body_json(resp)$candidates
     outputs <- unlist(lapply(candidates, \(c) c$content$parts))
-    return(outputs)
+    return(outputs[1])
   }
 }
 
@@ -607,210 +697,6 @@ biblioAiPrompts <- function(values, activeTab) {
   return(prompt)
 }
 
-geminiGenerate <- function(
-  values,
-  activeTab,
-  gemini_additional,
-  gemini_model_parameters,
-  input
-) {
-  if (gemini_additional != "") {
-    desc <- paste0(
-      values$collection_description,
-      gemini_additional,
-      gemini_model_parameters,
-      collapse = ". "
-    )
-  } else {
-    desc <- paste0(
-      values$collection_description,
-      gemini_model_parameters,
-      collapse = ". "
-    )
-  }
-  prompt <- biblioAiPrompts(values, activeTab)
-  switch(
-    activeTab,
-    "mainInfo" = {
-      req(values$TABvb)
-      values$MainInfoGemini <- geminiPromptImage(
-        obj = NULL,
-        type = "text",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "lifeCycle" = {
-      req(values$DLC)
-      files <- DLC2Gemini(values$DLCplotYear, values$DLCplotCum)
-      values$DLCGemini <- geminiPromptImage(
-        obj = files,
-        type = "multi",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "threeFieldPlot" = {
-      req(values$TFP)
-      values$TFPGemini <- geminiPromptImage(
-        obj = values$TFP,
-        type = "plotly",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "authorsProdOverTime" = {
-      req(values$AUProdOverTime)
-      values$ApotGemini <- geminiPromptImage(
-        obj = values$AUProdOverTime$graph,
-        type = "ggplot2",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "correspAuthorCountry" = {
-      req(values$TABCo)
-      values$MostRelCountriesGemini <- geminiPromptImage(
-        obj = values$MRCOplot,
-        type = "ggplot2",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "mostLocalCitDoc" = {
-      req(values$TABLocDoc)
-      values$MostLocCitDocsGemini <- geminiPromptImage(
-        obj = NULL,
-        type = "text",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "trendTopic" = {
-      req(values$trendTopics)
-      values$trendTopicsGemini <- geminiPromptImage(
-        obj = values$trendTopics$graph,
-        type = "ggplot2",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "ReferenceSpect" = {
-      req(values$res)
-      values$rpysGemini <- geminiPromptImage(
-        obj = values$res$spectroscopy,
-        type = "ggplot2",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "coOccurenceNetwork" = {
-      req(values$COCnetwork)
-      values$cocGemini <- geminiPromptImage(
-        obj = values$COCnetwork$VIS,
-        type = "vis",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "thematicMap" = {
-      req(values$TMmap)
-      values$TMGemini <- geminiPromptImage(
-        obj = values$TMmap,
-        type = "plotly",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "thematicEvolution" = {
-      req(values$nexus)
-      files <- TE2Gemini(values$nexus, values$TEplot)
-      values$TEGemini <- geminiPromptImage(
-        obj = files,
-        type = "multi",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "factorialAnalysis" = {
-      req(values$plotCS)
-      values$CSGemini <- geminiPromptImage(
-        obj = values$plotCS,
-        type = "plotly",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "coCitationNetwork" = {
-      req(values$COCITnetwork)
-      values$cocitGemini <- geminiPromptImage(
-        obj = values$COCITnetwork$VIS,
-        type = "vis",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "historiograph" = {
-      req(values$histPlotVis$VIS)
-      values$histGemini <- geminiPromptImage(
-        obj = values$histPlotVis$VIS,
-        type = "vis",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "collabNetwork" = {
-      req(values$COLnetwork$VIS)
-      values$colGemini <- geminiPromptImage(
-        obj = values$COLnetwork$VIS,
-        type = "vis",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    },
-    "collabWorldMap" = {
-      values$WMGemini <- geminiPromptImage(
-        obj = values$WMmap$g,
-        type = "plotly",
-        prompt = prompt,
-        key = values$geminiAPI,
-        desc = desc,
-        values = values
-      )
-    }
-  )
-  return(values)
-}
 
 geminiParameterPrompt <- function(values, activeTab, input) {
   if ("DB_Original" %in% names(values$M)) {
@@ -951,76 +837,7 @@ geminiParameterPrompt <- function(values, activeTab, input) {
   return(txt)
 }
 
-## gemini prompt for images
-geminiPromptImage <- function(
-  obj,
-  type = "vis",
-  prompt = "Explain the topics in this map",
-  key,
-  desc = NULL,
-  values
-) {
-  ## Check Computer configuration to work with Biblio AI
-  ### Internet Connection
-  if (!is_online()) {
-    res <- '⚠️ **Note**: Biblio AI requires an active internet connection to work.'
-    return(res)
-  }
-  ### Chromium Browser
-  if (is.null(values$Chrome_url)) {
-    res <- '⚠️ **Note**: Biblio AI requires a **Chrome-based browser** (such as Google Chrome or Microsoft Edge) installed on your computer to work correctly.'
-    return(res)
-  }
 
-  if (key) {
-    if (!is.null(desc)) {
-      prompt <- paste0(prompt, desc, collapse = ". ")
-    }
-    tmpdir <- tempdir()
-    owd <- setwd(tmpdir)
-    on.exit(setwd(owd))
-    file_path <- paste0(tempfile(), ".png", collapse = "")
-    switch(
-      type,
-      "vis" = {
-        plot2pngGemini(obj, filename = file_path, type = "vis")
-      },
-      "plotly" = {
-        plot2pngGemini(obj, filename = file_path, type = "plotly")
-      },
-      "multi" = {
-        # prompt with multiple image files
-        file_path <- obj
-      },
-      "text" = {
-        # prompt based only on text
-        file_path <- NULL
-      },
-      "ggplot2" = {
-        ggsave(
-          filename = file_path,
-          plot = obj,
-          dpi = 72,
-          height = 7,
-          width = 14,
-          bg = "transparent"
-        )
-      }
-    )
-
-    res <- gemini_ai(
-      image = file_path,
-      prompt = prompt,
-      image_type = "png",
-      model = values$gemini_api_model,
-      outputSize = values$gemini_output_size
-    )
-  } else {
-    res <- 'To access this feature, please provide a valid Gemini AI API key. You can obtain your API key by visiting the official <a href="https://aistudio.google.com/" target="_blank">Google AI Studio website</a>.'
-  }
-
-  return(res)
-}
 
 geminiWaitingMessage <- function(values, activeTab) {
   messageTxt <- "⌛ Thinking..."
@@ -1093,6 +910,260 @@ geminiWaitingMessage <- function(values, activeTab) {
     }
   )
   return(values)
+}
+
+## Map activeTab to reactive field name in values
+geminiFieldName <- function(activeTab) {
+  switch(
+    activeTab,
+    "mainInfo" = "MainInfoGemini",
+    "lifeCycle" = "DLCGemini",
+    "threeFieldPlot" = "TFPGemini",
+    "authorsProdOverTime" = "ApotGemini",
+    "correspAuthorCountry" = "MostRelCountriesGemini",
+    "mostLocalCitDoc" = "MostLocCitDocsGemini",
+    "trendTopic" = "trendTopicsGemini",
+    "ReferenceSpect" = "rpysGemini",
+    "coOccurenceNetwork" = "cocGemini",
+    "thematicMap" = "TMGemini",
+    "thematicEvolution" = "TEGemini",
+    "factorialAnalysis" = "CSGemini",
+    "coCitationNetwork" = "cocitGemini",
+    "historiograph" = "histGemini",
+    "collabNetwork" = "colGemini",
+    "collabWorldMap" = "WMGemini",
+    NULL
+  )
+}
+
+## Prepare image files for Gemini (synchronous part of geminiPromptImage)
+geminiPrepareImage <- function(obj, type, prompt, key, desc, values) {
+  # Check internet connection
+  if (!is_online()) {
+    return(list(
+      prompt = NULL,
+      image_paths = NULL,
+      error_msg = '⚠️ **Note**: Biblio AI requires an active internet connection to work.'
+    ))
+  }
+  # Check Chrome browser
+  if (is.null(values$Chrome_url)) {
+    return(list(
+      prompt = NULL,
+      image_paths = NULL,
+      error_msg = '⚠️ **Note**: Biblio AI requires a **Chrome-based browser** (such as Google Chrome or Microsoft Edge) installed on your computer to work correctly.'
+    ))
+  }
+
+  if (!key) {
+    return(list(
+      prompt = NULL,
+      image_paths = NULL,
+      error_msg = 'To access this feature, please provide a valid Gemini AI API key. You can obtain your API key by visiting the official <a href="https://aistudio.google.com/" target="_blank">Google AI Studio website</a>.'
+    ))
+  }
+
+  # Build prompt with description
+  if (!is.null(desc)) {
+    prompt <- paste0(prompt, desc, collapse = ". ")
+  }
+
+  # Convert plot to PNG
+  file_path <- tempfile(fileext = ".png", tmpdir = getWD())
+
+  result <- tryCatch({
+    switch(
+      type,
+      "vis" = {
+        plot2pngGemini(obj, filename = file_path, type = "vis")
+      },
+      "plotly" = {
+        plot2pngGemini(obj, filename = file_path, type = "plotly")
+      },
+      "multi" = {
+        file_path <- obj
+      },
+      "text" = {
+        file_path <- NULL
+      },
+      "ggplot2" = {
+        ggsave(
+          filename = file_path,
+          plot = obj,
+          dpi = 72,
+          height = 7,
+          width = 14,
+          bg = "transparent"
+        )
+      }
+    )
+    NULL  # no error
+  }, error = function(e) {
+    conditionMessage(e)
+  })
+
+  if (!is.null(result)) {
+    return(list(
+      prompt = NULL,
+      image_paths = NULL,
+      error_msg = paste("Error preparing image:", result)
+    ))
+  }
+
+  return(list(
+    prompt = prompt,
+    image_paths = file_path,
+    error_msg = NULL
+  ))
+}
+
+## Cleanup temporary files after Gemini API call
+geminiCleanupFiles <- function(image_paths) {
+  if (!is.null(image_paths[1])) {
+    tryCatch({
+      filename_html <- paste0(tools::file_path_sans_ext(image_paths), ".html")
+      existing <- c(image_paths, filename_html)
+      existing <- existing[file.exists(existing)]
+      if (length(existing) > 0) file.remove(existing)
+      dirs <- paste0(tools::file_path_sans_ext(image_paths), "_files")
+      dirs <- dirs[dir.exists(dirs)]
+      if (length(dirs) > 0) unlink(dirs, recursive = TRUE)
+    }, error = function(e) {
+      # Silently ignore cleanup errors
+    })
+  }
+}
+
+## Prepare all data for async Gemini call (synchronous orchestration)
+geminiPrepareAll <- function(values, activeTab, input) {
+  field <- geminiFieldName(activeTab)
+  if (is.null(field)) {
+    return(list(field = "MainInfoGemini", can_proceed = FALSE,
+                error_msg = "Unsupported tab for Biblio AI."))
+  }
+
+  # Build description
+  gemini_additional <- values$gemini_additional
+  gemini_model_parameters <- values$gemini_model_parameters
+  if (!is.null(gemini_additional) && gemini_additional != "") {
+    desc <- paste0(
+      values$collection_description,
+      gemini_additional,
+      gemini_model_parameters,
+      collapse = ". "
+    )
+  } else {
+    desc <- paste0(
+      values$collection_description,
+      gemini_model_parameters,
+      collapse = ". "
+    )
+  }
+
+  # Build prompt
+  prompt <- biblioAiPrompts(values, activeTab)
+
+  # Determine obj and type for each tab
+  obj <- NULL
+  type <- "text"
+
+  switch(
+    activeTab,
+    "mainInfo" = {
+      obj <- NULL
+      type <- "text"
+    },
+    "lifeCycle" = {
+      files <- DLC2Gemini(values$DLCplotYear, values$DLCplotCum)
+      obj <- files
+      type <- "multi"
+    },
+    "threeFieldPlot" = {
+      obj <- values$TFP
+      type <- "plotly"
+    },
+    "authorsProdOverTime" = {
+      obj <- values$AUProdOverTime$graph
+      type <- "ggplot2"
+    },
+    "correspAuthorCountry" = {
+      obj <- values$MRCOplot
+      type <- "ggplot2"
+    },
+    "mostLocalCitDoc" = {
+      obj <- NULL
+      type <- "text"
+    },
+    "trendTopic" = {
+      obj <- values$trendTopics$graph
+      type <- "ggplot2"
+    },
+    "ReferenceSpect" = {
+      obj <- values$res$spectroscopy
+      type <- "ggplot2"
+    },
+    "coOccurenceNetwork" = {
+      obj <- values$COCnetwork$VIS
+      type <- "vis"
+    },
+    "thematicMap" = {
+      obj <- values$TMmap
+      type <- "plotly"
+    },
+    "thematicEvolution" = {
+      files <- TE2Gemini(values$nexus, values$TEplot)
+      obj <- files
+      type <- "multi"
+    },
+    "factorialAnalysis" = {
+      obj <- values$plotCS
+      type <- "plotly"
+    },
+    "coCitationNetwork" = {
+      obj <- values$COCITnetwork$VIS
+      type <- "vis"
+    },
+    "historiograph" = {
+      obj <- values$histPlotVis$VIS
+      type <- "vis"
+    },
+    "collabNetwork" = {
+      obj <- values$COLnetwork$VIS
+      type <- "vis"
+    },
+    "collabWorldMap" = {
+      obj <- values$WMmap$g
+      type <- "plotly"
+    }
+  )
+
+  # Prepare image (synchronous)
+  prep <- geminiPrepareImage(
+    obj = obj,
+    type = type,
+    prompt = prompt,
+    key = values$geminiAPI,
+    desc = desc,
+    values = values
+  )
+
+  if (!is.null(prep$error_msg)) {
+    return(list(
+      field = field,
+      can_proceed = FALSE,
+      error_msg = prep$error_msg,
+      prompt = NULL,
+      image_paths = NULL
+    ))
+  }
+
+  return(list(
+    field = field,
+    can_proceed = TRUE,
+    error_msg = NULL,
+    prompt = prep$prompt,
+    image_paths = prep$image_paths
+  ))
 }
 
 geminiSave <- function(values, activeTab) {
@@ -1427,25 +1498,39 @@ merge_df_to_string <- function(df) {
 }
 
 plot2pngGemini <- function(p, filename, zoom = 2, type = "vis") {
-  html_name <- tempfile(fileext = ".html")
+  #html_name <- tempfile(fileext = ".html")
+  # remove file extensions from filename
+  filename_html <- tools::file_path_sans_ext(filename)
+  temp_html <- paste0(filename_html, ".html")
   switch(
     type,
     vis = {
-      visSave(p, html_name)
+      visSave(p, temp_html)
     },
     plotly = {
-      htmlwidgets::saveWidget(p, file = html_name)
+      htmlwidgets::saveWidget(p, file = temp_html, selfcontained = TRUE)
     }
   )
 
-  biblioShot(html_name, zoom = zoom, file = filename)
+  biblioShot(temp_html, zoom = zoom, file = filename, delay = 2.5)
+}
+
+getWD <- function() {
+  home_path <- Sys.getenv("HOME")
+  temp_path <- file.path(home_path, "temp")
+
+  if (!dir.exists(temp_path)) {
+    dir.create(temp_path, recursive = TRUE)
+  }
+
+  return(temp_path)
 }
 
 ## save all plots of the life cycle analysis
 DLC2Gemini <- function(DLCplotYear, DLCplotCum) {
   plots <- c("annual", "cumulative")
   files <- unlist(lapply(plots, function(x) {
-    paste0(tempdir(), "/plotDLC_", x, ".png")
+    paste0(getWD(), "/plotDLC_", x, ".png")
   }))
 
   plot2pngGemini(DLCplotYear, filename = files[1], type = "plotly")
@@ -1459,9 +1544,9 @@ TE2Gemini <- function(nexus, plotTE) {
   K <- length(nexus$TM)
   periods <- nexus$Nodes %>% select(group) %>% distinct() %>% pull()
   files <- unlist(lapply(periods, function(x) {
-    paste0(tempdir(), "/", x, "_period.png")
+    file.path(getWD(), paste0(x, "_period.png"))
   }))
-  files <- c(paste0(tempdir(), "/Evolution_Plot.png"), files)
+  files <- c(file.path(getWD(), "Evolution_Plot.png"), files)
 
   plot2pngGemini(plotTE, filename = files[1], type = "plotly")
 

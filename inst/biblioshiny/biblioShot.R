@@ -20,7 +20,7 @@ biblioShot <- function(
   selector = NULL,
   cliprect = NULL,
   expand = NULL,
-  delay = 0.2,
+  delay = 0.3,
   zoom = 1,
   useragent = NULL,
   max_concurrent = getOption("biblioShot.concurrent", default = 6),

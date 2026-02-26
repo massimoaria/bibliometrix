@@ -4,7 +4,7 @@
 \alias{countries}
 \title{Index of Countries.}
 \format{
-A data frame with 199 rows and 5 variables:
+A data frame with 202 rows and 5 variables:
  \describe{
     \item{countries}{country names}
     \item{continent}{continent names}

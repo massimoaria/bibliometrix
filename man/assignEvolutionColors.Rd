@@ -4,12 +4,7 @@
 \alias{assignEvolutionColors}
 \title{Assign Colors to Thematic Evolution Nodes Based on Lineages}
 \usage{
-assignEvolutionColors(
-  nexus,
-  threshold = 0.5,
-  palette = NULL,
-  use_measure = "weighted"
-)
+assignEvolutionColors(nexus, threshold = 0.5, palette = NULL, alpha = 0.5)
 }
 \arguments{
 \item{nexus}{A list object returned by \code{\link{thematicEvolution}} containing:
@@ -27,14 +22,7 @@ the same color to connected nodes across periods.}
 uses a default palette of 50+ distinct colors. Colors are assigned sequentially
 without reuse.}
 
-\item{use_measure}{Character. The measure to use for determining edge strength.
-Can be one of:
-\itemize{
-  \item \code{"inclusion"}: uses the Inclusion measure (column 3 of Edges)
-  \item \code{"stability"}: uses the Stability measure (column 5 of Edges)
-  \item \code{"weighted"}: uses the weighted Inclusion measure (column 4 of Edges)
-}
-Default is "inclusion".}
+\item{alpha}{Numeric. Balancing parameters between inclusion and importance measures. Default value is 0.5.}
 }
 \value{
 Returns the modified \code{nexus} object with updated colors:

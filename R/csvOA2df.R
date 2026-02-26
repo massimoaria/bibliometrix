@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr", "DI", "C1", "id_oa", "RP", "UN", "AU_ID", "corresponding_author_ids", "References", "mutate_all"))
+utils::globalVariables(c("all_of", "corr", "DI", "C1", "id_oa", "RP", "UN", "AU_ID", "corresponding_author_ids", "References", "mutate_all", "AU_CORRESPONDING", "AU_CO", "AU"))
 
 csvOA2df <- function(file) {
   options(readr.num_columns = 0)
@@ -30,37 +30,114 @@ csvOA2df <- function(file) {
   # column re-labelling
   DATA <- relabelling_OA(DATA)
 
-  DATA <- DATA %>% distinct(id_oa, .keep_all = TRUE)
+  # Save original column names before pipe replacement (for dual-path detection)
+  DATA_ORIG_NAMES <- names(DATA)
 
-  # recode as numeric
-  # DATA$TC <- as.numeric(DATA$TC)
-  # DATA$PY <- as.numeric(DATA$PY)
-  # DATA$relevance_score <- as.numeric(DATA$relevance_score)
+  DATA <- DATA %>% distinct(id_oa, .keep_all = TRUE)
 
   # replace | with ;
   DATA <- DATA %>%
     mutate(across(where(is.character), ~ stringi::stri_replace_all_regex(., "\\|", ";")))
 
+  # Defensive checks for columns that may be missing in new format
+  missing_cols <- c()
+  if (!"CR" %in% names(DATA)) {
+    DATA$CR <- NA
+    missing_cols <- c(missing_cols, "Cited References (CR)")
+  }
+  if (!"NR" %in% names(DATA)) DATA$NR <- NA
+  if (!"VL" %in% names(DATA)) DATA$VL <- NA
+  if (!"IS" %in% names(DATA)) DATA$IS <- NA
+  if (!"DE" %in% names(DATA)) DATA$DE <- NA
+  if (!"ID" %in% names(DATA)) DATA$ID <- NA
+  if (!"TOPICS" %in% names(DATA)) DATA$TOPICS <- NA
+  if (!"WC" %in% names(DATA)) DATA$WC <- NA
+  if (!"SDG" %in% names(DATA)) DATA$SDG <- NA
+  if (!"MESH" %in% names(DATA)) DATA$MESH <- NA
+  if (!"SO_ID" %in% names(DATA)) DATA$SO_ID <- NA
+  if (!"AU_CO" %in% names(DATA)) DATA$AU_CO <- NA
+
+  if (length(missing_cols) > 0) {
+    warning(
+      "\nThe OpenAlex CSV does not contain the following fields: ",
+      paste(missing_cols, collapse = ", "), ".",
+      "\nSome analyses (e.g., citation network, co-citation, bibliographic coupling) may not be available.",
+      "\nTo get full metadata, consider using the OpenAlex API import instead.",
+      call. = FALSE
+    )
+  }
+
   DATA$AF <- DATA$AU
-  # DATA$ID <- DATA$DE
   if (!"AB" %in% names(DATA)) DATA$AB <- ""
-  DATA$CR <- gsub("https://openalex.org/", "", DATA$CR)
-  DATA$AU_ID <- gsub("https://openalex.org/", "", DATA$AU_ID)
+
+  # Protected gsub for OpenAlex URL prefixes
+  if ("CR" %in% names(DATA) && !all(is.na(DATA$CR))) {
+    DATA$CR <- gsub("https://openalex.org/", "", DATA$CR)
+  }
+  if ("AU_ID" %in% names(DATA)) {
+    DATA$AU_ID <- gsub("https://openalex.org/", "", DATA$AU_ID)
+  }
   DATA$id_oa <- gsub("https://openalex.org/", "", DATA$id_oa)
-  DATA$JI <- DATA$J9 <- gsub("https://openalex.org/", "", DATA$SO_ID)
-  DATA$corresponding_author_ids <- gsub("https://openalex.org/", "", DATA$corresponding_author_ids)
+  if (!all(is.na(DATA$SO_ID))) {
+    DATA$JI <- DATA$J9 <- gsub("https://openalex.org/", "", DATA$SO_ID)
+  } else {
+    DATA$JI <- DATA$J9 <- NA
+  }
+  if ("corresponding_author_ids" %in% names(DATA)) {
+    DATA$corresponding_author_ids <- gsub("https://openalex.org/", "", DATA$corresponding_author_ids)
+  }
   DATA$DB <- "OPENALEX"
 
-  # affiliation string November 2024
-  DATA <- extract_collapsed_affiliations(DATA$authorships.affiliations, DATA$id_oa) %>%
-    right_join(DATA, by = "id_oa")
+  ## Affiliations — dual path: old vs new format
+  if ("authorships.affiliations" %in% DATA_ORIG_NAMES) {
+    # Old format: parse JSON-like affiliations string
+    DATA <- extract_collapsed_affiliations(DATA$authorships.affiliations, DATA$id_oa) %>%
+      right_join(DATA, by = "id_oa")
+  } else if ("C1_NAMES" %in% names(DATA)) {
+    # New format: pipe-separated values already converted to ; by mutate above
+    DATA$C1 <- DATA$C1_NAMES
+    DATA$C1_ID <- gsub("https://openalex.org/", "", DATA$C1_IDS)
+  } else {
+    DATA$C1 <- NA
+    DATA$C1_ID <- NA
+  }
 
-  ## corresponding author
-
-  CORR_INFO <- replace_corresponding_info(DATA[, c("corresponding_author_ids", "corresponding_institution_ids", "AU", "AU_ID", "C1", "C1_ID", "AU_CO")]) %>%
-    select("RP", "AU1_CO", "corresponding_author_name")
-
-  DATA <- bind_cols(DATA, CORR_INFO)
+  ## Corresponding author — dual path: old vs new format
+  if ("corresponding_author_ids" %in% DATA_ORIG_NAMES) {
+    # Old format: use replace_corresponding_info()
+    CORR_INFO <- replace_corresponding_info(DATA[, c("corresponding_author_ids", "corresponding_institution_ids", "AU", "AU_ID", "C1", "C1_ID", "AU_CO")]) %>%
+      select("RP", "AU1_CO", "corresponding_author_name")
+    DATA <- bind_cols(DATA, CORR_INFO)
+  } else if ("AU_CORRESPONDING" %in% names(DATA)) {
+    # New format: find corresponding author from is_corresponding flags
+    DATA <- DATA %>%
+      rowwise() %>%
+      mutate(
+        corresponding_author_name = {
+          corr_flags <- trimws(unlist(strsplit(AU_CORRESPONDING, ";")))
+          authors <- trimws(unlist(strsplit(AU, ";")))
+          idx <- which(toupper(corr_flags) == "TRUE")
+          if (length(idx) > 0 && idx[1] <= length(authors)) authors[idx[1]] else NA_character_
+        },
+        RP = {
+          corr_flags <- trimws(unlist(strsplit(AU_CORRESPONDING, ";")))
+          affils <- trimws(unlist(strsplit(ifelse(is.na(C1), "", C1), ";")))
+          idx <- which(toupper(corr_flags) == "TRUE")
+          if (length(idx) > 0 && idx[1] <= length(affils)) affils[idx[1]] else NA_character_
+        },
+        AU1_CO = {
+          corr_flags <- trimws(unlist(strsplit(AU_CORRESPONDING, ";")))
+          countries_list <- trimws(unlist(strsplit(ifelse(is.na(AU_CO), "", AU_CO), ";")))
+          idx <- which(toupper(corr_flags) == "TRUE")
+          if (length(idx) > 0 && idx[1] <= length(countries_list)) countries_list[idx[1]] else NA_character_
+        }
+      ) %>%
+      ungroup()
+  } else {
+    DATA$corresponding_author_name <- NA
+    DATA$RP <- NA
+    DATA$AU1_CO <- NA
+  }
 
   # move all char strings to Upper
   ind <- apply(DATA, 2, function(x) {
@@ -78,11 +155,11 @@ csvOA2df <- function(file) {
     )
   DATA$SO <- toupper(DATA$SO)
   DATA$SO[DATA$SO == "NAN"] <- NA
-  DATA$C1 <- toupper(DATA$C1)
-  DATA$RP <- toupper(DATA$RP)
-  DATA$AU_CO <- toupper(DATA$AU_CO)
-  DATA$AU1_CO <- toupper(DATA$AU1_CO)
-  data("countries", envir = environment()) 
+  if ("C1" %in% names(DATA)) DATA$C1 <- toupper(DATA$C1)
+  if ("RP" %in% names(DATA)) DATA$RP <- toupper(DATA$RP)
+  if ("AU_CO" %in% names(DATA) && !all(is.na(DATA$AU_CO))) DATA$AU_CO <- toupper(DATA$AU_CO)
+  if ("AU1_CO" %in% names(DATA) && !all(is.na(DATA$AU1_CO))) DATA$AU1_CO <- toupper(DATA$AU1_CO)
+  data("countries", envir = environment())
   DATA$AU_CO <- convert_iso2_to_country(DATA$AU_CO, countries)
   DATA$AU1_CO <- convert_iso2_to_country(DATA$AU1_CO, countries)
   DATA$AB_raw <- AB
@@ -132,6 +209,22 @@ relabelling_OA <- function(DATA) {
   label[label %in% "authorships.author_position"] <- "AU_POSITION"
   # label[label %in% "authorships.countries"] <- "C1"
   label[label %in% "doi"] <- "DI"
+
+  # New OpenAlex CSV format mappings (backward-compatible)
+  label[label %in% "display_name"] <- "TI"
+  label[label %in% "primary_topic.display_name"] <- "WC"
+  label[label %in% "fwci"] <- "FWCI"
+  label[label %in% "ids.pmid"] <- "PMID"
+  label[label %in% "is_retracted"] <- "RETRACTED"
+  label[label %in% "funders.display_name"] <- "FU"
+  label[label %in% "publication_date"] <- "PD"
+  label[label %in% "authorships.institutions.display_name"] <- "C1_NAMES"
+  label[label %in% "authorships.institutions.id"] <- "C1_IDS"
+  label[label %in% "authorships.is_corresponding"] <- "AU_CORRESPONDING"
+  label[label %in% "best_oa_location.license"] <- "OA_LICENSE"
+  label[label %in% "open_access.is_oa"] <- "OA"
+  label[label %in% "open_access.oa_status"] <- "OA_STATUS"
+
   names(DATA) <- label
   return(DATA)
 }

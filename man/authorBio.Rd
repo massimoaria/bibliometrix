@@ -11,7 +11,8 @@ authorBio(
   return_all_authors = FALSE,
   sleep_time = 1,
   max_retries = 3,
-  retry_delay = 2
+  retry_delay = 2,
+  mailto = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ authorBio(
 \item{max_retries}{Integer. Maximum number of retry attempts for failed API calls (default: 3)}
 
 \item{retry_delay}{Numeric. Base delay in seconds before retrying after an error (default: 2)}
+
+\item{mailto}{Character. Email address for OpenAlex polite pool (default: NULL, uses openalexR.mailto option if set)}
 }
 \value{
 If \code{return_all_authors = FALSE}, returns a tibble with comprehensive information 

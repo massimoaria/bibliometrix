@@ -17,8 +17,28 @@ utils::globalVariables(c(
   "Cluster.y",
   "Occ",
   "name",
-  "group"
+  "group",
+  "Inc_Weighted",
+  "PageRank",
+  "PageRankIndex",
+  "PageRankProd",
+  "PageRankTot.x",
+  "PageRankTot.y",
+  "PageRankXY",
+  "PageRankXYTot",
+  "has_natural_successor",
+  "idnew",
+  "is_natural_lineage",
+  "lineage_strength",
+  "new old_combined",
+  "pagerank_assigned",
+  "pagerank_centrality.x",
+  "pagerank_centrality.y",
+  "rel_freq_temp",
+  "separate_rows",
+  "total_pagerank"
 ))
+
 #' Perform a Thematic Evolution Analysis
 #'
 #' It performs a Thematic Evolution Analysis based on co-word network analysis and clustering.
@@ -45,8 +65,8 @@ utils::globalVariables(c(
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @param seed is numerical. It indicates the seed for random number generator to obtain always the same results. Default value is \code{seed = 1234}.
-#' @param assign.evolution.colors is a list. If \code{assignEvolutionColors = list(assign = TRUE)}, colors are assigned to lineages based on the highest weighted inclusion value. If a list is provided, it must contain the arguments \code{assignEvolutionColors = list(assign = c(TRUE, FALSE), measure=("inclusion","stability", "weighted"))}.
-#' Default is \code{assign.evolution.colors = list(assign=TRUE, measure="weighted")}. If assign = FALSE, measure argument is ignored.
+#' @param assign.evolution.colors is a list. If \code{assignEvolutionColors = list(assign = TRUE)}, colors are assigned to lineages based on the highest weighted inclusion value. If a list is provided, it must contain the arguments \code{assignEvolutionColors = list(assign = c(TRUE, FALSE), alpha=0.5)}.
+#' Default is \code{assign.evolution.colors = list(assign=TRUE, alpha = 0.5)}. If assign = FALSE, measure argument is ignored.
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
@@ -82,13 +102,13 @@ thematicEvolution <- function(
   synonyms = NULL,
   cluster = "louvain",
   seed = 1234,
-  assign.evolution.colors = list(assign = TRUE, measure = "weighted")
+  assign.evolution.colors = list(assign = TRUE, alpha = 0.5)
 ) {
   list_df <- timeslice(M, breaks = years)
   K <- length(list_df)
   S <- net <- res <- list()
   Y <- NULL
-  # pdf(file = NULL) ## to improve adding graph=FALSE in thematicMap
+
   for (k in 1:K) {
     Mk <- list_df[[k]]
     Y[k] <- paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")
@@ -112,8 +132,7 @@ thematicEvolution <- function(
     res[[k]] <- resk
     net[[k]] <- resk$net
   }
-  # dev.off()
-  # par(mfrow = c(1, (K - 1)))
+
   if (K < 2) {
     print("Error")
     return()
@@ -146,10 +165,18 @@ thematicEvolution <- function(
     res2$clusters$label <- paste(res2$clusters$name, "--", Y[k], sep = "")
     cluster1 <- res1$words %>%
       group_by(Cluster_Label) %>%
-      mutate(len = length(Words), tot = sum(Occurrences))
+      mutate(
+        len = length(Words),
+        tot = sum(Occurrences),
+        PageRankTot = sum(pagerank_centrality, na.rm = TRUE)
+      )
     cluster2 <- res2$words %>%
       group_by(Cluster_Label) %>%
-      mutate(len = length(Words), tot = sum(Occurrences))
+      mutate(
+        len = length(Words),
+        tot = sum(Occurrences),
+        PageRankTot = sum(pagerank_centrality, na.rm = TRUE)
+      )
     A <- inner_join(cluster1, cluster2, by = "Words") %>%
       group_by(Cluster_Label.x, Cluster_Label.y) %>%
       rowwise() %>%
@@ -159,12 +186,16 @@ thematicEvolution <- function(
           Occurrences.y
         ),
         Occ = sum(Occurrences.x),
-        tot = min(tot.x, tot.y)
+        tot = min(tot.x, tot.y),
+        PageRankTot.x = min(PageRankTot.x),
+        PageRankTot.y = min(PageRankTot.y),
+        PageRankXY = pagerank_centrality.x * pagerank_centrality.y
       ) %>%
-      ungroup()
+      ungroup() %>%
+      mutate(PageRankProd = PageRankTot.x * PageRankTot.y)
     B <- A %>%
       group_by(Cluster_Label.x, Cluster_Label.y) %>%
-      summarise(
+      reframe(
         CL1 = Cluster.x[1],
         CL2 = Cluster.y[1],
         Words = paste0(Words, collapse = ";", sep = ""),
@@ -180,9 +211,14 @@ thematicEvolution <- function(
         Stability = length(Words) /
           (len.x[1] +
             len.y[1] -
-            length(Words))
+            length(Words)),
+        PageRank1 = sum(pagerank_centrality.x),
+        PageRank2 = sum(pagerank_centrality.y),
+        PageRankXYTot = sum(PageRankXY),
+        PageRankIndex = sqrt(PageRankXYTot / PageRankProd)
       ) %>%
-      data.frame()
+      data.frame() %>%
+      distinct()
     incMatrix[[k - 1]] <- B
   }
   INC <- incMatrix[[1]]
@@ -196,14 +232,16 @@ thematicEvolution <- function(
     "CL2",
     "Inc_index",
     "Inc_Weighted",
-    "Stability"
-  )]
+    "Stability",
+    "PageRankIndex"
+  )] #%>%
+  #distinct()
   # edges = edges[edges[, 3] > 0, ]
   nodes <- data.frame(name = unique(c(edges$CL1, edges$CL2)))
   nodes$group <- nodes$name
 
   cont <- 0
-  edges[, 6] <- edges[, 1]
+  edges[, 7] <- edges[, 1]
   for (i in nodes$name) {
     ind <- which(edges[, 1] == i)
     edges[ind, 1] <- cont
@@ -217,6 +255,7 @@ thematicEvolution <- function(
     "Inclusion",
     "Inc_Weighted",
     "Stability",
+    "PageRankIndex",
     "group"
   )
   edges$from <- as.numeric(edges$from)
@@ -305,15 +344,15 @@ thematicEvolution <- function(
   )
 
   if (!is.list(assign.evolution.colors)) {
-    assign.evolution.colors <- list(assign = TRUE, measure = "weighted")
+    assign.evolution.colors <- list(assign = TRUE, alpha = 0.5)
   }
 
   if (is.null(assign.evolution.colors$assign)) {
-    assign.evolution.colors <- list(assign = TRUE, measure = "weighted")
+    assign.evolution.colors <- list(assign = TRUE, alpha = 0.5)
   }
 
-  if (is.null(assign.evolution.colors$measure)) {
-    assign.evolution.colors$measure <- "weighted"
+  if (is.null(assign.evolution.colors$alpha)) {
+    assign.evolution.colors$alpha = 0.5
   }
 
   if (assign.evolution.colors$assign) {
@@ -322,7 +361,7 @@ thematicEvolution <- function(
       nexus = nexus,
       threshold = 0.5,
       palette = NULL,
-      use_measure = assign.evolution.colors$measure
+      alpha = assign.evolution.colors$alpha
     )
   }
 

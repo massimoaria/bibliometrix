@@ -16,6 +16,7 @@
 ^\.claude$
 LICENCE.*$
 Rubbish
+^.positai$
 ^_gh-pages$
 ^README\.Rmd$
 ^_pkgdown\.yml$

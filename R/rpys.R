@@ -26,9 +26,6 @@ utils::globalVariables(c(
   "is_peak",
   "lead",
   "observed",
-  "seq1",
-  "seq2",
-  "seq3",
   "z_class",
   "everything"
 ))
@@ -219,6 +216,17 @@ rpys <- function(
       by = c("Year" = "citedYears")
     )
 
+  ## Identify top 10 peaks on the deviation line ----
+  peaks <- RPYS %>%
+    arrange(Year) %>%
+    mutate(
+      is_peak = (diffMedian > dplyr::lag(diffMedian)) &
+        (diffMedian > dplyr::lead(diffMedian))
+    ) %>%
+    dplyr::filter(is_peak) %>%
+    arrange(desc(diffMedian)) %>%
+    slice_head(n = 10)
+
   g <- ggplot(
     RPYS,
     aes(
@@ -241,11 +249,33 @@ rpys <- function(
       color = "firebrick",
       group = "NA"
     )) +
+    # Top 10 peaks
+    geom_point(
+      data = peaks,
+      aes(x = Year, y = diffMedian),
+      color = "#D6604D",
+      size = 3,
+      inherit.aes = FALSE
+    ) +
+    ggrepel::geom_text_repel(
+      data = peaks,
+      aes(x = Year, y = diffMedian, label = Year),
+      color = "#D6604D",
+      size = 3.5,
+      fontface = "bold",
+      direction = "y",
+      nudge_y = max(RPYS$Citations) * 0.05,
+      segment.color = "#D6604D",
+      segment.size = 0.3,
+      segment.alpha = 0.5,
+      min.segment.length = 0,
+      inherit.aes = FALSE
+    ) +
     labs(
       x = "Year",
       y = "Cited References",
       title = "Reference Publication Year Spectroscopy",
-      caption = "Number of Cited References (black line) - Deviation from the 5-Year Median (red line)"
+      caption = "Number of Cited References (black line) - Deviation from the 5-Year Median (red line) - Top 10 peaks labeled"
     ) +
     scale_x_continuous(
       breaks = (RPYS$Year[seq(
@@ -264,7 +294,6 @@ rpys <- function(
         face = "bold"
       ),
       panel.background = element_rect(fill = "#FFFFFF"),
-      # ,panel.grid.minor = element_line(color = '#FFFFFF')
       panel.grid.major = element_line(color = "#EFEFEF"),
       plot.title = element_text(size = 24),
       axis.title = element_text(size = 14, color = "#555555"),
@@ -436,28 +465,49 @@ sequenceTypes <- function(M, timespan = NULL) {
     sequence = sequences, stringsAsFactors = FALSE
   )
 
-  # Classify sequences
-  df$seq1 <- substr(df$sequence, 1, 4)
-  df$seq2 <- ifelse(
+  # Classify sequences (based on Table 1 of Thor et al., 2018)
+  # Helper: count occurrences of a character in a string
+  countChar <- function(s, ch) nchar(s) - nchar(gsub(ch, "", s, fixed = TRUE))
+
+  first3 <- substr(df$sequence, 1, 3)
+  first4 <- substr(df$sequence, 1, 4)
+  rest_after3 <- ifelse(
+    nchar(df$sequence) > 3,
+    substr(df$sequence, 4, nchar(df$sequence)),
+    ""
+  )
+  rest_after4 <- ifelse(
     nchar(df$sequence) > 4,
     substr(df$sequence, 5, nchar(df$sequence)),
     ""
   )
-  df$seq3 <- ifelse(
-    nchar(df$sequence) > 6,
+  last3 <- ifelse(
+    nchar(df$sequence) >= 3,
     substr(df$sequence, nchar(df$sequence) - 2, nchar(df$sequence)),
-    ""
+    df$sequence
   )
-  df$SB <- regexpr("\\-{2,}", substr(df$sequence, 1, 3)) > -1 &
-    regexpr("\\+", substr(df$sequence, 4, nchar(df$sequence))) > -1
+
+  # SB (Sleeping Beauty): below average ("-") in 2 of the first 3 citing years,
+  # and above average ("+") in the following years at least once
+  df$SB <- countChar(first3, "-") >= 2 &
+    countChar(rest_after3, "+") >= 1
+
+  # CP (Constant Performer): cited in >80% of years at least once,
+  # and in >80% of years at average level or above (z > -1)
   df$CP <- df$freqO >= 0.8 & df$freqYC >= 0.8 & nchar(df$sequence) > 2
-  df$HP <- regexpr("\\+{2,}", substr(df$sequence, 1, 3)) > -1
-  df$LC <- !regexpr("\\+{3,}", df$seq1) > -1 &
-    regexpr("\\+{2,}", df$seq2) > -1 &
-    regexpr("\\+{0,}", df$seq3) > -1
+
+  # HP (Hot Paper): above average ("+") in 2 of the first 3 citing years
+  df$HP <- countChar(first3, "+") >= 2
+
+  # LC (Life Cycle): at least 2 of first 4 years on average or lower (not "+"),
+  # at least 2 of the following years above average ("+"),
+  # and last 3 years on average or lower (no "+")
+  df$LC <- (nchar(df$sequence) > 6) &
+    (nchar(first4) - countChar(first4, "+")) >= 2 &
+    countChar(rest_after4, "+") >= 2 &
+    countChar(last3, "+") == 0
 
   df <- df %>%
-    select(-seq1, -seq2, -seq3) %>%
     mutate(
       SB = ifelse(SB, "Sleeping Beauty", NA),
       CP = ifelse(CP, "Constant Performer", NA),

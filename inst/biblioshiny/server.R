@@ -59,6 +59,58 @@ server <- function(input, output, session) {
     shinyjs::runjs(resizeChartsJS)
   })
 
+  # Define JS functions for visNetwork canvas capture (DPI-aware)
+  session$onFlushed(
+    function() {
+      shinyjs::runjs(
+        '
+      window._captureVisCanvas = function(networkId, dpi, callback) {
+        var widget = HTMLWidgets.find("#" + networkId);
+        if (!widget || !widget.network) return;
+        var network = widget.network;
+        var canvas = network.canvas.frame.canvas;
+        var targetScale = (dpi || 96) / 96;
+
+        // Override window.devicePixelRatio so vis.js _setPixelRatio() picks it up
+        Object.defineProperty(window, "devicePixelRatio", {
+          value: targetScale, configurable: true
+        });
+
+        // redraw() is synchronous: setSize() reads devicePixelRatio, then _redraw() renders
+        network.redraw();
+        var dataURL = canvas.toDataURL("image/png");
+
+        // Restore original devicePixelRatio (unshadow the prototype getter)
+        delete window.devicePixelRatio;
+        network.redraw();
+
+        callback(dataURL);
+      };
+
+      window.captureVisExport = function(networkId, filename, dpi) {
+        _captureVisCanvas(networkId, dpi, function(dataURL) {
+          var link = document.createElement("a");
+          link.href = dataURL;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+      };
+
+      window.captureVisReport = function(networkId, dpi) {
+        _captureVisCanvas(networkId, dpi, function(dataURL) {
+          Shiny.setInputValue("vis_canvas_report", {
+            data: dataURL
+          }, {priority: "event"});
+        });
+      };
+    '
+      )
+    },
+    once = TRUE
+  )
+
   # Stop App button handler
   observeEvent(input$stop_app, {
     showModal(modalDialog(
@@ -198,8 +250,9 @@ To ensure the functionality of Biblioshiny,
     "First Author" = "AU1"
   )
 
-  ### setting values
+  ### setting values (defaults, may be overridden by saved settings below)
   values$dpi <- 300
+  values$report_dpi <- 72
   values$h <- 7
   #values$w <- 14
   values$path <- paste0(getwd(), .Platform$file.sep)
@@ -317,6 +370,59 @@ To ensure the functionality of Biblioshiny,
   gemini_api_model <- loadGeminiModel(path_gemini_model)
   values$gemini_api_model <- gemini_api_model[1]
   values$gemini_output_size <- gemini_api_model[2]
+
+  ## Graph settings
+  path_graph_settings <- file.path(home, ".biblio_graph_settings.txt")
+  if (file.exists(path_graph_settings)) {
+    graph_settings <- readLines(path_graph_settings, warn = FALSE)
+    if (length(graph_settings) >= 3) {
+      saved_dpi <- suppressWarnings(as.numeric(graph_settings[1]))
+      saved_report_dpi <- suppressWarnings(as.numeric(graph_settings[2]))
+      saved_h <- suppressWarnings(as.numeric(graph_settings[3]))
+      if (!is.na(saved_dpi)) {
+        values$dpi <- saved_dpi
+      }
+      if (!is.na(saved_report_dpi)) {
+        values$report_dpi <- saved_report_dpi
+      }
+      if (!is.na(saved_h)) values$h <- saved_h
+    }
+  }
+
+  ## Render settings sliders with saved values
+  output$dpi_slider <- renderUI({
+    sliderTextInput(
+      inputId = "dpi",
+      label = NULL,
+      grid = TRUE,
+      force_edges = TRUE,
+      choices = c("75", "150", "300", "600"),
+      width = "100%",
+      selected = as.character(as.integer(isolate(values$dpi)))
+    )
+  })
+  output$report_dpi_slider <- renderUI({
+    sliderTextInput(
+      inputId = "report_dpi",
+      label = NULL,
+      grid = TRUE,
+      force_edges = TRUE,
+      choices = c("72", "150", "300"),
+      width = "100%",
+      selected = as.character(as.integer(isolate(values$report_dpi)))
+    )
+  })
+  output$h_slider <- renderUI({
+    sliderTextInput(
+      inputId = "h",
+      label = NULL,
+      grid = TRUE,
+      force_edges = TRUE,
+      choices = seq(5, 15),
+      width = "100%",
+      selected = as.character(as.integer(isolate(values$h)))
+    )
+  })
 
   ## Setup async execution for AI calls
   future::plan(future::multisession, workers = 2)
@@ -2250,8 +2356,9 @@ To ensure the functionality of Biblioshiny,
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$fileMDT <- screenSh(
         values$missingdf_formatted,
-        zoom = 2,
-        type = "df2html"
+        type = "df2html",
+        dpi = values$report_dpi,
+        height = values$h
       )
       values$list_file <- rbind(
         values$list_file,
@@ -4981,7 +5088,12 @@ To ensure the functionality of Biblioshiny,
         sheetname <- paste(sheetname, "(", length(ind) + 1, ")", sep = "")
       }
       addWorksheet(wb = values$wb, sheetName = sheetname, gridLines = FALSE)
-      values$fileTFP <- screenSh(values$TFP, zoom = 2, type = "plotly")
+      values$fileTFP <- screenSh(
+        values$TFP,
+        type = "plotly",
+        dpi = values$report_dpi,
+        height = values$h
+      )
       values$list_file <- rbind(
         values$list_file,
         c(sheetname, values$fileTFP, 1)
@@ -5221,9 +5333,9 @@ To ensure the functionality of Biblioshiny,
 
   ### Bradford's Law ----
   output$bradfordPlot <- renderPlotly({
-    values$bradford = bradford(values$M)
+    values$bradford <- bradford(values$M)
     plot.ly(
-      values$bradford$graph,
+      values$bradford$graph_shiny,
       flip = FALSE,
       side = "r",
       aspectratio = 1.6,
@@ -5270,9 +5382,142 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
+  output$bradfordSummary <- renderUI({
+    req(values$bradford)
+    s <- values$bradford$stat
+    zs <- values$bradford$zoneSummary
+
+    # Interpretation of KS test
+    ks_interpretation <- if (s$ks.pvalue >= 0.05) {
+      paste0(
+        "<span style='color:#2E7D32;font-weight:bold;'>The empirical distribution is consistent with Bradford's Law (p = ",
+        format.pval(s$ks.pvalue, digits = 3),
+        ")</span>"
+      )
+    } else {
+      paste0(
+        "<span style='color:#C62828;font-weight:bold;'>The empirical distribution deviates significantly from Bradford's Law (p = ",
+        format.pval(s$ks.pvalue, digits = 3),
+        ")</span>"
+      )
+    }
+
+    # Build summary HTML
+    summary_html <- paste0(
+      "<div style='max-width:800px; margin:30px auto; font-family:inherit;'>",
+
+      "<h4 style='color:#333; border-bottom:2px solid #2171B5; padding-bottom:8px;'>",
+      "Bradford Distribution Model</h4>",
+      "<p style='font-size:15px; color:#444;'>",
+      "The Bradford distribution models the cumulative number of articles <em>C(r)</em> ",
+      "contributed by the top <em>r</em> sources as:</p>",
+      "<p style='font-size:16px; text-align:center; font-weight:bold; color:#333; ",
+      "background:#f8f9fa; padding:12px; border-radius:6px;'>",
+      "C(r) = ",
+      round(s$a, 2),
+      " + ",
+      round(s$b, 2),
+      " &middot; log(r)",
+      "</p>",
+
+      "<table style='width:100%; border-collapse:collapse; margin:20px 0;'>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>Intercept (a)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$a, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>Slope (b)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$b, 4),
+      "</td></tr>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>R&sup2;</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$R2, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>Bradford Multiplier (k)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$k, 2),
+      "</td></tr>",
+      "</table>",
+
+      "<h4 style='color:#333; border-bottom:2px solid #2171B5; padding-bottom:8px; margin-top:30px;'>",
+      "Kolmogorov-Smirnov Goodness-of-Fit Test</h4>",
+      "<table style='width:100%; border-collapse:collapse; margin:20px 0;'>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>KS Statistic (D)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$ks.stat, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>p-value</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      format.pval(s$ks.pvalue, digits = 3),
+      "</td></tr>",
+      "</table>",
+      "<p style='font-size:14px; margin:10px 0 5px 0;'>",
+      ks_interpretation,
+      "</p>",
+      "<p style='font-size:12px; color:#888;'>H0: The empirical distribution follows the theoretical Bradford distribution. ",
+      "A p-value &ge; 0.05 indicates no significant deviation.</p>",
+
+      "<h4 style='color:#333; border-bottom:2px solid #2171B5; padding-bottom:8px; margin-top:30px;'>",
+      "Zone Summary</h4>",
+      "<table style='width:100%; border-collapse:collapse; margin:20px 0;'>",
+      "<thead><tr style='background:#2171B5; color:white;'>",
+      "<th style='padding:10px 15px; text-align:left;'>Zone</th>",
+      "<th style='padding:10px 15px; text-align:right;'>N. Sources</th>",
+      "<th style='padding:10px 15px; text-align:right;'>% Sources</th>",
+      "<th style='padding:10px 15px; text-align:right;'>N. Articles</th>",
+      "<th style='padding:10px 15px; text-align:right;'>% Articles</th>",
+      "</tr></thead><tbody>"
+    )
+
+    zone_colors <- c("#E3F0FA", "#FFFFFF", "#E3F0FA", "#F0F4F8")
+    for (i in seq_len(nrow(zs))) {
+      bg <- zone_colors[i]
+      fw <- if (i == nrow(zs)) "font-weight:bold;" else ""
+      summary_html <- paste0(
+        summary_html,
+        "<tr style='background:",
+        bg,
+        ";'>",
+        "<td style='padding:8px 15px; border-bottom:1px solid #ddd;",
+        fw,
+        "'>",
+        zs$Zone[i],
+        "</td>",
+        "<td style='padding:8px 15px; text-align:right; border-bottom:1px solid #ddd;",
+        fw,
+        "'>",
+        zs[["N. Sources"]][i],
+        "</td>",
+        "<td style='padding:8px 15px; text-align:right; border-bottom:1px solid #ddd;",
+        fw,
+        "'>",
+        zs[["% Sources"]][i],
+        "%</td>",
+        "<td style='padding:8px 15px; text-align:right; border-bottom:1px solid #ddd;",
+        fw,
+        "'>",
+        zs[["N. Articles"]][i],
+        "</td>",
+        "<td style='padding:8px 15px; text-align:right; border-bottom:1px solid #ddd;",
+        fw,
+        "'>",
+        zs[["% Articles"]][i],
+        "%</td>",
+        "</tr>"
+      )
+    }
+
+    summary_html <- paste0(summary_html, "</tbody></table></div>")
+
+    HTML(summary_html)
+  })
+
   observeEvent(input$reportBradford, {
     if (!is.null(values$bradford$table)) {
-      list_df <- list(values$bradford$table)
+      list_df <- list(values$bradford$table, values$bradford$zoneSummary)
       list_plot <- list(values$bradford$graph)
       wb <- addSheetToReport(
         list_df,
@@ -5281,11 +5526,20 @@ To ensure the functionality of Biblioshiny,
         wb = values$wb
       )
       values$wb <- wb
-      popUp(title = "Core Sources by Bradford's Law", type = "success")
+      popUp(title = "Bradford's Law", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type = "error")
     }
+  })
+
+  output$BradfordGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
+    geminiOutput(title = "", content = values$BradfordGemini, values)
   })
 
   ### Sources' Impact ----
@@ -5423,6 +5677,15 @@ To ensure the functionality of Biblioshiny,
       min(values$SODF$Freq) + diff(range(values$SODF$Freq)) * 0.15
     )
 
+    # Reorder legend by descending max cumulative value
+    values$SODF$Source <- factor(
+      values$SODF$Source,
+      levels = names(sort(
+        tapply(values$SODF$Freq, values$SODF$Source, max),
+        decreasing = TRUE
+      ))
+    )
+
     g = ggplot(
       values$SODF,
       aes(
@@ -5446,16 +5709,16 @@ To ensure the functionality of Biblioshiny,
       labs(color = "Source") +
       theme(
         text = element_text(color = "#444444"),
-        legend.text = ggplot2::element_text(size = width_scale),
+        legend.text = ggplot2::element_text(size = 10),
         legend.box.margin = margin(6, 6, 6, 6),
         legend.title = ggplot2::element_text(
-          size = 1.5 * width_scale,
+          size = 12,
           face = "bold"
         ),
-        legend.position = "bottom",
+        legend.position = "right",
         legend.direction = "vertical",
-        legend.key.size = grid::unit(width_scale / 50, "inch"),
-        legend.key.width = grid::unit(width_scale / 50, "inch"),
+        legend.key.size = grid::unit(0.4, "cm"),
+        legend.key.width = grid::unit(0.6, "cm"),
         plot.caption = element_text(
           size = 9,
           hjust = 0.5,
@@ -5506,20 +5769,23 @@ To ensure the functionality of Biblioshiny,
     g <- SOGrowth()
 
     leg <- list(
-      orientation = 'h',
-      y = -0.15,
+      orientation = 'v',
+      x = 1.02,
+      y = 1,
+      xanchor = 'left',
+      yanchor = 'top',
       font = list(
         family = "sans-serif",
-        size = 10,
+        size = 12,
         color = "#000"
       ),
-      bgcolor = "#FFFFFF",
-      bordercolor = "#FFFFFF",
-      borderwidth = 2
+      bgcolor = "rgba(255,255,255,0.9)",
+      bordercolor = "#EEEEEE",
+      borderwidth = 1
     )
 
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.8, size = 0.10) %>%
-      layout(legend = leg) %>%
+      layout(legend = leg, margin = list(r = 200)) %>%
       config(
         displaylogo = FALSE,
         modeBarButtonsToRemove = c(
@@ -6314,6 +6580,136 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
+  output$lotkaSummary <- renderUI({
+    req(values$lotka)
+    s <- values$lotka$stat
+
+    # Interpretation of KS tests
+    ks_theo_interp <- if (s$ks.theo.pvalue >= 0.05) {
+      paste0(
+        "<span style='color:#2E7D32;font-weight:bold;'>The empirical distribution is consistent with the theoretical Lotka's Law (\u03B2=2) (p = ",
+        format.pval(s$ks.theo.pvalue, digits = 3),
+        ")</span>"
+      )
+    } else {
+      paste0(
+        "<span style='color:#C62828;font-weight:bold;'>The empirical distribution deviates significantly from the theoretical Lotka's Law (\u03B2=2) (p = ",
+        format.pval(s$ks.theo.pvalue, digits = 3),
+        ")</span>"
+      )
+    }
+
+    ks_fit_interp <- if (s$ks.fit.pvalue >= 0.05) {
+      paste0(
+        "<span style='color:#2E7D32;font-weight:bold;'>The empirical distribution is consistent with the fitted model (\u03B2=",
+        round(s$Beta, 2),
+        ") (p = ",
+        format.pval(s$ks.fit.pvalue, digits = 3),
+        ")</span>"
+      )
+    } else {
+      paste0(
+        "<span style='color:#C62828;font-weight:bold;'>The empirical distribution deviates significantly from the fitted model (\u03B2=",
+        round(s$Beta, 2),
+        ") (p = ",
+        format.pval(s$ks.fit.pvalue, digits = 3),
+        ")</span>"
+      )
+    }
+
+    summary_html <- paste0(
+      "<div style='max-width:800px; margin:30px auto; font-family:inherit;'>",
+
+      "<h4 style='color:#333; border-bottom:2px solid #2171B5; padding-bottom:8px;'>",
+      "Lotka's Inverse Power Law Model</h4>",
+      "<p style='font-size:15px; color:#444;'>",
+      "Lotka's Law models the proportion of authors <em>f(n)</em> who publish exactly <em>n</em> articles as:</p>",
+      "<p style='font-size:16px; text-align:center; font-weight:bold; color:#333; ",
+      "background:#f8f9fa; padding:12px; border-radius:6px;'>",
+      "f(n) = C / n<sup>\u03B2</sup>",
+      "</p>",
+
+      "<table style='width:100%; border-collapse:collapse; margin:20px 0;'>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>Estimated \u03B2 (slope)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$Beta, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>Theoretical \u03B2</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>2.0000</td></tr>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>Constant (C)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$C, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>R&sup2;</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$R2, 4),
+      "</td></tr>",
+      "</table>",
+
+      "<h4 style='color:#333; border-bottom:2px solid #2171B5; padding-bottom:8px; margin-top:30px;'>",
+      "Kolmogorov-Smirnov Goodness-of-Fit Tests</h4>",
+
+      "<h5 style='color:#555; margin-top:15px;'>Test 1: Empirical vs Theoretical (\u03B2 = 2)</h5>",
+      "<table style='width:100%; border-collapse:collapse; margin:10px 0;'>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>KS Statistic (D)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$ks.theo.stat, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>p-value</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      format.pval(s$ks.theo.pvalue, digits = 3),
+      "</td></tr>",
+      "</table>",
+      "<p style='font-size:14px; margin:5px 0;'>",
+      ks_theo_interp,
+      "</p>",
+
+      "<h5 style='color:#555; margin-top:20px;'>Test 2: Empirical vs Fitted (\u03B2 = ",
+      round(s$Beta, 2),
+      ")</h5>",
+      "<table style='width:100%; border-collapse:collapse; margin:10px 0;'>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>KS Statistic (D)</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      round(s$ks.fit.stat, 4),
+      "</td></tr>",
+      "<tr><td style='padding:10px 15px; font-weight:bold; border-bottom:1px solid #ddd;'>p-value</td>",
+      "<td style='padding:10px 15px; border-bottom:1px solid #ddd;'>",
+      format.pval(s$ks.fit.pvalue, digits = 3),
+      "</td></tr>",
+      "</table>",
+      "<p style='font-size:14px; margin:5px 0;'>",
+      ks_fit_interp,
+      "</p>",
+
+      "<p style='font-size:12px; color:#888; margin-top:15px;'>H0: The empirical distribution follows the theoretical distribution. ",
+      "A p-value &ge; 0.05 indicates no significant deviation.</p>",
+
+      "<h4 style='color:#333; border-bottom:2px solid #2171B5; padding-bottom:8px; margin-top:30px;'>",
+      "Plot Legend</h4>",
+      "<table style='width:100%; border-collapse:collapse; margin:10px 0;'>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:8px 15px; border-bottom:1px solid #ddd;'><span style='color:#1a1a1a;font-weight:bold;'>&mdash;&mdash;</span> Solid black</td>",
+      "<td style='padding:8px 15px; border-bottom:1px solid #ddd;'>Empirical distribution</td></tr>",
+      "<tr>",
+      "<td style='padding:8px 15px; border-bottom:1px solid #ddd;'><span style='color:#D6604D;font-weight:bold;'>- - -</span> Dashed red</td>",
+      "<td style='padding:8px 15px; border-bottom:1px solid #ddd;'>Theoretical Lotka's Law (\u03B2 = 2)</td></tr>",
+      "<tr style='background:#f0f4f8;'>",
+      "<td style='padding:8px 15px; border-bottom:1px solid #ddd;'><span style='color:#2171B5;font-weight:bold;'>-&middot;-&middot;-</span> Dot-dash blue</td>",
+      "<td style='padding:8px 15px; border-bottom:1px solid #ddd;'>Fitted model (\u03B2 = ",
+      round(s$Beta, 2),
+      ")</td></tr>",
+      "</table>",
+
+      "</div>"
+    )
+
+    HTML(summary_html)
+  })
+
   observeEvent(input$reportLotka, {
     if (!is.null(values$lotka$AuthorProd)) {
       list_df <- list(values$lotka$AuthorProd)
@@ -6325,11 +6721,20 @@ To ensure the functionality of Biblioshiny,
         wb = values$wb
       )
       values$wb <- wb
-      popUp(title = "Author Productivity through Lotka's Law", type = "success")
+      popUp(title = "Lotka's Law", type = "success")
       values$myChoices <- sheets(values$wb)
     } else {
       popUp(type = "error")
     }
+  })
+
+  output$LotkaGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
+    geminiOutput(title = "", content = values$LotkaGemini, values)
   })
 
   # Affiliations ----
@@ -6508,20 +6913,23 @@ To ensure the functionality of Biblioshiny,
     AFFGrowth()
     g <- values$AffOverTimePlot
     leg <- list(
-      orientation = 'h',
-      y = -0.15,
+      orientation = 'v',
+      x = 1.02,
+      y = 1,
+      xanchor = 'left',
+      yanchor = 'top',
       font = list(
         family = "sans-serif",
-        size = 10,
+        size = 12,
         color = "#000"
       ),
-      bgcolor = "#FFFFFF",
-      bordercolor = "#FFFFFF",
-      borderwidth = 2
+      bgcolor = "rgba(255,255,255,0.9)",
+      bordercolor = "#EEEEEE",
+      borderwidth = 1
     )
 
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.8, size = 0.10) %>%
-      layout(legend = leg) %>%
+      layout(legend = leg, margin = list(r = 200)) %>%
       config(
         displaylogo = FALSE,
         modeBarButtonsToRemove = c(
@@ -6666,6 +7074,7 @@ To ensure the functionality of Biblioshiny,
               axis.title = element_text(size = 14, color = '#555555'),
               axis.title.y = element_text(vjust = 1, angle = 0),
               axis.title.x = element_text(hjust = 0),
+              axis.text.y = element_text(face = "bold", size = 11),
               axis.line.x = element_line(color = "black", linewidth = 0.5)
             ) +
             coord_flip()
@@ -6876,20 +7285,23 @@ To ensure the functionality of Biblioshiny,
     COGrowth()
     g <- values$CountryOverTimePlot
     leg <- list(
-      orientation = 'h',
-      y = -0.15,
+      orientation = 'v',
+      x = 1.02,
+      y = 1,
+      xanchor = 'left',
+      yanchor = 'top',
       font = list(
         family = "sans-serif",
-        size = 10,
+        size = 12,
         color = "#000"
       ),
-      bgcolor = "#FFFFFF",
-      bordercolor = "#FFFFFF",
-      borderwidth = 2
+      bgcolor = "rgba(255,255,255,0.9)",
+      bordercolor = "#EEEEEE",
+      borderwidth = 1
     )
 
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.8, size = 0.10) %>%
-      layout(legend = leg) %>%
+      layout(legend = leg, margin = list(r = 200)) %>%
       config(
         displaylogo = FALSE,
         modeBarButtonsToRemove = c(
@@ -7874,7 +8286,15 @@ To ensure the functionality of Biblioshiny,
 
   output$rpysPlot <- renderPlotly({
     req(values$RPYS_ready > 0)
-    plot.ly(values$res$spectroscopy, side = "l", aspectratio = 1.3, size = 0.10)
+    p <- plot.ly(values$res$spectroscopy, side = "l", aspectratio = 1.3, size = 0.10)
+    # Disable hover on peak points and labels (traces 3+) so they don't block line tooltips
+    n_traces <- length(p$x$data)
+    if (n_traces > 2) {
+      for (i in 3:n_traces) {
+        p$x$data[[i]]$hoverinfo <- "skip"
+      }
+    }
+    p
   })
 
   output$rpysTable <- renderUI({
@@ -8386,7 +8806,12 @@ To ensure the functionality of Biblioshiny,
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$wb <- res$wb
       #values$fileTFP <- screenSh(selector = "#wordcloud") ## screenshot
-      values$fileWC <- screenSh(values$WordCloud, zoom = 2, type = "plotly")
+      values$fileWC <- screenSh(
+        values$WordCloud,
+        type = "plotly",
+        dpi = values$report_dpi,
+        height = values$h
+      )
       values$list_file <- rbind(
         values$list_file,
         c(sheetname = res$sheetname, values$fileWC, res$col)
@@ -8564,7 +8989,12 @@ To ensure the functionality of Biblioshiny,
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$wb <- res$wb
       #values$fileTFP <- screenSh(selector = "#treemap") ## screenshot
-      values$fileTreeMap <- screenSh(values$TreeMap, zoom = 2, type = "plotly")
+      values$fileTreeMap <- screenSh(
+        values$TreeMap,
+        type = "plotly",
+        dpi = values$report_dpi,
+        height = values$h
+      )
       values$list_file <- rbind(
         values$list_file,
         c(sheetname = res$sheetname, values$fileTreeMap, res$col)
@@ -8751,6 +9181,15 @@ To ensure the functionality of Biblioshiny,
       min(values$DF$Freq) + diff(range(values$DF$Freq)) * 0.20
     )
 
+    # Reorder legend by descending max cumulative value
+    values$DF$Term <- factor(
+      values$DF$Term,
+      levels = names(sort(
+        tapply(values$DF$Freq, values$DF$Term, max),
+        decreasing = TRUE
+      ))
+    )
+
     g <- ggplot(
       values$DF,
       aes(x = Year, y = Freq, group = Term, color = Term, text = Text)
@@ -8768,16 +9207,16 @@ To ensure the functionality of Biblioshiny,
       labs(color = "Term") +
       theme(
         text = element_text(color = "#444444"),
-        legend.text = ggplot2::element_text(size = width_scale),
+        legend.text = ggplot2::element_text(size = 10),
         legend.box.margin = margin(6, 6, 6, 6),
         legend.title = ggplot2::element_text(
-          size = 1.5 * width_scale,
+          size = 12,
           face = "bold"
         ),
-        legend.position = "bottom",
+        legend.position = "right",
         legend.direction = "vertical",
-        legend.key.size = grid::unit(width_scale / 50, "inch"),
-        legend.key.width = grid::unit(width_scale / 50, "inch"),
+        legend.key.size = grid::unit(0.4, "cm"),
+        legend.key.width = grid::unit(0.6, "cm"),
         plot.caption = element_text(
           size = 9,
           hjust = 0.5,
@@ -8828,20 +9267,23 @@ To ensure the functionality of Biblioshiny,
     g <- WDynamics()
 
     leg <- list(
-      orientation = 'h',
-      y = -0.15,
+      orientation = 'v',
+      x = 1.02,
+      y = 1,
+      xanchor = 'left',
+      yanchor = 'top',
       font = list(
         family = "sans-serif",
-        size = 10,
+        size = 12,
         color = "#000"
       ),
-      bgcolor = "#FFFFFF",
-      bordercolor = "#FFFFFF",
-      borderwidth = 2
+      bgcolor = "rgba(255,255,255,0.9)",
+      bordercolor = "#EEEEEE",
+      borderwidth = 1
     )
 
     plot.ly(g, flip = FALSE, side = "r", aspectratio = 1.6, size = 0.10) %>%
-      layout(legend = leg) %>%
+      layout(legend = leg, margin = list(r = 200)) %>%
       config(
         displaylogo = FALSE,
         modeBarButtonsToRemove = c(
@@ -9797,7 +10239,6 @@ To ensure the functionality of Biblioshiny,
       list_df <- list(values$cocnet$cluster_res)
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
-      #values$wb <- res$wb
       values$wb <- addGgplotsWb(
         list_plot,
         wb = res$wb,
@@ -9807,14 +10248,21 @@ To ensure the functionality of Biblioshiny,
         height = 7,
         dpi = 75
       )
-      #values$fileTFP <- screenSh(selector = "#cocPlot") ## screenshot
-      values$fileCOC <- screenSh(values$COCnetwork$VIS, zoom = 2, type = "vis")
-      values$list_file <- rbind(
-        values$list_file,
-        c(sheetname = res$sheetname, values$fileCOC, res$col)
+      values$vis_report_config <- list(
+        callback = function(file_path) {
+          values$fileCOC <- file_path
+          values$list_file <- rbind(
+            values$list_file,
+            c(sheetname = res$sheetname, file_path, res$col)
+          )
+          popUp(title = "Co-occurrence Network", type = "success")
+          values$myChoices <- sheets(values$wb)
+        }
       )
-      popUp(title = "Co-occurrence Network", type = "success")
-      values$myChoices <- sheets(values$wb)
+      shinyjs::runjs(sprintf(
+        'captureVisReport("cocPlot", %d);',
+        values$report_dpi
+      ))
     } else {
       popUp(type = "error")
     }
@@ -11452,7 +11900,12 @@ To ensure the functionality of Biblioshiny,
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       #values$wb <- res$wb
       #values$fileTFP <- screenSh(selector = "#TEPlot") ## screenshot
-      values$fileTEplot <- screenSh(values$TEplot, zoom = 2, type = "plotly")
+      values$fileTEplot <- screenSh(
+        values$TEplot,
+        type = "plotly",
+        dpi = values$report_dpi,
+        height = values$h
+      )
       values$list_file <- rbind(
         values$list_file,
         c(sheetname = res$sheetname, values$fileTEplot, res$col)
@@ -11751,7 +12204,6 @@ To ensure the functionality of Biblioshiny,
       list_df <- list(values$cocitnet$cluster_res)
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
-      #values$wb <- res$wb
       values$wb <- addGgplotsWb(
         list_plot,
         wb = res$wb,
@@ -11761,18 +12213,21 @@ To ensure the functionality of Biblioshiny,
         height = 8,
         dpi = 75
       )
-      #values$fileTFP <- screenSh(selector = "#cocitPlot") ## screenshot
-      values$fileCOCIT <- screenSh(
-        values$COCITnetwork$VIS,
-        zoom = 2,
-        type = "vis"
+      values$vis_report_config <- list(
+        callback = function(file_path) {
+          values$fileCOCIT <- file_path
+          values$list_file <- rbind(
+            values$list_file,
+            c(sheetname = res$sheetname, file_path, res$col)
+          )
+          popUp(title = "Co-citation Network", type = "success")
+          values$myChoices <- sheets(values$wb)
+        }
       )
-      values$list_file <- rbind(
-        values$list_file,
-        c(sheetname = res$sheetname, values$fileCOCIT, res$col)
-      )
-      popUp(title = "Co-citation Network", type = "success")
-      values$myChoices <- sheets(values$wb)
+      shinyjs::runjs(sprintf(
+        'captureVisReport("cocitPlot", %d);',
+        values$report_dpi
+      ))
     } else {
       popUp(type = "error")
     }
@@ -11945,18 +12400,21 @@ To ensure the functionality of Biblioshiny,
       sheetname <- "Historiograph"
       list_df <- list(values$histResults$histData)
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
-      #values$fileTFP <- screenSh(selector = "#histPlotVis") ## screenshot
-      values$fileHIST <- screenSh(
-        values$histPlotVis$VIS,
-        zoom = 2,
-        type = "vis"
+      values$vis_report_config <- list(
+        callback = function(file_path) {
+          values$fileHIST <- file_path
+          values$list_file <- rbind(
+            values$list_file,
+            c(sheetname = res$sheetname, file_path, res$col)
+          )
+          popUp(title = "Historiograph", type = "success")
+          values$myChoices <- sheets(values$wb)
+        }
       )
-      values$list_file <- rbind(
-        values$list_file,
-        c(sheetname = res$sheetname, values$fileHIST, res$col)
-      )
-      popUp(title = "Historiograph", type = "success")
-      values$myChoices <- sheets(values$wb)
+      shinyjs::runjs(sprintf(
+        'captureVisReport("histPlotVis", %d);',
+        values$report_dpi
+      ))
     } else {
       popUp(type = "error")
     }
@@ -12415,14 +12873,21 @@ To ensure the functionality of Biblioshiny,
         height = 8,
         dpi = 75
       )
-      #values$fileTFP <- screenSh(selector = "#colPlot") ## screenshot
-      values$fileCOL <- screenSh(values$COLnetwork$VIS, zoom = 2, type = "vis")
-      values$list_file <- rbind(
-        values$list_file,
-        c(sheetname = res$sheetname, values$fileCOL, res$col)
+      values$vis_report_config <- list(
+        callback = function(file_path) {
+          values$fileCOL <- file_path
+          values$list_file <- rbind(
+            values$list_file,
+            c(sheetname = res$sheetname, file_path, res$col)
+          )
+          popUp(title = "Collaboration Network", type = "success")
+          values$myChoices <- sheets(values$wb)
+        }
       )
-      popUp(title = "Collaboration Network", type = "success")
-      values$myChoices <- sheets(values$wb)
+      shinyjs::runjs(sprintf(
+        'captureVisReport("colPlot", %d);',
+        values$report_dpi
+      ))
     } else {
       popUp(type = "error")
     }
@@ -12493,7 +12958,9 @@ To ensure the functionality of Biblioshiny,
     screen2export(
       values$WMmap$g,
       filename = "CountryCollaborationMap",
-      type = "plotly"
+      type = "plotly",
+      dpi = values$dpi,
+      height = values$h
     )
   })
 
@@ -12534,7 +13001,12 @@ To ensure the functionality of Biblioshiny,
       if (length(ind) > 0) {
         sheetname <- paste(sheetname, "(", length(ind) + 1, ")", sep = "")
       }
-      values$fileWMap <- screenSh(values$WMmap$g, zoom = 2, type = "plotly")
+      values$fileWMap <- screenSh(
+        values$WMmap$g,
+        type = "plotly",
+        dpi = values$report_dpi,
+        height = values$h
+      )
       values$list_file <- rbind(
         values$list_file,
         c(sheetname, values$fileWMap, 1)
@@ -12671,7 +13143,9 @@ To ensure the functionality of Biblioshiny,
     screen2export(
       values$missingdf_formatted,
       filename = "missingDataTable",
-      type = "df2html"
+      type = "df2html",
+      dpi = values$dpi,
+      height = values$h
     )
   })
 
@@ -12679,7 +13153,9 @@ To ensure the functionality of Biblioshiny,
     screen2export(
       values$TFP,
       filename = "ThreeFieldPlot",
-      type = "plotly"
+      type = "plotly",
+      dpi = values$dpi,
+      height = values$h
     )
   })
 
@@ -12687,7 +13163,9 @@ To ensure the functionality of Biblioshiny,
     screen2export(
       obj = values$WordCloud,
       filename = "WordCloud",
-      type = "plotly"
+      type = "plotly",
+      dpi = values$dpi,
+      height = values$h
     )
   })
 
@@ -12695,64 +13173,89 @@ To ensure the functionality of Biblioshiny,
     screen2export(
       obj = values$WTreeMap,
       filename = "TreeMap",
-      type = "plotly"
+      type = "plotly",
+      dpi = values$dpi,
+      height = values$h
     )
   })
 
   observeEvent(input$screenCOC, {
-    screen2export(
-      obj = values$COCnetwork$VIS,
-      filename = "Co_occurrenceNetwork",
-      type = "vis"
-    )
+    shinyjs::runjs(sprintf(
+      'captureVisExport("cocPlot", "%s", %d);',
+      paste0("Co_occurrenceNetwork-", gsub(" |:", "", Sys.time()), ".png"),
+      values$dpi
+    ))
   })
 
   observeEvent(input$export_coc, {
-    screen2export(
-      obj = values$COCnetworkOverTime,
-      filename = paste0(
+    shinyjs::runjs(sprintf(
+      'captureVisExport("cocOverTime", "%s", %d);',
+      paste0(
         "Co-occurence_Network-Year-",
         values$current_year_col,
-        "_"
+        "_-",
+        gsub(" |:", "", Sys.time()),
+        ".png"
       ),
-      type = "vis"
-    )
+      values$dpi
+    ))
   })
 
   observeEvent(input$screenCOCIT, {
-    screen2export(
-      obj = values$COCITnetwork$VIS,
-      filename = "Co_citationNetwork",
-      type = "vis"
-    )
+    shinyjs::runjs(sprintf(
+      'captureVisExport("cocitPlot", "%s", %d);',
+      paste0("Co_citationNetwork-", gsub(" |:", "", Sys.time()), ".png"),
+      values$dpi
+    ))
   })
 
   observeEvent(input$screenHIST, {
-    screen2export(
-      obj = values$histPlotVis$VIS,
-      filename = "Historiograph",
-      type = "vis"
-    )
+    shinyjs::runjs(sprintf(
+      'captureVisExport("histPlotVis", "%s", %d);',
+      paste0("Historiograph-", gsub(" |:", "", Sys.time()), ".png"),
+      values$dpi
+    ))
   })
 
   observeEvent(input$screenCOL, {
-    screen2export(
-      obj = values$COLnetwork$VIS,
-      filename = "Collaboration_Network",
-      type = "vis"
-    )
+    shinyjs::runjs(sprintf(
+      'captureVisExport("colPlot", "%s", %d);',
+      paste0("Collaboration_Network-", gsub(" |:", "", Sys.time()), ".png"),
+      values$dpi
+    ))
   })
 
   observeEvent(input$export_col, {
-    screen2export(
-      obj = values$COLnetworkOverTime,
-      filename = paste0(
+    shinyjs::runjs(sprintf(
+      'captureVisExport("colOverTime", "%s", %d);',
+      paste0(
         "Collaboration_Network-Year-",
         values$current_year_col,
-        "_"
+        "_-",
+        gsub(" |:", "", Sys.time()),
+        ".png"
       ),
-      type = "vis"
+      values$dpi
+    ))
+  })
+
+  ## visNetwork report canvas observer ----
+  observeEvent(input$vis_canvas_report, {
+    req(values$vis_report_config)
+    config <- values$vis_report_config
+    values$vis_report_config <- NULL
+    base64_str <- sub(
+      "^data:image/png;base64,",
+      "",
+      input$vis_canvas_report$data
     )
+    raw_data <- base64enc::base64decode(base64_str)
+    file_path <- file.path(
+      getWD(),
+      paste0("figureImage_", format(Sys.time(), "%Y-%m-%d_%H%M%S"), ".png")
+    )
+    writeBin(raw_data, file_path)
+    config$callback(file_path)
   })
 
   ## TALL EXPORT ----
@@ -12904,13 +13407,53 @@ To ensure the functionality of Biblioshiny,
   )
 
   ## SETTING ----
-  observeEvent(input$dpi, {
-    values$dpi <- as.numeric(input$dpi)
-  })
+  observeEvent(
+    input$dpi,
+    {
+      values$dpi <- as.numeric(input$dpi)
+      writeLines(
+        c(
+          as.character(values$dpi),
+          as.character(values$report_dpi),
+          as.character(values$h)
+        ),
+        file.path(homeFolder(), ".biblio_graph_settings.txt")
+      )
+    },
+    ignoreInit = TRUE
+  )
 
-  observeEvent(input$h, {
-    values$h <- as.numeric(input$h)
-  })
+  observeEvent(
+    input$report_dpi,
+    {
+      values$report_dpi <- as.numeric(input$report_dpi)
+      writeLines(
+        c(
+          as.character(values$dpi),
+          as.character(values$report_dpi),
+          as.character(values$h)
+        ),
+        file.path(homeFolder(), ".biblio_graph_settings.txt")
+      )
+    },
+    ignoreInit = TRUE
+  )
+
+  observeEvent(
+    input$h,
+    {
+      values$h <- as.numeric(input$h)
+      writeLines(
+        c(
+          as.character(values$dpi),
+          as.character(values$report_dpi),
+          as.character(values$h)
+        ),
+        file.path(homeFolder(), ".biblio_graph_settings.txt")
+      )
+    },
+    ignoreInit = TRUE
+  )
 
   # Server code for randomize seed button
   observeEvent(input$randomize_seed, {
@@ -12980,7 +13523,8 @@ To ensure the functionality of Biblioshiny,
           "Gemini 2.5 Flash" = "2.5-flash",
           "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
           "Gemini 3.0 Flash" = "3-flash-preview",
-          "Gemini 3.0 Pro" = "3-pro-preview"
+          "Gemini 3.1 Pro" = "3.1-pro-preview",
+          "Gemini Pro Latest" = "pro-latest"
           # "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
           # "Gemini 1.5 Flash" = "1.5-flash",
           # "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
@@ -13107,7 +13651,14 @@ To ensure the functionality of Biblioshiny,
   # Show API key status on load
   output$oaApiKeyStatus <- renderUI({
     if (!is.null(values$oaApiKey) && nchar(values$oaApiKey) >= 10) {
-      masked_key <- paste0("...", substr(values$oaApiKey, nchar(values$oaApiKey) - 3, nchar(values$oaApiKey)))
+      masked_key <- paste0(
+        "...",
+        substr(
+          values$oaApiKey,
+          nchar(values$oaApiKey) - 3,
+          nchar(values$oaApiKey)
+        )
+      )
       div(
         style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
         icon("check-circle"),

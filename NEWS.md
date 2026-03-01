@@ -1,30 +1,34 @@
-# biblioshiny (development version)
+# bibliometrix V.5.3.0 (Release date: 2026-02-26)
 
-Major Changes
+## Major Changes
 - **New Table Rendering Engine**: Replaced `DT` (DataTables) with a custom `htmlBoxFormat` engine for data visualization.
     - **Improved UI Stability**: Fixed a long-standing glitch where column names would occasionally wrap or misalign in high-density dashboards.
     - **Enhanced Performance**: Optimized client-side rendering using a lightweight vanilla JavaScript implementation for sorting, filtering, and pagination.
     - **Uniform Design**: Introduced a new "Bibliobox" style that ensures consistent aesthetics across all analysis modules.
     - **Better Data Handling**: Improved DOI and URL handling in tables; the filtering and sorting logic now correctly ignores underlying HTML tags (like links) to focus on visible text.
-    - **Uniform Design**: Introduced a new "Bibliobox" style that ensures consistent aesthetics across all analysis modules.
-    - **Better Data Handling**: Improved DOI and URL handling in tables; the filtering and sorting logic now correctly ignores underlying HTML tags (like links) to focus on visible text.
 
-Performance and User Experience Improvements
-- **Asynchronous Processing**: All Biblioshiny analyses now run asynchronously, keeping the UI responsive
+## Performance and User Experience Improvements
+- **Asynchronous Processing**: All Biblioshiny analyses now run asynchronously, keeping the UI responsive during long-running operations.
 - **Async AI Integration**: AI API calls (Gemini and OpenRouter) are now non-blocking with proper timeout handling and exponential backoff on retries.
 - **AI Summary Button**: Added AI-powered document summaries in Most Global/Local Cited Documents tables.
-- **Function Optimization**: Optimized heavy functions including rpys() and table rendering for better performance.
+- **Function Optimization**: Optimized heavy functions including `rpys()`, `cocMatrix()`, and table rendering for better performance.
 - **Power-off Button**: Added a power-off button in Biblioshiny to properly shut down the application.
-- **Max Rows Control**: Added max.rows argument in biblioshiny() to control the maximum number of rows displayed in tables.
+- **Max Rows Control**: Added `max.rows` argument in `biblioshiny()` to control the maximum number of rows displayed in tables.
 
-Technical Improvements
+## New Features
+- Added OpenAlex API key settings panel and warning banner for unauthenticated access.
+- Added email setting for polite use of the OpenAlex AI features.
+- Improved cited reference (CR) download from the OpenAlex API.
+
+## Technical Improvements
 - Added `renderBibliobox` server-side wrapper to simplify the migration from `renderDT` and provide global error handling via `tryCatch`.
 - Implemented responsive horizontal scrolling for wide datasets while maintaining fixed headers for better readability.
 - Refined pagination logic to handle large datasets more gracefully with dynamic page indicators.
-- Implemented future/promises for non-blocking API calls with req_timeout(120) to HTTP pipelines.
-- Cleaned up async AI pipeline, removing unused geminiGenerate() and geminiPromptImage() functions.
+- Implemented future/promises for non-blocking API calls with `req_timeout(120)` to HTTP pipelines.
+- Cleaned up async AI pipeline, removing unused `geminiGenerate()` and `geminiPromptImage()` functions.
 
-Bug Fixes
+## Bug Fixes
+- #591 [Solved] – Synced the country dictionary with the latest ISO 3166-1 standard.
 - Fixed reference matching algorithm.
 - Fixed plot resize issues.
 - Fixed thematic evolution display issues.

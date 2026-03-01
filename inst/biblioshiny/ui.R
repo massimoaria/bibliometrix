@@ -3014,6 +3014,45 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(uiOutput("bradfordTable"))
+            ),
+            tabPanel(
+              "Summary",
+              shinycssloaders::withSpinner(uiOutput("bradfordSummary"))
+            ),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(
+                      htmlOutput("BradfordGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
+                  )
+                )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$bradfordLaw)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -3266,7 +3305,7 @@ body <- dashboardBody(
               "Plot",
               shinycssloaders::withSpinner(plotlyOutput(
                 outputId = "soGrowthPlot",
-                height = "90vh"
+                height = "80vh"
               ))
             ),
             tabPanel(
@@ -3833,6 +3872,45 @@ body <- dashboardBody(
             tabPanel(
               "Table",
               shinycssloaders::withSpinner(uiOutput("lotkaTable"))
+            ),
+            tabPanel(
+              "Summary",
+              shinycssloaders::withSpinner(uiOutput("lotkaSummary"))
+            ),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(
+                fluidRow(
+                  column(
+                    12,
+                    br(),
+                    shinycssloaders::withSpinner(
+                      htmlOutput("LotkaGeminiUI"),
+                      caption = HTML("<br><strong>Thinking...</strong>"),
+                      image = "ai_small2.gif",
+                      color = "#466fc4"
+                    )
+                  )
+                )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$lotkaLaw)
+                  ),
+                  column(1)
+                )
+              )
             )
           )
         )
@@ -4197,7 +4275,7 @@ body <- dashboardBody(
               "Plot",
               shinycssloaders::withSpinner(plotlyOutput(
                 outputId = "AffOverTimePlot",
-                height = "90vh"
+                height = "80vh"
               ))
             ),
             tabPanel(
@@ -4505,7 +4583,7 @@ body <- dashboardBody(
               "Plot",
               shinycssloaders::withSpinner(plotlyOutput(
                 outputId = "CountryOverTimePlot",
-                height = "90vh"
+                height = "80vh"
               ))
             ),
             tabPanel(
@@ -5247,6 +5325,19 @@ body <- dashboardBody(
                     )
                   )
                 )
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              icon = fa_i(name = "info-circle"),
+              br(),
+              fluidRow(
+                column(1),
+                column(
+                  10,
+                  HTML(helpContent()$rpys)
+                ),
+                column(1)
               )
             )
           )
@@ -6413,7 +6504,7 @@ body <- dashboardBody(
               "Plot",
               shinycssloaders::withSpinner(plotlyOutput(
                 outputId = "kwGrowthPlot",
-                height = "90vh"
+                height = "80vh"
               ))
             ),
             tabPanel(
@@ -10910,24 +11001,30 @@ body <- dashboardBody(
               div(
                 class = "box-body",
 
-                # DPI Setting
+                # DPI Setting (Export)
                 div(
                   style = "margin-bottom: 25px;",
                   tags$label(
-                    "Resolution (DPI)",
+                    "Export Resolution (DPI)",
                     style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
                   ),
-                  sliderTextInput(
-                    inputId = "dpi",
-                    label = NULL,
-                    grid = TRUE,
-                    force_edges = TRUE,
-                    choices = c("75", "150", "300", "600"),
-                    width = "100%",
-                    selected = "300"
-                  ),
+                  uiOutput("dpi_slider"),
                   helpText(
-                    "Higher DPI values produce better quality images but larger file sizes.",
+                    "Resolution for exported images (download button). Higher DPI = better quality but larger files.",
+                    style = "margin-top: 5px; color: #666; font-size: 12px;"
+                  )
+                ),
+
+                # DPI Setting (Report)
+                div(
+                  style = "margin-bottom: 25px;",
+                  tags$label(
+                    "Report Resolution (DPI)",
+                    style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
+                  ),
+                  uiOutput("report_dpi_slider"),
+                  helpText(
+                    "Resolution for images added to the Excel report. Lower DPI keeps the report file size small.",
                     style = "margin-top: 5px; color: #666; font-size: 12px;"
                   )
                 ),
@@ -10939,15 +11036,7 @@ body <- dashboardBody(
                     "Plot Height (inches)",
                     style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
                   ),
-                  sliderTextInput(
-                    inputId = "h",
-                    label = NULL,
-                    grid = TRUE,
-                    force_edges = TRUE,
-                    width = "100%",
-                    choices = seq(5, 15),
-                    selected = "7"
-                  ),
+                  uiOutput("h_slider"),
                   helpText(
                     "Adjust the height of exported plots. Width is automatically calculated to maintain aspect ratio.",
                     style = "margin-top: 5px; color: #666; font-size: 12px;"
@@ -11201,7 +11290,9 @@ body <- dashboardBody(
                       style = "color: #1a5276; font-weight: bold; text-decoration: underline;",
                       "openalex.org/settings/api"
                     ),
-                    HTML(". Optionally, you can also set an email for the <strong>polite pool</strong> (faster, more reliable access).")
+                    HTML(
+                      ". Optionally, you can also set an email for the <strong>polite pool</strong> (faster, more reliable access)."
+                    )
                   )
                 ),
 

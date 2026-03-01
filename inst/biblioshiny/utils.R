@@ -2403,7 +2403,9 @@ freqPlot <- function(
     )
   }
 
-  xx[, y] <- substr(xx[, y], 1, string.max)
+  xx[, y] <- sapply(substr(xx[, y], 1, string.max), function(s) {
+    if (nchar(s) > 40) paste0(stringr::str_wrap(s, width = 40)) else s
+  })
 
   g <- ggplot(xx, aes(x = xx[, x], y = xx[, y], label = xx[, x], text = Text)) +
     geom_segment(
@@ -2412,14 +2414,16 @@ freqPlot <- function(
     ) +
     geom_point(aes(color = -xx[, x], size = xx[, x]), show.legend = FALSE) +
     scale_radius(range = c(5, 12)) +
-    geom_text(color = "white", size = 3) +
+    geom_text(color = "#333333", size = 3.5, fontface = "bold", hjust = 0,
+              nudge_x = max(xx[, x]) * 0.04) +
     scale_y_discrete(limits = rev(xx[, y])) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
     scale_fill_continuous(type = "gradient") +
     labs(title = title, y = textLaby) +
     labs(x = textLabx) +
     expand_limits(y = c(1, length(xx[, y]) + 1)) +
     theme_minimal() +
-    theme(axis.text.y = element_text(angle = 0, hjust = 0)) +
+    theme(axis.text.y = element_text(angle = 0, hjust = 1, face = "bold", size = 11)) +
     annotation_custom(
       values$logoGrid,
       xmin = xl[1],
@@ -3178,7 +3182,6 @@ AffiliationOverTime <- function(values, n) {
     values$AffOverTime$Articles,
     sep = ""
   )
-  width_scale <- 1.7 * 26 / length(unique(values$AffOverTime$Affiliation))
   x <- c(
     max(values$AffOverTime$Year) -
       0.02 -
@@ -3191,6 +3194,10 @@ AffiliationOverTime <- function(values, n) {
     min(values$AffOverTime$Articles) +
       diff(range(values$AffOverTime$Articles)) * 0.15
   )
+
+  # Reorder legend by descending max cumulative value
+  values$AffOverTime$Affiliation <- factor(values$AffOverTime$Affiliation,
+    levels = names(sort(tapply(values$AffOverTime$Articles, values$AffOverTime$Affiliation, max), decreasing = TRUE)))
 
   values$AffOverTimePlot <- ggplot(
     values$AffOverTime,
@@ -3209,26 +3216,25 @@ AffiliationOverTime <- function(values, n) {
       title = "Affiliations' Production over Time"
     ) +
     scale_x_continuous(
-      breaks = (values$AffOverTime$Year[seq(
-        1,
-        length(values$AffOverTime$Year),
-        by = ceiling(length(values$AffOverTime$Year) / 20)
-      )])
+      breaks = {
+        yrs <- sort(unique(values$AffOverTime$Year))
+        yrs[seq(1, length(yrs), by = max(1, ceiling(length(yrs) / 20)))]
+      }
     ) +
     geom_hline(aes(yintercept = 0), alpha = 0.1) +
     labs(color = "Affiliation") +
     theme(
       text = element_text(color = "#444444"),
-      legend.text = ggplot2::element_text(size = width_scale),
+      legend.text = ggplot2::element_text(size = 10),
       legend.box.margin = margin(6, 6, 6, 6),
       legend.title = ggplot2::element_text(
-        size = 1.5 * width_scale,
+        size = 12,
         face = "bold"
       ),
-      legend.position = "bottom",
+      legend.position = "right",
       legend.direction = "vertical",
-      legend.key.size = grid::unit(width_scale / 50, "inch"),
-      legend.key.width = grid::unit(width_scale / 50, "inch"),
+      legend.key.size = grid::unit(0.4, "cm"),
+      legend.key.width = grid::unit(0.6, "cm"),
       plot.caption = element_text(
         size = 9,
         hjust = 0.5,
@@ -3301,7 +3307,6 @@ CountryOverTime <- function(values, n) {
     values$CountryOverTime$Articles,
     sep = ""
   )
-  width_scale <- 1.7 * 26 / length(unique(values$CountryOverTime$Country))
   x <- c(
     max(values$CountryOverTime$Year) -
       0.02 -
@@ -3315,6 +3320,10 @@ CountryOverTime <- function(values, n) {
       diff(range(values$CountryOverTime$Articles)) * 0.15
   )
 
+  # Reorder legend by descending max cumulative value
+  values$CountryOverTime$Country <- factor(values$CountryOverTime$Country,
+    levels = names(sort(tapply(values$CountryOverTime$Articles, values$CountryOverTime$Country, max), decreasing = TRUE)))
+
   values$CountryOverTimePlot <- ggplot(
     values$CountryOverTime,
     aes(x = Year, y = Articles, group = Country, color = Country, text = Text)
@@ -3326,26 +3335,25 @@ CountryOverTime <- function(values, n) {
       title = "Country Production over Time"
     ) +
     scale_x_continuous(
-      breaks = (values$CountryOverTime$Year[seq(
-        1,
-        length(values$CountryOverTime$Year),
-        by = ceiling(length(values$CountryOverTime$Year) / 20)
-      )])
+      breaks = {
+        yrs <- sort(unique(values$CountryOverTime$Year))
+        yrs[seq(1, length(yrs), by = max(1, ceiling(length(yrs) / 20)))]
+      }
     ) +
     geom_hline(aes(yintercept = 0), alpha = 0.1) +
     labs(color = "Country") +
     theme(
       text = element_text(color = "#444444"),
-      legend.text = ggplot2::element_text(size = width_scale),
+      legend.text = ggplot2::element_text(size = 10),
       legend.box.margin = margin(6, 6, 6, 6),
       legend.title = ggplot2::element_text(
-        size = 1.5 * width_scale,
+        size = 12,
         face = "bold"
       ),
-      legend.position = "bottom",
+      legend.position = "right",
       legend.direction = "vertical",
-      legend.key.size = grid::unit(width_scale / 50, "inch"),
-      legend.key.width = grid::unit(width_scale / 50, "inch"),
+      legend.key.size = grid::unit(0.4, "cm"),
+      legend.key.width = grid::unit(0.6, "cm"),
       plot.caption = element_text(
         size = 9,
         hjust = 0.5,
@@ -5642,7 +5650,7 @@ addGgplotsWb <- function(
   return(wb)
 }
 
-screenSh <- function(p, zoom = 2, type = "vis") {
+screenSh <- function(p, type = "vis", dpi = 300, height = 7) {
   #tmpdir <- getWD()
 
   fileName <- file.path(
@@ -5650,12 +5658,12 @@ screenSh <- function(p, zoom = 2, type = "vis") {
     paste0("figureImage_", Sys.time(), ".png")
   )
 
-  plot2png(p, filename = fileName, zoom = zoom, type = type)
+  plot2png(p, filename = fileName, type = type, dpi = dpi, height = height)
 
   return(fileName)
 }
 
-screenShot <- function(p, filename, type) {
+screenShot <- function(p, filename, type, dpi = 300, height = 7) {
   #home <- homeFolder()
 
   # # setting up the main directory
@@ -5665,7 +5673,7 @@ screenShot <- function(p, filename, type) {
   #   filename <- file.path(home, filename)
   # }
 
-  plot2png(p, filename, zoom = 2, type = type)
+  plot2png(p, filename, type = type, dpi = dpi, height = height)
   filename_html <- paste0(tools::file_path_sans_ext(filename), ".html")
   file.remove(filename_html)
   unlink(
@@ -5674,7 +5682,11 @@ screenShot <- function(p, filename, type) {
   )
 }
 
-plot2png <- function(p, filename, zoom = 2, type = "vis") {
+plot2png <- function(p, filename, type = "vis", dpi = 300, height = 7) {
+  zoom <- dpi / 96
+  vwidth  <- round(height * 2 * 96)
+  vheight <- round(height * 96)
+
   filename_html <- tools::file_path_sans_ext(filename)
   html_name <- paste0(filename_html, ".html")
   switch(
@@ -5689,7 +5701,7 @@ plot2png <- function(p, filename, zoom = 2, type = "vis") {
       screenHtml(p, html_name)
     }
   )
-  biblioShot(url = html_name, zoom = zoom, file = filename) # , verbose=FALSE)
+  biblioShot(url = html_name, zoom = zoom, vwidth = vwidth, vheight = vheight, file = filename)
 
   popUpGeneric(
     title = NULL,
@@ -5754,7 +5766,7 @@ screenHtml <- function(df, html_file) {
 }
 
 ## export screen to browser download
-screen2export <- function(filename = "file", obj, type) {
+screen2export <- function(filename = "file", obj, type, dpi = 300, height = 7) {
   JScode_screenshot <- "
     var link = document.createElement('a');
     link.href = '%s';
@@ -5775,7 +5787,9 @@ screen2export <- function(filename = "file", obj, type) {
   screenShot(
     obj,
     filename = full_path,
-    type = type
+    type = type,
+    dpi = dpi,
+    height = height
   )
   img_data <- base64enc::dataURI(file = full_path, mime = "image/png")
   shinyjs::runjs(sprintf(JScode_screenshot, img_data, base_name))

@@ -191,7 +191,7 @@ lifeCycle <- function(data,
            bty = "n")
     
     text(max(all_years), max_annual * 1.05, 
-         sprintf("R\u00b2 = %.3f", R2), 
+         sprintf("R2 = %.3f", R2),
          adj = 1, cex = 0.9)
     
     # Plot 2: Cumulative Publications
@@ -249,7 +249,7 @@ lifeCycle <- function(data,
         fit_lm <- lm(fisher_pry_all[1:nrow(df)][valid_obs_fp] ~ df$PY[valid_obs_fp])
         r2_fp <- summary(fit_lm)$r.squared
         text(min(df$PY), max(fisher_pry_all[valid_fp], na.rm = TRUE), 
-             sprintf("R\u00b2 = %.3f", r2_fp), adj = 0, cex = 0.9)
+             sprintf("R2 = %.3f", r2_fp), adj = 0, cex = 0.9)
                  
       }
     }

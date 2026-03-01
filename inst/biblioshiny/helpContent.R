@@ -2636,6 +2636,228 @@ helpContent <- function() {
     </div>
     </body>"
 
+  bradfordLaw <-
+    "<body>
+  <div class='container'>
+  <h3>Bradford's Law of Scattering</h3>
+
+  <p><strong>Bradford's Law</strong> is one of the foundational laws of bibliometrics, first formulated by Samuel C. Bradford in 1934. The law describes the phenomenon of <em>concentration and dispersion</em> in scientific publishing: a small number of core journals account for a disproportionately large share of the literature on a given topic, while the remaining literature is scattered across an increasingly large number of peripheral journals.</p>
+
+  <br>
+
+  <h4>The Original Formulation</h4>
+  <p>Bradford observed that if scientific journals are ranked in order of decreasing productivity on a given subject and then divided into groups (zones) that each contain approximately the same number of articles, the number of journals in successive zones increases geometrically. Specifically, if the journals are partitioned into three zones such that each zone contains roughly one-third of the total articles, the number of journals in each zone follows the ratio:</p>
+
+  <p style='text-align:center; font-size:18px;'><strong>1 : k : k&sup2;</strong></p>
+
+  <p>where <strong>k</strong> is the <strong>Bradford multiplier</strong>. The first zone (Zone 1, or the &ldquo;core&rdquo;) contains a small number of highly productive journals; the second zone (Zone 2) contains a larger number of moderately productive journals; and the third zone (Zone 3, or the &ldquo;periphery&rdquo;) contains a very large number of journals that each contribute only one or a few articles.</p>
+
+  <br>
+
+  <h4>The Bradford Distribution</h4>
+  <p>More formally, the law can be expressed through the <strong>Bradford distribution</strong>. If sources are ranked in decreasing order of productivity (<em>n</em><sub>1</sub> &ge; <em>n</em><sub>2</sub> &ge; &hellip; &ge; <em>n</em><sub>S</sub>) and the cumulative number of articles is plotted against the logarithm of the source rank, the resulting curve &mdash; known as the <strong>Bradford bibliograph</strong> &mdash; shows a characteristic pattern: an initial concave region (corresponding to the core journals) followed by a linear region (corresponding to the intermediate and peripheral journals).</p>
+
+  <p>The linear portion of the curve indicates that:</p>
+
+  <p style='text-align:center; font-size:16px; background:#f8f9fa; padding:12px; border-radius:6px;'>
+  <strong>C(r) = a + b &middot; log(r)</strong></p>
+
+  <p>where <strong>C(r)</strong> is the cumulative number of articles contributed by the top <em>r</em> sources, and <em>a</em> and <em>b</em> are constants estimated via linear regression.</p>
+
+  <p>This logarithmic relationship implies that each successive &ldquo;doubling&rdquo; of the number of journals yields a roughly constant increment in the total number of articles &mdash; a fundamental feature of the skewed, heavy-tailed distributions that pervade bibliometric data.</p>
+
+  <br>
+
+  <h4>Practical Interpretation of Bradford Zones</h4>
+  <p>Biblioshiny implements Bradford's Law by partitioning the sources in the collection into zones. The partition serves multiple analytical and practical purposes:</p>
+
+  <ul>
+    <li><strong>Core zone (Zone 1):</strong> Contains the most productive journals &mdash; the &ldquo;essential&rdquo; outlets of the field. These are the journals that a researcher working in the domain should monitor regularly, as they collectively publish a substantial share of the relevant literature. For library acquisition policies, these journals represent the highest priority.</li>
+    <li><strong>Intermediate zone (Zone 2):</strong> Contains journals with moderate productivity. These outlets publish relevant articles with some regularity but are not exclusively devoted to the topic. Researchers may encounter relevant articles in these journals but would not rely on them as primary sources.</li>
+    <li><strong>Peripheral zone (Zone 3):</strong> Contains the long tail of journals that each contribute very few articles &mdash; often just one or two. These may be multidisciplinary venues, regional journals, or outlets in adjacent disciplines where the topic occasionally appears. Although individually these journals contribute little, collectively they account for a substantial share of the total literature.</li>
+  </ul>
+
+  <br>
+
+  <h4>Diagnostic Information from the Bradford Curve</h4>
+  <p>The shape of the Bradford curve provides diagnostic information about the field:</p>
+  <ul>
+    <li>A <strong>steep initial drop</strong> (with a small core zone) indicates <em>high concentration</em> &mdash; a field dominated by a few key journals.</li>
+    <li>A <strong>flatter curve</strong> indicates <em>greater dispersion</em> &mdash; a field where the literature is spread more evenly across many outlets.</li>
+    <li>The position of a particular journal along the curve reveals its role in the field's publication landscape: journals in the core zone are the field's &ldquo;home&rdquo; outlets, while journals in the periphery are incidental contributors.</li>
+  </ul>
+
+  <br>
+
+  <h4>Goodness-of-Fit Test</h4>
+  <p>To assess whether the empirical source distribution conforms to the theoretical Bradford distribution, Biblioshiny performs a <strong>Kolmogorov-Smirnov (KS) goodness-of-fit test</strong>. This test compares the empirical cumulative distribution of articles across sources with the theoretical distribution predicted by the fitted Bradford model.</p>
+
+  <ul>
+    <li><strong>R&sup2; (coefficient of determination):</strong> Measures how well the linear model C(r) = a + b &middot; log(r) fits the empirical data. Values close to 1 indicate an excellent fit.</li>
+    <li><strong>KS statistic (D):</strong> The maximum absolute difference between the empirical and theoretical cumulative distributions. Smaller values indicate a better fit.</li>
+    <li><strong>p-value:</strong> If <em>p</em> &ge; 0.05, the empirical distribution is consistent with Bradford's Law (we cannot reject the null hypothesis that the data follow the theoretical distribution). If <em>p</em> &lt; 0.05, there is a statistically significant deviation.</li>
+  </ul>
+
+  <br>
+
+  <h4>References</h4>
+
+  <p><strong>Bradford, S. C. (1934).</strong> <i>Sources of information on specific subjects.</i> <strong>Engineering</strong>, 137, 85&ndash;86.</p>
+
+  <p><strong>Brookes, B. C. (1969).</strong> <i>Bradford's law and the bibliography of science.</i> <strong>Nature</strong>, 224(5223), 953&ndash;956. <a href='https://doi.org/10.1038/224953a0' target='_blank'>https://doi.org/10.1038/224953a0</a></p>
+
+  <p><strong>Egghe, L. (1986).</strong> <i>The dual of Bradford's law.</i> <strong>Journal of the American Society for Information Science</strong>, 37(4), 246&ndash;255. <a href='https://doi.org/10.1002/(SICI)1097-4571(198607)37:4&lt;246::AID-ASI10&gt;3.0.CO;2-F' target='_blank'>https://doi.org/10.1002/(SICI)1097-4571(198607)37:4&lt;246::AID-ASI10&gt;3.0.CO;2-F</a></p>
+
+  <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    </div>
+    </body>"
+
+  lotkaLaw <-
+    "<body>
+  <div class='container'>
+  <h3>Lotka's Law of Scientific Productivity</h3>
+
+  <p><strong>Lotka's Law</strong> is one of the foundational laws of bibliometrics, first formulated by Alfred J. Lotka in 1926. The law describes the <em>frequency distribution of scientific productivity</em> among authors: a large proportion of authors publish only one paper, while a small proportion are highly prolific.</p>
+
+  <br>
+
+  <h4>The Inverse Power Law</h4>
+  <p>Lotka observed that the number of authors who publish exactly <em>n</em> articles follows an inverse power law:</p>
+
+  <p style='text-align:center; font-size:16px; background:#f8f9fa; padding:12px; border-radius:6px;'>
+  <strong>f(n) = C / n<sup>&beta;</sup></strong></p>
+
+  <p>where:</p>
+  <ul>
+    <li><strong>f(n)</strong>: the proportion of authors who publish exactly <em>n</em> articles</li>
+    <li><strong>C</strong>: a constant (approximately equal to the proportion of authors with one publication)</li>
+    <li><strong>&beta;</strong>: the productivity exponent (slope in log-log space)</li>
+  </ul>
+
+  <p>In Lotka's original formulation, <strong>&beta; = 2</strong>, meaning that approximately <em>1/n&sup2;</em> of the authors who publish one paper will publish <em>n</em> papers. For example, about 1/4 of authors with one paper will have two papers, about 1/9 will have three papers, and so on.</p>
+
+  <br>
+
+  <h4>Estimation Method</h4>
+  <p>Biblioshiny estimates the parameters of Lotka's Law using <strong>linear regression in log-log space</strong>:</p>
+
+  <p style='text-align:center; font-size:16px; background:#f8f9fa; padding:12px; border-radius:6px;'>
+  <strong>log<sub>10</sub>(f) = log<sub>10</sub>(C) &minus; &beta; &middot; log<sub>10</sub>(n)</strong></p>
+
+  <p>This provides the estimated &beta; and C coefficients, along with the R&sup2; goodness-of-fit measure. The plot displays three curves:</p>
+  <ul>
+    <li><strong>Solid black line</strong>: the empirical distribution observed in the data</li>
+    <li><strong>Dashed red line</strong>: the theoretical Lotka's Law with &beta; = 2</li>
+    <li><strong>Dot-dash blue line</strong>: the fitted model using the estimated &beta;</li>
+  </ul>
+
+  <br>
+
+  <h4>Kolmogorov-Smirnov Goodness-of-Fit Tests</h4>
+  <p>Two Kolmogorov-Smirnov (KS) tests are performed to assess how well the data conform to Lotka's Law:</p>
+
+  <ul>
+    <li><strong>Test 1 &ndash; Theoretical (&beta; = 2):</strong> Compares the empirical distribution to the classical Lotka's Law. A p-value &ge; 0.05 indicates the data are consistent with the original formulation.</li>
+    <li><strong>Test 2 &ndash; Fitted (empirical &beta;):</strong> Compares the empirical distribution to the fitted model. A p-value &ge; 0.05 indicates the generalized inverse power law provides a good fit, even if &beta; &ne; 2.</li>
+  </ul>
+
+  <br>
+
+  <h4>Interpreting the Results</h4>
+  <ul>
+    <li><strong>&beta; &asymp; 2:</strong> The field follows the classical Lotka's Law. Author productivity is distributed according to the original inverse-square pattern.</li>
+    <li><strong>&beta; &gt; 2:</strong> Productivity is <em>more concentrated</em> than predicted by Lotka &mdash; the proportion of prolific authors drops off more steeply. This is common in specialized or niche fields.</li>
+    <li><strong>&beta; &lt; 2:</strong> Productivity is <em>more dispersed</em> than predicted &mdash; there are relatively more prolific authors than expected. This may occur in established, broad fields with sustained research communities.</li>
+    <li><strong>High R&sup2;:</strong> The inverse power law model fits well, confirming that the skewed productivity distribution is a robust feature of the field.</li>
+    <li><strong>Low R&sup2;:</strong> The data may deviate from a simple power law, possibly due to collaboration patterns, multi-authorship conventions, or data artifacts.</li>
+  </ul>
+
+  <br>
+
+  <h4>References</h4>
+
+  <p><strong>Lotka, A. J. (1926).</strong> <i>The frequency distribution of scientific productivity.</i> <strong>Journal of the Washington Academy of Sciences</strong>, 16(12), 317&ndash;323.</p>
+
+  <p><strong>Pao, M. L. (1985).</strong> <i>Lotka's law: A testing procedure.</i> <strong>Information Processing &amp; Management</strong>, 21(4), 305&ndash;320. <a href='https://doi.org/10.1016/0306-4573(85)90055-X' target='_blank'>https://doi.org/10.1016/0306-4573(85)90055-X</a></p>
+
+  <p><strong>Nicholls, P. T. (1986).</strong> <i>Empirical validation of Lotka's law.</i> <strong>Information Processing &amp; Management</strong>, 22(5), 417&ndash;419. <a href='https://doi.org/10.1016/0306-4573(86)90007-0' target='_blank'>https://doi.org/10.1016/0306-4573(86)90007-0</a></p>
+
+  <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    </div>
+    </body>"
+
+  rpys <-
+    "<body>
+  <div class='container'>
+  <h3>Reference Publication Year Spectroscopy (RPYS)</h3>
+
+  <p><strong>Reference Publication Year Spectroscopy (RPYS)</strong> is a method for detecting the <em>historical roots</em> of research fields, topics, or researchers by analysing the publication years of the cited references in a body of literature. The method was introduced by Marx et al. (2014) and later extended by Thor et al. (2018).</p>
+
+  <br>
+
+  <h4>The Spectrogram</h4>
+  <p>The RPYS spectrogram plots two curves:</p>
+  <ul>
+    <li><strong>Number of Cited References (black line):</strong> The total count of cited references for each reference publication year (RPY). Peaks in this curve indicate years in which an unusually large number of references were published &mdash; often pointing to seminal works.</li>
+    <li><strong>Deviation from the 5-Year Median (red line):</strong> The difference between the observed count and the median count over a 5-year window. This smoothed curve highlights peaks more clearly by removing background trends. The default window uses the centred 5-year median (Y&minus;2 to Y+2) as proposed by Marx et al. (2014). An alternative backward 5-year median (Y&minus;4 to Y) is also available.</li>
+  </ul>
+
+  <p>The <strong>top 10 peaks</strong> of the deviation curve are automatically identified and labelled in the spectrogram. These peaks correspond to the most influential reference publication years.</p>
+
+  <br>
+
+  <h4>Types of Citation Sequences</h4>
+  <p>Following the methodology of Thor et al. (2018), Biblioshiny applies <strong>Configural Frequency Analysis (CFA)</strong> to classify the citation dynamics of individual cited references over time. For each cited reference, CRExplorer computes standardised residuals (z-scores) that compare the observed citation counts with expected values under a model of independence. Based on the z-scores, each citing year is classified as:</p>
+  <ul>
+    <li><strong>&ldquo;+&rdquo;</strong> (above average): z &gt; 1</li>
+    <li><strong>&ldquo;o&rdquo;</strong> (on average): &minus;1 &le; z &le; 1</li>
+    <li><strong>&ldquo;&minus;&rdquo;</strong> (below average): z &lt; &minus;1</li>
+  </ul>
+
+  <p>The resulting sequence of symbols across citing years characterises the citation trajectory of each reference. Four types of sequences are identified:</p>
+
+  <table style='width:100%; border-collapse:collapse; margin-top:10px; margin-bottom:10px;'>
+  <tr style='background:#2c3e50; color:white;'>
+    <th style='padding:10px; text-align:left; width:20%;'>Type</th>
+    <th style='padding:10px; text-align:left;'>Definition</th>
+  </tr>
+  <tr style='background:#f8f9fa;'>
+    <td style='padding:10px; font-weight:bold;'>Sleeping Beauty</td>
+    <td style='padding:10px;'>Publication cited <em>below average</em> (&ldquo;&minus;&rdquo;; z &lt; &minus;1) in at least <strong>two of the first three</strong> citing years, and <em>above average</em> (&ldquo;+&rdquo;; z &gt; 1) in at least one of the following citing years.</td>
+  </tr>
+  <tr>
+    <td style='padding:10px; font-weight:bold;'>Constant Performer</td>
+    <td style='padding:10px;'>Publication cited in more than <strong>80%</strong> of the citing years at least once. In more than 80% of the citing years it has been cited at least on the average level (&ldquo;o&rdquo;; &minus;1 &le; z &le; 1) or above (&ldquo;+&rdquo;; z &gt; 1).</td>
+  </tr>
+  <tr style='background:#f8f9fa;'>
+    <td style='padding:10px; font-weight:bold;'>Hot Paper</td>
+    <td style='padding:10px;'>Publication cited <em>above average</em> (&ldquo;+&rdquo;; z &gt; 1) in at least <strong>two of the first three</strong> citing years after publication.</td>
+  </tr>
+  <tr>
+    <td style='padding:10px; font-weight:bold;'>Life Cycle</td>
+    <td style='padding:10px;'>Publication cited in at least <strong>two of the first four</strong> years on the average level (&ldquo;o&rdquo;) or lower (&ldquo;&minus;&rdquo;), in at least <strong>two</strong> of the following years <em>above average</em> (&ldquo;+&rdquo;; z &gt; 1), and in the <strong>last three</strong> years on the average level (&ldquo;o&rdquo;) or lower (&ldquo;&minus;&rdquo;).</td>
+  </tr>
+  </table>
+
+  <p>A single cited reference may belong to more than one type. When this occurs, all applicable types are reported.</p>
+
+  <br>
+
+  <h4>References</h4>
+
+  <p><strong>Marx, W., Bornmann, L., Barth, A., &amp; Leydesdorff, L. (2014).</strong> <i>Detecting the historical roots of research fields by reference publication year spectroscopy (RPYS).</i> <strong>Journal of the Association for Information Science and Technology</strong>, 65(4), 751&ndash;764. <a href='https://doi.org/10.1002/asi.23089' target='_blank'>https://doi.org/10.1002/asi.23089</a></p>
+
+  <p><strong>Thor, A., Bornmann, L., Marx, W., &amp; Mutz, R. (2018).</strong> <i>Identifying single influential publications in a research field: New analysis opportunities of the CRExplorer.</i> <strong>Scientometrics</strong>, 116, 591&ndash;608. <a href='https://doi.org/10.1007/s11192-018-2733-7' target='_blank'>https://doi.org/10.1007/s11192-018-2733-7</a></p>
+
+  <p><strong>Barth, A., Marx, W., Bornmann, L., &amp; Mutz, R. (2014).</strong> <i>On the origins and the historical roots of the Higgs boson research from a bibliometric perspective.</i> <strong>The European Physical Journal Plus</strong>, 129, 111. <a href='https://doi.org/10.1140/epjp/i2014-14111-6' target='_blank'>https://doi.org/10.1140/epjp/i2014-14111-6</a></p>
+
+  <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    </div>
+    </body>"
+
   return(list(
     biblioAI = biblioAI,
     saas = saas,
@@ -2657,6 +2879,9 @@ helpContent <- function() {
     factorialAnalysis = factorialAnalysis,
     coCitationNetwork = coCitationNetwork,
     historiograph = historiograph,
-    trendTopics = trendTopics
+    trendTopics = trendTopics,
+    bradfordLaw = bradfordLaw,
+    lotkaLaw = lotkaLaw,
+    rpys = rpys
   ))
 }

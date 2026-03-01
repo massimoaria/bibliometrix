@@ -12,18 +12,28 @@ bradford(M)
 \value{
 The function \code{bradford} returns a list containing the following objects:
 \tabular{lll}{
-\code{table}  \tab   \tab a dataframe with the source distribution partitioned in the three zones\cr
-\code{graph}   \tab   \tab the source distribution plot in ggplot2 format}
+\code{table}       \tab   \tab a dataframe with the source distribution partitioned in the three zones\cr
+\code{graph}       \tab   \tab the Bradford bibliograph plot in ggplot2 format\cr
+\code{graph_shiny} \tab   \tab the Bradford bibliograph plot for biblioshiny (without logo)\cr
+\code{zoneSummary} \tab   \tab a dataframe summarizing the three Bradford zones\cr
+\code{stat}        \tab   \tab a list of statistical results (coefficients, R2, KS test, Bradford multiplier)}
 }
 \description{
-It estimates and draws the Bradford's law source distribution.
+It estimates Bradford's law source distribution and tests the goodness of fit.
 }
 \details{
-Bradford's law is a pattern first described by (\cite{Samuel C. Bradford, 1934}) that estimates the exponentially diminishing returns
-of searching for references in science journals.
+Bradford's Law of Scattering, first formulated by Samuel C. Bradford in 1934,
+describes the phenomenon of concentration and dispersion in scientific publishing:
+a small number of core journals account for a disproportionately large share of the
+literature on a given topic, while the remaining literature is scattered across an
+increasingly large number of peripheral journals.\cr\cr
 
-One formulation is that if journals in a field are sorted by number of articles into three groups, each with about one-third of all articles,
-then the number of journals in each group will be proportional to 1:n:n2.\cr\cr
+If journals are ranked in decreasing order of productivity and partitioned into three
+zones, each containing roughly one-third of the total articles, the number of journals
+in each zone follows the ratio 1:n:n^2, where n is the Bradford multiplier.\cr\cr
+
+The Bradford distribution models the cumulative number of articles C(r) contributed
+by the top r sources as: C(r) = a + b * log(r)\cr\cr
 
 Reference:\cr
 Bradford, S. C. (1934). Sources of information on specific subjects. Engineering, 137, 85-86.\cr

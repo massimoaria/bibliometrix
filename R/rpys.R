@@ -201,11 +201,10 @@ rpys <- function(
 
   x <- c(min(RPYS$Year), min(RPYS$Year) + diff(range(RPYS$Year)) * 0.125) + 1
   y <- c(
-    min(c(RPYS$Citations, RPYS$diffMedian)),
-    min(c(RPYS$Citations, RPYS$diffMedian)) +
-      diff(range(c(RPYS$Citations, RPYS$diffMedian))) * 0.125
-  ) *
-    1.05
+    max(c(RPYS$Citations, RPYS$diffMedian)) -
+      diff(range(c(RPYS$Citations, RPYS$diffMedian))) * 0.125,
+    max(c(RPYS$Citations, RPYS$diffMedian))
+  )
 
   RPYS <- RPYS %>%
     left_join(

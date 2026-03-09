@@ -20,6 +20,242 @@ content_analysis_server <- function(input, output, session, values) {
     if (!is.null(lhs) && length(lhs) > 0) lhs else rhs
   }
 
+  # Enhance citation network layout for better readability
+  # Post-processes the visNetwork from create_citation_network() with:
+  # - max_nodes_per_section filtering
+  # - community-aware Fruchterman-Reingold layout
+  # - degree-proportional font sizing
+  # - label overlap removal
+  enhance_citation_network <- function(network, spacing = 5,
+                                       max_nodes_per_section = NULL,
+                                       node_size = 5,
+                                       label_size = 5,
+                                       repulsion = 5,
+                                       edge_max_distance = NULL) {
+    if (is.null(network)) return(NULL)
+
+    # Extract nodes and edges from visNetwork object
+    nodes <- network$x$nodes
+    edges <- network$x$edges
+    stats_attr <- attr(network, "stats")
+
+    if (is.null(nodes) || nrow(nodes) == 0) return(network)
+
+    # --- Filter edges by max distance ---
+    if (!is.null(edge_max_distance) && "distance" %in% names(edges)) {
+      edges <- edges[edges$distance <= edge_max_distance, ]
+      if (nrow(edges) == 0) return(NULL)
+    }
+
+    # --- Increase edge transparency ---
+    if ("color" %in% names(edges)) {
+      edges$color <- gsub(
+        "rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*[0-9.]+\\)",
+        "rgba(\\1, \\2, \\3, 0.12)",
+        edges$color
+      )
+    }
+
+    # --- Max nodes per section filtering ---
+    if (!is.null(max_nodes_per_section) && max_nodes_per_section > 0 &&
+        "primary_section" %in% names(nodes)) {
+      nodes <- nodes %>%
+        dplyr::group_by(primary_section) %>%
+        dplyr::arrange(dplyr::desc(connections), .by_group = TRUE) %>%
+        dplyr::slice_head(n = max_nodes_per_section) %>%
+        dplyr::ungroup() %>%
+        as.data.frame(stringsAsFactors = FALSE)
+
+      # Filter edges to only valid nodes
+      valid_ids <- nodes$id
+      edges <- edges[edges$from %in% valid_ids & edges$to %in% valid_ids, ]
+
+      if (nrow(edges) == 0) return(NULL)
+
+      # Recalculate connections after filtering
+      edge_counts <- c(edges$from, edges$to)
+      conn_table <- as.data.frame(table(edge_counts), stringsAsFactors = FALSE)
+      names(conn_table) <- c("id", "connections")
+      conn_table$id <- as.integer(conn_table$id)
+      conn_table$connections <- as.integer(conn_table$connections)
+      nodes$connections <- conn_table$connections[match(nodes$id, conn_table$id)]
+      nodes$connections[is.na(nodes$connections)] <- 0
+      nodes <- nodes[nodes$connections > 0, ]
+      valid_ids <- nodes$id
+      edges <- edges[edges$from %in% valid_ids & edges$to %in% valid_ids, ]
+    }
+
+    if (nrow(nodes) == 0 || nrow(edges) == 0) return(NULL)
+
+    # --- Node size scaling (sqrt for compressed range) ---
+    node_size <- max(1, min(10, node_size))
+    size_mult <- node_size / 5
+
+    scalemin <- round(10 * size_mult + 5)
+    scalemax <- round(35 * size_mult + 15)
+    conn_min <- min(nodes$connections)
+    conn_max <- max(nodes$connections)
+
+    if (conn_max > conn_min) {
+      # sqrt scale: compresses high values, expands low values
+      norm_conn <- (nodes$connections - conn_min) / (conn_max - conn_min)
+      font_size <- sqrt(norm_conn) * (scalemax - scalemin) + scalemin
+    } else {
+      font_size <- rep((scalemin + scalemax) / 2, nrow(nodes))
+    }
+    font_size <- pmax(scalemin, pmin(scalemax, font_size))
+
+    label_size <- max(1, min(10, label_size))
+    label_mult <- label_size / 5
+    nodes$font.size <- font_size * 0.6 * label_mult
+    nodes$size <- font_size * 0.5 * size_mult
+    nodes$font.vadjust <- -0.7 * nodes$font.size
+
+    # Font opacity proportional to size (sqrt already applied above)
+    opacity_range <- (font_size - min(font_size)) / max(1, diff(range(font_size)))
+    font_opacity <- opacity_range * 0.6 + 0.4
+    nodes$font.color <- sapply(font_opacity, function(a) {
+      grDevices::adjustcolor("black", alpha.f = a)
+    })
+
+    # --- Build igraph and apply community repulsion to edge weights ---
+    ig <- igraph::graph_from_data_frame(
+      d = edges[, c("from", "to")],
+      directed = FALSE,
+      vertices = data.frame(name = nodes$id)
+    )
+
+    spacing <- max(1, min(10, spacing))
+    spacing_mult <- spacing / 5
+    repulsion <- max(1, min(10, repulsion))
+
+    # Apply community repulsion via edge weight manipulation (same as biblioshiny co-occurrence)
+    if ("primary_section" %in% names(nodes)) {
+      node_sections <- stats::setNames(nodes$primary_section, as.character(nodes$id))
+      n_nodes <- nrow(nodes)
+      n_sections <- length(unique(nodes$primary_section))
+      section_sizes <- table(nodes$primary_section)
+      avg_section_size <- mean(section_sizes)
+
+      # Adaptive repulsion strength (from biblioshiny networkPlot.R)
+      community.repulsion <- repulsion / 10  # normalize to 0-1
+      scale_factor <- log10(n_nodes + 10) / log10(100)
+      community_factor <- 1 + (n_sections - 2) * 0.1
+      community_factor <- max(0.5, min(community_factor, 2))
+      x <- community.repulsion * 10
+      sigmoid_transform <- x / (1 + x)
+      repulsion_strength <- sigmoid_transform * scale_factor * community_factor
+
+      # Apply weights per edge
+      edge_from_sec <- node_sections[as.character(edges$from)]
+      edge_to_sec <- node_sections[as.character(edges$to)]
+      same_section <- edge_from_sec == edge_to_sec
+
+      original_weights <- if (!is.null(igraph::E(ig)$weight)) {
+        igraph::E(ig)$weight
+      } else {
+        rep(1, nrow(edges))
+      }
+
+      new_weights <- original_weights
+      # Intra-section: moderate increase with sub-linear growth
+      intra_mult <- 1 + (repulsion_strength^0.7) * 1.5
+      new_weights[same_section] <- original_weights[same_section] * intra_mult
+      # Inter-section: gradual reduction with attenuated exponential
+      inter_div <- 1 + exp(repulsion_strength * 1.2) - 1
+      new_weights[!same_section] <- original_weights[!same_section] / inter_div
+
+      igraph::E(ig)$weight <- new_weights
+    }
+
+    set.seed(values$random_seed %||% 1234)
+    coords <- igraph::layout_with_fr(ig, niter = 1500)
+    coords <- igraph::norm_coords(coords, xmin = -1, xmax = 1, ymin = -1, ymax = 1)
+
+    # --- Post-layout: spread nodes within each cluster ---
+    if ("primary_section" %in% names(nodes)) {
+      spread_factor <- 0.15 * spacing_mult
+      sections <- unique(nodes$primary_section)
+      for (sec in sections) {
+        idx <- which(nodes$primary_section == sec)
+        if (length(idx) > 1) {
+          sec_center <- colMeans(coords[idx, , drop = FALSE])
+          coords[idx, 1] <- sec_center[1] + (coords[idx, 1] - sec_center[1]) * (1 + spread_factor)
+          coords[idx, 2] <- sec_center[2] + (coords[idx, 2] - sec_center[2]) * (1 + spread_factor)
+        }
+      }
+      coords <- igraph::norm_coords(coords, xmin = -1, xmax = 1, ymin = -1, ymax = 1)
+    }
+
+    # --- Label overlap removal ---
+    threshold <- 0.05 * spacing_mult
+    w <- data.frame(
+      x = coords[, 1],
+      y = coords[, 2] / 2,
+      label = nodes$label,
+      dotSize = font_size,
+      stringsAsFactors = FALSE
+    )
+
+    labeled <- w[w$label != "", , drop = FALSE]
+    labels_to_remove <- character(0)
+    if (nrow(labeled) >= 2) {
+      d <- as.matrix(stats::dist(labeled[, c("x", "y")], method = "manhattan"))
+      diag(d) <- Inf
+      while (TRUE) {
+        min_idx <- which(d == min(d), arr.ind = TRUE)[1, ]
+        if (d[min_idx[1], min_idx[2]] >= threshold) break
+        i <- min_idx[1]; j <- min_idx[2]
+        remove_idx <- if (labeled$dotSize[i] >= labeled$dotSize[j]) j else i
+        labels_to_remove <- c(labels_to_remove, labeled$label[remove_idx])
+        d[remove_idx, ] <- Inf
+        d[, remove_idx] <- Inf
+      }
+    }
+    nodes$label[nodes$label %in% labels_to_remove] <- ""
+
+    # --- Rebuild visNetwork with improved layout ---
+    network_enhanced <- visNetwork::visNetwork(
+      nodes, edges,
+      type = "full", smooth = TRUE, physics = FALSE
+    ) %>%
+      visNetwork::visNodes(
+        shadow = TRUE, shape = "dot",
+        font = list(
+          color = nodes$font.color,
+          size = nodes$font.size,
+          vadjust = nodes$font.vadjust
+        )
+      ) %>%
+      visNetwork::visIgraphLayout(
+        layout = "layout.norm",
+        layoutMatrix = coords,
+        type = "full"
+      ) %>%
+      visNetwork::visEdges(smooth = list(type = "horizontal")) %>%
+      visNetwork::visOptions(
+        highlightNearest = list(enabled = TRUE, hover = TRUE, degree = 1),
+        nodesIdSelection = TRUE
+      ) %>%
+      visNetwork::visInteraction(
+        dragNodes = TRUE, dragView = TRUE,
+        hideEdgesOnDrag = TRUE, zoomView = TRUE, zoomSpeed = 0.15
+      ) %>%
+      visNetwork::visPhysics(enabled = FALSE)
+
+    # Update stats
+    if (!is.null(stats_attr)) {
+      stats_attr$n_nodes <- nrow(nodes)
+      stats_attr$n_edges <- nrow(edges)
+      stats_attr$section_distribution <- nodes %>%
+        dplyr::count(primary_section) %>%
+        dplyr::arrange(dplyr::desc(n))
+    }
+    attr(network_enhanced, "stats") <- stats_attr
+
+    return(network_enhanced)
+  }
+
   # Cartella temporanea per i PDF
   tmpdir <- tempdir()
 
@@ -834,12 +1070,35 @@ content_analysis_server <- function(input, output, session, values) {
           !is.null(values$analysis_results$network_data) &&
             nrow(values$analysis_results$network_data) > 0
         ) {
-          values$network_plot <- create_citation_network(
+          raw_network <- create_citation_network(
             values$analysis_results,
             max_distance = input$max_distance,
             show_labels = TRUE
           )
+          values$network_plot <- enhance_citation_network(
+            raw_network,
+            spacing = input$network_spacing %||% 5,
+            max_nodes_per_section = input$network_max_nodes %||% 10,
+            node_size = input$network_node_size %||% 5,
+            label_size = input$network_label_size %||% 5,
+            repulsion = input$network_repulsion %||% 5,
+            edge_max_distance = input$network_edge_distance %||% 1000
+          )
         }
+
+        # Describe citation clusters
+        tryCatch(
+          {
+            values$cluster_description <- describe_citation_clusters(
+              values$analysis_results,
+              top_n = 10,
+              ngram_range = c(1, 2)
+            )
+          },
+          error = function(e) {
+            values$cluster_description <- NULL
+          }
+        )
 
         preview_visible(FALSE)
 
@@ -1385,10 +1644,19 @@ Avg sentence length: %.1f words",
           !is.null(values$analysis_results$network_data) &&
             nrow(values$analysis_results$network_data) > 0
         ) {
-          values$network_plot <- create_citation_network(
+          raw_network <- create_citation_network(
             values$analysis_results,
             max_distance = input$max_distance,
             show_labels = TRUE
+          )
+          values$network_plot <- enhance_citation_network(
+            raw_network,
+            spacing = input$network_spacing %||% 5,
+            max_nodes_per_section = input$network_max_nodes %||% 10,
+            node_size = input$network_node_size %||% 5,
+            label_size = input$network_label_size %||% 5,
+            repulsion = input$network_repulsion %||% 5,
+            edge_max_distance = input$network_edge_distance %||% 1000
           )
         }
 
@@ -1696,6 +1964,41 @@ Avg sentence length: %.1f words",
       ) %>%
         visOptions(highlightNearest = FALSE) %>%
         visInteraction(dragNodes = FALSE, dragView = FALSE, zoomView = FALSE)
+    }
+  })
+
+  # Update network layout with new spacing
+  observeEvent(input$update_network_layout, {
+    req(values$analysis_results)
+    if (
+      !is.null(values$analysis_results$network_data) &&
+        nrow(values$analysis_results$network_data) > 0
+    ) {
+      tryCatch(
+        {
+          raw_network <- create_citation_network(
+            values$analysis_results,
+            max_distance = input$max_distance,
+            show_labels = TRUE
+          )
+          values$network_plot <- enhance_citation_network(
+            raw_network,
+            spacing = input$network_spacing %||% 5,
+            max_nodes_per_section = input$network_max_nodes %||% 10,
+            node_size = input$network_node_size %||% 5,
+            label_size = input$network_label_size %||% 5,
+            repulsion = input$network_repulsion %||% 5,
+            edge_max_distance = input$network_edge_distance %||% 1000
+          )
+        },
+        error = function(e) {
+          showNotification(
+            paste("Error updating layout:", e$message),
+            type = "error",
+            duration = 4
+          )
+        }
+      )
     }
   })
 
@@ -2090,6 +2393,525 @@ Avg sentence length: %.1f words",
       } else {
         write.csv(
           data.frame(message = "No word trends data available"),
+          file,
+          row.names = FALSE
+        )
+      }
+    }
+  )
+
+  # ===========================================
+  # TAB 4: CITATION CLUSTERS
+  # ===========================================
+
+  # Check if cluster data is available
+  output$clusters_available <- reactive({
+    return(
+      !is.null(values$cluster_description) &&
+        !is.null(values$cluster_description$cluster_descriptions) &&
+        nrow(values$cluster_description$cluster_descriptions) > 0
+    )
+  })
+  outputOptions(output, "clusters_available", suspendWhenHidden = FALSE)
+
+  # Cluster Summary Table
+  output$cluster_summary_table <- renderUI({
+    req(values$cluster_description)
+    summary_data <- values$cluster_description$cluster_summary
+    section_colors <- values$analysis_results$section_colors
+
+    cards <- lapply(seq_len(nrow(summary_data)), function(i) {
+      row <- summary_data[i, ]
+      sec_color <- if (
+        !is.null(section_colors) && row$section %in% names(section_colors)
+      ) {
+        section_colors[row$section]
+      } else {
+        "#2E86AB"
+      }
+
+      # Split top terms and create styled badges
+      terms <- trimws(strsplit(row$top_terms, ",")[[1]])
+      term_badges <- lapply(terms, function(term) {
+        tags$span(
+          term,
+          style = paste0(
+            "display: inline-block; padding: 3px 8px; margin: 2px;",
+            "background-color: ", sec_color, "22;",
+            "color: ", sec_color, ";",
+            "border: 1px solid ", sec_color, "55;",
+            "border-radius: 12px; font-size: 12px;"
+          )
+        )
+      })
+
+      div(
+        style = paste0(
+          "border-left: 4px solid ", sec_color, ";",
+          "padding: 12px 15px; margin-bottom: 12px;",
+          "background-color: #fafafa; border-radius: 0 5px 5px 0;"
+        ),
+        div(
+          style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;",
+          h5(
+            row$section,
+            style = paste0(
+              "margin: 0; color: ", sec_color, "; font-weight: bold;"
+            )
+          ),
+          tags$span(
+            paste0(row$n_references, " references"),
+            style = paste0(
+              "padding: 2px 10px; border-radius: 10px;",
+              "background-color: ", sec_color, ";",
+              "color: white; font-size: 12px; font-weight: 500;"
+            )
+          )
+        ),
+        div(
+          style = "margin-top: 5px;",
+          tags$strong("Top terms: ", style = "font-size: 12px; color: #666;"),
+          do.call(tagList, term_badges)
+        )
+      )
+    })
+
+    do.call(tagList, cards)
+  })
+
+  # TF-IDF Bar Chart - dynamic height container
+  # TF-IDF Bar Chart - dynamic height container (2-column grid)
+  output$cluster_tfidf_bars_ui <- renderUI({
+    req(values$cluster_description)
+    descriptions <- values$cluster_description$cluster_descriptions
+    n_sections <- length(unique(descriptions$section))
+    n_rows <- ceiling(n_sections / 2)
+    plot_height <- max(450, n_rows * 10 * 20 + 80)
+    plotlyOutput("cluster_tfidf_bars", height = paste0(plot_height, "px"))
+  })
+
+  output$cluster_tfidf_bars <- renderPlotly({
+    req(values$cluster_description)
+
+    cluster_desc <- values$cluster_description
+    section_colors <- values$analysis_results$section_colors
+    descriptions <- cluster_desc$cluster_descriptions
+
+    # Preserve section order
+    if (!is.null(cluster_desc$section_order)) {
+      all_sections <- cluster_desc$section_order
+      all_sections <- all_sections[all_sections %in% unique(descriptions$section)]
+    } else {
+      all_sections <- unique(descriptions$section)
+    }
+    n_sections <- length(all_sections)
+    n_cols <- 2
+    n_rows <- ceiling(n_sections / n_cols)
+
+    # Build subplots for each section
+    subplot_list <- list()
+    for (i in seq_along(all_sections)) {
+      sec <- all_sections[i]
+      sec_data <- descriptions %>%
+        dplyr::filter(section == sec) %>%
+        dplyr::arrange(tf_idf)
+
+      sec_color <- if (
+        !is.null(section_colors) && sec %in% names(section_colors)
+      ) {
+        section_colors[sec]
+      } else {
+        "#2E86AB"
+      }
+
+      ngram_type <- ifelse(sec_data$ngram_size == 1, "unigram", "bigram")
+      hover_text <- paste0(
+        "<b>Term:</b> ", sec_data$ngram, "<br>",
+        "<b>TF-IDF:</b> ", round(sec_data$tf_idf, 4), "<br>",
+        "<b>Count:</b> ", sec_data$n, "<br>",
+        "<b>Type:</b> ", ngram_type
+      )
+
+      p <- plotly::plot_ly(
+        data = sec_data,
+        y = ~factor(ngram, levels = ngram),
+        x = ~tf_idf,
+        type = "bar",
+        orientation = "h",
+        marker = list(color = sec_color),
+        text = hover_text,
+        hovertemplate = "%{text}<extra></extra>",
+        name = sec,
+        showlegend = FALSE
+      ) %>%
+        plotly::layout(
+          yaxis = list(
+            title = "",
+            tickfont = list(size = 10),
+            categoryorder = "array",
+            categoryarray = sec_data$ngram
+          )
+        )
+
+      subplot_list[[i]] <- p
+    }
+
+    # Pad with empty plots if odd number of sections
+    if (n_sections %% n_cols != 0) {
+      empty_p <- plotly::plot_ly(type = "bar") %>%
+        plotly::layout(
+          xaxis = list(visible = FALSE),
+          yaxis = list(visible = FALSE)
+        )
+      for (k in seq_len(n_cols - (n_sections %% n_cols))) {
+        subplot_list[[length(subplot_list) + 1]] <- empty_p
+      }
+    }
+
+    bar_plot_height <- max(450, n_rows * 10 * 20 + 80)
+
+    fig <- plotly::subplot(
+      subplot_list,
+      nrows = n_rows,
+      shareX = FALSE,
+      shareY = FALSE,
+      titleY = TRUE,
+      margin = 0.06
+    )
+    fig$height <- bar_plot_height
+
+    # Build annotations for section titles
+    section_annotations <- list()
+    for (i in seq_along(all_sections)) {
+      row_idx <- ceiling(i / n_cols)
+      col_idx <- ((i - 1) %% n_cols) + 1
+      x_pos <- (col_idx - 1) / n_cols + 0.5 / n_cols
+      y_pos <- 1 - (row_idx - 1) / n_rows + 0.005
+
+      ann_color <- if (
+        !is.null(section_colors) && all_sections[i] %in% names(section_colors)
+      ) {
+        section_colors[all_sections[i]]
+      } else {
+        "#2E86AB"
+      }
+
+      section_annotations[[i]] <- list(
+        text = paste0("<b>", all_sections[i], "</b>"),
+        xref = "paper", yref = "paper",
+        x = x_pos, y = y_pos,
+        xanchor = "center", yanchor = "bottom",
+        showarrow = FALSE,
+        font = list(size = 11, color = ann_color)
+      )
+    }
+
+    fig %>%
+      plotly::layout(
+        annotations = section_annotations,
+        plot_bgcolor = "#fafafa",
+        paper_bgcolor = "white",
+        margin = list(l = 120, r = 20, t = 30, b = 40)
+      ) %>%
+      plotly::config(
+        displayModeBar = TRUE,
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("select2d", "lasso2d", "autoScale2d"),
+        toImageButtonOptions = list(
+          format = "png",
+          filename = "tfidf_bars",
+          height = bar_plot_height,
+          width = 1200,
+          scale = 2
+        )
+      )
+  })
+
+  # TF-IDF Heatmap
+  output$cluster_tfidf_heatmap <- renderPlotly({
+    req(values$cluster_description)
+
+    cluster_desc <- values$cluster_description
+    section_colors <- values$analysis_results$section_colors
+    descriptions <- cluster_desc$cluster_descriptions
+
+    if (!is.null(cluster_desc$section_order)) {
+      all_sections <- cluster_desc$section_order
+      all_sections <- all_sections[all_sections %in% unique(descriptions$section)]
+    } else {
+      all_sections <- unique(descriptions$section)
+    }
+    n_sections <- length(all_sections)
+
+    # Get top terms for heatmap
+    top_terms_per_section <- descriptions %>%
+      dplyr::group_by(section) %>%
+      dplyr::slice_head(n = max(1, floor(20 / n_sections))) %>%
+      dplyr::ungroup()
+
+    heatmap_terms <- unique(top_terms_per_section$ngram)
+    if (length(heatmap_terms) < 20) {
+      remaining <- descriptions %>%
+        dplyr::filter(!ngram %in% heatmap_terms) %>%
+        dplyr::arrange(dplyr::desc(tf_idf)) %>%
+        dplyr::pull(ngram) %>%
+        unique()
+      heatmap_terms <- unique(c(heatmap_terms, remaining))[
+        seq_len(min(20, length(unique(c(heatmap_terms, remaining)))))
+      ]
+    }
+
+    # Build heatmap matrix
+    heatmap_data <- expand.grid(
+      ngram = heatmap_terms,
+      section = all_sections,
+      stringsAsFactors = FALSE
+    ) %>%
+      dplyr::left_join(
+        descriptions %>% dplyr::select(ngram, section, tf_idf),
+        by = c("ngram", "section")
+      ) %>%
+      dplyr::mutate(tf_idf = ifelse(is.na(tf_idf), 0, tf_idf))
+
+    heatmap_matrix <- matrix(0, nrow = length(heatmap_terms), ncol = n_sections)
+    rownames(heatmap_matrix) <- heatmap_terms
+    colnames(heatmap_matrix) <- all_sections
+
+    for (r in seq_along(heatmap_terms)) {
+      for (cc in seq_along(all_sections)) {
+        val <- heatmap_data$tf_idf[
+          heatmap_data$ngram == heatmap_terms[r] &
+            heatmap_data$section == all_sections[cc]
+        ]
+        if (length(val) > 0) heatmap_matrix[r, cc] <- val[1]
+      }
+    }
+
+    hover_matrix <- matrix("", nrow = length(heatmap_terms), ncol = n_sections)
+    for (r in seq_along(heatmap_terms)) {
+      for (cc in seq_along(all_sections)) {
+        hover_matrix[r, cc] <- paste0(
+          "<b>Term:</b> ", heatmap_terms[r], "<br>",
+          "<b>Section:</b> ", all_sections[cc], "<br>",
+          "<b>TF-IDF:</b> ", round(heatmap_matrix[r, cc], 4)
+        )
+      }
+    }
+
+    plotly::plot_ly(
+      x = all_sections,
+      y = heatmap_terms,
+      z = heatmap_matrix,
+      type = "heatmap",
+      colorscale = list(c(0, "white"), c(1, "#08519c")),
+      text = hover_matrix,
+      hovertemplate = "%{text}<extra></extra>",
+      colorbar = list(title = "TF-IDF")
+    ) %>%
+      plotly::layout(
+        xaxis = list(
+          title = list(
+            text = "Section",
+            font = list(size = 12, family = "Arial, sans-serif", color = "#333")
+          ),
+          tickangle = -45,
+          tickfont = list(size = 11),
+          categoryorder = "array",
+          categoryarray = all_sections
+        ),
+        yaxis = list(
+          title = list(
+            text = "Term",
+            font = list(size = 12, family = "Arial, sans-serif", color = "#333")
+          ),
+          tickfont = list(size = 10),
+          autorange = "reversed"
+        ),
+        plot_bgcolor = "#fafafa",
+        paper_bgcolor = "white",
+        margin = list(l = 140, r = 40, t = 20, b = 100)
+      ) %>%
+      plotly::config(
+        displayModeBar = TRUE,
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("select2d", "lasso2d", "autoScale2d"),
+        toImageButtonOptions = list(
+          format = "png",
+          filename = "tfidf_heatmap",
+          height = 600,
+          width = 1000,
+          scale = 2
+        )
+      )
+  })
+
+  # References per Section Bar Chart
+  output$cluster_refs_per_section <- renderPlotly({
+    req(values$cluster_description)
+
+    cluster_desc <- values$cluster_description
+    section_colors <- values$analysis_results$section_colors
+    summary_data <- cluster_desc$cluster_summary
+
+    if (!is.null(cluster_desc$section_order)) {
+      all_sections <- cluster_desc$section_order
+      all_sections <- all_sections[all_sections %in% summary_data$section]
+    } else {
+      all_sections <- summary_data$section
+    }
+
+    ref_counts <- summary_data %>%
+      dplyr::mutate(section = factor(section, levels = all_sections)) %>%
+      dplyr::arrange(section) %>%
+      dplyr::mutate(section = as.character(section))
+
+    bar_colors <- sapply(ref_counts$section, function(s) {
+      if (!is.null(section_colors) && s %in% names(section_colors)) {
+        section_colors[s]
+      } else {
+        "#CCCCCC"
+      }
+    })
+
+    hover_refs <- paste0(
+      "<b>Section:</b> ", ref_counts$section, "<br>",
+      "<b>References:</b> ", ref_counts$n_references
+    )
+
+    plotly::plot_ly(
+      data = ref_counts,
+      x = ~section,
+      y = ~n_references,
+      type = "bar",
+      marker = list(color = bar_colors),
+      text = ~n_references,
+      textposition = "outside",
+      textfont = list(size = 12, color = "#333"),
+      hovertext = hover_refs,
+      hovertemplate = "%{hovertext}<extra></extra>"
+    ) %>%
+      plotly::layout(
+        xaxis = list(
+          title = list(
+            text = "Section",
+            font = list(size = 12, family = "Arial, sans-serif", color = "#333")
+          ),
+          tickangle = -45,
+          gridcolor = "#e0e0e0",
+          categoryorder = "array",
+          categoryarray = all_sections
+        ),
+        yaxis = list(
+          title = list(
+            text = "Number of References",
+            font = list(size = 12, family = "Arial, sans-serif", color = "#333")
+          ),
+          gridcolor = "#e0e0e0"
+        ),
+        plot_bgcolor = "#fafafa",
+        paper_bgcolor = "white",
+        margin = list(l = 60, r = 40, t = 20, b = 100)
+      ) %>%
+      plotly::config(
+        displayModeBar = TRUE,
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("select2d", "lasso2d", "autoScale2d"),
+        toImageButtonOptions = list(
+          format = "png",
+          filename = "references_per_section",
+          height = 600,
+          width = 1000,
+          scale = 2
+        )
+      )
+  })
+
+  # Detailed cluster references table
+  output$cluster_references_detail <- renderUI({
+    req(values$cluster_description)
+
+    cluster_refs <- values$cluster_description$cluster_references
+    section_colors <- values$analysis_results$section_colors
+    section_order <- values$cluster_description$section_order
+
+    # Order sections
+    sections <- if (!is.null(section_order)) {
+      section_order[section_order %in% unique(cluster_refs$section)]
+    } else {
+      unique(cluster_refs$section)
+    }
+
+    section_panels <- lapply(sections, function(sec) {
+      sec_refs <- cluster_refs %>%
+        dplyr::filter(section == sec) %>%
+        dplyr::distinct(ref_full_text) %>%
+        dplyr::arrange(ref_full_text)
+
+      sec_color <- if (
+        !is.null(section_colors) && sec %in% names(section_colors)
+      ) {
+        section_colors[sec]
+      } else {
+        "#2E86AB"
+      }
+
+      ref_items <- lapply(seq_len(nrow(sec_refs)), function(j) {
+        div(
+          style = "padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #444;",
+          tags$span(
+            paste0(j, "."),
+            style = "font-weight: bold; color: #999; margin-right: 8px;"
+          ),
+          sec_refs$ref_full_text[j]
+        )
+      })
+
+      div(
+        style = "margin-bottom: 15px;",
+        div(
+          style = paste0(
+            "padding: 8px 15px; border-left: 4px solid ", sec_color, ";",
+            "background-color: ", sec_color, "11; cursor: pointer;"
+          ),
+          onclick = paste0(
+            "$(this).next().slideToggle(200);",
+            "$(this).find('.toggle-icon').toggleClass('fa-chevron-down fa-chevron-right');"
+          ),
+          tags$span(
+            class = "toggle-icon fa fa-chevron-down",
+            style = paste0("color: ", sec_color, "; margin-right: 8px;")
+          ),
+          tags$strong(sec, style = paste0("color: ", sec_color, ";")),
+          tags$span(
+            paste0(" (", nrow(sec_refs), " references)"),
+            style = "color: #888; font-size: 12px;"
+          )
+        ),
+        div(
+          style = "border: 1px solid #eee; border-top: none;",
+          do.call(tagList, ref_items)
+        )
+      )
+    })
+
+    do.call(tagList, section_panels)
+  })
+
+  # Download cluster data
+  output$download_clusters <- downloadHandler(
+    filename = function() {
+      paste0("citation_clusters_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      if (!is.null(values$cluster_description)) {
+        write.csv(
+          values$cluster_description$cluster_descriptions,
+          file,
+          row.names = FALSE
+        )
+      } else {
+        write.csv(
+          data.frame(message = "No cluster data available"),
           file,
           row.names = FALSE
         )
@@ -3032,6 +3854,7 @@ Avg sentence length: %.1f words",
     values$analysis_running <- FALSE
     values$readability_indices <- NULL
     values$word_trends_data <- NULL
+    values$cluster_description <- NULL
     values$pdf_doi <- NULL
     values$citation_type_used <- NULL
 
@@ -3591,6 +4414,117 @@ Avg sentence length: %.1f words",
             )
           }
 
+          # === SHEET: CLUSTER TF-IDF ===
+          if (
+            !is.null(values$cluster_description) &&
+              !is.null(values$cluster_description$cluster_descriptions) &&
+              nrow(values$cluster_description$cluster_descriptions) > 0
+          ) {
+            openxlsx::addWorksheet(wb_content, "Cluster_TF_IDF")
+
+            cluster_tfidf_export <- values$cluster_description$cluster_descriptions %>%
+              as.data.frame(stringsAsFactors = FALSE)
+
+            openxlsx::writeData(
+              wb_content,
+              "Cluster_TF_IDF",
+              cluster_tfidf_export,
+              startRow = 1
+            )
+            openxlsx::addStyle(
+              wb_content,
+              "Cluster_TF_IDF",
+              style = openxlsx::createStyle(
+                textDecoration = "bold",
+                fgFill = "#8e44ad",
+                fontColour = "#FFFFFF"
+              ),
+              rows = 1,
+              cols = 1:ncol(cluster_tfidf_export),
+              gridExpand = TRUE
+            )
+            openxlsx::setColWidths(
+              wb_content,
+              "Cluster_TF_IDF",
+              cols = 1:ncol(cluster_tfidf_export),
+              widths = "auto"
+            )
+          }
+
+          # === SHEET: CLUSTER SUMMARY ===
+          if (
+            !is.null(values$cluster_description) &&
+              !is.null(values$cluster_description$cluster_summary) &&
+              nrow(values$cluster_description$cluster_summary) > 0
+          ) {
+            openxlsx::addWorksheet(wb_content, "Cluster_Summary")
+
+            cluster_summary_export <- values$cluster_description$cluster_summary %>%
+              as.data.frame(stringsAsFactors = FALSE)
+
+            openxlsx::writeData(
+              wb_content,
+              "Cluster_Summary",
+              cluster_summary_export,
+              startRow = 1
+            )
+            openxlsx::addStyle(
+              wb_content,
+              "Cluster_Summary",
+              style = openxlsx::createStyle(
+                textDecoration = "bold",
+                fgFill = "#e67e22",
+                fontColour = "#FFFFFF"
+              ),
+              rows = 1,
+              cols = 1:ncol(cluster_summary_export),
+              gridExpand = TRUE
+            )
+            openxlsx::setColWidths(
+              wb_content,
+              "Cluster_Summary",
+              cols = 1:ncol(cluster_summary_export),
+              widths = "auto"
+            )
+          }
+
+          # === SHEET: CLUSTER REFERENCES ===
+          if (
+            !is.null(values$cluster_description) &&
+              !is.null(values$cluster_description$cluster_references) &&
+              nrow(values$cluster_description$cluster_references) > 0
+          ) {
+            openxlsx::addWorksheet(wb_content, "Cluster_References")
+
+            cluster_refs_export <- values$cluster_description$cluster_references %>%
+              as.data.frame(stringsAsFactors = FALSE)
+
+            openxlsx::writeData(
+              wb_content,
+              "Cluster_References",
+              cluster_refs_export,
+              startRow = 1
+            )
+            openxlsx::addStyle(
+              wb_content,
+              "Cluster_References",
+              style = openxlsx::createStyle(
+                textDecoration = "bold",
+                fgFill = "#16a085",
+                fontColour = "#FFFFFF"
+              ),
+              rows = 1,
+              cols = 1:ncol(cluster_refs_export),
+              gridExpand = TRUE
+            )
+            openxlsx::setColWidths(
+              wb_content,
+              "Cluster_References",
+              cols = 1:ncol(cluster_refs_export),
+              widths = "auto"
+            )
+          }
+
           # Save workbook
           openxlsx::saveWorkbook(wb_content, file, overwrite = TRUE)
         },
@@ -3610,6 +4544,167 @@ Avg sentence length: %.1f words",
       )
     }
   )
+
+  # ===========================================
+  # EXPORT ALL IMAGES
+  # ===========================================
+
+  # Step 1: Button click triggers JS canvas capture of the live network
+  observeEvent(input$export_all_images, {
+    req(values$analysis_results)
+    if (!is.null(values$network_plot)) {
+      dpi <- values$dpi %||% 300
+      shinyjs::runjs(sprintf(
+        'window._captureVisCanvas("citation_network", %d, function(dataURL) {
+           Shiny.setInputValue("ca_network_canvas", {data: dataURL}, {priority: "event"});
+         });',
+        dpi
+      ))
+    } else {
+      # No network — proceed directly
+      shinyjs::runjs(
+        'Shiny.setInputValue("ca_network_canvas", {data: null}, {priority: "event"});'
+      )
+    }
+    showNotification("Exporting images...", type = "message", duration = 3)
+  })
+
+  # Step 2: Receive canvas data and build ZIP with all images
+  observeEvent(input$ca_network_canvas, {
+    req(values$analysis_results)
+
+    tmpdir_img <- tempfile("ca_images_")
+    dir.create(tmpdir_img, recursive = TRUE)
+    png_files <- character(0)
+
+    dpi <- values$dpi %||% 300
+    h <- values$h %||% 7
+    zoom <- dpi / 96
+    vwidth <- round(h * 2 * 96)
+    vheight <- round(h * 96)
+
+    # Helper: save a plotly object to PNG
+    save_plotly_png <- function(p, name) {
+      png_path <- file.path(tmpdir_img, paste0(name, ".png"))
+      html_path <- file.path(tmpdir_img, paste0(name, ".html"))
+      htmlwidgets::saveWidget(p, file = html_path, selfcontained = FALSE)
+      biblioShot(
+        url = html_path,
+        zoom = zoom,
+        vwidth = vwidth,
+        vheight = vheight,
+        file = png_path
+      )
+      unlink(html_path)
+      unlink(
+        paste0(tools::file_path_sans_ext(html_path), "_files"),
+        recursive = TRUE
+      )
+      png_path
+    }
+
+    tryCatch(
+      {
+        # 1. Citation Network from live canvas capture
+        canvas_data <- input$ca_network_canvas$data
+        if (!is.null(canvas_data) && nchar(canvas_data) > 0) {
+          base64_str <- sub("^data:image/png;base64,", "", canvas_data)
+          raw_data <- base64enc::base64decode(base64_str)
+          net_png <- file.path(tmpdir_img, "Citation_Network.png")
+          writeBin(raw_data, net_png)
+          if (file.exists(net_png)) png_files <- c(png_files, net_png)
+        }
+
+        # 2. Cluster plots (plotly)
+        if (!is.null(values$cluster_description)) {
+          cluster_plots <- plot_citation_clusters(
+            values$cluster_description,
+            section_colors = values$analysis_results$section_colors,
+            top_n = 10
+          )
+
+          if (!is.null(cluster_plots$tfidf_bars)) {
+            f <- save_plotly_png(cluster_plots$tfidf_bars, "TF_IDF_Bars")
+            if (file.exists(f)) png_files <- c(png_files, f)
+          }
+
+          if (!is.null(cluster_plots$tfidf_heatmap)) {
+            f <- save_plotly_png(
+              cluster_plots$tfidf_heatmap, "TF_IDF_Heatmap"
+            )
+            if (file.exists(f)) png_files <- c(png_files, f)
+          }
+
+          if (!is.null(cluster_plots$references_per_section)) {
+            f <- save_plotly_png(
+              cluster_plots$references_per_section, "References_per_Section"
+            )
+            if (file.exists(f)) png_files <- c(png_files, f)
+          }
+        }
+
+        # 3. Word Trends (plotly)
+        if (
+          !is.null(values$word_trends_data) &&
+            nrow(values$word_trends_data) > 0
+        ) {
+          trends_plot <- tryCatch(
+            plot_word_distribution(
+              word_distribution_data = values$word_trends_data,
+              plot_type = input$trend_plot_type %||% "line",
+              smooth = TRUE,
+              show_points = input$trend_show_points %||% TRUE,
+              colors = NULL
+            ),
+            error = function(e) NULL
+          )
+          if (!is.null(trends_plot)) {
+            f <- save_plotly_png(trends_plot, "Word_Trends")
+            if (file.exists(f)) png_files <- c(png_files, f)
+          }
+        }
+
+        # Create zip and trigger browser download
+        if (length(png_files) > 0) {
+          zip_path <- file.path(tmpdir_img, paste0(
+            "content_analysis_images_", Sys.Date(), ".zip"
+          ))
+          zip::zip(
+            zip_path,
+            files = basename(png_files),
+            root = tmpdir_img
+          )
+          # Trigger download via base64 data URI
+          zip_data <- base64enc::dataURI(file = zip_path, mime = "application/zip")
+          zip_filename <- basename(zip_path)
+          shinyjs::runjs(sprintf(
+            "var link = document.createElement('a'); link.href = '%s'; link.download = '%s'; document.body.appendChild(link); link.click(); document.body.removeChild(link);",
+            zip_data, zip_filename
+          ))
+          showNotification(
+            paste(length(png_files), "images exported successfully!"),
+            type = "message", duration = 3
+          )
+        } else {
+          showNotification(
+            "No images available to export.",
+            type = "warning",
+            duration = 4
+          )
+        }
+      },
+      error = function(e) {
+        showNotification(
+          paste("Error exporting images:", e$message),
+          type = "error",
+          duration = 5
+        )
+      },
+      finally = {
+        unlink(tmpdir_img, recursive = TRUE)
+      }
+    )
+  })
 
   # ===========================================
   # UTILITY FUNCTIONS

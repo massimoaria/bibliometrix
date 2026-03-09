@@ -55,15 +55,25 @@ content_analysis_tab <- function(id = "content_analysis") {
                 uiOutput("pdf_metadata_display")
               ),
 
-              # Export button (shown after analysis completion)
+              # Export buttons (shown after analysis completion)
               conditionalPanel(
                 condition = "output.analysis_completed",
-                downloadButton(
-                  "download_all_results",
-                  "Export All Results",
-                  icon = icon("file-excel"),
-                  class = "btn-success",
-                  style = "font-weight: bold; margin-top: 10px;"
+                div(
+                  style = "display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;",
+                  downloadButton(
+                    "download_all_results",
+                    "Export All Results",
+                    icon = icon("file-excel"),
+                    class = "btn-success",
+                    style = "font-weight: bold; margin-top: 10px;"
+                  ),
+                  actionButton(
+                    "export_all_images",
+                    "Export All Images",
+                    icon = icon("image"),
+                    class = "btn-info",
+                    style = "font-weight: bold; margin-top: 10px;"
+                  )
                 )
               )
             )
@@ -875,11 +885,106 @@ content_analysis_tab <- function(id = "content_analysis") {
                       div(
                         class = "box-body",
                         div(
-                          style = "margin-bottom: 15px; padding: 10px; background-color: #f0f8ff; border-radius: 5px;",
-                          icon("info-circle", style = "color: #3498db;"),
-                          span(
-                            " Nodes are colored by paper section. Legend visible on the right side of the network.",
-                            style = "color: #555; font-size: 13px; margin-left: 8px;"
+                          style = "margin-bottom: 15px; padding: 10px; background-color: #f0f8ff; border-radius: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 15px;",
+                          div(
+                            style = "flex: 1; min-width: 300px;",
+                            icon("info-circle", style = "color: #3498db;"),
+                            span(
+                              " Nodes are colored by paper section. Use the slider to adjust node spacing.",
+                              style = "color: #555; font-size: 13px; margin-left: 8px;"
+                            )
+                          ),
+                          div(
+                            style = "display: flex; align-items: center; gap: 12px; flex-wrap: wrap;",
+                            tags$label(
+                              "Max nodes/section:",
+                              style = "margin: 0; font-size: 12px; color: #555; white-space: nowrap;"
+                            ),
+                            numericInput(
+                              "network_max_nodes",
+                              label = NULL,
+                              value = 10,
+                              min = 3,
+                              max = 50,
+                              step = 1,
+                              width = "70px"
+                            ),
+                            tags$label(
+                              "Node size:",
+                              style = "margin: 0; font-size: 12px; color: #555; white-space: nowrap;"
+                            ),
+                            sliderInput(
+                              "network_node_size",
+                              label = NULL,
+                              min = 1,
+                              max = 10,
+                              value = 5,
+                              step = 1,
+                              width = "100px",
+                              ticks = FALSE
+                            ),
+                            tags$label(
+                              "Label size:",
+                              style = "margin: 0; font-size: 12px; color: #555; white-space: nowrap;"
+                            ),
+                            sliderInput(
+                              "network_label_size",
+                              label = NULL,
+                              min = 1,
+                              max = 10,
+                              value = 5,
+                              step = 1,
+                              width = "100px",
+                              ticks = FALSE
+                            ),
+                            tags$label(
+                              "Spacing:",
+                              style = "margin: 0; font-size: 12px; color: #555; white-space: nowrap;"
+                            ),
+                            sliderInput(
+                              "network_spacing",
+                              label = NULL,
+                              min = 1,
+                              max = 10,
+                              value = 5,
+                              step = 1,
+                              width = "100px",
+                              ticks = FALSE
+                            ),
+                            tags$label(
+                              "Repulsion:",
+                              style = "margin: 0; font-size: 12px; color: #555; white-space: nowrap;"
+                            ),
+                            sliderInput(
+                              "network_repulsion",
+                              label = NULL,
+                              min = 1,
+                              max = 10,
+                              value = 5,
+                              step = 1,
+                              width = "100px",
+                              ticks = FALSE
+                            ),
+                            tags$label(
+                              "Max edge dist.:",
+                              style = "margin: 0; font-size: 12px; color: #555; white-space: nowrap;"
+                            ),
+                            numericInput(
+                              "network_edge_distance",
+                              label = NULL,
+                              value = 1000,
+                              min = 100,
+                              max = 2000,
+                              step = 100,
+                              width = "80px"
+                            ),
+                            actionButton(
+                              "update_network_layout",
+                              "Update",
+                              icon = icon("refresh"),
+                              class = "btn-primary btn-sm",
+                              style = "padding: 3px 12px;"
+                            )
                           )
                         ),
                         div(
@@ -927,6 +1032,167 @@ content_analysis_tab <- function(id = "content_analysis") {
                         div(
                           class = "box-body",
                           uiOutput("strongest_connections")
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # ===========================================
+                # TAB 4: CITATION CLUSTERS
+                # ===========================================
+                tabPanel(
+                  title = "Citation Clusters",
+                  value = "tab_clusters",
+
+                  br(),
+
+                  # Cluster Summary Table
+                  fluidRow(
+                    column(
+                      12,
+                      div(
+                        class = "box box-primary",
+                        div(
+                          class = "box-header with-border",
+                          h4(
+                            "Citation Cluster Analysis",
+                            class = "box-title",
+                            style = "color: #2E86AB;"
+                          ),
+                          div(
+                            class = "box-tools pull-right",
+                            downloadButton(
+                              "download_clusters",
+                              "Export Data",
+                              class = "btn btn-primary btn-sm",
+                              icon = icon("download")
+                            )
+                          )
+                        ),
+                        div(
+                          class = "box-body",
+                          conditionalPanel(
+                            condition = "output.clusters_available",
+                            div(
+                              style = "margin-bottom: 15px; padding: 10px; background-color: #f0f8ff; border-radius: 5px;",
+                              icon("info-circle", style = "color: #3498db;"),
+                              span(
+                                " Citation clusters are described using TF-IDF analysis of reference titles grouped by document section.",
+                                style = "color: #555; font-size: 13px; margin-left: 8px;"
+                              )
+                            ),
+                            uiOutput("cluster_summary_table")
+                          ),
+                          conditionalPanel(
+                            condition = "!output.clusters_available",
+                            div(
+                              style = "text-align: center; padding: 60px; color: #999;",
+                              icon(
+                                "project-diagram",
+                                style = "font-size: 48px; margin-bottom: 20px;"
+                              ),
+                              h4(
+                                "No cluster data available",
+                                style = "color: #666;"
+                              ),
+                              p(
+                                "Citation cluster analysis will appear here after the content analysis is complete.",
+                                style = "font-size: 14px;"
+                              ),
+                              p(
+                                "Clusters are based on TF-IDF analysis of reference titles grouped by document section.",
+                                style = "font-size: 12px; color: #999;"
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  ),
+
+                  # TF-IDF Bar Chart
+                  conditionalPanel(
+                    condition = "output.clusters_available",
+                    fluidRow(
+                      column(
+                        12,
+                        div(
+                          class = "box box-success",
+                          div(
+                            class = "box-header with-border",
+                            h4(
+                              "Top TF-IDF Terms by Section",
+                              class = "box-title",
+                              style = "color: #27ae60;"
+                            )
+                          ),
+                          div(
+                            class = "box-body",
+                            uiOutput("cluster_tfidf_bars_ui")
+                          )
+                        )
+                      )
+                    ),
+
+                    # Heatmap and References per Section side by side
+                    fluidRow(
+                      column(
+                        7,
+                        div(
+                          class = "box box-info",
+                          div(
+                            class = "box-header with-border",
+                            h4(
+                              "TF-IDF Heatmap: Terms vs Sections",
+                              class = "box-title",
+                              style = "color: #3498db;"
+                            )
+                          ),
+                          div(
+                            class = "box-body",
+                            plotlyOutput("cluster_tfidf_heatmap", height = "600px")
+                          )
+                        )
+                      ),
+                      column(
+                        5,
+                        div(
+                          class = "box box-warning",
+                          div(
+                            class = "box-header with-border",
+                            h4(
+                              "References per Section",
+                              class = "box-title",
+                              style = "color: #e67e22;"
+                            )
+                          ),
+                          div(
+                            class = "box-body",
+                            plotlyOutput("cluster_refs_per_section", height = "600px")
+                          )
+                        )
+                      )
+                    ),
+
+                    # Detailed cluster references table
+                    fluidRow(
+                      column(
+                        12,
+                        div(
+                          class = "box box-default",
+                          div(
+                            class = "box-header with-border",
+                            h4(
+                              "References by Section",
+                              class = "box-title",
+                              style = "color: #555;"
+                            )
+                          ),
+                          div(
+                            class = "box-body",
+                            uiOutput("cluster_references_detail")
+                          )
                         )
                       )
                     )

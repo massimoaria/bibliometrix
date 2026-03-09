@@ -5668,13 +5668,12 @@ To ensure the functionality of Biblioshiny,
     width_scale <- 1.7 * 26 / length(unique(values$SODF$Source))
 
     x <- c(
-      max(values$SODF$Year) - 0.02 - diff(range(values$SODF$Year)) * 0.15,
-      max(values$SODF$Year) - 0.02
-    ) +
-      1
+      min(values$SODF$Year) + 0.02,
+      min(values$SODF$Year) + 0.02 + diff(range(values$SODF$Year)) * 0.15
+    )
     y <- c(
-      min(values$SODF$Freq),
-      min(values$SODF$Freq) + diff(range(values$SODF$Freq)) * 0.15
+      max(values$SODF$Freq) - diff(range(values$SODF$Freq)) * 0.15,
+      max(values$SODF$Freq)
     )
 
     # Reorder legend by descending max cumulative value
@@ -9172,13 +9171,12 @@ To ensure the functionality of Biblioshiny,
     )
 
     x <- c(
-      max(values$DF$Year) - 0.02 - diff(range(values$DF$Year)) * 0.20,
-      max(values$DF$Year) - 0.02
-    ) -
-      1
+      min(values$DF$Year) + 0.02,
+      min(values$DF$Year) + 0.02 + diff(range(values$DF$Year)) * 0.20
+    )
     y <- c(
-      min(values$DF$Freq),
-      min(values$DF$Freq) + diff(range(values$DF$Freq)) * 0.20
+      max(values$DF$Freq) - diff(range(values$DF$Freq)) * 0.20,
+      max(values$DF$Freq)
     )
 
     # Reorder legend by descending max cumulative value
@@ -11288,12 +11286,29 @@ To ensure the functionality of Biblioshiny,
         )
         files <- c(fileName, files)
       }
-      plot2png(
-        values$TEplot,
-        filename = filenameTE,
-        zoom = 2,
-        type = "plotly"
+      # Export Sankey using Plotly.toImage() via shared utility
+      export_nodes <- values$nexus$Nodes
+      export_edges <- values$nexus$Edges
+      # Convert hex+alpha to rgba() with desired export opacity
+      hex_to_rgba <- function(hex_colors, alpha = 1) {
+        sapply(hex_colors, function(h) {
+          h <- sub("^#", "", h)
+          if (nchar(h) == 8) h <- substr(h, 1, 6)
+          r <- strtoi(substr(h, 1, 2), 16L)
+          g <- strtoi(substr(h, 3, 4), 16L)
+          b <- strtoi(substr(h, 5, 6), 16L)
+          sprintf("rgba(%d,%d,%d,%s)", r, g, b, alpha)
+        }, USE.NAMES = FALSE)
+      }
+      export_nodes$color <- hex_to_rgba(export_nodes$color, alpha = 1)
+      export_edges$color <- hex_to_rgba(export_edges$color, alpha = 0.6)
+      export_plot <- plotThematicEvolution(
+        Nodes = export_nodes,
+        Edges = export_edges,
+        min.flow = 0
       )
+      plotlySankey2png(export_plot, filename = filenameTE,
+        dpi = values$dpi, height = values$h)
       zip::zip(file, files)
     },
     contentType = "zip"
@@ -13150,13 +13165,15 @@ To ensure the functionality of Biblioshiny,
   })
 
   observeEvent(input$screenTFP, {
-    screen2export(
-      values$TFP,
-      filename = "ThreeFieldPlot",
-      type = "plotly",
-      dpi = values$dpi,
-      height = values$h
-    )
+    base_name <- paste0("ThreeFieldPlot-", gsub(" |:", "", Sys.time()), ".png")
+    full_path <- file.path(getWD(), base_name)
+    plotlySankey2png(values$TFP, filename = full_path, dpi = values$dpi, height = values$h)
+    # Trigger browser download
+    img_data <- base64enc::dataURI(file = full_path, mime = "image/png")
+    shinyjs::runjs(sprintf(
+      "var link = document.createElement('a'); link.href = '%s'; link.download = '%s'; document.body.appendChild(link); link.click(); document.body.removeChild(link);",
+      img_data, base_name
+    ))
   })
 
   observeEvent(input$screenWC, {
@@ -13171,7 +13188,7 @@ To ensure the functionality of Biblioshiny,
 
   observeEvent(input$screenTREEMAP, {
     screen2export(
-      obj = values$WTreeMap,
+      obj = values$TreeMap,
       filename = "TreeMap",
       type = "plotly",
       dpi = values$dpi,

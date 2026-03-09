@@ -30,7 +30,7 @@ Depends: R (>= 3.5.0)
 Imports: stats,
      grDevices,
 		 bibliometrixData,
-		 contentanalysis,
+		 contentanalysis (>= 1.0.0),
 		 dimensionsR, 
 		 dplyr,
 		 ca,

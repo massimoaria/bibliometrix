@@ -329,7 +329,11 @@ assignEvolutionColors <- function(
       Nodes %>% select(id, color_to = color_final),
       by = c("to" = "id")
     ) %>%
-    mutate(color = if_else(color_from == color_to, color_from, "#D3D3D380")) %>%
+    mutate(color = if_else(
+      color_from == color_to,
+      paste0(substr(color_from, 1, 7), "80"),
+      "#D3D3D380"
+    )) %>%
     select(-color_from, -color_to)
 
   Nodes <- Nodes %>%

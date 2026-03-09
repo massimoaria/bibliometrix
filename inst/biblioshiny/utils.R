@@ -3183,16 +3183,14 @@ AffiliationOverTime <- function(values, n) {
     sep = ""
   )
   x <- c(
-    max(values$AffOverTime$Year) -
-      0.02 -
-      diff(range(values$AffOverTime$Year)) * 0.15,
-    max(values$AffOverTime$Year) - 0.02
-  ) +
-    1
+    min(values$AffOverTime$Year) + 0.02,
+    min(values$AffOverTime$Year) + 0.02 +
+      diff(range(values$AffOverTime$Year)) * 0.15
+  )
   y <- c(
-    min(values$AffOverTime$Articles),
-    min(values$AffOverTime$Articles) +
-      diff(range(values$AffOverTime$Articles)) * 0.15
+    max(values$AffOverTime$Articles) -
+      diff(range(values$AffOverTime$Articles)) * 0.15,
+    max(values$AffOverTime$Articles)
   )
 
   # Reorder legend by descending max cumulative value
@@ -3308,16 +3306,14 @@ CountryOverTime <- function(values, n) {
     sep = ""
   )
   x <- c(
-    max(values$CountryOverTime$Year) -
-      0.02 -
-      diff(range(values$CountryOverTime$Year)) * 0.15,
-    max(values$CountryOverTime$Year) - 0.02
-  ) +
-    1
+    min(values$CountryOverTime$Year) + 0.02,
+    min(values$CountryOverTime$Year) + 0.02 +
+      diff(range(values$CountryOverTime$Year)) * 0.15
+  )
   y <- c(
-    min(values$CountryOverTime$Articles),
-    min(values$CountryOverTime$Articles) +
-      diff(range(values$CountryOverTime$Articles)) * 0.15
+    max(values$CountryOverTime$Articles) -
+      diff(range(values$CountryOverTime$Articles)) * 0.15,
+    max(values$CountryOverTime$Articles)
   )
 
   # Reorder legend by descending max cumulative value
@@ -5695,7 +5691,7 @@ plot2png <- function(p, filename, type = "vis", dpi = 300, height = 7) {
       visSave(p, html_name)
     },
     plotly = {
-      htmlwidgets::saveWidget(p, file = html_name)
+      htmlwidgets::saveWidget(p, file = html_name, selfcontained = FALSE)
     },
     df2html = {
       screenHtml(p, html_name)
@@ -5711,6 +5707,66 @@ plot2png <- function(p, filename, type = "vis", dpi = 300, height = 7) {
     btn_labels = "OK",
     size = "40%"
   )
+}
+
+## Export Plotly Sankey to PNG using Plotly.toImage() via chromote
+## Chromote has a rendering bug with complex SVG paths (Sankey links
+## render at ~5% opacity). Plotly.toImage() uses canvas rendering instead.
+plotlySankey2png <- function(p, filename, dpi = 300, height = 7) {
+  vw <- max(round(height * 2 * 96), 1344)
+  vh <- max(round(height * 96), 672)
+  img_scale <- dpi / 96
+
+  export_plot <- p %>%
+    htmlwidgets::onRender(sprintf("
+      function(el, x) {
+        var plotDiv = el.querySelector('.js-plotly-plot') || el;
+        Plotly.toImage(plotDiv, {format:'png', width:%d, height:%d, scale:%f}).then(function(url) {
+          document.title = url;
+        });
+      }
+    ", vw, vh, img_scale))
+
+  html_name <- paste0(tools::file_path_sans_ext(filename), ".html")
+  htmlwidgets::saveWidget(export_plot, file = html_name, selfcontained = TRUE)
+
+  b <- chromote::ChromoteSession$new(width = vw, height = vh)
+  tryCatch({
+    p_event <- b$Page$loadEventFired(wait_ = FALSE)
+    html_url <- paste0("file:///", normalizePath(html_name, winslash = "/", mustWork = TRUE))
+    b$Page$navigate(html_url)
+    b$wait_for(p_event)
+    Sys.sleep(3)
+    result <- b$Runtime$evaluate("document.title")
+    base64_str <- result$result$value
+    if (grepl("^data:image/png;base64,", base64_str)) {
+      raw_data <- base64enc::base64decode(sub("^data:image/png;base64,", "", base64_str))
+      writeBin(raw_data, filename)
+    } else {
+      # Fallback: call Plotly.toImage directly
+      result2 <- b$Runtime$evaluate(sprintf("
+        new Promise(function(resolve) {
+          var plotDiv = document.querySelector('.js-plotly-plot');
+          if (plotDiv) {
+            Plotly.toImage(plotDiv, {format:'png', width:%d, height:%d, scale:%f}).then(resolve);
+          } else { resolve(''); }
+        })
+      ", vw, vh, img_scale), awaitPromise = TRUE)
+      base64_str2 <- result2$result$value
+      if (nchar(base64_str2) > 100) {
+        raw_data <- base64enc::base64decode(sub("^data:image/png;base64,", "", base64_str2))
+        writeBin(raw_data, filename)
+      } else {
+        # Last resort: use biblioShot (links may be faint)
+        biblioShot(url = html_name, file = filename,
+          zoom = dpi / 96, vwidth = vw, vheight = vh, delay = 2)
+      }
+    }
+  }, finally = {
+    try(b$close(), silent = TRUE)
+  })
+  unlink(html_name)
+  unlink(paste0(tools::file_path_sans_ext(html_name), "_files"), recursive = TRUE)
 }
 
 ## screenshot of html objects

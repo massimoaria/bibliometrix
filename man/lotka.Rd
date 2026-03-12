@@ -10,25 +10,35 @@ lotka(M)
 \item{M}{is an object of the class '\code{bibliometrixDB}'.}
 }
 \value{
-The function \code{lotka} returns a list of summary statistics of the Lotka's law estimation of an object of class \code{bibliometrix}.
-
-the list contains the following objects:
+The function \code{lotka} returns a list containing the following objects:
 \tabular{lll}{
-\code{Beta}  \tab   \tab Beta coefficient\cr
-\code{C}   \tab   \tab Constant coefficient\cr
-\code{R2} \tab   \tab Goodness of Fit\cr
-\code{fitted} \tab     \tab Fitted Values\cr
-\code{p.value} \tab     \tab Pvalue of two-sample Kolmogorov-Smirnov test between the empirical and the theoretical Lotka's Law distribution (with Beta=2)\cr
 \code{AuthorProd}    \tab   \tab Authors' Productivity frequency table\cr
-\code{g}   \tab    \tab Lotka's law plot\cr
-\code{g_shiny}   \tab  \tab Lotka's law plot for biblioshiny}
+\code{g}             \tab   \tab Lotka's law plot in ggplot2 format (with logo)\cr
+\code{g_shiny}       \tab   \tab Lotka's law plot for biblioshiny (without logo)\cr
+\code{stat}          \tab   \tab list of statistical results (Beta, C, R2, KS tests)\cr
+\code{Beta}          \tab   \tab Beta coefficient (estimated)\cr
+\code{C}             \tab   \tab Constant coefficient\cr
+\code{R2}            \tab   \tab Goodness of Fit (R-squared)\cr
+\code{fitted}        \tab   \tab Fitted Values\cr
+\code{p.value}       \tab   \tab p-value of KS test (theoretical Beta=2)}
 }
 \description{
-It estimates Lotka's law coefficients for scientific productivity (\cite{Lotka A.J., 1926}).\cr\cr
+It estimates Lotka's law coefficients for scientific productivity and tests the goodness of fit.
 }
 \details{
-Reference:
-Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the Washington academy of sciences, 16(12), 317-323.\cr
+Lotka's Law, first formulated by Alfred J. Lotka in 1926, describes the frequency distribution
+of scientific productivity among authors. The law states that the number of authors producing
+\eqn{n} publications is approximately \eqn{C / n^\beta}, where \eqn{C} is a constant and
+\eqn{\beta} is the productivity exponent.\cr\cr
+
+In the original formulation, Lotka proposed that \eqn{\beta = 2}, meaning that the number of
+authors who publish \eqn{n} papers is approximately \eqn{1/n^2} of those who publish one paper.
+The function estimates both the empirical \eqn{\beta} via regression and tests the fit of
+the theoretical distribution (\eqn{\beta = 2}) using a Kolmogorov-Smirnov test.\cr\cr
+
+Reference:\cr
+Lotka, A. J. (1926). The frequency distribution of scientific productivity. Journal of the
+Washington Academy of Sciences, 16(12), 317-323.\cr
 }
 \examples{
 data(management, package = "bibliometrixData")

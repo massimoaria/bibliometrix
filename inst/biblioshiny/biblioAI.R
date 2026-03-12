@@ -679,16 +679,45 @@ biblioAiPrompts <- function(values, activeTab) {
     "collabWorldMap" = {
       #values$WMGemini
       prompt <- paste0(
-        "Provide an interpretation of this 'Countries’ Collaboration World Map'. The map visualizes international scientific ",
+        "Provide an interpretation of this ‘Countries’ Collaboration World Map’. The map visualizes international scientific ",
         "collaboration by showing, for each country, the total number of articles with at least one contributing author. ",
         "The color intensity of each country is proportional to its research output. The connecting lines represent collaborative ",
         "links between countries, based on co-authorship across all authors (not only corresponding authors). ",
         "Focus on identifying major hubs of scientific production, key international partnerships, and global patterns of collaboration."
       )
     },
+    "bradford" = {
+      prompt <- paste0(
+        "Provide an interpretation of this Bradford bibliograph and Bradford’s Law analysis. ",
+        "The plot shows the cumulative number of articles (y-axis) against the logarithm of source rank (x-axis). ",
+        "The solid black line is the empirical curve and the dashed red line is the theoretical fitted Bradford distribution: C(r) = a + b * log(r). ",
+        "The three shaded zones represent the Bradford zones: Zone 1 (core journals), Zone 2 (intermediate), and Zone 3 (periphery). ",
+        "Each zone contains approximately one-third of the total articles, but the number of journals increases geometrically (ratio 1:k:k^2). ",
+        "Focus on: (1) the degree of concentration vs dispersion in the field’s publication landscape, ",
+        "(2) the shape of the curve (steep initial drop = high concentration, flatter = more dispersion), ",
+        "(3) how well the empirical data fits the theoretical Bradford distribution (R-squared and KS test), ",
+        "(4) the Bradford multiplier k and what it reveals about the zone structure, ",
+        "(5) identifying and discussing the core journals and their role in the field."
+      )
+    },
+    "lotka" = {
+      prompt <- paste0(
+        "Provide an interpretation of this Lotka’s Law plot and analysis. ",
+        "The plot shows the author productivity distribution: the percentage of authors (y-axis) who published a given number of documents (x-axis). ",
+        "Three curves are displayed: (1) the solid black line is the empirical distribution, ",
+        "(2) the dashed red line is the theoretical Lotka’s Law with Beta=2 (inverse square law), ",
+        "(3) the dot-dash blue line is the fitted generalized inverse power law with the estimated Beta. ",
+        "Lotka’s Law states that f(n) = C / n^Beta, where f(n) is the proportion of authors publishing n articles. ",
+        "Focus on: (1) how well the empirical data fits the theoretical (Beta=2) and fitted distributions (KS test results), ",
+        "(2) the estimated Beta value and what it reveals about productivity concentration in the field, ",
+        "(3) the proportion of single-paper authors vs prolific authors, ",
+        "(4) whether Beta > 2 (more concentrated, typical of niche fields) or Beta < 2 (more dispersed, typical of broad fields), ",
+        "(5) implications for the field’s author productivity patterns."
+      )
+    },
     {
       prompt <- paste0(
-        "Provide an interpretation of this plot creted with 'bibliometrix R Package'"
+        "Provide an interpretation of this plot creted with ‘bibliometrix R Package’"
       )
     }
   )
@@ -832,6 +861,34 @@ geminiParameterPrompt <- function(values, activeTab, input) {
     },
     "collabWorldMap" = {
       req(values$WMmap)
+    },
+    "bradford" = {
+      req(values$bradford)
+      s <- values$bradford$stat
+      zs <- values$bradford$zoneSummary
+      txt <- paste0(
+        txt,
+        " Bradford's Law analysis results: ",
+        "Fitted model C(r) = ", round(s$a, 2), " + ", round(s$b, 2), " * log(r), ",
+        "R-squared = ", round(s$R2, 4), ", ",
+        "Bradford multiplier k = ", round(s$k, 2), ", ",
+        "KS test p-value = ", format.pval(s$ks.pvalue, digits = 3), ". ",
+        "Zone summary: ", merge_df_to_string(zs)
+      )
+    },
+    "lotka" = {
+      req(values$lotka)
+      s <- values$lotka$stat
+      txt <- paste0(
+        txt,
+        " Lotka's Law analysis results: ",
+        "Estimated Beta = ", round(s$Beta, 4), ", ",
+        "Constant C = ", round(s$C, 4), ", ",
+        "R-squared = ", round(s$R2, 4), ", ",
+        "KS p-value (theoretical Beta=2) = ", format.pval(s$ks.theo.pvalue, digits = 3), ", ",
+        "KS p-value (fitted Beta) = ", format.pval(s$ks.fit.pvalue, digits = 3), ". ",
+        "Author productivity table: ", merge_df_to_string(values$lotka$AuthorProd)
+      )
     }
   )
   return(txt)
@@ -907,6 +964,14 @@ geminiWaitingMessage <- function(values, activeTab) {
     "collabWorldMap" = {
       req(values$WMmap)
       values$WMGemini <- messageTxt
+    },
+    "bradford" = {
+      req(values$bradford)
+      values$BradfordGemini <- messageTxt
+    },
+    "lotka" = {
+      req(values$lotka)
+      values$LotkaGemini <- messageTxt
     }
   )
   return(values)
@@ -932,6 +997,8 @@ geminiFieldName <- function(activeTab) {
     "historiograph" = "histGemini",
     "collabNetwork" = "colGemini",
     "collabWorldMap" = "WMGemini",
+    "bradford" = "BradfordGemini",
+    "lotka" = "LotkaGemini",
     NULL
   )
 }
@@ -1134,6 +1201,14 @@ geminiPrepareAll <- function(values, activeTab, input) {
     "collabWorldMap" = {
       obj <- values$WMmap$g
       type <- "plotly"
+    },
+    "bradford" = {
+      obj <- values$bradford$graph
+      type <- "ggplot2"
+    },
+    "lotka" = {
+      obj <- values$lotka$g
+      type <- "ggplot2"
     }
   )
 
@@ -1216,6 +1291,12 @@ geminiSave <- function(values, activeTab) {
     },
     "collabWorldMap" = {
       gemini <- values$WMGemini
+    },
+    "bradford" = {
+      gemini <- values$BradfordGemini
+    },
+    "lotka" = {
+      gemini <- values$LotkaGemini
     }
   )
   if (is.null(gemini)) {

@@ -2403,7 +2403,9 @@ freqPlot <- function(
     )
   }
 
-  xx[, y] <- substr(xx[, y], 1, string.max)
+  xx[, y] <- sapply(substr(xx[, y], 1, string.max), function(s) {
+    if (nchar(s) > 40) paste0(stringr::str_wrap(s, width = 40)) else s
+  })
 
   g <- ggplot(xx, aes(x = xx[, x], y = xx[, y], label = xx[, x], text = Text)) +
     geom_segment(
@@ -2412,14 +2414,16 @@ freqPlot <- function(
     ) +
     geom_point(aes(color = -xx[, x], size = xx[, x]), show.legend = FALSE) +
     scale_radius(range = c(5, 12)) +
-    geom_text(color = "white", size = 3) +
+    geom_text(color = "#333333", size = 3.5, fontface = "bold", hjust = 0,
+              nudge_x = max(xx[, x]) * 0.04) +
     scale_y_discrete(limits = rev(xx[, y])) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
     scale_fill_continuous(type = "gradient") +
     labs(title = title, y = textLaby) +
     labs(x = textLabx) +
     expand_limits(y = c(1, length(xx[, y]) + 1)) +
     theme_minimal() +
-    theme(axis.text.y = element_text(angle = 0, hjust = 0)) +
+    theme(axis.text.y = element_text(angle = 0, hjust = 1, face = "bold", size = 11)) +
     annotation_custom(
       values$logoGrid,
       xmin = xl[1],
@@ -3178,18 +3182,27 @@ AffiliationOverTime <- function(values, n) {
     values$AffOverTime$Articles,
     sep = ""
   )
-  width_scale <- 1.7 * 26 / length(unique(values$AffOverTime$Affiliation))
   x <- c(
-    max(values$AffOverTime$Year) -
-      0.02 -
-      diff(range(values$AffOverTime$Year)) * 0.15,
-    max(values$AffOverTime$Year) - 0.02
-  ) +
-    1
+    min(values$AffOverTime$Year) + 0.02,
+    min(values$AffOverTime$Year) + 0.02 +
+      diff(range(values$AffOverTime$Year)) * 0.15
+  )
   y <- c(
-    min(values$AffOverTime$Articles),
-    min(values$AffOverTime$Articles) +
-      diff(range(values$AffOverTime$Articles)) * 0.15
+    max(values$AffOverTime$Articles) -
+      diff(range(values$AffOverTime$Articles)) * 0.15,
+    max(values$AffOverTime$Articles)
+  )
+
+  # Reorder legend by descending max cumulative value
+  values$AffOverTime$Affiliation <- factor(values$AffOverTime$Affiliation,
+    levels = names(sort(tapply(values$AffOverTime$Articles, values$AffOverTime$Affiliation, max), decreasing = TRUE)))
+
+  # Truncate long affiliation names for legend readability
+  trunc_aff_labels <- setNames(
+    ifelse(nchar(levels(values$AffOverTime$Affiliation)) > 35,
+           paste0(substr(levels(values$AffOverTime$Affiliation), 1, 32), "..."),
+           levels(values$AffOverTime$Affiliation)),
+    levels(values$AffOverTime$Affiliation)
   )
 
   values$AffOverTimePlot <- ggplot(
@@ -3209,26 +3222,25 @@ AffiliationOverTime <- function(values, n) {
       title = "Affiliations' Production over Time"
     ) +
     scale_x_continuous(
-      breaks = (values$AffOverTime$Year[seq(
-        1,
-        length(values$AffOverTime$Year),
-        by = ceiling(length(values$AffOverTime$Year) / 20)
-      )])
+      breaks = {
+        yrs <- sort(unique(values$AffOverTime$Year))
+        yrs[seq(1, length(yrs), by = max(1, ceiling(length(yrs) / 20)))]
+      }
     ) +
     geom_hline(aes(yintercept = 0), alpha = 0.1) +
     labs(color = "Affiliation") +
     theme(
       text = element_text(color = "#444444"),
-      legend.text = ggplot2::element_text(size = width_scale),
-      legend.box.margin = margin(6, 6, 6, 6),
+      legend.text = ggplot2::element_text(size = 9, face = "bold"),
+      legend.box.margin = margin(2, 2, 2, 2),
       legend.title = ggplot2::element_text(
-        size = 1.5 * width_scale,
+        size = 10,
         face = "bold"
       ),
       legend.position = "bottom",
-      legend.direction = "vertical",
-      legend.key.size = grid::unit(width_scale / 50, "inch"),
-      legend.key.width = grid::unit(width_scale / 50, "inch"),
+      legend.direction = "horizontal",
+      legend.key.size = grid::unit(0.4, "cm"),
+      legend.key.width = grid::unit(0.6, "cm"),
       plot.caption = element_text(
         size = 9,
         hjust = 0.5,
@@ -3246,6 +3258,8 @@ AffiliationOverTime <- function(values, n) {
       axis.line.x = element_line(color = "black", linewidth = 0.5),
       axis.line.y = element_line(color = "black", linewidth = 0.5)
     ) +
+    scale_color_discrete(labels = trunc_aff_labels) +
+    guides(color = guide_legend(ncol = 2)) +
     annotation_custom(
       values$logoGrid,
       xmin = x[1],
@@ -3301,19 +3315,20 @@ CountryOverTime <- function(values, n) {
     values$CountryOverTime$Articles,
     sep = ""
   )
-  width_scale <- 1.7 * 26 / length(unique(values$CountryOverTime$Country))
   x <- c(
-    max(values$CountryOverTime$Year) -
-      0.02 -
-      diff(range(values$CountryOverTime$Year)) * 0.15,
-    max(values$CountryOverTime$Year) - 0.02
-  ) +
-    1
-  y <- c(
-    min(values$CountryOverTime$Articles),
-    min(values$CountryOverTime$Articles) +
-      diff(range(values$CountryOverTime$Articles)) * 0.15
+    min(values$CountryOverTime$Year) + 0.02,
+    min(values$CountryOverTime$Year) + 0.02 +
+      diff(range(values$CountryOverTime$Year)) * 0.15
   )
+  y <- c(
+    max(values$CountryOverTime$Articles) -
+      diff(range(values$CountryOverTime$Articles)) * 0.15,
+    max(values$CountryOverTime$Articles)
+  )
+
+  # Reorder legend by descending max cumulative value
+  values$CountryOverTime$Country <- factor(values$CountryOverTime$Country,
+    levels = names(sort(tapply(values$CountryOverTime$Articles, values$CountryOverTime$Country, max), decreasing = TRUE)))
 
   values$CountryOverTimePlot <- ggplot(
     values$CountryOverTime,
@@ -3326,26 +3341,25 @@ CountryOverTime <- function(values, n) {
       title = "Country Production over Time"
     ) +
     scale_x_continuous(
-      breaks = (values$CountryOverTime$Year[seq(
-        1,
-        length(values$CountryOverTime$Year),
-        by = ceiling(length(values$CountryOverTime$Year) / 20)
-      )])
+      breaks = {
+        yrs <- sort(unique(values$CountryOverTime$Year))
+        yrs[seq(1, length(yrs), by = max(1, ceiling(length(yrs) / 20)))]
+      }
     ) +
     geom_hline(aes(yintercept = 0), alpha = 0.1) +
     labs(color = "Country") +
     theme(
       text = element_text(color = "#444444"),
-      legend.text = ggplot2::element_text(size = width_scale),
+      legend.text = ggplot2::element_text(size = 10),
       legend.box.margin = margin(6, 6, 6, 6),
       legend.title = ggplot2::element_text(
-        size = 1.5 * width_scale,
+        size = 12,
         face = "bold"
       ),
-      legend.position = "bottom",
+      legend.position = "right",
       legend.direction = "vertical",
-      legend.key.size = grid::unit(width_scale / 50, "inch"),
-      legend.key.width = grid::unit(width_scale / 50, "inch"),
+      legend.key.size = grid::unit(0.4, "cm"),
+      legend.key.width = grid::unit(0.6, "cm"),
       plot.caption = element_text(
         size = 9,
         hjust = 0.5,
@@ -5642,7 +5656,7 @@ addGgplotsWb <- function(
   return(wb)
 }
 
-screenSh <- function(p, zoom = 2, type = "vis") {
+screenSh <- function(p, type = "vis", dpi = 300, height = 7) {
   #tmpdir <- getWD()
 
   fileName <- file.path(
@@ -5650,12 +5664,12 @@ screenSh <- function(p, zoom = 2, type = "vis") {
     paste0("figureImage_", Sys.time(), ".png")
   )
 
-  plot2png(p, filename = fileName, zoom = zoom, type = type)
+  plot2png(p, filename = fileName, type = type, dpi = dpi, height = height)
 
   return(fileName)
 }
 
-screenShot <- function(p, filename, type) {
+screenShot <- function(p, filename, type, dpi = 300, height = 7) {
   #home <- homeFolder()
 
   # # setting up the main directory
@@ -5665,7 +5679,7 @@ screenShot <- function(p, filename, type) {
   #   filename <- file.path(home, filename)
   # }
 
-  plot2png(p, filename, zoom = 2, type = type)
+  plot2png(p, filename, type = type, dpi = dpi, height = height)
   filename_html <- paste0(tools::file_path_sans_ext(filename), ".html")
   file.remove(filename_html)
   unlink(
@@ -5674,7 +5688,11 @@ screenShot <- function(p, filename, type) {
   )
 }
 
-plot2png <- function(p, filename, zoom = 2, type = "vis") {
+plot2png <- function(p, filename, type = "vis", dpi = 300, height = 7) {
+  zoom <- dpi / 96
+  vwidth  <- round(height * 2 * 96)
+  vheight <- round(height * 96)
+
   filename_html <- tools::file_path_sans_ext(filename)
   html_name <- paste0(filename_html, ".html")
   switch(
@@ -5683,13 +5701,13 @@ plot2png <- function(p, filename, zoom = 2, type = "vis") {
       visSave(p, html_name)
     },
     plotly = {
-      htmlwidgets::saveWidget(p, file = html_name)
+      htmlwidgets::saveWidget(p, file = html_name, selfcontained = FALSE)
     },
     df2html = {
       screenHtml(p, html_name)
     }
   )
-  biblioShot(url = html_name, zoom = zoom, file = filename) # , verbose=FALSE)
+  biblioShot(url = html_name, zoom = zoom, vwidth = vwidth, vheight = vheight, file = filename)
 
   popUpGeneric(
     title = NULL,
@@ -5699,6 +5717,66 @@ plot2png <- function(p, filename, zoom = 2, type = "vis") {
     btn_labels = "OK",
     size = "40%"
   )
+}
+
+## Export Plotly Sankey to PNG using Plotly.toImage() via chromote
+## Chromote has a rendering bug with complex SVG paths (Sankey links
+## render at ~5% opacity). Plotly.toImage() uses canvas rendering instead.
+plotlySankey2png <- function(p, filename, dpi = 300, height = 7) {
+  vw <- max(round(height * 2 * 96), 1344)
+  vh <- max(round(height * 96), 672)
+  img_scale <- dpi / 96
+
+  export_plot <- p %>%
+    htmlwidgets::onRender(sprintf("
+      function(el, x) {
+        var plotDiv = el.querySelector('.js-plotly-plot') || el;
+        Plotly.toImage(plotDiv, {format:'png', width:%d, height:%d, scale:%f}).then(function(url) {
+          document.title = url;
+        });
+      }
+    ", vw, vh, img_scale))
+
+  html_name <- paste0(tools::file_path_sans_ext(filename), ".html")
+  htmlwidgets::saveWidget(export_plot, file = html_name, selfcontained = TRUE)
+
+  b <- chromote::ChromoteSession$new(width = vw, height = vh)
+  tryCatch({
+    p_event <- b$Page$loadEventFired(wait_ = FALSE)
+    html_url <- paste0("file:///", normalizePath(html_name, winslash = "/", mustWork = TRUE))
+    b$Page$navigate(html_url)
+    b$wait_for(p_event)
+    Sys.sleep(3)
+    result <- b$Runtime$evaluate("document.title")
+    base64_str <- result$result$value
+    if (grepl("^data:image/png;base64,", base64_str)) {
+      raw_data <- base64enc::base64decode(sub("^data:image/png;base64,", "", base64_str))
+      writeBin(raw_data, filename)
+    } else {
+      # Fallback: call Plotly.toImage directly
+      result2 <- b$Runtime$evaluate(sprintf("
+        new Promise(function(resolve) {
+          var plotDiv = document.querySelector('.js-plotly-plot');
+          if (plotDiv) {
+            Plotly.toImage(plotDiv, {format:'png', width:%d, height:%d, scale:%f}).then(resolve);
+          } else { resolve(''); }
+        })
+      ", vw, vh, img_scale), awaitPromise = TRUE)
+      base64_str2 <- result2$result$value
+      if (nchar(base64_str2) > 100) {
+        raw_data <- base64enc::base64decode(sub("^data:image/png;base64,", "", base64_str2))
+        writeBin(raw_data, filename)
+      } else {
+        # Last resort: use biblioShot (links may be faint)
+        biblioShot(url = html_name, file = filename,
+          zoom = dpi / 96, vwidth = vw, vheight = vh, delay = 2)
+      }
+    }
+  }, finally = {
+    try(b$close(), silent = TRUE)
+  })
+  unlink(html_name)
+  unlink(paste0(tools::file_path_sans_ext(html_name), "_files"), recursive = TRUE)
 }
 
 ## screenshot of html objects
@@ -5754,7 +5832,7 @@ screenHtml <- function(df, html_file) {
 }
 
 ## export screen to browser download
-screen2export <- function(filename = "file", obj, type) {
+screen2export <- function(filename = "file", obj, type, dpi = 300, height = 7) {
   JScode_screenshot <- "
     var link = document.createElement('a');
     link.href = '%s';
@@ -5775,7 +5853,9 @@ screen2export <- function(filename = "file", obj, type) {
   screenShot(
     obj,
     filename = full_path,
-    type = type
+    type = type,
+    dpi = dpi,
+    height = height
   )
   img_data <- base64enc::dataURI(file = full_path, mime = "image/png")
   shinyjs::runjs(sprintf(JScode_screenshot, img_data, base_name))

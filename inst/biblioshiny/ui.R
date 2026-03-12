@@ -1304,6 +1304,21 @@ body <- dashboardBody(
                       ),
 
                       # ============================================
+                      # SECTION 6B: MISSING DATA BUTTON
+                      # ============================================
+                      div(
+                        style = "margin-top: 10px; text-align: center;",
+                        actionBttn(
+                          inputId = "showMissingData",
+                          label = strong("Missing Data"),
+                          style = "pill",
+                          color = "warning",
+                          size = "lg",
+                          icon = icon("search", lib = "glyphicon")
+                        )
+                      ),
+
+                      # ============================================
                       # SECTION 7: EXPORT OPTIONS
                       # ============================================
                       div(
@@ -11031,7 +11046,7 @@ body <- dashboardBody(
 
                 # Height Setting
                 div(
-                  style = "margin-bottom: 10px;",
+                  style = "margin-bottom: 25px;",
                   tags$label(
                     "Plot Height (inches)",
                     style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
@@ -11039,6 +11054,18 @@ body <- dashboardBody(
                   uiOutput("h_slider"),
                   helpText(
                     "Adjust the height of exported plots. Width is automatically calculated to maintain aspect ratio.",
+                    style = "margin-top: 5px; color: #666; font-size: 12px;"
+                  )
+                ),
+                div(
+                  style = "margin-bottom: 10px;",
+                  tags$label(
+                    "Plot Aspect Ratio",
+                    style = "font-weight: 600; color: #2E86AB; margin-bottom: 8px; display: block;"
+                  ),
+                  uiOutput("aspect_radio"),
+                  helpText(
+                    "Publication (3:2) is ideal for papers and books. Wide (2:1) is better for presentations and dashboards.",
                     style = "margin-top: 5px; color: #666; font-size: 12px;"
                   )
                 )

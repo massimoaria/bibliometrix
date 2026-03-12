@@ -3197,6 +3197,14 @@ AffiliationOverTime <- function(values, n) {
   values$AffOverTime$Affiliation <- factor(values$AffOverTime$Affiliation,
     levels = names(sort(tapply(values$AffOverTime$Articles, values$AffOverTime$Affiliation, max), decreasing = TRUE)))
 
+  # Truncate long affiliation names for legend readability
+  trunc_aff_labels <- setNames(
+    ifelse(nchar(levels(values$AffOverTime$Affiliation)) > 35,
+           paste0(substr(levels(values$AffOverTime$Affiliation), 1, 32), "..."),
+           levels(values$AffOverTime$Affiliation)),
+    levels(values$AffOverTime$Affiliation)
+  )
+
   values$AffOverTimePlot <- ggplot(
     values$AffOverTime,
     aes(
@@ -3223,14 +3231,14 @@ AffiliationOverTime <- function(values, n) {
     labs(color = "Affiliation") +
     theme(
       text = element_text(color = "#444444"),
-      legend.text = ggplot2::element_text(size = 10),
-      legend.box.margin = margin(6, 6, 6, 6),
+      legend.text = ggplot2::element_text(size = 9, face = "bold"),
+      legend.box.margin = margin(2, 2, 2, 2),
       legend.title = ggplot2::element_text(
-        size = 12,
+        size = 10,
         face = "bold"
       ),
-      legend.position = "right",
-      legend.direction = "vertical",
+      legend.position = "bottom",
+      legend.direction = "horizontal",
       legend.key.size = grid::unit(0.4, "cm"),
       legend.key.width = grid::unit(0.6, "cm"),
       plot.caption = element_text(
@@ -3250,6 +3258,8 @@ AffiliationOverTime <- function(values, n) {
       axis.line.x = element_line(color = "black", linewidth = 0.5),
       axis.line.y = element_line(color = "black", linewidth = 0.5)
     ) +
+    scale_color_discrete(labels = trunc_aff_labels) +
+    guides(color = guide_legend(ncol = 2)) +
     annotation_custom(
       values$logoGrid,
       xmin = x[1],

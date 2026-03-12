@@ -2698,8 +2698,13 @@ Avg sentence length: %.1f words",
       }
     }
 
+    # Truncate long section labels for x-axis display
+    trunc_sections <- ifelse(nchar(all_sections) > 30,
+                             paste0(substr(all_sections, 1, 27), "..."),
+                             all_sections)
+
     plotly::plot_ly(
-      x = all_sections,
+      x = trunc_sections,
       y = heatmap_terms,
       z = heatmap_matrix,
       type = "heatmap",
@@ -2717,7 +2722,7 @@ Avg sentence length: %.1f words",
           tickangle = -45,
           tickfont = list(size = 11),
           categoryorder = "array",
-          categoryarray = all_sections
+          categoryarray = trunc_sections
         ),
         yaxis = list(
           title = list(
@@ -2729,7 +2734,7 @@ Avg sentence length: %.1f words",
         ),
         plot_bgcolor = "#fafafa",
         paper_bgcolor = "white",
-        margin = list(l = 140, r = 40, t = 20, b = 100)
+        margin = list(l = 140, r = 40, t = 20, b = 140)
       ) %>%
       plotly::config(
         displayModeBar = TRUE,
@@ -2773,6 +2778,14 @@ Avg sentence length: %.1f words",
       }
     })
 
+    # Truncate long section labels for x-axis display
+    trunc_ref_sections <- ifelse(nchar(ref_counts$section) > 30,
+                                 paste0(substr(ref_counts$section, 1, 27), "..."),
+                                 ref_counts$section)
+    trunc_all_sections <- ifelse(nchar(all_sections) > 30,
+                                 paste0(substr(all_sections, 1, 27), "..."),
+                                 all_sections)
+
     hover_refs <- paste0(
       "<b>Section:</b> ", ref_counts$section, "<br>",
       "<b>References:</b> ", ref_counts$n_references
@@ -2780,7 +2793,7 @@ Avg sentence length: %.1f words",
 
     plotly::plot_ly(
       data = ref_counts,
-      x = ~section,
+      x = trunc_ref_sections,
       y = ~n_references,
       type = "bar",
       marker = list(color = bar_colors),
@@ -2799,7 +2812,7 @@ Avg sentence length: %.1f words",
           tickangle = -45,
           gridcolor = "#e0e0e0",
           categoryorder = "array",
-          categoryarray = all_sections
+          categoryarray = trunc_all_sections
         ),
         yaxis = list(
           title = list(
@@ -2810,7 +2823,7 @@ Avg sentence length: %.1f words",
         ),
         plot_bgcolor = "#fafafa",
         paper_bgcolor = "white",
-        margin = list(l = 60, r = 40, t = 20, b = 100)
+        margin = list(l = 60, r = 40, t = 20, b = 140)
       ) %>%
       plotly::config(
         displayModeBar = TRUE,

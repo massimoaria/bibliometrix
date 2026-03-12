@@ -254,6 +254,7 @@ To ensure the functionality of Biblioshiny,
   values$dpi <- 300
   values$report_dpi <- 72
   values$h <- 7
+  values$aspect <- 1.5  # Publication (3:2) default; Wide = 2.0
   #values$w <- 14
   values$path <- paste0(getwd(), .Platform$file.sep)
   ###
@@ -386,6 +387,12 @@ To ensure the functionality of Biblioshiny,
         values$report_dpi <- saved_report_dpi
       }
       if (!is.na(saved_h)) values$h <- saved_h
+      if (length(graph_settings) >= 4) {
+        saved_aspect <- suppressWarnings(as.numeric(graph_settings[4]))
+        if (!is.na(saved_aspect) && saved_aspect %in% c(1.5, 2.0)) {
+          values$aspect <- saved_aspect
+        }
+      }
     }
   }
 
@@ -421,6 +428,17 @@ To ensure the functionality of Biblioshiny,
       choices = seq(5, 15),
       width = "100%",
       selected = as.character(as.integer(isolate(values$h)))
+    )
+  })
+  output$aspect_radio <- renderUI({
+    radioGroupButtons(
+      inputId = "aspect",
+      label = NULL,
+      choices = c("Publication (3:2)" = "1.5", "Wide (2:1)" = "2"),
+      selected = as.character(isolate(values$aspect)),
+      justified = TRUE,
+      size = "sm",
+      status = "primary"
     )
   })
 
@@ -2163,11 +2181,80 @@ To ensure the functionality of Biblioshiny,
   })
 
   ### Missing Data in Metadata ----
+
+  # Helper: create inline SVG sparkline showing missing % over time for a metadata tag
+  missingSparkline <- function(M, tag, width = 180, height = 28) {
+    na_svg <- sprintf(
+      '<svg width="%d" height="%d" style="vertical-align: middle;"><rect x="0" y="0" width="%d" height="%d" fill="#f5f5f5" rx="2"/><text x="%d" y="%d" text-anchor="middle" font-size="9" fill="#999">N/A</text></svg>',
+      width, height, width, height, width %/% 2, height %/% 2 + 3
+    )
+    if (!"PY" %in% names(M)) return(na_svg)
+    if (!tag %in% names(M)) {
+      # Tag completely missing: all bars at 100%
+      years <- sort(unique(M$PY[!is.na(M$PY)]))
+      if (length(years) < 1) return(na_svg)
+      yearly_miss <- rep(100, length(years))
+    } else {
+      years <- sort(unique(M$PY[!is.na(M$PY)]))
+      if (length(years) < 1) return(na_svg)
+
+      yearly_miss <- vapply(years, function(y) {
+        idx <- which(M$PY == y)
+        if (length(idx) == 0) return(0)
+        vals <- M[[tag]][idx]
+        miss <- sum(is.na(vals) | vals %in% c("NA,0000,NA", "NA", "", "none"))
+        round(miss / length(idx) * 100, 1)
+      }, numeric(1))
+
+      # TC special case
+      if (tag == "TC" && sum(as.numeric(M$TC), na.rm = TRUE) == 0) {
+        yearly_miss[] <- 100
+      }
+    }
+
+    n <- length(years)
+    bar_w <- max(1, width / n)
+    svg_w <- bar_w * n
+
+    bar_color <- function(pct) {
+      if (pct == 0) return("#32cd32")
+      if (pct <= 10) return("#90ee90")
+      if (pct <= 20) return("#f0e68c")
+      if (pct <= 50) return("#f08080")
+      return("#b22222")
+    }
+
+    bars <- vapply(seq_along(years), function(i) {
+      pct <- yearly_miss[i]
+      bar_h <- max(1, pct / 100 * height)
+      y_pos <- height - bar_h
+      gap <- if (bar_w > 2) 0.5 else 0
+      sprintf(
+        '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s" opacity="0.85"><title>%d: %.1f%%</title></rect>',
+        (i - 1) * bar_w, y_pos, bar_w - gap, bar_h, bar_color(pct), years[i], pct
+      )
+    }, character(1))
+
+    # Year labels below bars
+    lbl_h <- 10
+    total_h <- height + lbl_h + 2
+    lbl_start <- sprintf('<text x="1" y="%d" font-size="8" fill="#888">%d</text>', total_h - 1, min(years))
+    lbl_end <- sprintf('<text x="%.1f" y="%d" font-size="8" fill="#888" text-anchor="end">%d</text>', svg_w - 1, total_h - 1, max(years))
+
+    sprintf(
+      '<svg width="%.0f" height="%d" style="vertical-align: middle;"><rect x="0" y="0" width="%.0f" height="%d" fill="#f5f5f5" rx="2"/>%s%s%s</svg>',
+      svg_w, total_h, svg_w, height, paste(bars, collapse = ""), lbl_start, lbl_end
+    )
+  }
+
   output$missingDataTable <- renderUI({
     values$missingdf <- df <- missingData(values$M)$mandatoryTags
     values$missTags <- df$tag[df$missing_pct > 50]
     # values$menu <- menuList(values)
     updateMenuVisibility(session, values)
+
+    # Compute sparkline trends per tag
+    sparklines <- vapply(df$tag, function(t) missingSparkline(values$M, t), character(1))
 
     names(df) <- c(
       "Metadata",
@@ -2176,6 +2263,10 @@ To ensure the functionality of Biblioshiny,
       "Missing %",
       "Status"
     )
+
+    # Add trend column and reorder
+    df$Trend <- sparklines
+    df <- df[, c("Metadata", "Description", "Missing Counts", "Missing %", "Trend", "Status")]
 
     # Pre-processing del dataframe per aggiungere colori e formattazione
     df_formatted <- df %>%
@@ -2349,10 +2440,71 @@ To ensure the functionality of Biblioshiny,
     )
   }
 
+  observeEvent(input$showMissingData, {
+    if (ncol(values$M) > 1) {
+      showModal(missingModal(session))
+    }
+  })
+
   observeEvent(input$missingReport, {
     if (!is.null(values$missingdf_formatted)) {
       sheetname <- "MissingData"
-      list_df <- list(values$missingdf_formatted[, -5])
+      df_excel <- values$missingdf_formatted[, !names(values$missingdf_formatted) %in% c("Trend", "Status")]
+
+      # Compute year-by-year missing % matrix for temporal data
+      M <- values$M
+      md <- values$missingdf
+      years <- sort(unique(M$PY[!is.na(M$PY)]))
+      if (length(years) > 0) {
+        # Compute year-by-year missing counts and percentages
+        yearly_counts <- do.call(rbind, lapply(seq_len(nrow(md)), function(i) {
+          tag <- md$tag[i]
+          vapply(years, function(y) {
+            idx <- which(M$PY == y)
+            if (length(idx) == 0) return(NA_real_)
+            if (!tag %in% names(M)) return(as.numeric(length(idx)))
+            vals <- M[[tag]][idx]
+            sum(is.na(vals) | vals %in% c("NA,0000,NA", "NA", "", "none"))
+          }, numeric(1))
+        }))
+        yearly_pct <- do.call(rbind, lapply(seq_len(nrow(md)), function(i) {
+          tag <- md$tag[i]
+          vapply(years, function(y) {
+            idx <- which(M$PY == y)
+            if (length(idx) == 0) return(NA_real_)
+            if (!tag %in% names(M)) return(100)
+            vals <- M[[tag]][idx]
+            miss <- sum(is.na(vals) | vals %in% c("NA,0000,NA", "NA", "", "none"))
+            round(miss / length(idx) * 100, 2)
+          }, numeric(1))
+        }))
+        # TC special case
+        tc_row <- which(md$tag == "TC")
+        if (length(tc_row) > 0 && sum(as.numeric(M$TC), na.rm = TRUE) == 0) {
+          yearly_pct[tc_row, ] <- 100
+          yearly_counts[tc_row, ] <- vapply(years, function(y) sum(M$PY == y, na.rm = TRUE), numeric(1))
+        }
+        # Absolute counts table
+        df_yearly_counts <- data.frame(
+          Metadata = md$tag,
+          Description = md$description,
+          yearly_counts,
+          check.names = FALSE
+        )
+        names(df_yearly_counts)[-(1:2)] <- as.character(years)
+        # Percentage table
+        df_yearly_pct <- data.frame(
+          Metadata = md$tag,
+          Description = md$description,
+          yearly_pct,
+          check.names = FALSE
+        )
+        names(df_yearly_pct)[-(1:2)] <- as.character(years)
+        list_df <- list(df_excel, df_yearly_counts, df_yearly_pct)
+      } else {
+        list_df <- list(df_excel)
+      }
+
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$fileMDT <- screenSh(
         values$missingdf_formatted,
@@ -4795,7 +4947,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$ASPplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -4920,7 +5072,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$ACpYplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -5043,7 +5195,7 @@ To ensure the functionality of Biblioshiny,
           plot = ggplotLifeCycle(values$DLC, plot_type = c(i)),
           dpi = values$dpi,
           height = values$h,
-          width = values$h * 2,
+          width = values$h * values$aspect,
           bg = "white"
         )
       }
@@ -5175,7 +5327,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MRSplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -5276,7 +5428,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MLCSplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -5353,7 +5505,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$bradford$graph,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -5579,7 +5731,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$SIplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -5685,6 +5837,14 @@ To ensure the functionality of Biblioshiny,
       ))
     )
 
+    # Truncate long source names for legend readability
+    trunc_labels <- setNames(
+      ifelse(nchar(levels(values$SODF$Source)) > 35,
+             paste0(substr(levels(values$SODF$Source), 1, 32), "..."),
+             levels(values$SODF$Source)),
+      levels(values$SODF$Source)
+    )
+
     g = ggplot(
       values$SODF,
       aes(
@@ -5708,14 +5868,14 @@ To ensure the functionality of Biblioshiny,
       labs(color = "Source") +
       theme(
         text = element_text(color = "#444444"),
-        legend.text = ggplot2::element_text(size = 10),
-        legend.box.margin = margin(6, 6, 6, 6),
+        legend.text = ggplot2::element_text(size = 9, face = "bold"),
+        legend.box.margin = margin(2, 2, 2, 2),
         legend.title = ggplot2::element_text(
-          size = 12,
+          size = 10,
           face = "bold"
         ),
-        legend.position = "right",
-        legend.direction = "vertical",
+        legend.position = "bottom",
+        legend.direction = "horizontal",
         legend.key.size = grid::unit(0.4, "cm"),
         legend.key.width = grid::unit(0.6, "cm"),
         plot.caption = element_text(
@@ -5735,6 +5895,8 @@ To ensure the functionality of Biblioshiny,
         axis.line.x = element_line(color = "black", linewidth = 0.5),
         axis.line.y = element_line(color = "black", linewidth = 0.5)
       ) +
+      scale_color_discrete(labels = trunc_labels) +
+      guides(color = guide_legend(ncol = 2)) +
       annotation_custom(
         values$logoGrid,
         xmin = x[1],
@@ -5757,7 +5919,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$SDplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -6053,7 +6215,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MRAplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -6265,7 +6427,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MLCAplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -6355,7 +6517,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$AIplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -6436,7 +6598,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$AUProdOverTime$graph,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2.5,
+        width = values$h * values$aspect * 1.25,
         bg = "white"
       )
     },
@@ -6550,7 +6712,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$LLplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -6825,7 +6987,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$AFFplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -6901,7 +7063,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$AffOverTimePlot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -7124,7 +7286,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MRCOplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -7210,7 +7372,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$mapworld$g,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -7273,7 +7435,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$CountryOverTimePlot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -7449,7 +7611,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MCCplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -7874,7 +8036,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MGCDplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -8015,7 +8177,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MLCDplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -8128,7 +8290,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MLCRplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -8266,7 +8428,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$res$spectroscopy,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -8634,7 +8796,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$MRWplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -9254,7 +9416,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$WDplot,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -9465,7 +9627,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$trendTopics$graph,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -9627,7 +9789,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$CM$map,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         bg = "white"
       )
     },
@@ -10484,13 +10646,13 @@ To ensure the functionality of Biblioshiny,
         plot = values$CS$graph_terms,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 1.5,
+        width = values$h * values$aspect * 0.75,
         bg = "white"
       )
       png(
         filename = files[2],
         height = values$h,
-        width = values$h * 2,
+        width = values$h * values$aspect,
         units = "in",
         res = values$dpi
       )
@@ -10875,7 +11037,7 @@ To ensure the functionality of Biblioshiny,
         plot = values$TM$map,
         dpi = values$dpi,
         height = values$h,
-        width = values$h * 1.5,
+        width = values$h * values$aspect * 0.75,
         bg = "white"
       )
     },
@@ -11281,7 +11443,7 @@ To ensure the functionality of Biblioshiny,
           plot = values$nexus$TM[[i]]$map,
           dpi = values$dpi,
           height = values$h,
-          width = values$h * 1.5,
+          width = values$h * values$aspect * 0.75,
           bg = "white"
         )
         files <- c(fileName, files)
@@ -13424,53 +13586,37 @@ To ensure the functionality of Biblioshiny,
   )
 
   ## SETTING ----
-  observeEvent(
-    input$dpi,
-    {
-      values$dpi <- as.numeric(input$dpi)
-      writeLines(
-        c(
-          as.character(values$dpi),
-          as.character(values$report_dpi),
-          as.character(values$h)
-        ),
-        file.path(homeFolder(), ".biblio_graph_settings.txt")
-      )
-    },
-    ignoreInit = TRUE
-  )
+  saveGraphSettings <- function() {
+    writeLines(
+      c(
+        as.character(values$dpi),
+        as.character(values$report_dpi),
+        as.character(values$h),
+        as.character(values$aspect)
+      ),
+      file.path(homeFolder(), ".biblio_graph_settings.txt")
+    )
+  }
 
-  observeEvent(
-    input$report_dpi,
-    {
-      values$report_dpi <- as.numeric(input$report_dpi)
-      writeLines(
-        c(
-          as.character(values$dpi),
-          as.character(values$report_dpi),
-          as.character(values$h)
-        ),
-        file.path(homeFolder(), ".biblio_graph_settings.txt")
-      )
-    },
-    ignoreInit = TRUE
-  )
+  observeEvent(input$dpi, {
+    values$dpi <- as.numeric(input$dpi)
+    saveGraphSettings()
+  }, ignoreInit = TRUE)
 
-  observeEvent(
-    input$h,
-    {
-      values$h <- as.numeric(input$h)
-      writeLines(
-        c(
-          as.character(values$dpi),
-          as.character(values$report_dpi),
-          as.character(values$h)
-        ),
-        file.path(homeFolder(), ".biblio_graph_settings.txt")
-      )
-    },
-    ignoreInit = TRUE
-  )
+  observeEvent(input$report_dpi, {
+    values$report_dpi <- as.numeric(input$report_dpi)
+    saveGraphSettings()
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$h, {
+    values$h <- as.numeric(input$h)
+    saveGraphSettings()
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$aspect, {
+    values$aspect <- as.numeric(input$aspect)
+    saveGraphSettings()
+  }, ignoreInit = TRUE)
 
   # Server code for randomize seed button
   observeEvent(input$randomize_seed, {

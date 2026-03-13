@@ -1527,7 +1527,7 @@ To ensure the functionality of Biblioshiny,
           if (isTRUE(input$importFetchRefs)) {
             # Check if CR column has actual reference IDs (old format) or is empty/NA (new format)
             has_cr_ids <- "CR" %in% names(M) && any(!is.na(M$CR) & M$CR != "")
-            only_multiple <- isTRUE(input$importRefsFilter == "multiple")
+            only_multiple <- is.null(input$importRefsFilter) || input$importRefsFilter == "multiple"
 
             showModal(modalDialog(
               title = "Resolving Cited References",
@@ -1770,6 +1770,230 @@ To ensure the functionality of Biblioshiny,
             dbsource = input$dbsource,
             format = "api"
           )
+
+          # Resolve cited references if requested
+          if (isTRUE(input$importFetchRefs)) {
+            has_cr_ids <- "CR" %in% names(M) && any(!is.na(M$CR) & M$CR != "")
+            only_multiple <- is.null(input$importRefsFilter) || input$importRefsFilter == "multiple"
+
+            showModal(modalDialog(
+              title = "Resolving Cited References",
+              div(
+                div(
+                  style = "text-align: center; margin: 20px 0;",
+                  icon("spinner", class = "fa-spin fa-3x")
+                ),
+                div(
+                  id = "import-ref-progress",
+                  style = "text-align: center; font-size: 14px;",
+                  "Collecting reference IDs..."
+                ),
+                div(
+                  style = "margin-top: 10px; background-color: #e9ecef; border-radius: 4px; height: 20px; width: 100%;",
+                  div(
+                    id = "import-ref-bar",
+                    style = "background-color: #007bff; height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s ease;"
+                  )
+                ),
+                div(
+                  id = "import-ref-pct",
+                  style = "text-align: center; margin-top: 5px; font-size: 12px; color: #666;",
+                  "0%"
+                )
+              ),
+              footer = NULL,
+              easyClose = FALSE
+            ))
+
+            tryCatch(
+              {
+                if (has_cr_ids) {
+                  # CR column contains OpenAlex reference IDs (e.g. W1234567890)
+                  all_cr <- M$CR[!is.na(M$CR) & M$CR != ""]
+                  all_ref_ids <- unique(trimws(unlist(strsplit(all_cr, ";\\s*"))))
+                  # Add OpenAlex URL prefix if missing
+                  all_ref_ids <- ifelse(
+                    grepl("^https://openalex\\.org/", all_ref_ids),
+                    all_ref_ids,
+                    paste0("https://openalex.org/", all_ref_ids)
+                  )
+                  all_ref_ids <- unique(all_ref_ids[grepl("^https://openalex\\.org/W", all_ref_ids)])
+
+                  if (length(all_ref_ids) > 0) {
+                    shinyjs::html(
+                      "import-ref-progress",
+                      sprintf(
+                        "Resolving %s unique references...",
+                        format(length(all_ref_ids), big.mark = ",")
+                      )
+                    )
+
+                    oa_data_fake <- lapply(seq_len(nrow(M)), function(i) {
+                      cr <- M$CR[i]
+                      if (is.na(cr) || cr == "") {
+                        list(referenced_works = character(0))
+                      } else {
+                        refs <- trimws(unlist(strsplit(cr, ";\\s*")))
+                        refs <- ifelse(
+                          grepl("^https://openalex\\.org/", refs),
+                          refs,
+                          paste0("https://openalex.org/", refs)
+                        )
+                        refs <- refs[grepl("^https://openalex\\.org/W", refs)]
+                        list(referenced_works = refs)
+                      }
+                    })
+
+                    ref_lookup <- resolve_openalex_references(
+                      oa_data_fake,
+                      progress_id = "import-ref-progress",
+                      progress_bar_id = "import-ref-bar",
+                      progress_pct_id = "import-ref-pct",
+                      only_multiple = only_multiple
+                    )
+
+                    if (length(ref_lookup) > 0) {
+                      shinyjs::html(
+                        "import-ref-progress",
+                        "Building citation strings..."
+                      )
+                      cr_col <- build_cr_column(oa_data_fake, ref_lookup)
+                      M$CRids <- M$CR
+                      M$CR <- cr_col
+                    }
+                  }
+                } else {
+                  # No CR column: fetch referenced_works via API using id_oa
+                  work_ids <- M$id_oa[!is.na(M$id_oa) & M$id_oa != ""]
+                  if (length(work_ids) > 0) {
+                    shinyjs::html(
+                      "import-ref-progress",
+                      sprintf(
+                        "Fetching referenced works for %s publications...",
+                        format(length(work_ids), big.mark = ",")
+                      )
+                    )
+
+                    batch_size <- 50
+                    n_batches <- ceiling(length(work_ids) / batch_size)
+                    ref_map <- setNames(
+                      vector("list", length(work_ids)),
+                      work_ids
+                    )
+
+                    for (b in seq_len(n_batches)) {
+                      start_idx <- (b - 1) * batch_size + 1
+                      end_idx <- min(b * batch_size, length(work_ids))
+                      batch_ids <- work_ids[start_idx:end_idx]
+
+                      pct <- round(b / n_batches * 50)
+                      shinyjs::runjs(sprintf(
+                        "$('#import-ref-bar').css('width', '%d%%');",
+                        pct
+                      ))
+                      shinyjs::html(
+                        "import-ref-pct",
+                        sprintf(
+                          "Fetching references... batch %d/%d (%d%%)",
+                          b, n_batches, pct
+                        )
+                      )
+
+                      tryCatch(
+                        {
+                          result <- openalexR::oa_fetch(
+                            entity = "works",
+                            openalex_id = paste(batch_ids, collapse = "|"),
+                            output = "list",
+                            verbose = FALSE
+                          )
+                          if (is.list(result)) {
+                            for (work in result) {
+                              wid <- gsub("https://openalex.org/", "", work$id)
+                              if (!is.null(wid) && !is.null(work$referenced_works)) {
+                                ref_map[[wid]] <- work$referenced_works
+                              }
+                            }
+                          }
+                        },
+                        error = function(e) {}
+                      )
+                    }
+
+                    oa_data_fake <- lapply(seq_len(nrow(M)), function(i) {
+                      refs <- ref_map[[M$id_oa[i]]]
+                      if (is.null(refs) || length(refs) == 0) {
+                        list(referenced_works = character(0))
+                      } else {
+                        list(referenced_works = refs)
+                      }
+                    })
+
+                    all_ref_ids <- unique(unlist(lapply(
+                      oa_data_fake,
+                      function(w) w$referenced_works
+                    )))
+                    all_ref_ids <- all_ref_ids[!is.na(all_ref_ids) & all_ref_ids != ""]
+
+                    if (length(all_ref_ids) > 0) {
+                      shinyjs::html(
+                        "import-ref-progress",
+                        sprintf(
+                          "Resolving %s unique references...",
+                          format(length(all_ref_ids), big.mark = ",")
+                        )
+                      )
+
+                      ref_lookup <- resolve_openalex_references(
+                        oa_data_fake,
+                        progress_id = "import-ref-progress",
+                        progress_bar_id = "import-ref-bar",
+                        progress_pct_id = "import-ref-pct",
+                        only_multiple = only_multiple
+                      )
+
+                      if (length(ref_lookup) > 0) {
+                        shinyjs::html(
+                          "import-ref-progress",
+                          "Building citation strings..."
+                        )
+                        cr_col <- build_cr_column(oa_data_fake, ref_lookup)
+                        M$CRids <- vapply(
+                          oa_data_fake,
+                          function(w) {
+                            ids <- gsub("https://openalex.org/", "", w$referenced_works)
+                            if (length(ids) == 0) NA_character_ else paste(ids, collapse = ";")
+                          },
+                          character(1)
+                        )
+                        M$CR <- cr_col
+                        M$NR <- vapply(
+                          oa_data_fake,
+                          function(w) length(w$referenced_works),
+                          integer(1)
+                        )
+                      }
+                    }
+                  }
+                }
+
+                removeModal()
+              },
+              error = function(e) {
+                removeModal()
+                showModal(modalDialog(
+                  title = "Warning",
+                  paste(
+                    "Reference resolution failed:",
+                    e$message,
+                    "\nThe collection was imported without resolved references."
+                  ),
+                  easyClose = TRUE,
+                  footer = modalButton("OK")
+                ))
+              }
+            )
+          }
         },
         lens = {
           switch(

@@ -690,6 +690,19 @@ resolve_openalex_references <- function(oa_data, progress_id = NULL,
 
   if (length(all_ref_ids) == 0) return(list())
 
+  # Update progress with actual count after filtering
+  if (!is.null(progress_id)) {
+    filter_label <- if (isTRUE(only_multiple)) " (cited > 1)" else ""
+    shinyjs::html(
+      progress_id,
+      sprintf(
+        "Resolving %s unique references%s...",
+        format(length(all_ref_ids), big.mark = ","),
+        filter_label
+      )
+    )
+  }
+
   # Batch fetch referenced works (50 per batch to stay within URL limits)
   batch_size <- 50
   n_batches <- ceiling(length(all_ref_ids) / batch_size)

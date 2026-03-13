@@ -1192,7 +1192,7 @@ body <- dashboardBody(
                           )
                         ),
                         conditionalPanel(
-                          condition = "input.dbsource == 'openalex'",
+                          condition = "input.dbsource == 'openalex' || input.dbsource == 'openalex_api'",
                           div(
                             style = "margin-bottom: 15px; padding: 12px; background-color: #d6eaf8; border-radius: 5px; border-left: 4px solid #3498db;",
                             checkboxInput(

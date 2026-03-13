@@ -2271,44 +2271,51 @@ To ensure the functionality of Biblioshiny,
     # Pre-processing del dataframe per aggiungere colori e formattazione
     df_formatted <- df %>%
       mutate(
+        # Bold formatting for Metadata and Description
+        Metadata = paste0('<strong style="font-size: 14px;">', Metadata, '</strong>'),
+        Description = paste0('<strong style="font-size: 14px;">', Description, '</strong>'),
+        `Missing Counts` = as.character(`Missing Counts`),
+        `Missing Counts` = paste0('<span style="font-size: 14px; font-weight: 600;">', `Missing Counts`, '</span>'),
+
         # Arrotonda la colonna "Missing %" a 2 decimali
         `Missing %` = round(`Missing %`, 2),
+        `Missing %` = paste0('<span style="font-size: 14px; font-weight: 600;">', `Missing %`, '</span>'),
 
         # Aggiungi colori di background alla colonna Status basandosi sul valore
         Status = case_when(
           Status == "Completely missing" ~
             paste0(
-              '<span style="display: block; background-color: #b22222; color: white; padding: 5px; text-align: center; border-radius: 3px;">',
+              '<span style="display: block; background-color: #b22222; color: white; padding: 5px; text-align: center; border-radius: 3px; font-size: 14px; font-weight: 700;">',
               Status,
               '</span>'
             ),
           Status == "Critical" ~
             paste0(
-              '<span style="display: block; background-color: #f08080; color: white; padding: 5px; text-align: center; border-radius: 3px;">',
+              '<span style="display: block; background-color: #f08080; color: white; padding: 5px; text-align: center; border-radius: 3px; font-size: 14px; font-weight: 700;">',
               Status,
               '</span>'
             ),
           Status == "Poor" ~
             paste0(
-              '<span style="display: block; background-color: lightgrey; color: black; padding: 5px; text-align: center; border-radius: 3px;">',
+              '<span style="display: block; background-color: lightgrey; color: black; padding: 5px; text-align: center; border-radius: 3px; font-size: 14px; font-weight: 700;">',
               Status,
               '</span>'
             ),
           Status == "Acceptable" ~
             paste0(
-              '<span style="display: block; background-color: #f0e68c; color: black; padding: 5px; text-align: center; border-radius: 3px;">',
+              '<span style="display: block; background-color: #f0e68c; color: black; padding: 5px; text-align: center; border-radius: 3px; font-size: 14px; font-weight: 700;">',
               Status,
               '</span>'
             ),
           Status == "Good" ~
             paste0(
-              '<span style="display: block; background-color: #90ee90; color: black; padding: 5px; text-align: center; border-radius: 3px;">',
+              '<span style="display: block; background-color: #90ee90; color: black; padding: 5px; text-align: center; border-radius: 3px; font-size: 14px; font-weight: 700;">',
               Status,
               '</span>'
             ),
           Status == "Excellent" ~
             paste0(
-              '<span style="display: block; background-color: #32cd32; color: white; padding: 5px; text-align: center; border-radius: 3px;">',
+              '<span style="display: block; background-color: #32cd32; color: white; padding: 5px; text-align: center; border-radius: 3px; font-size: 14px; font-weight: 700;">',
               Status,
               '</span>'
             ),

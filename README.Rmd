@@ -751,7 +751,7 @@ scientific knowledge evolves and builds upon previous research.
 
 ### The Book
 
-Aria, M. & Cuccurullo, C. (2025). **Science Mapping Analysis: A
+Aria, M. & Cuccurullo, C. (2026). **Science Mapping Analysis: A
 Primer with Biblioshiny**, *McGraw-Hill Education*.
 
 ### Core bibliometrix publication

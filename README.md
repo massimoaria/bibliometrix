@@ -655,7 +655,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-03-25 12:38:36
+#> $ query_timestamp             <dttm> 2026-03-25 12:41:43
 ```
 
 This function provides comprehensive author profiles including:
@@ -1139,7 +1139,7 @@ scientific knowledge evolves and builds upon previous research.
 
 ### The Book
 
-Aria, M. & Cuccurullo, C. (2025). **Science Mapping Analysis: A Primer
+Aria, M. & Cuccurullo, C. (2026). **Science Mapping Analysis: A Primer
 with Biblioshiny**, *McGraw-Hill Education*.
 
 ### Core bibliometrix publication

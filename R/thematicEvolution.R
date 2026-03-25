@@ -35,7 +35,7 @@ utils::globalVariables(c(
   "pagerank_centrality.x",
   "pagerank_centrality.y",
   "rel_freq_temp",
-  "separate_rows",
+  "separate_longer_delim",
   "total_pagerank"
 ))
 

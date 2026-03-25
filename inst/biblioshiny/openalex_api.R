@@ -275,8 +275,18 @@ openAlexUI <- function() {
                   column(
                     width = 3,
                     selectizeInput(
-                      "oaTopic",
-                      "Topic:",
+                      "oaKeyword",
+                      "Keyword:",
+                      choices = NULL,
+                      multiple = TRUE,
+                      options = list(placeholder = "Enter a query first...")
+                    )
+                  ),
+                  column(
+                    width = 3,
+                    selectizeInput(
+                      "oaDomain",
+                      "Domain:",
                       choices = NULL,
                       multiple = TRUE,
                       options = list(placeholder = "Enter a query first...")
@@ -788,7 +798,6 @@ openAlexServer <- function(input, output, session, values) {
   showDateRange <- reactiveVal(TRUE)
   showAdvanced <- reactiveVal(TRUE)
   downloadProgress <- reactiveVal(NULL)
-  topicChoices <- reactiveVal(NULL)
   journalChoices <- reactiveVal(NULL)
   submittedQueryFilters <- reactiveVal(NULL) # keyword filters submitted via Search button
 
@@ -811,11 +820,13 @@ openAlexServer <- function(input, output, session, values) {
     }
   })
 
-  # Disable Topic/Journal dropdowns at startup (no data yet)
+  # Disable Keyword/Domain/Journal dropdowns at startup (no data yet)
   observeEvent(TRUE, {
-    shinyjs::disable("oaTopic")
+    shinyjs::disable("oaKeyword")
+    shinyjs::disable("oaDomain")
     shinyjs::disable("oaJournal")
-    shinyjs::runjs("$('#oaTopic').closest('.form-group').css('opacity', '0.5');")
+    shinyjs::runjs("$('#oaKeyword').closest('.form-group').css('opacity', '0.5');")
+    shinyjs::runjs("$('#oaDomain').closest('.form-group').css('opacity', '0.5');")
     shinyjs::runjs("$('#oaJournal').closest('.form-group').css('opacity', '0.5');")
   }, once = TRUE)
 
@@ -947,14 +958,15 @@ openAlexServer <- function(input, output, session, values) {
     updateNumericInput(session, "oaMaxRecords", value = 1000)
     updateSelectizeInput(session, "oaOpenAccess", selected = "")
     updateSelectizeInput(session, "oaSDG", selected = "")
-    updateSelectizeInput(session, "oaTopic", choices = character(0), selected = character(0))
+    updateSelectizeInput(session, "oaKeyword", choices = character(0), selected = character(0))
+    updateSelectizeInput(session, "oaDomain", choices = character(0), selected = character(0))
     updateSelectizeInput(session, "oaJournal", choices = character(0), selected = character(0))
     updateRadioButtons(session, "oaDropdownSort", selected = "count")
     updateCheckboxInput(session, "oaFetchRefs", value = FALSE)
     updateRadioButtons(session, "oaRefsFilter", selected = "multiple")
-    topicChoices(NULL)
     journalChoices(NULL)
-    topicData(NULL)
+    keywordData(NULL)
+    domainData(NULL)
     journalData(NULL)
     submittedQueryFilters(NULL)
   })
@@ -1104,7 +1116,8 @@ openAlexServer <- function(input, output, session, values) {
   baseSearchFiltersDebounced <- debounce(baseSearchFilters, 2000)
 
   # Raw data from group_by API (data.frames with key, key_display_name, count)
-  topicData <- reactiveVal(NULL)
+  keywordData <- reactiveVal(NULL)
+  domainData <- reactiveVal(NULL)
   journalData <- reactiveVal(NULL)
 
   # Helper: build sorted named vector from group_by result
@@ -1119,38 +1132,57 @@ openAlexServer <- function(input, output, session, values) {
     setNames(data$key, paste0(data$key_display_name, " (", data$count, ")"))
   }
 
-  # Observer: fetch Topic and Journal raw data via group_by
+  # Observer: fetch Keyword, Domain and Journal raw data via group_by
   observe({
     base_filters <- baseSearchFiltersDebounced()
 
     if (is.null(base_filters)) {
-      topicData(NULL)
+      keywordData(NULL)
+      domainData(NULL)
       journalData(NULL)
-      shinyjs::disable("oaTopic")
+      shinyjs::disable("oaKeyword")
+      shinyjs::disable("oaDomain")
       shinyjs::disable("oaJournal")
-      shinyjs::runjs("$('#oaTopic').closest('.form-group').css('opacity', '0.5');")
+      shinyjs::runjs("$('#oaKeyword').closest('.form-group').css('opacity', '0.5');")
+      shinyjs::runjs("$('#oaDomain').closest('.form-group').css('opacity', '0.5');")
       shinyjs::runjs("$('#oaJournal').closest('.form-group').css('opacity', '0.5');")
       return()
     }
 
     # Grey out and disable while loading
-    shinyjs::disable("oaTopic")
+    shinyjs::disable("oaKeyword")
+    shinyjs::disable("oaDomain")
     shinyjs::disable("oaJournal")
-    shinyjs::runjs("$('#oaTopic').closest('.form-group').css('opacity', '0.5');")
+    shinyjs::runjs("$('#oaKeyword').closest('.form-group').css('opacity', '0.5');")
+    shinyjs::runjs("$('#oaDomain').closest('.form-group').css('opacity', '0.5');")
     shinyjs::runjs("$('#oaJournal').closest('.form-group').css('opacity', '0.5');")
 
     tryCatch({
-      topic_result <- do.call(
+      keyword_result <- do.call(
         openalexR::oa_fetch,
-        c(list(entity = "works", group_by = "topics.id", verbose = FALSE), base_filters)
+        c(list(entity = "works", group_by = "keywords.id", verbose = FALSE), base_filters)
       )
-      if (!is.null(topic_result) && nrow(topic_result) > 0) {
-        topicData(topic_result)
+      if (!is.null(keyword_result) && nrow(keyword_result) > 0) {
+        keywordData(keyword_result)
       } else {
-        topicData(NULL)
+        keywordData(NULL)
       }
     }, error = function(e) {
-      topicData(NULL)
+      keywordData(NULL)
+    })
+
+    tryCatch({
+      domain_result <- do.call(
+        openalexR::oa_fetch,
+        c(list(entity = "works", group_by = "topics.domain.id", verbose = FALSE), base_filters)
+      )
+      if (!is.null(domain_result) && nrow(domain_result) > 0) {
+        domainData(domain_result)
+      } else {
+        domainData(NULL)
+      }
+    }, error = function(e) {
+      domainData(NULL)
     })
 
     tryCatch({
@@ -1168,29 +1200,39 @@ openAlexServer <- function(input, output, session, values) {
     })
 
     # Re-enable after loading completes
-    shinyjs::enable("oaTopic")
+    shinyjs::enable("oaKeyword")
+    shinyjs::enable("oaDomain")
     shinyjs::enable("oaJournal")
-    shinyjs::runjs("$('#oaTopic').closest('.form-group').css('opacity', '1');")
+    shinyjs::runjs("$('#oaKeyword').closest('.form-group').css('opacity', '1');")
+    shinyjs::runjs("$('#oaDomain').closest('.form-group').css('opacity', '1');")
     shinyjs::runjs("$('#oaJournal').closest('.form-group').css('opacity', '1');")
   })
 
   # Observer: update dropdown choices when raw data or sort order changes
   observe({
-    td <- topicData()
+    kd <- keywordData()
+    dd <- domainData()
     jd <- journalData()
     sort_order <- input$oaDropdownSort
 
-    current_topics <- isolate(input$oaTopic)
+    current_keywords <- isolate(input$oaKeyword)
+    current_domains <- isolate(input$oaDomain)
     current_journals <- isolate(input$oaJournal)
 
-    tc <- sort_groupby_choices(td, sort_order)
-    if (length(tc) > 0) {
-      topicChoices(tc)
-      valid_topics <- current_topics[current_topics %in% tc]
-      updateSelectizeInput(session, "oaTopic", choices = tc, selected = valid_topics)
+    kc <- sort_groupby_choices(kd, sort_order)
+    if (length(kc) > 0) {
+      valid_keywords <- current_keywords[current_keywords %in% kc]
+      updateSelectizeInput(session, "oaKeyword", choices = kc, selected = valid_keywords)
     } else {
-      topicChoices(NULL)
-      updateSelectizeInput(session, "oaTopic", choices = character(0), selected = character(0))
+      updateSelectizeInput(session, "oaKeyword", choices = character(0), selected = character(0))
+    }
+
+    dc <- sort_groupby_choices(dd, sort_order)
+    if (length(dc) > 0) {
+      valid_domains <- current_domains[current_domains %in% dc]
+      updateSelectizeInput(session, "oaDomain", choices = dc, selected = valid_domains)
+    } else {
+      updateSelectizeInput(session, "oaDomain", choices = character(0), selected = character(0))
     }
 
     jc <- sort_groupby_choices(jd, sort_order)
@@ -1204,7 +1246,7 @@ openAlexServer <- function(input, output, session, values) {
     }
   })
 
-  # Reactive: full search filters (base + Topic + Journal)
+  # Reactive: full search filters (base + Keyword + Domain + Journal)
   fullSearchFilters <- reactive({
     base_filters <- baseSearchFilters()
     if (is.null(base_filters)) return(NULL)
@@ -1212,9 +1254,17 @@ openAlexServer <- function(input, output, session, values) {
     search_filters <- base_filters
 
     if (showAdvanced()) {
-      if (!is.null(input$oaTopic) && length(input$oaTopic) > 0) {
-        topics <- input$oaTopic[input$oaTopic != ""]
-        if (length(topics) > 0) search_filters$topics.id <- topics
+      if (!is.null(input$oaKeyword) && length(input$oaKeyword) > 0) {
+        keywords <- input$oaKeyword[input$oaKeyword != ""]
+        if (length(keywords) > 0) search_filters$keywords.id <- keywords
+      }
+      if (!is.null(input$oaDomain) && length(input$oaDomain) > 0) {
+        domains <- input$oaDomain[input$oaDomain != ""]
+        if (length(domains) > 0) {
+          # Extract numeric ID from full URL (e.g., "https://openalex.org/domains/2" -> "2")
+          domains <- gsub("https://openalex.org/domains/", "", domains)
+          search_filters$primary_topic.domain.id <- domains
+        }
       }
       if (!is.null(input$oaJournal) && length(input$oaJournal) > 0) {
         journals <- input$oaJournal[input$oaJournal != ""]

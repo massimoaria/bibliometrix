@@ -16,6 +16,7 @@
 - **Max Rows Control**: Added `max.rows` argument in `biblioshiny()` to control the maximum number of rows displayed in tables.
 
 ## New Features
+- Add PRISMA Flow Diagram module to Biblioshiny
 - Added OpenAlex API key settings panel and warning banner for unauthenticated access.
 - Added email setting for polite use of the OpenAlex AI features.
 - Improved cited reference (CR) download from the OpenAlex API.

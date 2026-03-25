@@ -51,6 +51,57 @@ directors, information specialists, librarians, and scholars themselves.
   network analysis, multiple correspondence analysis, and other data
   reduction techniques.
 
+For an in-depth guide to science mapping with bibliometrix, see the
+companion book [Science Mapping Analysis: A Primer with
+Biblioshiny](#the-book).
+
+## The SAAS Workflow
+
+**bibliometrix** and **biblioshiny** are designed around the **SAAS
+workflow** — a four-stage methodological framework for conducting
+rigorous bibliometric research:
+
+<p align="center">
+
+<img src="man/figures/c02_SAAS_WF1.png" width="700"/>
+</p>
+
+The SAAS workflow aligns the analytical pipeline with the structure of a
+scientific article:
+
+- **Search** — Define the research question, select bibliographic
+  databases (Web of Science, Scopus, OpenAlex, PubMed, Lens.org,
+  Cochrane, Dimensions), formulate search queries, and collect data via
+  web export or API.
+
+- **Appraisal** — Assess and refine the dataset using the PRISMA flow
+  diagram, apply inclusion/exclusion filters (timespan, language,
+  document type, impact metrics), and ensure data quality through
+  pre-processing and citation matching.
+
+- **Analysis** — Perform descriptive analysis at three levels (Sources,
+  Authors, Documents) and explore the knowledge structures: conceptual
+  (co-word analysis, thematic mapping), intellectual (co-citation,
+  historiograph), and social (collaboration networks).
+
+- **Synthesis** — Generate visualizations (networks, maps, matrices,
+  Sankey diagrams) and interpret results with the support of **Biblio
+  AI**, the integrated AI assistant.
+
+This framework ensures transparency and reproducibility, mapping each
+analytical step to a specific section of the resulting research paper.
+
+## The Book
+
+**Science Mapping Analysis: A Primer with Biblioshiny** by Massimo Aria
+and Corrado Cuccurullo (McGraw-Hill) is the definitive guide to
+bibliometric research using bibliometrix and biblioshiny.
+
+The book covers the full SAAS workflow, from research design and data
+collection to advanced analyses including thematic evolution, content
+analysis, and AI-assisted interpretation. Each chapter provides
+step-by-step instructions with practical examples using biblioshiny.
+
 ## biblioshiny
 
 **bibliometrix** includes **biblioshiny: bibliometrix for no-coders**
@@ -59,59 +110,141 @@ directors, information specialists, librarians, and scholars themselves.
 interface for bibliometrix*.
 
 It enables scholars to easily access the main features of bibliometrix
-through an interactive workflow:
+through an interactive workflow organized around the SAAS model.
+
+<p align="center">
+
+<img src="man/figures/c02_biblioshiny_interface.png" width="700"/>
+</p>
 
 ### Data Management
 
 - **Import and convert** data from multiple bibliographic databases (Web
-  of Science, Scopus, PubMed, OpenAlex, Cochrane CDSR, Lens.org)
+  of Science, Scopus, PubMed, OpenAlex, Cochrane CDSR, Lens.org,
+  Dimensions)
+
+- **API Integration** for direct data retrieval from OpenAlex and PubMed
 
 - **Filter data** by various criteria including publication years,
   journals, countries, citation counts, and custom journal rankings
 
 - **Merge collections** from different databases
 
-- **API Integration** for direct data retrieval from OpenAlex and PubMed
+- **Citation Matching**: Intelligent algorithm to match and reconcile
+  citations across different databases
+
+- **PRISMA Flow Diagram**: Automatically generate a PRISMA-compliant
+  flow diagram documenting the data selection process — from
+  identification through screening, eligibility, and final inclusion.
+
+<p align="center">
+
+<img src="man/figures/c03_prisma.png" width="500"/>
+</p>
 
 ### Analytics and Visualization
 
+- **Main Information**: A comprehensive dashboard summarizing the key
+  bibliometric indicators of the collection.
+
+- **Three-Field Plot**: A Sankey diagram connecting three metadata
+  fields (e.g., cited references, authors, and keywords) to reveal
+  relational patterns at a glance.
+
+<p align="center">
+
+<img src="man/figures/c04_threefieldplot.png" width="700"/>
+</p>
+
 - **Three-level metrics** for comprehensive analysis:
 
-  - **Sources**: journal performance, impact metrics, Bradford’s law
+  - **Sources**: journal performance, impact metrics, Bradford’s law,
+    source production over time
 
-  - **Authors**: productivity analysis, h-index, collaboration patterns,
-    author profiles with biographical information
+  - **Authors**: productivity analysis, h-index, Lotka’s law,
+    collaboration patterns, author profiles with biographical
+    information from OpenAlex
 
   - **Documents**: citation analysis, most relevant papers, reference
-    publication year spectroscopy (RPYS)
+    publication year spectroscopy (RPYS), trend topics
+
+- **Life Cycle Analysis**: Fit a logistic growth model to annual
+  publication counts to identify the developmental stage of a research
+  field (emergence, rapid growth, maturity, or saturation) and forecast
+  future trends.
+
+<p align="center">
+
+<img src="man/figures/c04_lifecycle.png" width="700"/>
+</p>
 
 ### Knowledge Structure Analysis
 
-- **Conceptual Structure**: analyzing the topics and themes through
-  co-word analysis, thematic mapping, and thematic evolution
+- **Conceptual Structure**: Analyze the topics and themes through
+  co-word networks, thematic mapping (strategic diagrams), and thematic
+  evolution over time.
 
-- **Intellectual Structure**: examining the citation networks through
-  co-citation analysis, historiograph, and document coupling
+<p align="center">
 
-- **Social Structure**: exploring collaboration patterns through
-  co-authorship networks at author, institution, and country levels
+<img src="man/figures/c08_thematicMap.png" width="500"/>
+</p>
 
-### Advanced Features
+<p align="center">
 
-- **Biblio AI**: An integrated AI assistant to help interpret results,
-  generate insights, and provide context-aware recommendations
+<img src="man/figures/c08_TE_lineages.png" width="700"/>
+</p>
 
-- **Life Cycle Analysis**: Track and visualize the evolution of research
-  topics, authors, and documents over time
+- **Intellectual Structure**: Examine the citation networks through
+  co-citation analysis (at document, author, and source level),
+  historiograph, and bibliographic coupling.
+
+<p align="center">
+
+<img src="man/figures/c09_co-citation_papers_network.png" width="500"/>
+</p>
+
+<p align="center">
+
+<img src="man/figures/c09_historiograph_temporal_network.png" width="700"/>
+</p>
+
+- **Social Structure**: Explore collaboration patterns through
+  co-authorship networks at author, institution, and country levels,
+  including an interactive collaboration world map.
+
+<p align="center">
+
+<img src="man/figures/c10_collaboration_map.png" width="700"/>
+</p>
+
+### Content Analysis
+
+**Content Analysis** goes beyond metadata to examine the full text of
+key scientific publications. It includes:
+
+- Citation function analysis (background, method, comparison, critique)
+- In-context citation analysis with citation windows
+- Keyword and concept extraction (TF-IDF, RAKE, YAKE)
+- Word frequency trends and structural analysis (IMRaD)
+- AI-powered summaries via Biblio AI
+
+<p align="center">
+
+<img src="man/figures/c11_CA_menu.png" width="400"/>
+</p>
+
+### Biblio AI
+
+**Biblio AI** is an integrated AI assistant that helps scholars
+interpret bibliometric results, generate insights, and provide
+context-aware recommendations. It supports the synthesis and
+interpretation phases of the SAAS workflow by translating quantitative
+outputs into actionable research narratives.
+
+### Additional Features
 
 - **Animated Networks**: Dynamic visualization of diachronic networks
   showing temporal evolution
-
-- **Content Analysis**: Advanced text mining using natural language
-  processing for deeper content exploration
-
-- **Citation Matching**: Intelligent algorithm to match and reconcile
-  citations across different databases
 
 - **Interactive Reports**: Generate comprehensive Excel reports
   combining multiple analyses
@@ -311,9 +444,9 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #>  Sources (Journals, Books, etc)        281 
 #>  Documents                             898 
 #>  Annual Growth Rate %                  14.05 
-#>  Document Average Age                  10.2 
+#>  Document Average Age                  11.2 
 #>  Average citations per doc             37.12 
-#>  Average citations per year per doc    3.061 
+#>  Average citations per year per doc    2.788 
 #>  References                            43935 
 #>  
 #> DOCUMENT TYPES                     
@@ -396,16 +529,16 @@ S <- summary(object = results, k = 10, pause = FALSE)
 #> Top manuscripts per citations
 #> 
 #>                                  Paper                                     DOI   TC TCperYear   NTC
-#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    154.36 15.64
-#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     76.73 17.17
-#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     30.32  3.76
-#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     39.12  9.82
-#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     28.45  5.67
-#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     15.48  2.66
-#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     19.61  3.48
-#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     12.92  2.15
-#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.56  1.81
-#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     12.54  2.40
+#> 1  CHEN HC, 2012, MIS QUART                     NA                             2161    144.07 15.64
+#> 2  ZUPIC I, 2015, ORGAN RES METHODS             10.1177/1094428114562629        844     70.33 17.17
+#> 3  RAMOS-RODRIGUEZ AR, 2004, STRATEGIC MANAGE J 10.1002/smj.397                 667     29.00  3.76
+#> 4  VOLBERDA HW, 2010, ORGAN SCI                 10.1287/orsc.1090.0503          626     36.82  9.82
+#> 5  DAIM TU, 2006, TECHNOL FORECAST SOC          10.1016/j.techfore.2006.04.004  569     27.10  5.67
+#> 6  KOSTOFF RN, 2001, IEEE T ENG MANAGE          10.1109/17.922473               387     14.88  2.66
+#> 7  NERUR SP, 2008, STRATEG MANAGE J             10.1002/smj.659                 353     18.58  3.48
+#> 8  MELIN G, 2000, RES POLICY                    10.1016/S0048-7333(99)00031-1   336     12.44  2.15
+#> 9  MOED HF, 1985, RES POLICY                    10.1016/0048-7333(85)90012-5    310      7.38  1.81
+#> 10 MURRAY F, 2002, RES POLICY                   10.1016/S0048-7333(02)00070-7   301     12.04  2.40
 #> 
 #> 
 #> Corresponding Author's Countries
@@ -483,7 +616,7 @@ Basic visualizations can be generated using the **plot** function:
 plot(x = results, k = 10, pause = FALSE)
 ```
 
-<img src="man/figures/README-plot generic function-1.png" width="100%" /><img src="man/figures/README-plot generic function-2.png" width="100%" /><img src="man/figures/README-plot generic function-3.png" width="100%" /><img src="man/figures/README-plot generic function-4.png" width="100%" /><img src="man/figures/README-plot generic function-5.png" width="100%" />
+<img src="man/figures/README-plot generic function-1.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-2.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-3.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-4.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-5.png" alt="" width="100%" />
 
 ## Author Bio Cards
 
@@ -500,16 +633,16 @@ dplyr::glimpse(authorInfo)
 #> Columns: 25
 #> $ id                          <chr> "https://openalex.org/A5069892096"
 #> $ display_name                <chr> "Massimo Aria"
-#> $ display_name_alternatives   <list> <"Massimo Aria", "Aria, Massimo", "M Aria", "M Aría", "M. Aria", "M. Qasem Aria", …
+#> $ display_name_alternatives   <list> <"Aria, Massimo", "M Aria", "M. Aria", "M. Qasem Aria", "MASSIMO ARIA", "Massimo A…
 #> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411">
 #> $ orcid                       <chr> "https://orcid.org/0000-0002-8517-9411"
-#> $ works_count                 <int> 227
-#> $ cited_by_count              <int> 16124
-#> $ counts_by_year              <list> [<data.frame[23 x 4]>]
-#> $ `2yr_mean_citedness`        <dbl> 3.983607
-#> $ h_index                     <int> 35
-#> $ i10_index                   <int> 93
-#> $ last_known_institutions     <list> [<data.frame[2 x 6]>]
+#> $ works_count                 <int> 229
+#> $ cited_by_count              <int> 17991
+#> $ counts_by_year              <list> [<data.frame[24 x 4]>]
+#> $ `2yr_mean_citedness`        <dbl> 2.591837
+#> $ h_index                     <int> 36
+#> $ i10_index                   <int> 95
+#> $ last_known_institutions     <list> [<data.frame[3 x 6]>]
 #> $ topics                      <list> [<tbl_df[20 x 5]>]
 #> $ works_api_url               <chr> "https://api.openalex.org/works?filter=author.id:A5069892096"
 #> $ author_position_in_paper    <dbl> 1
@@ -522,7 +655,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2025-12-11 09:08:17
+#> $ query_timestamp             <dttm> 2026-03-25 12:38:36
 ```
 
 This function provides comprehensive author profiles including:
@@ -561,7 +694,7 @@ data <- M %>% group_by(PY) %>% count()
 LC <- lifeCycle(data, forecast_years = 20, plot = TRUE, verbose = FALSE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
 
 ``` r
 
@@ -640,7 +773,7 @@ net <- networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaborat
                    type = "circle", size = TRUE, remove.multiple = FALSE, labelsize = 0.8)
 ```
 
-<img src="man/figures/README-Country collaboration-1.png" width="100%" />
+<img src="man/figures/README-Country collaboration-1.png" alt="" width="100%" />
 
 This visualization reveals international research collaborations,
 highlighting countries with strong scientific partnerships.
@@ -657,7 +790,7 @@ net <- networkPlot(NetMatrix, Title = "Co-Citation Network", type = "fruchterman
                    size = TRUE, remove.multiple = FALSE, labelsize = 0.7, edgesize = 5)
 ```
 
-<img src="man/figures/README-Co-citation network-1.png" width="100%" />
+<img src="man/figures/README-Co-citation network-1.png" alt="" width="100%" />
 
 Co-citation analysis identifies the intellectual foundations of a
 research field by revealing which references are frequently cited
@@ -676,7 +809,7 @@ net <- networkPlot(NetMatrix, normalize = "association", weighted = TRUE, n = 30
                    size = TRUE, edgesize = 5, labelsize = 0.7)
 ```
 
-<img src="man/figures/README-Keyword co-occurrences-1.png" width="100%" />
+<img src="man/figures/README-Keyword co-occurrences-1.png" alt="" width="100%" />
 
 Keyword co-occurrence networks reveal the conceptual structure of a
 research field, identifying main themes and their relationships.
@@ -709,13 +842,13 @@ thematicMapResults <- thematicMap(M, field = "DE", n = 250, minfreq = 5,
 plot(thematicMapResults$map)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" alt="" width="100%" />
 
 ``` r
 plot(thematicMapResults$net$graph)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-2.png" alt="" width="100%" />
 
 ### Thematic Evolution
 
@@ -741,7 +874,7 @@ TEResults <- thematicEvolution(M, field = "DE", n = 250,
 plotThematicEvolution(TEResults$Nodes, TEResults$Edges, measure="weighted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" alt="" width="100%" />
 
 #### 1985-2004
 
@@ -750,7 +883,7 @@ plotThematicEvolution(TEResults$Nodes, TEResults$Edges, measure="weighted")
 plot(TEResults$TM[[1]]$map)
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" alt="" width="100%" />
 
 #### 2005-2008
 
@@ -760,7 +893,7 @@ plot(TEResults$TM[[1]]$map)
 plot(TEResults$TM[[2]]$map)
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" alt="" width="100%" />
 
 #### 2009-2015
 
@@ -771,7 +904,7 @@ plot(TEResults$TM[[2]]$map)
 plot(TEResults$TM[[3]]$map)
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" alt="" width="100%" />
 
 #### 2016-2020
 
@@ -781,7 +914,7 @@ plot(TEResults$TM[[3]]$map)
 plot(TEResults$TM[[4]]$map)
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" alt="" width="100%" />
 
 ## Co-Word Analysis: The conceptual structure of a field
 
@@ -812,13 +945,13 @@ CS <- conceptualStructure(M, field = "ID", method = "MCA", minDegree = 10,
 plot(CS$graph_terms)
 ```
 
-<img src="man/figures/README-Co-Word Analysis-1.png" width="100%" />
+<img src="man/figures/README-Co-Word Analysis-1.png" alt="" width="100%" />
 
 ``` r
 plot(CS$graph_dendogram)
 ```
 
-<img src="man/figures/README-Co-Word Analysis-2.png" width="100%" />
+<img src="man/figures/README-Co-Word Analysis-2.png" alt="" width="100%" />
 
 This analysis helps identify: - Main research themes and sub-themes -
 Relationships between concepts - Evolution of research focus - Emerging
@@ -835,12 +968,12 @@ identify seminal works and breakthrough moments in a research field. The
 rpysResults <- rpys(M, sep = ";", timespan = NULL, graph = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" alt="" width="100%" />
 
 ``` r
 
 print(rpysResults$Sequences %>% filter(Class!="") %>% group_by(Class) %>% slice_max(order_by=Freq,n=3, with_ties = FALSE) %>% arrange(desc(RPY),.by_group = TRUE), n=30)
-#> # A tibble: 18 × 5
+#> # A tibble: 17 × 5
 #> # Groups:   Class [7]
 #>    CR                                            RPY    Freq sequence                       Class                       
 #>    <chr>                                         <chr> <dbl> <chr>                          <chr>                       
@@ -850,18 +983,17 @@ print(rpysResults$Sequences %>% filter(Class!="") %>% group_by(Class) %>% slice_
 #>  4 "ACEDO FJ 2005 INT BUS REV "                  2005     30 oo+o+++ooooo--oo               Constant Performer+Life Cyc…
 #>  5 "TSENG YH 2007 INFORM PROCESS MANAG "         2007     14 o++ooooooo-oo-                 Hot Paper                   
 #>  6 "ZHOU P 2006 RES POLICY "                     2006     14 o+++oo+oo--oooo                Hot Paper                   
-#>  7 "KOSTOFF RN 2002 J POWER SOURCES "            2002     13 +++o+ooooo++oo---              Hot Paper                   
-#>  8 "SHIBATA N 2009 J AM SOC INF SCI TEC "        2009      8 ++ooo++ooo--                   Hot Paper+Life Cycle        
-#>  9 "DE SOLLA PRICE D. 1963 LITTLE SCI BIG SCI"   1963     25 o++oo+++oooo+++ooo-o-o-        Hot Paper+Life Cycle        
-#> 10 "BARNEY J 1991 J MANAGE "                     1991     73 oo--ooooooooo-oo---oooo-+o++o  Life Cycle                  
-#> 11 "SMALL H 1973 J AM SOC INFORM SCI "           1973    120 oooo-oo-ooooooooooo--oo-ooo++  Life Cycle                  
-#> 12 "PRITCHARD A 1969 J DOC "                     1969     74 ooooooooooo-ooo-ooo++          Life Cycle                  
-#> 13 "ARIA M 2017 J INFORMETR "                    2017     19 o--+                           Sleeping Beauty             
-#> 14 "NERUR SP 2008 STRATEG MANAGE J "             2008     67 o--oo+-o+-o+o                  Sleeping Beauty             
-#> 15 "MCCAIN KW 1990 J AM SOC INFORM SCI "         1990     63 --oooo+oooooooooooo+o+-oo+ooo  Sleeping Beauty             
-#> 16 "VAN ECK NJ 2010 SCIENTOMETRICS "             2010    124 o------o-++                    Sleeping Beauty+Life Cycle  
-#> 17 "COHEN WM 1990 ADMIN SCI QUART "              1990     61 --o-oooo+ooooooo-o-oo-oooo++o  Sleeping Beauty+Life Cycle  
-#> 18 "EISENHARDT KM 1989 ACAD MANAGE REV "         1989     43 o--o--oooooooooooo-oooooooo++o Sleeping Beauty+Life Cycle
+#>  7 "PORTER AL 2005 TECH MINING EXPLOITI"         2005     22 +o+oooooo+--+o+-               Hot Paper                   
+#>  8 "ROGERS E.M. 2010 DIFFUSION INNOVATION"       2010     11 +o+ooo++ooo                    Hot Paper+Life Cycle        
+#>  9 "READER D 2006 ENTREP THEORY PRACT "          2006     11 ++oooo+oo+o-ooo                Hot Paper+Life Cycle        
+#> 10 "DE SOLLA PRICE D. 1963 LITTLE SCI BIG SCI"   1963     25 o++oo+++oooo+++ooo-o-o-        Hot Paper+Life Cycle        
+#> 11 "WHITE HD 1998 J AM SOC INFORM SCI "          1998     47 ooooooooooo-o+o++-ooooo        Life Cycle                  
+#> 12 "WHITE HD 1981 J AM SOC INFORM SCI "          1981     52 oo-+o-oo-oooooo++ooo+ooooooooo Life Cycle                  
+#> 13 "GARFIELD E 1979 SCIENTOMETRICS "             1979     37 oooooooooooooooo+ooo-+oo+oooo  Life Cycle                  
+#> 14 "ZUPIC I 2015 ORGAN RES METHODS "             2015     71 -o---+                         Sleeping Beauty             
+#> 15 "VAN ECK NJ 2010 SCIENTOMETRICS "             2010    124 o------o-++                    Sleeping Beauty             
+#> 16 "NERUR SP 2008 STRATEG MANAGE J "             2008     67 o--oo+-o+-o+o                  Sleeping Beauty             
+#> 17 "MCCAIN KW 1990 J AM SOC INFORM SCI "         1990     63 --oooo+oooooooooooo+o+-oo+ooo  Sleeping Beauty+Life Cycle
 ```
 
 The analysis identifies four types of influential references:
@@ -905,7 +1037,7 @@ histResults <- histNetwork(M, sep = ";")
 net <- histPlot(histResults, n = 20, size = FALSE, label = "short")
 ```
 
-<img src="man/figures/README-Historical Co-citation network-1.png" width="100%" />
+<img src="man/figures/README-Historical Co-citation network-1.png" alt="" width="100%" />
 
     #> 
     #>  Legend
@@ -1004,6 +1136,11 @@ This visualization is particularly valuable for understanding how
 scientific knowledge evolves and builds upon previous research.
 
 ## Main Authors’ References
+
+### The Book
+
+Aria, M. & Cuccurullo, C. (2025). **Science Mapping Analysis: A Primer
+with Biblioshiny**, *McGraw-Hill Education*.
 
 ### Core bibliometrix publication
 

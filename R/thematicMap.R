@@ -484,7 +484,7 @@ clusterAssignment <- function(
   # 2. Tokenizzazione
   allField <- M %>%
     select(SR, terms = !!sym(field)) %>%
-    separate_rows(terms, sep = ";") %>%
+    tidyr::separate_longer_delim(terms, delim = ";") %>%
     mutate(terms = trimws(terms)) %>%
     dplyr::filter(terms != "" & !is.na(terms))
 
@@ -504,7 +504,7 @@ clusterAssignment <- function(
         sep = ";",
         extra = "merge"
       ) %>%
-      separate_rows(old_combined, sep = ";") %>%
+      tidyr::separate_longer_delim(old_combined, delim = ";") %>%
       mutate(across(everything(), ~ trimws(toupper(.x)))) %>%
       rename(old = old_combined)
 

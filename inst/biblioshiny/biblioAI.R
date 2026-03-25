@@ -1693,46 +1693,76 @@ gemini_to_html <- function(text, font_size = "16px") {
   # Divide text into lines
   lines <- unlist(strsplit(text, "\n", fixed = TRUE))
 
-  # Remove empty rows
-  lines <- lines[lines != ""]
-
   # Initialize HTML output with CSS styles including font size
   html_lines <- c(
     paste0(
-      "<div style='font-family: Arial, sans-serif; line-height: 1.3; margin: 0 auto; padding: 20px; font-size: ",
+      "<div style='font-family: Arial, sans-serif; line-height: 1.4; margin: 0 auto; padding: 15px; font-size: ",
       font_size,
       ";'>"
     )
   )
+
   in_list <- FALSE
   list_type <- ""
+  last_ol_number <- 0
 
-  for (i in 1:length(lines)) {
+  close_list <- function() {
+    if (in_list) {
+      if (list_type == "ul") {
+        html_lines <<- c(html_lines, "</ul>")
+      } else {
+        html_lines <<- c(html_lines, "</ol>")
+      }
+      in_list <<- FALSE
+    }
+  }
+
+  for (i in seq_along(lines)) {
     line <- trimws(lines[i])
 
-    # Jump empty lines
-    if (line == "") {
-      next
-    }
+    # Skip empty lines
+    if (line == "") next
 
-    # Title management (lines enclosed in **)
-    if (stringr::str_detect(line, "^\\*\\*[^*]+\\*\\*$")) {
-      # Close any open lists
-      if (in_list) {
-        if (list_type == "ul") {
-          html_lines <- c(html_lines, "</ul>")
-        } else {
-          html_lines <- c(html_lines, "</ol>")
-        }
-        in_list <- FALSE
-      }
+    # Skip horizontal rules (--- or ***)
+    if (grepl("^[-*_]{3,}\\s*$", line)) next
 
-      # Convert titles
-      title_text <- stringr::str_replace_all(line, "^\\*\\*(.+)\\*\\*$", "\\1")
+    # Markdown header management (lines starting with #, ##, ###, ####)
+    if (stringr::str_detect(line, "^#{1,4}\\s+")) {
+      close_list()
+
+      header_level <- nchar(stringr::str_extract(line, "^#+"))
+      header_text <- stringr::str_replace(line, "^#+\\s+", "")
+      header_text <- stringr::str_replace(header_text, "\\s*#+\\s*$", "")
+      header_text <- stringr::str_replace_all(header_text, "\\*\\*([^*]+)\\*\\*", "\\1")
+
+      h_tag <- paste0("h", min(header_level + 1, 5))
+      h_size <- switch(as.character(header_level),
+        "1" = "font-size: 1.3em;",
+        "2" = "font-size: 1.15em;",
+        "3" = "font-size: 1.05em;",
+        "font-size: 1em;"
+      )
       html_lines <- c(
         html_lines,
         paste0(
-          "<h3 style='color: #333; border-bottom: 2px solid #007acc; padding-bottom: 5px; margin-bottom: 10px; margin-top: 20px;'>",
+          "<", h_tag, " style='color: #333; border-bottom: 1px solid #007acc; padding-bottom: 4px; margin-bottom: 6px; margin-top: 14px; ", h_size, "'>",
+          header_text,
+          "</", h_tag, ">"
+        )
+      )
+      next
+    }
+
+    # Title management (lines enclosed in ** only)
+    if (stringr::str_detect(line, "^\\*\\*[^*]+\\*\\*$")) {
+      close_list()
+
+      title_text <- stringr::str_replace_all(line, "^\\*\\*(.+)\\*\\*$", "\\1")
+      title_text <- stringr::str_replace(title_text, "^\\d+\\.\\s*", "")
+      html_lines <- c(
+        html_lines,
+        paste0(
+          "<h3 style='color: #333; border-bottom: 1px solid #007acc; padding-bottom: 4px; margin-bottom: 6px; margin-top: 14px;'>",
           title_text,
           "</h3>"
         )
@@ -1740,82 +1770,66 @@ gemini_to_html <- function(text, font_size = "16px") {
       next
     }
 
-    # Managing bulleted lists (starting with *)
-    if (stringr::str_detect(line, "^\\s*\\*\\s+")) {
-      # If we are not already in a bulleted list, start it
+    # Managing bulleted lists (starting with * or -)
+    if (stringr::str_detect(line, "^\\s*[*\\-]\\s+")) {
       if (!in_list || list_type != "ul") {
-        if (in_list && list_type == "ol") {
-          html_lines <- c(html_lines, "</ol>")
-        }
+        close_list()
         html_lines <- c(
           html_lines,
-          "<ul style='margin-bottom: 10px; margin-top: 5px;'>"
+          "<ul style='margin-bottom: 6px; margin-top: 4px;'>"
         )
         in_list <- TRUE
         list_type <- "ul"
       }
 
-      # Remove the asterisk and format the content
-      item_text <- stringr::str_replace(line, "^\\s*\\*\\s+", "")
+      item_text <- stringr::str_replace(line, "^\\s*[*\\-]\\s+", "")
       item_text <- format_inline_text(item_text)
+
       html_lines <- c(
         html_lines,
-        paste0("<li style='margin-bottom: 3px;'>", item_text, "</li>")
+        paste0("<li style='margin-bottom: 2px;'>", item_text, "</li>")
       )
       next
     }
 
     # Managing numbered lists (starting with a number followed by a period)
     if (stringr::str_detect(line, "^\\s*\\d+\\.\\s+")) {
-      # If we are not already in a numbered list, start it
+      item_number <- as.integer(stringr::str_extract(line, "^\\s*\\d+"))
+
       if (!in_list || list_type != "ol") {
-        if (in_list && list_type == "ul") {
-          html_lines <- c(html_lines, "</ul>")
-        }
+        close_list()
+        start_attr <- if (item_number > 1) paste0(" start='", item_number, "'") else ""
         html_lines <- c(
           html_lines,
-          "<ol style='margin-bottom: 10px; margin-top: 5px;'>"
+          paste0("<ol style='margin-bottom: 6px; margin-top: 4px;'", start_attr, ">")
         )
         in_list <- TRUE
         list_type <- "ol"
       }
 
-      # Remove the number and format the content
+      last_ol_number <- item_number
       item_text <- stringr::str_replace(line, "^\\s*\\d+\\.\\s+", "")
       item_text <- format_inline_text(item_text)
       html_lines <- c(
         html_lines,
-        paste0("<li style='margin-bottom: 3px;'>", item_text, "</li>")
+        paste0("<li style='margin-bottom: 2px;'>", item_text, "</li>")
       )
       next
     }
 
-    # If we get here and we're in a list, let's close it
-    if (in_list) {
-      if (list_type == "ul") {
-        html_lines <- c(html_lines, "</ul>")
-      } else {
-        html_lines <- c(html_lines, "</ol>")
-      }
-      in_list <- FALSE
-    }
+    # Non-list, non-header line: close any open list
+    close_list()
 
     # Normal paragraph management
     formatted_line <- format_inline_text(line)
     html_lines <- c(
       html_lines,
-      paste0("<p style='margin-bottom: 8px;'>", formatted_line, "</p>")
+      paste0("<p style='margin-bottom: 5px; margin-top: 2px;'>", formatted_line, "</p>")
     )
   }
 
   # Close any lists that remain open
-  if (in_list) {
-    if (list_type == "ul") {
-      html_lines <- c(html_lines, "</ul>")
-    } else {
-      html_lines <- c(html_lines, "</ol>")
-    }
-  }
+  close_list()
 
   # Close the container div
   html_lines <- c(html_lines, "</div>")

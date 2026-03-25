@@ -460,6 +460,12 @@ To ensure the functionality of Biblioshiny,
           time = 0.3
         )
         shinyjs::show(
+          "menu-prisma",
+          anim = TRUE,
+          animType = "fade",
+          time = 0.3
+        )
+        shinyjs::show(
           "menu-overview",
           anim = TRUE,
           animType = "fade",
@@ -4815,6 +4821,176 @@ To ensure the functionality of Biblioshiny,
     } else {
       Mdisp = data.frame(Message = "Empty collection", row.names = " ")
     }
+  })
+
+  # PRISMA DIAGRAM ----
+
+  # Reactive counter for PRISMA steps
+  values$prisma_step_count <- 0
+  values$prismaParams <- NULL
+
+  # Add a screening/eligibility step
+
+  # Phase auto-assignment based on criterion type (bibliometric PRISMA convention)
+  # Screening: duplicate removal, time span, document type
+  # Eligibility: subject category, language, journal, country, other
+  prisma_phase_map <- c(
+    "duplicate removal" = "Screening",
+    "time span" = "Screening",
+    "document type" = "Screening",
+    "subject category" = "Eligibility",
+    "language" = "Eligibility",
+    "journal" = "Eligibility",
+    "country" = "Eligibility",
+    "other" = "Eligibility"
+  )
+
+  observeEvent(input$prisma_add_step, {
+    n <- values$prisma_step_count + 1
+    values$prisma_step_count <- n
+
+    insertUI(
+      selector = "#prisma_steps_container",
+      where = "beforeEnd",
+      ui = tags$div(
+        id = paste0("prisma_step_div_", n),
+        class = "prisma-step",
+        style = "border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-bottom: 10px; background: #f9f9f9;",
+        h5(strong(paste("Step", n)), style = "margin-top: 0;"),
+        selectInput(
+          paste0("prisma_criterion_", n),
+          "Filter Criterion",
+          choices = c(
+            "Duplicate removal" = "duplicate removal",
+            "Time span" = "time span",
+            "Document type" = "document type",
+            "Subject category" = "subject category",
+            "Language" = "language",
+            "Journal" = "journal",
+            "Country" = "country",
+            "Other" = "other"
+          )
+        ),
+        textInput(
+          paste0("prisma_values_", n),
+          "Filter Values (optional)",
+          placeholder = "e.g. Article, Review; or 1985-2025"
+        ),
+        numericInput(
+          paste0("prisma_n_remaining_", n),
+          "Records Remaining After This Filter",
+          value = 0,
+          min = 0
+        )
+      )
+    )
+  })
+
+  # Remove last step
+  observeEvent(input$prisma_remove_step, {
+    n <- values$prisma_step_count
+    if (n > 0) {
+      removeUI(selector = paste0("#prisma_step_div_", n))
+      values$prisma_step_count <- n - 1
+    }
+  })
+
+  # Generate PRISMA diagram
+  observeEvent(input$prisma_generate, {
+    req(!is.null(input$prisma_n_total))
+
+    n_steps <- values$prisma_step_count
+    n_other <- ifelse(is.null(input$prisma_n_other), 0, input$prisma_n_other)
+    total_n <- input$prisma_n_total + n_other
+
+    steps_df <- data.frame(
+      phase = character(0),
+      criterion = character(0),
+      values = character(0),
+      n_excluded = integer(0),
+      n_remaining = integer(0),
+      stringsAsFactors = FALSE
+    )
+
+    if (n_steps > 0) {
+      prev_remaining <- total_n
+      for (i in seq_len(n_steps)) {
+        criterion <- input[[paste0("prisma_criterion_", i)]]
+        n_rem <- input[[paste0("prisma_n_remaining_", i)]]
+        if (is.null(n_rem) || is.na(n_rem)) n_rem <- prev_remaining
+        n_excl <- prev_remaining - n_rem
+
+        steps_df <- rbind(steps_df, data.frame(
+          phase = prisma_phase_map[criterion],
+          criterion = criterion,
+          values = ifelse(is.null(input[[paste0("prisma_values_", i)]]), "", input[[paste0("prisma_values_", i)]]),
+          n_excluded = n_excl,
+          n_remaining = n_rem,
+          stringsAsFactors = FALSE
+        ))
+        prev_remaining <- n_rem
+      }
+    }
+
+    # n_included is automatically the last remaining count (or total if no steps)
+    n_included <- if (n_steps > 0) steps_df$n_remaining[n_steps] else total_n
+
+    values$prismaParams <- list(
+      db_name = input$prisma_db_name,
+      query = input$prisma_query,
+      n_total = input$prisma_n_total,
+      other_source = input$prisma_other_source,
+      n_other = n_other,
+      steps = steps_df,
+      n_included = n_included
+    )
+  })
+
+  output$prismaPlotOutput <- renderPlot({
+    req(values$prismaParams)
+    do.call(drawPrismaFlowDiagram, values$prismaParams)
+  })
+
+  # Download PRISMA diagram as PNG
+  output$prismaPlot.save <- downloadHandler(
+    filename = function() {
+      paste0("PRISMA-Diagram-", Sys.Date(), ".png")
+    },
+    content = function(file) {
+      req(values$prismaParams)
+      grDevices::png(file, width = 3600, height = 3600, res = 300)
+      do.call(drawPrismaFlowDiagram, values$prismaParams)
+      grDevices::dev.off()
+    },
+    contentType = "image/png"
+  )
+
+  # Add PRISMA to report
+  observeEvent(input$reportPrisma, {
+    req(values$prismaParams)
+
+    sheetname <- "PRISMA_Diagram"
+    if (sheetname %in% openxlsx::sheets(values$wb)) {
+      showNotification("PRISMA Diagram sheet already exists in the report.",
+                       type = "warning", duration = 3)
+      return(NULL)
+    }
+
+    # Save plot to persistent file and embed in workbook
+    imgfile <- file.path(getWD(), paste0("PRISMA_Diagram_", format(Sys.time(), "%Y%m%d%H%M%S"), ".png"))
+    grDevices::png(imgfile, width = 3600, height = 3600, res = 300)
+    do.call(drawPrismaFlowDiagram, values$prismaParams)
+    grDevices::dev.off()
+
+    openxlsx::addWorksheet(values$wb, sheetname)
+    openxlsx::insertImage(values$wb, sheetname, imgfile,
+                          width = 12, height = 12,
+                          startRow = 1, startCol = 1, units = "in",
+                          dpi = 300)
+
+    values$myChoices <- openxlsx::sheets(values$wb)
+    showNotification("PRISMA Diagram added to the report.",
+                     type = "message", duration = 3)
   })
 
   # OVERVIEW ----
@@ -13950,6 +14126,26 @@ To ensure the functionality of Biblioshiny,
           tags$br(),
           "Latency time: Low"
         ))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '3-flash-preview'",
+        helpText(strong("Free Tier Rate Limits:")),
+        helpText(em(
+          "Request per Minutes: 10",
+          tags$br(),
+          "Requests per Day: 500",
+          tags$br(),
+          "Latency time: Medium"
+        ))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '3.1-pro-preview' || input.gemini_api_model == 'pro-latest'",
+        helpText(strong(style = "color: #d9534f;", "Paid API Key Required")),
+        helpText(em(
+          "Pro models require a paid (non-free tier) API key.",
+          tags$br(),
+          "Free tier API keys will not work with these models."
+        ))
       )
     )
   })
@@ -13962,6 +14158,18 @@ To ensure the functionality of Biblioshiny,
       )
       values$gemini_api_model <- input$gemini_api_model
       values$gemini_output_size <- input$gemini_output_size
+
+      # Alert for Pro models requiring paid API key
+      if (input$gemini_api_model %in% c("3.1-pro-preview", "pro-latest")) {
+        showModal(modalDialog(
+          title = "Paid API Key Required",
+          tags$p("The selected Pro model requires a ", tags$strong("paid (non-free tier)"), " Google AI API key."),
+          tags$p("Free tier API keys do not support Pro models. If you are using a free tier key, the API calls will fail."),
+          tags$p("You can upgrade your API key at: ", tags$a(href = "https://aistudio.google.com/apikey", target = "_blank", "Google AI Studio")),
+          easyClose = TRUE,
+          footer = modalButton("OK")
+        ))
+      }
     }
   })
 

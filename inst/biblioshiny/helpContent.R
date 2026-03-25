@@ -81,6 +81,7 @@ helpContent <- function() {
     
     <ul>
       <li><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></li>
+      <li><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</li>
       
       <li><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2024).</strong> <i>Comparative science mapping: a novel conceptual structure analysis with metadata.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-024-05161-6' target='_blank'>https://doi.org/10.1007/s11192-024-05161-6</a></li>
 
@@ -628,6 +629,7 @@ helpContent <- function() {
   <p><strong>Bradford, S. C. (1934).</strong> <i>Sources of information on specific subjects.</i> <strong>Engineering</strong>, 137, 85–86.</p>
   
   <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
   
   <p><strong>Garfield, E. (2009).</strong> <i>From the science of science to Scientometrics: visualizing the history of science with HistCite software.</i> <strong>Journal of Informetrics</strong>, 3(3), 173–179. <a href='https://doi.org/10.1016/j.joi.2009.03.009' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.009</a></p>
   </div>
@@ -786,6 +788,7 @@ helpContent <- function() {
     
     <h4>📚 References</h4>
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
     
     <p><strong>Garfield, E. (1979).</strong> <i>Citation indexing: Its theory and application in science, technology, and humanities.</i> New York: Wiley.</p>
     
@@ -896,6 +899,7 @@ helpContent <- function() {
     
     <h4>📚 References</h4>
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
     </div>
     </body>"
 
@@ -1189,6 +1193,7 @@ helpContent <- function() {
     
     <h4>📚 References</h4>
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
     
     <p><strong>Visser, M., van Eck, N. J., & Waltman, L. (2021).</strong> <i>Large-scale comparison of bibliographic data sources: Scopus, Web of Science, Dimensions, Crossref, and Microsoft Academic.</i> <strong>Quantitative Science Studies</strong>, 2(1), 20–41. <a href='https://doi.org/10.1162/qss_a_00112' target='_blank'>https://doi.org/10.1162/qss_a_00112</a></p>
     
@@ -1355,6 +1360,7 @@ helpContent <- function() {
     
   <h4>📚 References</h4>
   <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
   
   <p><strong>Zupic, I., & Čater, T. (2015).</strong> <i>Bibliometric methods in management and organization.</i> <strong>Organizational Research Methods</strong>, 18(3), 429–472. <a href='https://doi.org/10.1177/1094428114562629' target='_blank'>https://doi.org/10.1177/1094428114562629</a></p>
   </div>
@@ -1742,6 +1748,7 @@ helpContent <- function() {
     
     <h4>📚 Key References</h4>
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
     
     <p><strong>Chen, C. (2017).</strong> <i>Science Mapping: A Systematic Review of the Literature.</i> <strong>Journal of Data and Information Science</strong>, 2(2), 1–40. <a href='https://doi.org/10.1515/jdis-2017-0006' target='_blank'>https://doi.org/10.1515/jdis-2017-0006</a></p>
     
@@ -2191,6 +2198,7 @@ helpContent <- function() {
   <p><strong>Aria, M., & Cuccurullo, C. (2025).</strong> <i>contentanalysis: Scientific Content and Citation Analysis from PDF Documents.</i> <strong>[R package]</strong>. <a href='https://doi.org/10.32614/CRAN.package.contentanalysis' target='_blank'>https://doi.org/10.32614/CRAN.package.contentanalysis</a></p>
   
   <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
   
   <p><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2024).</strong> <i>Comparative science mapping: a novel conceptual structure analysis with metadata.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-024-05161-6' target='_blank'>https://doi.org/10.1007/s11192-024-05161-6</a></p>
   
@@ -2267,6 +2275,7 @@ helpContent <- function() {
     <p><strong>Callon, M., Courtial, J.-P., Turner, W. A., & Bauin, S. (1983).</strong> <i>From translations to problematic networks: An introduction to co-word analysis.</i> <strong>Social Science Information</strong>, 22(2), 191-235. <a href='https://doi.org/10.1177/053901883022002003' target='_blank'>https://doi.org/10.1177/053901883022002003</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Van Eck, N. J., & Waltman, L. (2010).</strong> <i>Software survey: VOSviewer, a computer program for bibliometric mapping.</i> <strong>Scientometrics</strong>, 84(2), 523-538. <a href='https://doi.org/10.1007/s11192-009-0146-3' target='_blank'>https://doi.org/10.1007/s11192-009-0146-3</a></p>
 
@@ -2335,6 +2344,7 @@ helpContent <- function() {
     <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2012).</strong> <i>SciMAT: A new science mapping analysis software tool.</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 63(8), 1609-1630. <a href='https://doi.org/10.1002/asi.22688' target='_blank'>https://doi.org/10.1002/asi.22688</a></p>
 
@@ -2398,6 +2408,7 @@ helpContent <- function() {
     <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Callon, M., Courtial, J.-P., & Laville, F. (1991).</strong> <i>Co-word analysis as a tool for describing the network of interactions between basic and technological research: The case of polymer chemistry.</i> <strong>Scientometrics</strong>, 22(1), 155-205. <a href='https://doi.org/10.1007/BF02019280' target='_blank'>https://doi.org/10.1007/BF02019280</a></p>
 
@@ -2460,6 +2471,7 @@ helpContent <- function() {
     <p><strong>Benzecri, J.-P. (1973).</strong> <i>L'Analyse des Donnees. Volume II: L'Analyse des Correspondances.</i> Paris: Dunod.</p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Cuccurullo, C., Aria, M., & Sarto, F. (2016).</strong> <i>Foundations and trends in performance management. A twenty-five years bibliometric analysis in business and public administration domains.</i> <strong>Scientometrics</strong>, 108(2), 595-611. <a href='https://doi.org/10.1007/s11192-016-1948-8' target='_blank'>https://doi.org/10.1007/s11192-016-1948-8</a></p>
 
@@ -2514,6 +2526,7 @@ helpContent <- function() {
     <p><strong>Kessler, M. M. (1963).</strong> <i>Bibliographic coupling between scientific papers.</i> <strong>American Documentation</strong>, 14(1), 10-25. <a href='https://doi.org/10.1002/asi.5090140103' target='_blank'>https://doi.org/10.1002/asi.5090140103</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Small, H. (1999).</strong> <i>Visualizing science by citation mapping.</i> <strong>Journal of the American Society for Information Science</strong>, 50(9), 799-813. <a href='https://doi.org/10.1002/(SICI)1097-4571(1999)50:9<799::AID-ASI9>3.0.CO;2-G' target='_blank'>DOI link</a></p>
 
@@ -2571,6 +2584,7 @@ helpContent <- function() {
     <p><strong>Garfield, E., Pudovkin, A. I., & Istomin, V. S. (2003).</strong> <i>Why do we need algorithmic historiography?</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 54(5), 400-412. <a href='https://doi.org/10.1002/asi.10226' target='_blank'>https://doi.org/10.1002/asi.10226</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Lucio-Arias, D., & Leydesdorff, L. (2008).</strong> <i>Main-path analysis and path-dependent transitions in HistCite-based historiograms.</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 59(12), 1948-1962. <a href='https://doi.org/10.1002/asi.20903' target='_blank'>https://doi.org/10.1002/asi.20903</a></p>
 
@@ -2628,6 +2642,7 @@ helpContent <- function() {
     <h5>&#128218; Key References</h5>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
 
@@ -2709,6 +2724,7 @@ helpContent <- function() {
   <p><strong>Egghe, L. (1986).</strong> <i>The dual of Bradford's law.</i> <strong>Journal of the American Society for Information Science</strong>, 37(4), 246&ndash;255. <a href='https://doi.org/10.1002/(SICI)1097-4571(198607)37:4&lt;246::AID-ASI10&gt;3.0.CO;2-F' target='_blank'>https://doi.org/10.1002/(SICI)1097-4571(198607)37:4&lt;246::AID-ASI10&gt;3.0.CO;2-F</a></p>
 
   <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     </div>
     </body>"
@@ -2784,6 +2800,7 @@ helpContent <- function() {
   <p><strong>Nicholls, P. T. (1986).</strong> <i>Empirical validation of Lotka's law.</i> <strong>Information Processing &amp; Management</strong>, 22(5), 417&ndash;419. <a href='https://doi.org/10.1016/0306-4573(86)90007-0' target='_blank'>https://doi.org/10.1016/0306-4573(86)90007-0</a></p>
 
   <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     </div>
     </body>"
@@ -2854,6 +2871,53 @@ helpContent <- function() {
   <p><strong>Barth, A., Marx, W., Bornmann, L., &amp; Mutz, R. (2014).</strong> <i>On the origins and the historical roots of the Higgs boson research from a bibliometric perspective.</i> <strong>The European Physical Journal Plus</strong>, 129, 111. <a href='https://doi.org/10.1140/epjp/i2014-14111-6' target='_blank'>https://doi.org/10.1140/epjp/i2014-14111-6</a></p>
 
   <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
+
+    </div>
+    </body>"
+
+  ## PRISMA Diagram ----
+  prisma <-
+    "<body>
+    <div class='container'>
+    <h3>PRISMA Flow Diagram for Bibliometric Studies</h3>
+    <p>The PRISMA (Preferred Reporting Items for Systematic Reviews and Meta-Analyses)
+    flow diagram documents the process of selecting studies for analysis.
+    In bibliometric research, the PRISMA diagram tracks how the initial set of records
+    retrieved from databases is progressively refined through filtering criteria.</p>
+
+    <h4>Phases</h4>
+    <ul>
+      <li><strong>Identification</strong>: Records retrieved from database queries and other sources.</li>
+      <li><strong>Screening</strong>: Filters based on formal criteria such as duplicate removal,
+      time span, and document type.</li>
+      <li><strong>Eligibility</strong>: Filters based on content-related criteria such as
+      subject category, language, journal, and country.</li>
+      <li><strong>Inclusion</strong>: Final set of studies included in the bibliometric analysis.</li>
+    </ul>
+
+    <h4>How to use</h4>
+    <ol>
+      <li>In the <strong>Identification</strong> box, enter the database name, your search query, and the total number of records retrieved.</li>
+      <li>Optionally, add a secondary source (e.g. records added via DOI or from another database).</li>
+      <li>Click <strong>Add Step</strong> to define each filtering stage. For each step, select the criterion type,
+      optionally describe the filter values (e.g. &ldquo;Article, Review&rdquo; or &ldquo;1985&ndash;2025&rdquo;),
+      and enter the number of records remaining after applying that filter.</li>
+      <li>The PRISMA phase (Screening or Eligibility) and the number of excluded records are computed automatically.</li>
+      <li>Click <strong>Generate PRISMA Diagram</strong> to produce the flow chart.</li>
+      <li>Use the download button to export the diagram as a high-resolution PNG, or the report button to add it to the workbook.</li>
+    </ol>
+
+    <br>
+
+    <h4>References</h4>
+
+    <p><strong>Page, M. J., et al. (2021).</strong> <i>The PRISMA 2020 statement: an updated guideline for
+    reporting systematic reviews.</i> <strong>BMJ</strong>, 372, n71.
+    <a href='https://doi.org/10.1136/bmj.n71' target='_blank'>https://doi.org/10.1136/bmj.n71</a></p>
+
+    <p><strong>Aria, M., &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA.</p>
 
     </div>
     </body>"
@@ -2882,6 +2946,7 @@ helpContent <- function() {
     trendTopics = trendTopics,
     bradfordLaw = bradfordLaw,
     lotkaLaw = lotkaLaw,
-    rpys = rpys
+    rpys = rpys,
+    prisma = prisma
   ))
 }

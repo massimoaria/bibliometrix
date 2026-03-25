@@ -5973,7 +5973,8 @@ dfLabel <- function() {
     "CoCitNet",
     "Historiograph",
     "CollabNet",
-    "CollabWorldMap"
+    "CollabWorldMap",
+    "PRISMA_Diagram"
   )
 
   long <- c(
@@ -6022,7 +6023,8 @@ dfLabel <- function() {
     "Co-citation Network",
     "Historiograph",
     "Collaboration Network",
-    "Countries Collaboration World Map"
+    "Countries Collaboration World Map",
+    "PRISMA Diagram"
   )
   data.frame(short = short, long = long)
 }
@@ -6600,4 +6602,312 @@ homeFolder <- function() {
     }
   )
   return(home)
+}
+
+### PRISMA Flow Diagram ----
+#' Draw a PRISMA Flow Diagram for bibliometric studies
+#'
+#' @param db_name Character. Name of the primary database.
+#' @param query Character. Search query or topic description.
+#' @param n_total Integer. Total records retrieved from primary source.
+#' @param other_source Character. Description of additional source (or "").
+#' @param n_other Integer. Records from additional source.
+#' @param steps A data.frame with columns: phase, criterion, values, n_excluded, n_remaining.
+#'   phase is one of "Screening" or "Eligibility".
+#' @param n_included Integer. Final number of studies included.
+#' @return Invisible NULL. Draws directly on the current graphics device.
+drawPrismaFlowDiagram <- function(db_name = "Web of Science",
+                                   query = "",
+                                   n_total = 0,
+                                   other_source = "",
+                                   n_other = 0,
+                                   steps = data.frame(),
+                                   n_included = 0) {
+
+  format_n <- function(n) format(n, big.mark = ",")
+
+  # Wrap long text to fit within a given character width
+  wrap_text <- function(text, max_chars = 50) {
+    lines <- strsplit(text, "\n")[[1]]
+    wrapped <- character(0)
+    for (line in lines) {
+      if (nchar(line) <= max_chars) {
+        wrapped <- c(wrapped, line)
+      } else {
+        words <- strsplit(line, " ")[[1]]
+        current <- words[1]
+        for (w in words[-1]) {
+          if (nchar(paste(current, w)) <= max_chars) {
+            current <- paste(current, w)
+          } else {
+            wrapped <- c(wrapped, current)
+            current <- w
+          }
+        }
+        wrapped <- c(wrapped, current)
+      }
+    }
+    paste(wrapped, collapse = "\n")
+  }
+
+  count_lines <- function(label) length(strsplit(label, "\n")[[1]])
+
+  # Height per line of text in npc units
+  line_h <- 0.022
+  # Base box padding (top + bottom)
+  pad_h <- 0.025
+
+  # Compute box height from label
+  box_height <- function(label) pad_h + count_lines(label) * line_h
+
+  # Helper: draw box with text, supporting optional secondary text (smaller font)
+  draw_box <- function(x, y, w, h, label, fill = "#D6E8F5", border = "#2B5C8A",
+                       font_size = 14, font_face = "plain", text_col = "black",
+                       sub_label = NULL, sub_font_size = 11) {
+    grid::grid.roundrect(
+      x = grid::unit(x, "npc"), y = grid::unit(y, "npc"),
+      width = grid::unit(w, "npc"), height = grid::unit(h, "npc"),
+      r = grid::unit(0.008, "npc"),
+      gp = grid::gpar(fill = fill, col = border, lwd = 2.5)
+    )
+    if (is.null(sub_label)) {
+      grid::grid.text(
+        label, x = grid::unit(x, "npc"), y = grid::unit(y, "npc"),
+        gp = grid::gpar(fontsize = font_size, fontface = font_face,
+                         col = text_col, lineheight = 1.15),
+        just = "centre"
+      )
+    } else {
+      # Two-part text: main label on top, sub_label below in smaller font
+      n_main <- count_lines(label)
+      n_sub <- count_lines(sub_label)
+      total_text_h <- n_main * line_h + n_sub * (line_h * sub_font_size / font_size)
+      y_main <- y + total_text_h / 2 - (n_main * line_h) / 2
+      y_sub <- y_main - (n_main * line_h) / 2 - (n_sub * line_h * sub_font_size / font_size) / 2 - 0.003
+      grid::grid.text(
+        label, x = grid::unit(x, "npc"), y = grid::unit(y_main, "npc"),
+        gp = grid::gpar(fontsize = font_size, fontface = font_face,
+                         col = text_col, lineheight = 1.15),
+        just = "centre"
+      )
+      grid::grid.text(
+        sub_label, x = grid::unit(x, "npc"), y = grid::unit(y_sub, "npc"),
+        gp = grid::gpar(fontsize = sub_font_size, fontface = "italic",
+                         col = "#444444", lineheight = 1.10),
+        just = "centre"
+      )
+    }
+  }
+
+  draw_phase_label <- function(x, y, w, h, label) {
+    grid::grid.roundrect(
+      x = grid::unit(x, "npc"), y = grid::unit(y, "npc"),
+      width = grid::unit(w, "npc"), height = grid::unit(h, "npc"),
+      r = grid::unit(0.008, "npc"),
+      gp = grid::gpar(fill = "#1B3A5C", col = "#1B3A5C", lwd = 2)
+    )
+    grid::grid.text(
+      label, x = grid::unit(x, "npc"), y = grid::unit(y, "npc"),
+      gp = grid::gpar(fontsize = 15, fontface = "bold", col = "white")
+    )
+  }
+
+  draw_arrow <- function(x0, y0, x1, y1, col = "#2B5C8A") {
+    grid::grid.lines(
+      x = grid::unit(c(x0, x1), "npc"), y = grid::unit(c(y0, y1), "npc"),
+      arrow = grid::arrow(length = grid::unit(0.012, "npc"), type = "closed"),
+      gp = grid::gpar(col = col, fill = col, lwd = 2.5)
+    )
+  }
+
+  draw_line <- function(x0, y0, x1, y1, col = "#2B5C8A") {
+    grid::grid.lines(
+      x = grid::unit(c(x0, x1), "npc"), y = grid::unit(c(y0, y1), "npc"),
+      gp = grid::gpar(col = col, lwd = 2)
+    )
+  }
+
+  # Layout constants
+  cx <- 0.42
+  rbox_x <- 0.81
+  bw <- 0.34
+  rbw <- 0.28
+  fs <- 14
+  fs_side <- 13
+  fs_query <- 11
+  plx <- 0.09
+  plw <- 0.13
+  plh <- 0.042
+  main_wrap <- 50   # max chars per line for main boxes
+  side_wrap <- 35   # max chars per line for side boxes
+  query_wrap <- 55  # wider wrap for query text (smaller font)
+
+  has_other <- nchar(trimws(other_source)) > 0 && n_other > 0
+  n_steps <- nrow(steps)
+
+  # --- Pre-compute all labels and box heights ---
+
+  # Identification: separate main label from query (shown in smaller font)
+  has_query <- nchar(trimws(query)) > 0
+  id_main_label <- paste0("Records identified from ", db_name, "\n(n = ", format_n(n_total), ")")
+  id_main_label <- wrap_text(id_main_label, main_wrap)
+  id_query_label <- NULL
+
+  if (has_query) {
+    id_query_label <- wrap_text(query, query_wrap)
+    n_main <- count_lines(id_main_label)
+    n_query <- count_lines(id_query_label)
+    id_bh <- pad_h + n_main * line_h + n_query * (line_h * fs_query / fs) + 0.008
+  } else {
+    id_bh <- box_height(id_main_label)
+  }
+
+  # Total records label
+  total_n <- n_total + ifelse(has_other, n_other, 0)
+  total_label <- wrap_text(paste0("Total records retrieved\n(n = ", format_n(total_n), ")"), main_wrap)
+  total_bh <- box_height(total_label)
+
+  # Step labels
+  step_labels <- character(0)
+  step_bhs <- numeric(0)
+  excl_labels <- character(0)
+  excl_bhs <- numeric(0)
+  for (i in seq_len(n_steps)) {
+    step <- steps[i, ]
+    has_values <- nchar(trimws(step$values)) > 0
+    if (has_values) {
+      ml <- paste0("After ", step$criterion, " filter\n",
+                    step$values, "\n(n = ", format_n(step$n_remaining), ")")
+    } else {
+      ml <- paste0("After ", step$criterion, " filter\n(n = ", format_n(step$n_remaining), ")")
+    }
+    ml <- wrap_text(ml, main_wrap)
+    step_labels <- c(step_labels, ml)
+    step_bhs <- c(step_bhs, box_height(ml))
+
+    el <- wrap_text(paste0("Excluded by ", step$criterion, "\n(n = ", format_n(step$n_excluded), ")"), side_wrap)
+    excl_labels <- c(excl_labels, el)
+    excl_bhs <- c(excl_bhs, box_height(el))
+  }
+
+  # Inclusion label
+  inc_label <- wrap_text(paste0("Studies included in the analysis\n(n = ", format_n(n_included), ")"), main_wrap)
+  inc_bh <- box_height(inc_label)
+
+  # Other source label
+  if (has_other) {
+    other_label <- wrap_text(paste0("Records from\n", other_source, "\n(n = ", format_n(n_other), ")"), main_wrap)
+    other_bh <- box_height(other_label)
+  }
+
+  # --- Compute Y positions: distribute evenly to fill vertical space ---
+  all_bhs <- c(id_bh, total_bh, step_bhs, inc_bh)
+  n_rows <- length(all_bhs)
+
+  y_top_start <- 0.91
+  y_bottom_end <- 0.05
+  total_space <- y_top_start - y_bottom_end
+  total_box_h <- sum(all_bhs)
+
+  # Distribute remaining space equally as gaps
+  gap <- if (n_rows > 1) (total_space - total_box_h) / (n_rows - 1) else 0
+  gap <- max(gap, 0.010)  # minimum gap
+
+  # If boxes + min gaps exceed space, shrink proportionally
+  if (total_box_h + (n_rows - 1) * 0.010 > total_space) {
+    scale <- (total_space - (n_rows - 1) * 0.010) / total_box_h
+    all_bhs <- all_bhs * scale
+    id_bh <- all_bhs[1]; total_bh <- all_bhs[2]
+    if (n_steps > 0) step_bhs <- all_bhs[3:(2 + n_steps)]
+    inc_bh <- all_bhs[n_rows]
+    gap <- 0.010
+  }
+
+  # Compute y centers top-down
+  y_centers <- numeric(n_rows)
+  y_cur <- y_top_start - all_bhs[1] / 2
+  y_centers[1] <- y_cur
+  for (j in 2:n_rows) {
+    y_cur <- y_cur - all_bhs[j - 1] / 2 - gap - all_bhs[j] / 2
+    y_centers[j] <- y_cur
+  }
+
+  y_id <- y_centers[1]
+  y_total <- y_centers[2]
+  y_steps <- if (n_steps > 0) y_centers[3:(2 + n_steps)] else numeric(0)
+  y_inc <- y_centers[n_rows]
+
+  # Phase labels y positions
+  screening_ys <- if (n_steps > 0) y_steps[steps$phase == "Screening"] else numeric(0)
+  eligibility_ys <- if (n_steps > 0) y_steps[steps$phase == "Eligibility"] else numeric(0)
+
+  # --- Start drawing ---
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(width = 0.96, height = 0.96))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  # Title
+  grid::grid.text("PRISMA Flow Diagram",
+                   x = grid::unit(0.5, "npc"), y = grid::unit(0.97, "npc"),
+                   gp = grid::gpar(fontsize = 22, fontface = "bold", col = "#1B3A5C"))
+  grid::grid.text("(adapted for bibliometric studies)",
+                   x = grid::unit(0.5, "npc"), y = grid::unit(0.945, "npc"),
+                   gp = grid::gpar(fontsize = 14, fontface = "italic", col = "#555555"))
+
+  # Phase labels
+  draw_phase_label(plx, y_id, plw, plh, "Identification")
+  if (length(screening_ys) > 0)
+    draw_phase_label(plx, mean(screening_ys), plw, plh, "Screening")
+  if (length(eligibility_ys) > 0)
+    draw_phase_label(plx, mean(eligibility_ys), plw, plh, "Eligibility")
+  draw_phase_label(plx, y_inc, plw, plh, "Inclusion")
+
+  # Identification boxes
+  if (has_other) {
+    id_left_x <- 0.32
+    id_right_x <- 0.58
+    id_bw <- 0.24
+    draw_box(id_left_x, y_id, id_bw, id_bh, id_main_label,
+             font_size = fs, sub_label = id_query_label, sub_font_size = fs_query)
+    draw_box(id_right_x, y_id, id_bw, other_bh, other_label, font_size = fs - 1)
+    draw_arrow(id_left_x, y_id - id_bh / 2, cx, y_total + total_bh / 2)
+    draw_arrow(id_right_x, y_id - other_bh / 2, cx, y_total + total_bh / 2)
+  } else {
+    draw_box(cx, y_id, bw, id_bh, id_main_label,
+             font_size = fs, sub_label = id_query_label, sub_font_size = fs_query)
+    draw_arrow(cx, y_id - id_bh / 2, cx, y_total + total_bh / 2)
+  }
+
+  # Total records
+  draw_box(cx, y_total, bw, total_bh, total_label, font_size = fs)
+
+  # Steps
+  prev_y <- y_total
+  prev_bh <- total_bh
+  for (i in seq_len(n_steps)) {
+    cur_y <- y_steps[i]
+    cur_bh <- step_bhs[i]
+
+    draw_arrow(cx, prev_y - prev_bh / 2, cx, cur_y + cur_bh / 2)
+    draw_box(cx, cur_y, bw, cur_bh, step_labels[i], font_size = fs)
+
+    # Right exclusion box
+    draw_box(rbox_x, cur_y, rbw, excl_bhs[i], excl_labels[i],
+             fill = "#FFFFFF", border = "#8B2020",
+             font_size = fs_side, text_col = "#8B2020")
+    draw_line(cx + bw / 2, cur_y, rbox_x - rbw / 2, cur_y, col = "#8B2020")
+
+    prev_y <- cur_y
+    prev_bh <- cur_bh
+  }
+
+  # Inclusion
+  draw_arrow(cx, prev_y - prev_bh / 2, cx, y_inc + inc_bh / 2)
+
+  draw_box(cx, y_inc, bw, inc_bh, inc_label,
+           fill = "#D6E8F5", border = "#1B3A5C",
+           font_size = fs, font_face = "bold")
+
+  grid::popViewport()
+  invisible(NULL)
 }

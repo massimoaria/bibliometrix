@@ -51,6 +51,7 @@ pubs <- helpContent()$publications
 filters <- helpContent()$filters
 authorProfile <- helpContent()$authorProfile
 referenceMatching_help <- helpContent()$referenceMatching
+prisma_help <- helpContent()$prisma
 
 ## Header ----
 header <- shinydashboardPlus::dashboardHeader(
@@ -117,30 +118,6 @@ header <- shinydashboardPlus::dashboardHeader(
     )
   ),
 
-  # dropdownMenu(
-  #   type = "messages",
-  #   icon = fa_i(name = "cube"),
-  #   badgeStatus = NULL,
-  #   headerText = strong("Credits"),
-  #   messageItem2(
-  #     from = "Bibliometrix",
-  #     message = "",
-  #     href = bibliometrixWeb,
-  #     icon = fa_i(name = "globe")
-  #   ),
-  #   messageItem2(
-  #     from = "K-Synth",
-  #     message = "",
-  #     href = k_synth,
-  #     icon = fa_i(name = "watchman-monitoring")
-  #   ),
-  #   messageItem2(
-  #     from = "Github",
-  #     message = "",
-  #     href = github_aria,
-  #     icon = fa_i(name = "github")
-  #   )
-  # ),
   # Settings Button - uses actionLink to trigger server-side tab change
   tags$li(
     class = "dropdown",
@@ -218,6 +195,7 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
         
         // Add IDs to menu items and hide them
         addIdToSimpleMenuItem('Filters', 'menu-filters');
+        addIdToSimpleMenuItem('PRISMA Diagram', 'menu-prisma');
         addIdToMenuItem('Overview', 'menu-overview');
         addIdToMenuItem('Sources', 'menu-sources');
         addIdToMenuItem('Authors', 'menu-authors');
@@ -367,6 +345,13 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       "Filters",
       tabName = "filters",
       icon = fa_i(name = "filter")
+    ),
+
+    # PRISMA Diagram - will get ID 'menu-prisma' via JavaScript (hidden initially)
+    menuItem(
+      "PRISMA Diagram",
+      tabName = "prisma",
+      icon = fa_i(name = "diagram-project")
     ),
 
     # ANALYSIS SECTION HEADER (always visible) ----
@@ -2115,6 +2100,172 @@ body <- dashboardBody(
                   10,
                   br(),
                   HTML(filters)
+                ),
+                column(1)
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    #### PRISMA Diagram ----
+    tabItem(
+      "prisma",
+      fluidPage(
+        tabsetPanel(
+          id = "tabsPrisma",
+          type = "tabs",
+          tabPanel(
+            "PRISMA Diagram",
+            fluidRow(
+              column(
+                10,
+                h3(strong("PRISMA Flow Diagram"), align = "center"),
+                h5(
+                  em("(adapted for bibliometric studies)"),
+                  align = "center",
+                  style = "color: #555555; margin-top: -5px;"
+                )
+              ),
+              div(
+                style = style_bttn,
+                title = t_export,
+                column(
+                  1,
+                  do.call(
+                    "downloadBttn",
+                    c(
+                      export_bttn,
+                      list(
+                        outputId = "prismaPlot.save"
+                      )
+                    )
+                  )
+                )
+              ),
+              div(
+                style = style_bttn,
+                title = t_report,
+                column(
+                  1,
+                  do.call(
+                    "actionBttn",
+                    c(
+                      report_bttn,
+                      list(inputId = "reportPrisma")
+                    )
+                  )
+                )
+              )
+            ),
+            fluidRow(
+              column(
+                8,
+                box(
+                  title = "PRISMA Flow Diagram",
+                  width = 12,
+                  solidHeader = TRUE,
+                  status = "primary",
+                  shinycssloaders::withSpinner(
+                    plotOutput("prismaPlotOutput", height = "750px")
+                  )
+                )
+              ),
+              column(
+                4,
+                box(
+                  title = "Identification",
+                  width = 12,
+                  solidHeader = TRUE,
+                  status = "primary",
+                  textInput(
+                    "prisma_db_name",
+                    "Database Name",
+                    value = "Web of Science",
+                    placeholder = "e.g. Web of Science, Scopus"
+                  ),
+                  textInput(
+                    "prisma_query",
+                    "Search Query / Topic",
+                    value = "",
+                    placeholder = "e.g. TS=(bibliometrics)"
+                  ),
+                  numericInput(
+                    "prisma_n_total",
+                    "Total Records Retrieved",
+                    value = 0,
+                    min = 0
+                  ),
+                  hr(),
+                  h5(strong("Additional Source (optional)")),
+                  textInput(
+                    "prisma_other_source",
+                    "Other Source Description",
+                    value = "",
+                    placeholder = "e.g. Records from Scopus"
+                  ),
+                  numericInput(
+                    "prisma_n_other",
+                    "Records from Other Source",
+                    value = 0,
+                    min = 0
+                  )
+                ),
+                box(
+                  title = "Screening & Eligibility Steps",
+                  width = 12,
+                  solidHeader = TRUE,
+                  status = "success",
+                  helpText(
+                    "Add filtering steps in the order they were applied.
+                           For each step, select the criterion and enter the number of records remaining.
+                           The phase (Screening/Eligibility) and excluded counts are computed automatically."
+                  ),
+                  tags$div(id = "prisma_steps_container"),
+                  br(),
+                  actionBttn(
+                    inputId = "prisma_add_step",
+                    label = "Add Step",
+                    style = "pill",
+                    color = "success",
+                    size = "sm",
+                    icon = icon("plus")
+                  ),
+                  actionBttn(
+                    inputId = "prisma_remove_step",
+                    label = "Remove Last Step",
+                    style = "pill",
+                    color = "danger",
+                    size = "sm",
+                    icon = icon("minus")
+                  )
+                ),
+                br(),
+                div(
+                  align = "center",
+                  actionBttn(
+                    inputId = "prisma_generate",
+                    label = strong("Generate PRISMA Diagram"),
+                    style = "pill",
+                    color = "primary",
+                    size = "lg",
+                    icon = icon("diagram-project")
+                  )
+                ),
+                br()
+              )
+            )
+          ),
+          tabPanel(
+            "Info & References",
+            fluidPage(
+              fluidRow(
+                column(1),
+                column(
+                  10,
+                  br(),
+                  HTML(prisma_help)
                 ),
                 column(1)
               )

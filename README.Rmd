@@ -752,7 +752,7 @@ scientific knowledge evolves and builds upon previous research.
 ### The Book
 
 Aria, M. & Cuccurullo, C. (2026). **Science Mapping Analysis: A
-Primer with Biblioshiny**, *McGraw-Hill Education*.
+Primer with Biblioshiny**, *McGraw-Hill Education*. ISBN: 978-88-386-2297-7.
 
 ### Core bibliometrix publication
 

@@ -934,6 +934,14 @@ body <- dashboardBody(
                 ", 11(4), 959-975."
               ),
               div(
+                class = "citation-text",
+                style = "margin-top: 8px;",
+                strong("Aria, M., & Cuccurullo, C."),
+                " (2026). Science Mapping Analysis - A primer with Biblioshiny. ",
+                em("McGraw-Hill"),
+                ", ISBN: 978-88-386-2297-7."
+              ),
+              div(
                 class = "citation-warning",
                 icon("exclamation-triangle"),
                 "Failure to cite is a license violation"

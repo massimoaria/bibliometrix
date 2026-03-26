@@ -3341,25 +3341,22 @@ Avg sentence length: %.1f words",
   # BIBLIOAI SUMMARY INITIALIZATION
   # ===========================================
 
-  # Initialize API key from environment on startup
-  observe(
-    {
-      api_key_env <- Sys.getenv("GEMINI_API_KEY")
-      if (nzchar(api_key_env) && is.null(values$gemini_api_key)) {
-        values$gemini_api_key <- api_key_env
-      }
-    },
-    priority = 100
-  )
+  # Initialize API key from environment on startup (run once)
+  observeEvent(TRUE, {
+    api_key_env <- Sys.getenv("GEMINI_API_KEY")
+    if (nzchar(api_key_env) && is.null(values$gemini_api_key)) {
+      values$gemini_api_key <- api_key_env
+    }
+  }, once = TRUE)
 
   # ===========================================
   # API STATUS DISPLAY
   # ===========================================
 
   output$gemini_api_status <- renderUI({
-    api_key_env <- Sys.getenv("GEMINI_API_KEY")
+    api_key <- values$gemini_api_key
 
-    if (!nzchar(api_key_env)) {
+    if (is.null(api_key) || !nzchar(api_key)) {
       tags$span(
         class = "label label-danger",
         style = "font-size: 12px; padding: 6px 12px;",

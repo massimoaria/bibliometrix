@@ -93,6 +93,11 @@ analytical step to a specific section of the resulting research paper.
 
 ## The Book
 
+<p align="center">
+
+<img src="man/figures/book_cover.png" width="800"/>
+</p>
+
 **Science Mapping Analysis: A Primer with Biblioshiny** by Massimo Aria
 and Corrado Cuccurullo (McGraw-Hill) is the definitive guide to
 bibliometric research using bibliometrix and biblioshiny.
@@ -658,7 +663,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-03-26 16:48:20
+#> $ query_timestamp             <dttm> 2026-03-26 17:04:07
 ```
 
 This function provides comprehensive author profiles including:

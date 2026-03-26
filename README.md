@@ -305,10 +305,13 @@ Load `bibliometrix`:
 ``` r
 library(bibliometrix)
 #> Please note that our software is open source and available for use, distributed under the MIT license.
-#> When it is used in a publication, we ask that authors properly cite the following reference:
+#> When it is used in a publication, we ask that authors properly cite the following references:
 #> 
 #> Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis,
 #>                         Journal of Informetrics, 11(4), pp 959-975, Elsevier.
+#> 
+#> Aria, M. & Cuccurullo, C. (2026) Science Mapping Analysis - A primer with Biblioshiny,
+#>                         McGraw-Hill, ISBN: 978-88-386-2297-7.
 #> 
 #> Failure to properly cite the software is considered a violation of the license.
 #>                         
@@ -637,7 +640,7 @@ dplyr::glimpse(authorInfo)
 #> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411">
 #> $ orcid                       <chr> "https://orcid.org/0000-0002-8517-9411"
 #> $ works_count                 <int> 229
-#> $ cited_by_count              <int> 17991
+#> $ cited_by_count              <int> 18010
 #> $ counts_by_year              <list> [<data.frame[24 x 4]>]
 #> $ `2yr_mean_citedness`        <dbl> 2.591837
 #> $ h_index                     <int> 36
@@ -655,7 +658,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-03-25 12:44:45
+#> $ query_timestamp             <dttm> 2026-03-26 16:48:20
 ```
 
 This function provides comprehensive author profiles including:
@@ -1140,7 +1143,7 @@ scientific knowledge evolves and builds upon previous research.
 ### The Book
 
 Aria, M. & Cuccurullo, C. (2026). **Science Mapping Analysis: A Primer
-with Biblioshiny**, *McGraw-Hill Education*.
+with Biblioshiny**, *McGraw-Hill Education*. ISBN: 978-88-386-2297-7.
 
 ### Core bibliometrix publication
 

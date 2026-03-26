@@ -8,5 +8,16 @@ bibentry(bibtype="Article",
          doi = "10.1016/j.joi.2017.08.007",
          textVersion =
            paste("Aria, M., & Cuccurullo, C. (2017),",
-           "bibliometrix: An R-tool for comprehensive science mapping analysis,", 
+           "bibliometrix: An R-tool for comprehensive science mapping analysis,",
            "Journal of informetrics, 11(4), 959-975, Elsevier."))
+
+bibentry(bibtype="Book",
+         title = "Science Mapping Analysis - A primer with Biblioshiny",
+         author = "Massimo Aria and Corrado Cuccurullo",
+         publisher = "McGraw-Hill",
+         year = "2026",
+         isbn = "978-88-386-2297-7",
+         textVersion =
+           paste("Aria, M., & Cuccurullo, C. (2026),",
+           "Science Mapping Analysis - A primer with Biblioshiny,",
+           "McGraw-Hill, ISBN: 978-88-386-2297-7."))

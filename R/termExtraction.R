@@ -226,8 +226,8 @@ extractNgrams <- function(text, Var, nword, stopwords, custom_stopwords, stemmin
 
   ## come back to the original multiword format
   ngrams <- ngrams %>%
-    mutate_at(paste("word", seq(1, nword), sep = ""), ~ gsub("__", "-", .)) %>%
-    mutate_at(paste("word", seq(1, nword), sep = ""), ~ gsub("_", " ", .))
+    mutate(across(paste("word", seq(1, nword), sep = ""), ~ gsub("__", "-", .))) %>%
+    mutate(across(paste("word", seq(1, nword), sep = ""), ~ gsub("_", " ", .)))
   ##
 
   ngrams <- ngrams %>% dplyr::filter(if_all(starts_with("word"), ~ !.x %in% stopwords))

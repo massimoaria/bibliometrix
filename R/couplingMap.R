@@ -364,8 +364,7 @@ labeling <- function(M, df_lab, term, n, n.labels, analysis, ngrams) {
 
   df <- df %>%
     group_by(Cluster) %>%
-    do(w = best_lab(.data, tab_global, n.labels, term)) %>%
-    unnest(w) %>%
+    reframe(best_lab(pick(everything()), tab_global, n.labels, term)) %>%
     as.data.frame()
 
   return(df$w)

@@ -1555,7 +1555,7 @@ create_author_bio_card <- function(
     top_topics <- topics_data[topics_data$type == "topic", ][
       1:min(max_topics, sum(topics_data$type == "topic")),
     ] %>%
-      sample_frac(size = 1)
+      slice_sample(prop = 1)
 
     # Calculate font sizes based on counts
     if (nrow(top_topics) > 0) {
@@ -3156,7 +3156,7 @@ AffiliationOverTime <- function(values, n) {
     arrange(Year) %>%
     ungroup() %>%
     pivot_wider(Affiliation, names_from = Year, values_from = n) %>%
-    mutate_all(~ replace(., is.na(.), 0)) %>%
+    mutate(across(everything(), ~ replace(., is.na(.), 0))) %>%
     pivot_longer(
       cols = !Affiliation,
       names_to = "Year",
@@ -3288,7 +3288,7 @@ CountryOverTime <- function(values, n) {
     arrange(Year) %>%
     ungroup() %>%
     pivot_wider(Affiliation, names_from = Year, values_from = n) %>%
-    mutate_all(~ replace(., is.na(.), 0)) %>%
+    mutate(across(everything(), ~ replace(., is.na(.), 0))) %>%
     pivot_longer(
       cols = !Affiliation,
       names_to = "Year",

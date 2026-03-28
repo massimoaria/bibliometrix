@@ -110,6 +110,10 @@ research paper.
 
 ## The Book
 
+<p align="center">
+<img src="man/figures/book_cover.png" width="800"/>
+</p>
+
 **Science Mapping Analysis: A Primer with Biblioshiny** by Massimo
 Aria and Corrado Cuccurullo (McGraw-Hill) is the definitive guide to
 bibliometric research using bibliometrix and biblioshiny.

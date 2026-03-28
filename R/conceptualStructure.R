@@ -297,7 +297,7 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
     A <- A %>%
       mutate(names = row.names(A)) %>%
       group_by(color) %>%
-      top_n(n = documents, wt = contrib) %>%
+      slice_max(order_by = contrib, n = documents, with_ties = FALSE) %>%
       select(!"contrib") %>%
       as.data.frame()
 
@@ -369,7 +369,7 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
     B <- B %>%
       mutate(names = row.names(B)) %>%
       group_by(color) %>%
-      top_n(n = documents, wt = TC) %>%
+      slice_max(order_by = TC, n = documents, with_ties = FALSE) %>%
       select(!"TC") %>%
       as.data.frame()
 

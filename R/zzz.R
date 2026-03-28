@@ -36,7 +36,9 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom dplyr lead
 #' @importFrom dplyr pull
 #' @importFrom dplyr arrange
-#' @importFrom dplyr do
+#' @importFrom dplyr everything
+#' @importFrom dplyr where
+#' @importFrom dplyr pick
 #' @importFrom dplyr distinct
 #' @importFrom dplyr join_by
 #' @importFrom dplyr n
@@ -50,9 +52,6 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
-#' @importFrom dplyr mutate_at
-#' @importFrom dplyr mutate_if
-#' @importFrom dplyr mutate_all
 #' @importFrom dplyr ungroup
 #' @importFrom dplyr rename
 #' @importFrom dplyr rename_with
@@ -64,7 +63,6 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom dplyr inner_join
 #' @importFrom dplyr left_join
 #' @importFrom dplyr right_join
-#' @importFrom dplyr top_n
 #' @importFrom dplyr relocate
 #' @importFrom dplyr slice_head
 #' @importFrom dplyr slice_tail

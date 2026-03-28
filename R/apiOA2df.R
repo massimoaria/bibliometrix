@@ -161,18 +161,18 @@ relabelling_OA_API <- function(DATA) {
 # Basic metadata extraction
 extract_basic_info <- function(article) {
   tibble(
-    id = article$id,
-    doi = article$doi,
-    title = article$title,
-    language = article$language,
-    display_name = article$display_name,
-    publication_year = article$publication_year,
-    publication_date = article$publication_date,
-    type = article$type,
-    countries_distinct_count = article$countries_distinct_count,
-    institutions_distinct_count = article$institutions_distinct_count,
-    referenced_works_count = article$referenced_works_count,
-    cited_by_count = article$cited_by_count
+    id = article$id %||% NA_character_,
+    doi = article$doi %||% NA_character_,
+    title = article$title %||% NA_character_,
+    language = article$language %||% NA_character_,
+    display_name = article$display_name %||% NA_character_,
+    publication_year = article$publication_year %||% NA_integer_,
+    publication_date = article$publication_date %||% NA_character_,
+    type = article$type %||% NA_character_,
+    countries_distinct_count = article$countries_distinct_count %||% NA_integer_,
+    institutions_distinct_count = article$institutions_distinct_count %||% NA_integer_,
+    referenced_works_count = article$referenced_works_count %||% NA_integer_,
+    cited_by_count = article$cited_by_count %||% NA_integer_
   )
 }
 
@@ -317,19 +317,19 @@ extract_journal_info <- function(article) {
   primary_loc <- article$primary_location
 
   if (!is.null(primary_loc$source)) {
-    journal_name <- primary_loc$source$display_name
-    issn <- primary_loc$source$issn_l
+    journal_name <- primary_loc$source$display_name %||% NA_character_
+    issn <- primary_loc$source$issn_l %||% NA_character_
   } else {
-    journal_name <- NA
-    issn <- NA
+    journal_name <- NA_character_
+    issn <- NA_character_
   }
 
   tibble(
     journal_name = journal_name,
     issn = issn,
-    is_oa = primary_loc$is_oa,
-    oa_status = article$open_access$oa_status,
-    oa_url = article$open_access$oa_url
+    is_oa = primary_loc$is_oa %||% NA,
+    oa_status = article$open_access$oa_status %||% NA_character_,
+    oa_url = article$open_access$oa_url %||% NA_character_
   )
 }
 
@@ -495,18 +495,10 @@ extract_additional_info <- function(article) {
 
   tibble(
     yearly_citations = yearly_citations,
-    fwci = ifelse(!is.null(article$fwci), article$fwci, NA),
-    apc_value = ifelse(
-      !is.null(article$apc_list$value),
-      article$apc_list$value,
-      NA
-    ),
-    apc_currency = ifelse(
-      !is.null(article$apc_list$currency),
-      article$apc_list$currency,
-      NA
-    ),
-    has_fulltext = article$has_fulltext
+    fwci = article$fwci %||% NA_real_,
+    apc_value = article$apc_list$value %||% NA_real_,
+    apc_currency = article$apc_list$currency %||% NA_character_,
+    has_fulltext = article$has_fulltext %||% NA
   )
 }
 
@@ -535,8 +527,8 @@ extract_corresponding_info <- function(authorships) {
   }
 
   # Estrai nome e ID autore
-  display_name <- selected_author$author$display_name
-  id <- selected_author$author$id
+  display_name <- selected_author$author$display_name %||% NA_character_
+  id <- selected_author$author$id %||% NA_character_
 
   # Estrai il paese se disponibile
   if (

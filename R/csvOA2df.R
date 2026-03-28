@@ -1,4 +1,4 @@
-utils::globalVariables(c("all_of", "corr", "DI", "C1", "id_oa", "RP", "UN", "AU_ID", "corresponding_author_ids", "References", "mutate_all", "AU_CORRESPONDING", "AU_CO", "AU"))
+utils::globalVariables(c("all_of", "corr", "DI", "C1", "id_oa", "RP", "UN", "AU_ID", "corresponding_author_ids", "References", "AU_CORRESPONDING", "AU_CO", "AU"))
 
 csvOA2df <- function(file) {
   options(readr.num_columns = 0)
@@ -271,7 +271,7 @@ extract_collapsed_affiliations <- function(affiliations, id_oa) {
     )
 
     # Rimozione dei caratteri `"` da tutte le colonne
-    df <- df %>% mutate_all(~ stringr::str_replace_all(., "\"", ""))
+    df <- df %>% mutate(across(everything(), ~ stringr::str_replace_all(., "\"", "")))
   })
 }
 

@@ -40,7 +40,7 @@ splitCommunities <- function(graph, n = NULL) {
   if (!is.null(n)) {
     labels <- df %>%
       group_by(group) %>%
-      top_n(n = n, wt = size) %>%
+      slice_max(order_by = size, n = n, with_ties = FALSE) %>%
       as.data.frame()
   } else {
     labels <- df %>%

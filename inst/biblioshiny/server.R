@@ -4932,8 +4932,22 @@ To ensure the functionality of Biblioshiny,
       }
     }
 
+    # Sort steps by phase: all Screening before Eligibility (PRISMA convention)
+    # Recalculate n_remaining sequentially using each step's original n_excluded
+    if (nrow(steps_df) > 0) {
+      phase_order <- factor(steps_df$phase, levels = c("Screening", "Eligibility"))
+      steps_df <- steps_df[order(phase_order), ]
+      rownames(steps_df) <- NULL
+
+      prev_remaining <- total_n
+      for (i in seq_len(nrow(steps_df))) {
+        steps_df$n_remaining[i] <- prev_remaining - steps_df$n_excluded[i]
+        prev_remaining <- steps_df$n_remaining[i]
+      }
+    }
+
     # n_included is automatically the last remaining count (or total if no steps)
-    n_included <- if (n_steps > 0) steps_df$n_remaining[n_steps] else total_n
+    n_included <- if (nrow(steps_df) > 0) steps_df$n_remaining[nrow(steps_df)] else total_n
 
     values$prismaParams <- list(
       db_name = input$prisma_db_name,

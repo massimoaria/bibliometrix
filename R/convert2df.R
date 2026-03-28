@@ -272,7 +272,7 @@ convert2df <- function(
 
   # remove double ;
   M <- M %>%
-    mutate_if(is.character, ~ gsub(";;", ";", .x))
+    mutate(across(where(is.character), ~ gsub(";;", ";", .x)))
 
   ### SR field creation
   if (isTRUE(remove.duplicates)) {

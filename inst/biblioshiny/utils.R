@@ -6217,14 +6217,42 @@ overlayPlotly <- function(VIS) {
     mutate(log = ceiling(log(deg))) %>%
     slice(rep(1, each = log))
 
-  p <- plot_ly(nodes2, x = ~x, y = ~y) %>%
-    add_histogram2d(
-      histnorm = "density",
-      zsmooth = "fast",
+  # Compute 2D kernel density estimation for smooth heatmap
+  x_range <- range(nodes2$x, na.rm = TRUE)
+  y_range <- range(nodes2$y, na.rm = TRUE)
+  x_pad <- diff(x_range) * 0.15
+  y_pad <- diff(y_range) * 0.15
+
+  kde <- tryCatch({
+    bw_x <- diff(x_range) / 4
+    bw_y <- diff(y_range) / 4
+    dens <- MASS::kde2d(nodes2$x, nodes2$y, n = 300,
+                        h = c(bw_x, bw_y),
+                        lims = c(x_range[1] - x_pad, x_range[2] + x_pad,
+                                 y_range[1] - y_pad, y_range[2] + y_pad))
+    list(x = dens$x, y = dens$y, z = dens$z)
+  }, error = function(e) NULL)
+
+  if (!is.null(kde)) {
+    # z from kde2d is [x_index, y_index]; plotly heatmap expects z[y_index, x_index]
+    p <- plotly::plot_ly(
+      x = kde$x, y = kde$y, z = t(kde$z),
+      type = "heatmap",
       colorscale = Reds,
-      # colorscale=colori[15],
-      showscale = FALSE
+      showscale = FALSE,
+      zsmooth = "best",
+      hoverinfo = "none"
     )
+  } else {
+    # Fallback to histogram2d
+    p <- plot_ly(nodes2, x = ~x, y = ~y) %>%
+      add_histogram2d(
+        histnorm = "density",
+        zsmooth = "fast",
+        colorscale = Reds,
+        showscale = FALSE
+      )
+  }
 
   for (i in 1:nrow(nodes)) {
     p <- p %>%
@@ -6234,6 +6262,7 @@ overlayPlotly <- function(VIS) {
         x = nodes$x[i],
         y = nodes$y[i],
         text = nodes$label[i],
+        xanchor = "center",
         font = list(
           family = "Arial",
           size = nodes$font.size[i],
@@ -6857,9 +6886,9 @@ drawPrismaFlowDiagram <- function(db_name = "Web of Science",
   # Phase labels
   draw_phase_label(plx, y_id, plw, plh, "Identification")
   if (length(screening_ys) > 0)
-    draw_phase_label(plx, mean(screening_ys), plw, plh, "Screening")
+    draw_phase_label(plx, screening_ys[1], plw, plh, "Screening")
   if (length(eligibility_ys) > 0)
-    draw_phase_label(plx, mean(eligibility_ys), plw, plh, "Eligibility")
+    draw_phase_label(plx, eligibility_ys[1], plw, plh, "Eligibility")
   draw_phase_label(plx, y_inc, plw, plh, "Inclusion")
 
   # Identification boxes

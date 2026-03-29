@@ -2407,6 +2407,13 @@ freqPlot <- function(
     if (nchar(s) > 40) paste0(stringr::str_wrap(s, width = 40)) else s
   })
 
+  # Ensure unique labels to avoid multiple points on same y-axis row
+  dupes <- duplicated(xx[, y]) | duplicated(xx[, y], fromLast = TRUE)
+  if (any(dupes)) {
+    counts <- ave(seq_along(xx[, y]), xx[, y], FUN = seq_along)
+    xx[dupes, y] <- paste0(xx[dupes, y], " (", counts[dupes], ")")
+  }
+
   g <- ggplot(xx, aes(x = xx[, x], y = xx[, y], label = xx[, x], text = Text)) +
     geom_segment(
       aes(x = 0, y = xx[, y], xend = xx[, x], yend = xx[, y]),

@@ -1416,7 +1416,7 @@ Avg sentence length: %.1f words",
   })
 
   # Citation types table
-  output$citation_types_table <- renderBibliobox(
+  output$citation_types_table <- renderUI({ renderBibliobox(
     df = reactive({
       if (
         !is.null(values$analysis_results) &&
@@ -1435,10 +1435,10 @@ Avg sentence length: %.1f words",
     nrow = 10,
     filter = "none",
     round = 2
-  )
+  ) })
 
   # Citation sections table
-  output$citation_sections_table <- renderBibliobox(
+  output$citation_sections_table <- renderUI({ renderBibliobox(
     df = reactive({
       if (
         !is.null(values$analysis_results) &&
@@ -1460,10 +1460,10 @@ Avg sentence length: %.1f words",
     nrow = 10,
     filter = "none",
     round = 2
-  )
+  ) })
 
   # Frequent words table
-  output$frequent_words_table <- renderBibliobox(
+  output$frequent_words_table <- renderUI({ renderBibliobox(
     df = reactive({
       if (!is.null(values$analysis_results)) {
         values$analysis_results$word_frequencies %>%
@@ -1477,10 +1477,10 @@ Avg sentence length: %.1f words",
     nrow = 15,
     filter = "none",
     round = 0
-  )
+  ) })
 
   # Bigrams table
-  output$bigrams_table <- renderBibliobox(
+  output$bigrams_table <- renderUI({ renderBibliobox(
     df = reactive({
       if (
         !is.null(values$analysis_results) &&
@@ -1497,10 +1497,10 @@ Avg sentence length: %.1f words",
     nrow = 15,
     filter = "none",
     round = 0
-  )
+  ) })
 
   # Trigrams table
-  output$trigrams_table <- renderBibliobox(
+  output$trigrams_table <- renderUI({ renderBibliobox(
     df = reactive({
       if (
         !is.null(values$analysis_results) &&
@@ -1517,7 +1517,7 @@ Avg sentence length: %.1f words",
     nrow = 15,
     filter = "none",
     round = 0
-  )
+  ) })
 
   # Text statistics
   # output$text_stats <- renderText({
@@ -2046,7 +2046,7 @@ Avg sentence length: %.1f words",
   })
 
   # Strongest connections table
-  output$strongest_connections <- renderBibliobox(
+  output$strongest_connections <- renderUI({ renderBibliobox(
     df = reactive({
       if (
         !is.null(values$analysis_results) &&
@@ -2074,7 +2074,7 @@ Avg sentence length: %.1f words",
     nrow = 8,
     filter = "none",
     round = 0
-  )
+  ) })
 
   # ===========================================
   # DOWNLOAD HANDLERS
@@ -2322,7 +2322,7 @@ Avg sentence length: %.1f words",
   })
 
   # Render word trends statistics table
-  output$word_trends_table <- renderBibliobox(
+  output$word_trends_table <- renderUI({ renderBibliobox(
     df = reactive({
       req(values$word_trends_data)
 
@@ -2367,7 +2367,7 @@ Avg sentence length: %.1f words",
     scrollX = TRUE,
     escape = FALSE, # Important: allows HTML in cells
     round = 3
-  )
+  ) })
 
   # Download handler for word trends
   output$download_word_trends <- downloadHandler(

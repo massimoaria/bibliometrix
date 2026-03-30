@@ -27,7 +27,10 @@ utils::globalVariables(c(
   "len",
   "page_start",
   "str_starts",
+  "CR_stripped",
+  "n_stripped",
   "temp_citation",
+  "variant_freq",
   "wos_key"
 ))
 
@@ -1401,6 +1404,49 @@ normalize_citations <- function(
     }
   }
 
+  # Punctuation-invariant matching: additional exact matching pass using
+  # a stripped form of the original string (all non-alphanumeric characters
+  # removed, case-folded, whitespace collapsed). This catches citation
+  # pairs that differ only in punctuation, spacing, or formatting.
+  unmatched_df2 <- df %>%
+    dplyr::filter(is.na(cluster_id))
+
+  if (nrow(unmatched_df2) > 0) {
+    unmatched_df2 <- unmatched_df2 %>%
+      mutate(
+        CR_stripped = sapply(CR_original, function(x) {
+          x %>%
+            remove_diacritics() %>%
+            toupper() %>%
+            str_replace_all("[^A-Z0-9]", "")
+        }, USE.NAMES = FALSE)
+      )
+
+    stripped_matches <- unmatched_df2 %>%
+      group_by(CR_stripped) %>%
+      mutate(
+        n_stripped = n(),
+        cluster_id = if_else(
+          n_stripped > 1,
+          paste0("STRIP_", min(CR_id)),
+          NA_character_
+        )
+      ) %>%
+      ungroup() %>%
+      dplyr::filter(!is.na(cluster_id))
+
+    if (nrow(stripped_matches) > 0) {
+      df$cluster_id[
+        df$CR_id %in% stripped_matches$CR_id
+      ] <- stripped_matches$cluster_id
+      cat(
+        "  Matched",
+        nrow(stripped_matches),
+        "citations via punctuation-invariant matching\n"
+      )
+    }
+  }
+
   cat("Phase 3: Blocking by author + year + journal...\n")
 
   # Restrictive blocking - must have same author, year, and journal
@@ -1630,8 +1676,8 @@ normalize_citations <- function(
             title_words
           ),
 
-        # Fallback: basic metadata only (risky)
-        TRUE ~
+        # Fallback with title: use title_words to distinguish
+        !is.na(title_words) ~
           paste0(
             coalesce(first_author, "UNK"),
             "_",
@@ -1639,8 +1685,13 @@ normalize_citations <- function(
             "_",
             coalesce(journal, "UNK"),
             "_",
-            coalesce(volume, "NA")
-          )
+            coalesce(volume, "NA"),
+            "_",
+            title_words
+          ),
+
+        # Last resort: no pages, no title - keep original cluster (no merge)
+        TRUE ~ paste0("NOMERGE_", cluster_id)
       )
     ) %>%
     group_by(merge_key) %>%
@@ -1660,17 +1711,22 @@ normalize_citations <- function(
   cat("Phase 5: Selecting canonical representatives...\n")
 
   result <- df_matched %>%
+    # Count frequency of each variant within its cluster
+    group_by(cluster_id, CR_original) %>%
+    mutate(variant_freq = n()) %>%
+    ungroup() %>%
     group_by(cluster_id) %>%
     mutate(
       n_cluster = n(),
-      # Scoring: DOI > volume > pages > length
-      completeness_score = (!is.na(doi)) *
-        100 +
+      # Scoring: frequency first, then completeness as tiebreaker
+      completeness_score = variant_freq * 1000 +
+        (!is.na(doi)) * 100 +
         (!is.na(volume)) * 10 +
         (!is.na(pages)) * 5 +
         nchar(CR_original) * 0.01,
       CR_canonical = CR_original[which.max(completeness_score)][1]
     ) %>%
+    select(-variant_freq) %>%
     ungroup() %>%
     arrange(desc(n_cluster), cluster_id) %>%
     select(
@@ -1966,12 +2022,19 @@ applyCitationMatching <- function(
   result <- CR_df %>%
     left_join(matched, by = c("CR" = "CR_original"))
 
+  # Remove invalid entries: filtered citations and short canonical forms
+  result <- result %>%
+    dplyr::filter(
+      !is.na(cluster_id),
+      !grepl("^FILTERED_", cluster_id),
+      nchar(CR_canonical) >= min_chars
+    )
+
   # Reference citation counts
   citation_count <- result %>% distinct() %>% count(CR_canonical, sort = TRUE)
 
   # Create summary
   summary <- result %>%
-    dplyr::filter(!grepl("^FILTERED_", cluster_id)) %>%
     group_by(CR_canonical, cluster_id) %>%
     summarise(
       n_variants = n_distinct(CR),

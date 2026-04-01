@@ -3335,7 +3335,7 @@ To ensure the functionality of Biblioshiny,
 
     tryCatch(
       {
-        results <- applyCitationMatching(
+        results <- applyReferenceMatching(
           M = values$M,
           threshold = input$refMatch_threshold,
           method = input$refMatch_method

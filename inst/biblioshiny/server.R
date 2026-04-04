@@ -1336,23 +1336,43 @@ To ensure the functionality of Biblioshiny,
     # column will contain the local filenames where the data can
     # be found.
     if (input$load == "demo") {
-      data(management, package = "bibliometrixData")
-      values = initial(values)
-      row.names(management) <- management$SR
-      management <- management %>% mergeKeywords(force = T)
-      values$M <- management
-      values$Morig = management
-      values$SCdf <- wcTable(management)
-      values$COdf <- countryTable(management)
-      values$Histfield = "NA"
-      values$results = list("NA")
-      values$rest_sidebar <- TRUE
-      values$missingdf <- df <- missingData(values$M)$mandatoryTags
-      values$missTags <- NULL
-      # values$menu <- menuList(values)
-      updateMenuVisibility(session, values)
-      values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
+      values <- initial(values)
 
+      if (input$demoDataset == "book_dataset") {
+        M <- tryCatch(
+          loadBookDataset(),
+          error = function(e) {
+            showModal(modalDialog(
+              title = "Download Error",
+              paste("Failed to download the book dataset:", e$message),
+              easyClose = TRUE
+            ))
+            return(NULL)
+          }
+        )
+        if (is.null(M)) return()
+        row.names(M) <- M$SR
+        M <- M %>% mergeKeywords(force = TRUE)
+        values$M <- M
+        values$Morig <- M
+        values$collection_description <- 'The objective of this analysis is to map and synthesize the evolution of "Bibliometric and Scientometric research applied to Management and Business disciplines." This collection serves as a comprehensive proxy for understanding how science mapping techniques have matured within these fields, leveraging a dataset characterized by diverse methodological approaches and a robust institutional network. More specifically, we collected all original research articles, written in English, that employ bibliometric or scientometric methods, including science mapping, citation analysis, co-citation analysis, and bibliographic coupling, within the management and business fields, as indexed by Web of Science, over the period 1985--2025.'
+      } else {
+        data(management, package = "bibliometrixData")
+        row.names(management) <- management$SR
+        management <- management %>% mergeKeywords(force = TRUE)
+        values$M <- management
+        values$Morig <- management
+        values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985\u20132020. This collection was identified by retrieving all documents indexed under the subject categories "Management" and "Business" that contain at least one of the following terms in their topic fields: "science map", "bibliometric*".'
+      }
+
+      values$SCdf <- wcTable(values$M)
+      values$COdf <- countryTable(values$M)
+      values$Histfield <- "NA"
+      values$results <- list("NA")
+      values$rest_sidebar <- TRUE
+      values$missingdf <- missingData(values$M)$mandatoryTags
+      values$missTags <- NULL
+      updateMenuVisibility(session, values)
       showModal(missingModal(session))
       return()
     }

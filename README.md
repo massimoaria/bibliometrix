@@ -624,7 +624,7 @@ Basic visualizations can be generated using the **plot** function:
 plot(x = results, k = 10, pause = FALSE)
 ```
 
-<img src="man/figures/README-plot generic function-1.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-2.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-3.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-4.png" alt="" width="100%" /><img src="man/figures/README-plot generic function-5.png" alt="" width="100%" />
+<img src="man/figures/README-plot-generic-function-1.png" alt="" width="100%" /><img src="man/figures/README-plot-generic-function-2.png" alt="" width="100%" /><img src="man/figures/README-plot-generic-function-3.png" alt="" width="100%" /><img src="man/figures/README-plot-generic-function-4.png" alt="" width="100%" /><img src="man/figures/README-plot-generic-function-5.png" alt="" width="100%" />
 
 ## Author Bio Cards
 
@@ -781,7 +781,7 @@ net <- networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Country Collaborat
                    type = "circle", size = TRUE, remove.multiple = FALSE, labelsize = 0.8)
 ```
 
-<img src="man/figures/README-Country collaboration-1.png" alt="" width="100%" />
+<img src="man/figures/README-Country-collaboration-1.png" alt="" width="100%" />
 
 This visualization reveals international research collaborations,
 highlighting countries with strong scientific partnerships.
@@ -798,7 +798,7 @@ net <- networkPlot(NetMatrix, Title = "Co-Citation Network", type = "fruchterman
                    size = TRUE, remove.multiple = FALSE, labelsize = 0.7, edgesize = 5)
 ```
 
-<img src="man/figures/README-Co-citation network-1.png" alt="" width="100%" />
+<img src="man/figures/README-Co-citation-network-1.png" alt="" width="100%" />
 
 Co-citation analysis identifies the intellectual foundations of a
 research field by revealing which references are frequently cited
@@ -817,7 +817,7 @@ net <- networkPlot(NetMatrix, normalize = "association", weighted = TRUE, n = 30
                    size = TRUE, edgesize = 5, labelsize = 0.7)
 ```
 
-<img src="man/figures/README-Keyword co-occurrences-1.png" alt="" width="100%" />
+<img src="man/figures/README-Keyword-co-occurrences-1.png" alt="" width="100%" />
 
 Keyword co-occurrence networks reveal the conceptual structure of a
 research field, identifying main themes and their relationships.
@@ -953,13 +953,13 @@ CS <- conceptualStructure(M, field = "ID", method = "MCA", minDegree = 10,
 plot(CS$graph_terms)
 ```
 
-<img src="man/figures/README-Co-Word Analysis-1.png" alt="" width="100%" />
+<img src="man/figures/README-Co-Word-Analysis-1.png" alt="" width="100%" />
 
 ``` r
 plot(CS$graph_dendogram)
 ```
 
-<img src="man/figures/README-Co-Word Analysis-2.png" alt="" width="100%" />
+<img src="man/figures/README-Co-Word-Analysis-2.png" alt="" width="100%" />
 
 This analysis helps identify: - Main research themes and sub-themes -
 Relationships between concepts - Evolution of research focus - Emerging
@@ -1045,7 +1045,7 @@ histResults <- histNetwork(M, sep = ";")
 net <- histPlot(histResults, n = 20, size = FALSE, label = "short")
 ```
 
-<img src="man/figures/README-Historical Co-citation network-1.png" alt="" width="100%" />
+<img src="man/figures/README-Historical-Co-citation-network-1.png" alt="" width="100%" />
 
     #> 
     #>  Legend

@@ -1176,6 +1176,14 @@ body <- dashboardBody(
                               em("Period: 1985 - 2025, Source WoS."),
                               br(),
                               br(),
+                              div(
+                                style = "font-size: 13px; color: #555; line-height: 1.5;",
+                                strong("Aria, M., & Cuccurullo, C."),
+                                " (2026). Science Mapping Analysis - A primer with Biblioshiny. ",
+                                em("McGraw-Hill"),
+                                ", ISBN: 978-88-386-2297-7."
+                              ),
+                              br(),
                               tags$small(
                                 style = "color: #888;",
                                 "This dataset will be downloaded from GitHub on first use and cached locally."

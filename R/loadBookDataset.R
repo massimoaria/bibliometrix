@@ -13,6 +13,7 @@
 #'
 #' @param force_download Logical. If \code{TRUE}, re-downloads the dataset even
 #'   if a cached copy exists locally. Default is \code{FALSE}.
+#' @importFrom utils download.file
 #'
 #' @return A bibliometrix data frame containing the book dataset.
 #'

@@ -129,7 +129,7 @@ lotka <- function(M) {
   )
 
   ## 7. Plot ----
-  g_shiny <- ggplot2::ggplot(AuthorProd, ggplot2::aes(x = N.Articles)) +
+  g_shiny <- suppressWarnings(ggplot2::ggplot(AuthorProd, ggplot2::aes(x = N.Articles)) +
     # Empirical line
     ggplot2::geom_line(
       ggplot2::aes(
@@ -203,7 +203,7 @@ lotka <- function(M) {
       ),
       panel.grid.minor = ggplot2::element_blank(),
       legend.position = "none"
-    )
+    ))
 
   # Version with logo for export
   x_logo <- c(

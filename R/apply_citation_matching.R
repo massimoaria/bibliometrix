@@ -31,7 +31,8 @@ utils::globalVariables(c(
   "n_stripped",
   "temp_citation",
   "variant_freq",
-  "wos_key"
+  "wos_key",
+  "author_surname"
 ))
 
 #' Normalize journal names to ISO4 abbreviated form

@@ -1,0 +1,689 @@
+FN Clarivate Analytics Web of Science
+VR 1.0
+PT J
+AU Toh, ML
+AF Toh, Ming Liang
+TI Mapping the application of Geographic Information System (GIS) in real
+   estate: a bibliometric analysis using bibliometrix and QGIS
+SO SURVEY REVIEW
+LA English
+DT Article; Early Access
+DE Word; GIS; Real Estate; bibliometric analysis; bibliometrix; QGIS
+ID TEMPORALLY WEIGHTED REGRESSION; URBAN EXPANSION; HOUSING-MARKET; MODELS
+AB This study presents a comprehensive bibliometric analysis of Geographic Information System (GIS) applications in real estate, in line with the lack of systematic mapping in this domain. A total of 533 peer-reviewed articles published between 2000 and 2025 were retrieved from the Scopus database and analysed using the Bibliometrix R package and QGIS software. The study highlights the growing academic and practical importance of GIS as a decision-support tool in real estate. The findings offer valuable insights for policymakers, practitioners, and researchers seeking to enhance spatial data use in the real estate sector.
+C1 [Toh, Ming Liang] Univ Technol Sarawak, Sch Built Environm, Jalan Univ, Sibu 96000, Sarawak, Malaysia.
+RP Toh, ML (corresponding author), Univ Technol Sarawak, Sch Built Environm, Jalan Univ, Sibu 96000, Sarawak, Malaysia.
+EM tohmingliang@uts.edu.my
+CR Amponsah M., 2024, INT J MULTIDISCIPLIN, V6
+   Anselin L, 2006, GEOGR ANAL, V38, P5, DOI 10.1111/j.0016-7363.2005.00671.x
+   Aria M, 2017, J INFORMETR, V11, P959, DOI 10.1016/j.joi.2017.08.007
+   Bender O, 2005, LANDSCAPE ECOL, V20, P149, DOI 10.1007/s10980-003-1506-7
+   Bharath HA, 2018, EGYPT J REMOTE SENS, V21, P201, DOI 10.1016/j.ejrs.2017.08.002
+   Binoy BV, 2022, INT J HOUS MARK ANAL, V15, P35, DOI 10.1108/IJHMA-09-2020-0115
+   BROADUS RN, 1987, SCIENTOMETRICS, V12, P373, DOI 10.1007/BF02016680
+   Bryan BA, 2010, LANDSCAPE URBAN PLAN, V97, P111, DOI 10.1016/j.landurbplan.2010.05.002
+   Ceh M, 2018, ISPRS INT J GEO-INF, V7, DOI [10.3390/ijgi705168, 10.3390/ijgi7050168]
+   Çelik KT, 2023, MEGARON, V18, P499, DOI 10.14744/megaron.2023.70962
+   Chuvieco E, 2014, GLOBAL ECOL BIOGEOGR, V23, P245, DOI 10.1111/geb.12095
+   Dejniak D., 2018, ACTA UNIVERSITATIS L, V1, P27
+   Din A, 2001, URBAN STUD, V38, P1989, DOI 10.1080/00420980120080899
+   Donthu N, 2021, J BUS RES, V133, P285, DOI 10.1016/j.jbusres.2021.04.070
+   El Jaouhari A, 2024, INT J STRATEG PROP M, V28, P286, DOI 10.3846/ijspm.2024.22251
+   Enemark S., 2014, FIT FOR PURPOSE LAND
+   Gabrielli L, 2023, LAND-BASEL, V12, DOI 10.3390/land12061248
+   Goodman AC, 2003, J HOUS ECON, V12, P181, DOI 10.1016/S1051-1377(03)00031-7
+   Hassan M.M., 2023, INT J ACAD RES BUSIN, V13, P131
+   Helbich M, 2014, URBAN STUD, V51, P390, DOI 10.1177/0042098013492234
+   Hillier AE, 2005, SOC SCI HIST, V29, P207, DOI 10.1215/01455532-29-2-207
+   Hillier AE, 2003, J URBAN HIST, V29, P394, DOI 10.1177/0096144203029004002
+   Huang B, 2010, INT J GEOGR INF SCI, V24, P383, DOI 10.1080/13658810802672469
+   Hull S, 2018, S AFR J GEOMAT, V7, P102, DOI 10.4314/sajg.v7i2.1
+   Hwang M, 2006, J REGIONAL SCI, V46, P425, DOI 10.1111/j.1467-9787.2006.00480.x
+   Jamaludin AF, 2025, PROP MANAG, V43, P582, DOI 10.1108/PM-11-2024-0114
+   Ji CY, 2001, INT J REMOTE SENS, V22, P1441, DOI 10.1080/01431160117207
+   Jebur  AK, 2021, Saudi Journal of Civil Engineering, V5, P18, DOI [10.36348/sjce.2021.v05i02.001, 10.36348/sjce.2021.v05i02.001, DOI 10.36348/SJCE.2021.V05I02.001]
+   Kuminoff NV, 2010, J ENVIRON ECON MANAG, V60, P145, DOI 10.1016/j.jeem.2010.06.001
+   Liu F, 2021, CHINESE GEOGR SCI, V31, P765, DOI 10.1007/s11769-021-1225-5
+   Longley P.A., 2015, GEOGRAPHIC INFORM SY
+   Marinheiro J, 2025, AGRONOMY-BASEL, V15, DOI 10.3390/agronomy15092110
+   Marondedze AK, 2024, J ENVIRON MANAGE, V370, DOI 10.1016/j.jenvman.2024.123099
+   Moyroud N., 2018, QGIS and generic tools, V1, P1, DOI DOI 10.1002/9781119457091.CH1
+   Mwangi E.K., 2011, JOMO KENYATTA U AGR, V13, P115
+   Pires AA, 2025, APPL SCI-BASEL, V15, DOI 10.3390/app15179600
+   Pomortseva O., 2024, INT C YOUNG PROFESSI, V2024, P1, DOI DOI 10.3997/2214-4609.2024510031
+   Quiros TP, 2015, TRANSPORT RES REC, P101, DOI 10.3141/2512-12
+   Rezvani SM, 2023, APPL SCI-BASEL, V13, DOI 10.3390/app13042223
+   2024, Journal of Computing Research and Innovation, V9, DOI [10.24191/jcrinn.v9i2.457, 10.24191/jcrinn.v9i2.457, DOI 10.24191/JCRINN.V9I2.457]
+   Tekouabou SCK, 2024, ARCH COMPUT METHOD E, V31, P1079, DOI 10.1007/s11831-023-10010-5
+   Toh M.L., 2025, INT J ENV SCI, V11, P1476
+   Tomlinson R.F., 1987, INT J GEOGR INF SYST, V1, P203
+   VICKERY BC, 1948, J DOC, V4, P198, DOI 10.1108/eb026133
+   Wang DK, 2019, SUSTAINABILITY-BASEL, V11, DOI 10.3390/su11247006
+   Williamson I., 2010, LAND ADM SUSTAINABLE
+   Wu C, 2019, INT J GEOGR INF SCI, V33, P489, DOI 10.1080/13658816.2018.1545158
+   Wu J, 2014, J REAL ESTATE FINANC, V48, P522, DOI 10.1007/s11146-013-9416-1
+   Yang ZH, 2013, INT C DIGIT MANUF, P409, DOI 10.1109/ICDMA.2013.96
+   Yiorkas C, 2017, PROC SPIE, V10444, DOI 10.1117/12.2280255
+   Young AF, 2013, CLIM RES, V57, P73, DOI 10.3354/cr01161
+   Yu DL, 2007, ENVIRON PLANN B, V34, P1085, DOI 10.1068/b32119
+   Zysk E, 2020, CITIES, V96, DOI 10.1016/j.cities.2019.102423
+NR 53
+TC 0
+Z9 0
+U1 1
+U2 1
+PU TAYLOR & FRANCIS LTD
+PI ABINGDON
+PA 2-4 PARK SQUARE, MILTON PARK, ABINGDON OR14 4RN, OXON, ENGLAND
+SN 0039-6265
+EI 1752-2706
+J9 SURV REV
+JI Surv. Rev.
+PD 2026 FEB 25
+PY 2026
+DI 10.1080/00396265.2026.2635057
+EA FEB 2026
+PG 12
+WC Engineering, Civil; Geosciences, Multidisciplinary; Remote Sensing
+WE Science Citation Index Expanded (SCI-EXPANDED)
+SC Engineering; Geology; Remote Sensing
+GA EJ5HG
+UT WOS:001702577900001
+DA 2026-03-28
+ER
+PT J
+AU Büyükkidik, S
+AF Buyukkidik, Serap
+TI A Bibliometric Analysis: A Tutorial for the Bibliometrix Package in R
+   Using IRT Literature
+SO JOURNAL OF MEASUREMENT AND EVALUATION IN EDUCATION AND PSYCHOLOGY-EPOD
+LA English
+DT Article
+DE bibliometric analysis; item response theory (IRT); biblioshiny;
+   bibliometrix
+ID SCIENCE; INFORMETRICS; DIMENSION; JOURNALS; FIELD; TOOL
+AB The bibliometrix package in R programming language, which is frequently used in bibliometric analysis, was introduced in this research. The article aimed to illustrate the various analyses applied in a bibliometric study. For this purpose, articles containing the "item response theory" (IRT) or "item response modeling" or "item response model" terms in the abstract were searched in the Thomson Reuters Clarivate Analytics Web of Science (WoS at http://www.webofknowledge.com), and bibliometric data was downloaded. Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) steps were followed in the study. Data from 3388 IRT-related articles on education and psychology, searched between 2001 and 2021, were used in the study. Data were analyzed with the bibliometrix package. Some of the stages in data analysis were shared with screenshots. As a result of data analysis through the real data set, the author's keywords related to IRT were item response model, differential item functioning, psychometrics, assessment, measurement, reliability, validity, Rasch model, and measurement invariance. The countries with the highest number of citations in IRT studies were the USA, Canada, Netherlands, United Kingdom, and China, respectively. Turkey ranked 12th in IRT studies with 434 citations. It was thought that bibliometric analysis of articles related to IRT would shed light on researchers in the field of psychometrics.
+C1 [Buyukkidik, Serap] Sinop Univ, Fac Educ, Sinop, Turkey.
+C3 Sinop University
+RP Büyükkidik, S (corresponding author), Sinop Univ, Fac Educ, Sinop, Turkey.
+EM sbuyukkidik@gmail.com
+RI Buyukkidik, Serap/MFJ-0972-2025
+CR Adnan Menderes Üniversitesi, 2019, International Journal of Progressive Education, V15, P44, DOI [10.29329/ijpe.2019.189.4, 10.29329/ijpe.2019.189.4, DOI 10.29329/IJPE.2019.189.4]
+   Andrés A, 2009, MEASURING ACADEMIC RESEARCH: HOW TO UNDERTAKE A BIBLIOMETRIC STUDY, P1
+   [Anonymous], 2009, Science of science (Sci2) tool
+   Aria M, 2017, J INFORMETR, V11, P959, DOI 10.1016/j.joi.2017.08.007
+   Bailón-Moreno R, 2005, SCIENTOMETRICS, V63, P259, DOI 10.1007/s11192-005-0212-4
+   Bock R.D., 1997, Educational Measurement, V16, P21, DOI [DOI 10.1111/J.1745-3992.1997.TB00605.X, 10.1111/j.1745-3992.1997.tb00605.x]
+   Chen CM, 2006, J AM SOC INF SCI TEC, V57, P359, DOI 10.1002/asi.20317
+   Cobo MJ, 2012, J AM SOC INF SCI TEC, V63, P1609, DOI 10.1002/asi.22688
+   Demir SB, 2018, J INFORMETR, V12, P1296, DOI 10.1016/j.joi.2018.10.008
+   Donthu N, 2021, J BUS RES, V133, P285, DOI 10.1016/j.jbusres.2021.04.070
+   Durieux V, 2010, RADIOLOGY, V255, P342, DOI 10.1148/radiol.09090626
+   Egghe L, 2005, INFORM PROCESS MANAG, V41, P1311, DOI 10.1016/j.ipm.2005.03.011
+   Embretson SE., 2000, ITEM RESPONSE THEORY, DOI DOI 10.4324/9781410605269
+   Eysenck H.L., 1973, The Measurement of Intelligence
+   GARFIELD E, 1964, SCIENCE, V144, P649, DOI 10.1126/science.144.3619.649
+   GARFIELD E, 1955, SCIENCE, V122, P108, DOI 10.1126/science.122.3159.108
+   Gomez Benito J, 2005, SCIENTOMETRICS, V64, P3, DOI 10.1007/s11192-005-0234-y
+   Grauwin Sebastian, 2018, Proceedings of the Association for Information Science and Technology, V55, DOI [10.1002/pra2.2018.14505501129, 10.1002/pra2.2018.14505501129]
+   Gülmez D, 2021, EGIT BILIM, V46, P213, DOI 10.15390/EB.2020.9317
+   Gümüs S, 2020, SCH LEADERSH MANAG, V40, P23, DOI 10.1080/13632434.2019.1578737
+   Hallinger P, 2019, EDUC MANAG ADM LEAD, V47, P20, DOI 10.1177/1741143217717280
+   Hambleton RonaldK., 1991, FUNDAMENTALS ITEM RE
+   Linnenluecke MK, 2020, AUST J MANAGE, V45, P175, DOI 10.1177/0312896219877678
+   Moher D, 2009, J CLIN EPIDEMIOL, V62, P1006, DOI 10.1016/j.jclinepi.2009.06.005
+   National Center for Education Statistics (NCES), 2020, NUMB DEGR GRANT POST
+   National Science Foundation (NSF), 2007, AS RIS SCI TECHN STR
+   Osareh F, 1996, LIBRI, V46, P149, DOI 10.1515/libr.1996.46.3.149
+   Persson O., 2009, CELEBRATING SCHOLARL, DOI DOI 1458990/FILE/1458992.PDF#PAGE=11
+   PRITCHARD A, 1969, J DOC, V25, P348
+   R Core Team, 2021, INTRO R
+   Raats M. M., 1992, Food Quality and Preference, V3, P89, DOI 10.1016/0950-3293(91)90028-D
+   Rey-Rocha J, 2002, SCIENTOMETRICS, V55, P137, DOI 10.1023/A:1016059222182
+   SENGUPTA IN, 1992, LIBRI, V42, P75, DOI 10.1515/libr.1992.42.2.75
+   van Eck NJ, 2014, J INFORMETR, V8, P802, DOI 10.1016/j.joi.2014.07.006
+   van Eck NJ, 2010, SCIENTOMETRICS, V84, P523, DOI 10.1007/s11192-009-0146-3
+   van Raan A.F. J., 2004, Handbook of Quantitative Science and Technology Research, P19, DOI DOI 10.1007/1-4020-2755-9_2
+   Ware M., 2015, The STM report: An overview of scientific and scholarly journal publishing, V4th
+   Yurtçu M, 2021, Participatory Educational Research, V8, P426, DOI [10.17275/per.21.98.8.4, 10.17275/per.21.98.8.4, DOI 10.17275/PER.21.98.8.4]
+   Zupic I, 2015, ORGAN RES METHODS, V18, P429, DOI [10.1177/1094428114562629, 10.1016/j.ufug.2020.126932]
+NR 39
+TC 55
+Z9 92
+U1 5
+U2 154
+PU ASSOC MEASUREMENT & EVALUATION EDUCATION & PSYCHOLOGY
+PI ANKARA
+PA ASSOC MEASUREMENT & EVALUATION EDUCATION & PSYCHOLOGY, ANKARA, 00000,
+   Turkiye
+SN 1309-6575
+J9 J MEAS EVAL EDUC PSY
+JI J. Meas. Eval. Educ. Psychol.-EPOD
+PY 2022
+VL 13
+IS 3
+BP 164
+EP 193
+DI 10.21031/epod.1069307
+PG 30
+WC Psychology, Educational
+WE Emerging Sources Citation Index (ESCI)
+SC Psychology
+GA 5L2HN
+UT WOS:000870236000001
+OA Green Submitted, gold
+DA 2026-03-28
+ER
+PT J
+AU Aria, M
+   Cuccurullo, C
+AF Aria, Massimo
+   Cuccurullo, Corrado
+TI bibliometrix: An R-tool for comprehensive science mapping
+   analysis
+SO JOURNAL OF INFORMETRICS
+LA English
+DT Article
+DE sBibliometrics; Science mapping; Workflow; Co-citation; Bibliographic
+   coupling; R package
+ID INFORMATION-SCIENCE; SCIENTIFIC WORKFLOWS; AUTHOR COCITATION; CITATION
+   IMAGE; ALGORITHM; EVOLUTION; NETWORKS; PATTERNS; TRENDS; INDEX
+AB The use of bibliometrics is gradually extending to all disciplines. It is particularly suitable for science mapping at a time when the emphasis on empirical contributions is producing voluminous, fragmented, and controversial research streams. Science mapping is complex and unwieldly because it is multi-step and frequently requires numerous and diverse software tools, which are not all necessarily freeware. Although automated workflows that integrate these software tools into an organized data flow are emerging, in this paper we propose a unique open-source tool, designed by the authors, called bibliometrix, for performing comprehensive science mapping analysis. bibliometrix supports a recommended workflow to perform bibliometric analyses. As it is programmed in R, the proposed tool is flexible and can be rapidly upgraded and integrated with other statistical R-packages. It is therefore useful in a constantly changing science such as bibliometrics. (c) 2017 Elsevier Ltd. All rights reserved.
+C1 [Aria, Massimo] Univ Napoli Federico II, Dept Econ & Stat, Via Cintia, I-80126 Naples, Italy.
+   [Cuccurullo, Corrado] Univ Campania Luigi Vanvitelli, Dept Econ & Management, Capua, CE, Italy.
+C3 University of Naples Federico II; Universita della Campania Vanvitelli
+RP Aria, M (corresponding author), Univ Napoli Federico II, Dept Econ & Stat, Via Cintia, I-80126 Naples, Italy.
+EM aria@unina.it; corrado.cuccurullo@unicampania.it
+RI ; Aria, Massimo/O-7983-2015
+OI CUCCURULLO, Corrado/0000-0002-7401-8575; Aria,
+   Massimo/0000-0002-8517-9411
+CR Alavifard S., 2015, HINDEXCALCULATOR H I
+   [Anonymous], ANAL DONNESS ANAL CO
+   [Anonymous], 2016, R: A Language and Environment for Statistical Computing
+   [Anonymous], 2016, SCIENTOTEXT TEXT SCI
+   [Anonymous], 2009, Science of Science (Sci2) Tool
+   [Anonymous], 11 INT C SCI TECHN I
+   [Anonymous], J AM SOC INFORM SCI
+   [Anonymous], 2012, OXFORD HDB EVIDENCE
+   Bailón-Moreno R, 2006, J AM SOC INF SCI TEC, V57, P949, DOI 10.1002/asi.20362
+   Bar-Ilan J, 2008, SCIENTOMETRICS, V74, P257, DOI 10.1007/s11192-008-0216-y
+   Blasius J.e., 2006, Multiple Correspondence Analysis and Related Methods, DOI DOI 10.1201/9781420011319
+   Börner K, 2003, ANNU REV INFORM SCI, V37, P179, DOI 10.1002/aris.1440370106
+   Briner R.B., 2012, Handbook of evidence-based management: companies, classrooms, and research, P328, DOI [10.1093/oxfordhb/9780199763986.001.0001, DOI 10.1093/OXFORDHB/9780199763986.001.0001, 10.1093/oxfordhb/9780199763986.013.0007, DOI 10.1093/OXFORDHB/9780199763986.013.0007]
+   BROADUS RN, 1987, SCIENTOMETRICS, V12, P373, DOI 10.1007/BF02016680
+   CALLON M, 1983, SOC SCI INFORM, V22, P191, DOI 10.1177/053901883022002003
+   Chen CM, 2006, J AM SOC INF SCI TEC, V57, P359, DOI 10.1002/asi.20317
+   Cobo MJ, 2012, J AM SOC INF SCI TEC, V63, P1609, DOI 10.1002/asi.22688
+   Cobo MJ, 2011, J INFORMETR, V5, P146, DOI 10.1016/j.joi.2010.10.002
+   Crane Diana., 1972, INVISIBLE COLL
+   Cuccurullo C, 2016, SCIENTOMETRICS, V108, P595, DOI 10.1007/s11192-016-1948-8
+   de Moya-Anegón F, 2005, INFORM PROCESS MANAG, V41, P1520, DOI 10.1016/j.ipm.2005.03.017
+   Diodato V., 1994, Dictionary of bibliometrics
+   Dumais ST, 2004, ANNU REV INFORM SCI, V38, P189
+   Gagolewski M, 2011, J INFORMETR, V5, P678, DOI 10.1016/j.joi.2011.06.006
+   Gao X, 2009, SCIENTOMETRICS, V80, P283, DOI 10.1007/s11192-007-2013-4
+   Garfield E, 2004, J INF SCI, V30, P119, DOI 10.1177/0165551504042802
+   Gifi Albert., 1990, NONLINEAR MULTIVARIA
+   Glänzel W, 2004, HANDBOOK OF QUANTITATIVE SCIENCE AND TECHNOLOGY RESEARCH: THE USE OF PUBLICATION AND PATENT STATISTICS IN STUDIES OF S&T SYSTEMS, P257
+   Glänzel W, 2001, SCIENTOMETRICS, V51, P69, DOI 10.1023/A:1010512628145
+   Glänzel W, 2012, SCIENTOMETRICS, V91, P399, DOI 10.1007/s11192-011-0591-7
+   Guler AT, 2016, J INFORMETR, V10, P830, DOI 10.1016/j.joi.2016.05.002
+   Guler AT, 2016, SCIENTOMETRICS, V107, P385, DOI 10.1007/s11192-016-1885-6
+   Harzing A.-W., 1997, PUBLISH PERISH
+   Hirsch JE, 2005, P NATL ACAD SCI USA, V102, P16569, DOI 10.1073/pnas.0507655102
+   KAMADA T, 1989, INFORM PROCESS LETT, V31, P7, DOI 10.1016/0020-0190(89)90102-6
+   Keirstead J., 2015, scholar: Analyse Citation Data from Google Scholar
+   KESSLER MM, 1963, AM DOC, V14, P10, DOI 10.1002/asi.5090140103
+   Klavans R, 2017, J ASSOC INF SCI TECH, V68, P984, DOI 10.1002/asi.23734
+   Lebart L., 1984, MULTIVARIATE DESCRIP
+   Marion LS, 2002, P ASIST ANNU, V39, P3
+   MatLoff N., 2011, The art of R programming: a tour of statistical software design
+   McCain KW, 2009, J AM SOC INF SCI TEC, V60, P1301, DOI 10.1002/asi.21064
+   MCCAIN KW, 1991, J AM SOC INFORM SCI, V42, P290, DOI 10.1002/(SICI)1097-4571(199105)42:4<290::AID-ASI5>3.0.CO;2-9
+   Persson O., 2009, CELEBRATING SCHOLARL, DOI DOI 1458990/FILE/1458992.PDF#PAGE=11
+   PETERS HPF, 1991, SCIENTOMETRICS, V20, P235, DOI 10.1007/BF02018157
+   PORTER MF, 1980, PROGRAM-AUTOM LIBR, V14, P130, DOI 10.1108/eb046814
+   PRITCHARD A, 1969, J DOC, V25, P348
+   Schnabel SK, 2009, COMPUT STAT DATA AN, V53, P4168, DOI 10.1016/j.csda.2009.05.002
+   Skupin A, 2009, J INFORMETR, V3, P233, DOI 10.1016/j.joi.2009.03.002
+   SMALL H, 1973, J AM SOC INFORM SCI, V24, P265, DOI 10.1002/asi.4630240406
+   Small H, 2006, SCIENTOMETRICS, V68, P595, DOI 10.1007/s11192-006-0132-y
+   Small H, 2009, SCIENTOMETRICS, V79, P365, DOI 10.1007/s11192-009-0424-0
+   Thijs B, 2013, SCIENTOMETRICS, V96, P667, DOI 10.1007/s11192-012-0896-1
+   Upham SP, 2010, SCIENTOMETRICS, V83, P15, DOI 10.1007/s11192-009-0051-9
+   van Eck NJ, 2008, J INFORMETR, V2, P263, DOI 10.1016/j.joi.2008.09.004
+   van Eck NJ, 2014, J INFORMETR, V8, P802, DOI 10.1016/j.joi.2014.07.006
+   van Eck NJ, 2010, SCIENTOMETRICS, V84, P523, DOI 10.1007/s11192-009-0146-3
+   van Eck NJ, 2009, J AM SOC INF SCI TEC, V60, P1635, DOI 10.1002/asi.21075
+   Waltman L, 2016, J INFORMETR, V10, P365, DOI 10.1016/j.joi.2016.02.007
+   Waltman L, 2010, J INFORMETR, V4, P629, DOI 10.1016/j.joi.2010.07.002
+   WHITE HD, 1981, J AM SOC INFORM SCI, V32, P163, DOI 10.1002/asi.4630320302
+   White HD, 1998, J AM SOC INFORM SCI, V49, P327, DOI 10.1002/(SICI)1097-4571(19980401)49:4<327::AID-ASI4>3.0.CO;2-W
+   Yan EJ, 2012, J AM SOC INF SCI TEC, V63, P1313, DOI 10.1002/asi.22680
+   Yang K., 2006, Proceedings of the American Society for information science and technology, V43, P1, DOI [DOI 10.1002/MEET.14504301185, 10.1002/meet.14504301185]
+   Yang SL, 2016, J INFORMETR, V10, P132, DOI 10.1016/j.joi.2015.12.003
+   Zhao DZ, 2008, J AM SOC INF SCI TEC, V59, P2070, DOI 10.1002/asi.20910
+   Zupic I, 2015, ORGAN RES METHODS, V18, P429, DOI [10.1177/1094428114562629, 10.1016/j.ufug.2020.126932]
+NR 67
+TC 8858
+Z9 11190
+U1 316
+U2 3443
+PU ELSEVIER
+PI AMSTERDAM
+PA RADARWEG 29, 1043 NX AMSTERDAM, NETHERLANDS
+SN 1751-1577
+EI 1875-5879
+J9 J INFORMETR
+JI J. Informetr.
+PD NOV
+PY 2017
+VL 11
+IS 4
+BP 959
+EP 975
+DI 10.1016/j.joi.2017.08.007
+PG 17
+WC Computer Science, Interdisciplinary Applications; Information Science &
+   Library Science
+WE Science Citation Index Expanded (SCI-EXPANDED); Social Science Citation Index (SSCI)
+SC Computer Science; Information Science & Library Science
+GA FQ0DK
+UT WOS:000418020600003
+HC Y
+HP N
+DA 2026-03-28
+ER
+PT J
+AU Jalal, SK
+AF Jalal, Samir Kumar
+TI Co-authorship and co-occurrences analysis using Bibliometrix R-package:
+   a case study of India and Bangladesh
+SO ANNALS OF LIBRARY AND INFORMATION STUDIES
+LA English
+DT Article
+DE Research Collaboration; Bibliometrix R-Package; Co-authorship;
+   Co-occurrence analysis; Collaboration Network; India; Bangladesh
+ID INTERNATIONAL RESEARCH COLLABORATION; INDEX; SCIENCE
+AB Research collaboration between India and Bangladesh based on research output of 1156 papers jointly produced by both countries were retrieved from Web of Science for the period of 1991 to 2017.The collaboration network on co-authorship and co-occurrences was build using BibliometrixR package. Top ten keywords have been plotted to show the subject trends in general. VOSviewer was used to build network maps to know the collaborative zones with respect to authors, subjects and keywords. The study shows that the major collaborations were in medical science followed by agriculture and biological sciences. The verification of Lotkas's Law was made using lotka() function in Bibliometrix R package. The finding of the study shows that Lotka's law is still valid for the co-authorship data at the international level.
+C1 [Jalal, Samir Kumar] Indian Inst Technol IIT Kharagpur, Cent Lib, Kharagpur 721302, W Bengal, India.
+C3 Indian Institute of Technology System (IIT System); Indian Institute of
+   Technology (IIT) - Kharagpur
+RP Jalal, SK (corresponding author), Indian Inst Technol IIT Kharagpur, Cent Lib, Kharagpur 721302, W Bengal, India.
+EM jalalsk1971@gmail.com
+RI Jalal, Samir Kumar/AAL-4598-2020
+OI Jalal, Samir Kumar/0000-0001-7840-5970
+CR Anuradha KT, 2007, SCIENTOMETRICS, V71, P179, DOI 10.1007/s11192-007-1657-4
+   Chen KH, 2019, RES POLICY, V48, P149, DOI 10.1016/j.respol.2018.08.005
+   Egghe L, 2006, SCIENTOMETRICS, V69, P131, DOI 10.1007/s11192-006-0144-7
+   Fazli F, 2018, LIB PHILOS PRACTICE
+   FRAME JD, 1979, SOC STUD SCI, V9, P481
+   Fu XL, 2016, INT J TECHNOL MANAGE, V70, P193, DOI 10.1504/IJTM.2016.075162
+   GARFIELD E, 1964, SCIENCE, V144, P649, DOI 10.1126/science.144.3619.649
+   GARFIELD E, 1955, SCIENCE, V122, P108, DOI 10.1126/science.122.3159.108
+   Georghiou L, 1998, RES POLICY, V27, P611, DOI 10.1016/S0048-7333(98)00054-7
+   Hayati Z, 2010, LIBR HI TECH, V28, P433, DOI 10.1108/07378831011076675
+   He TW, 2009, SCIENTOMETRICS, V80, P571, DOI 10.1007/s11192-007-2043-y
+   Hirsch JE, 2005, P NATL ACAD SCI USA, V102, P16569, DOI 10.1073/pnas.0507655102
+   Katz JS, 1997, RES POLICY, V26, P1, DOI 10.1016/S0048-7333(96)00917-1
+   Kim KW, 2006, SCIENTOMETRICS, V66, P231, DOI 10.1007/s11192-006-0017-0
+   Kumar S., 2008, Proceedings of Fourth International Conference on Webometrics, Informetrics and Scientometrics, 28
+   Kumar VV, 2017, J COMPUT THEOR NANOS, V14, P5686, DOI 10.1166/jctn.2017.6595
+   Leydesdorff L, 2006, J AM SOC INF SCI TEC, V57, P1616, DOI 10.1002/asi.20335
+   Savic M, 2019, INTELLIGENT SYSTEMS, V148
+   Stead GB, 2000, CAREER DEV Q, V48, P323, DOI 10.1002/j.2161-0045.2000.tb00877.x
+   SUBRAMANYAM K, 1983, J INFORM SCI, V6, P33, DOI 10.1177/016555158300600105
+   Tol RSJ, 2008, J INFORMETR, V2, P149, DOI 10.1016/j.joi.2008.01.001
+   WHITE HD, 1981, J AM SOC INFORM SCI, V32, P163, DOI 10.1002/asi.4630320302
+NR 22
+TC 31
+Z9 42
+U1 2
+U2 57
+PU NATL INST SCIENCE COMMUNICATION-NISCAIR
+PI NEW DELHI
+PA DR K S KRISHNAN MARG, PUSA CAMPUS, NEW DELHI 110 012, INDIA
+SN 0972-5423
+EI 0975-2404
+J9 ANN LIBR INF STUD
+JI Ann. Libr. Inf. Stud.
+PD JUN
+PY 2019
+VL 66
+IS 2
+BP 57
+EP 64
+DI 10.56042/alis.v66i2.22404
+PG 8
+WC Information Science & Library Science
+WE Emerging Sources Citation Index (ESCI)
+SC Information Science & Library Science
+GA JV9ZD
+UT WOS:000502717900001
+DA 2026-03-28
+ER
+PT J
+AU Zhao, ZQ
+   Xu, K
+   Jiang, YZ
+   Xu, XS
+   Liu, YL
+AF Zhao, Ziqi
+   Xu, Kun
+   Jiang, Yizhuo
+   Xu, Xisheng
+   Liu, Yuliang
+TI Comment on "Knowledge mapping of B cell and atherosclerosis over the
+   past 20 years: A bibliometric analysis"
+SO HUMAN VACCINES & IMMUNOTHERAPEUTICS
+LA English
+DT Article
+DE B cell; atherosclerosis; bibliometric; CiteSpace; VOSviewer;
+   bibliometrix
+C1 [Zhao, Ziqi; Xu, Kun; Jiang, Yizhuo; Xu, Xisheng; Liu, Yuliang] Zhejiang Chinese Med Univ, Sch Basic Med, 548 Binwen Rd,Bldg 9, Hangzhou 310053, Zhejiang, Peoples R China.
+C3 Zhejiang Chinese Medical University
+RP Liu, YL (corresponding author), Zhejiang Chinese Med Univ, Sch Basic Med, 548 Binwen Rd,Bldg 9, Hangzhou 310053, Zhejiang, Peoples R China.
+EM 1693114263@qq.com
+RI ; Jiang, Yizhuo/OSH-4440-2025
+OI Zhao, Ziqi/0009-0004-9789-2785; 
+FU National Administration of Traditional Chinese Medicine National
+   Clinical Excellent Talents Training Program [2022-239]
+FX The work was supported by National Administration of Traditional Chinese
+   Medicine National Clinical Excellent Talents Training Program
+   [No.2022-239].
+CR Cheng T, 2023, HUM VACC IMMUNOTHER, V19, DOI 10.1080/21645515.2023.2277567
+NR 1
+TC 0
+Z9 0
+U1 10
+U2 44
+PU TAYLOR & FRANCIS INC
+PI PHILADELPHIA
+PA 530 WALNUT STREET, STE 850, PHILADELPHIA, PA 19106 USA
+SN 2164-5515
+EI 2164-554X
+J9 HUM VACC IMMUNOTHER
+JI Human Vaccines Immunother.
+PD DEC 31
+PY 2024
+VL 20
+IS 1
+AR 2372912
+DI 10.1080/21645515.2024.2372912
+PG 2
+WC Biotechnology & Applied Microbiology; Immunology
+WE Science Citation Index Expanded (SCI-EXPANDED)
+SC Biotechnology & Applied Microbiology; Immunology
+GA J6P3A
+UT WOS:001338261400001
+PM 39436706
+OA Green Submitted, gold
+DA 2026-03-28
+ER
+PT J
+AU López, ACC
+   Marín, AAL
+   Pérez, MAD
+AF Lopez, Alejandro Carlos Campina
+   Marin, Antonio Alejandro Lorca
+   Perez, M. angeles de las Heras
+TI Inquiry, modelling and computational thinking: A bibliometrical review
+   using bibliometrix through biblioshiny.
+SO REVISTA EUREKA SOBRE ENSENANZA Y DIVULGACION DE LAS CIENCIAS
+LA English
+DT Article
+DE bibliometrics; bibliometrix; modelling; computational thinking; inquiry;
+   science education learning
+AB As its first objective, this article carries out a bibliometric analysis aimed at serving as a guide on how to conduct bibliometrics using Biblioshiny, an interface of the Bibliometrix statistical software. To achieve this, a search has been used as an example, detailing the methodology, procedures, and strategies employed to address research questions and, as a secondary objective, to understand which works jointly develop Computational Thinking, Modelling, and Inquiry in the field of sciences. By utilizing quantitative statistical methods for data visualization, the intention is to identify the most relevant authors and journals, along with their impact indices, as well as the main thematic areas and their temporal evolution, in order to gain insights into what is being studied and how in this field. The results indicate that modelling is one of the salient themes among the 31 selected articles, accomplished through research, construction, and design of simulations in digital environments using block -based programming.
+C1 [Lopez, Alejandro Carlos Campina; Marin, Antonio Alejandro Lorca; Perez, M. angeles de las Heras] Univ Huelva, Dept Didact Integradas, Huelva, Spain.
+C3 Universidad de Huelva
+RP López, ACC (corresponding author), Univ Huelva, Dept Didact Integradas, Huelva, Spain.
+EM alejandro.campina@ddi.uhu.com; alejandro.campina@ddi.uhu.com;
+   angeles.delasheras@ddcc.uhu.es
+RI Campina-López, Alejandro/ABD-9900-2022; Heras Pérez, María Ángeles de
+   las/AAB-7319-2020; Lorca Marín, Antonio Alejano/A-6691-2017; Lorca
+   Marín, Antonio/A-6691-2017
+OI Campina López, Alejano/0000-0002-6221-347X; Heras Pérez, María Ángeles
+   de las/0000-0002-3640-8337; Lorca Marín, Antonio
+   Alejano/0000-0002-9727-9268; 
+CR [Anonymous], 2022, Real Decreto 217/2022
+   Aria M, 2017, J INFORMETR, V11, P959, DOI 10.1016/j.joi.2017.08.007
+   Campina-Lopez A., 2023, Revista APICE
+   Cardenas Y. B., 2017, Educacion Y Ciencia, V20, P1
+   Fussero G. B., 2021, Revista Iberoamericana de Tecnologia en Educacion y Educacion en Tecnologia, V30, P40
+   Galvez A., 2002, Matronas Profesion, V3, P25
+   Hertzberg S., 1999, ED POLICY ANAL ARCH, V7, P25, DOI DOI 10.14507/EPAA.V7N25.1999
+   López-Robles JR, 2019, PROF INFORM, V28, DOI 10.3145/epi.2019.jul.17
+   Oliva JM, 2019, ENSEN CIENC, V37, P5, DOI 10.5565/rev/ensciencias.2648
+   Moher D, 2009, J CLIN EPIDEMIOL, V62, P1006, DOI 10.1016/j.jclinepi.2009.06.005
+   Mokhnacheva YV, 2020, SCI TECH INF PROCESS, V47, P158, DOI 10.3103/S014768822003003X
+   Ninkov A, 2022, PERSPECT MED EDUC, V11, P173, DOI 10.1007/s40037-021-00695-4
+   Page MJ, 2021, BMJ-BRIT MED J, V372, DOI [10.1136/bmj.n71, 10.1016/j.rec.2021.07.010]
+   Salmeron A., 2016, Ecuacion de busqueda BUNS UAL t-Formas
+   Torres Salinas D., 2020, Zenodo, DOI [10.5281/zenodo.4327614, DOI 10.5281/ZENODO.4327614]
+NR 15
+TC 0
+Z9 0
+U1 8
+U2 66
+PU UNIV CADIZ, DEPT DIDACTICA
+PI CADIZ
+PA FAC CIENCIAS EDUC, UNIV CADIZ, AVDA REPUBLICA SAHARAUI S-N, CADIZ,
+   PUERTO REAL 11519, SPAIN
+SN 1697-011X
+J9 REV EUREKA ENSEN DIV
+JI Rev. Eureka Ensen. Divulg. Cienc.
+PD MAR
+PY 2024
+VL 21
+IS 1
+AR 1102
+DI 10.25267/Rev_Eureka_ensen_divulg_cienc.2024.v21.i1.1102
+PG 16
+WC Education & Educational Research
+WE Emerging Sources Citation Index (ESCI)
+SC Education & Educational Research
+GA LJ4D5
+UT WOS:001186408000010
+OA Green Submitted, gold
+DA 2026-03-28
+ER
+PT J
+AU Zeng, SH
+   Wang, R
+   Chen, J
+   He, Y
+AF Zeng, Shuhan
+   Wang, Rui
+   Chen, Jie
+   He, Yue
+TI Bibliometric analysis of research trends on the epiretinal membrane
+   since 2000
+SO ACTA BIOCHIMICA POLONICA
+LA English
+DT Article
+DE bibliometric analysis; bibliometrix; citespace; epiretinal membrane;
+   VOSviewer
+ID JAPANESE POPULATION; RISK-FACTORS; PREVALENCE; VITRECTOMY; SURGERY
+AB Epiretinal membrane (ERM) is an important retinal disorder, yet its global research landscape has not been systematically evaluated. This study conducted a comprehensive bibliometric analysis of ERM-related publications indexed in the Web of Science Core Collection. Data were analyzed using CiteSpace, bibliometrix, VOSviewer, and the bibliometrix R package to assess publication trends, international collaboration, influential journals, and evolving research topics. A total of 1,059 articles published between 2000 and 2024 were included. The annual number of publications showed a steady increase, with the United States and other developed countries contributing the majority of research output. Journal analysis identified Retina-The Journal of Retinal and Vitreous Diseases as the leading outlet in terms of productivity. Keyword co-occurrence and co-citation analyses revealed that current research hotspots involve epidemiology, molecular mechanisms, imaging biomarkers associated with surgical outcomes, and the emerging use of artificial intelligence in diagnosis and prognosis prediction. These findings provide an integrated overview of ERM research development, highlight major thematic shifts, and offer valuable guidance for future investigations in this field.
+C1 [Zeng, Shuhan; Wang, Rui; He, Yue] Southwest Med Univ, Dept Ophthalmol, Affiliated Hosp, Luzhou, Sichuan, Peoples R China.
+   [Chen, Jie] Southwest Med Univ, Dept Rheumatol & Immunol, Affiliated Hosp, Luzhou, Sichuan, Peoples R China.
+C3 Southwest Medical University; Southwest Medical University
+RP He, Y (corresponding author), Southwest Med Univ, Dept Ophthalmol, Affiliated Hosp, Luzhou, Sichuan, Peoples R China.
+EM hylyfy@163.com
+FU Luzhou Science and Technology Program [2023JYJ037]; Project of Youth
+   Innovation in Medical Research in Sichuan Province [Q15014]; Scientific
+   Research Topics of Sichuan Health and Family Planning Commission
+   [16PJ560]; Sichuan Science and Technology Program [2022YFS0611]
+FX The author(s) declared that financial support was received for this work
+   and/or its publication. This work was supported by The Luzhou Science
+   and Technology Program (2023JYJ037); The project of Youth Innovation in
+   Medical Research in Sichuan Province (Q15014); The Scientific Research
+   Topics of Sichuan Health and Family Planning Commission (16PJ560); The
+   Sichuan Science and Technology Program (2022YFS0611).
+CR Aria M, 2017, J INFORMETR, V11, P959, DOI 10.1016/j.joi.2017.08.007
+   Azuma K, 2017, RETINA-J RET VIT DIS, V37, P1813, DOI 10.1097/IAE.0000000000001537
+   Chen CM, 2012, EXPERT OPIN BIOL TH, V12, P593, DOI 10.1517/14712598.2012.674507
+   Cheung N, 2017, BRIT J OPHTHALMOL, V101, P371, DOI 10.1136/bjophthalmol-2016-308563
+   Chou HD, 2024, EYE, V38, P778, DOI 10.1038/s41433-023-02776-6
+   Choudhri AF, 2015, RADIOGRAPHICS, V35, P736, DOI 10.1148/rg.2015140036
+   Chua PY, 2022, EYE, V36, P495, DOI 10.1038/s41433-021-01681-0
+   Dong L, 2022, JAMA NETW OPEN, V5, DOI 10.1001/jamanetworkopen.2022.9960
+   Drexler W, 2003, ARCH OPHTHALMOL-CHIC, V121, P695, DOI 10.1001/archopht.121.5.695
+   Ducloyer JB, 2025, BRIT J OPHTHALMOL, V109, P119, DOI 10.1136/bjo-2023-324990
+   Dupas B, 2015, J FR OPHTALMOL, V38, P861, DOI 10.1016/j.jfo.2015.08.004
+   Fraser-Bell S, 2003, OPHTHALMOLOGY, V110, P34, DOI 10.1016/S0161-6420(02)01443-4
+   Fujii GY, 2002, OPHTHALMOLOGY, V109, P1807, DOI 10.1016/S0161-6420(02)01179-X
+   Fung AT, 2021, CLIN EXP OPHTHALMOL, V49, P289, DOI 10.1111/ceo.13914
+   Hirsch JE, 2005, P NATL ACAD SCI USA, V102, P16569, DOI 10.1073/pnas.0507655102
+   Holzwarth J, 2024, OPHTHALMOLOGIE, V121, P443, DOI 10.1007/s00347-024-02055-z
+   Hung CL, 2023, METHODS, V214, P28, DOI 10.1016/j.ymeth.2023.04.006
+   Kanda A, 2019, SCI REP-UK, V9, DOI 10.1038/s41598-018-36917-9
+   Kawasaki R, 2009, EYE, V23, P1045, DOI 10.1038/eye.2008.238
+   Kim J, 2023, SCI REP-UK, V13, DOI 10.1038/s41598-023-46063-6
+   Kim JS, 2022, CLIN EXP OPHTHALMOL, V50, P1047, DOI 10.1111/ceo.14164
+   Kohno RI, 2009, BRIT J OPHTHALMOL, V93, P1020, DOI 10.1136/bjo.2008.155069
+   Matoba R, 2024, JPN J OPHTHALMOL, V68, P603, DOI 10.1007/s10384-024-01127-6
+   Matoba R, 2021, ACTA MED OKAYAMA, V75, P403, DOI 10.18926/AMO/62378
+   Meuer SM, 2015, OPHTHALMOLOGY, V122, P787, DOI 10.1016/j.ophtha.2014.10.014
+   Miyazaki M, 2003, GRAEF ARCH CLIN EXP, V241, P642, DOI 10.1007/s00417-003-0723-8
+   Nagar AM, 2020, J CATARACT REFR SURG, V46, P204, DOI 10.1016/j.jcrs.2019.09.004
+   Ng CH, 2011, OPHTHALMOLOGY, V118, P694, DOI 10.1016/j.ophtha.2010.08.009
+   Ninkov A, 2022, PERSPECT MED EDUC, V11, P173, DOI 10.1007/s40037-021-00695-4
+   Pennock S, 2013, AM J PATHOL, V182, P1659, DOI 10.1016/j.ajpath.2013.01.052
+   Schechet SA, 2017, RETINA-J RET VIT DIS, V37, P873, DOI 10.1097/IAE.0000000000001263
+   Shen SM, 2024, SCI REP-UK, V14, DOI 10.1038/s41598-024-57203-x
+   Stevenson W, 2016, CLIN OPHTHALMOL, V10, P527, DOI 10.2147/OPTH.S97722
+   Synnestvedt Marie B, 2005, AMIA Annu Symp Proc, P724
+   Thompson DF, 2015, PHARMACOTHERAPY, V35, P551, DOI 10.1002/phar.1586
+   van Eck NJ, 2010, SCIENTOMETRICS, V84, P523, DOI 10.1007/s11192-009-0146-3
+   Wen DJ, 2023, BMC OPHTHALMOL, V23, DOI 10.1186/s12886-023-03079-w
+   Yan Y, 2024, EYE, V38, P730, DOI 10.1038/s41433-023-02765-9
+   Yu YP, 2017, OSLI RETINA, V48, P906, DOI 10.3928/23258160-20171030-06
+   Zhang BW, 2023, HELIYON, V9, DOI 10.1016/j.heliyon.2023.e14079
+NR 40
+TC 0
+Z9 0
+U1 2
+U2 2
+PU FRONTIERS MEDIA SA
+PI LAUSANNE
+PA AVENUE DU TRIBUNAL FEDERAL 34, LAUSANNE, CH-1015, SWITZERLAND
+EI 1734-154X
+J9 ACTA BIOCHIM POL
+JI Acta Biochim. Pol.
+PD FEB 12
+PY 2026
+VL 73
+AR 15244
+DI 10.3389/abp.2026.15244
+PG 12
+WC Biochemistry & Molecular Biology
+WE Science Citation Index Expanded (SCI-EXPANDED)
+SC Biochemistry & Molecular Biology
+GA EF2FM
+UT WOS:001699661900001
+PM 41769207
+OA Green Submitted, gold
+DA 2026-03-28
+ER
+PT J
+AU Souza, LRD
+   da Silva, DH
+   Ribeiro, CT
+   da Silva, DA
+   Nasuto, SJ
+   Sweeney-Reed, CM
+   Andrade, AD
+   Pereira, AA
+AF Souza, Leandro Rodrigues da Silva
+   da Silva, Daniel Hilario
+   Ribeiro, Caio Tonus
+   da Silva, Daiane Alves
+   Nasuto, Slawomir J.
+   Sweeney-Reed, Catherine M.
+   Andrade, Adriano de Oliveira
+   Pereira, Adriano Alves
+TI PubMedMetaTool: Automated metadata extraction from PubMed using Python
+   for bibliometric analysis
+SO SOFTWARE IMPACTS
+LA English
+DT Article
+DE PubMed; Bibliometric analysis; Bibliometric database; Science mapping;
+   Bibliometrix; VoSViewer
+AB Bibliometric analyses often depend on extracting metadata from large scientific databases, a process that is still largely manual, repetitive, and error prone. This paper presents PubMedMetaTool, an open-source Python-based solution that automates the retrieval and transformation of bibliographic metadata from PubMed, using either article titles or Digital Object Identifiers as input. The tool implements a modular pipeline that extracts metadata using NCBI's Entrez programming utilities and transforms it into formats compatible with tools such as Bibliometrix, VOSviewer, and pyBibX. Designed to be transparent and configurable, the tool improves bibliometric workflow efficiency, accuracy, and interoperability workflows.
+C1 [Souza, Leandro Rodrigues da Silva; da Silva, Daniel Hilario; Ribeiro, Caio Tonus; Andrade, Adriano de Oliveira; Pereira, Adriano Alves] Programa Posgrad Engn Biomed, Uberlandia, Brazil.
+   [da Silva, Daniel Hilario] Inst Fed Goiano Campus Cristalina, Cristalina, Brazil.
+   [Souza, Leandro Rodrigues da Silva] Inst Fed Goiano Campus Rio Verde, Rio Verde, Brazil.
+   [Andrade, Adriano de Oliveira; Pereira, Adriano Alves] Fac Engn Elect, Uberlandia, Brazil.
+   [da Silva, Daiane Alves] Programa Posgrad Estudo Literario, Uberlandia, Brazil.
+   [Nasuto, Slawomir J.] Otto von Guericke Univ, Dept Neurol, Neurocybernet & Rehabil, Magdeburg, Germany.
+   [Sweeney-Reed, Catherine M.] Univ Reading, Sch Biol Sci, Biomed Sci & Biomed Engn Div, Reading, England.
+C3 Instituto Federal de Goias (IFG); Otto von Guericke University;
+   University of Reading
+RP Souza, LRD (corresponding author), Inst Fed Goiano Campus Rio Verde, Rio Verde, Brazil.
+EM leandro.souza@ifgoiano.edu.br
+RI Sweeney-Reed, Catherine/ADB-1879-2022; Pereira, Adriano/AAK-2075-2020;
+   Andrade, Adriano/D-9721-2012; Tonus, Caio/LLK-6351-2024; Silva,
+   Daniel/JWO-9082-2024
+OI Nasuto, Slawomir/0000-0001-9414-9049; 
+FU National Council for Scientific and Technological Development (CNPq);
+   Coordination for the Improvement of Higher Education Personnel (CAPES);
+   Foundation for Research Support of the State of Minas Gerais (FAPEMIG);
+   CNPq, Brazil [302942/2022-0, 309525/2021-7]
+FX The present study was carried out with the support of the National
+   Council for Scientific and Technological Development (CNPq) ,
+   Coordination for the Improvement of Higher Education Personnel (CAPES) ,
+   along with the Foundation for Research Support of the State of Minas
+   Gerais (FAPEMIG) . A.O.A. (302942/2022-0) and A.A.P. (309525/2021-7) are
+   fellows of CNPq, Brazil. We express our gratitude to the Michael J. Fox
+   Foundation (MJFF) for promoting public awareness of the scientific
+   research derived from data fostered by the foundation, to Centre for
+   Innovation and Technology Assessment in Health (NIATS) , Federal
+   University of Uberlandia, Brazil, and to the Federal Institute of
+   Education, Science, and Technology Goiano (IF Goiano) - Campus Rio
+   Verde, Campus Cristalina and the Center of Excellence in Exponential
+   Agriculture-CEAGRE, the Goias State Research Support Foundation (FAPEG)
+   , for structural support to conduct this study.
+CR Aria M, 2017, J INFORMETR, V11, P959, DOI 10.1016/j.joi.2017.08.007
+   Arruda H, 2022, J MED LIBR ASSOC, V110, P392, DOI 10.5195/jmla.2022.1434
+   Bramley R, 2023, DATABASE-OXFORD, V2023, DOI 10.1093/database/baad070
+   Consortium of Academic and Research Libraries in Illinois (CARLI), 2024, PMID key CARLI I-share electronic resource management
+   Ellegaard O, 2015, SCIENTOMETRICS, V105, P1809, DOI 10.1007/s11192-015-1645-z
+   Hogue CWV, 1996, TRENDS BIOCHEM SCI, V21, P226, DOI 10.1016/0968-0004(96)30017-0
+   Mrozek D, 2013, BMC BIOINFORMATICS, V14, DOI 10.1186/1471-2105-14-73
+   National Center for Biotechnology Information (NCBI), 2017, New API keys for the Eutilities
+   Ostell J., 2003, The NCBI Handbook
+   Oyewola DO, 2022, SN APPL SCI, V4, DOI 10.1007/s42452-022-05027-7
+   Pereira V., 2023, arXiv, DOI [10.1108/DTA-08-2023-0461, DOI 10.1108/DTA-08-2023-0461]
+   Sayers E., 2010, Entrez Programming Utilities Help
+   Souza L.R. da S., 2024, J. Fox Found. Data Set, DOI [10.5281/zenodo.11044198,Zenodo, DOI 10.5281/ZENODO.11044198,ZENODO]
+   Souza L.R. da S., 2024, P IFMBE, P2
+   Toaza B, 2024, SOFTW IMPACTS, V19, DOI 10.1016/j.simpa.2023.100602
+NR 15
+TC 0
+Z9 0
+U1 4
+U2 12
+PU ELSEVIER
+PI AMSTERDAM
+PA RADARWEG 29, 1043 NX AMSTERDAM, NETHERLANDS
+SN 2665-9638
+J9 SOFTW IMPACTS
+JI Software Impacts
+PD JUN
+PY 2025
+VL 24
+AR 100766
+DI 10.1016/j.simpa.2025.100766
+EA MAY 2025
+PG 7
+WC Computer Science, Software Engineering
+WE Emerging Sources Citation Index (ESCI)
+SC Computer Science
+GA 2WA8X
+UT WOS:001492673800001
+OA gold
+DA 2026-03-28
+ER
+EF

@@ -58,8 +58,9 @@ Imports: stats,
 		 tidyr,
 		 tidytext,
 		 visNetwork
-Suggests: 
+Suggests:
     knitr,
+    ragg,
     rmarkdown,
     testthat (>= 3.0.0),
     wordcloud2

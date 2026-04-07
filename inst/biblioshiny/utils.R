@@ -2324,9 +2324,8 @@ create_empty_local_author_bio_card <- function(
 
 # Helper: return a working PNG device function (Windows ARM64 lacks png())
 safe_png_device <- function() {
-  if (capabilities("png")) {
-    return(grDevices::png)
-  }
+  # Prefer ragg: it works reliably on all platforms including Windows ARM64
+  # where grDevices::png() reports capabilities("png") == TRUE but fails
   if (requireNamespace("ragg", quietly = TRUE)) {
     return(ragg::agg_png)
   }
@@ -2335,6 +2334,9 @@ safe_png_device <- function() {
       grDevices::png(filename = filename, width = width, height = height,
                      res = res, units = units, type = "cairo", ...)
     })
+  }
+  if (capabilities("png")) {
+    return(grDevices::png)
   }
   stop("No PNG graphics device available. Install the 'ragg' package: install.packages('ragg')")
 }

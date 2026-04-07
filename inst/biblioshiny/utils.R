@@ -2322,6 +2322,33 @@ create_empty_local_author_bio_card <- function(
 # Helper function for safe extraction (null coalescing operator)
 `%||%` <- function(x, y) if (is.null(x) || is.na(x) || length(x) == 0) y else x
 
+# Helper: return a working PNG device function (Windows ARM64 lacks png())
+safe_png_device <- function() {
+  if (capabilities("png")) {
+    return(grDevices::png)
+  }
+  if (requireNamespace("ragg", quietly = TRUE)) {
+    return(ragg::agg_png)
+  }
+  if (capabilities("cairo")) {
+    return(function(filename, width, height, res = 72, units = "in", ...) {
+      grDevices::png(filename = filename, width = width, height = height,
+                     res = res, units = units, type = "cairo", ...)
+    })
+  }
+  stop("No PNG graphics device available. Install the 'ragg' package: install.packages('ragg')")
+}
+
+# Safe wrapper for ggsave that uses a working PNG device
+safe_ggsave <- function(..., device = NULL) {
+  args <- list(...)
+  filename <- args$filename %||% args[[1]]
+  if (is.null(device) && grepl("\\.png$", filename, ignore.case = TRUE)) {
+    device <- safe_png_device()
+  }
+  ggplot2::ggsave(..., device = device)
+}
+
 
 # from igraph to png file
 igraph2PNG <- function(x, filename, width = 10, height = 7, dpi = 75) {
@@ -2334,11 +2361,12 @@ igraph2PNG <- function(x, filename, width = 10, height = 7, dpi = 75) {
     group_by(cluster) %>%
     slice_head(n = 3)
   V(x)$label[!(V(x)$label %in% df$name)] <- ""
-  png(
+  png_dev <- safe_png_device()
+  png_dev(
     filename = filename,
     width = width,
     height = height,
-    unit = "in",
+    units = "in",
     res = dpi
   )
   grid::grid.draw(plot(x))
@@ -5614,7 +5642,7 @@ addGgplotsWb <- function(
       paste0("figureImage_", i, "_", Sys.time(), ".png")
     )
     if (inherits(list_plot[[i]], "ggplot")) {
-      ggsave(
+      safe_ggsave(
         plot = list_plot[[i]],
         filename = fileName,
         width = width,
@@ -5633,18 +5661,15 @@ addGgplotsWb <- function(
       )
     }
     if (inherits(list_plot[[i]], "bibliodendrogram")) {
-      # print("dendrogram plot")
-      # 1. Open jpeg file
-      png(
+      png_dev <- safe_png_device()
+      png_dev(
         filename = fileName,
         width = width,
         height = height,
         res = 300,
         units = "in"
       )
-      # 2. Create the plot
       plot(list_plot[[i]])
-      # 3. Close the file
       dev.off()
     }
     insertImage(

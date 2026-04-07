@@ -5367,7 +5367,7 @@ To ensure the functionality of Biblioshiny,
     },
 
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$ASPplot,
         dpi = values$dpi,
@@ -5492,7 +5492,7 @@ To ensure the functionality of Biblioshiny,
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$ACpYplot,
         dpi = values$dpi,
@@ -5615,7 +5615,7 @@ To ensure the functionality of Biblioshiny,
         filename <- basename(sub(".zip", paste0("_", i, ".png"), file))
         myfile <- c(myfile, filename)
 
-        ggsave(
+        safe_ggsave(
           filename = filename,
           plot = ggplotLifeCycle(values$DLC, plot_type = c(i)),
           dpi = values$dpi,
@@ -5728,7 +5728,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantSources-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MRSplot,
         dpi = values$dpi,
@@ -5829,7 +5829,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedSources-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MLCSplot,
         dpi = values$dpi,
@@ -5906,7 +5906,7 @@ To ensure the functionality of Biblioshiny,
       paste("BradfordLaws-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$bradford$graph,
         dpi = values$dpi,
@@ -6132,7 +6132,7 @@ To ensure the functionality of Biblioshiny,
       paste("SourceImpact-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$SIplot,
         dpi = values$dpi,
@@ -6320,7 +6320,7 @@ To ensure the functionality of Biblioshiny,
       paste("SourceDynamics-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$SDplot,
         dpi = values$dpi,
@@ -6599,7 +6599,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantAuthors-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MRAplot,
         dpi = values$dpi,
@@ -6794,7 +6794,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MLCAplot,
         dpi = values$dpi,
@@ -6884,7 +6884,7 @@ To ensure the functionality of Biblioshiny,
       paste("AuthorImpact-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$AIplot,
         dpi = values$dpi,
@@ -6965,7 +6965,7 @@ To ensure the functionality of Biblioshiny,
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$AUProdOverTime$graph,
         dpi = values$dpi,
@@ -7079,7 +7079,7 @@ To ensure the functionality of Biblioshiny,
       paste("LotkaLaw-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$LLplot,
         dpi = values$dpi,
@@ -7336,7 +7336,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$AFFplot,
         dpi = values$dpi,
@@ -7412,7 +7412,7 @@ To ensure the functionality of Biblioshiny,
       paste("AffiliationOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$AffOverTimePlot,
         dpi = values$dpi,
@@ -7615,7 +7615,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantCountries-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MRCOplot,
         dpi = values$dpi,
@@ -7701,7 +7701,7 @@ To ensure the functionality of Biblioshiny,
       paste("CountryScientificProduction-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$mapworld$g,
         dpi = values$dpi,
@@ -7764,7 +7764,7 @@ To ensure the functionality of Biblioshiny,
       paste("CountryOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$CountryOverTimePlot,
         dpi = values$dpi,
@@ -7923,7 +7923,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostCitedCountries-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MCCplot,
         dpi = values$dpi,
@@ -8331,7 +8331,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MGCDplot,
         dpi = values$dpi,
@@ -8472,7 +8472,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MLCDplot,
         dpi = values$dpi,
@@ -8585,7 +8585,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MLCRplot,
         dpi = values$dpi,
@@ -8723,7 +8723,7 @@ To ensure the functionality of Biblioshiny,
       paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$res$spectroscopy,
         dpi = values$dpi,
@@ -9091,7 +9091,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantWords-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$MRWplot,
         dpi = values$dpi,
@@ -9711,7 +9711,7 @@ To ensure the functionality of Biblioshiny,
       paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$WDplot,
         dpi = values$dpi,
@@ -9922,7 +9922,7 @@ To ensure the functionality of Biblioshiny,
       paste("TrendTopics-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$trendTopics$graph,
         dpi = values$dpi,
@@ -10067,7 +10067,7 @@ To ensure the functionality of Biblioshiny,
       paste("CouplingMap-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$CM$map,
         dpi = values$dpi,
@@ -10895,7 +10895,7 @@ To ensure the functionality of Biblioshiny,
         #paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
         #paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
       )
-      ggsave(
+      safe_safe_ggsave(
         filename = files[1],
         plot = values$CS$graph_terms,
         dpi = values$dpi,
@@ -10903,7 +10903,8 @@ To ensure the functionality of Biblioshiny,
         width = values$h * values$aspect * 0.75,
         bg = "white"
       )
-      png(
+      png_dev <- safe_png_device()
+      png_dev(
         filename = files[2],
         height = values$h,
         width = values$h * values$aspect,
@@ -11268,7 +11269,7 @@ To ensure the functionality of Biblioshiny,
       paste("ThematicMap-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
-      ggsave(
+      safe_ggsave(
         filename = file,
         plot = values$TM$map,
         dpi = values$dpi,
@@ -11655,7 +11656,7 @@ To ensure the functionality of Biblioshiny,
           ".png",
           sep = ""
         )
-        ggsave(
+        safe_ggsave(
           filename = fileName,
           plot = values$nexus$TM[[i]]$map,
           dpi = values$dpi,

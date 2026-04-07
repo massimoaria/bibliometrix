@@ -3,6 +3,7 @@
 .RData
 .Renviron
 *.csv
+!tests/testthat/fixtures/*.csv
 *.xlsx
 .txt
 .bib

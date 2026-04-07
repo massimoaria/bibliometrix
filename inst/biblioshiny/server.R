@@ -275,27 +275,11 @@ To ensure the functionality of Biblioshiny,
   ## Computation cache keys and results
   values$cache_TM_key <- NULL
   values$cache_TE_key <- NULL
-  values$TE_ready <- 0
   values$TE_computing <- FALSE
   values$TE_error <- NULL
   values$RPYS_ready <- 0
   values$RPYS_computing <- FALSE
   values$RPYS_error <- NULL
-  values$TMAP_ready <- 0
-  values$CMMAP_ready <- 0
-  values$COC_ready <- 0
-  values$CS_ready <- 0
-  values$COCIT_ready <- 0
-  values$COL_ready <- 0
-  values$HIST_ready <- 0
-  values$WM_ready <- 0
-  values$MRSources_ready <- 0
-  values$MRAuthors_ready <- 0
-  values$MLCAuthors_ready <- 0
-  values$MRAff_ready <- 0
-  values$CAUCountries_ready <- 0
-  values$MCCountries_ready <- 0
-  values$MGCDocs_ready <- 0
   values$cache_HIST_key <- NULL
   values$cache_HAu_key <- NULL
   values$cache_HAu_result <- NULL
@@ -1352,23 +1336,43 @@ To ensure the functionality of Biblioshiny,
     # column will contain the local filenames where the data can
     # be found.
     if (input$load == "demo") {
-      data(management, package = "bibliometrixData")
-      values = initial(values)
-      row.names(management) <- management$SR
-      management <- management %>% mergeKeywords(force = T)
-      values$M <- management
-      values$Morig = management
-      values$SCdf <- wcTable(management)
-      values$COdf <- countryTable(management)
-      values$Histfield = "NA"
-      values$results = list("NA")
-      values$rest_sidebar <- TRUE
-      values$missingdf <- df <- missingData(values$M)$mandatoryTags
-      values$missTags <- NULL
-      # values$menu <- menuList(values)
-      updateMenuVisibility(session, values)
-      values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985–2020. This collection was identified by retrieving all documents indexed under the subject categories “Management” and "Business" that contain at least one of the following terms in their topic fields: “science map”, "bibliometric*".'
+      values <- initial(values)
 
+      if (input$demoDataset == "book_dataset") {
+        M <- tryCatch(
+          loadBookDataset(),
+          error = function(e) {
+            showModal(modalDialog(
+              title = "Download Error",
+              paste("Failed to download the book dataset:", e$message),
+              easyClose = TRUE
+            ))
+            return(NULL)
+          }
+        )
+        if (is.null(M)) return()
+        row.names(M) <- M$SR
+        M <- M %>% mergeKeywords(force = TRUE)
+        values$M <- M
+        values$Morig <- M
+        values$collection_description <- 'The objective of this analysis is to map and synthesize the evolution of "Bibliometric and Scientometric research applied to Management and Business disciplines." This collection serves as a comprehensive proxy for understanding how science mapping techniques have matured within these fields, leveraging a dataset characterized by diverse methodological approaches and a robust institutional network. More specifically, we collected all original research articles, written in English, that employ bibliometric or scientometric methods, including science mapping, citation analysis, co-citation analysis, and bibliographic coupling, within the management and business fields, as indexed by Web of Science, over the period 1985--2025.'
+      } else {
+        data(management, package = "bibliometrixData")
+        row.names(management) <- management$SR
+        management <- management %>% mergeKeywords(force = TRUE)
+        values$M <- management
+        values$Morig <- management
+        values$collection_description <- 'A collection of scientific articles about the use of bibliometric approaches in business and management disciplines. Period: 1985\u20132020. This collection was identified by retrieving all documents indexed under the subject categories "Management" and "Business" that contain at least one of the following terms in their topic fields: "science map", "bibliometric*".'
+      }
+
+      values$SCdf <- wcTable(values$M)
+      values$COdf <- countryTable(values$M)
+      values$Histfield <- "NA"
+      values$results <- list("NA")
+      values$rest_sidebar <- TRUE
+      values$missingdf <- missingData(values$M)$mandatoryTags
+      values$missTags <- NULL
+      updateMenuVisibility(session, values)
       showModal(missingModal(session))
       return()
     }
@@ -3351,7 +3355,7 @@ To ensure the functionality of Biblioshiny,
 
     tryCatch(
       {
-        results <- applyCitationMatching(
+        results <- applyReferenceMatching(
           M = values$M,
           threshold = input$refMatch_threshold,
           method = input$refMatch_method
@@ -3860,7 +3864,7 @@ To ensure the functionality of Biblioshiny,
     # Header
     header_cols <- paste0(
       sprintf(
-        '<th class="sortable-header" data-col="%d" style="text-align: left; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%; transform: translateY(-50%);">&#8693;</span></th>',
+        '<th class="sortable-header" data-col="%d" style="text-align: left; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%%; transform: translateY(-50%%);">&#8693;</span></th>',
         0:(n_cols - 1),
         col_names
       ),
@@ -5680,62 +5684,43 @@ To ensure the functionality of Biblioshiny,
 
   # SOURCES MENU ----
   ### Most Relevant Sources ----
-  observeEvent(input$applyMRSources, {
-    M_data <- values$M
-    k <- input$MostRelSourcesK
-    logoGrid <- values$logoGrid
+  MRSourcesResult <- eventReactive(input$applyMRSources, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostRelSourcesK
 
-    showNotification(
-      "Most Relevant Sources: computing...",
-      id = "MRS_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
-        TAB <- M_data %>%
+      TAB <- tryCatch({
+        M_data %>%
           dplyr::group_by(SO) %>%
           dplyr::count() %>%
           dplyr::arrange(dplyr::desc(n)) %>%
           dplyr::rename(Sources = SO, Articles = n) %>%
           as.data.frame()
-        TAB
-      },
-      seed = TRUE,
-      packages = c("dplyr")
-    ) %...>%
-      (function(TAB) {
-        removeNotification("MRS_progress")
-        values$TAB <- TAB
-        values$TABSo <- TAB
-        xx <- TAB %>% tidyr::drop_na()
-        if (k > nrow(xx)) {
-          k <- nrow(xx)
-        }
-        xx <- xx %>% dplyr::slice_head(n = k)
-        xx$Sources <- substr(xx$Sources, 1, 50)
-        g <- freqPlot(
-          xx,
-          x = 2,
-          y = 1,
-          textLaby = "Sources",
-          textLabx = "N. of Documents",
-          title = "Most Relevant Sources",
-          values
-        )
-        values$MRSplot <- g
-        values$MRSources_ready <- values$MRSources_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("MRS_progress")
-        showNotification(
-          paste("Sources error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Sources error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(TAB)
+    values$TAB <- TAB
+    values$TABSo <- TAB
+    xx <- TAB %>% tidyr::drop_na()
+    if (k > nrow(xx)) {
+      k <- nrow(xx)
+    }
+    xx <- xx %>% dplyr::slice_head(n = k)
+    xx$Sources <- substr(xx$Sources, 1, 50)
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Sources",
+      textLabx = "N. of Documents",
+      title = "Most Relevant Sources",
+      values
+    )
+    values$MRSplot <- g
+    return(g)
   })
 
   output$MRSplot.save <- downloadHandler(
@@ -5756,9 +5741,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostRelSourcesPlot <- renderPlotly({
-    req(values$MRSources_ready > 0)
+    g <- MRSourcesResult()
     plot.ly(
-      values$MRSplot,
+      g,
       flip = FALSE,
       side = "r",
       aspectratio = 1.1,
@@ -5767,7 +5752,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$MostRelSourcesTable <- renderUI({
-    req(values$MRSources_ready > 0)
+    req(values$TABSo)
 
     TAB <- values$TABSo %>% drop_na()
     renderBibliobox(
@@ -6546,21 +6531,14 @@ To ensure the functionality of Biblioshiny,
   )
 
   ### Most Relevant Authors ----
-  observeEvent(input$applyMRAuthors, {
-    M_data <- values$M
-    k <- input$MostRelAuthorsK
-    freq_measure <- input$AuFreqMeasure
-    n_docs <- nrow(M_data)
+  MRAuthorsResult <- eventReactive(input$applyMRAuthors, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostRelAuthorsK
+      freq_measure <- input$AuFreqMeasure
+      n_docs <- nrow(M_data)
 
-    showNotification(
-      "Most Relevant Authors: computing...",
-      id = "MRA_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      TAB <- tryCatch({
         listAU <- strsplit(M_data$AU, ";")
         nAU <- lengths(listAU)
         fracAU <- rep(1 / nAU, nAU)
@@ -6571,59 +6549,49 @@ To ensure the functionality of Biblioshiny,
           as.data.frame()
         names(TAB) <- c("Authors", "Articles", "Articles Fractionalized")
         TAB
-      },
-      seed = TRUE,
-      packages = c("dplyr", "tibble")
-    ) %...>%
-      (function(TAB) {
-        removeNotification("MRA_progress")
-        values$TAB <- TAB
-        values$TABAu <- TAB
-        xx <- TAB
-        switch(
-          freq_measure,
-          t = {
-            lab <- "N. of Documents"
-            xx <- xx[, 1:2]
-          },
-          p = {
-            xx <- xx[, 1:2]
-            xx[, 2] <- as.numeric(xx[, 2]) / n_docs * 100
-            lab <- "N. of Documents (in %)"
-          },
-          f = {
-            xx <- xx[, c(1, 3)]
-            lab <- "N. of Documents (Fractionalized)"
-          }
-        )
-        xx[, 2] <- as.numeric(xx[, 2])
-        if (k > nrow(xx)) {
-          k <- nrow(xx)
-        }
-        xx <- xx[1:k, ]
-        xx[, 2] <- round(xx[, 2], 1)
-        xx <- xx[order(-xx[, 2]), ]
-        g <- freqPlot(
-          xx,
-          x = 2,
-          y = 1,
-          textLaby = "Authors",
-          textLabx = lab,
-          title = "Most Relevant Authors",
-          values
-        )
-        values$MRAplot <- g
-        values$MRAuthors_ready <- values$MRAuthors_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("MRA_progress")
-        showNotification(
-          paste("Authors error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Authors error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(TAB)
+    values$TAB <- TAB
+    values$TABAu <- TAB
+    xx <- TAB
+    switch(
+      freq_measure,
+      t = {
+        lab <- "N. of Documents"
+        xx <- xx[, 1:2]
+      },
+      p = {
+        xx <- xx[, 1:2]
+        xx[, 2] <- as.numeric(xx[, 2]) / n_docs * 100
+        lab <- "N. of Documents (in %)"
+      },
+      f = {
+        xx <- xx[, c(1, 3)]
+        lab <- "N. of Documents (Fractionalized)"
+      }
+    )
+    xx[, 2] <- as.numeric(xx[, 2])
+    if (k > nrow(xx)) {
+      k <- nrow(xx)
+    }
+    xx <- xx[1:k, ]
+    xx[, 2] <- round(xx[, 2], 1)
+    xx <- xx[order(-xx[, 2]), ]
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Authors",
+      textLabx = lab,
+      title = "Most Relevant Authors",
+      values
+    )
+    values$MRAplot <- g
+    return(g)
   })
 
   output$MRAplot.save <- downloadHandler(
@@ -6644,9 +6612,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostRelAuthorsPlot <- renderPlotly({
-    req(values$MRAuthors_ready > 0)
+    g <- MRAuthorsResult()
     plot.ly(
-      values$MRAplot,
+      g,
       flip = FALSE,
       side = "r",
       aspectratio = 1.3,
@@ -6780,62 +6748,45 @@ To ensure the functionality of Biblioshiny,
   )
 
   ### Most Cited Authors ----
-  observeEvent(input$applyMLCAuthors, {
-    M_data <- values$M
-    k <- input$MostCitAuthorsK
+  MLCAuthorsResult <- eventReactive(input$applyMLCAuthors, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostCitAuthorsK
 
-    showNotification(
-      "Most Local Cited Authors: computing...",
-      id = "MLCA_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      TAB <- tryCatch({
         CR <- bibliometrix::localCitations(
           M_data,
           fast.search = FALSE,
           verbose = FALSE
         )
         CR$Authors
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr")
-    ) %...>%
-      (function(TAB) {
-        removeNotification("MLCA_progress")
-        values$TAB <- TAB
-        values$TABAuCit <- TAB
-        xx <- TAB
-        xx[, 2] <- as.numeric(xx[, 2])
-        if (k > nrow(xx)) {
-          k <- nrow(xx)
-        }
-        xx <- xx[1:k, ]
-        xx[, 2] <- round(xx[, 2], 1)
-        xx <- xx[order(-xx[, 2]), ]
-        g <- freqPlot(
-          xx,
-          x = 2,
-          y = 1,
-          textLaby = "Authors",
-          textLabx = "Local Citations",
-          title = "Most Local Cited Authors",
-          values
-        )
-        values$MLCAplot <- g
-        values$MLCAuthors_ready <- values$MLCAuthors_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("MLCA_progress")
-        showNotification(
-          paste("Local Citations error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Local Citations error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(TAB)
+    values$TAB <- TAB
+    values$TABAuCit <- TAB
+    xx <- TAB
+    xx[, 2] <- as.numeric(xx[, 2])
+    if (k > nrow(xx)) {
+      k <- nrow(xx)
+    }
+    xx <- xx[1:k, ]
+    xx[, 2] <- round(xx[, 2], 1)
+    xx <- xx[order(-xx[, 2]), ]
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Authors",
+      textLabx = "Local Citations",
+      title = "Most Local Cited Authors",
+      values
+    )
+    values$MLCAplot <- g
+    return(g)
   })
 
   output$MLCAplot.save <- downloadHandler(
@@ -6856,9 +6807,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostCitAuthorsPlot <- renderPlotly({
-    req(values$MLCAuthors_ready > 0)
+    g <- MLCAuthorsResult()
     plot.ly(
-      values$MLCAplot,
+      g,
       flip = FALSE,
       side = "r",
       aspectratio = 1.3,
@@ -7321,28 +7272,21 @@ To ensure the functionality of Biblioshiny,
 
   # Affiliations ----
   ### Most Relevant Affiliations ----
-  observeEvent(input$applyMRAffiliations, {
-    M_data <- values$M
-    k <- input$MostRelAffiliationsK
-    disAff <- input$disAff
+  MRAffResult <- eventReactive(input$applyMRAffiliations, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostRelAffiliationsK
+      disAff <- input$disAff
 
-    # Synchronous: metaTagExtraction if needed
-    if (disAff == "Y" && !("AU_UN" %in% names(M_data))) {
-      M_data <- metaTagExtraction(M_data, Field = "AU_UN")
-      values$M <- M_data
-    }
+      # metaTagExtraction if needed
+      if (disAff == "Y" && !("AU_UN" %in% names(M_data))) {
+        M_data <- metaTagExtraction(M_data, Field = "AU_UN")
+        values$M <- M_data
+      }
 
-    showNotification(
-      "Affiliations: computing...",
-      id = "AFF_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      TAB <- tryCatch({
         if (disAff == "Y") {
-          TAB <- data.frame(
+          data.frame(
             Affiliation = unlist(strsplit(M_data$AU_UN, ";"))
           ) %>%
             dplyr::group_by(Affiliation) %>%
@@ -7358,44 +7302,33 @@ To ensure the functionality of Biblioshiny,
             Affiliations = names(TAB),
             Articles = as.numeric(TAB)
           )
-          TAB <- TAB[nchar(TAB[, 1]) > 4, ]
+          TAB[nchar(TAB[, 1]) > 4, ]
         }
-        TAB
-      },
-      seed = TRUE,
-      packages = c("dplyr", "tidyr", "bibliometrix")
-    ) %...>%
-      (function(TAB) {
-        removeNotification("AFF_progress")
-        values$TAB <- TAB
-        values$TABAff <- TAB
-        xx <- TAB
-        names(xx) <- c("AFF", "Freq")
-        if (k > nrow(xx)) {
-          k <- nrow(xx)
-        }
-        xx <- xx[1:k, ]
-        g <- freqPlot(
-          xx,
-          x = 2,
-          y = 1,
-          textLaby = "Affiliations",
-          textLabx = "Articles",
-          title = "Most Relevant Affiliations",
-          values
-        )
-        values$AFFplot <- g
-        values$MRAff_ready <- values$MRAff_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("AFF_progress")
-        showNotification(
-          paste("Affiliations error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Affiliations error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(TAB)
+    values$TAB <- TAB
+    values$TABAff <- TAB
+    xx <- TAB
+    names(xx) <- c("AFF", "Freq")
+    if (k > nrow(xx)) {
+      k <- nrow(xx)
+    }
+    xx <- xx[1:k, ]
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Affiliations",
+      textLabx = "Articles",
+      title = "Most Relevant Affiliations",
+      values
+    )
+    values$AFFplot <- g
+    return(g)
   })
 
   output$AFFplot.save <- downloadHandler(
@@ -7416,9 +7349,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostRelAffiliationsPlot <- renderPlotly({
-    req(values$MRAff_ready > 0)
+    g <- MRAffResult()
     plot.ly(
-      values$AFFplot,
+      g,
       flip = FALSE,
       side = "r",
       aspectratio = 1,
@@ -7427,7 +7360,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$MostRelAffiliationsTable <- renderUI({
-    req(values$MRAff_ready > 0)
+    req(values$TABAff)
 
     TAB <- values$TABAff
     renderBibliobox(
@@ -7569,32 +7502,21 @@ To ensure the functionality of Biblioshiny,
 
   # Countries ----
   ### Country by Corresponding Authors ----
-  observeEvent(input$applyCAUCountries, {
-    M_data <- values$M
-    k <- input$MostRelCountriesK
-    logoGrid <- values$logoGrid
+  CAUCountriesResult <- eventReactive(input$applyCAUCountries, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostRelCountriesK
+      logoGrid <- values$logoGrid
 
-    showNotification(
-      "Countries: computing...",
-      id = "CAU_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      TABCo <- tryCatch({
         countryCollab(M_data)
-      },
-      seed = TRUE,
-      globals = list(
-        countryCollab = countryCollab,
-        M_data = M_data,
-        trim = trim
-      ),
-      packages = c("bibliometrix", "dplyr")
-    ) %...>%
-      (function(TABCo) {
-        removeNotification("CAU_progress")
+      }, error = function(e) {
+        showNotification(paste("Countries error:", e$message), type = "error", duration = 8)
+        return(NULL)
+      })
+    })
+    req(TABCo)
+    {
         TABCo <- TABCo %>%
           dplyr::mutate(Freq = Articles / sum(Articles)) %>%
           dplyr::mutate(MCP_Ratio = MCP / Articles) %>%
@@ -7674,17 +7596,8 @@ To ensure the functionality of Biblioshiny,
           dplyr::rename("Articles %" = Freq, "MCP %" = MCP_Ratio) %>%
           dplyr::select(Country, "Articles", "Articles %", SCP, MCP, "MCP %")
         values$MRCOplot <- g
-        values$CAUCountries_ready <- values$CAUCountries_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("CAU_progress")
-        showNotification(
-          paste("Countries error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
-      })
-    return(p)
+        return(g)
+    }
   })
 
   # gemini button for word network
@@ -7715,9 +7628,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostRelCountriesPlot <- renderPlotly({
-    req(values$CAUCountries_ready > 0)
+    g <- CAUCountriesResult()
     plot.ly(
-      values$MRCOplot,
+      g,
       flip = T,
       side = "r",
       aspectratio = 1.4,
@@ -7727,7 +7640,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$MostRelCountriesTable <- renderUI({
-    req(values$CAUCountries_ready > 0)
+    req(values$TABCo)
 
     TAB <- values$TABCo
     renderBibliobox(
@@ -7943,26 +7856,19 @@ To ensure the functionality of Biblioshiny,
   })
 
   ### Most Cited Country ----
-  observeEvent(input$applyMCCountries, {
-    M_data <- values$M
-    k <- input$MostCitCountriesK
-    measure <- input$CitCountriesMeasure
+  MCCountriesResult <- eventReactive(input$applyMCCountries, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostCitCountriesK
+      measure <- input$CitCountriesMeasure
 
-    # Synchronous: metaTagExtraction if needed
-    if (!"AU1_CO" %in% names(M_data)) {
-      M_data <- metaTagExtraction(M_data, "AU1_CO")
-      values$M <- M_data
-    }
+      # metaTagExtraction if needed
+      if (!"AU1_CO" %in% names(M_data)) {
+        M_data <- metaTagExtraction(M_data, "AU1_CO")
+        values$M <- M_data
+      }
 
-    showNotification(
-      "Most Cited Countries: computing...",
-      id = "MCC_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      TAB <- tryCatch({
         M_data %>%
           dplyr::select(AU1_CO, TC) %>%
           tidyr::drop_na(AU1_CO) %>%
@@ -7977,49 +7883,39 @@ To ensure the functionality of Biblioshiny,
           ) %>%
           dplyr::arrange(-TC) %>%
           as.data.frame()
-      },
-      seed = TRUE,
-      packages = c("dplyr", "tidyr")
-    ) %...>%
-      (function(TAB) {
-        removeNotification("MCC_progress")
-        values$TAB <- TAB
-        values$TABCitCo <- TAB
-        xx <- TAB
-        xx[, 2] <- as.numeric(xx[, 2])
-        xx[, 3] <- as.numeric(xx[, 3])
-        if (k > nrow(xx)) {
-          k <- nrow(xx)
-        }
-        if (measure == "TC") {
-          xx <- xx[1:k, c(1, 2)]
-          laby <- "N. of Citations"
-        } else {
-          xx <- xx[order(-xx[, 3]), ]
-          xx <- xx[1:k, c(1, 3)]
-          laby <- "Average Article Citations"
-        }
-        g <- freqPlot(
-          xx,
-          x = 2,
-          y = 1,
-          textLaby = "Countries",
-          textLabx = laby,
-          title = "Most Cited Countries",
-          values
-        )
-        values$MCCplot <- g
-        values$MCCountries_ready <- values$MCCountries_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("MCC_progress")
-        showNotification(
-          paste("Most Cited Countries error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Most Cited Countries error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(TAB)
+    values$TAB <- TAB
+    values$TABCitCo <- TAB
+    xx <- TAB
+    xx[, 2] <- as.numeric(xx[, 2])
+    xx[, 3] <- as.numeric(xx[, 3])
+    if (k > nrow(xx)) {
+      k <- nrow(xx)
+    }
+    if (measure == "TC") {
+      xx <- xx[1:k, c(1, 2)]
+      laby <- "N. of Citations"
+    } else {
+      xx <- xx[order(-xx[, 3]), ]
+      xx <- xx[1:k, c(1, 3)]
+      laby <- "Average Article Citations"
+    }
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Countries",
+      textLabx = laby,
+      title = "Most Cited Countries",
+      values
+    )
+    values$MCCplot <- g
+    return(g)
   })
 
   output$MCCplot.save <- downloadHandler(
@@ -8040,9 +7936,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostCitCountriesPlot <- renderPlotly({
-    req(values$MCCountries_ready > 0)
+    g <- MCCountriesResult()
     plot.ly(
-      values$MCCplot,
+      g,
       flip = FALSE,
       side = "r",
       aspectratio = 1.3,
@@ -8051,7 +7947,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$MostCitCountriesTable <- renderUI({
-    req(values$MCCountries_ready > 0)
+    req(values$TABCitCo)
     TAB <- values$TABCitCo
     renderBibliobox(
       TAB,
@@ -8372,20 +8268,13 @@ To ensure the functionality of Biblioshiny,
 
   ### Most Global Cited Documents ----
 
-  observeEvent(input$applyMGCDocuments, {
-    M_data <- values$M
-    k <- input$MostCitDocsK
-    measure <- input$CitDocsMeasure
+  MGCDocsResult <- eventReactive(input$applyMGCDocuments, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      k <- input$MostCitDocsK
+      measure <- input$CitDocsMeasure
 
-    showNotification(
-      "Most Cited Documents: computing...",
-      id = "MGCD_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      TAB <- tryCatch({
         y <- as.numeric(substr(Sys.Date(), 1, 4))
         TAB <- M_data %>%
           dplyr::mutate(TCperYear = round(TC / (y + 1 - PY), 1)) %>%
@@ -8404,47 +8293,37 @@ To ensure the functionality of Biblioshiny,
           "Normalized TC"
         )
         TAB
-      },
-      seed = TRUE,
-      packages = c("dplyr")
-    ) %...>%
-      (function(TAB) {
-        removeNotification("MGCD_progress")
-        values$TAB <- TAB
-        values$TABGlobDoc <- TAB
-        if (measure == "TC") {
-          xx <- TAB %>% dplyr::select(1, 3)
-          lab <- "Global Citations"
-        } else {
-          xx <- TAB %>% dplyr::select(1, 4)
-          xx[, 2] <- round(xx[, 2], 1)
-          lab <- "Global Citations per Year"
-        }
-        if (k > nrow(xx)) {
-          k <- nrow(xx)
-        }
-        xx <- xx[1:k, ]
-        g <- freqPlot(
-          xx,
-          x = 2,
-          y = 1,
-          textLaby = "Documents",
-          textLabx = lab,
-          title = "Most Global Cited Documents",
-          values
-        )
-        values$MGCDplot <- g
-        values$MGCDocs_ready <- values$MGCDocs_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("MGCD_progress")
-        showNotification(
-          paste("Most Cited Documents error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Most Cited Documents error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(TAB)
+    values$TAB <- TAB
+    values$TABGlobDoc <- TAB
+    if (measure == "TC") {
+      xx <- TAB %>% dplyr::select(1, 3)
+      lab <- "Global Citations"
+    } else {
+      xx <- TAB %>% dplyr::select(1, 4)
+      xx[, 2] <- round(xx[, 2], 1)
+      lab <- "Global Citations per Year"
+    }
+    if (k > nrow(xx)) {
+      k <- nrow(xx)
+    }
+    xx <- xx[1:k, ]
+    g <- freqPlot(
+      xx,
+      x = 2,
+      y = 1,
+      textLaby = "Documents",
+      textLabx = lab,
+      title = "Most Global Cited Documents",
+      values
+    )
+    values$MGCDplot <- g
+    return(g)
   })
 
   output$MGCDplot.save <- downloadHandler(
@@ -8465,9 +8344,9 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$MostCitDocsPlot <- renderPlotly({
-    req(values$MGCDocs_ready > 0)
+    g <- MGCDocsResult()
     plot.ly(
-      values$MGCDplot,
+      g,
       flip = FALSE,
       side = "r",
       aspectratio = 1,
@@ -8476,7 +8355,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$MostCitDocsTable <- renderUI({
-    req(values$MGCDocs_ready > 0)
+    req(values$TABGlobDoc)
     TAB <- values$TABGlobDoc
     TAB$DOI <- paste0(
       '<a href=\"https://doi.org/',
@@ -10120,29 +9999,22 @@ To ensure the functionality of Biblioshiny,
 
   # CLUSTERING ----
   ### Clustering by Coupling ----
-  observeEvent(input$applyCM, {
-    M_data <- values$M
-    cm_analysis <- input$CManalysis
-    cm_field <- input$CMfield
-    cm_n <- input$CMn
-    cm_freq <- input$CMfreq
-    cm_ngrams <- as.numeric(input$CMngrams)
-    cm_repulsion <- input$CMrepulsion
-    cm_impact <- input$CMimpact
-    cm_stemming <- input$CMstemming
-    cm_size <- input$sizeCM
-    cm_labeling <- input$CMlabeling
-    cm_nlabels <- input$CMn.labels
+  CMMAPResult <- eventReactive(input$applyCM, {
+    withProgress(message = 'Calculation in progress', value = 0, {
+      M_data <- values$M
+      cm_analysis <- input$CManalysis
+      cm_field <- input$CMfield
+      cm_n <- input$CMn
+      cm_freq <- input$CMfreq
+      cm_ngrams <- as.numeric(input$CMngrams)
+      cm_repulsion <- input$CMrepulsion
+      cm_impact <- input$CMimpact
+      cm_stemming <- input$CMstemming
+      cm_size <- input$sizeCM
+      cm_labeling <- input$CMlabeling
+      cm_nlabels <- input$CMn.labels
 
-    showNotification(
-      "Coupling Map: computing...",
-      id = "CM_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+      CM <- tryCatch({
         bibliometrix::couplingMap(
           M_data,
           analysis = cm_analysis,
@@ -10158,35 +10030,25 @@ To ensure the functionality of Biblioshiny,
           n.labels = cm_nlabels,
           repel = FALSE
         )
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr", "tidyr", "ggplot2", "igraph")
-    ) %...>%
-      (function(CM) {
-        removeNotification("CM_progress")
-        CM$data <- CM$data[, c(1, 5, 2)]
-        CM$clusters <- CM$clusters[, c(7, 1:4, 6)]
-        values$CM <- CM
-        values$CMMAP_ready <- values$CMMAP_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("CM_progress")
-        showNotification(
-          paste("Coupling Map error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Coupling Map error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    })
+    req(CM)
+    CM$data <- CM$data[, c(1, 5, 2)]
+    CM$clusters <- CM$clusters[, c(7, 1:4, 6)]
+    values$CM <- CM
+    return(CM)
   })
 
   output$CMPlot <- renderPlotly({
-    req(values$CMMAP_ready > 0)
-    plot.ly(values$CM$map, size = 0.15, aspectratio = 1.3)
+    CM <- CMMAPResult()
+    plot.ly(CM$map, size = 0.15, aspectratio = 1.3)
   })
 
   output$CMNetPlot <- renderVisNetwork({
-    req(values$CMMAP_ready > 0)
+    req(values$CM)
     values$networkCM <- igraph2vis(
       g = values$CM$net$graph,
       curved = (input$coc.curved == "Yes"),
@@ -10218,7 +10080,7 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$CMTable <- renderUI({
-    req(values$CMMAP_ready > 0)
+    req(values$CM)
     #cmData=values$CM$data[,c(2,1,3,5)]
     cmData <- values$CM$data
     renderBibliobox(
@@ -10243,7 +10105,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$CMTableCluster <- renderUI({
-    req(values$CMMAP_ready > 0)
+    req(values$CM)
     #cmData=values$CM$clusters[,c(7,1:4,6)]
     cmData <- values$CM$clusters
     renderBibliobox(
@@ -10483,8 +10345,7 @@ To ensure the functionality of Biblioshiny,
     }
     net_title <- values$Title
 
-    p <- promises::future_promise(
-      {
+    cocnet <- tryCatch({
         bibliometrix::networkPlot(
           NetWords,
           normalize = coc_normalize,
@@ -10507,90 +10368,79 @@ To ensure the functionality of Biblioshiny,
           seed = random_seed,
           verbose = FALSE
         )
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr", "igraph", "ggplot2", "Matrix")
-    ) %...>%
-      (function(cocnet) {
-        removeNotification("COC_progress")
-
-        # Add year info to graph
-        g <- cocnet$graph
-        Y <- keywords2Years(M_data, field = coc_field, n = Inf)
-        label_df <- data.frame(Keyword = igraph::V(g)$name)
-        df <- label_df %>%
-          dplyr::left_join(
-            Y %>% dplyr::mutate(Keyword = tolower(Keyword)),
-            by = "Keyword"
-          ) %>%
-          dplyr::rename(year_med = Year)
-        igraph::V(g)$year_med <- df$year_med
-        if (coc_years) {
-          col <- hcl.colors(
-            (diff(range(df$year_med)) + 1) * 10,
-            palette = "Blues 3"
-          )
-          igraph::V(g)$color <- col[(max(df$year_med) - df$year_med + 1) * 10]
-        }
-        cocnet$graph <- g
-        values$cocnet <- cocnet
-
-        values$COCnetwork <- igraph2vis(
-          g = cocnet$graph,
-          curved = coc_curved,
-          labelsize = coc_labelsize,
-          opacity = coc_alpha,
-          type = coc_layout,
-          shape = coc_shape,
-          net = cocnet,
-          shadow = coc_shadow,
-          edgesize = coc_edgesize,
-          noOverlap = coc_noOverlap
-        )
-        values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
-        values$degreePlot <- degreePlot(cocnet)
-        values$years_coc <- sort(unique(c(
-          M_data %>% tidyr::drop_na(PY) %>% dplyr::pull(PY)
-        )))
-        values$index_coc <- 0
-        values$playing_coc <- FALSE
-        values$paused_coc <- FALSE
-        values$current_year_coc <- min(values$years_coc)
-        output$year_slider_cocUI <- renderUI({
-          sliderInput(
-            "year_slider_coc",
-            "Year",
-            min = min(values$years_coc),
-            max = max(values$years_coc),
-            value = min(values$years_coc),
-            step = 1,
-            animate = FALSE,
-            width = "100%",
-            ticks = FALSE,
-            round = TRUE,
-            sep = ""
-          )
-        })
-        values$COC_ready <- values$COC_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("COC_progress")
-        showNotification(
-          paste("Co-occurrence Network error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
+      }, error = function(e) {
+        showNotification(paste("Co-occurrence Network error:", e$message), type = "error", duration = 8)
+        return(NULL)
       })
-    return(p)
+    removeNotification("COC_progress")
+    req(cocnet)
+
+    # Add year info to graph
+    g <- cocnet$graph
+    Y <- keywords2Years(M_data, field = coc_field, n = Inf)
+    label_df <- data.frame(Keyword = igraph::V(g)$name)
+    df <- label_df %>%
+      dplyr::left_join(
+        Y %>% dplyr::mutate(Keyword = tolower(Keyword)),
+        by = "Keyword"
+      ) %>%
+      dplyr::rename(year_med = Year)
+    igraph::V(g)$year_med <- df$year_med
+    if (coc_years) {
+      col <- hcl.colors(
+        (diff(range(df$year_med)) + 1) * 10,
+        palette = "Blues 3"
+      )
+      igraph::V(g)$color <- col[(max(df$year_med) - df$year_med + 1) * 10]
+    }
+    cocnet$graph <- g
+    values$cocnet <- cocnet
+
+    values$COCnetwork <- igraph2vis(
+      g = cocnet$graph,
+      curved = coc_curved,
+      labelsize = coc_labelsize,
+      opacity = coc_alpha,
+      type = coc_layout,
+      shape = coc_shape,
+      net = cocnet,
+      shadow = coc_shadow,
+      edgesize = coc_edgesize,
+      noOverlap = coc_noOverlap
+    )
+    values$cocOverlay <- overlayPlotly(values$COCnetwork$VIS)
+    values$degreePlot <- degreePlot(cocnet)
+    values$years_coc <- sort(unique(c(
+      M_data %>% tidyr::drop_na(PY) %>% dplyr::pull(PY)
+    )))
+    values$index_coc <- 0
+    values$playing_coc <- FALSE
+    values$paused_coc <- FALSE
+    values$current_year_coc <- min(values$years_coc)
+    output$year_slider_cocUI <- renderUI({
+      sliderInput(
+        "year_slider_coc",
+        "Year",
+        min = min(values$years_coc),
+        max = max(values$years_coc),
+        value = min(values$years_coc),
+        step = 1,
+        animate = FALSE,
+        width = "100%",
+        ticks = FALSE,
+        round = TRUE,
+        sep = ""
+      )
+    })
   })
 
   output$cocPlot <- renderVisNetwork({
-    req(values$COC_ready > 0)
+    req(values$COCnetwork)
     values$COCnetwork$VIS
   })
 
   output$cocOverlay <- renderPlotly({
-    req(values$COC_ready > 0)
+    req(values$cocOverlay)
     values$cocOverlay
   })
 
@@ -10770,7 +10620,7 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$cocTable <- renderUI({
-    req(values$COC_ready > 0)
+    req(values$cocnet)
     cocData = values$cocnet$cluster_res
     names(cocData) = c(
       "Node",
@@ -10802,7 +10652,7 @@ To ensure the functionality of Biblioshiny,
 
   ### Degree Plot Co-word analysis ----
   output$cocDegree <- renderPlotly({
-    req(values$COC_ready > 0)
+    req(values$cocnet)
     #values$degreePlot <- degreePlot(values$cocnet)
     plot.ly(values$degreePlot)
   })
@@ -10938,15 +10788,8 @@ To ensure the functionality of Biblioshiny,
     }
     minDegree <- as.numeric(tab[cs_n])
 
-    showNotification(
-      "Conceptual Structure: computing...",
-      id = "CS_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+    CS <- tryCatch({
+      withProgress(message = 'Conceptual Structure: computing...', value = 0, {
         bibliometrix::conceptualStructure(
           M_data,
           method = cs_method,
@@ -10962,79 +10805,69 @@ To ensure the functionality of Biblioshiny,
           remove.terms = remove.terms,
           synonyms = synonyms
         )
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr", "tidyr", "ggplot2")
-    ) %...>%
-      (function(CS) {
-        removeNotification("CS_progress")
-        if (cs_method != "MDS") {
-          CSData <- CS$docCoord
-          CSData <- data.frame(Documents = row.names(CSData), CSData)
-          CSData$dim1 <- round(CSData$dim1, 2)
-          CSData$dim2 <- round(CSData$dim2, 2)
-          CSData$contrib <- round(CSData$contrib, 2)
-          CS$CSData <- CSData
-        } else {
-          CS$CSData <- data.frame(Docuemnts = NA, dim1 = NA, dim2 = NA)
-        }
-        switch(
-          cs_method,
-          CA = {
-            WData <- data.frame(
-              word = row.names(CS$km.res$data.clust),
-              CS$km.res$data.clust,
-              stringsAsFactors = FALSE
-            )
-            names(WData)[4] <- "cluster"
-          },
-          MCA = {
-            WData <- data.frame(
-              word = row.names(CS$km.res$data.clust),
-              CS$km.res$data.clust,
-              stringsAsFactors = FALSE
-            )
-            names(WData)[4] <- "cluster"
-          },
-          MDS = {
-            WData <- data.frame(
-              word = row.names(CS$res),
-              CS$res,
-              cluster = CS$km.res$cluster
-            )
-          }
-        )
-        WData$Dim1 <- round(WData$Dim1, 2)
-        WData$Dim2 <- round(WData$Dim2, 2)
-        CS$WData <- WData
-        values$CS <- CS
-        values$plotCS <- ca2plotly(
-          CS,
-          method = cs_method,
-          dimX = 1,
-          dimY = 2,
-          topWordPlot = Inf,
-          threshold = 0.05,
-          labelsize = cs_labelsize * 2,
-          size = cs_labelsize * 1.5
-        )
-        values$dendCS <- dend2vis(
-          CS$km.res,
-          labelsize = cs_labelsize,
-          nclusters = as.numeric(cs_nclusters),
-          community = FALSE
-        )
-        values$CS_ready <- values$CS_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("CS_progress")
-        showNotification(
-          paste("Conceptual Structure error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
       })
-    return(p)
+    }, error = function(e) {
+      showNotification(paste("Conceptual Structure error:", e$message), type = "error", duration = 8)
+      return(NULL)
+    })
+    req(CS)
+
+    if (cs_method != "MDS") {
+      CSData <- CS$docCoord
+      CSData <- data.frame(Documents = row.names(CSData), CSData)
+      CSData$dim1 <- round(CSData$dim1, 2)
+      CSData$dim2 <- round(CSData$dim2, 2)
+      CSData$contrib <- round(CSData$contrib, 2)
+      CS$CSData <- CSData
+    } else {
+      CS$CSData <- data.frame(Docuemnts = NA, dim1 = NA, dim2 = NA)
+    }
+    switch(
+      cs_method,
+      CA = {
+        WData <- data.frame(
+          word = row.names(CS$km.res$data.clust),
+          CS$km.res$data.clust,
+          stringsAsFactors = FALSE
+        )
+        names(WData)[4] <- "cluster"
+      },
+      MCA = {
+        WData <- data.frame(
+          word = row.names(CS$km.res$data.clust),
+          CS$km.res$data.clust,
+          stringsAsFactors = FALSE
+        )
+        names(WData)[4] <- "cluster"
+      },
+      MDS = {
+        WData <- data.frame(
+          word = row.names(CS$res),
+          CS$res,
+          cluster = CS$km.res$cluster
+        )
+      }
+    )
+    WData$Dim1 <- round(WData$Dim1, 2)
+    WData$Dim2 <- round(WData$Dim2, 2)
+    CS$WData <- WData
+    values$CS <- CS
+    values$plotCS <- ca2plotly(
+      CS,
+      method = cs_method,
+      dimX = 1,
+      dimY = 2,
+      topWordPlot = Inf,
+      threshold = 0.05,
+      labelsize = cs_labelsize * 2,
+      size = cs_labelsize * 1.5
+    )
+    values$dendCS <- dend2vis(
+      CS$km.res,
+      labelsize = cs_labelsize,
+      nclusters = as.numeric(cs_nclusters),
+      community = FALSE
+    )
   })
 
   # gemini button for correspondence analysis
@@ -11085,21 +10918,21 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$CSPlot1 <- renderPlotly({
-    req(values$CS_ready > 0)
+    req(values$CS)
     #CS=values$CS
     #save(CS,file="provaCS.rdata")
     values$plotCS #<- ca2plotly(values$CS, method=input$method ,dimX = 1, dimY = 2, topWordPlot = Inf, threshold=0.05, labelsize = input$CSlabelsize*2, size=input$CSlabelsize*1.5)
   })
 
   output$CSPlot4 <- renderVisNetwork({
-    req(values$CS_ready > 0)
+    req(values$CS)
     #dend2vis(values$CS$km.res, labelsize=input$CSlabelsize, nclusters=as.numeric(input$nClustersCS), community=FALSE)
     values$dendCS
     #values$CS$graph_dendogram)
   })
 
   output$CSTableW <- renderUI({
-    req(values$CS_ready > 0)
+    req(values$CS)
     WData <- values$CS$WData
     renderBibliobox(
       WData,
@@ -11123,7 +10956,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$CSTableD <- renderUI({
-    req(values$CS_ready > 0)
+    req(values$CS)
     CSData <- values$CS$CSData
     renderBibliobox(
       CSData,
@@ -11249,16 +11082,8 @@ To ensure the functionality of Biblioshiny,
     )
 
     if (identical(cache_key, values$cache_TM_key)) {
-      values$TMAP_ready <- values$TMAP_ready + 1
       return()
     }
-
-    showNotification(
-      "Thematic Map: computing...",
-      id = "TM_progress",
-      type = "message",
-      duration = NULL
-    )
 
     # Snapshot
     M_data <- values$M
@@ -11273,8 +11098,8 @@ To ensure the functionality of Biblioshiny,
     alpha <- input$TMalpha
     seed <- values$random_seed
 
-    p <- promises::future_promise(
-      {
+    TM <- tryCatch({
+      withProgress(message = 'Thematic Map: computing...', value = 0, {
         bibliometrix::thematicMap(
           M_data,
           field = field,
@@ -11293,73 +11118,63 @@ To ensure the functionality of Biblioshiny,
           alpha = alpha,
           seed = seed
         )
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr", "tidyr")
-    ) %...>%
-      (function(TM) {
-        removeNotification("TM_progress")
-        if (TM$nclust == 0) {
-          showNotification(
-            "No topics found. Please select different parameters.",
-            type = "error",
-            duration = 8
-          )
-          return()
-        }
-        values$TM <- TM
-        values$TM$doc2clust <- TM$documentToClusters %>%
-          select(Assigned_cluster, SR, pagerank)
-        values$TM$documentToClusters$DI <- paste0(
-          '<a href=\"https://doi.org/',
-          TM$documentToClusters$DI,
-          '\" target=\"_blank\">',
-          TM$documentToClusters$DI,
-          '</a>'
-        )
-        names(values$TM$documentToClusters)[1:9] <- c(
-          "DOI",
-          "Authors",
-          "Title",
-          "Source",
-          "Year",
-          "TotalCitation",
-          "TCperYear",
-          "NTC",
-          "SR"
-        )
-        values$TM$words <- values$TM$words[, -c(4, 6)]
-        values$TM$clusters_orig <- values$TM$clusters
-        values$TM$clusters <- values$TM$clusters[, c(9, 5:8, 11)]
-        names(values$TM$clusters) <- c(
-          "Cluster",
-          "CallonCentrality",
-          "CallonDensity",
-          "RankCentrality",
-          "RankDensity",
-          "ClusterFrequency"
-        )
-        values$TMmap <- plot.ly(
-          values$TM$map,
-          size = 0.07,
-          aspectratio = 1.3,
-          customdata = values$TM$clusters$color
-        )
-        values$cache_TM_key <- cache_key
-        values$TMAP_ready <- values$TMAP_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("TM_progress")
-        showNotification(
-          paste("Thematic Map error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
       })
-    return(p)
+    }, error = function(e) {
+      showNotification(paste("Thematic Map error:", e$message), type = "error", duration = 8)
+      return(NULL)
+    })
+    req(TM)
+
+    if (TM$nclust == 0) {
+      showNotification(
+        "No topics found. Please select different parameters.",
+        type = "error",
+        duration = 8
+      )
+      return()
+    }
+    values$TM <- TM
+    values$TM$doc2clust <- TM$documentToClusters %>%
+      select(Assigned_cluster, SR, pagerank)
+    values$TM$documentToClusters$DI <- paste0(
+      '<a href=\"https://doi.org/',
+      TM$documentToClusters$DI,
+      '\" target=\"_blank\">',
+      TM$documentToClusters$DI,
+      '</a>'
+    )
+    names(values$TM$documentToClusters)[1:9] <- c(
+      "DOI",
+      "Authors",
+      "Title",
+      "Source",
+      "Year",
+      "TotalCitation",
+      "TCperYear",
+      "NTC",
+      "SR"
+    )
+    values$TM$words <- values$TM$words[, -c(4, 6)]
+    values$TM$clusters_orig <- values$TM$clusters
+    values$TM$clusters <- values$TM$clusters[, c(9, 5:8, 11)]
+    names(values$TM$clusters) <- c(
+      "Cluster",
+      "CallonCentrality",
+      "CallonDensity",
+      "RankCentrality",
+      "RankDensity",
+      "ClusterFrequency"
+    )
+    values$TMmap <- plot.ly(
+      values$TM$map,
+      size = 0.07,
+      aspectratio = 1.3,
+      customdata = values$TM$clusters$color
+    )
+    values$cache_TM_key <- cache_key
   })
   output$TMPlot <- renderPlotly({
-    req(values$TMAP_ready > 0)
+    req(values$TM)
     values$TMmap
   })
 
@@ -11434,7 +11249,7 @@ To ensure the functionality of Biblioshiny,
   ### end click cluster subgraphs
 
   output$NetPlot <- renderVisNetwork({
-    req(values$TMAP_ready > 0)
+    req(values$TM)
     values$networkTM <- igraph2vis(
       g = values$TM$net$graph,
       curved = (input$coc.curved == "Yes"),
@@ -11466,7 +11281,7 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$TMTable <- renderUI({
-    req(values$TMAP_ready > 0)
+    req(values$TM)
     tmData = values$TM$words
     renderBibliobox(
       tmData,
@@ -11490,7 +11305,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableCluster <- renderUI({
-    req(values$TMAP_ready > 0)
+    req(values$TM)
     tmData <- values$TM$clusters
     renderBibliobox(
       tmData,
@@ -11514,7 +11329,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableDocument <- renderUI({
-    req(values$TMAP_ready > 0)
+    req(values$TM)
     tmDataDoc <- values$TM$documentToClusters
     renderBibliobox(
       tmDataDoc,
@@ -11681,20 +11496,13 @@ To ensure the functionality of Biblioshiny,
       )
 
       if (identical(cache_key, values$cache_TE_key)) {
-        values$TE_ready <- values$TE_ready + 1
         return()
       }
 
       values$TE_computing <- TRUE
       values$TE_error <- NULL
-      showNotification(
-        "Thematic Evolution: computing...",
-        id = "TE_progress",
-        type = "message",
-        duration = NULL
-      )
 
-      # Snapshot variables for the future
+      # Snapshot variables
       M_data <- values$M
       field <- input$TEfield
       yearSlices <- values$yearSlices
@@ -11707,9 +11515,8 @@ To ensure the functionality of Biblioshiny,
       alpha <- input$TEalpha
       minFlow <- input$minFlowTE
 
-      # Async: heavy computation in background
-      p <- promises::future_promise(
-        {
+      nexus <- tryCatch({
+        withProgress(message = 'Thematic Evolution: computing...', value = 0, {
           bibliometrix::thematicEvolution(
             M_data,
             field = field,
@@ -11726,97 +11533,86 @@ To ensure the functionality of Biblioshiny,
             seed = seed,
             assign.evolution.colors = list(assign = TRUE, alpha = alpha)
           )
-        },
-        seed = TRUE,
-        packages = c("bibliometrix", "tidyr", "dplyr")
-      ) %...>%
-        (function(nexus) {
-          removeNotification("TE_progress")
-          if (isFALSE(nexus$check)) {
-            values$TE_computing <- FALSE
-            values$TE_error <- "No topics in one or more periods. Please select a different set of parameters."
-            showNotification(values$TE_error, type = "error", duration = 8)
-            return()
-          }
-          values$nexus <- nexus
-          for (i in 1:(length(yearSlices) + 1)) {
-            values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[, -c(4, 6)]
-            values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[, c(
-              9,
-              5:8,
-              11
-            )]
-            names(values$nexus$TM[[i]]$clusters) <- c(
-              "Cluster",
-              "CallonCentrality",
-              "CallonDensity",
-              "RankCentrality",
-              "RankDensity",
-              "ClusterFrequency"
-            )
-
-            values$nexus$TM[[i]]$documentToClusters$DI <- paste0(
-              '<a href=\"https://doi.org/',
-              values$nexus$TM[[i]]$documentToClusters$DI,
-              '\" target=\"_blank\">',
-              values$nexus$TM[[i]]$documentToClusters$DI,
-              '</a>'
-            )
-            names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c(
-              "DOI",
-              "Authors",
-              "Title",
-              "Source",
-              "Year",
-              "TotalCitation",
-              "SR",
-              "TCperYear",
-              "NTC"
-            )
-            values$nexus$TM[[i]]$documentToClusters <- values$nexus$TM[[
-              i
-            ]]$documentToClusters[c(
-              "DOI",
-              "Authors",
-              "Title",
-              "Source",
-              "Year",
-              "TotalCitation",
-              "TCperYear",
-              "NTC",
-              "SR"
-            )]
-          }
-          values$nexus$Data <- values$nexus$Data[
-            values$nexus$Data$Inc_index > 0,
-            -c(4, 8)
-          ]
-          values$TEplot <- plotThematicEvolution(
-            Nodes = values$nexus$Nodes,
-            Edges = values$nexus$Edges,
-            min.flow = minFlow
-          )
-          values$cache_TE_key <- cache_key
-          values$TE_computing <- FALSE
-          values$TE_ready <- values$TE_ready + 1
-        }) %...!%
-        (function(err) {
-          removeNotification("TE_progress")
-          values$TE_computing <- FALSE
-          values$TE_error <- conditionMessage(err)
-          showNotification(
-            paste("Thematic Evolution error:", values$TE_error),
-            type = "error",
-            duration = 8
-          )
         })
+      }, error = function(e) {
+        values$TE_computing <- FALSE
+        values$TE_error <- e$message
+        showNotification(paste("Thematic Evolution error:", e$message), type = "error", duration = 8)
+        return(NULL)
+      })
+      req(nexus)
 
-      return(p) # Return promise so Shiny manages async lifecycle
+      if (isFALSE(nexus$check)) {
+        values$TE_computing <- FALSE
+        values$TE_error <- "No topics in one or more periods. Please select a different set of parameters."
+        showNotification(values$TE_error, type = "error", duration = 8)
+        return()
+      }
+      values$nexus <- nexus
+      for (i in 1:(length(yearSlices) + 1)) {
+        values$nexus$TM[[i]]$words <- values$nexus$TM[[i]]$words[, -c(4, 6)]
+        values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[, c(
+          9,
+          5:8,
+          11
+        )]
+        names(values$nexus$TM[[i]]$clusters) <- c(
+          "Cluster",
+          "CallonCentrality",
+          "CallonDensity",
+          "RankCentrality",
+          "RankDensity",
+          "ClusterFrequency"
+        )
+
+        values$nexus$TM[[i]]$documentToClusters$DI <- paste0(
+          '<a href=\"https://doi.org/',
+          values$nexus$TM[[i]]$documentToClusters$DI,
+          '\" target=\"_blank\">',
+          values$nexus$TM[[i]]$documentToClusters$DI,
+          '</a>'
+        )
+        names(values$nexus$TM[[i]]$documentToClusters)[1:9] <- c(
+          "DOI",
+          "Authors",
+          "Title",
+          "Source",
+          "Year",
+          "TotalCitation",
+          "SR",
+          "TCperYear",
+          "NTC"
+        )
+        values$nexus$TM[[i]]$documentToClusters <- values$nexus$TM[[
+          i
+        ]]$documentToClusters[c(
+          "DOI",
+          "Authors",
+          "Title",
+          "Source",
+          "Year",
+          "TotalCitation",
+          "TCperYear",
+          "NTC",
+          "SR"
+        )]
+      }
+      values$nexus$Data <- values$nexus$Data[
+        values$nexus$Data$Inc_index > 0,
+        -c(4, 8)
+      ]
+      values$TEplot <- plotThematicEvolution(
+        Nodes = values$nexus$Nodes,
+        Edges = values$nexus$Edges,
+        min.flow = minFlow
+      )
+      values$cache_TE_key <- cache_key
+      values$TE_computing <- FALSE
     }
   })
 
   output$TEPlot <- plotly::renderPlotly({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     values$TEplot
   })
 
@@ -11898,7 +11694,7 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$TETable <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     TEData = values$nexus$Data
     names(TEData) = c(
       "From",
@@ -11931,7 +11727,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMPlot1 <- renderPlotly({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     if (length(values$nexus$TM) >= 1) {
       plot.ly(values$nexus$TM[[1]]$map, size = 0.07, aspectratio = 1.3)
     } else {
@@ -11940,7 +11736,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMPlot2 <- renderPlotly({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     if (length(values$nexus$TM) >= 2) {
       plot.ly(values$nexus$TM[[2]]$map, size = 0.07, aspectratio = 1.3)
     } else {
@@ -11949,7 +11745,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMPlot3 <- renderPlotly({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     if (length(values$nexus$TM) >= 3) {
       plot.ly(values$nexus$TM[[3]]$map, size = 0.07, aspectratio = 1.3)
     } else {
@@ -11958,7 +11754,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMPlot4 <- renderPlotly({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     if (length(values$nexus$TM) >= 4) {
       plot.ly(values$nexus$TM[[4]]$map, size = 0.07, aspectratio = 1.3)
     } else {
@@ -11967,7 +11763,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMPlot5 <- renderPlotly({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     if (length(values$nexus$TM) >= 5) {
       plot.ly(values$nexus$TM[[5]]$map, size = 0.07, aspectratio = 1.3)
     } else {
@@ -11976,7 +11772,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$NetPlot1 <- renderVisNetwork({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     k = 1
     values$network1 <- igraph2vis(
       g = values$nexus$Net[[k]]$graph,
@@ -11992,7 +11788,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$NetPlot2 <- renderVisNetwork({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     k = 2
     values$network2 <- igraph2vis(
       g = values$nexus$Net[[k]]$graph,
@@ -12008,7 +11804,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$NetPlot3 <- renderVisNetwork({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     k = 3
     values$network3 <- igraph2vis(
       g = values$nexus$Net[[k]]$graph,
@@ -12024,7 +11820,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$NetPlot4 <- renderVisNetwork({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     k = 4
     values$network4 <- igraph2vis(
       g = values$nexus$Net[[k]]$graph,
@@ -12040,7 +11836,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$NetPlot5 <- renderVisNetwork({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     k = 5
     values$network5 <- igraph2vis(
       g = values$nexus$Net[[k]]$graph,
@@ -12056,7 +11852,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTable1 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData = values$nexus$TM[[1]]$words
     renderBibliobox(
       tmData,
@@ -12080,7 +11876,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTable2 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData = values$nexus$TM[[2]]$words
     renderBibliobox(
       tmData,
@@ -12104,7 +11900,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTable3 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData = values$nexus$TM[[3]]$words
     renderBibliobox(
       tmData,
@@ -12128,7 +11924,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTable4 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData = values$nexus$TM[[4]]$words
     renderBibliobox(
       tmData,
@@ -12152,7 +11948,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTable5 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData = values$nexus$TM[[5]]$words
     renderBibliobox(
       tmData,
@@ -12176,7 +11972,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableCluster1 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData <- values$nexus$TM[[1]]$clusters
     renderBibliobox(
       tmData,
@@ -12200,7 +11996,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableCluster2 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData <- values$nexus$TM[[2]]$clusters
     renderBibliobox(
       tmData,
@@ -12224,7 +12020,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableCluster3 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData <- values$nexus$TM[[3]]$clusters
     renderBibliobox(
       tmData,
@@ -12248,7 +12044,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableCluster4 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData <- values$nexus$TM[[4]]$clusters
     renderBibliobox(
       tmData,
@@ -12272,7 +12068,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableCluster5 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmData <- values$nexus$TM[[5]]$clusters
     renderBibliobox(
       tmData,
@@ -12296,7 +12092,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableDocument1 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmDataDoc <- values$nexus$TM[[1]]$documentToClusters
     renderBibliobox(
       tmDataDoc,
@@ -12320,7 +12116,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableDocument2 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmDataDoc <- values$nexus$TM[[2]]$documentToClusters
     tmDataDoc$DI <- paste0(
       '<a href=\"https://doi.org/',
@@ -12362,7 +12158,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableDocument3 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmDataDoc <- values$nexus$TM[[3]]$documentToClusters
     tmDataDoc$DI <- paste0(
       '<a href=\"https://doi.org/',
@@ -12405,7 +12201,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableDocument4 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmDataDoc <- values$nexus$TM[[4]]$documentToClusters
     tmDataDoc$DI <- paste0(
       '<a href=\"https://doi.org/',
@@ -12448,7 +12244,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$TMTableDocument5 <- renderUI({
-    req(values$TE_ready > 0)
+    req(values$nexus)
     tmDataDoc <- values$nexus$TM[[5]]$documentToClusters
     tmDataDoc$DI <- paste0(
       '<a href=\"https://doi.org/',
@@ -12639,15 +12435,8 @@ To ensure the functionality of Biblioshiny,
     }
     net_title <- values$Title
 
-    showNotification(
-      "Co-citation Network: computing...",
-      id = "COCIT_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+    cocitnet <- tryCatch({
+      withProgress(message = 'Co-citation Network: computing...', value = 0, {
         bibliometrix::networkPlot(
           NetRefs,
           normalize = NULL,
@@ -12669,46 +12458,36 @@ To ensure the functionality of Biblioshiny,
           community.repulsion = cit_repulsion,
           verbose = FALSE
         )
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr", "igraph", "ggplot2", "Matrix")
-    ) %...>%
-      (function(cocitnet) {
-        removeNotification("COCIT_progress")
-        values$cocitnet <- cocitnet
-        values$COCITnetwork <- igraph2vis(
-          g = cocitnet$graph,
-          curved = cit_curved,
-          labelsize = cit_labelsize,
-          opacity = 0.7,
-          type = cit_layout,
-          shape = cit_shape,
-          net = cocitnet,
-          shadow = cit_shadow,
-          noOverlap = cit_noOverlap
-        )
-        values$cocitOverlay <- overlayPlotly(values$COCITnetwork$VIS)
-        values$degreePlot <- degreePlot(cocitnet)
-        values$COCIT_ready <- values$COCIT_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("COCIT_progress")
-        showNotification(
-          paste("Co-citation Network error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
       })
-    return(p)
+    }, error = function(e) {
+      showNotification(paste("Co-citation Network error:", e$message), type = "error", duration = 8)
+      return(NULL)
+    })
+    req(cocitnet)
+
+    values$cocitnet <- cocitnet
+    values$COCITnetwork <- igraph2vis(
+      g = cocitnet$graph,
+      curved = cit_curved,
+      labelsize = cit_labelsize,
+      opacity = 0.7,
+      type = cit_layout,
+      shape = cit_shape,
+      net = cocitnet,
+      shadow = cit_shadow,
+      noOverlap = cit_noOverlap
+    )
+    values$cocitOverlay <- overlayPlotly(values$COCITnetwork$VIS)
+    values$degreePlot <- degreePlot(cocitnet)
   })
 
   output$cocitPlot <- renderVisNetwork({
-    req(values$COCIT_ready > 0)
+    req(values$COCITnetwork)
     isolate(values$COCITnetwork$VIS)
   })
 
   output$cocitOverlay <- renderPlotly({
-    req(values$COCIT_ready > 0)
+    req(values$cocitOverlay)
     values$cocitOverlay
   })
 
@@ -12743,7 +12522,7 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$cocitTable <- renderUI({
-    req(values$COCIT_ready > 0)
+    req(values$cocitnet)
     cocitData = values$cocitnet$cluster_res
     names(cocitData) = c(
       "Node",
@@ -12784,7 +12563,7 @@ To ensure the functionality of Biblioshiny,
 
   ### Degree Plot Co-citation analysis ####
   output$cocitDegree <- renderPlotly({
-    req(values$COCIT_ready > 0)
+    req(values$cocitnet)
     #p <- degreePlot(values$cocitnet)
     plot.ly(values$degreePlot)
   })
@@ -12850,20 +12629,12 @@ To ensure the functionality of Biblioshiny,
     )
 
     if (identical(cache_key, values$cache_HIST_key)) {
-      values$HIST_ready <- values$HIST_ready + 1
       return()
     }
 
     M_data <- values$M
-    showNotification(
-      "Historiograph: computing...",
-      id = "HIST_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+    res <- tryCatch({
+      withProgress(message = 'Historiograph: computing...', value = 0, {
         histResults <- bibliometrix::histNetwork(
           M_data,
           min.citations = 0,
@@ -12891,60 +12662,43 @@ To ensure the functionality of Biblioshiny,
           )
         }
         list(histResults = histResults, histPlot = histPlot)
-      },
-      seed = TRUE,
-      packages = c(
-        "bibliometrix",
-        "dplyr",
-        "tidyr",
-        "tibble",
-        "igraph",
-        "ggplot2"
-      )
-    ) %...>%
-      (function(res) {
-        removeNotification("HIST_progress")
-        histResults <- res$histResults
-        histPlot <- res$histPlot
-
-        histResults$histData$DOI <- paste0(
-          '<a href=\"https://doi.org/',
-          histResults$histData$DOI,
-          '\" target=\"_blank\">',
-          histResults$histData$DOI,
-          "</a>"
-        )
-
-        histResults$histData <- histResults$histData %>%
-          dplyr::left_join(
-            histPlot$layout %>% dplyr::select(name, color),
-            by = c("Paper" = "name")
-          ) %>%
-          tidyr::drop_na(color) %>%
-          dplyr::mutate(cluster = match(color, unique(color))) %>%
-          dplyr::select(!color) %>%
-          dplyr::group_by(cluster) %>%
-          dplyr::arrange(Year, .by_group = TRUE)
-
-        values$histResults <- histResults
-        values$histPlot <- histPlot
-        values$histlog <- histPlot
-        values$cache_HIST_key <- cache_key
-        values$HIST_ready <- values$HIST_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("HIST_progress")
-        showNotification(
-          paste("Historiograph error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
       })
-    return(p)
+    }, error = function(e) {
+      showNotification(paste("Historiograph error:", e$message), type = "error", duration = 8)
+      return(NULL)
+    })
+    req(res)
+
+    histResults <- res$histResults
+    histPlot <- res$histPlot
+
+    histResults$histData$DOI <- paste0(
+      '<a href=\"https://doi.org/',
+      histResults$histData$DOI,
+      '\" target=\"_blank\">',
+      histResults$histData$DOI,
+      "</a>"
+    )
+
+    histResults$histData <- histResults$histData %>%
+      dplyr::left_join(
+        histPlot$layout %>% dplyr::select(name, color),
+        by = c("Paper" = "name")
+      ) %>%
+      tidyr::drop_na(color) %>%
+      dplyr::mutate(cluster = match(color, unique(color))) %>%
+      dplyr::select(!color) %>%
+      dplyr::group_by(cluster) %>%
+      dplyr::arrange(Year, .by_group = TRUE)
+
+    values$histResults <- histResults
+    values$histPlot <- histPlot
+    values$histlog <- histPlot
+    values$cache_HIST_key <- cache_key
   })
 
   output$histPlotVis <- renderVisNetwork({
-    req(values$HIST_ready > 0)
+    req(values$histPlot)
     values$histPlotVis <- hist2vis(
       values$histPlot,
       curved = TRUE,
@@ -12959,7 +12713,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$histTable <- renderUI({
-    req(values$HIST_ready > 0)
+    req(values$histResults)
     Data <- values$histResults$histData
     renderBibliobox(
       Data,
@@ -13126,15 +12880,8 @@ To ensure the functionality of Biblioshiny,
     net_title <- values$Title
     fieldCOL <- values$fieldCOL
 
-    showNotification(
-      "Collaboration Network: computing...",
-      id = "COL_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+    colnet <- tryCatch({
+      withProgress(message = 'Collaboration Network: computing...', value = 0, {
         bibliometrix::networkPlot(
           ColNetRefs,
           normalize = col_normalize,
@@ -13156,99 +12903,88 @@ To ensure the functionality of Biblioshiny,
           community.repulsion = col_repulsion,
           verbose = FALSE
         )
-      },
-      seed = TRUE,
-      packages = c("bibliometrix", "dplyr", "igraph", "ggplot2", "Matrix")
-    ) %...>%
-      (function(colnet) {
-        removeNotification("COL_progress")
-
-        # Add year info
-        g <- colnet$graph
-        Y <- authors2Years(M_data, fieldCOL)
-        label_df <- data.frame(Item = igraph::V(g)$name)
-        df <- label_df %>%
-          dplyr::left_join(
-            Y %>% dplyr::mutate(Item = tolower(Item)),
-            by = "Item"
-          ) %>%
-          dplyr::rename(year_med = FirstYear)
-        igraph::V(g)$year_med <- df$year_med
-        colnet$graph <- g
-        values$colnet <- colnet
-
-        if (is.null(dim(colnet$cluster_res))) {
-          values$colnet$cluster_res <- data.frame(
-            Node = NA,
-            Cluster = NA,
-            Betweenness = NA,
-            Closeness = NA,
-            PageRank = NA
-          )
-        } else {
-          names(values$colnet$cluster_res) <- c(
-            "Node",
-            "Cluster",
-            "Betweenness",
-            "Closeness",
-            "PageRank"
-          )
-        }
-
-        values$COLnetwork <- igraph2vis(
-          g = colnet$graph,
-          curved = col_curved,
-          labelsize = col_labelsize,
-          opacity = col_alpha,
-          type = col_layout,
-          shape = col_shape,
-          net = colnet,
-          shadow = col_shadow,
-          noOverlap = col_noOverlap
-        )
-        values$colOverlay <- overlayPlotly(values$COLnetwork$VIS)
-        values$degreePlot <- degreePlot(colnet)
-        values$years_col <- sort(unique(c(
-          M_data %>% tidyr::drop_na(PY) %>% dplyr::pull(PY)
-        )))
-        values$index_col <- 0
-        values$playing_col <- FALSE
-        values$paused_col <- FALSE
-        values$current_year_col <- min(values$years_col)
-        output$year_slider_colUI <- renderUI({
-          sliderInput(
-            "year_slider_col",
-            "Year",
-            min = min(values$years_col),
-            max = max(values$years_col),
-            value = min(values$years_col),
-            step = 1,
-            animate = FALSE,
-            width = "100%",
-            ticks = FALSE,
-            round = TRUE,
-            sep = ""
-          )
-        })
-        values$COL_ready <- values$COL_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("COL_progress")
-        showNotification(
-          paste("Collaboration Network error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
       })
-    return(p)
+    }, error = function(e) {
+      showNotification(paste("Collaboration Network error:", e$message), type = "error", duration = 8)
+      return(NULL)
+    })
+    req(colnet)
+
+    # Add year info
+    g <- colnet$graph
+    Y <- authors2Years(M_data, fieldCOL)
+    label_df <- data.frame(Item = igraph::V(g)$name)
+    df <- label_df %>%
+      dplyr::left_join(
+        Y %>% dplyr::mutate(Item = tolower(Item)),
+        by = "Item"
+      ) %>%
+      dplyr::rename(year_med = FirstYear)
+    igraph::V(g)$year_med <- df$year_med
+    colnet$graph <- g
+    values$colnet <- colnet
+
+    if (is.null(dim(colnet$cluster_res))) {
+      values$colnet$cluster_res <- data.frame(
+        Node = NA,
+        Cluster = NA,
+        Betweenness = NA,
+        Closeness = NA,
+        PageRank = NA
+      )
+    } else {
+      names(values$colnet$cluster_res) <- c(
+        "Node",
+        "Cluster",
+        "Betweenness",
+        "Closeness",
+        "PageRank"
+      )
+    }
+
+    values$COLnetwork <- igraph2vis(
+      g = colnet$graph,
+      curved = col_curved,
+      labelsize = col_labelsize,
+      opacity = col_alpha,
+      type = col_layout,
+      shape = col_shape,
+      net = colnet,
+      shadow = col_shadow,
+      noOverlap = col_noOverlap
+    )
+    values$colOverlay <- overlayPlotly(values$COLnetwork$VIS)
+    values$degreePlot <- degreePlot(colnet)
+    values$years_col <- sort(unique(c(
+      M_data %>% tidyr::drop_na(PY) %>% dplyr::pull(PY)
+    )))
+    values$index_col <- 0
+    values$playing_col <- FALSE
+    values$paused_col <- FALSE
+    values$current_year_col <- min(values$years_col)
+    output$year_slider_colUI <- renderUI({
+      sliderInput(
+        "year_slider_col",
+        "Year",
+        min = min(values$years_col),
+        max = max(values$years_col),
+        value = min(values$years_col),
+        step = 1,
+        animate = FALSE,
+        width = "100%",
+        ticks = FALSE,
+        round = TRUE,
+        sep = ""
+      )
+    })
   })
   output$colPlot <- renderVisNetwork({
-    req(values$COL_ready > 0)
+    req(values$COLnetwork)
     values$COLnetwork$VIS
   })
 
   output$colOverlay <- renderPlotly({
-    req(values$COL_ready > 0)
+    req(values$colOverlay)
     values$colOverlay
   })
 
@@ -13417,7 +13153,7 @@ To ensure the functionality of Biblioshiny,
   )
 
   output$colTable <- renderUI({
-    req(values$COL_ready > 0)
+    req(values$colnet)
     colData = values$colnet$cluster_res
     renderBibliobox(
       colData,
@@ -13451,7 +13187,7 @@ To ensure the functionality of Biblioshiny,
 
   ### Degree Plot Collaboration analysis ####
   output$colDegree <- renderPlotly({
-    req(values$COL_ready > 0)
+    req(values$colnet)
     p <- degreePlot(values$colnet)
     plot.ly(p)
   })
@@ -13497,15 +13233,8 @@ To ensure the functionality of Biblioshiny,
     wm_min_edges <- input$WMedges.min
     wm_edgesize <- input$WMedgesize * 2
 
-    showNotification(
-      "World Collaboration Map: computing...",
-      id = "WM_progress",
-      type = "message",
-      duration = NULL
-    )
-
-    p <- promises::future_promise(
-      {
+    WMmap <- tryCatch({
+      withProgress(message = 'World Collaboration Map: computing...', value = 0, {
         countrycollaboration_plotly(
           M_data,
           min.edges = wm_min_edges,
@@ -13513,33 +13242,16 @@ To ensure the functionality of Biblioshiny,
           edgesize = wm_edgesize,
           min_edgesize = 1
         )
-      },
-      seed = TRUE,
-      globals = list(
-        countrycollaboration_plotly = countrycollaboration_plotly,
-        count.duplicates = count.duplicates,
-        M_data = M_data,
-        wm_min_edges = wm_min_edges,
-        wm_edgesize = wm_edgesize
-      ),
-      packages = c("bibliometrix", "dplyr", "plotly", "igraph", "geosphere")
-    ) %...>%
-      (function(WMmap) {
-        removeNotification("WM_progress")
-        WMmap$tab <- WMmap$tab[, c(1, 2, 11)]
-        names(WMmap$tab) <- c("From", "To", "Frequency")
-        values$WMmap <- WMmap
-        values$WM_ready <- values$WM_ready + 1
-      }) %...!%
-      (function(err) {
-        removeNotification("WM_progress")
-        showNotification(
-          paste("World Map error:", conditionMessage(err)),
-          type = "error",
-          duration = 8
-        )
       })
-    return(p)
+    }, error = function(e) {
+      showNotification(paste("World Map error:", e$message), type = "error", duration = 8)
+      return(NULL)
+    })
+    req(WMmap)
+
+    WMmap$tab <- WMmap$tab[, c(1, 2, 11)]
+    names(WMmap$tab) <- c("From", "To", "Frequency")
+    values$WMmap <- WMmap
   })
 
   # gemini button for World Map
@@ -13563,12 +13275,12 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$WMPlot <- renderPlotly({
-    req(values$WM_ready > 0)
+    req(values$WMmap)
     values$WMmap$g
   })
 
   output$WMTable <- renderUI({
-    req(values$WM_ready > 0)
+    req(values$WMmap)
     colData = values$WMmap$tab
     renderBibliobox(
       colData,

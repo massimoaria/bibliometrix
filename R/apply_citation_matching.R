@@ -27,8 +27,12 @@ utils::globalVariables(c(
   "len",
   "page_start",
   "str_starts",
+  "CR_stripped",
+  "n_stripped",
   "temp_citation",
-  "wos_key"
+  "variant_freq",
+  "wos_key",
+  "author_surname"
 ))
 
 #' Normalize journal names to ISO4 abbreviated form
@@ -971,7 +975,7 @@ convert_scopus_new_to_classic <- function(citation) {
 #' }
 #'
 #' @seealso
-#' \code{\link{applyCitationMatching}} for direct application to bibliometrix data frames
+#' \code{\link{applyReferenceMatching}} for direct application to bibliometrix data frames
 #'
 #' @references
 #' Aria, M. & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive
@@ -1401,17 +1405,59 @@ normalize_citations <- function(
     }
   }
 
-  cat("Phase 3: Blocking by author + year + journal...\n")
+  # Punctuation-invariant matching: additional exact matching pass using
+  # a stripped form of the original string (all non-alphanumeric characters
+  # removed, case-folded, whitespace collapsed). This catches citation
+  # pairs that differ only in punctuation, spacing, or formatting.
+  unmatched_df2 <- df %>%
+    dplyr::filter(is.na(cluster_id))
 
-  # Restrictive blocking - must have same author, year, and journal
+  if (nrow(unmatched_df2) > 0) {
+    unmatched_df2 <- unmatched_df2 %>%
+      mutate(
+        CR_stripped = sapply(CR_original, function(x) {
+          x %>%
+            remove_diacritics() %>%
+            toupper() %>%
+            str_replace_all("[^A-Z0-9]", "")
+        }, USE.NAMES = FALSE)
+      )
+
+    stripped_matches <- unmatched_df2 %>%
+      group_by(CR_stripped) %>%
+      mutate(
+        n_stripped = n(),
+        cluster_id = if_else(
+          n_stripped > 1,
+          paste0("STRIP_", min(CR_id)),
+          NA_character_
+        )
+      ) %>%
+      ungroup() %>%
+      dplyr::filter(!is.na(cluster_id))
+
+    if (nrow(stripped_matches) > 0) {
+      df$cluster_id[
+        df$CR_id %in% stripped_matches$CR_id
+      ] <- stripped_matches$cluster_id
+      cat(
+        "  Matched",
+        nrow(stripped_matches),
+        "citations via punctuation-invariant matching\n"
+      )
+    }
+  }
+
+  cat("Phase 3: Blocking by author + year...\n")
+
+  # Block by author surname + year to allow matching across journal/name variants
+  # Use only surname (first word) so "ARIA M" and "ARIA MASSIMO" share a block
   df <- df %>%
     mutate(
       blocking_key = paste0(
-        coalesce(first_author, "UNK"),
+        coalesce(gsub("\\s.*", "", first_author), "UNK"),
         "_",
-        coalesce(year, "0000"),
-        "_",
-        coalesce(substr(journal, 1, 15), "UNK")
+        coalesce(year, "0000")
       )
     )
 
@@ -1446,11 +1492,11 @@ normalize_citations <- function(
         mutate(
           page_start = str_extract(pages, "\\d+"),
           wos_key = paste0(
-            coalesce(first_author, "UNK"),
+            coalesce(gsub("\\s.*", "", first_author), "UNK"),
             "_",
             coalesce(year, "0000"),
             "_",
-            coalesce(journal, "UNK"),
+            coalesce(gsub("[^A-Z0-9]", "", toupper(journal)), "UNK"),
             "_",
             coalesce(volume, "NA"),
             "_",
@@ -1558,13 +1604,15 @@ normalize_citations <- function(
   n_clusters_before_merge <- n_distinct(df_matched$cluster_id)
 
   # Different merge strategies based on format
+  # Journal is excluded from merge keys: author + year + volume + page_start
+  # (+ title_words for Scopus) is already highly discriminating
   df_matched <- df_matched %>%
     mutate(
       # Extract starting page number
       page_start = str_extract(pages, "^\\d+"),
+      # Use surname only for merge keys (handles "ARIA M" vs "ARIA MASSIMO")
+      author_surname = coalesce(gsub("\\s.*", "", first_author), "UNK"),
 
-      # For WoS: use deterministic key (author + year + journal + volume + page)
-      # For Scopus: add title_words to distinguish articles in same issue
       merge_key = case_when(
         # WoS format: DOI is most reliable
         format == "wos" & !is.na(doi) ~ paste0("DOI_", doi),
@@ -1572,28 +1620,24 @@ normalize_citations <- function(
         # WoS format without DOI: use metadata + pages
         format == "wos" ~
           paste0(
-            coalesce(first_author, "UNK"),
+            author_surname,
             "_",
             coalesce(year, "0000"),
-            "_",
-            coalesce(journal, "UNK"),
             "_",
             coalesce(volume, "NA"),
             "_",
             coalesce(page_start, "NOPAGE")
           ),
 
-        # Scopus format (both classic and new): use metadata + pages + title fingerprint
+        # Scopus format: use metadata + pages + title fingerprint
         format %in%
           c("scopus", "scopus_new") &
           !is.na(page_start) &
           !is.na(title_words) ~
           paste0(
-            coalesce(first_author, "UNK"),
+            author_surname,
             "_",
             coalesce(year, "0000"),
-            "_",
-            coalesce(journal, "UNK"),
             "_",
             coalesce(volume, "NA"),
             "_",
@@ -1605,11 +1649,9 @@ normalize_citations <- function(
         # Scopus with pages but no title
         format %in% c("scopus", "scopus_new") & !is.na(page_start) ~
           paste0(
-            coalesce(first_author, "UNK"),
+            author_surname,
             "_",
             coalesce(year, "0000"),
-            "_",
-            coalesce(journal, "UNK"),
             "_",
             coalesce(volume, "NA"),
             "_",
@@ -1619,28 +1661,29 @@ normalize_citations <- function(
         # Scopus with title but no pages (rare)
         format %in% c("scopus", "scopus_new") & !is.na(title_words) ~
           paste0(
-            coalesce(first_author, "UNK"),
+            author_surname,
             "_",
             coalesce(year, "0000"),
-            "_",
-            coalesce(journal, "UNK"),
             "_",
             coalesce(volume, "NA"),
             "_",
             title_words
           ),
 
-        # Fallback: basic metadata only (risky)
-        TRUE ~
+        # Fallback with title: use title_words to distinguish
+        !is.na(title_words) ~
           paste0(
-            coalesce(first_author, "UNK"),
+            author_surname,
             "_",
             coalesce(year, "0000"),
             "_",
-            coalesce(journal, "UNK"),
+            coalesce(volume, "NA"),
             "_",
-            coalesce(volume, "NA")
-          )
+            title_words
+          ),
+
+        # Last resort: no pages, no title - keep original cluster (no merge)
+        TRUE ~ paste0("NOMERGE_", cluster_id)
       )
     ) %>%
     group_by(merge_key) %>%
@@ -1648,7 +1691,7 @@ normalize_citations <- function(
       cluster_id = min(cluster_id, na.rm = TRUE)
     ) %>%
     ungroup() %>%
-    select(-merge_key, -page_start)
+    select(-merge_key, -page_start, -author_surname)
 
   n_clusters_after_merge <- n_distinct(df_matched$cluster_id)
   n_additional_matches <- n_clusters_before_merge - n_clusters_after_merge
@@ -1660,17 +1703,22 @@ normalize_citations <- function(
   cat("Phase 5: Selecting canonical representatives...\n")
 
   result <- df_matched %>%
+    # Count frequency of each variant within its cluster
+    group_by(cluster_id, CR_original) %>%
+    mutate(variant_freq = n()) %>%
+    ungroup() %>%
     group_by(cluster_id) %>%
     mutate(
       n_cluster = n(),
-      # Scoring: DOI > volume > pages > length
-      completeness_score = (!is.na(doi)) *
-        100 +
+      # Scoring: frequency first, then completeness as tiebreaker
+      completeness_score = variant_freq * 1000 +
+        (!is.na(doi)) * 100 +
         (!is.na(volume)) * 10 +
         (!is.na(pages)) * 5 +
         nchar(CR_original) * 0.01,
       CR_canonical = CR_original[which.max(completeness_score)][1]
     ) %>%
+    select(-variant_freq) %>%
     ungroup() %>%
     arrange(desc(n_cluster), cluster_id) %>%
     select(
@@ -1778,7 +1826,7 @@ normalize_citations <- function(
 }
 
 
-#' Apply citation normalization to bibliometrix data frame
+#' Apply reference normalization to bibliometrix data frame
 #'
 #' This is a convenience wrapper function that applies \code{\link{normalize_citations}}
 #' to a bibliometrix data frame (typically loaded with \code{\link{convert2df}}). It
@@ -1861,8 +1909,8 @@ normalize_citations <- function(
 #' file <- "https://www.bibliometrix.org/datasets/savedrecs.txt"
 #' M <- convert2df(file, dbsource = "wos", format = "plaintext")
 #'
-#' # Apply citation normalization
-#' results <- applyCitationMatching(M, threshold = 0.85)
+#' # Apply reference normalization
+#' results <- applyReferenceMatching(M, threshold = 0.85)
 #'
 #' # View top cited works (after normalization)
 #' head(results$summary, 20)
@@ -1905,7 +1953,7 @@ normalize_citations <- function(
 #'
 #' @export
 
-applyCitationMatching <- function(
+applyReferenceMatching <- function(
   M,
   threshold = 0.90,
   method = "jw",
@@ -1966,12 +2014,19 @@ applyCitationMatching <- function(
   result <- CR_df %>%
     left_join(matched, by = c("CR" = "CR_original"))
 
+  # Remove invalid entries: filtered citations and short canonical forms
+  result <- result %>%
+    dplyr::filter(
+      !is.na(cluster_id),
+      !grepl("^FILTERED_", cluster_id),
+      nchar(CR_canonical) >= min_chars
+    )
+
   # Reference citation counts
   citation_count <- result %>% distinct() %>% count(CR_canonical, sort = TRUE)
 
   # Create summary
   summary <- result %>%
-    dplyr::filter(!grepl("^FILTERED_", cluster_id)) %>%
     group_by(CR_canonical, cluster_id) %>%
     summarise(
       n_variants = n_distinct(CR),
@@ -2015,4 +2070,25 @@ applyCitationMatching <- function(
     matched_citations = matched,
     CR_normalized = CR_by_paper
   ))
+}
+
+
+#' @title applyCitationMatching (Deprecated)
+#'
+#' @description
+#' \strong{Deprecated} in bibliometrix 6.0. This function has been renamed to
+#' \code{\link{applyReferenceMatching}}. Please use \code{applyReferenceMatching()} instead.
+#'
+#' @inheritParams applyReferenceMatching
+#'
+#' @return Same as \code{\link{applyReferenceMatching}}.
+#'
+#' @export
+applyCitationMatching <- function(M, threshold = 0.90, method = "jw", min_chars = 20) {
+  warning(
+    "applyCitationMatching() is deprecated as of bibliometrix 6.0. ",
+    "Please use applyReferenceMatching() instead.",
+    call. = FALSE
+  )
+  applyReferenceMatching(M = M, threshold = threshold, method = method, min_chars = min_chars)
 }

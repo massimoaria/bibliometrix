@@ -1,20 +1,17 @@
 ## Wrapper function to render bibliobox in Shiny
 renderBibliobox <- function(df, title = "", ...) {
-  renderUI({
-    req(df)
-    tryCatch(
-      {
-        data <- if (is.reactive(df)) df() else df
-        HTML(htmlBoxFormat(data, title = title, ...))
-      },
-      error = function(e) {
-        tags$div(
-          class = "alert alert-danger",
-          paste("Render error:", e$message)
-        )
-      }
-    )
-  })
+  tryCatch(
+    {
+      data <- if (is.reactive(df)) df() else df
+      HTML(htmlBoxFormat(data, title = title, ...))
+    },
+    error = function(e) {
+      tags$div(
+        class = "alert alert-danger",
+        paste("Render error:", e$message)
+      )
+    }
+  )
 }
 
 #' HTML Box Format with Filter-Aware Excel Export

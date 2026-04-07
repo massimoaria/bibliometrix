@@ -123,7 +123,7 @@ fieldByYear <- function(M,
       x = "Term",
       y = "Year"
     ) +
-    geom_segment(data = df, aes(x = item, y = year_q1, xend = item, yend = year_q3), size = 1.0, color = "royalblue4", alpha = 0.3) +
+    geom_segment(data = df, aes(x = item, y = year_q1, xend = item, yend = year_q3), linewidth = 1.0, color = "royalblue4", alpha = 0.3) +
     coord_flip()
 
   if (isTRUE(graph)) {

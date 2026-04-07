@@ -1114,27 +1114,81 @@ body <- dashboardBody(
                       # ============================================
                       conditionalPanel(
                         condition = "input.load == 'demo'",
-                        div(
-                          style = "background-color: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3c8dbc; margin-bottom: 20px;",
-                          h4(
-                            strong(
-                              "The use of bibliometric approaches in business and management disciplines."
-                            ),
-                            style = "color: #2c3e50; margin-top: 0;"
+                        radioButtons(
+                          "demoDataset",
+                          label = tags$strong("Choose a sample dataset:"),
+                          choices = c(
+                            "Sample Collection (bibliometrix package)" = "bibliometrix_sample",
+                            "Book Dataset (from GitHub)" = "book_dataset"
                           ),
-                          h5(
-                            strong("Dataset 'Management'"),
-                            style = "color: #34495e; margin-top: 10px;"
-                          ),
+                          selected = "bibliometrix_sample",
+                          inline = FALSE
+                        ),
+                        conditionalPanel(
+                          condition = "input.demoDataset == 'bibliometrix_sample'",
                           div(
-                            style = "color: #555; font-size: 14px; line-height: 1.6;",
-                            em(
-                              "A collection of scientific articles about the use of bibliometric approaches ",
-                              "in business and management disciplines."
+                            style = "background-color: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3c8dbc; margin-bottom: 20px;",
+                            h4(
+                              strong(
+                                "The use of bibliometric approaches in business and management disciplines."
+                              ),
+                              style = "color: #2c3e50; margin-top: 0;"
                             ),
-                            br(),
-                            br(),
-                            em("Period: 1985 - 2020, Source WoS.")
+                            h5(
+                              strong("Dataset 'Management'"),
+                              style = "color: #34495e; margin-top: 10px;"
+                            ),
+                            div(
+                              style = "color: #555; font-size: 14px; line-height: 1.6;",
+                              em(
+                                "A collection of scientific articles about the use of bibliometric approaches ",
+                                "in business and management disciplines."
+                              ),
+                              br(),
+                              br(),
+                              em("Period: 1985 - 2020, Source WoS.")
+                            )
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.demoDataset == 'book_dataset'",
+                          div(
+                            style = "background-color: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3c8dbc; margin-bottom: 20px;",
+                            h4(
+                              strong(
+                                "Bibliometric and Scientometric Research in Management and Business"
+                              ),
+                              style = "color: #2c3e50; margin-top: 0;"
+                            ),
+                            h5(
+                              strong("Dataset 'Book Collection'"),
+                              style = "color: #34495e; margin-top: 10px;"
+                            ),
+                            div(
+                              style = "color: #555; font-size: 14px; line-height: 1.6;",
+                              em(
+                                "A comprehensive collection of original research articles employing bibliometric ",
+                                "or scientometric methods within management and business fields, ",
+                                "as indexed by Web of Science."
+                              ),
+                              br(),
+                              br(),
+                              em("Period: 1985 - 2025, Source WoS."),
+                              br(),
+                              br(),
+                              div(
+                                style = "font-size: 13px; color: #555; line-height: 1.5;",
+                                strong("Aria, M., & Cuccurullo, C."),
+                                " (2026). Science Mapping Analysis - A primer with Biblioshiny. ",
+                                em("McGraw-Hill"),
+                                ", ISBN: 978-88-386-2297-7."
+                              ),
+                              br(),
+                              tags$small(
+                                style = "color: #888;",
+                                "This dataset will be downloaded from GitHub on first use and cached locally."
+                              )
+                            )
                           )
                         )
                       ),

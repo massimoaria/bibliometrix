@@ -50,6 +50,12 @@ csvScopus2df <- function(file) {
     DATA$J9 <- DATA$JI <- sapply(DATA$SO, AbbrevTitle, USE.NAMES = FALSE)
   }
 
+  # Fix new Scopus CSV format: replace ";" between authors with ","
+  # so that ";" remains only as separator between different references
+  if ("CR" %in% names(DATA)) {
+    DATA$CR <- fix_scopus_author_separator(DATA$CR)
+  }
+
   DI <- DATA$DI
   URL <- DATA$URL
   AB <- DATA$AB
@@ -65,6 +71,42 @@ csvScopus2df <- function(file) {
 }
 
 
+#' Fix author separators in new Scopus CSV reference format
+#'
+#' In the new Scopus CSV format, both author separators and reference
+#' separators use ";". This function replaces ";" between authors within
+#' each reference with "," so that ";" only separates different references.
+#'
+#' @param cr_vec Character vector of CR strings
+#' @return Character vector with fixed separators
+#' @noRd
+fix_scopus_author_separator <- function(cr_vec) {
+  is_new_format <- grepl("\\(\\d{4}\\)", cr_vec)
+
+  cr_vec[is_new_format] <- vapply(
+    cr_vec[is_new_format],
+    function(cr) {
+      if (is.na(cr) || nchar(trimws(cr)) == 0) return(cr)
+
+      # Split on reference boundaries: (YYYY) followed by ;
+      cr_split <- gsub("\\((\\d{4})\\)\\s*;\\s*", "(\\1)|||", cr)
+      refs <- unlist(strsplit(cr_split, "\\|\\|\\|"))
+      refs <- trimws(refs)
+
+      # Within each reference, replace ";" (author separator) with ","
+      refs <- vapply(refs, function(ref) {
+        gsub(";", ",", ref)
+      }, character(1), USE.NAMES = FALSE)
+
+      # Rejoin references with ";"
+      paste(refs, collapse = "; ")
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
+
+  cr_vec
+}
 
 
 labelling <- function(DATA) {

@@ -183,7 +183,7 @@ bradford <- function(M) {
     format.pval(ks_result$p.value, digits = 3)
   )
 
-  g_shiny <- ggplot2::ggplot(df) +
+  g_shiny <- suppressWarnings(ggplot2::ggplot(df) +
     # Zone background shading
     ggplot2::geom_rect(
       data = zone_rects,
@@ -300,7 +300,7 @@ bradford <- function(M) {
       ),
       panel.grid.minor = ggplot2::element_blank(),
       legend.position = "none"
-    )
+    ))
 
   # Version with logo for export
   x_logo <- c(xmax - 0.02 - (xmax - 0) * 0.10, xmax - 0.02)

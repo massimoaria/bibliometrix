@@ -1,3 +1,5 @@
+# bibliometrix 5.3.0
+
 # bibliometrix V.5.3.0 (Release date: 2026-04-10)
 
 ## Major Changes

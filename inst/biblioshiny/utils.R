@@ -5641,7 +5641,7 @@ addGgplotsWb <- function(
   for (i in 1:l) {
     fileName <- file.path(
       getWD(),
-      paste0("figureImage_", i, "_", Sys.time(), ".png")
+      paste0("figureImage_", i, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".png")
     )
     if (inherits(list_plot[[i]], "ggplot")) {
       safe_ggsave(
@@ -5695,7 +5695,7 @@ screenSh <- function(p, type = "vis", dpi = 300, height = 7) {
 
   fileName <- file.path(
     getWD(),
-    paste0("figureImage_", Sys.time(), ".png")
+    paste0("figureImage_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".png")
   )
 
   plot2png(p, filename = fileName, type = type, dpi = dpi, height = height)

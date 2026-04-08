@@ -1219,6 +1219,7 @@ To ensure the functionality of Biblioshiny,
     },
     content <- function(file) {
       txtOutput <- geminiSave(values, input$sidebarmenu)
+      req(txtOutput)
       writeLines(txtOutput, con = file)
     },
     contentType = "txt"
@@ -2776,6 +2777,7 @@ To ensure the functionality of Biblioshiny,
       )
     },
     content <- function(file) {
+      req(values$M)
       tr <- FALSE
       if ("CR" %in% names(values$M)) {
         tr <- (sum(nchar(values$M$CR) > 32767, na.rm = TRUE)) > 0
@@ -2836,6 +2838,7 @@ To ensure the functionality of Biblioshiny,
       )
     },
     content <- function(file) {
+      req(values$M)
       tr <- FALSE
       if ("CR" %in% names(values$M)) {
         tr <- (sum(nchar(values$M$CR) > 32767, na.rm = TRUE)) > 0
@@ -2897,6 +2900,7 @@ To ensure the functionality of Biblioshiny,
       )
     },
     content <- function(file) {
+      req(values$M)
       switch(
         input$save_file_api,
         xlsx = {
@@ -5367,6 +5371,7 @@ To ensure the functionality of Biblioshiny,
     },
 
     content <- function(file) {
+      req(values$ASPplot)
       safe_ggsave(
         filename = file,
         plot = values$ASPplot,
@@ -5492,6 +5497,7 @@ To ensure the functionality of Biblioshiny,
       paste("AverageArticleCitationPerYear-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$ACpYplot)
       safe_ggsave(
         filename = file,
         plot = values$ACpYplot,
@@ -5606,6 +5612,7 @@ To ensure the functionality of Biblioshiny,
       paste("LifeCycle-", Sys.Date(), ".zip", sep = "")
     },
     content = function(file) {
+      req(values$DLC)
       tmpdir <- getWD()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
@@ -5728,6 +5735,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantSources-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MRSplot)
       safe_ggsave(
         filename = file,
         plot = values$MRSplot,
@@ -5829,6 +5837,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedSources-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MLCSplot)
       safe_ggsave(
         filename = file,
         plot = values$MLCSplot,
@@ -5906,6 +5915,7 @@ To ensure the functionality of Biblioshiny,
       paste("BradfordLaws-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$bradford)
       safe_ggsave(
         filename = file,
         plot = values$bradford$graph,
@@ -6132,6 +6142,7 @@ To ensure the functionality of Biblioshiny,
       paste("SourceImpact-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$SIplot)
       safe_ggsave(
         filename = file,
         plot = values$SIplot,
@@ -6320,6 +6331,7 @@ To ensure the functionality of Biblioshiny,
       paste("SourceDynamics-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$SDplot)
       safe_ggsave(
         filename = file,
         plot = values$SDplot,
@@ -6599,6 +6611,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantAuthors-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MRAplot)
       safe_ggsave(
         filename = file,
         plot = values$MRAplot,
@@ -6794,6 +6807,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedAuthors-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MLCAplot)
       safe_ggsave(
         filename = file,
         plot = values$MLCAplot,
@@ -6884,6 +6898,7 @@ To ensure the functionality of Biblioshiny,
       paste("AuthorImpact-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$AIplot)
       safe_ggsave(
         filename = file,
         plot = values$AIplot,
@@ -6965,6 +6980,7 @@ To ensure the functionality of Biblioshiny,
       paste("AuthorsProductionOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$AUProdOverTime)
       safe_ggsave(
         filename = file,
         plot = values$AUProdOverTime$graph,
@@ -7079,6 +7095,7 @@ To ensure the functionality of Biblioshiny,
       paste("LotkaLaw-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$LLplot)
       safe_ggsave(
         filename = file,
         plot = values$LLplot,
@@ -7336,6 +7353,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantAffiliations-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$AFFplot)
       safe_ggsave(
         filename = file,
         plot = values$AFFplot,
@@ -7412,6 +7430,7 @@ To ensure the functionality of Biblioshiny,
       paste("AffiliationOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$AffOverTimePlot)
       safe_ggsave(
         filename = file,
         plot = values$AffOverTimePlot,
@@ -7615,6 +7634,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantCountries-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MRCOplot)
       safe_ggsave(
         filename = file,
         plot = values$MRCOplot,
@@ -7701,6 +7721,7 @@ To ensure the functionality of Biblioshiny,
       paste("CountryScientificProduction-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$mapworld)
       safe_ggsave(
         filename = file,
         plot = values$mapworld$g,
@@ -7764,6 +7785,7 @@ To ensure the functionality of Biblioshiny,
       paste("CountryOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$CountryOverTimePlot)
       safe_ggsave(
         filename = file,
         plot = values$CountryOverTimePlot,
@@ -7923,6 +7945,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostCitedCountries-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MCCplot)
       safe_ggsave(
         filename = file,
         plot = values$MCCplot,
@@ -8331,6 +8354,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostGlobalCitedDocuments-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MGCDplot)
       safe_ggsave(
         filename = file,
         plot = values$MGCDplot,
@@ -8472,6 +8496,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedDocuments-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MLCDplot)
       safe_ggsave(
         filename = file,
         plot = values$MLCDplot,
@@ -8585,6 +8610,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostLocalCitedReferences-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MLCRplot)
       safe_ggsave(
         filename = file,
         plot = values$MLCRplot,
@@ -8723,6 +8749,7 @@ To ensure the functionality of Biblioshiny,
       paste("ReferenceSpectroscopy-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$res)
       safe_ggsave(
         filename = file,
         plot = values$res$spectroscopy,
@@ -9091,6 +9118,7 @@ To ensure the functionality of Biblioshiny,
       paste("MostRelevantWords-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$MRWplot)
       safe_ggsave(
         filename = file,
         plot = values$MRWplot,
@@ -9711,6 +9739,7 @@ To ensure the functionality of Biblioshiny,
       paste("WordsFrequencyOverTime-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$WDplot)
       safe_ggsave(
         filename = file,
         plot = values$WDplot,
@@ -9922,6 +9951,7 @@ To ensure the functionality of Biblioshiny,
       paste("TrendTopics-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$trendTopics)
       safe_ggsave(
         filename = file,
         plot = values$trendTopics$graph,
@@ -10067,6 +10097,7 @@ To ensure the functionality of Biblioshiny,
       paste("CouplingMap-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$CM)
       safe_ggsave(
         filename = file,
         plot = values$CM$map,
@@ -10599,6 +10630,7 @@ To ensure the functionality of Biblioshiny,
       paste("Co_occurrence_network-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
+      req(values$cocnet)
       tmpdir <- getWD()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
@@ -10614,6 +10646,7 @@ To ensure the functionality of Biblioshiny,
   output$networkCoc.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
+      req(values$COCnetwork)
       savenetwork(con, values$COCnetwork$VIS)
     },
     contentType = "html"
@@ -10886,6 +10919,7 @@ To ensure the functionality of Biblioshiny,
       paste("FactorialAnalysis_", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
+      req(values$CS)
       #go to a temp dir to avoid permission issues
       owd <- setwd(getWD())
       on.exit(setwd(owd))
@@ -11269,6 +11303,7 @@ To ensure the functionality of Biblioshiny,
       paste("ThematicMap-", Sys.Date(), ".png", sep = "")
     },
     content <- function(file) {
+      req(values$TM)
       safe_ggsave(
         filename = file,
         plot = values$TM$map,
@@ -11636,6 +11671,7 @@ To ensure the functionality of Biblioshiny,
       paste("ThematicEvolution-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
+      req(values$nexus)
       #go to a temp dir to avoid permission issues
       tmpdir <- getWD()
       owd <- setwd(tmpdir)
@@ -12507,6 +12543,7 @@ To ensure the functionality of Biblioshiny,
       paste("Co_citation_network-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
+      req(values$cocitnet)
       tmpdir <- getWD()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
@@ -12557,6 +12594,7 @@ To ensure the functionality of Biblioshiny,
   output$networkCocit.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
+      req(values$COCITnetwork)
       savenetwork(con, values$COCITnetwork$VIS)
     },
     contentType = "html"
@@ -13138,6 +13176,7 @@ To ensure the functionality of Biblioshiny,
       paste("Collaboration_network-", Sys.Date(), ".zip", sep = "")
     },
     content <- function(file) {
+      req(values$colnet)
       tmpdir <- getWD()
       owd <- setwd(tmpdir)
       on.exit(setwd(owd))
@@ -13181,6 +13220,7 @@ To ensure the functionality of Biblioshiny,
   output$networkCol.fig <- downloadHandler(
     filename = "network.html",
     content <- function(con) {
+      req(values$COLnetwork)
       savenetwork(con, values$COLnetwork$VIS)
     },
     contentType = "html"
@@ -13347,6 +13387,7 @@ To ensure the functionality of Biblioshiny,
       paste("BiblioshinyReport-", Sys.Date(), ".xlsx", sep = "")
     },
     content <- function(file) {
+      req(values$wb)
       wb_export <- copyWorkbook(values$wb)
       if (nrow(values$list_file) > 0) {
         wb_export <- addScreenWb(df = values$list_file, wb = wb_export) #, width=10, height=7, dpi=300)
@@ -13440,6 +13481,78 @@ To ensure the functionality of Biblioshiny,
     ignoreNULL = TRUE
   )
 
+  ### Disable download/screenshot buttons until analysis is run ----
+  .toggleDownloadBtn <- function(id, enabled) {
+    if (enabled) {
+      shinyjs::runjs(sprintf(
+        "var el=document.getElementById('%s'); if(el){el.removeAttribute('disabled'); el.classList.remove('disabled');}",
+        id
+      ))
+    } else {
+      shinyjs::runjs(sprintf(
+        "var el=document.getElementById('%s'); if(el){el.setAttribute('disabled','disabled'); el.classList.add('disabled');}",
+        id
+      ))
+    }
+  }
+
+  # Collection
+  observe({ .toggleDownloadBtn("collection.save", !is.null(values$M)) })
+  observe({ .toggleDownloadBtn("collection.saveMerge", !is.null(values$M)) })
+  observe({ .toggleDownloadBtn("collection.save_api", !is.null(values$M)) })
+  # Overview
+  observe({ .toggleDownloadBtn("ASPplot.save", !is.null(values$ASPplot)) })
+  observe({ .toggleDownloadBtn("ACpYplot.save", !is.null(values$ACpYplot)) })
+  observe({ .toggleDownloadBtn("DLCplot.save", !is.null(values$DLC)) })
+  observe({ .toggleDownloadBtn("screenTFP", !is.null(values$TFP)) })
+  # Sources
+  observe({ .toggleDownloadBtn("MRSplot.save", !is.null(values$MRSplot)) })
+  observe({ .toggleDownloadBtn("MLCSplot.save", !is.null(values$MLCSplot)) })
+  observe({ .toggleDownloadBtn("BLplot.save", !is.null(values$bradford)) })
+  observe({ .toggleDownloadBtn("SIplot.save", !is.null(values$SIplot)) })
+  observe({ .toggleDownloadBtn("SDplot.save", !is.null(values$SDplot)) })
+  # Authors
+  observe({ .toggleDownloadBtn("MRAplot.save", !is.null(values$MRAplot)) })
+  observe({ .toggleDownloadBtn("MLCAplot.save", !is.null(values$MLCAplot)) })
+  observe({ .toggleDownloadBtn("AIplot.save", !is.null(values$AIplot)) })
+  observe({ .toggleDownloadBtn("APOTplot.save", !is.null(values$AUProdOverTime)) })
+  observe({ .toggleDownloadBtn("LLplot.save", !is.null(values$LLplot)) })
+  # Affiliations
+  observe({ .toggleDownloadBtn("AFFplot.save", !is.null(values$AFFplot)) })
+  observe({ .toggleDownloadBtn("AffOverTimeplot.save", !is.null(values$AffOverTimePlot)) })
+  # Countries
+  observe({ .toggleDownloadBtn("MRCOplot.save", !is.null(values$MRCOplot)) })
+  observe({ .toggleDownloadBtn("CSPplot.save", !is.null(values$mapworld)) })
+  observe({ .toggleDownloadBtn("CountryOverTimeplot.save", !is.null(values$CountryOverTimePlot)) })
+  observe({ .toggleDownloadBtn("MCCplot.save", !is.null(values$MCCplot)) })
+  # Documents
+  observe({ .toggleDownloadBtn("MGCDplot.save", !is.null(values$MGCDplot)) })
+  observe({ .toggleDownloadBtn("MLCDplot.save", !is.null(values$MLCDplot)) })
+  observe({ .toggleDownloadBtn("MLCRplot.save", !is.null(values$MLCRplot)) })
+  observe({ .toggleDownloadBtn("RSplot.save", !is.null(values$res)) })
+  # Words
+  observe({ .toggleDownloadBtn("MRWplot.save", !is.null(values$MRWplot)) })
+  observe({ .toggleDownloadBtn("screenWC", !is.null(values$WordCloud)) })
+  observe({ .toggleDownloadBtn("screenTREEMAP", !is.null(values$TreeMap)) })
+  observe({ .toggleDownloadBtn("WDplot.save", !is.null(values$WDplot)) })
+  observe({ .toggleDownloadBtn("TTplot.save", !is.null(values$trendTopics)) })
+  # Clustering/Maps
+  observe({ .toggleDownloadBtn("CMplot.save", !is.null(values$CM)) })
+  observe({ .toggleDownloadBtn("FAplot.save", !is.null(values$CS)) })
+  observe({ .toggleDownloadBtn("TMplot.save", !is.null(values$TM)) })
+  observe({ .toggleDownloadBtn("TEplot.save", !is.null(values$nexus)) })
+  # Networks
+  observe({ .toggleDownloadBtn("network.coc", !is.null(values$cocnet)) })
+  observe({ .toggleDownloadBtn("networkCoc.fig", !is.null(values$COCnetwork)) })
+  observe({ .toggleDownloadBtn("network.cocit", !is.null(values$cocitnet)) })
+  observe({ .toggleDownloadBtn("networkCocit.fig", !is.null(values$COCITnetwork)) })
+  observe({ .toggleDownloadBtn("network.col", !is.null(values$colnet)) })
+  observe({ .toggleDownloadBtn("networkCol.fig", !is.null(values$COLnetwork)) })
+  # Report
+  observe({ .toggleDownloadBtn("report.save", !is.null(values$wb)) })
+  observe({ .toggleDownloadBtn("tall.save", !is.null(values$tallDf)) })
+  observe({ .toggleDownloadBtn("missingDataSave", !is.null(values$missingdf_formatted)) })
+
   ### screenshot buttons ----
   JScode_screenshot <- "
     var link = document.createElement('a');
@@ -13451,6 +13564,7 @@ To ensure the functionality of Biblioshiny,
   "
 
   observeEvent(input$missingDataSave, {
+    req(values$missingdf_formatted)
     screen2export(
       values$missingdf_formatted,
       filename = "missingDataTable",
@@ -13461,6 +13575,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   observeEvent(input$screenTFP, {
+    req(values$TFP)
     base_name <- paste0("ThreeFieldPlot-", gsub(" |:", "", Sys.time()), ".png")
     full_path <- file.path(getWD(), base_name)
     plotlySankey2png(values$TFP, filename = full_path, dpi = values$dpi, height = values$h)
@@ -13473,6 +13588,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   observeEvent(input$screenWC, {
+    req(values$WordCloud)
     screen2export(
       obj = values$WordCloud,
       filename = "WordCloud",
@@ -13483,6 +13599,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   observeEvent(input$screenTREEMAP, {
+    req(values$TreeMap)
     screen2export(
       obj = values$TreeMap,
       filename = "TreeMap",
@@ -13640,6 +13757,7 @@ To ensure the functionality of Biblioshiny,
       paste("tallFile-", Sys.Date(), ".csv", sep = "")
     },
     content <- function(file) {
+      req(values$tallDf)
       write.csv(values$tallDf, file = file, row.names = FALSE)
     },
     contentType = "csv"

@@ -10662,24 +10662,32 @@ To ensure the functionality of Biblioshiny,
       "Closeness",
       "PageRank"
     )
-    renderBibliobox(
-      cocData,
-      nrow = 10,
-      filename = "CoWord_Network",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 3:5,
-      dom = FALSE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$cocnet$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        cocData,
+        nrow = 10,
+        filename = "CoWord_Network",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 3:5,
+        dom = FALSE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
@@ -11343,24 +11351,32 @@ To ensure the functionality of Biblioshiny,
   output$TMTableCluster <- renderUI({
     req(values$TM)
     tmData <- values$TM$clusters
-    renderBibliobox(
-      tmData,
-      nrow = 10,
-      filename = "Thematic_Map_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 2:3,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$TM$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        tmData,
+        nrow = 10,
+        filename = "Thematic_Map_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 2:3,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
@@ -12011,120 +12027,160 @@ To ensure the functionality of Biblioshiny,
   output$TMTableCluster1 <- renderUI({
     req(values$nexus)
     tmData <- values$nexus$TM[[1]]$clusters
-    renderBibliobox(
-      tmData,
-      nrow = 10,
-      filename = "Thematic_Map_Period_1_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 2:3,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$nexus$TM[[1]]$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        tmData,
+        nrow = 10,
+        filename = "Thematic_Map_Period_1_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 2:3,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
   output$TMTableCluster2 <- renderUI({
     req(values$nexus)
     tmData <- values$nexus$TM[[2]]$clusters
-    renderBibliobox(
-      tmData,
-      nrow = 10,
-      filename = "Thematic_Map_Period_2_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 2:3,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$nexus$TM[[2]]$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        tmData,
+        nrow = 10,
+        filename = "Thematic_Map_Period_2_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 2:3,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
   output$TMTableCluster3 <- renderUI({
     req(values$nexus)
     tmData <- values$nexus$TM[[3]]$clusters
-    renderBibliobox(
-      tmData,
-      nrow = 10,
-      filename = "Thematic_Map_Period_3_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 2:3,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$nexus$TM[[3]]$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        tmData,
+        nrow = 10,
+        filename = "Thematic_Map_Period_3_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 2:3,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
   output$TMTableCluster4 <- renderUI({
     req(values$nexus)
     tmData <- values$nexus$TM[[4]]$clusters
-    renderBibliobox(
-      tmData,
-      nrow = 10,
-      filename = "Thematic_Map_Period_4_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 2:3,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$nexus$TM[[4]]$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        tmData,
+        nrow = 10,
+        filename = "Thematic_Map_Period_4_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 2:3,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
   output$TMTableCluster5 <- renderUI({
     req(values$nexus)
     tmData <- values$nexus$TM[[5]]$clusters
-    renderBibliobox(
-      tmData,
-      nrow = 10,
-      filename = "Thematic_Map_Period_5_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 2:3,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
+    Q <- values$nexus$TM[[5]]$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        tmData,
+        nrow = 10,
+        filename = "Thematic_Map_Period_5_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 2:3,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
       button = TRUE,
       escape = FALSE,
       selection = FALSE
+      )
     )
   })
 
@@ -12569,24 +12625,32 @@ To ensure the functionality of Biblioshiny,
       "Closeness",
       "PageRank"
     )
-    renderBibliobox(
-      cocitData,
-      nrow = 10,
-      filename = "CoCitation_Network",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 3:5,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$cocitnet$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        cocitData,
+        nrow = 10,
+        filename = "CoCitation_Network",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 3:5,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
@@ -13195,24 +13259,32 @@ To ensure the functionality of Biblioshiny,
   output$colTable <- renderUI({
     req(values$colnet)
     colData = values$colnet$cluster_res
-    renderBibliobox(
-      colData,
-      nrow = 10,
-      filename = "Collaboration_Network",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 3:5,
-      dom = TRUE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$colnet$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        colData,
+        nrow = 10,
+        filename = "Collaboration_Network",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 3:5,
+        dom = TRUE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 

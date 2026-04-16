@@ -412,6 +412,9 @@ networkPlot <-
       row.names = NULL
     )
 
+    ## Modularity of community detection
+    Q <- modularity(bsk.network, V(bsk.network)$community)
+
     net <- list(
       graph = bsk.network,
       graph_pajek = bsk.save,
@@ -421,6 +424,7 @@ networkPlot <-
       layout = l,
       S = S,
       nodeDegree = deg.dist,
+      modularity = Q,
       params = params
     )
 

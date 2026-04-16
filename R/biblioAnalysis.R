@@ -265,6 +265,10 @@ countryCollaboration <- function(M, Country, k, sep) {
     }
   }
 
+  if (k == 0) {
+    return(data.frame(Country = character(0), SCP = numeric(0), MCP = numeric(0)))
+  }
+
   CO <- names(Country)[1:k]
 
   df <- data.frame(Country = rep(NA, k), SCP = rep(0, k))

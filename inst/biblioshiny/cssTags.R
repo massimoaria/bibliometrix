@@ -4,6 +4,25 @@ cssTags <- function() {
     tags$head(tags$style(HTML(
       ".has-feedback .form-control { padding-right: 0px;}"
     ))),
+    ## Disable download/action buttons when analysis not yet run
+    tags$head(tags$style(HTML(
+      "[disabled], .disabled,
+       a.shiny-download-link[disabled], a.shiny-download-link.disabled,
+       a.bttn[disabled], a.bttn.disabled,
+       button.bttn[disabled], button.bttn.disabled {
+        pointer-events: none !important;
+        opacity: 0.35 !important;
+        cursor: not-allowed !important;
+      }"
+    ))),
+    ## JS interceptor: block clicks on disabled download links
+    tags$head(tags$script(HTML(
+      "$(document).on('click', 'a[disabled], a.disabled', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      });"
+    ))),
     ### animation for filter results box
     tags$head(tags$style(HTML(
       "

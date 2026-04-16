@@ -1,4 +1,8 @@
-# bibliometrix V.5.3.0 (Release date: 2026-02-26)
+# bibliometrix (development version)
+
+# bibliometrix 5.3.0
+
+# bibliometrix V.5.3.0 (Release date: 2026-04-10)
 
 ## Major Changes
 - **New Table Rendering Engine**: Replaced `DT` (DataTables) with a custom `htmlBoxFormat` engine for data visualization.
@@ -35,6 +39,8 @@
 - Fixed thematic evolution display issues.
 - Fixed chromium compatibility issues on Ubuntu server.
 - Improved author name formatting.
+- Fixed Biblioshiny crash and empty HTML downloads when clicking download/screenshot buttons before running the analysis. All export buttons are now disabled until results are available.
+- Fixed OpenAlex API error 400 when searching by Author or Concept fields. Entity-based fields now use a two-step ID resolution approach compatible with the current OpenAlex API.
 
 
 # bibliometrix V.5.2.1 (Release date: 2025-12-11)

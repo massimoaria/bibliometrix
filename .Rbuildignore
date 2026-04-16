@@ -28,3 +28,8 @@ Rubbish
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
 ^test_biblioshiny\.R$
+^man/figures/README-
+^man/figures/c[0-9]
+^man/figures/book_cover
+
+CRAN-SUBMISSION

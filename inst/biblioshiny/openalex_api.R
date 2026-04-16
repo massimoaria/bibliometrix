@@ -1007,16 +1007,54 @@ openAlexServer <- function(input, output, session, values) {
   })
 
   # Helper function to get field name for filter
+  # Fields that can be filtered directly on the /works endpoint
   get_filter_name <- function(field) {
     switch(
       field,
       "title" = "title.search",
       "abstract" = "abstract.search",
       "title_abstract" = "title_and_abstract.search",
-      "author" = "authorships.author.display_name.search",
-      "concept" = "concepts.display_name.search",
-      "default" = "default.search"
+      "default" = "default.search",
+      NULL
     )
+  }
+
+  # Entity-based fields require a two-step approach:
+  # 1) Search the entity endpoint to resolve names to IDs
+  # 2) Filter /works by those IDs
+  entity_field_config <- list(
+    "author" = list(
+      entity = "authors",
+      works_filter = "authorships.author.id"
+    ),
+    "concept" = list(
+      entity = "concepts",
+      works_filter = "concepts.id"
+    )
+  )
+
+  # Resolve entity-based search terms to OpenAlex IDs
+  resolve_entity_ids <- function(field, query_text) {
+    config <- entity_field_config[[field]]
+    if (is.null(config)) return(NULL)
+
+    tryCatch({
+      results <- openalexR::oa_fetch(
+        entity = config$entity,
+        display_name.search = query_text,
+        verbose = FALSE
+      )
+      if (!is.null(results) && nrow(results) > 0) {
+        ids <- gsub("https://openalex.org/", "", results$id)
+        return(list(
+          works_filter = config$works_filter,
+          ids = ids
+        ))
+      }
+      return(NULL)
+    }, error = function(e) {
+      return(NULL)
+    })
   }
 
   # Helper function to build query filters
@@ -1025,55 +1063,84 @@ openAlexServer <- function(input, output, session, values) {
       return(list())
     }
 
-    # Group queries by field
-    field_queries <- list()
+    search_filters <- list()
+
+    # Separate direct filters from entity-based filters
+    direct_queries <- list()
+    entity_queries <- list()
 
     for (i in seq_along(queryList)) {
       item <- queryList[[i]]
       field <- item$field
       filter_name <- get_filter_name(field)
 
-      if (is.null(field_queries[[filter_name]])) {
-        # First query for this field
-        field_queries[[filter_name]] <- list(
-          terms = c(item$query),
-          operators = c()
-        )
-      } else {
-        # Add operator and term
-        field_queries[[filter_name]]$operators <- c(
-          field_queries[[filter_name]]$operators,
-          item$operator
-        )
-        field_queries[[filter_name]]$terms <- c(
-          field_queries[[filter_name]]$terms,
-          item$query
-        )
+      if (!is.null(filter_name)) {
+        # Direct works filter (title, abstract, etc.)
+        if (is.null(direct_queries[[filter_name]])) {
+          direct_queries[[filter_name]] <- list(
+            terms = c(item$query),
+            operators = c()
+          )
+        } else {
+          direct_queries[[filter_name]]$operators <- c(
+            direct_queries[[filter_name]]$operators,
+            item$operator
+          )
+          direct_queries[[filter_name]]$terms <- c(
+            direct_queries[[filter_name]]$terms,
+            item$query
+          )
+        }
+      } else if (field %in% names(entity_field_config)) {
+        # Entity-based filter (author, concept)
+        if (is.null(entity_queries[[field]])) {
+          entity_queries[[field]] <- list(
+            terms = c(item$query),
+            operators = c()
+          )
+        } else {
+          entity_queries[[field]]$operators <- c(
+            entity_queries[[field]]$operators,
+            item$operator
+          )
+          entity_queries[[field]]$terms <- c(
+            entity_queries[[field]]$terms,
+            item$query
+          )
+        }
       }
     }
 
-    # Build the filter arguments
-    search_filters <- list()
-
-    for (filter_name in names(field_queries)) {
-      field_data <- field_queries[[filter_name]]
+    # Build direct filters
+    for (filter_name in names(direct_queries)) {
+      field_data <- direct_queries[[filter_name]]
 
       if (length(field_data$terms) == 1) {
-        # Single term - just use it as is
         search_filters[[filter_name]] <- field_data$terms[1]
       } else {
-        # Multiple terms - combine with operators
         query_parts <- c(field_data$terms[1])
-
         for (j in seq_along(field_data$operators)) {
-          operator <- field_data$operators[j]
-          term <- field_data$terms[j + 1]
-          query_parts <- c(query_parts, operator, term)
+          query_parts <- c(query_parts, field_data$operators[j], field_data$terms[j + 1])
         }
+        search_filters[[filter_name]] <- paste(query_parts, collapse = " ")
+      }
+    }
 
-        # Combine into single string
-        combined_query <- paste(query_parts, collapse = " ")
-        search_filters[[filter_name]] <- combined_query
+    # Resolve entity-based filters to IDs
+    for (field in names(entity_queries)) {
+      field_data <- entity_queries[[field]]
+      all_ids <- c()
+
+      for (term in field_data$terms) {
+        resolved <- resolve_entity_ids(field, term)
+        if (!is.null(resolved)) {
+          all_ids <- c(all_ids, resolved$ids)
+        }
+      }
+
+      if (length(all_ids) > 0) {
+        config <- entity_field_config[[field]]
+        search_filters[[config$works_filter]] <- paste(unique(all_ids), collapse = "|")
       }
     }
 

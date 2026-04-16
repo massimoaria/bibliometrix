@@ -460,6 +460,7 @@ thematicMap <- function(
       ),
     nclust = dim(df)[1],
     net = Net,
+    modularity = Net$modularity,
     subgraphs = gcl,
     documentToClusters = documentToClusters,
     params = params

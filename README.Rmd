@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%",
-  dpi = 300
+  dpi = 96
 )
 library(dplyr)
 ```
@@ -338,7 +338,7 @@ Example:
 file <- c("file1.txt", "file2.txt", ...)
 ```
 
-```{r Data loading and Converting}
+```{r Data-loading-and-Converting}
 ## An example from bibliometrix vignettes
 
 file <- c("https://www.bibliometrix.org/datasets/management1.txt","https://www.bibliometrix.org/datasets/management2.txt")
@@ -370,7 +370,7 @@ completeness of metadata using **missingData()**:
 The argument *M* is a bibliographic data frame obtained by the
 **convert2df** function.
 
-```{r Completeness of metadata}
+```{r Completeness-of-metadata}
 ## An example from bibliometrix vignettes
 
 com <- missingData(M)
@@ -405,7 +405,7 @@ The **biblioAnalysis** function returns an object of class
 
 Use the generic function **summary** to display main results:
 
-```{r summary generic function}
+```{r summary-generic-function}
 S <- summary(object = results, k = 10, pause = FALSE)
 ```
 
@@ -415,7 +415,7 @@ to pause between tables.
 
 Basic visualizations can be generated using the **plot** function:
 
-```{r plot generic function, fig.width=7}
+```{r plot-generic-function, fig.width=7}
 plot(x = results, k = 10, pause = FALSE)
 ```
 
@@ -527,7 +527,7 @@ kamada-kawai, fruchterman-reingold, mds, etc.
 
 ### Country Scientific Collaboration
 
-```{r Country collaboration, fig.height=7, fig.width=7, warning=FALSE}
+```{r Country-collaboration, fig.height=7, fig.width=7, warning=FALSE}
 # Create a country collaboration network
 
 M <- metaTagExtraction(M, Field = "AU_CO", sep = ";")
@@ -543,7 +543,7 @@ highlighting countries with strong scientific partnerships.
 
 ### Co-Citation Network
 
-```{r Co-citation network, fig.height=7, fig.width=7, warning=FALSE}
+```{r Co-citation-network, fig.height=7, fig.width=7, warning=FALSE}
 # Create a co-citation network
 
 NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", n = 30, sep = ";")
@@ -559,7 +559,7 @@ together.
 
 ### Keyword Co-occurrences
 
-```{r Keyword co-occurrences, fig.height=7, fig.width=7, warning=FALSE}
+```{r Keyword-co-occurrences, fig.height=7, fig.width=7, warning=FALSE}
 # Create keyword co-occurrences network
 
 NetMatrix <- biblioNetwork(M, analysis = "co-occurrences", network = "keywords", sep = ";")
@@ -681,7 +681,7 @@ The function includes natural language processing (NLP) routines (see
 implements Porter's stemming algorithm to reduce words to their root
 form.
 
-```{r Co-Word Analysis, fig.height=9, fig.width=9, warning=FALSE}
+```{r Co-Word-Analysis, fig.height=9, fig.width=9, warning=FALSE}
 # Conceptual Structure using keywords (method="MCA")
 
 CS <- conceptualStructure(M, field = "ID", method = "MCA", minDegree = 10, 
@@ -734,7 +734,7 @@ bibliographic collection.
 The **histNetwork** function generates a chronological direct citation
 network matrix that can be visualized using **histPlot**:
 
-```{r Historical Co-citation network, fig.height=9, fig.width=9, warning=FALSE}
+```{r Historical-Co-citation-network, fig.height=9, fig.width=9, warning=FALSE}
 # Create a historical citation network
 
 histResults <- histNetwork(M, sep = ";")

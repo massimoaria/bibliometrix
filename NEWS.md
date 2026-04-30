@@ -1,6 +1,7 @@
 # bibliometrix (development version)
 
-# bibliometrix 5.3.0
+## Changes:
+- **Biblioshiny**: Minor fix in table layout for numeric columns
 
 # bibliometrix V.5.3.0 (Release date: 2026-04-10)
 

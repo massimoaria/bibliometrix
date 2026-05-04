@@ -57,6 +57,24 @@ htmlBoxFormat <- function(
     paste(sample(c(0:9, letters), 8, replace = TRUE), collapse = "")
   )
   col_names <- colnames(df)
+  n_cols <- ncol(df)
+
+  # Detect numeric columns: explicit (via `numeric` arg) plus auto-detected
+  # (every non-empty stripped value parses cleanly as a number). Used for
+  # right-alignment AND for client-side filter behavior.
+  num_re <- "^-?[0-9]+(\\.[0-9]+)?$"
+  is_numeric_col <- logical(n_cols)
+  for (j in seq_len(n_cols)) {
+    if (j %in% numeric) {
+      is_numeric_col[j] <- TRUE
+      next
+    }
+    raw <- as.character(df[[j]])
+    stripped <- gsub("<.*?>", "", raw)
+    stripped <- stripped[!is.na(stripped) & nzchar(stripped)]
+    is_numeric_col[j] <- length(stripped) > 0 &&
+      all(grepl(num_re, stripped))
+  }
 
   get_align <- function(i) {
     if (i %in% left) {
@@ -65,7 +83,7 @@ htmlBoxFormat <- function(
     if (i %in% right) {
       return("text-align: right;")
     }
-    if (i %in% numeric) {
+    if (is_numeric_col[i]) {
       return("text-align: right;")
     }
     return("text-align: left;")
@@ -110,19 +128,31 @@ htmlBoxFormat <- function(
   header_html <- paste0(header_html, "</thead>")
 
   # Body: prepare data as JSON for client-side rendering (only visible page in DOM)
-  n_cols <- ncol(df)
   aligns <- sapply(1:n_cols, get_align)
+  numeric_cols_idx <- which(is_numeric_col) - 1L # 0-indexed for JS
 
   # Build column-oriented vectors (fast R serialization, reconstruct rows in JS)
   sort_cols <- vector("list", n_cols)
   disp_cols <- vector("list", n_cols)
   for (j in 1:n_cols) {
     vals <- as.character(df[[j]])
+    vals[is.na(vals)] <- ""
     sort_vals <- gsub("<.*?>", "", vals)
-    if (j %in% numeric) {
-      num_vals <- as.numeric(sort_vals)
-      disp_cols[[j]] <- format(round(num_vals, round), nsmall = round)
-      sort_cols[[j]] <- as.character(num_vals)
+    # Apply decimal formatting to:
+    #  - explicit numeric columns (always — user opted in)
+    #  - auto-detected numeric columns that contain at least one decimal value
+    #    (so integers in a "rounded" column display as "29.0" alongside "30.5",
+    #    while pure-integer columns like years stay as "2020" instead of "2020.00")
+    apply_format <- (j %in% numeric) ||
+      (is_numeric_col[j] && round > 0 && any(grepl(".", sort_vals, fixed = TRUE)))
+    if (apply_format) {
+      num_vals <- suppressWarnings(as.numeric(sort_vals))
+      disp_cols[[j]] <- ifelse(
+        is.na(num_vals),
+        "",
+        formatC(num_vals, format = "f", digits = round)
+      )
+      sort_cols[[j]] <- ifelse(is.na(num_vals), "", as.character(num_vals))
     } else {
       disp_cols[[j]] <- vals
       sort_cols[[j]] <- sort_vals
@@ -133,11 +163,13 @@ htmlBoxFormat <- function(
   # jsonlite serializes character vectors very efficiently in C — no nested R list overhead
   data_json <- jsonlite::toJSON(
     list(s = sort_cols, d = disp_cols, n = nrow(df)),
-    auto_unbox = TRUE
+    auto_unbox = TRUE,
+    na = "string"
   )
 
   # UI Structure — empty tbody, data delivered via JSON script tag
   aligns_json <- jsonlite::toJSON(aligns, auto_unbox = TRUE)
+  numeric_cols_json <- jsonlite::toJSON(numeric_cols_idx, auto_unbox = FALSE)
 
   html_out <- tagList(
     tags$script(
@@ -193,8 +225,8 @@ htmlBoxFormat <- function(
       HTML(as.character(data_json))
     ),
 
-    tags$script(HTML(sprintf(
-      '
+    tags$script(HTML({
+      js_tmpl <- '
       if (typeof window.exportToExcel !== "function") {
         window.exportToExcel = function(tid, fname) {
           var state = window["__bb_" + tid];
@@ -225,10 +257,11 @@ htmlBoxFormat <- function(
       }
 
       (function() {
-        var tid = "%s";
-        var pageSize = %d;
-        var hasSummary = %s;
-        var aligns = %s;
+        var tid = "@@TID@@";
+        var pageSize = @@PAGESIZE@@;
+        var hasSummary = @@HASSUMMARY@@;
+        var aligns = @@ALIGNS@@;
+        var numericColsList = @@NUMERIC@@;
 
         function init() {
           var table = document.getElementById(tid);
@@ -243,12 +276,23 @@ htmlBoxFormat <- function(
           for (var r = 0; r < raw.n; r++) {
             var row = new Array(nCols);
             for (var c = 0; c < nCols; c++) {
-              row[c] = {s: raw.s[c][r], d: raw.d[c][r]};
+              var sVal = raw.s[c][r];
+              var dVal = raw.d[c][r];
+              row[c] = {
+                s: (sVal == null ? "" : String(sVal)),
+                d: (dVal == null ? "" : String(dVal))
+              };
             }
             allData[r] = row;
           }
           raw = null; // free column-oriented data
           var filteredData = allData.slice();
+
+          // R has already determined which columns are numeric (explicit + auto)
+          var numRe = /^-?\\d+(?:\\.\\d+)?$/;
+          var isNumericCol = new Array(nCols);
+          for (var c2 = 0; c2 < nCols; c2++) isNumericCol[c2] = false;
+          for (var k = 0; k < numericColsList.length; k++) isNumericCol[numericColsList[k]] = true;
           var currentPage = 0;
           var sortCol = -1;
           var sortAsc = true;
@@ -322,8 +366,8 @@ htmlBoxFormat <- function(
               this.querySelector(".sort-icon").innerText = sortAsc ? "\\u25B2" : "\\u25BC";
               this.querySelector(".sort-icon").style.color = "#333";
               filteredData.sort(function(a, b) {
-                var valA = a[col].s.trim();
-                var valB = b[col].s.trim();
+                var valA = (a[col].s || "").trim();
+                var valB = (b[col].s || "").trim();
                 if (!isNaN(valA) && !isNaN(valB) && valA !== "" && valB !== "") {
                   return sortAsc ? parseFloat(valA) - parseFloat(valB) : parseFloat(valB) - parseFloat(valA);
                 }
@@ -335,14 +379,55 @@ htmlBoxFormat <- function(
           });
 
           var filters = document.querySelectorAll(".table-filter-" + tid);
+          // Hint users that numeric columns accept operators
+          filters.forEach(function(input) {
+            var col = parseInt(input.getAttribute("data-col"));
+            if (isNumericCol[col]) input.setAttribute("placeholder", "= > < range");
+          });
+
+          var rangeRe = /^(-?\\d+(?:\\.\\d+)?)\\s*(?:-|\\.\\.)\\s*(-?\\d+(?:\\.\\d+)?)$/;
+          var opRe = /^(>=|<=|>|<|=)\\s*(-?\\d+(?:\\.\\d+)?)$/;
+
+          function matchNumeric(cellSort, raw) {
+            if (cellSort === "" || cellSort === "NA") return false;
+            var n = parseFloat(cellSort);
+            if (isNaN(n)) return false;
+            var fv = raw.trim();
+            var m;
+            if ((m = rangeRe.exec(fv))) {
+              var lo = parseFloat(m[1]), hi = parseFloat(m[2]);
+              if (lo > hi) { var t = lo; lo = hi; hi = t; }
+              return n >= lo && n <= hi;
+            }
+            if ((m = opRe.exec(fv))) {
+              var op = m[1], v = parseFloat(m[2]);
+              if (op === ">") return n > v;
+              if (op === "<") return n < v;
+              if (op === ">=") return n >= v;
+              if (op === "<=") return n <= v;
+              return n === v;
+            }
+            if (numRe.test(fv)) return n === parseFloat(fv);
+            // Unrecognized expression: filter out everything until input is valid.
+            return false;
+          }
+
           filters.forEach(function(input) {
             input.addEventListener("input", function() {
-              var fVals = Array.from(filters).map(function(f) { return f.value.toUpperCase(); });
+              var fRaw = Array.from(filters).map(function(f) { return f.value; });
+              var fUpper = fRaw.map(function(v) { return v.toUpperCase(); });
               filteredData = allData.filter(function(row) {
-                return fVals.every(function(val, idx) {
-                  if (!val) return true;
-                  return row[idx].s.toUpperCase().indexOf(val) > -1;
-                });
+                for (var idx = 0; idx < fRaw.length; idx++) {
+                  var val = fRaw[idx];
+                  if (!val || !val.trim()) continue;
+                  var cell = row[idx].s;
+                  if (isNumericCol[idx]) {
+                    if (!matchNumeric(cell, val)) return false;
+                  } else {
+                    if (cell.toUpperCase().indexOf(fUpper[idx]) === -1) return false;
+                  }
+                }
+                return true;
               });
               window["__bb_" + tid].filteredData = filteredData;
               currentPage = 0;
@@ -354,12 +439,35 @@ htmlBoxFormat <- function(
         }
         init();
       })();
-      ',
-      table_id,
-      nrow,
-      ifelse(has_summary, "true", "false"),
-      as.character(aligns_json)
-    )))
+      '
+      js_filled <- js_tmpl
+      js_filled <- gsub("@@TID@@", table_id, js_filled, fixed = TRUE)
+      js_filled <- gsub(
+        "@@PAGESIZE@@",
+        as.character(nrow),
+        js_filled,
+        fixed = TRUE
+      )
+      js_filled <- gsub(
+        "@@HASSUMMARY@@",
+        ifelse(has_summary, "true", "false"),
+        js_filled,
+        fixed = TRUE
+      )
+      js_filled <- gsub(
+        "@@ALIGNS@@",
+        as.character(aligns_json),
+        js_filled,
+        fixed = TRUE
+      )
+      js_filled <- gsub(
+        "@@NUMERIC@@",
+        as.character(numeric_cols_json),
+        js_filled,
+        fixed = TRUE
+      )
+      js_filled
+    }))
   )
 
   return(as.character(html_out))

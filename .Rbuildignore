@@ -33,3 +33,5 @@ Rubbish
 ^man/figures/book_cover
 
 CRAN-SUBMISSION
+^\.positai$
+^tasks$

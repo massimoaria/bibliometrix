@@ -126,6 +126,21 @@ completeMetadata <- function(M,
 
   before <- missingData(M)$mandatoryTags
 
+  ## TC normalization to match missingData()'s collection-level semantics.
+  ## missingData() reports TC as 100% missing only when sum(M$TC) == 0;
+  ## otherwise per-cell zeros are treated as legitimate (a real 0 citation
+  ## count). To stay consistent, we treat TC = 0 as vacant for enrichment
+  ## ONLY when the entire column sums to zero, by mapping those zeros to NA
+  ## here so the standard vacancy predicate flags them. If even one row has
+  ## TC > 0, all the zeros are left untouched (genuine zeros).
+  if ("TC" %in% fields && "TC" %in% names(M)) {
+    tc_sum <- suppressWarnings(sum(as.numeric(M$TC), na.rm = TRUE))
+    if (!is.na(tc_sum) && tc_sum == 0) {
+      tc_zeros <- !is.na(M$TC) & trimws(as.character(M$TC)) %in% c("0", "0.0")
+      if (any(tc_zeros)) M$TC[tc_zeros] <- NA_character_
+    }
+  }
+
   ## Snapshot eligible rows: DOI present and at least one target field empty.
   doi_norm <- .normalize_doi(M$DI)
   target_present <- intersect(fields, names(M))
@@ -275,16 +290,8 @@ completeMetadata <- function(M,
 }
 
 #' @noRd
-.is_vacant <- function(x, field = NULL) {
-  base <- is.na(x) | x %in% c("NA,0000,NA", "NA", "", "none")
-  if (!is.null(field) && identical(field, "TC")) {
-    ## Scopus exports often ship TC = 0 for every row; missingData() flags
-    ## that as Critical. When the user opts to fill TC, treat 0 as vacant
-    ## so OpenAlex can replace it with the current citation count. The
-    ## enrichment is still fill-only for any other field.
-    base <- base | trimws(as.character(x)) %in% c("0", "0.0")
-  }
-  base
+.is_vacant <- function(x) {
+  is.na(x) | x %in% c("NA,0000,NA", "NA", "", "none")
 }
 
 #' @noRd
@@ -692,7 +699,7 @@ completeMetadata <- function(M,
     for (f in fields) {
       if (!(f %in% names(M))) next
       cur <- M[[f]][i]
-      if (!.is_vacant(cur, field = f)) next
+      if (!.is_vacant(cur)) next
       val <- rec[[f]]
       if (is.null(val) || length(val) == 0) next
       v <- as.character(val[[1]])

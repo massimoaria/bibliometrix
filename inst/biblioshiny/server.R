@@ -2718,7 +2718,10 @@ To ensure the functionality of Biblioshiny,
 
   output$enrichmentComparison <- renderUI({
     before <- values$missingdf_before
-    after  <- values$missingdf
+    ## Prefer the post-enrichment snapshot returned by completeMetadata().
+    ## values$missingdf is stale until output$missingDataTable re-renders.
+    after  <- values$missingdf_after
+    if (is.null(after)) after <- values$missingdf
     report <- values$enrichmentReport
     if (is.null(before) || is.null(after) || is.null(report)) {
       return(div(em("No enrichment result to display.")))
@@ -2737,7 +2740,9 @@ To ensure the functionality of Biblioshiny,
     }
 
     before_pct <- before$missing_pct[match(after$tag, before$tag)]
-    delta <- round(before_pct - after$missing_pct, 2)
+    ## Natural sign: delta = after - before. Negative = improvement (good),
+    ## positive = regression (should not happen with fill-only enrichment).
+    delta <- round(after$missing_pct - before_pct, 2)
 
     ## Status colour mapping mirrors the existing missingDataTable.
     status_html <- function(s) {
@@ -2760,9 +2765,21 @@ To ensure the functionality of Biblioshiny,
     }
     delta_html <- function(d) {
       if (is.na(d) || d == 0) {
-        return(sprintf('<span style="color:#888;">%.2f</span>', if (is.na(d)) 0 else d))
+        return('<span style="color:#888;">0.00</span>')
       }
-      sprintf('<span style="color:#1a7f37;font-weight:600;">-%.2f</span>', d)
+      ## Non-zero deltas are rendered as full coloured badges so the gain
+      ## from the enrichment is immediately visible. Improvement = blue,
+      ## regression = red (should not happen with fill-only enrichment).
+      ## A leading arrow icon serves a second purpose: it makes the visible
+      ## text non-numeric, so renderBibliobox does NOT auto-detect this
+      ## column as numeric (which would strip the HTML and reformat the
+      ## values with formatC(), killing the badge).
+      bg    <- if (d < 0) "#1d8fe1" else "#b22222"
+      arrow <- if (d < 0) "&#9660;" else "&#9650;"   # ▼ or ▲
+      sprintf(
+        '<span style="display:block;background-color:%s;color:white;padding:4px;border-radius:3px;text-align:center;font-weight:700;font-size:13px;">%s %.2f</span>',
+        bg, arrow, abs(d)
+      )
     }
 
     df <- data.frame(
@@ -2828,6 +2845,7 @@ To ensure the functionality of Biblioshiny,
     values$M_pre_enrich <- NULL
     values$enrichmentReport <- NULL
     values$missingdf_before <- NULL
+    values$missingdf_after <- NULL
     removeModal()
     show_alert(
       title = "Enrichment reverted",
@@ -3029,6 +3047,10 @@ To ensure the functionality of Biblioshiny,
     ## Apply the enriched collection
     values$M <- res$M
     values$enrichmentReport <- res$report
+    ## Stash the post-enrichment missingData() snapshot. We cannot rely on
+    ## values$missingdf because it is only re-set when output$missingDataTable
+    ## is re-rendered, which has not happened yet (its modal is closed).
+    values$missingdf_after <- res$after
     n_filled <- sum(res$report$n_filled, na.rm = TRUE)
     n_failed <- sum(res$report$n_failed, na.rm = TRUE)
 
@@ -3081,6 +3103,8 @@ To ensure the functionality of Biblioshiny,
     values$M <- values$M_pre_enrich
     values$M_pre_enrich <- NULL
     values$enrichmentReport <- NULL
+    values$missingdf_before <- NULL
+    values$missingdf_after <- NULL
     show_alert(
       title = "Enrichment reverted",
       text = "Restored the collection to its pre-enrichment state.",
@@ -9406,8 +9430,15 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$stopwordList <- renderUI({
+    df_sl <- values$GenericSL
+    if (!is.null(df_sl) && "term" %in% names(df_sl)) {
+      df_sl$term <- sprintf(
+        '<span style="white-space:nowrap;">%s</span>',
+        as.character(df_sl$term)
+      )
+    }
     renderBibliobox(
-      values$GenericSL,
+      df_sl,
       nrow = Inf,
       filename = "Stopword_List",
       pagelength = FALSE,
@@ -9429,8 +9460,18 @@ To ensure the functionality of Biblioshiny,
   })
 
   output$synonymList <- renderUI({
+    df_syn <- values$GenericSYN
+    if (!is.null(df_syn) && "term" %in% names(df_syn)) {
+      ## Keep single-word terms (e.g. "bibliometrics") on one line; the
+      ## modal width is bounded so without nowrap the column would split
+      ## mid-word.
+      df_syn$term <- sprintf(
+        '<span style="white-space:nowrap;">%s</span>',
+        as.character(df_syn$term)
+      )
+    }
     renderBibliobox(
-      values$GenericSYN,
+      df_syn,
       nrow = Inf,
       filename = "Stopword_List",
       pagelength = FALSE,

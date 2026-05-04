@@ -6070,7 +6070,11 @@ popUpGeneric <- function(
   color = c("#1d8fe1", "#913333", "#FFA800"),
   subtitle = "",
   btn_labels = "OK",
-  size = "40%"
+  ## "40%" is not a valid show_alert() size (the enum is xs/s/m/l/xl) and was
+  ## silently dropped to the default, producing a very narrow modal. "l" gives
+  ## these tabular pop-ups (Synonym List, Stopword List, ...) enough width to
+  ## display single-word terms without mid-word breaks.
+  size = "l"
 ) {
   showButton <- TRUE
   timer <- NA

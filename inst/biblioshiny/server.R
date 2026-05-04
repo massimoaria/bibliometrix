@@ -2668,6 +2668,16 @@ To ensure the functionality of Biblioshiny,
           icon = icon("exclamation-sign", lib = "glyphicon")
         ),
         actionButton(
+          label = "Complete",
+          inputId = "missingComplete",
+          icon = icon("download", lib = "glyphicon")
+        ),
+        actionButton(
+          label = "Undo",
+          inputId = "missingCompleteUndo",
+          icon = icon("repeat", lib = "glyphicon")
+        ),
+        actionButton(
           label = "Report",
           inputId = "missingReport",
           icon = icon("plus", lib = "glyphicon")
@@ -2681,6 +2691,421 @@ To ensure the functionality of Biblioshiny,
       ),
     )
   }
+
+  ## ---- Metadata completion result modal (Before / After) -----------------
+  enrichmentResultModal <- function(session) {
+    ns <- session$ns
+    modalDialog(
+      title = "Metadata completion - Before / After",
+      uiOutput(ns("enrichmentComparison")),
+      size = "l",
+      easyClose = TRUE,
+      footer = tagList(
+        actionButton(
+          label = "Show full audit",
+          inputId = "enrichmentBackToAudit",
+          icon = icon("list", lib = "glyphicon")
+        ),
+        actionButton(
+          label = "Undo",
+          inputId = "enrichmentUndoFromResult",
+          icon = icon("repeat", lib = "glyphicon")
+        ),
+        modalButton(label = "Close")
+      )
+    )
+  }
+
+  output$enrichmentComparison <- renderUI({
+    before <- values$missingdf_before
+    after  <- values$missingdf
+    report <- values$enrichmentReport
+    if (is.null(before) || is.null(after) || is.null(report)) {
+      return(div(em("No enrichment result to display.")))
+    }
+
+    ## Aggregate filled counts per (field, source).
+    by_oa <- stats::setNames(integer(length(after$tag)), after$tag)
+    by_cr <- stats::setNames(integer(length(after$tag)), after$tag)
+    if (nrow(report) > 0) {
+      for (i in seq_len(nrow(report))) {
+        f <- report$field[i]; s <- report$source[i]; n <- report$n_filled[i]
+        if (!(f %in% names(by_oa))) next
+        if (s == "openalex") by_oa[f] <- by_oa[f] + n
+        else if (s == "crossref") by_cr[f] <- by_cr[f] + n
+      }
+    }
+
+    before_pct <- before$missing_pct[match(after$tag, before$tag)]
+    delta <- round(before_pct - after$missing_pct, 2)
+
+    ## Status colour mapping mirrors the existing missingDataTable.
+    status_html <- function(s) {
+      if (is.na(s)) return("")
+      bg <- switch(
+        s,
+        "Completely missing" = "#b22222",
+        "Critical"           = "#f08080",
+        "Poor"               = "lightgrey",
+        "Acceptable"         = "#f0e68c",
+        "Good"               = "#90ee90",
+        "Excellent"          = "#32cd32",
+        "white"
+      )
+      fg <- if (s %in% c("Completely missing","Critical","Excellent")) "white" else "black"
+      sprintf(
+        '<span style="display:block;background-color:%s;color:%s;padding:4px;border-radius:3px;text-align:center;font-weight:600;font-size:13px;">%s</span>',
+        bg, fg, s
+      )
+    }
+    delta_html <- function(d) {
+      if (is.na(d) || d == 0) {
+        return(sprintf('<span style="color:#888;">%.2f</span>', if (is.na(d)) 0 else d))
+      }
+      sprintf('<span style="color:#1a7f37;font-weight:600;">-%.2f</span>', d)
+    }
+
+    df <- data.frame(
+      Metadata    = sprintf('<strong>%s</strong>', after$tag),
+      Description = sprintf('<strong>%s</strong>', after$description),
+      `Before %`  = sprintf('%.2f', before_pct),
+      `After %`   = sprintf('<b>%.2f</b>', after$missing_pct),
+      `Delta`     = vapply(delta, delta_html, character(1)),
+      OpenAlex    = sprintf('<span style="color:%s;">%d</span>',
+                            ifelse(by_oa[after$tag] > 0, "#1a7f37", "#888"),
+                            by_oa[after$tag]),
+      Crossref    = sprintf('<span style="color:%s;">%d</span>',
+                            ifelse(by_cr[after$tag] > 0, "#1a7f37", "#888"),
+                            by_cr[after$tag]),
+      Status      = vapply(after$status, status_html, character(1)),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+
+    n_filled_total <- sum(report$n_filled, na.rm = TRUE)
+    n_failed_total <- sum(report$n_failed, na.rm = TRUE)
+    headline <- sprintf(
+      'Filled <b>%d</b> cells across %d records (Open Access: %d &middot; Crossref: %d)%s',
+      n_filled_total,
+      sum(report$n_attempted, na.rm = TRUE),
+      sum(by_oa), sum(by_cr),
+      if (n_failed_total > 0) sprintf(' &middot; <i>%d records not retrieved</i>', n_failed_total) else ""
+    )
+
+    tagList(
+      div(HTML(headline), style = "text-align:center;margin-bottom:14px;font-size:14px;"),
+      renderBibliobox(
+        df         = df,
+        nrow       = nrow(df),
+        escape     = FALSE,
+        scrollX    = TRUE,
+        dom        = FALSE,
+        filter     = "none",
+        pagelength = FALSE,
+        button     = FALSE,
+        round      = 2
+      )
+    )
+  })
+
+  observeEvent(input$enrichmentBackToAudit, {
+    removeModal()
+    if (ncol(values$M) > 1) {
+      showModal(missingModal(session))
+    }
+  })
+
+  observeEvent(input$enrichmentUndoFromResult, {
+    if (is.null(values$M_pre_enrich)) {
+      show_alert(
+        title = "Nothing to undo",
+        text = "No enrichment has been applied in this session.",
+        type = "info"
+      )
+      return()
+    }
+    values$M <- values$M_pre_enrich
+    values$M_pre_enrich <- NULL
+    values$enrichmentReport <- NULL
+    values$missingdf_before <- NULL
+    removeModal()
+    show_alert(
+      title = "Enrichment reverted",
+      text = "Restored the collection to its pre-enrichment state.",
+      type = "success"
+    )
+    if (ncol(values$M) > 1) {
+      showModal(missingModal(session))
+    }
+  })
+
+  ## ---- Metadata completion via Crossref (DOI lookup) ----------------------
+  ## The missingModal exposes a "Complete" button that opens a small config
+  ## sub-modal. Running the enrichment updates values$M; the missingDataTable
+  ## reactive then re-renders automatically. The pre-enrichment snapshot is
+  ## stashed in values$M_pre_enrich so "Undo" can restore it.
+
+  observeEvent(input$missingComplete, {
+    if (!ncol(values$M) > 1 || nrow(values$M) < 1) return()
+
+    ## Build the field checkbox list, pre-selecting fields that are Poor /
+    ## Critical / Completely missing. Crossref does not provide DE/ID/WC/TC;
+    ## OpenAlex covers TC plus all the others except DE/ID/WC.
+    md <- values$missingdf
+    all_fields <- c("AB","AU","C1","CR","DT","LA","PY","RP","SO","TC","TI")
+    cr_fields  <- setdiff(all_fields, "TC")  # TC requires OpenAlex
+    if (!is.null(md)) {
+      bad_status <- c("Poor","Critical","Completely missing")
+      preselect <- md$tag[md$tag %in% all_fields & md$status %in% bad_status]
+      if (length(preselect) == 0) preselect <- intersect(all_fields, md$tag)
+    } else {
+      preselect <- all_fields
+    }
+    n_eligible <- sum(!is.na(.bib_doi_norm(values$M$DI)))
+
+    ## Auto-disable OpenAlex when the source DB is OpenAlex itself.
+    db_is_oa <- length(values$M$DB) > 0 &&
+      !is.na(values$M$DB[1]) &&
+      toupper(values$M$DB[1]) == "OPENALEX"
+
+    default_sources <- if (db_is_oa) "crossref" else c("openalex", "crossref")
+
+    ## Read polite email and OpenAlex API key from biblioshiny Settings.
+    polite_email <- if (!is.null(values$oaPoliteEmail) &&
+                        nzchar(values$oaPoliteEmail)) values$oaPoliteEmail else NULL
+    oa_apikey    <- if (!is.null(values$oaApiKey) &&
+                        nzchar(values$oaApiKey)) values$oaApiKey else NULL
+
+    creds_html <- paste0(
+      "<small>",
+      if (!is.null(polite_email)) {
+        sprintf("Polite email from Settings: <code>%s</code>", polite_email)
+      } else {
+        "<i>No polite email set in Settings; requests will use the public pool.</i>"
+      },
+      "<br>",
+      if (!is.null(oa_apikey)) {
+        "OpenAlex API key from Settings: <code>configured</code>"
+      } else {
+        "<i>No OpenAlex API key set in Settings; the public pool will be used.</i>"
+      },
+      "</small>"
+    )
+
+    removeModal()
+    showModal(modalDialog(
+      title = "Complete missing metadata via DOI lookup",
+      tagList(
+        p(HTML(sprintf(
+          "We will query the selected sources for the %d records that have a DOI and try to fill the selected fields. <b>Existing values are never overwritten.</b>",
+          n_eligible
+        ))),
+        checkboxGroupInput(
+          "missingCompleteSources",
+          label = "Sources",
+          choices = c("OpenAlex" = "openalex", "Crossref" = "crossref"),
+          selected = default_sources,
+          inline = TRUE
+        ),
+        if (db_is_oa) {
+          helpText(HTML(
+            "<small><i>The collection was imported from OpenAlex; the OpenAlex pass is unavailable for this dataset.</i></small>"
+          ))
+        },
+        helpText(HTML(creds_html)),
+        checkboxGroupInput(
+          "missingCompleteFields",
+          label = "Fields to attempt to fill",
+          choices = all_fields,
+          selected = preselect,
+          inline = TRUE
+        ),
+        helpText(HTML(
+          "<small>Always skipped: <b>ID</b> (Keywords Plus) and <b>WC</b> (WoS categories) are WoS-proprietary. <b>DE</b> (author keywords) is not provided by Crossref; OpenAlex \"keywords\" are AI-derived topic labels and are not filled by default. <b>TC</b> requires the OpenAlex pass.</small>"
+        ))
+      ),
+      size = "m",
+      easyClose = FALSE,
+      footer = tagList(
+        actionButton(
+          label = "Run",
+          inputId = "missingCompleteRun",
+          icon = icon("play", lib = "glyphicon"),
+          class = "btn-primary"
+        ),
+        actionButton(
+          label = "Back",
+          inputId = "missingCompleteBack",
+          icon = icon("arrow-left", lib = "glyphicon")
+        )
+      )
+    ))
+  })
+
+  observeEvent(input$missingCompleteBack, {
+    removeModal()
+    if (ncol(values$M) > 1) {
+      showModal(missingModal(session))
+    }
+  })
+
+  observeEvent(input$missingCompleteRun, {
+    fields <- input$missingCompleteFields
+    if (is.null(fields) || length(fields) == 0) {
+      show_alert(
+        title = "No fields selected",
+        text = "Pick at least one field to enrich.",
+        type = "warning"
+      )
+      return()
+    }
+    sources <- input$missingCompleteSources
+    if (is.null(sources) || length(sources) == 0) {
+      show_alert(
+        title = "No sources selected",
+        text = "Pick at least one of OpenAlex or Crossref.",
+        type = "warning"
+      )
+      return()
+    }
+    ## Pick credentials from biblioshiny Settings (no per-modal input).
+    email <- if (!is.null(values$oaPoliteEmail) &&
+                 nzchar(values$oaPoliteEmail)) values$oaPoliteEmail else NULL
+    oa_key <- if (!is.null(values$oaApiKey) &&
+                  nzchar(values$oaApiKey)) values$oaApiKey else NULL
+
+    removeModal()
+
+    ## Snapshot the pre-enrichment state for Undo and the missingData table
+    ## for the Before/After comparison view.
+    values$M_pre_enrich      <- values$M
+    values$missingdf_before  <- values$missingdf
+
+    res <- NULL
+    progress_msg <- if (length(sources) == 1) {
+      sprintf("Querying %s...",
+              if (sources == "openalex") "OpenAlex" else "Crossref")
+    } else {
+      "Querying OpenAlex + Crossref..."
+    }
+    withProgress(
+      message = progress_msg,
+      value = 0,
+      {
+        progress_cb <- function(done, total, label) {
+          incProgress(amount = min(1, (done / max(total, 1))) - 0,
+                      detail = label)
+        }
+        res <- tryCatch(
+          completeMetadata(
+            values$M,
+            sources   = sources,
+            fields    = fields,
+            email     = email,
+            oa_apikey = oa_key,
+            progress  = progress_cb,
+            verbose   = FALSE
+          ),
+          error = function(e) {
+            list(error = conditionMessage(e))
+          }
+        )
+      }
+    )
+
+    if (!is.null(res$error)) {
+      show_alert(
+        title = "Metadata enrichment failed",
+        text = res$error,
+        type = "error"
+      )
+      ## Reopen the missingModal so the user is not left empty-handed
+      if (ncol(values$M) > 1) {
+        showModal(missingModal(session))
+      }
+      return()
+    }
+
+    ## Apply the enriched collection
+    values$M <- res$M
+    values$enrichmentReport <- res$report
+    n_filled <- sum(res$report$n_filled, na.rm = TRUE)
+    n_failed <- sum(res$report$n_failed, na.rm = TRUE)
+
+    summary_html <- if (nrow(res$report) > 0) {
+      ## Per source -> field breakdown so the user sees who filled what.
+      lines <- vapply(seq_len(nrow(res$report)), function(i) {
+        if (res$report$n_filled[i] == 0) return(NA_character_)
+        sprintf("- <b>%s</b> via <i>%s</i>: %d filled",
+                res$report$field[i],
+                res$report$source[i],
+                res$report$n_filled[i])
+      }, character(1))
+      lines <- lines[!is.na(lines)]
+      if (length(lines) > 0) {
+        paste(lines, collapse = "<br>")
+      } else {
+        "Nothing to fill."
+      }
+    } else {
+      "Nothing to fill."
+    }
+
+    show_alert(
+      title = sprintf("Enrichment done: %d cells filled", n_filled),
+      text = tagList(div(HTML(paste0(
+        summary_html,
+        if (n_failed > 0) sprintf("<br><br><i>%d records could not be retrieved.</i>", n_failed) else ""
+      )), style = "text-align:left")),
+      type = if (n_filled > 0) "success" else "info",
+      html = TRUE,
+      btn_labels = "Show before/after",
+      btn_colors = "#1d8fe1"
+    )
+
+    ## Open the comparison modal showing Before vs After side by side.
+    if (ncol(values$M) > 1) {
+      showModal(enrichmentResultModal(session))
+    }
+  })
+
+  observeEvent(input$missingCompleteUndo, {
+    if (is.null(values$M_pre_enrich)) {
+      show_alert(
+        title = "Nothing to undo",
+        text = "No enrichment has been applied in this session.",
+        type = "info"
+      )
+      return()
+    }
+    values$M <- values$M_pre_enrich
+    values$M_pre_enrich <- NULL
+    values$enrichmentReport <- NULL
+    show_alert(
+      title = "Enrichment reverted",
+      text = "Restored the collection to its pre-enrichment state.",
+      type = "success"
+    )
+    if (ncol(values$M) > 1) {
+      removeModal()
+      showModal(missingModal(session))
+    }
+  })
+
+  ## Local helper: same DOI normaliser used by completeMetadata, for the
+  ## eligibility count shown in the config sub-modal. Inlined to avoid
+  ## reaching for an unexported helper from biblioshiny.
+  .bib_doi_norm <- function(x) {
+    if (is.null(x)) return(character(0))
+    s <- trimws(as.character(x))
+    s[s == "" | s == "NA" | s == "none"] <- NA_character_
+    s <- sub("^https?://(dx\\.)?doi\\.org/", "", s, ignore.case = TRUE)
+    s <- sub("^doi:\\s*", "", s, ignore.case = TRUE)
+    ok <- grepl("^10\\.[0-9]{4,9}/", s)
+    s[!ok] <- NA_character_
+    s
+  }
+
 
   observeEvent(input$showMissingData, {
     if (ncol(values$M) > 1) {

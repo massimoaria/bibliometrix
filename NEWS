@@ -1,5 +1,13 @@
 bibliometrix V.5.3.1
 
+New Features
+- completeMetadata(): new function to complete missing bibliographic metadata via DOI lookup against OpenAlex and Crossref. Existing values are never overwritten. Provenance is recorded both as a per-row M$ENRICH column (compact tags like "AB:OA; TC:OA; CR:CR") and as a long-format attr(M, "enrichment") data frame (SR, field, source, timestamp).
+    - Two-pass orchestration: OpenAlex runs first (broader coverage of AB/CR/C1/TC), Crossref then fills residual gaps. OpenAlex is auto-skipped when the source DB is OpenAlex (M$DB[1] == "OPENALEX").
+    - Field-aware vacancy predicate: TC = 0 is treated as missing for the TC field only, so Scopus collections with all-zero citation counts can be refreshed via OpenAlex.
+    - Honest per-source field coverage matrix: ID (Keywords Plus) and WC (WoS categories) are always skipped (WoS-proprietary); TC requires the OpenAlex pass; DE is off by default for both sources.
+- Biblioshiny: new Complete and Undo buttons in the Missing Data audit modal. The Complete sub-modal pre-selects fields with status Poor/Critical/Completely missing and reads the polite-pool email and OpenAlex API key from the Settings panel (no per-modal credential typing).
+- Biblioshiny: new before/after comparison modal opened after each enrichment, showing per-tag Before %, After %, Delta %, and the number of cells filled by OpenAlex vs Crossref, plus an Undo path that restores the pre-enrichment collection.
+
 Changes:
 - Biblioshiny: Minor fix in table layout for numeric columns
 

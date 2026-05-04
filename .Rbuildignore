@@ -34,3 +34,4 @@ Rubbish
 
 CRAN-SUBMISSION
 ^\.positai$
+^tasks$

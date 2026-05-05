@@ -9461,19 +9461,35 @@ To ensure the functionality of Biblioshiny,
 
   output$synonymList <- renderUI({
     df_syn <- values$GenericSYN
-    if (!is.null(df_syn) && "term" %in% names(df_syn)) {
-      ## Keep single-word terms (e.g. "bibliometrics") on one line; the
-      ## modal width is bounded so without nowrap the column would split
-      ## mid-word.
-      df_syn$term <- sprintf(
-        '<span style="white-space:nowrap;">%s</span>',
-        as.character(df_syn$term)
-      )
+    if (!is.null(df_syn)) {
+      if ("term" %in% names(df_syn)) {
+        ## Keep single-word terms (e.g. "bibliometrics") on one line; the
+        ## modal width is bounded so without nowrap the column would split
+        ## mid-word. Wrapping the term in a fixed-min-width block also
+        ## prevents the auto-layout from collapsing the column when the
+        ## synonyms cell contains a very long unbroken string.
+        df_syn$term <- sprintf(
+          '<span style="white-space:nowrap; display:inline-block; min-width:140px;">%s</span>',
+          as.character(df_syn$term)
+        )
+      }
+      if ("synonyms" %in% names(df_syn)) {
+        ## The synonyms string uses ";" as separator with no spaces. Without
+        ## explicit break opportunities the whole list is treated as a single
+        ## unbreakable token by the browser, which then steals all the
+        ## horizontal space from the term column. Insert a space after each
+        ## ";" so the cell wraps cleanly across multiple lines.
+        df_syn$synonyms <- gsub(";", "; ", as.character(df_syn$synonyms), fixed = TRUE)
+        df_syn$synonyms <- sprintf(
+          '<span style="word-break:break-word; white-space:normal;">%s</span>',
+          df_syn$synonyms
+        )
+      }
     }
     renderBibliobox(
       df_syn,
       nrow = Inf,
-      filename = "Stopword_List",
+      filename = "Synonym_List",
       pagelength = FALSE,
       left = 1,
       right = NULL,

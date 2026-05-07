@@ -64,12 +64,136 @@ helpContent <- function() {
     
     <p>Some other databases, such as <strong>Dimensions</strong>, <strong>PubMed</strong>, and <strong>Cochrane Library</strong>, provide only a limited set of metadata. This may impose restrictions on the range of analyses that can be conducted using those datasets.</p>
     
-    <p>The following table (not included here) reports, for each supported database:</p>
+    <p>The following table reports, for each supported database:</p>
     <ul>
       <li>The <strong>file formats supported</strong> by the export interface</li>
       <li>The <strong>types of metadata</strong> contained in each export option</li>
       <li>The <strong>suggested file format</strong> to use with <strong>Biblioshiny</strong></li>
     </ul>
+
+    <h4>Databases, available metadata and suggested file formats</h4>
+    <table style='width:100%; border-collapse:collapse; margin-top:10px; font-size:14px;'>
+      <thead>
+        <tr style='background-color:#dcdcdc; text-align:left;'>
+          <th style='padding:8px; border:1px solid #bbb;'>Source</th>
+          <th style='padding:8px; border:1px solid #bbb;'>Format</th>
+          <th style='padding:8px; border:1px solid #bbb;'>Exported metadata</th>
+          <th style='padding:8px; border:1px solid #bbb;'>Recommended Format</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style='padding:8px; border:1px solid #bbb;'><i>Web of Science</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'BibTeX'</li>
+              <li>'Plaintext'</li>
+              <li>'EndNote Desktop'</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>All except Cited references</li>
+              <li>All</li>
+              <li>All</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>Plaintext</td>
+        </tr>
+        <tr style='background-color:#f5f5f5;'>
+          <td style='padding:8px; border:1px solid #bbb;'><i>Scopus</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'BibTeX'</li>
+              <li>'CSV'</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>All except Cited references</li>
+              <li>All</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>CSV</td>
+        </tr>
+        <tr>
+          <td style='padding:8px; border:1px solid #bbb;'><i>OpenAlex</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'Excel'</li>
+              <li>'API'</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>All but with limited reference info (only Ids)</li>
+              <li>All but with limited reference info (only Ids)</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>Excel</td>
+        </tr>
+        <tr style='background-color:#f5f5f5;'>
+          <td style='padding:8px; border:1px solid #bbb;'><i>Dimensions</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'Excel'</li>
+              <li>'API' <span style='color:#c0392b;'>(no longer supported &mdash; Dimensions has moved to a closed commercial access model)</span></li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>All but with limited reference info (only Ids)</li>
+              <li>&mdash;</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>Excel</td>
+        </tr>
+        <tr>
+          <td style='padding:8px; border:1px solid #bbb;'><i>The Lens</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'CSV export'</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>All but with limited reference info (only Ids)</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>CSV</td>
+        </tr>
+        <tr style='background-color:#f5f5f5;'>
+          <td style='padding:8px; border:1px solid #bbb;'><i>PubMed</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'PubMed export'</li>
+              <li>'API'</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>Document, Authors, Content info</li>
+              <li>Document, Authors, Content info</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>PubMed export</td>
+        </tr>
+        <tr>
+          <td style='padding:8px; border:1px solid #bbb;'><i>Cochrane Library</i></td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>'Plaintext'</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <ul style='margin:0; padding-left:18px;'>
+              <li>Document, Authors, Content info</li>
+            </ul>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>Plaintext</td>
+        </tr>
+      </tbody>
+    </table>
     </div>
     </body>"
 

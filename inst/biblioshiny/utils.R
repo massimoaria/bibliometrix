@@ -5638,42 +5638,75 @@ addGgplotsWb <- function(
 ) {
   l <- length(list_plot)
   startRow <- 1
-  for (i in 1:l) {
+  for (i in seq_len(l)) {
+    p <- list_plot[[i]]
+
+    # Defensive guards. Without them, a NULL plot (e.g. user clicks the
+    # report button before the corresponding tab has finished rendering)
+    # or an unrecognised class would skip every writer branch below and
+    # then crash openxlsx::insertImage with "File does not exist".
+    if (is.null(p)) {
+      warning(sprintf("Plot %d for sheet '%s' is NULL — skipped from report.",
+                      i, sheetname), call. = FALSE)
+      next
+    }
+
     fileName <- file.path(
       getWD(),
       paste0("figureImage_", i, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".png")
     )
-    if (inherits(list_plot[[i]], "ggplot")) {
-      safe_ggsave(
-        plot = list_plot[[i]],
-        filename = fileName,
-        width = width,
-        height = height,
-        units = "in",
-        dpi = dpi
-      )
+
+    written <- tryCatch({
+      if (inherits(p, "ggplot")) {
+        safe_ggsave(
+          plot = p,
+          filename = fileName,
+          width = width,
+          height = height,
+          units = "in",
+          dpi = dpi
+        )
+        TRUE
+      } else if (inherits(p, "igraph")) {
+        igraph2PNG(
+          x = p,
+          filename = fileName,
+          width = width,
+          height = height,
+          dpi = dpi
+        )
+        TRUE
+      } else if (inherits(p, "bibliodendrogram")) {
+        png_dev <- safe_png_device()
+        png_dev(
+          filename = fileName,
+          width = width,
+          height = height,
+          res = 300,
+          units = "in"
+        )
+        plot(p)
+        dev.off()
+        TRUE
+      } else {
+        warning(sprintf(
+          "Plot %d for sheet '%s' has unsupported class (%s) — skipped from report.",
+          i, sheetname, paste(class(p), collapse = "/")
+        ), call. = FALSE)
+        FALSE
+      }
+    }, error = function(e) {
+      warning(sprintf(
+        "Could not export plot %d for sheet '%s': %s",
+        i, sheetname, conditionMessage(e)
+      ), call. = FALSE)
+      FALSE
+    })
+
+    if (!isTRUE(written) || !file.exists(fileName)) {
+      next
     }
-    if (inherits(list_plot[[i]], "igraph")) {
-      igraph2PNG(
-        x = list_plot[[i]],
-        filename = fileName,
-        width = width,
-        height = height,
-        dpi = dpi
-      )
-    }
-    if (inherits(list_plot[[i]], "bibliodendrogram")) {
-      png_dev <- safe_png_device()
-      png_dev(
-        filename = fileName,
-        width = width,
-        height = height,
-        res = 300,
-        units = "in"
-      )
-      plot(list_plot[[i]])
-      dev.off()
-    }
+
     insertImage(
       wb = wb,
       sheet = sheetname,
@@ -5906,6 +5939,14 @@ addScreenWb <- function(df, wb, width = 14, height = 8, dpi = 75) {
       startRow <- 1
       for (j in 1:l) {
         fileName <- df_sh$file[j]
+        if (is.null(fileName) || is.na(fileName) || !nzchar(fileName) ||
+            !file.exists(fileName)) {
+          warning(sprintf(
+            "Screenshot file '%s' for sheet '%s' is missing — skipped from report.",
+            fileName %||% "<NA>", sh
+          ), call. = FALSE)
+          next
+        }
         insertImage(
           wb = wb,
           sheet = sh,

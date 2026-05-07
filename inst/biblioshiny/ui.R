@@ -1016,11 +1016,7 @@ body <- dashboardBody(
           column(1),
           column(
             10,
-            HTML(info),
-            div(
-              img(src = "table_DBformats.jpg", height = "70%", width = "70%"),
-              style = "text-align: center;"
-            )
+            HTML(info)
           ),
           column(1)
         )

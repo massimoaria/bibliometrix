@@ -31,10 +31,10 @@
 KeywordGrowth <- function(M, Tag = "ID", sep = ";", top = 10, cdf = TRUE, remove.terms = NULL, synonyms = NULL) {
   i <- which(names(M) == Tag)
   PY <- as.numeric(M$PY)
-  Tab <- (strsplit(as.character(M[, i]), sep))
+  Tab <- lapply(strsplit(as.character(M[, i]), sep),
+                function(x) unique(trimws(x)))
   Y <- rep(PY, lengths(Tab))
   A <- data.frame(Tab = unlist(Tab), Y = Y)
-  A$Tab <- trim.leading(A$Tab)
   A <- A[A$Tab != "", ]
   A <- A[!is.na(A$Y), ]
 
@@ -81,7 +81,7 @@ trim.years <- function(w, Year, cdf) {
   W <- matrix(0, length(Year), 1)
 
   for (i in 1:length(Year)) {
-    if (Y[1] == Year[i] & length(Y) > 0) {
+    if (length(Y) > 0 && Y[1] == Year[i]) {
       W[i, 1] <- w[1]
       Y <- Y[-1]
       w <- w[-1]

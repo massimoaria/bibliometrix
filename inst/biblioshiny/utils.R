@@ -2322,23 +2322,79 @@ create_empty_local_author_bio_card <- function(
 # Helper function for safe extraction (null coalescing operator)
 `%||%` <- function(x, y) if (is.null(x) || is.na(x) || length(x) == 0) y else x
 
-# Helper: return a working PNG device function (Windows ARM64 lacks png())
-safe_png_device <- function() {
-  # Prefer ragg: it works reliably on all platforms including Windows ARM64
-  # where grDevices::png() reports capabilities("png") == TRUE but fails
-  if (requireNamespace("ragg", quietly = TRUE)) {
-    return(ragg::agg_png)
+# Helper: return a working PNG device function.
+#
+# `capabilities()` reports what R was COMPILED with, not what currently works
+# on the host. Two real-world cases that bit users:
+#   * Windows ARM64: capabilities("png") == TRUE but grDevices::png() fails.
+#   * macOS without XQuartz on R >= 4.6: capabilities("cairo") == TRUE but
+#     png(type = "cairo") aborts because libXrender is missing.
+#
+# We therefore PROBE each candidate by opening a 1x1 PNG to a tempfile and
+# checking that a non-empty file was actually written. The first candidate
+# that survives the probe is cached for the session.
+.safe_png_device_cache <- new.env(parent = emptyenv())
+safe_png_device <- function(force = FALSE) {
+  if (!force && !is.null(.safe_png_device_cache$dev)) {
+    return(.safe_png_device_cache$dev)
   }
+
+  # Build candidate list in order of preference.
+  candidates <- list()
+
+  if (requireNamespace("ragg", quietly = TRUE)) {
+    candidates[["ragg"]] <- ragg::agg_png
+  }
+
+  is_macos <- (Sys.info()[["sysname"]] == "Darwin")
+  if (is_macos && capabilities("aqua")) {
+    candidates[["quartz"]] <- function(filename, width, height,
+                                       res = 72, units = "in", ...) {
+      grDevices::png(filename = filename, width = width, height = height,
+                     res = res, units = units, type = "quartz", ...)
+    }
+  }
+
+  if (capabilities("png")) {
+    # Default (system) png(): "quartz" on aqua macOS, "cairo" if linked, "Xlib"
+    # on plain X11. R picks whichever was compiled in.
+    candidates[["default"]] <- grDevices::png
+  }
+
   if (capabilities("cairo")) {
-    return(function(filename, width, height, res = 72, units = "in", ...) {
+    candidates[["cairo"]] <- function(filename, width, height,
+                                      res = 72, units = "in", ...) {
       grDevices::png(filename = filename, width = width, height = height,
                      res = res, units = units, type = "cairo", ...)
+    }
+  }
+
+  if (length(candidates) == 0) {
+    stop("No PNG graphics device available. Install the 'ragg' package: install.packages('ragg')")
+  }
+
+  for (name in names(candidates)) {
+    fn <- candidates[[name]]
+    test_file <- tempfile(fileext = ".png")
+    ok <- tryCatch({
+      fn(filename = test_file, width = 2, height = 2, res = 72, units = "in")
+      # quartz/ragg only flush a file when something is actually drawn.
+      grid::grid.rect(gp = grid::gpar(col = NA, fill = "white"))
+      grDevices::dev.off()
+      file.exists(test_file) && file.info(test_file)$size > 0
+    }, error = function(e) {
+      try(grDevices::dev.off(), silent = TRUE)
+      FALSE
     })
+    unlink(test_file)
+    if (isTRUE(ok)) {
+      .safe_png_device_cache$dev <- fn
+      .safe_png_device_cache$name <- name
+      return(fn)
+    }
   }
-  if (capabilities("png")) {
-    return(grDevices::png)
-  }
-  stop("No PNG graphics device available. Install the 'ragg' package: install.packages('ragg')")
+
+  stop("No working PNG graphics device available. Install the 'ragg' package: install.packages('ragg')")
 }
 
 # Safe wrapper for ggsave that uses a working PNG device
@@ -5638,42 +5694,75 @@ addGgplotsWb <- function(
 ) {
   l <- length(list_plot)
   startRow <- 1
-  for (i in 1:l) {
+  for (i in seq_len(l)) {
+    p <- list_plot[[i]]
+
+    # Defensive guards. Without them, a NULL plot (e.g. user clicks the
+    # report button before the corresponding tab has finished rendering)
+    # or an unrecognised class would skip every writer branch below and
+    # then crash openxlsx::insertImage with "File does not exist".
+    if (is.null(p)) {
+      warning(sprintf("Plot %d for sheet '%s' is NULL — skipped from report.",
+                      i, sheetname), call. = FALSE)
+      next
+    }
+
     fileName <- file.path(
       getWD(),
       paste0("figureImage_", i, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".png")
     )
-    if (inherits(list_plot[[i]], "ggplot")) {
-      safe_ggsave(
-        plot = list_plot[[i]],
-        filename = fileName,
-        width = width,
-        height = height,
-        units = "in",
-        dpi = dpi
-      )
+
+    written <- tryCatch({
+      if (inherits(p, "ggplot")) {
+        safe_ggsave(
+          plot = p,
+          filename = fileName,
+          width = width,
+          height = height,
+          units = "in",
+          dpi = dpi
+        )
+        TRUE
+      } else if (inherits(p, "igraph")) {
+        igraph2PNG(
+          x = p,
+          filename = fileName,
+          width = width,
+          height = height,
+          dpi = dpi
+        )
+        TRUE
+      } else if (inherits(p, "bibliodendrogram")) {
+        png_dev <- safe_png_device()
+        png_dev(
+          filename = fileName,
+          width = width,
+          height = height,
+          res = 300,
+          units = "in"
+        )
+        plot(p)
+        dev.off()
+        TRUE
+      } else {
+        warning(sprintf(
+          "Plot %d for sheet '%s' has unsupported class (%s) — skipped from report.",
+          i, sheetname, paste(class(p), collapse = "/")
+        ), call. = FALSE)
+        FALSE
+      }
+    }, error = function(e) {
+      warning(sprintf(
+        "Could not export plot %d for sheet '%s': %s",
+        i, sheetname, conditionMessage(e)
+      ), call. = FALSE)
+      FALSE
+    })
+
+    if (!isTRUE(written) || !file.exists(fileName)) {
+      next
     }
-    if (inherits(list_plot[[i]], "igraph")) {
-      igraph2PNG(
-        x = list_plot[[i]],
-        filename = fileName,
-        width = width,
-        height = height,
-        dpi = dpi
-      )
-    }
-    if (inherits(list_plot[[i]], "bibliodendrogram")) {
-      png_dev <- safe_png_device()
-      png_dev(
-        filename = fileName,
-        width = width,
-        height = height,
-        res = 300,
-        units = "in"
-      )
-      plot(list_plot[[i]])
-      dev.off()
-    }
+
     insertImage(
       wb = wb,
       sheet = sheetname,
@@ -5906,6 +5995,14 @@ addScreenWb <- function(df, wb, width = 14, height = 8, dpi = 75) {
       startRow <- 1
       for (j in 1:l) {
         fileName <- df_sh$file[j]
+        if (is.null(fileName) || is.na(fileName) || !nzchar(fileName) ||
+            !file.exists(fileName)) {
+          warning(sprintf(
+            "Screenshot file '%s' for sheet '%s' is missing — skipped from report.",
+            fileName %||% "<NA>", sh
+          ), call. = FALSE)
+          next
+        }
         insertImage(
           wb = wb,
           sheet = sh,

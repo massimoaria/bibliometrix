@@ -67,6 +67,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     wordcloud2
-RoxygenNote: 7.3.3
 NeedsCompilation: no
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

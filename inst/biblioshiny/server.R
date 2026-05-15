@@ -6004,17 +6004,36 @@ To ensure the functionality of Biblioshiny,
   observeEvent(input$applyDLC, {
     req(values$M)
     if (nrow(values$M) > 1) {
-      values$DLC <- lifeCycle(
-        values$M %>% group_by(PY) %>% count(),
-        forecast_years = 20,
-        plot = FALSE
+      # Records with missing PY are excluded: the logistic model needs a
+      # complete yearly time series. count() keeps the NA-year bucket, so
+      # it is dropped here before fitting.
+      dlc_data <- values$M %>%
+        filter(!is.na(PY)) %>%
+        group_by(PY) %>%
+        count()
+
+      values$DLC <- tryCatch(
+        lifeCycle(dlc_data, forecast_years = 20, plot = FALSE),
+        error = function(e) {
+          showNotification(
+            paste("Life Cycle analysis could not be computed:", conditionMessage(e)),
+            type = "error", duration = 8
+          )
+          NULL
+        }
       )
-      values$DLCplotYear <- plotLifeCycle(values$DLC, plot_type = "annual")
-      values$DLCplotCum <- plotLifeCycle(values$DLC, plot_type = "cumulative")
-      values$DLC$parameters <- values$DLC$parameters %>%
-        as.data.frame() %>%
-        tibble::rownames_to_column("Metrics") %>%
-        rename(Value = ".")
+
+      if (!is.null(values$DLC)) {
+        values$DLCplotYear <- plotLifeCycle(values$DLC, plot_type = "annual")
+        values$DLCplotCum <- plotLifeCycle(values$DLC, plot_type = "cumulative")
+        values$DLC$parameters <- values$DLC$parameters %>%
+          as.data.frame() %>%
+          tibble::rownames_to_column("Metrics") %>%
+          rename(Value = ".")
+      } else {
+        values$DLCplotYear <- NULL
+        values$DLCplotCum <- NULL
+      }
     } else {
       values$DLC = NULL
     }

@@ -121,7 +121,60 @@ apiOA2df <- function(file) {
   df$id_oa <- gsub("https://openalex.org/", "", df$id_oa)
 
   df <- df %>% as.data.frame()
+  df <- .flagOAAuthorship(df)
   return(df)
+}
+
+# ---------------------------------------------------------------------------
+# Authorship data-quality flag
+# ---------------------------------------------------------------------------
+
+#' Flag OpenAlex records whose author list looks corrupted
+#'
+#' OpenAlex occasionally absorbs a paper's cited-reference authors into its
+#' \code{authorships} array -- typically for low-quality / predatory journals
+#' whose PDFs are auto-parsed. Such records carry an implausibly long \code{AU}
+#' list of which only a small share have an OpenAlex \code{author.id}. A single
+#' such record turns the co-authorship network into a giant artificial clique.
+#'
+#' Records are NOT removed: a blanket author-count cap would also corrupt
+#' legitimate hyper-authorship papers (physics, genomics consortia). They are
+#' flagged in \code{df$AU_FLAG} (logical) and reported through a warning, so the
+#' user can inspect and, if appropriate, exclude them before running
+#' collaboration analyses.
+#'
+#' @param df A data frame produced by \code{csvOA2df()} / \code{apiOA2df()}.
+#' @return \code{df} with a logical \code{AU_FLAG} column added.
+#' @keywords internal
+#' @noRd
+.flagOAAuthorship <- function(df) {
+  if (is.null(df) || !"AU" %in% names(df) || nrow(df) == 0) return(df)
+
+  n_tokens <- function(x) {
+    vapply(strsplit(as.character(x), ";", fixed = TRUE),
+           function(t) sum(nzchar(trimws(t))), integer(1))
+  }
+  n_au   <- n_tokens(df$AU)
+  n_auid <- if ("AU_ID" %in% names(df)) n_tokens(df$AU_ID) else rep(0L, nrow(df))
+
+  # Suspect = many authors, yet a large share carry no OpenAlex author id.
+  # AU and AU_ID are both built from the same authorships array, so for a
+  # clean record they are (nearly) equal in length; a wide gap signals that
+  # reference authors leaked into the author list.
+  flag <- n_au >= 10 & n_auid < 0.6 * n_au
+  flag[is.na(flag)] <- FALSE
+  df$AU_FLAG <- flag
+
+  if (any(flag)) {
+    warning(sprintf(
+      paste0("%d record(s) have a suspicious authorship list (likely OpenAlex ",
+             "source corruption: cited-reference authors absorbed into the ",
+             "author field). Flagged in M$AU_FLAG; inspect row(s) %s before ",
+             "running collaboration networks."),
+      sum(flag), paste(which(flag), collapse = ", ")),
+      call. = FALSE)
+  }
+  df
 }
 
 relabelling_OA_API <- function(DATA) {

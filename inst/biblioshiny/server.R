@@ -6932,6 +6932,8 @@ To ensure the functionality of Biblioshiny,
       output$AuthorLocalProfileUI <- renderUI({
         create_empty_local_author_bio_card()
       })
+      values$authorGlobalCard <- NULL
+      values$authorLocalCard <- NULL
     }
   )
 
@@ -6964,6 +6966,7 @@ To ensure the functionality of Biblioshiny,
           output$AuthorBioPageUI <- renderUI({
             authorGlobalProfile
           })
+          values$authorGlobalCard <- authorGlobalProfile
 
           local_author <- values$author_data %>%
             dplyr::filter(AUid == selected_author) %>%
@@ -6991,6 +6994,12 @@ To ensure the functionality of Biblioshiny,
           output$AuthorLocalProfileUI <- renderUI({
             authorLocalProfile
           })
+          values$authorLocalCard <- authorLocalProfile
+          values$authorProfileName <- if (length(local_author) > 0) {
+            local_author[1]
+          } else {
+            selected_author
+          }
         },
         error = function(e) {
           # Manage the error
@@ -7007,6 +7016,66 @@ To ensure the functionality of Biblioshiny,
       )
     }
   )
+
+  ## Export the author profile card (Global or Local) as PNG ----
+  observeEvent(input$exportAuthorCard, {
+    active <- input$authorProfileTabs
+    if (is.null(active) || identical(active, "Info & References")) {
+      active <- "Global Profile"
+    }
+    if (identical(active, "Local Profile")) {
+      card <- values$authorLocalCard
+      selector <- ".local-author-bio-card"
+      tag <- "LocalProfile"
+    } else {
+      card <- values$authorGlobalCard
+      selector <- ".author-bio-card"
+      tag <- "GlobalProfile"
+    }
+
+    if (is.null(card)) {
+      showNotification(
+        "Search and apply an author first, then export the profile card.",
+        type = "warning",
+        duration = 5
+      )
+      return()
+    }
+
+    author_name <- gsub(
+      "[^A-Za-z0-9]+", "_",
+      values$authorProfileName %||% "Author"
+    )
+    base_name <- paste0(
+      "AuthorProfile_", tag, "_", author_name, "-",
+      gsub(" |:", "", Sys.time()), ".png"
+    )
+    full_path <- file.path(getWD(), base_name)
+
+    tryCatch(
+      {
+        authorCard2png(
+          card = card,
+          filename = full_path,
+          selector = selector,
+          dpi = values$dpi,
+          height = values$h
+        )
+        img_data <- base64enc::dataURI(file = full_path, mime = "image/png")
+        shinyjs::runjs(sprintf(
+          "var link = document.createElement('a'); link.href = '%s'; link.download = '%s'; document.body.appendChild(link); link.click(); document.body.removeChild(link);",
+          img_data, base_name
+        ))
+      },
+      error = function(e) {
+        showNotification(
+          paste("Error exporting author profile card:", conditionMessage(e)),
+          type = "error",
+          duration = 6
+        )
+      }
+    )
+  })
 
   ### Most Relevant Authors ----
   MRAuthorsResult <- eventReactive(input$applyMRAuthors, {
@@ -11436,7 +11505,7 @@ To ensure the functionality of Biblioshiny,
         #paste("MostContribDocuments_", Sys.Date(), ".png", sep=""),
         #paste("MostCitedDocuments_", Sys.Date(), ".png", sep="")
       )
-      safe_safe_ggsave(
+      safe_ggsave(
         filename = files[1],
         plot = values$CS$graph_terms,
         dpi = values$dpi,
@@ -14088,6 +14157,12 @@ To ensure the functionality of Biblioshiny,
   observe({ .toggleDownloadBtn("AIplot.save", !is.null(values$AIplot)) })
   observe({ .toggleDownloadBtn("APOTplot.save", !is.null(values$AUProdOverTime)) })
   observe({ .toggleDownloadBtn("LLplot.save", !is.null(values$LLplot)) })
+  observe({
+    .toggleDownloadBtn(
+      "exportAuthorCard",
+      !is.null(values$authorGlobalCard) || !is.null(values$authorLocalCard)
+    )
+  })
   # Affiliations
   observe({ .toggleDownloadBtn("AFFplot.save", !is.null(values$AFFplot)) })
   observe({ .toggleDownloadBtn("AffOverTimeplot.save", !is.null(values$AffOverTimePlot)) })

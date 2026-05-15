@@ -1592,13 +1592,23 @@ openAlexServer <- function(input, output, session, values) {
           icon = icon("exclamation-sign", lib = "glyphicon")
         ),
         actionButton(
+          label = "Complete",
+          inputId = "missingComplete",
+          icon = icon("download", lib = "glyphicon")
+        ),
+        actionButton(
+          label = "Undo",
+          inputId = "missingCompleteUndo",
+          icon = icon("repeat", lib = "glyphicon")
+        ),
+        actionButton(
           label = "Report",
           inputId = "missingReport",
           icon = icon("plus", lib = "glyphicon")
         ),
         actionButton(
           label = "Save",
-          inputId = "missingDataTable",
+          inputId = "missingDataSave",
           icon = icon("camera", lib = "glyphicon")
         ),
         modalButton(label = "Close")

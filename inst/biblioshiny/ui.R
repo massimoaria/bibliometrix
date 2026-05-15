@@ -11759,7 +11759,7 @@ body <- dashboardBody(
                           "shield-halved",
                           style = "color: #3498db; margin-right: 5px;"
                         ),
-                        "Your email is stored locally and only sent to OpenAlex for polite pool access."
+                        "Your email is stored locally and used as polite-pool identifier for both OpenAlex and PubMed (NCBI)."
                       ),
                       p(
                         icon(
@@ -11767,6 +11767,137 @@ body <- dashboardBody(
                           style = "color: #f39c12; margin-right: 5px;"
                         ),
                         "Polite pool users get faster responses and are not affected by rate limits."
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+
+        # ============================================
+        # SECTION 5: PUBMED API SETTINGS
+        # ============================================
+        fluidRow(
+          column(
+            12,
+            div(
+              class = "box box-primary",
+              div(
+                class = "box-header with-border",
+                h4(
+                  icon("dna", style = "margin-right: 8px;"),
+                  "PubMed API - Configuration",
+                  class = "box-title",
+                  style = "color: #16a085; font-weight: 600;"
+                )
+              ),
+              div(
+                class = "box-body",
+
+                # Description
+                div(
+                  style = "margin-bottom: 20px; padding: 15px; background-color: #d1f2eb; border-radius: 5px; border-left: 4px solid #16a085;",
+                  icon(
+                    "info-circle",
+                    style = "color: #117864; margin-right: 8px; font-size: 18px;"
+                  ),
+                  tags$span(
+                    style = "color: #0e6655; font-size: 14px;",
+                    HTML(
+                      "PubMed (NCBI E-utilities) accept an optional <strong>API key</strong> that raises the rate limit from <strong>3 to 10 requests/second</strong>. Get your free key at "
+                    ),
+                    tags$a(
+                      href = "https://www.ncbi.nlm.nih.gov/account/settings/",
+                      target = "_blank",
+                      style = "color: #0e6655; font-weight: bold; text-decoration: underline;",
+                      "ncbi.nlm.nih.gov/account/settings"
+                    ),
+                    HTML(
+                      ". The polite-pool email configured for OpenAlex above is also forwarded to NCBI."
+                    )
+                  )
+                ),
+
+                # API Key Configuration
+                fluidRow(
+                  column(
+                    6,
+                    div(
+                      style = "padding-right: 15px;",
+                      tags$label(
+                        "API Key",
+                        style = "font-weight: 600; color: #16a085; margin-bottom: 8px; display: block;"
+                      ),
+                      passwordInput(
+                        "pmApiKey",
+                        label = NULL,
+                        placeholder = "Enter your PubMed/NCBI API key",
+                        value = "",
+                        width = "100%"
+                      ),
+
+                      # Status Display
+                      div(
+                        style = "margin: 10px 0;",
+                        uiOutput("pmApiKeyStatus")
+                      ),
+
+                      # Action Buttons
+                      fluidRow(
+                        column(
+                          6,
+                          actionButton(
+                            "pmSetApiKey",
+                            "Save API Key",
+                            icon = icon("check"),
+                            class = "btn-primary btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        ),
+                        column(
+                          6,
+                          actionButton(
+                            "pmRemoveApiKey",
+                            "Remove API Key",
+                            icon = icon("trash"),
+                            class = "btn-danger btn-block",
+                            style = "font-weight: 600;"
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  column(
+                    6,
+                    div(
+                      style = "padding-left: 15px; margin-top: 28px; color: #555; font-size: 13px;",
+                      p(
+                        icon(
+                          "key",
+                          style = "color: #16a085; margin-right: 5px;"
+                        ),
+                        "Stored locally and exposed to pubmedR via the PUBMED_API_KEY / ENTREZ_KEY env vars."
+                      ),
+                      p(
+                        icon(
+                          "bolt",
+                          style = "color: #f39c12; margin-right: 5px;"
+                        ),
+                        "Without key: 3 requests/second. With free key: 10 requests/second."
+                      ),
+                      p(
+                        icon(
+                          "link",
+                          style = "color: #16a085; margin-right: 5px;"
+                        ),
+                        tags$a(
+                          href = "https://www.ncbi.nlm.nih.gov/account/settings/",
+                          target = "_blank",
+                          style = "color: #16a085; text-decoration: underline;",
+                          "Get your free NCBI API key here"
+                        )
                       )
                     )
                   )

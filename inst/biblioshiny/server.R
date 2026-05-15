@@ -321,13 +321,15 @@ To ensure the functionality of Biblioshiny,
   values$collection_description <- NULL
   values$gemini_additional <- NULL
 
-  ## OpenAlex polite pool email
+  ## OpenAlex polite pool email (also forwarded to PubMed/NCBI)
   path_oa_email <- file.path(home, ".biblio_openalex_email.txt")
   if (file.exists(path_oa_email)) {
     oa_saved_email <- trimws(readLines(path_oa_email, warn = FALSE)[1])
     if (!is.na(oa_saved_email) && nchar(oa_saved_email) >= 5) {
       Sys.setenv(openalexR.mailto = oa_saved_email)
       options(openalexR.mailto = oa_saved_email)
+      Sys.setenv(PUBMED_EMAIL = oa_saved_email)
+      Sys.setenv(ENTREZ_EMAIL = oa_saved_email)
       values$oaPoliteEmail <- oa_saved_email
     } else {
       values$oaPoliteEmail <- NULL
@@ -349,6 +351,21 @@ To ensure the functionality of Biblioshiny,
     }
   } else {
     values$oaApiKey <- NULL
+  }
+
+  ## PubMed / NCBI E-utilities API key
+  path_pm_apikey <- file.path(home, ".biblio_pubmed_apikey.txt")
+  if (file.exists(path_pm_apikey)) {
+    pm_saved_apikey <- trimws(readLines(path_pm_apikey, warn = FALSE)[1])
+    if (!is.na(pm_saved_apikey) && nchar(pm_saved_apikey) >= 10) {
+      Sys.setenv(PUBMED_API_KEY = pm_saved_apikey)
+      Sys.setenv(ENTREZ_KEY = pm_saved_apikey)
+      values$pmApiKey <- pm_saved_apikey
+    } else {
+      values$pmApiKey <- NULL
+    }
+  } else {
+    values$pmApiKey <- NULL
   }
 
   path_gemini_model <- file.path(home, ".biblio_gemini_model.txt")
@@ -14788,6 +14805,8 @@ To ensure the functionality of Biblioshiny,
     writeLines(email, path_oa_email)
     Sys.setenv(openalexR.mailto = email)
     options(openalexR.mailto = email)
+    Sys.setenv(PUBMED_EMAIL = email)
+    Sys.setenv(ENTREZ_EMAIL = email)
     values$oaPoliteEmail <- email
 
     output$oaEmailStatus <- renderUI({
@@ -14808,6 +14827,8 @@ To ensure the functionality of Biblioshiny,
     }
     Sys.unsetenv("openalexR.mailto")
     options(openalexR.mailto = NULL)
+    Sys.unsetenv("PUBMED_EMAIL")
+    Sys.unsetenv("ENTREZ_EMAIL")
     values$oaPoliteEmail <- NULL
     updateTextInput(session, "oaPoliteEmail", value = "")
 
@@ -14816,6 +14837,98 @@ To ensure the functionality of Biblioshiny,
         style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
         icon("exclamation-triangle"),
         " Email removed. Using common pool (slower rate limits)."
+      )
+    })
+  })
+
+  # ============================================
+  # PubMed / NCBI E-utilities API Key
+  # ============================================
+
+  # Show API key status on load
+  output$pmApiKeyStatus <- renderUI({
+    if (!is.null(values$pmApiKey) && nchar(values$pmApiKey) >= 10) {
+      masked_key <- paste0(
+        "...",
+        substr(
+          values$pmApiKey,
+          nchar(values$pmApiKey) - 3,
+          nchar(values$pmApiKey)
+        )
+      )
+      div(
+        style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("check-circle"),
+        sprintf(" API key active: %s", masked_key)
+      )
+    } else {
+      div(
+        style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("exclamation-triangle"),
+        " No API key set. Limited to 3 requests/second."
+      )
+    }
+  })
+
+  # Pre-fill API key input if already saved
+  observeEvent(
+    TRUE,
+    {
+      if (!is.null(values$pmApiKey) && nchar(values$pmApiKey) >= 10) {
+        updateTextInput(session, "pmApiKey", value = values$pmApiKey)
+      }
+    },
+    once = TRUE
+  )
+
+  # Save API key
+  observeEvent(input$pmSetApiKey, {
+    key <- trimws(input$pmApiKey)
+    if (is.null(key) || nchar(key) < 10) {
+      output$pmApiKeyStatus <- renderUI({
+        div(
+          style = "color: #721c24; background-color: #f8d7da; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+          icon("times-circle"),
+          " Please enter a valid API key (at least 10 characters)."
+        )
+      })
+      return()
+    }
+
+    home <- homeFolder()
+    path_pm_apikey <- file.path(home, ".biblio_pubmed_apikey.txt")
+    writeLines(key, path_pm_apikey)
+    Sys.setenv(PUBMED_API_KEY = key)
+    Sys.setenv(ENTREZ_KEY = key)
+    values$pmApiKey <- key
+
+    masked_key <- paste0("...", substr(key, nchar(key) - 3, nchar(key)))
+    output$pmApiKeyStatus <- renderUI({
+      div(
+        style = "color: #155724; background-color: #d4edda; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("check-circle"),
+        sprintf(" API key saved: %s", masked_key)
+      )
+    })
+  })
+
+  # Remove API key
+  observeEvent(input$pmRemoveApiKey, {
+    home <- homeFolder()
+    path_pm_apikey <- file.path(home, ".biblio_pubmed_apikey.txt")
+    if (file.exists(path_pm_apikey)) {
+      file.remove(path_pm_apikey)
+    }
+    Sys.unsetenv("PUBMED_API_KEY")
+    Sys.unsetenv("ENTREZ_KEY")
+    values$pmApiKey <- NULL
+    updateTextInput(session, "pmApiKey", value = "")
+
+    output$pmApiKeyStatus <- renderUI({
+      div(
+        style = "color: #856404; background-color: #fff3cd; padding: 8px 12px; border-radius: 4px; font-size: 13px;",
+        icon("exclamation-triangle"),
+        " API key removed. Limited to 3 requests/second."
       )
     })
   })

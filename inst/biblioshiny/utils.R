@@ -5954,6 +5954,62 @@ screenHtml <- function(df, html_file) {
   writeLines(html_page, html_file, useBytes = TRUE)
 }
 
+## screenshot of an Author Profile card (HTML) to PNG ----
+## The card (Global or Local profile) is a static HTML tag built with inline
+## styles + the Bootstrap grid. It is wrapped in a standalone HTML page and
+## captured with biblioShot(), cropping to the card via a CSS selector.
+authorCard2png <- function(card, filename, selector = ".author-bio-card",
+                           dpi = 300, height = 7) {
+  zoom <- dpi / 96
+  html_file <- paste0(tools::file_path_sans_ext(filename), ".html")
+  out_dir <- dirname(html_file)
+
+  # Make the card images available next to the HTML (cards use relative src).
+  for (img in c("ORCID.jpg", "openalex.jpg")) {
+    src <- file.path("www", img)
+    if (file.exists(src)) {
+      file.copy(src, file.path(out_dir, img), overwrite = TRUE)
+    }
+  }
+
+  card_html <- as.character(card)
+
+  html_page <- sprintf(
+    '<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body { margin: 0; padding: 25px; background: #ffffff;
+           font-family: "Segoe UI", Tahoma, sans-serif; }
+    .biblio-card-wrap { width: 950px; }
+  </style>
+</head>
+<body>
+  <div class="biblio-card-wrap">%s</div>
+</body>
+</html>',
+    card_html
+  )
+  writeLines(html_page, html_file, useBytes = TRUE)
+
+  biblioShot(
+    url = html_file,
+    file = filename,
+    selector = selector,
+    expand = c(20, 20, 20, 20),
+    zoom = zoom,
+    vwidth = 1100,
+    vheight = 1400,
+    delay = 1.2
+  )
+
+  unlink(html_file)
+  filename
+}
+
 ## export screen to browser download
 screen2export <- function(filename = "file", obj, type, dpi = 300, height = 7) {
   JScode_screenshot <- "

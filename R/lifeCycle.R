@@ -17,6 +17,17 @@ lifeCycle <- function(data,
                       verbose = FALSE) {
   
   # Prepare data
+  # Drop rows with missing publication year or count: records with NA PY
+  # (common in OpenAlex/Scopus exports) would otherwise turn min(df$PY) and
+  # all derived quantities into NA, making optim() fail with a non-finite value.
+  data <- as.data.frame(data)
+  data <- data[is.finite(data$PY) & is.finite(data$n), , drop = FALSE]
+
+  if (nrow(data) < 3) {
+    stop("lifeCycle: not enough valid data points. At least 3 years with a ",
+         "non-missing publication year are required to fit the logistic model.")
+  }
+
   df <- data[order(data$PY), ]
   df$year_index <- df$PY - min(df$PY) + 1
   

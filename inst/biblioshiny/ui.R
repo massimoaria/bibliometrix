@@ -3691,6 +3691,7 @@ body <- dashboardBody(
         column(
           9,
           tabsetPanel(
+            id = "authorProfileTabs",
             type = "tabs",
             tabPanel(
               "Global Profile",
@@ -3770,7 +3771,23 @@ body <- dashboardBody(
                     )
                   )
                 ),
-                column(4)
+                column(
+                  4,
+                  div(
+                    align = "center",
+                    title = "Export profile card as PNG",
+                    do.call(
+                      "actionButton",
+                      c(list(
+                        label = NULL,
+                        style = "display:block; height: 37px; width: 37px; border-radius: 50%;
+                                      border: 1px; margin-top: 16px;",
+                        icon = icon(name = "download", lib = "glyphicon"),
+                        inputId = "exportAuthorCard"
+                      ))
+                    )
+                  )
+                )
               ),
               br(),
               div(

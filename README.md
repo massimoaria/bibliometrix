@@ -644,12 +644,12 @@ dplyr::glimpse(authorInfo)
 #> $ display_name_alternatives   <list> <"Aria, Massimo", "M Aria", "M. Aria", "M. Qasem Aria", "MASSIMO ARIA", "Massimo A…
 #> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411">
 #> $ orcid                       <chr> "https://orcid.org/0000-0002-8517-9411"
-#> $ works_count                 <int> 229
-#> $ cited_by_count              <int> 18201
+#> $ works_count                 <int> 233
+#> $ cited_by_count              <int> 18722
 #> $ counts_by_year              <list> [<data.frame[24 x 4]>]
-#> $ `2yr_mean_citedness`        <dbl> 2.693878
+#> $ `2yr_mean_citedness`        <dbl> 3.02
 #> $ h_index                     <int> 36
-#> $ i10_index                   <int> 96
+#> $ i10_index                   <int> 97
 #> $ last_known_institutions     <list> [<data.frame[3 x 6]>]
 #> $ topics                      <list> [<tbl_df[20 x 5]>]
 #> $ works_api_url               <chr> "https://api.openalex.org/works?filter=author.id:A5069892096"
@@ -663,7 +663,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-04-08 12:40:46
+#> $ query_timestamp             <dttm> 2026-05-16 12:42:33
 ```
 
 This function provides comprehensive author profiles including:

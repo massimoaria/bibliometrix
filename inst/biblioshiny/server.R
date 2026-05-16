@@ -10891,11 +10891,14 @@ To ensure the functionality of Biblioshiny,
     values$field <- coc_field
     values$ngrams <- coc_ngrams
 
-    showNotification(
-      "Co-occurrence Network: computing...",
-      id = "COC_progress",
-      type = "message",
-      duration = NULL
+    show_alert(
+      title = "Analysis in progress...",
+      text = "Building co-occurrence network",
+      type = "info",
+      showConfirmButton = FALSE,
+      closeOnEsc = FALSE,
+      closeOnClickOutside = FALSE,
+      timer = NULL
     )
 
     # Build NetWords synchronously if needed (fast for cached), then run networkPlot in future
@@ -10987,10 +10990,10 @@ To ensure the functionality of Biblioshiny,
           verbose = FALSE
         )
       }, error = function(e) {
+        closeSweetAlert(session)
         showNotification(paste("Co-occurrence Network error:", e$message), type = "error", duration = 8)
         return(NULL)
       })
-    removeNotification("COC_progress")
     req(cocnet)
 
     # Add year info to graph
@@ -11013,6 +11016,73 @@ To ensure the functionality of Biblioshiny,
     }
     cocnet$graph <- g
     values$cocnet <- cocnet
+
+    ## Fuzzy assignment of documents to network clusters
+    cocDTC <- tryCatch(
+      {
+        if (
+          !is.null(cocnet$cluster_res) &&
+            nrow(cocnet$cluster_res) > 0
+        ) {
+          occ <- diag(as.matrix(NetWords))
+          words_coc <- data.frame(
+            Words = cocnet$cluster_res$vertex,
+            Cluster_Label = paste(
+              "Cluster",
+              cocnet$cluster_res$cluster
+            ),
+            pagerank_centrality = cocnet$cluster_res$pagerank_centrality,
+            stringsAsFactors = FALSE
+          )
+          words_coc$Occurrences <- occ[match(
+            words_coc$Words,
+            rownames(NetWords)
+          )]
+          words_coc$Occurrences[
+            is.na(words_coc$Occurrences) | words_coc$Occurrences == 0
+          ] <- 1
+          bibliometrix:::clusterAssignment(
+            M_data,
+            words = words_coc,
+            field = coc_field,
+            remove.terms = remove.terms,
+            synonyms = synonyms,
+            threshold = 0.5
+          )
+        } else {
+          NULL
+        }
+      },
+      error = function(e) NULL
+    )
+    if (!is.null(cocDTC)) {
+      ## simplified frame for Biblio AI (same structure as Thematic Map)
+      values$cocnet$doc2clust <- cocDTC[, c(
+        "Assigned_cluster",
+        "SR",
+        "pagerank"
+      )]
+      ## display table: clickable DOI + readable column names
+      cocDTC$DI <- paste0(
+        '<a href="https://doi.org/',
+        cocDTC$DI,
+        '" target="_blank">',
+        cocDTC$DI,
+        '</a>'
+      )
+      names(cocDTC)[1:9] <- c(
+        "DOI",
+        "Authors",
+        "Title",
+        "Source",
+        "Year",
+        "TotalCitation",
+        "TCperYear",
+        "NTC",
+        "SR"
+      )
+    }
+    values$cocnet$documentToClusters <- cocDTC
 
     values$COCnetwork <- igraph2vis(
       g = cocnet$graph,
@@ -11054,6 +11124,7 @@ To ensure the functionality of Biblioshiny,
 
   output$cocPlot <- renderVisNetwork({
     req(values$COCnetwork)
+    closeSweetAlert(session)
     values$COCnetwork$VIS
   })
 
@@ -11278,6 +11349,32 @@ To ensure the functionality of Biblioshiny,
     )
   })
 
+  ### Documents-to-clusters fuzzy assignment ----
+  output$cocTableDocument <- renderUI({
+    req(values$cocnet)
+    cocDataDoc <- values$cocnet$documentToClusters
+    req(cocDataDoc)
+    renderBibliobox(
+      cocDataDoc,
+      nrow = 10,
+      filename = "CoWord_Network_Documents",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = c(7:8, 10:(ncol(cocDataDoc) - 2), ncol(cocDataDoc)),
+      dom = TRUE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  })
+
   ### Degree Plot Co-word analysis ----
   output$cocDegree <- renderPlotly({
     req(values$cocnet)
@@ -11296,6 +11393,9 @@ To ensure the functionality of Biblioshiny,
       )
       sheetname <- "CoWordNet"
       list_df <- list(values$cocnet$cluster_res)
+      if (!is.null(values$cocnet$documentToClusters)) {
+        list_df[[2]] <- values$cocnet$documentToClusters
+      }
       list_plot <- list(values$degreePlot)
       res <- addDataScreenWb(list_df, wb = values$wb, sheetname = sheetname)
       values$wb <- addGgplotsWb(
@@ -14599,19 +14699,22 @@ To ensure the functionality of Biblioshiny,
       selectInput(
         inputId = "gemini_api_model",
         label = "Select the Gemini Model",
-        choices = c(
-          "Gemini 2.5 Flash" = "2.5-flash",
-          "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
-          "Gemini 3.0 Flash" = "3-flash-preview",
-          "Gemini 3.1 Pro" = "3.1-pro-preview",
-          "Gemini Pro Latest" = "pro-latest"
-          # "Gemini 2.0 Flash Lite" = "2.0-flash-lite",
-          # "Gemini 1.5 Flash" = "1.5-flash",
-          # "Gemini 1.5 Flash Lite" = "1.5-flash-8b"
+        choices = list(
+          "Free tier" = c(
+            "Gemini 2.5 Flash" = "2.5-flash",
+            "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
+            "Gemini 3.0 Flash" = "3-flash-preview",
+            "Gemma 4 31B (experimental)" = "gemma-4-31b-it",
+            "Gemma 4 26B (experimental)" = "gemma-4-26b-a4b-it"
+          ),
+          "Paid API key required" = c(
+            "Gemini 3.1 Pro" = "3.1-pro-preview",
+            "Gemini Pro Latest" = "pro-latest"
+          )
         ),
         selected = ifelse(
           is.null(values$gemini_api_model),
-          "2.5-flash",
+          "2.5-flash-lite",
           values$gemini_api_model
         )
       ),
@@ -14655,6 +14758,19 @@ To ensure the functionality of Biblioshiny,
           "Pro models require a paid (non-free tier) API key.",
           tags$br(),
           "Free tier API keys will not work with these models."
+        ))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == 'gemma-4-31b-it' || input.gemini_api_model == 'gemma-4-26b-a4b-it'",
+        helpText(strong(style = "color: #d9534f;", "Experimental — open Gemma models")),
+        helpText(em(
+          "Free tier, low latency, no extra setup (same Google API key).",
+          tags$br(),
+          "These open models can be unstable: the Google servers may return",
+          " temporary errors. Calls are retried automatically; if they keep",
+          " failing, switch back to a Gemini model.",
+          tags$br(),
+          "Analytical quality is lower than Gemini Flash — best used as a fallback."
         ))
       )
     )

@@ -562,6 +562,8 @@ clusterAssignment <- function(
   TERMS_final <- M %>%
     select(DI, AU, TI, SO, PY, TC, SR) %>%
     mutate(
+      TC = as.numeric(TC),
+      PY = as.numeric(PY),
       TCpY = TC / (current_year - PY),
       NTC = if_else(TC == 0, 0, TC / mean(TC, na.rm = TRUE))
     ) %>%

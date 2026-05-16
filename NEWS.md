@@ -18,6 +18,17 @@
 - **Biblioshiny - Metadata completion result**: the Delta column is now rendered as a coloured badge (blue ▼ for improvement, red ▲ for regression) so the gain from each enrichment pass is immediately visible. A small icon prefix prevents `renderBibliobox` from auto-detecting the column as numeric and silently stripping the HTML.
 - **Biblioshiny - Synonym / Stopword pop-ups**: the modal used to render very narrow because `popUpGeneric()` defaulted to `size = "40%"`, which is not a valid `show_alert()` enum and was silently dropped. Switched to `size = "l"` and added `white-space: nowrap` to the term column so single words like "bibliometrics" or "entrepreneurship" no longer break mid-word.
 - **Biblioshiny - Unified Text Editing layout**: the Stop Words / Synonyms boxes in Most Frequent Words, WordCloud, Treemap, Word Dynamics and Trend Topics now use the same panel layout (orange "Stop Words" panel + green "Synonyms" panel with icons) as the Co-occurrence Network menu. Existing input ids are preserved, no server-side change required.
+- **Biblio AI model selection**:
+  - Add open Gemma 4 models (gemma-4-31b-it, gemma-4-26b-a4b-it) via the Google Gemini API. gemini_ai() now handles their bare model id (no "gemini-" prefix), drops the unsupported `seed` field and caps output tokens for Gemma models.
+  - Parse "thought" parts for thinking models so the answer text is returned instead of the reasoning trace.
+  - Retry transient 5xx server errors (500/502/504), not only 429/503.
+  - Group the model dropdown into "Free tier" / "Paid API key required".
+  - Default to Gemini 2.5 Flash Lite on first launch.
+- **Co-occurrence Network**:
+  - New "Documents" tab: fuzzy assignment of documents to network clusters, reusing clusterAssignment() (the same engine as the Thematic Map).
+  - Include the document-to-cluster table in the Excel report.
+  - Feed the three most central documents per cluster to Biblio AI through the shared doc2clust() helper (same approach as the Thematic Map).
+- clusterAssignment(): coerce TC/PY to numeric to avoid an error on collections where TC is imported as character (affects Thematic Map too).
 
 # bibliometrix V.5.3.0 (Release date: 2026-04-10)
 

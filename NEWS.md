@@ -1,4 +1,4 @@
-# bibliometrix (development version)
+# bibliometrix 5.4.0
 
 ## New Features
 - **`completeMetadata()`**: new function to complete missing bibliographic metadata via DOI lookup against **OpenAlex** and **Crossref**. Existing values are never overwritten. Provenance is recorded both as a per-row `M$ENRICH` column (compact tags like `AB:OA; TC:OA; CR:CR`) and as a long-format `attr(M, "enrichment")` data frame `(SR, field, source, timestamp)`.

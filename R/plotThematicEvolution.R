@@ -127,6 +127,18 @@ plotThematicEvolution <- function(
 
   node_labels <- Nodes$name
 
+  # Clusters whose flows are all below the threshold: hide them from the plot.
+  # They are kept in the trace (so the period layering/topology is preserved
+  # and the other clusters stay in the right period) but rendered invisible -
+  # transparent node and empty label.
+  strong_ids <- unique(c(
+    Edges$from[!Edges$is_weak],
+    Edges$to[!Edges$is_weak]
+  ))
+  hidden_node <- !(Nodes$id %in% strong_ids)
+  node_labels[hidden_node] <- ""
+  Nodes$color[hidden_node] <- "rgba(0,0,0,0)"
+
   # Prepare tooltips
   node_customdata <- matrix(
     c(Nodes$freq, Nodes$rel_freq),

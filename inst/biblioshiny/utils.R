@@ -4696,8 +4696,12 @@ igraph2vis <- function(
       y = coords[, 2],
       labelToPlot = vn$nodes$label,
       dotSize = size,
-      row.names = vn$nodes$label
+      stringsAsFactors = FALSE
     )
+    # Hidden nodes share an empty label (""), which would clash as row.names.
+    # make.unique keeps the real, already-unique labels untouched (they are
+    # the only ones avoidNetOverlaps() looks up) and disambiguates the rest.
+    rownames(w) <- make.unique(vn$nodes$label)
     labelToRemove <- avoidNetOverlaps(w, threshold = threshold2)
   } else {
     labelToRemove <- ""

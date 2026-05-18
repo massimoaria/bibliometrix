@@ -94,7 +94,11 @@
 abbreviate_source_name <- function(name) {
   if (is.null(name) || is.na(name) || name == "") return("")
 
-  words <- unlist(strsplit(name, "[\\s:,]+"))
+  # NB: split on whitespace/colon/comma. The POSIX class [[:space:]] is used
+  # instead of \s because R's default (TRE) regex engine does not recognise
+  # \s inside a bracket expression -- "[\\s:,]" would match the literal
+  # characters \, s, : and , , splitting journal names on every letter "s".
+  words <- unlist(strsplit(name, "[[:space:]:,]+"))
   words <- words[words != ""]
 
   if (length(words) > 1) {

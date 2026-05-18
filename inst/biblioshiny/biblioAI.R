@@ -155,8 +155,23 @@ gemini_ai <- function(
   #   seed = 1234
   # )
 
+  # Gemma models on the Gemini API: no "gemini-" prefix, no `seed`,
+  # and a capped output window (open Gemma models max out at 8192 tokens).
+  is_gemma <- startsWith(model, "gemma")
+  if (is_gemma) {
+    generation_config$seed <- NULL
+    generation_config$maxOutputTokens <- min(
+      generation_config$maxOutputTokens,
+      8192
+    )
+  }
+
   # Build URL
-  model_query <- paste0("gemini-", model, ":generateContent")
+  model_query <- if (is_gemma) {
+    paste0(model, ":generateContent")
+  } else {
+    paste0("gemini-", model, ":generateContent")
+  }
   url <- paste0(
     "https://generativelanguage.googleapis.com/v1beta/models/",
     model_query
@@ -282,11 +297,12 @@ gemini_ai <- function(
     #   return(resp$message)
     # }
 
-    # Retry on HTTP 503 or 429
-    if (resp$status_code %in% c(429, 503)) {
+    # Retry on transient server errors (429 rate limit, 5xx server errors)
+    if (resp$status_code %in% c(429, 500, 502, 503, 504)) {
       if (attempt < retry_503) {
         message(paste0(
-          "⚠️ HTTP 503 (Service Unavailable) - retrying in 2 seconds (attempt ",
+          "⚠️ HTTP ", resp$status_code,
+          " (transient server error) - retrying (attempt ",
           attempt,
           "/",
           retry_503,
@@ -297,11 +313,12 @@ gemini_ai <- function(
       } else {
         return(
           paste0(
-            "❌ HTTP 503: Service Unavailable.\n",
-            "The Google Gemini servers are currently overloaded or under maintenance.\n",
+            "❌ HTTP ", resp$status_code,
+            ": the AI service is temporarily unavailable.\n",
+            "The Google Gemini servers are currently overloaded or unstable.\n",
             "All retry attempts failed (",
             retry_503,
-            "). Please try again in a few minutes. Alternatively, consider using a different AI model with lower latency."
+            "). Please try again in a few minutes, or select a different AI model."
           )
         )
       }
@@ -336,10 +353,23 @@ gemini_ai <- function(
       return(paste0("❌ HTTP ", resp$status_code, ": ", msg))
     }
 
-    # Successful response
+    # Successful response — concatenate answer text, skipping any "thought"
+    # parts (thinking models such as Gemma 4 return their reasoning in a
+    # separate part flagged with thought = TRUE).
     candidates <- httr2::resp_body_json(resp)$candidates
-    outputs <- unlist(lapply(candidates, \(c) c$content$parts))
-    return(outputs[1])
+    answer <- unlist(lapply(candidates, function(cand) {
+      lapply(cand$content$parts, function(p) {
+        if (isTRUE(p$thought)) NULL else p$text
+      })
+    }))
+    answer <- answer[!is.na(answer) & nzchar(answer)]
+    if (length(answer) == 0) {
+      return(paste0(
+        "❌ The model returned an empty response. ",
+        "Please try again or select a different AI model."
+      ))
+    }
+    return(paste(answer, collapse = "\n"))
   }
 }
 
@@ -431,7 +461,7 @@ loadGeminiModel = function(file) {
   if (file.exists(file)) {
     model <- readLines(file, warn = FALSE)
   } else {
-    model <- c("2.5-flash", "medium")
+    model <- c("2.5-flash-lite", "medium")
   }
   if (length(model == 1)) {
     model <- c(model, "medium")
@@ -635,6 +665,15 @@ biblioAiPrompts <- function(values, activeTab) {
         "Provide an interpretation of this 'word co-occurrence' network.",
         " Focus on the structure of the network, the presence of communities (topics), and the relevance of the most connected terms."
       )
+      if (!is.null(values$cocnet$doc2clust)) {
+        docs <- merge_df_to_string(doc2clust(values$cocnet))
+        prompt <- paste0(
+          prompt,
+          " Here there is the list of three most central articles for each cluster: ",
+          docs,
+          ". Also describe the articles belonging to each community."
+        )
+      }
     },
     "thematicMap" = {
       docs <- merge_df_to_string(doc2clust(values$TM))

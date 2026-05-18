@@ -8091,6 +8091,12 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(uiOutput(outputId = "cocTable"))
             ),
             tabPanel(
+              "Documents",
+              shinycssloaders::withSpinner(uiOutput(
+                outputId = "cocTableDocument"
+              ))
+            ),
+            tabPanel(
               "Degree Plot",
               shinycssloaders::withSpinner(plotlyOutput(
                 outputId = "cocDegree",

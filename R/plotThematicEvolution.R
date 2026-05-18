@@ -70,9 +70,14 @@ plotThematicEvolution <- function(
   # Store original lineage_strength for tooltips
   Edges$lineage_strength_display <- Edges$lineage_strength
 
-  # Filter by threshold
-  Edges <- Edges %>%
-    dplyr::filter(lineage_strength >= min.flow)
+  # Flag flows below the threshold. They are NOT removed: plotly assigns the
+  # sankey nodes to columns from the graph topology, so dropping edges would
+  # collapse the period layering and a cluster could be drawn in the wrong
+  # period (e.g. a 2016-2025 topic shown among the 2011-2015 ones). We keep
+  # every edge so the topology stays intact and hide the weak flows visually
+  # instead (zero width + transparent colour, see below).
+  Edges$is_weak <- !is.na(Edges$lineage_strength) &
+    Edges$lineage_strength < min.flow
 
   # Use lineage_strength as weight
   Edges <- Edges %>%
@@ -94,6 +99,10 @@ plotThematicEvolution <- function(
   # Scale weights for visualization
   Edges$weight <- Edges$weight * 100
 
+  # Weak flows are kept only to preserve the layout topology: give them a
+  # negligible width so they take no visible space.
+  Edges$weight[Edges$is_weak] <- 1e-6
+
   # NOW reassign node IDs for plotly
   Nodes$old_id <- Nodes$id
   Nodes$id <- (1:nrow(Nodes)) - 1
@@ -113,7 +122,22 @@ plotThematicEvolution <- function(
     Edges$color <- "#D3D3D380"
   }
 
+  # Hide the weak flows: kept for topology only, rendered fully transparent.
+  Edges$color[Edges$is_weak] <- "rgba(0,0,0,0)"
+
   node_labels <- Nodes$name
+
+  # Clusters whose flows are all below the threshold: hide them from the plot.
+  # They are kept in the trace (so the period layering/topology is preserved
+  # and the other clusters stay in the right period) but rendered invisible -
+  # transparent node and empty label.
+  strong_ids <- unique(c(
+    Edges$from[!Edges$is_weak],
+    Edges$to[!Edges$is_weak]
+  ))
+  hidden_node <- !(Nodes$id %in% strong_ids)
+  node_labels[hidden_node] <- ""
+  Nodes$color[hidden_node] <- "rgba(0,0,0,0)"
 
   # Prepare tooltips
   node_customdata <- matrix(

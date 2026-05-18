@@ -177,43 +177,47 @@ CR_AU <- function(M, sep) {
 
 ### CR_SO field
 CR_SO <- function(M, sep) {
-  FCAU <- list(NULL)
-  CCR <- NULL
   size <- dim(M)
-  CR <- M$CR
-  listCAU <- strsplit(as.character(CR), sep)
+  # Pre-size the result so M$CR_SO is ALWAYS created, even for DBs whose CR
+  # cannot be parsed. Otherwise tableTag()'s dplyr::pull() fails with a
+  # cryptic "must select exactly one column" error on the missing column.
+  CCR <- rep(NA_character_, size[1])
+  listCAU <- strsplit(as.character(M$CR), sep)
 
+  db <- toupper(M$DB[1])
 
   # vector of cited Journals
-  if (M$DB[1] == "ISI") {
-    for (i in 1:size[1]) {
-      elem <- strsplit(as.character(listCAU[[i]]), ",")
+  if (db == "SCOPUS") {
+    # SCOPUS reference layout: "AUTHORS, TITLE (YEAR) JOURNAL, VOL, PAGE"
+    # -> after dropping everything up to ") ", the journal is the 1st field.
+    for (i in seq_len(size[1])) {
+      refs <- gsub(".*?\\) ", "", listCAU[[i]])
+      elem <- strsplit(as.character(refs), ",")
       ind <- lengths(elem)
-      if (max(ind) > 2) {
+      if (length(ind) > 0 && max(ind) > 2) {
         elem <- elem[ind > 2]
-        FCAU[[i]] <- trim.leading(unlist(lapply(elem, function(l) l[[3]])))
-        CCR[i] <- paste(FCAU[[i]], collapse = ";")
-      } else {
-        CCR[[i]] <- NA
+        CCR[i] <- paste(trim.leading(unlist(lapply(elem, function(l) l[[1]]))),
+                        collapse = ";")
       }
     }
-  } else if (M$DB[1] == "SCOPUS") {
-    for (i in 1:size[1]) {
-      listCAU[[i]] <- gsub(".*?\\) ", "", listCAU[[i]])
+  } else if (db %in% c("ISI", "WOS", "OPENALEX", "PUBMED", "DIMENSIONS")) {
+    # WoS reference layout: "AUTHOR, YEAR, JOURNAL, VOL, PAGE, DOI".
+    # OpenAlex/PubMed/Dimensions CR is rewritten to this layout upstream
+    # (build_single_cr / completeMetadata / postprocessingDim), so the
+    # journal is the 3rd comma-separated field for all of them.
+    for (i in seq_len(size[1])) {
       elem <- strsplit(as.character(listCAU[[i]]), ",")
       ind <- lengths(elem)
-      CCR[[i]] <- NA
-      if (length(ind) > 0) {
-        if (max(ind) > 2) {
-          elem <- elem[ind > 2]
-          FCAU[[i]] <- trim.leading(unlist(lapply(elem, function(l) l[[1]])))
-          CCR[i] <- paste(FCAU[[i]], collapse = ";")
-        }
+      if (length(ind) > 0 && max(ind) > 2) {
+        elem <- elem[ind > 2]
+        CCR[i] <- paste(trim.leading(unlist(lapply(elem, function(l) l[[3]]))),
+                        collapse = ";")
       }
     }
   }
+  # Other DBs (e.g. LENS) have no reliable CR source -> column stays all-NA.
 
-  M$CR_SO <- unlist(CCR)
+  M$CR_SO <- CCR
   return(M)
 }
 

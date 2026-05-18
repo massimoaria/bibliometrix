@@ -36,8 +36,18 @@ csvOA2df <- function(file) {
   DATA <- DATA %>% distinct(id_oa, .keep_all = TRUE)
 
   # replace | with ;
+  # OpenAlex CSV uses '|' as the multi-value separator; bibliometrix uses ';'.
+  # In multi-value columns, any ';' already present INSIDE a value (e.g. author
+  # names mangled by OpenAlex such as "Francisco-Javier; Cabrerizo") must be
+  # neutralised BEFORE converting '|' to ';', otherwise the stray ';' becomes a
+  # spurious field boundary and inflates the author/affiliation count. Columns
+  # that contain no '|' (free text such as abstract/title) are left untouched.
   DATA <- DATA %>%
-    mutate(across(where(is.character), ~ stringi::stri_replace_all_regex(., "\\|", ";")))
+    mutate(across(where(is.character), function(x) {
+      if (!any(grepl("|", x, fixed = TRUE), na.rm = TRUE)) return(x)
+      x <- gsub(";", ",", x, fixed = TRUE)
+      gsub("|", ";", x, fixed = TRUE)
+    }))
 
   # Defensive checks for columns that may be missing in new format
   missing_cols <- c()
@@ -166,7 +176,8 @@ csvOA2df <- function(file) {
   DATA$TI_raw <- TI
   DATA$DE_raw <- DE
 
-  return(DATA %>% as.data.frame())
+  DATA <- .flagOAAuthorship(DATA %>% as.data.frame())
+  return(DATA)
 }
 
 relabelling_OA <- function(DATA) {

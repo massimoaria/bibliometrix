@@ -280,7 +280,8 @@ rpys <- function(
       breaks = (RPYS$Year[seq(
         1,
         length(RPYS$Year),
-        by = round(length(RPYS$Year) / 30)
+        # max(1, .) guards against by = 0 when fewer than ~15 years are present
+        by = max(1, round(length(RPYS$Year) / 30))
       )])
     ) +
     theme(
@@ -330,7 +331,10 @@ rpys <- function(
 
 yearExtract <- function(string, db) {
   string <- paste(" ", string, " ", sep = "")
-  if (db == "ISI") {
+  # WoS-format CR carries the year as a bare 4-digit token ("AUTHOR, YEAR, ...").
+  # OpenAlex/PubMed/Dimensions CR is rewritten to this layout upstream, so they
+  # use the same extraction; only SCOPUS keeps the parenthesised "(YEAR)" form.
+  if (toupper(db) %in% c("ISI", "WOS", "OPENALEX", "PUBMED", "DIMENSIONS")) {
     ind <- regexpr(" [[:digit:]]{4} ", string)
     ind[is.na(ind)] <- -1
     string[ind == -1] <- " 0000 "

@@ -256,6 +256,13 @@ convert2df <- function(
       x <- trimws(trimES(gsub("[^[:alnum:][-]']", " ", x)))
       x <- paste(x, collapse = ";")
     }))
+  } else if (dbsource == "openalex_api") {
+    # AU separator normalization only: apiOA2df collapses author names with "; "
+    # while every other dbsource uses ";". Strip the trailing space(s) so the
+    # AU delimiter is consistent across sources (issue #596). Full author-name
+    # format is preserved (no regex stripping) because the API returns full
+    # names that may include hyphens (e.g. U+2010), dots, and accented chars.
+    M$AU <- gsub("; +", ";", M$AU)
   }
 
   if ((dbsource == "pubmed") & (format == "pubmed")) {

@@ -202,7 +202,7 @@ summary.bibliometrix <- function(object, ...) {
     k <- length(object$Countries)
   }
   kk <- k
-  if (!is.null(object$Countries)) {
+  if (length(object$Countries) > 0) {
     # Most Productive Countries
     if (isTRUE(verbose)) {
       cat("\nCorresponding Author's Countries\n\n")

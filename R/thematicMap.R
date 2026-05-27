@@ -559,6 +559,20 @@ clusterAssignment <- function(
   current_year <- as.numeric(format(Sys.Date(), "%Y")) + 1
 
   # 9. Join Finale e Gestione NA Tipizzata (Risolve l'errore)
+  TERMS_wide <- TERMS_processed %>%
+    select(SR, Cluster_Label, p) %>%
+    pivot_wider(
+      names_from = Cluster_Label,
+      values_from = p,
+      values_fill = 0
+    )
+  cluster_cols <- setdiff(names(TERMS_wide), "SR")
+  if (length(cluster_cols) > 0) {
+    k <- suppressWarnings(as.numeric(gsub("\\D+", "", cluster_cols)))
+    cluster_cols <- cluster_cols[order(is.na(k), k, cluster_cols)]
+    TERMS_wide <- TERMS_wide[, c("SR", cluster_cols)]
+  }
+
   TERMS_final <- M %>%
     select(DI, AU, TI, SO, PY, TC, SR) %>%
     mutate(
@@ -568,13 +582,7 @@ clusterAssignment <- function(
       NTC = if_else(TC == 0, 0, TC / mean(TC, na.rm = TRUE))
     ) %>%
     left_join(
-      TERMS_processed %>%
-        select(SR, Cluster_Label, p) %>%
-        pivot_wider(
-          names_from = Cluster_Label,
-          values_from = p,
-          values_fill = 0
-        ) %>%
+      TERMS_wide %>%
         left_join(TERMS_Max, by = "SR"),
       by = "SR"
     ) %>%

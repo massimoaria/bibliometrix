@@ -11077,10 +11077,11 @@ To ensure the functionality of Biblioshiny,
         "Source",
         "Year",
         "TotalCitation",
+        "SR",
         "TCperYear",
-        "NTC",
-        "SR"
+        "NTC"
       )
+      cocDTC <- cocDTC[, c(1:6, 8, 9, 7, 10:ncol(cocDTC))]
     }
     values$cocnet$documentToClusters <- cocDTC
 
@@ -11880,10 +11881,17 @@ To ensure the functionality of Biblioshiny,
       "Source",
       "Year",
       "TotalCitation",
+      "SR",
       "TCperYear",
-      "NTC",
-      "SR"
+      "NTC"
     )
+    values$TM$documentToClusters <- values$TM$documentToClusters[, c(
+      1:6,
+      8,
+      9,
+      7,
+      10:ncol(values$TM$documentToClusters)
+    )]
     values$TM$words <- values$TM$words[, -c(4, 6)]
     values$TM$clusters_orig <- values$TM$clusters
     values$TM$clusters <- values$TM$clusters[, c(9, 5:8, 11)]
@@ -12324,21 +12332,17 @@ To ensure the functionality of Biblioshiny,
         )
         values$nexus$TM[[i]]$documentToClusters <- values$nexus$TM[[
           i
-        ]]$documentToClusters[c(
-          "DOI",
-          "Authors",
-          "Title",
-          "Source",
-          "Year",
-          "TotalCitation",
-          "TCperYear",
-          "NTC",
-          "SR"
+        ]]$documentToClusters[, c(
+          1:6,
+          8,
+          9,
+          7,
+          10:ncol(values$nexus$TM[[i]]$documentToClusters)
         )]
       }
       values$nexus$Data <- values$nexus$Data[
         values$nexus$Data$Inc_index > 0,
-        -c(4, 8)
+        -c(4, 8, 10, 11, 12)
       ]
       values$TEplot <- plotThematicEvolution(
         Nodes = values$nexus$Nodes,
@@ -12436,15 +12440,18 @@ To ensure the functionality of Biblioshiny,
   output$TETable <- renderUI({
     req(values$nexus)
     TEData = values$nexus$Data
-    names(TEData) = c(
+    base_names <- c(
       "From",
       "To",
       "Words",
       "Weighted Inclusion Index",
       "Inclusion Index",
       "Occurrences",
-      "Stability Index"
+      "Stability Index",
+      "PageRank Index"
     )
+    names(TEData)[seq_len(min(ncol(TEData), length(base_names)))] <-
+      base_names[seq_len(min(ncol(TEData), length(base_names)))]
     renderBibliobox(
       TEData,
       nrow = 10,
@@ -12452,7 +12459,7 @@ To ensure the functionality of Biblioshiny,
       pagelength = TRUE,
       left = NULL,
       right = NULL,
-      numeric = c(4, 5, 7),
+      numeric = c(4, 5, 7, intersect(8, seq_len(ncol(TEData)))),
       dom = TRUE,
       size = '85%',
       filter = "top",
@@ -12898,24 +12905,6 @@ To ensure the functionality of Biblioshiny,
   output$TMTableDocument2 <- renderUI({
     req(values$nexus)
     tmDataDoc <- values$nexus$TM[[2]]$documentToClusters
-    tmDataDoc$DI <- paste0(
-      '<a href=\"https://doi.org/',
-      tmDataDoc$DI,
-      '\" target=\"_blank\">',
-      tmDataDoc$DI,
-      '</a>'
-    )
-    names(tmDataDoc)[1:9] <- c(
-      "DOI",
-      "Authors",
-      "Title",
-      "Source",
-      "Year",
-      "TotalCitation",
-      "TCperYear",
-      "NTC",
-      "SR"
-    )
     renderBibliobox(
       tmDataDoc,
       nrow = 10,
@@ -12940,25 +12929,6 @@ To ensure the functionality of Biblioshiny,
   output$TMTableDocument3 <- renderUI({
     req(values$nexus)
     tmDataDoc <- values$nexus$TM[[3]]$documentToClusters
-    tmDataDoc$DI <- paste0(
-      '<a href=\"https://doi.org/',
-      tmDataDoc$DI,
-      '\" target=\"_blank\">',
-      tmDataDoc$DI,
-      '</a>'
-    )
-    names(tmDataDoc)[1:9] <- c(
-      "DOI",
-      "Authors",
-      "Title",
-      "Source",
-      "Year",
-      "TotalCitation",
-      "TCperYear",
-      "NTC",
-      "SR"
-    )
-
     renderBibliobox(
       tmDataDoc,
       nrow = 10,
@@ -12983,25 +12953,6 @@ To ensure the functionality of Biblioshiny,
   output$TMTableDocument4 <- renderUI({
     req(values$nexus)
     tmDataDoc <- values$nexus$TM[[4]]$documentToClusters
-    tmDataDoc$DI <- paste0(
-      '<a href=\"https://doi.org/',
-      tmDataDoc$DI,
-      '\" target=\"_blank\">',
-      tmDataDoc$DI,
-      '</a>'
-    )
-    names(tmDataDoc)[1:9] <- c(
-      "DOI",
-      "Authors",
-      "Title",
-      "Source",
-      "Year",
-      "TotalCitation",
-      "TCperYear",
-      "NTC",
-      "SR"
-    )
-
     renderBibliobox(
       tmDataDoc,
       nrow = 10,
@@ -13026,25 +12977,6 @@ To ensure the functionality of Biblioshiny,
   output$TMTableDocument5 <- renderUI({
     req(values$nexus)
     tmDataDoc <- values$nexus$TM[[5]]$documentToClusters
-    tmDataDoc$DI <- paste0(
-      '<a href=\"https://doi.org/',
-      tmDataDoc$DI,
-      '\" target=\"_blank\">',
-      tmDataDoc$DI,
-      '</a>'
-    )
-    names(tmDataDoc)[1:9] <- c(
-      "DOI",
-      "Authors",
-      "Title",
-      "Source",
-      "Year",
-      "TotalCitation",
-      "TCperYear",
-      "NTC",
-      "SR"
-    )
-
     renderBibliobox(
       tmDataDoc,
       nrow = 10,

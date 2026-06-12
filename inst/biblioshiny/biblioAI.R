@@ -271,34 +271,169 @@ gemini_ai <- function(
     generationConfig = generation_config
   )
 
+  # Helper: pull the real error message out of a Gemini error response body,
+  # returning NULL when the body can't be parsed or carries no message.
+  extract_api_error <- function(resp) {
+    tryCatch(
+      {
+        parsed <- jsonlite::fromJSON(httr2::resp_body_string(resp))
+        msg <- parsed$error$message
+        if (is.null(msg) || !nzchar(msg)) NULL else msg
+      },
+      error = function(e) NULL
+    )
+  }
+
+  # Helper: parse a Gemini 429 body into the human message, the server-suggested
+  # retry delay (seconds, from the RetryInfo detail) and whether the violated
+  # quota is a per-DAY cap — which a retry cannot clear, unlike a per-minute one.
+  parse_api_error <- function(resp) {
+    out <- list(message = NULL, retry_delay = NA_real_, is_daily = FALSE)
+    tryCatch(
+      {
+        err <- jsonlite::fromJSON(
+          httr2::resp_body_string(resp),
+          simplifyVector = FALSE
+        )$error
+        if (!is.null(err$message) && nzchar(err$message)) {
+          out$message <- err$message
+        }
+        for (d in err$details) {
+          dtype <- if (is.null(d[["@type"]])) "" else d[["@type"]]
+          if (grepl("RetryInfo", dtype) && !is.null(d$retryDelay)) {
+            out$retry_delay <- suppressWarnings(
+              as.numeric(sub("s$", "", d$retryDelay))
+            )
+          }
+          if (grepl("QuotaFailure", dtype)) {
+            ids <- vapply(d$violations, function(v) {
+              if (is.null(v$quotaId)) "" else v$quotaId
+            }, character(1))
+            if (any(grepl("PerDay", ids, ignore.case = TRUE))) {
+              out$is_daily <- TRUE
+            }
+          }
+        }
+        out
+      },
+      error = function(e) out
+    )
+  }
+
   # Retry loop
   for (attempt in seq_len(retry_503)) {
-    # Build and send request
+    # Build and send request. Disable httr2's default "throw on HTTP error
+    # status" so 4xx/5xx come back as normal response objects: this lets us
+    # read the actual error message Gemini returns instead of masking every
+    # failure as an invalid API key.
     req <- request(url) |>
       req_url_query(key = api_key) |>
       req_headers("Content-Type" = "application/json") |>
       req_body_json(request_body) |>
-      req_timeout(120)
+      req_timeout(120) |>
+      req_error(is_error = function(resp) FALSE)
 
     resp <- tryCatch(
       req_perform(req),
       error = function(e) {
-        return(list(
-          status_code = stringr::str_extract(e$message, "(?<=HTTP )\\d+") |>
-            as.numeric(),
-          error = TRUE,
-          message = paste("❌ Request failed with error:", e$message)
-        ))
+        # Transport-level failure (timeout, DNS, no network) — not an HTTP
+        # status. Flag it so it is handled separately from HTTP errors.
+        structure(
+          list(connection_error = TRUE, message = e$message),
+          class = "gemini_conn_error"
+        )
       }
     )
 
-    # # Handle connection-level error
-    # if (is.list(resp) && isTRUE(resp$error)) {
-    #   return(resp$message)
-    # }
+    # Connection-level error: retry if attempts remain, otherwise report it.
+    if (inherits(resp, "gemini_conn_error")) {
+      if (attempt < retry_503) {
+        message(paste0(
+          "⚠️ Connection error - retrying (attempt ",
+          attempt, "/", retry_503, ")..."
+        ))
+        Sys.sleep(min(2^attempt, 16))
+        next
+      }
+      return(paste0(
+        "❌ Request failed (connection error): ", resp$message,
+        "\nPlease check your internet connection and try again."
+      ))
+    }
 
-    # Retry on transient server errors (429 rate limit, 5xx server errors)
-    if (resp$status_code %in% c(429, 500, 502, 503, 504)) {
+    # 429 = RESOURCE_EXHAUSTED: a quota / rate-limit response, NOT server
+    # overload. On a paid tier this is typically the per-MINUTE request cap
+    # (RPM) hit by a burst — low-RPM models such as Gemini Pro (~25 RPM) trip
+    # far sooner than Flash (1000+ RPM) — or shared-capacity throttling on the
+    # newest flagship models. Gemini reports how long to wait (RetryInfo) and
+    # whether the cap is per-day (a retry cannot clear that), so honour both
+    # instead of hammering with a fixed backoff and masking the real cause.
+    if (resp$status_code == 429) {
+      err <- parse_api_error(resp)
+      msg <- err$message
+
+      # Depleted prepayment / billing credits: a hard 429 that a retry cannot
+      # clear. The paid "Pro" models (e.g. gemini-2.5-pro, gemini-3.1-pro)
+      # draw on prepay credits; when those run out Google returns this even
+      # though Flash models on the same key keep working.
+      is_billing <- !is.null(msg) && grepl(
+        "prepay|credits? (are )?depleted|billing|insufficient",
+        msg,
+        ignore.case = TRUE
+      )
+      if (is_billing) {
+        return(paste0(
+          "❌ HTTP 429: ",
+          paste0(msg, "\n\n"),
+          "This model needs available billing/prepayment credits on the key's ",
+          "Google Cloud project — retrying will not help. Top up or enable ",
+          "billing at https://ai.studio/projects , or switch to a Flash model ",
+          "(e.g. Gemini 2.5 Flash), which is often covered separately. Note ",
+          "that restricted promotional/EDU credits may not apply to the Pro ",
+          "models' prepay balance."
+        ))
+      }
+
+      # Per-day quota exhausted: retrying is futile — report and stop.
+      if (isTRUE(err$is_daily)) {
+        return(paste0(
+          "❌ HTTP 429: ",
+          if (!is.null(msg)) paste0(msg, "\n\n") else "",
+          "You have reached the per-DAY request quota for this model. ",
+          "Retrying will not help until it resets (around midnight Pacific ",
+          "time). Select a different model or try again tomorrow."
+        ))
+      }
+
+      # Per-minute / capacity throttling: wait the server-suggested delay
+      # (capped) and retry while attempts remain.
+      if (attempt < retry_503) {
+        wait <- if (!is.na(err$retry_delay) && err$retry_delay > 0) {
+          min(err$retry_delay + 1, 35)
+        } else {
+          min(2^attempt, 16)
+        }
+        message(paste0(
+          "⚠️ HTTP 429 (rate limited) - waiting ", round(wait),
+          "s before retry (attempt ", attempt, "/", retry_503, ")..."
+        ))
+        Sys.sleep(wait)
+        next
+      }
+
+      return(paste0(
+        "❌ HTTP 429: ",
+        if (!is.null(err$message)) paste0(err$message, "\n\n") else "",
+        "This is a per-minute rate-limit (RPM) or shared-capacity response, ",
+        "not a server outage. The request was retried ", retry_503,
+        " times without success. Try a higher-throughput model such as ",
+        "Gemini 2.5 Flash (much higher RPM than the Pro models), run the ",
+        "analysis less frequently, or wait a minute and retry."
+      ))
+    }
+
+    # Retry on transient server errors (5xx).
+    if (resp$status_code %in% c(500, 502, 503, 504)) {
       if (attempt < retry_503) {
         message(paste0(
           "⚠️ HTTP ", resp$status_code,

@@ -887,14 +887,39 @@ convert_scopus_new_to_classic <- function(citation) {
 #' @param threshold Numeric value between 0 and 1 indicating the similarity threshold
 #'   for matching citations. Higher values (e.g., 0.90-0.95) produce more conservative
 #'   matching, while lower values (e.g., 0.75-0.80) produce more aggressive matching.
-#'   Default is 0.85, which provides a good balance between precision and recall.
+#'   Default is 0.90, which provides a good balance between precision and recall.
 #' @param method String distance method to use for fuzzy matching. Options include:
 #'   \itemize{
 #'     \item "jw" (default): Jaro-Winkler distance, optimized for bibliographic strings
 #'     \item "lv": Levenshtein distance
+#'     \item "osa": Optimal String Alignment distance
+#'     \item "lcs": Longest Common Subsequence distance
 #'     \item Other methods supported by \code{\link[stringdist]{stringdistmatrix}}
 #'   }
-#' @param min_chars Minimum characters for valid citations (default: 20)
+#' @param min_chars Minimum characters for valid citations (default: 20).
+#' @param max_block_size Integer. Blocks with at least this many unique normalized
+#'   strings skip within-block fuzzy matching and fall back to exact matching only,
+#'   to bound the cost of the pairwise distance matrix (default: 100).
+#' @param use_iso4 Logical. If \code{TRUE} (default), normalize journal names to their
+#'   ISO 4 abbreviated form via the LTWA database (Phase 1.5). Set to \code{FALSE} to
+#'   disable ISO 4 / LTWA journal normalization (used for ablation analyses).
+#' @param use_doi Logical. If \code{TRUE} (default), perform exact matching on DOIs
+#'   (part of Phase 2). Set to \code{FALSE} to disable DOI-based matching.
+#' @param use_exact Logical. If \code{TRUE} (default), perform exact normalized-string
+#'   and punctuation-invariant matching (Phase 2). Set to \code{FALSE} to disable them.
+#' @param fuzzy Logical. If \code{TRUE} (default), perform within-block matching
+#'   (Phase 4: WoS deterministic key matching and Scopus fuzzy clustering). Set to
+#'   \code{FALSE} to disable within-block matching, keeping only the exact phases.
+#' @param use_postproc Logical. If \code{TRUE} (default), perform Phase 4.5
+#'   metadata-based post-processing merge. Set to \code{FALSE} to disable it.
+#' @param title_guard Logical. If \code{TRUE}, run an optional Phase 4.6 that
+#'   purifies clusters by detecting series part markers in titles: distinct
+#'   works that share author, year, journal and volume but differ only in a
+#'   series designator (e.g. "... Part I" / "... Part II", "... I." / "... II.")
+#'   are split into separate clusters. This step only splits clusters, never
+#'   merges; it relies solely on the part marker (not on full-title similarity)
+#'   so it does not interfere with robustness to title typos. Default
+#'   \code{FALSE} (legacy behaviour).
 #'
 #' @details
 #' The function implements a five-phase matching algorithm:
@@ -925,8 +950,9 @@ convert_scopus_new_to_classic <- function(citation) {
 #'
 #' \strong{Phase 3: Within-Block Matching}
 #' Within each block, citations are compared using string distance metrics and
-#' hierarchical clustering. For blocks larger than 500 citations, exact matching
-#' on normalized strings is used instead to maintain performance.
+#' hierarchical clustering. For blocks with at least \code{max_block_size} unique
+#' normalized strings (default 100), exact matching on normalized strings is used
+#' instead to maintain performance.
 #'
 #' \strong{Phase 4: Canonical Representative Selection}
 #' For each cluster, the most complete citation (prioritizing those with volume
@@ -987,7 +1013,14 @@ normalize_citations <- function(
   CR_vector,
   threshold = 0.90,
   method = "jw",
-  min_chars = 20
+  min_chars = 20,
+  max_block_size = 100,
+  use_iso4 = TRUE,
+  use_doi = TRUE,
+  use_exact = TRUE,
+  fuzzy = TRUE,
+  use_postproc = TRUE,
+  title_guard = FALSE
 ) {
   # Detect citation format
   detect_format <- function(x) {
@@ -1284,8 +1317,8 @@ normalize_citations <- function(
   # Try to load from bibliometrix package data
   data("ltwa", package = "bibliometrix", envir = environment())
 
-  # Apply ISO4 normalization if LTWA is available
-  if (!is.null(ltwa) && nrow(ltwa) > 0) {
+  # Apply ISO4 normalization if LTWA is available (and not disabled via use_iso4)
+  if (use_iso4 && !is.null(ltwa) && nrow(ltwa) > 0) {
     # Create ISO4 lookup table for efficiency
     journal_iso4_lookup <- create_journal_iso4_lookup(df$journal, ltwa)
 
@@ -1358,7 +1391,7 @@ normalize_citations <- function(
       nchar(doi) >= 10
     )
 
-  if (nrow(valid_dois) > 0) {
+  if (use_doi && nrow(valid_dois) > 0) {
     doi_clusters <- valid_dois %>%
       group_by(doi) %>%
       mutate(cluster_id = paste0("DOI_", min(CR_id))) %>%
@@ -1379,7 +1412,7 @@ normalize_citations <- function(
   unmatched_df <- df %>%
     dplyr::filter(is.na(cluster_id))
 
-  if (nrow(unmatched_df) > 0) {
+  if (use_exact && nrow(unmatched_df) > 0) {
     exact_matches <- unmatched_df %>%
       group_by(CR_normalized) %>%
       mutate(
@@ -1412,7 +1445,7 @@ normalize_citations <- function(
   unmatched_df2 <- df %>%
     dplyr::filter(is.na(cluster_id))
 
-  if (nrow(unmatched_df2) > 0) {
+  if (use_exact && nrow(unmatched_df2) > 0) {
     unmatched_df2 <- unmatched_df2 %>%
       mutate(
         CR_stripped = sapply(CR_original, function(x) {
@@ -1481,6 +1514,19 @@ normalize_citations <- function(
       return(block_df)
     }
 
+    # Ablation: when fuzzy matching is disabled, skip within-block matching
+    # entirely (both the WoS deterministic key and the Scopus fuzzy branch);
+    # each still-unmatched citation is kept as its own singleton cluster.
+    if (!fuzzy) {
+      for (i in seq_len(nrow(unmatched))) {
+        if (is.na(block_df$cluster_id[block_df$CR_id == unmatched$CR_id[i]])) {
+          block_df$cluster_id[block_df$CR_id == unmatched$CR_id[i]] <-
+            as.character(unmatched$CR_id[i])
+        }
+      }
+      return(block_df)
+    }
+
     # Check if block is predominantly WoS or Scopus
     format_counts <- table(unmatched$format)
     predominant_format <- names(which.max(format_counts))
@@ -1530,7 +1576,7 @@ normalize_citations <- function(
     }
 
     # Fuzzy matching for Scopus (or mixed blocks)
-    if (length(unique_norm) > 1 && length(unique_norm) < 100) {
+    if (length(unique_norm) > 1 && length(unique_norm) < max_block_size) {
       dist_matrix <- stringdist::stringdistmatrix(
         unique_norm,
         unique_norm,
@@ -1606,6 +1652,7 @@ normalize_citations <- function(
   # Different merge strategies based on format
   # Journal is excluded from merge keys: author + year + volume + page_start
   # (+ title_words for Scopus) is already highly discriminating
+  if (use_postproc) {
   df_matched <- df_matched %>%
     mutate(
       # Extract starting page number
@@ -1692,6 +1739,7 @@ normalize_citations <- function(
     ) %>%
     ungroup() %>%
     select(-merge_key, -page_start, -author_surname)
+  }
 
   n_clusters_after_merge <- n_distinct(df_matched$cluster_id)
   n_additional_matches <- n_clusters_before_merge - n_clusters_after_merge
@@ -1699,6 +1747,139 @@ normalize_citations <- function(
   cat("  Clusters before metadata merge:", n_clusters_before_merge, "\n")
   cat("  Clusters after metadata merge:", n_clusters_after_merge, "\n")
   cat("  Additional matches found:", n_additional_matches, "\n")
+
+  # ------------------------------------------------------------------
+  # Phase 4.6 (optional): Title-based cluster purification.
+  # Prevents over-merging of DISTINCT works that share author + year +
+  # journal + volume but differ in title (e.g. multi-part series such as
+  # "... Part I" / "... Part II", or several same-author/same-year/same-
+  # journal articles whose titles were dropped from the matching string).
+  # This step ONLY SPLITS existing clusters; it never merges. Disabled by
+  # default to preserve legacy behaviour.
+  # ------------------------------------------------------------------
+  if (isTRUE(title_guard)) {
+    cat("Phase 4.6: Title-based cluster purification...\n")
+
+    # Extract a normalised title from a raw Scopus reference (text between the
+    # author block and the year), returning NA for WoS / unparseable strings.
+    .get_title <- function(x, fmt) {
+      if (is.na(x) || is.na(fmt) || !fmt %in% c("scopus", "scopus_new")) {
+        return(NA_character_)
+      }
+      t <- str_extract(x, "^.*?(?=\\s*\\(\\d{4}\\))")
+      if (is.na(t)) {
+        return(NA_character_)
+      }
+      t2 <- str_extract(t, "(?<=,\\s).*$") # drop leading first-author chunk
+      if (!is.na(t2)) {
+        t <- t2
+      }
+      t <- toupper(remove_diacritics(t))
+      t <- gsub("[^A-Z0-9 ]", " ", t)
+      t <- str_trim(gsub("\\s+", " ", t))
+      if (nchar(t) < 4) {
+        return(NA_character_)
+      }
+      t
+    }
+
+    # Extract a series-part marker (roman numeral or digit, optionally after
+    # "PART") and map it to a canonical part number; NA when none is present.
+    .get_part <- function(t) {
+      if (is.na(t)) {
+        return(NA_character_)
+      }
+      m <- regmatches(
+        t,
+        regexpr("\\b(PART\\s+)?(VIII|VII|VI|IV|IX|III|II|I|V|X|[1-9])\\b", t)
+      )
+      if (length(m) == 0 || m == "") {
+        return(NA_character_)
+      }
+      r <- sub("PART\\s+", "", m)
+      rmap <- c(
+        I = "1", II = "2", III = "3", IV = "4", V = "5",
+        VI = "6", VII = "7", VIII = "8", IX = "9", X = "10"
+      )
+      if (r %in% names(rmap)) {
+        return(unname(rmap[r]))
+      }
+      r
+    }
+
+    ti_vec <- mapply(
+      .get_title,
+      df_matched$CR_original,
+      df_matched$format,
+      USE.NAMES = FALSE
+    )
+    pt_vec <- vapply(ti_vec, .get_part, character(1), USE.NAMES = FALSE)
+    df_matched$.title_sig <- ti_vec
+    df_matched$.part_sig <- pt_vec
+
+    n_split <- 0L
+
+    # Process only multi-member clusters; split into part-marker-compatible
+    # sub-clusters via complete linkage on the 0/1 dissimilarity below.
+    cl_sizes <- table(df_matched$cluster_id)
+    multi_ids <- names(cl_sizes)[cl_sizes > 1]
+
+    for (cid in multi_ids) {
+      rows <- which(df_matched$cluster_id == cid)
+      ti <- df_matched$.title_sig[rows]
+      pt <- df_matched$.part_sig[rows]
+      m <- length(rows)
+      # Need at least two members carrying a title to consider splitting.
+      if (sum(!is.na(ti)) < 2) {
+        next
+      }
+
+      # Pairwise 0/1 dissimilarity: two members are INCOMPATIBLE (distance 1)
+      # only when they carry DIFFERENT series part markers (e.g. "Part I" vs
+      # "Part II"). This is the single title signal that distinguishes genuine
+      # distinct works without being confounded by title typos (a character
+      # typo virtually never alters a short roman-numeral/part token, and an
+      # original and its perturbed variant always share the same marker), so it
+      # is safe for the typo-robustness the pipeline is designed for. Title-less
+      # members and same-marker members impose no constraint. Complete linkage
+      # guarantees that no incompatible pair ever shares a sub-cluster.
+      D <- matrix(0, m, m)
+      for (a in 1:(m - 1)) {
+        for (b in (a + 1):m) {
+          if (!is.na(pt[a]) && !is.na(pt[b]) && pt[a] != pt[b]) {
+            D[a, b] <- 1
+            D[b, a] <- 1
+          }
+        }
+      }
+
+      if (any(D == 1)) {
+        hc <- hclust(as.dist(D), method = "complete")
+        comp <- cutree(hc, h = 0.5)
+        if (length(unique(comp)) > 1) {
+          # Keep the largest sub-cluster on the original id; suffix the rest.
+          ord <- names(sort(table(comp), decreasing = TRUE))
+          new_ids <- df_matched$cluster_id[rows]
+          for (k in seq_along(ord)) {
+            if (k > 1) {
+              new_ids[comp == as.integer(ord[k])] <- paste0(cid, "_T", k)
+            }
+          }
+          df_matched$cluster_id[rows] <- new_ids
+          n_split <- n_split + (length(ord) - 1L)
+        }
+      }
+    }
+
+    df_matched$.title_sig <- NULL
+    df_matched$.part_sig <- NULL
+    cat("  Title-guard split operations:", n_split, "\n")
+    cat(
+      "  Clusters after purification:",
+      n_distinct(df_matched$cluster_id),
+      "\n"
+    )
+  }
 
   cat("Phase 5: Selecting canonical representatives...\n")
 
@@ -1845,15 +2026,32 @@ normalize_citations <- function(
 #'     \item \code{DB}: (Optional) Database source identifier for format detection
 #'   }
 #' @param threshold Numeric value between 0 and 1 indicating the similarity threshold
-#'   for matching citations. Default is 0.85. See \code{\link{normalize_citations}}
+#'   for matching citations. Default is 0.90. See \code{\link{normalize_citations}}
 #'   for details on selecting appropriate thresholds.
 #' @param method String distance method to use for fuzzy matching. Options include:
 #'   \itemize{
 #'     \item "jw" (default): Jaro-Winkler distance, optimized for bibliographic strings
 #'     \item "lv": Levenshtein distance
+#'     \item "osa": Optimal String Alignment distance
+#'     \item "lcs": Longest Common Subsequence distance
 #'     \item Other methods supported by \code{\link[stringdist]{stringdistmatrix}}
 #'   }
-#' @param min_chars Minimum characters for valid citations (default: 20)
+#' @param min_chars Minimum characters for valid citations (default: 20).
+#' @param max_block_size Integer. Blocks with at least this many unique normalized
+#'   strings skip within-block fuzzy matching and fall back to exact matching only
+#'   (default: 100). Passed to \code{\link{normalize_citations}}.
+#' @param use_iso4 Logical. Enable ISO 4 / LTWA journal normalization (default \code{TRUE}).
+#' @param use_doi Logical. Enable DOI-based exact matching (default \code{TRUE}).
+#' @param use_exact Logical. Enable exact normalized-string and punctuation-invariant
+#'   matching (default \code{TRUE}).
+#' @param fuzzy Logical. Enable within-block (WoS deterministic and Scopus fuzzy)
+#'   matching (default \code{TRUE}).
+#' @param use_postproc Logical. Enable Phase 4.5 metadata-based post-processing
+#'   merge (default \code{TRUE}). These five logical switches are intended primarily
+#'   for ablation analyses and are passed through to \code{\link{normalize_citations}}.
+#' @param title_guard Logical. Enable the optional Phase 4.6 series part-marker
+#'   cluster purification that splits over-merged multi-part works (default
+#'   \code{FALSE}). Passed through to \code{\link{normalize_citations}}.
 #'
 #' @details
 #' The function performs the following steps:
@@ -1957,7 +2155,14 @@ applyReferenceMatching <- function(
   M,
   threshold = 0.90,
   method = "jw",
-  min_chars = 20
+  min_chars = 20,
+  max_block_size = 100,
+  use_iso4 = TRUE,
+  use_doi = TRUE,
+  use_exact = TRUE,
+  fuzzy = TRUE,
+  use_postproc = TRUE,
+  title_guard = FALSE
 ) {
   # Extract citations
   CR <- strsplit(M$CR, ";")
@@ -2007,7 +2212,14 @@ applyReferenceMatching <- function(
     CR_df$CR,
     threshold = threshold,
     method = method,
-    min_chars = min_chars
+    min_chars = min_chars,
+    max_block_size = max_block_size,
+    use_iso4 = use_iso4,
+    use_doi = use_doi,
+    use_exact = use_exact,
+    fuzzy = fuzzy,
+    use_postproc = use_postproc,
+    title_guard = title_guard
   )
 
   # Join with SR
@@ -2084,11 +2296,35 @@ applyReferenceMatching <- function(
 #' @return Same as \code{\link{applyReferenceMatching}}.
 #'
 #' @export
-applyCitationMatching <- function(M, threshold = 0.90, method = "jw", min_chars = 20) {
+applyCitationMatching <- function(
+  M,
+  threshold = 0.90,
+  method = "jw",
+  min_chars = 20,
+  max_block_size = 100,
+  use_iso4 = TRUE,
+  use_doi = TRUE,
+  use_exact = TRUE,
+  fuzzy = TRUE,
+  use_postproc = TRUE,
+  title_guard = FALSE
+) {
   warning(
     "applyCitationMatching() is deprecated as of bibliometrix 6.0. ",
     "Please use applyReferenceMatching() instead.",
     call. = FALSE
   )
-  applyReferenceMatching(M = M, threshold = threshold, method = method, min_chars = min_chars)
+  applyReferenceMatching(
+    M = M,
+    threshold = threshold,
+    method = method,
+    min_chars = min_chars,
+    max_block_size = max_block_size,
+    use_iso4 = use_iso4,
+    use_doi = use_doi,
+    use_exact = use_exact,
+    fuzzy = fuzzy,
+    use_postproc = use_postproc,
+    title_guard = title_guard
+  )
 }

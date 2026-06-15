@@ -4,7 +4,19 @@
 \alias{normalize_citations}
 \title{Normalize and match bibliographic citations}
 \usage{
-normalize_citations(CR_vector, threshold = 0.9, method = "jw", min_chars = 20)
+normalize_citations(
+  CR_vector,
+  threshold = 0.9,
+  method = "jw",
+  min_chars = 20,
+  max_block_size = 100,
+  use_iso4 = TRUE,
+  use_doi = TRUE,
+  use_exact = TRUE,
+  fuzzy = TRUE,
+  use_postproc = TRUE,
+  title_guard = FALSE
+)
 }
 \arguments{
 \item{CR_vector}{Character vector containing bibliographic citations to be normalized and matched.}
@@ -12,16 +24,48 @@ normalize_citations(CR_vector, threshold = 0.9, method = "jw", min_chars = 20)
 \item{threshold}{Numeric value between 0 and 1 indicating the similarity threshold
 for matching citations. Higher values (e.g., 0.90-0.95) produce more conservative
 matching, while lower values (e.g., 0.75-0.80) produce more aggressive matching.
-Default is 0.85, which provides a good balance between precision and recall.}
+Default is 0.90, which provides a good balance between precision and recall.}
 
 \item{method}{String distance method to use for fuzzy matching. Options include:
 \itemize{
   \item "jw" (default): Jaro-Winkler distance, optimized for bibliographic strings
   \item "lv": Levenshtein distance
+  \item "osa": Optimal String Alignment distance
+  \item "lcs": Longest Common Subsequence distance
   \item Other methods supported by \code{\link[stringdist]{stringdistmatrix}}
 }}
 
-\item{min_chars}{Minimum characters for valid citations (default: 20)}
+\item{min_chars}{Minimum characters for valid citations (default: 20).}
+
+\item{max_block_size}{Integer. Blocks with at least this many unique normalized
+strings skip within-block fuzzy matching and fall back to exact matching only,
+to bound the cost of the pairwise distance matrix (default: 100).}
+
+\item{use_iso4}{Logical. If \code{TRUE} (default), normalize journal names to their
+ISO 4 abbreviated form via the LTWA database (Phase 1.5). Set to \code{FALSE} to
+disable ISO 4 / LTWA journal normalization (used for ablation analyses).}
+
+\item{use_doi}{Logical. If \code{TRUE} (default), perform exact matching on DOIs
+(part of Phase 2). Set to \code{FALSE} to disable DOI-based matching.}
+
+\item{use_exact}{Logical. If \code{TRUE} (default), perform exact normalized-string
+and punctuation-invariant matching (Phase 2). Set to \code{FALSE} to disable them.}
+
+\item{fuzzy}{Logical. If \code{TRUE} (default), perform within-block matching
+(Phase 4: WoS deterministic key matching and Scopus fuzzy clustering). Set to
+\code{FALSE} to disable within-block matching, keeping only the exact phases.}
+
+\item{use_postproc}{Logical. If \code{TRUE} (default), perform Phase 4.5
+metadata-based post-processing merge. Set to \code{FALSE} to disable it.}
+
+\item{title_guard}{Logical. If \code{TRUE}, run an optional Phase 4.6 that
+purifies clusters by detecting series part markers in titles: distinct
+works that share author, year, journal and volume but differ only in a
+series designator (e.g. "... Part I" / "... Part II", "... I." / "... II.")
+are split into separate clusters. This step only splits clusters, never
+merges; it relies solely on the part marker (not on full-title similarity)
+so it does not interfere with robustness to title typos. Default
+\code{FALSE} (legacy behaviour).}
 }
 \value{
 A data frame with the following columns:
@@ -75,8 +119,9 @@ the number of blocks and m is the average block size.
 
 \strong{Phase 3: Within-Block Matching}
 Within each block, citations are compared using string distance metrics and
-hierarchical clustering. For blocks larger than 500 citations, exact matching
-on normalized strings is used instead to maintain performance.
+hierarchical clustering. For blocks with at least \code{max_block_size} unique
+normalized strings (default 100), exact matching on normalized strings is used
+instead to maintain performance.
 
 \strong{Phase 4: Canonical Representative Selection}
 For each cluster, the most complete citation (prioritizing those with volume

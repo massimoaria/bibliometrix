@@ -1,4 +1,8 @@
-# bibliometrix (development version)
+# bibliometrix 5.4.1
+
+## Bug Fixes and Improvements
+- **Minor fixes** in Biblioshiny UI
+
 
 # bibliometrix 5.4.0
 

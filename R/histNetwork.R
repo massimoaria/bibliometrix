@@ -226,10 +226,7 @@ scopus <- function(M, min.citations, sep, network, verbose) {
     M <- metaTagExtraction(M, Field = "SR")
   }
   
-  CR <- match_citations_fast(
-    titles_df=M %>% select(SR,TI),
-    references_df=M %>% select(SR,CR)
-  )
+  CR <- match_citations_fast(M = M, sep = sep)
 
   LCS <- CR %>% 
     group_by(SR_cited) %>%
@@ -472,51 +469,67 @@ lens <- function(M, min.citations = min.citations, sep = sep, network = network,
 #     str_replace_all("[^A-Z0-9\\s]", " ") %>%
 #     str_squish()
 # }
-match_citations_fast <- function(titles_df, references_df) {
-  
-  # Normalizza i titoli
-  titles_norm <- titles_df %>%
-    dplyr::mutate(TI_clean = stringr::str_to_upper(TI) %>%
-                    stringr::str_replace_all("[^A-Z0-9\\s]", " ") %>%
-                    stringr::str_squish())
-  
-  # Normalizza le bibliografie
-  refs_norm <- references_df %>%
-    dplyr::mutate(CR_clean = stringr::str_to_upper(CR) %>%
-                    stringr::str_replace_all("[^A-Z0-9\\s]", " ") %>%
-                    stringr::str_squish())
-  
-  # Crea tutte le possibili combinazioni
-  all_combinations <- tidyr::expand_grid(
-    cited_SR = titles_norm$SR,
-    citing_SR = refs_norm$SR
+#' Match local citations for Scopus collections (flat data frame).
+#'
+#' A citing paper cites a target paper when ONE of its INDIVIDUAL references
+#' carries the target's first-author surname AND publication year AND (a substring
+#' of) its title. Earlier this matched the target title as a substring of the whole
+#' concatenated CR list, with no author/year guard — which over-counts badly for
+#' short/generic titles: a book chapter titled "INTRODUCTION" matched every
+#' reference list that merely contained the word "introduction" (LCS far above the
+#' true count, even LCS > GCS). Scopus also ships two reference layouts (classic
+#' "...(YEAR) JOURNAL" and the newer "...JOURNAL, ..., (YEAR)"); keying on the
+#' per-reference first author + parenthesised year is robust to both.
+#'
+#' @param M bibliographic data frame (needs SR, AU, PY, TI, CR).
+#' @param sep field separator splitting individual references in CR.
+#' @return data.frame(SR_cited, SR_citing) of confirmed local-citation links.
+#' @keywords internal
+match_citations_fast <- function(M, sep = ";") {
+  norm <- function(x) stringr::str_squish(stringr::str_replace_all(
+    stringr::str_to_upper(x), "[^A-Z0-9\\s]", " "))
+  # First space-delimited token, punctuation stripped -> surname key. Stable across
+  # "FARZANEGAN MR" / "FARZANEGAN M.R." and hyphenated names ("RAMOS-RODRIGUEZ").
+  surname <- function(au) toupper(gsub("[^A-Za-z0-9]", "", sub("[ ].*", "", trimws(au))))
+
+  # Cited-document keys (drop rows with no title/author/year to anchor on).
+  cited <- data.frame(
+    SR_cited = M$SR,
+    AU_sur   = surname(sub(";.*", "", M$AU)),
+    PY       = as.character(M$PY),
+    TI_clean = norm(M$TI),
+    stringsAsFactors = FALSE
   )
-  
-  # Aggiungi i titoli normalizzati
-  all_combinations <- dplyr::left_join(
-    all_combinations, 
-    titles_norm %>% dplyr::select(SR, TI_clean), 
-    by = c("cited_SR" = "SR")
+  cited <- cited[nzchar(cited$TI_clean) & nzchar(cited$AU_sur) & !is.na(cited$PY) & cited$PY != "NA", ]
+
+  # Citing-side INDIVIDUAL references (flat: split the concatenated CR list).
+  sp  <- strsplit(as.character(M$CR), sep)
+  refs <- data.frame(
+    SR_citing = rep(M$SR, lengths(sp)),
+    ref       = trimws(unlist(sp)),
+    stringsAsFactors = FALSE
   )
-  
-  # Aggiungi le bibliografie normalizzate
-  all_combinations <- dplyr::left_join(
-    all_combinations,
-    refs_norm %>% dplyr::select(SR, CR_clean), 
-    by = c("citing_SR" = "SR")
-  )
-  
-  # Trova i match
-  all_combinations$is_match <- stringr::str_detect(
-    all_combinations$CR_clean, 
-    stringr::fixed(all_combinations$TI_clean)
-  )
-  
-  # Filtra solo i match
-  matches <- all_combinations %>%
-    dplyr::filter(is_match) %>%
-    dplyr::select(cited_SR, citing_SR) %>% 
-    rename("SR_cited" = cited_SR, "SR_citing" = citing_SR)
-  
-  return(matches)
+  el <- strsplit(refs$ref, ",", fixed = TRUE)
+  refs$AU_sur    <- surname(vapply(el, function(l) if (length(l)) l[[1]] else "", character(1)))
+  refs$PY        <- sub(".*\\((\\d{4})\\).*", "\\1", refs$ref)
+  refs$PY[!grepl("^\\d{4}$", refs$PY)] <- NA_character_
+  refs$ref_clean <- norm(refs$ref)
+  refs <- refs[nzchar(refs$AU_sur) & !is.na(refs$PY), ]
+
+  if (nrow(cited) == 0 || nrow(refs) == 0) {
+    return(data.frame(SR_cited = character(0), SR_citing = character(0)))
+  }
+
+  # Candidate pairs share first-author surname AND year; then require the target
+  # title to appear within that single reference. The author+year join is selective,
+  # so this stays cheap despite the per-reference granularity.
+  cand <- dplyr::inner_join(cited, refs, by = c("AU_sur", "PY"),
+                            relationship = "many-to-many")
+  if (nrow(cand) == 0) {
+    return(data.frame(SR_cited = character(0), SR_citing = character(0)))
+  }
+  cand <- cand[stringr::str_detect(cand$ref_clean, stringr::fixed(cand$TI_clean)), ]
+  matches <- unique(cand[cand$SR_cited != cand$SR_citing, c("SR_cited", "SR_citing"), drop = FALSE])
+  rownames(matches) <- NULL
+  matches
 }

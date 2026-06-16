@@ -188,10 +188,18 @@ CR_SO <- function(M, sep) {
 
   # vector of cited Journals
   if (db == "SCOPUS") {
-    # SCOPUS reference layout: "AUTHORS, TITLE (YEAR) JOURNAL, VOL, PAGE"
-    # -> after dropping everything up to ") ", the journal is the 1st field.
+    # SCOPUS ships TWO reference layouts: the classic "AUTHORS, TITLE (YEAR)
+    # JOURNAL, VOL, PAGE" (year before journal) and the newer "AUTHORS, TITLE,
+    # JOURNAL, VOL, ISSUE, PP. PAGES, (YEAR)" (year last). Normalize the new layout
+    # to the classic one first (convert_scopus_new_to_classic moves the trailing
+    # year back after the title) so that, after dropping everything up to ") ",
+    # the journal is the 1st field for both. The previous code skipped the
+    # conversion and returned the first author for new-format refs.
     for (i in seq_len(size[1])) {
-      refs <- gsub(".*?\\) ", "", listCAU[[i]])
+      cr_i <- vapply(listCAU[[i]],
+                     function(r) convert_scopus_new_to_classic(r),
+                     character(1), USE.NAMES = FALSE)
+      refs <- gsub(".*?\\) ", "", cr_i)
       elem <- strsplit(as.character(refs), ",")
       ind <- lengths(elem)
       if (length(ind) > 0 && max(ind) > 2) {

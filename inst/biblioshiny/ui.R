@@ -811,10 +811,26 @@ body <- dashboardBody(
         font-weight: 400;
       }
       .content-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        margin-top: 30px;
+      }
+      .home-info-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 30px;
-        margin-top: 30px;
+        gap: 25px;
+      }
+      .citation-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 992px) {
+        .home-info-row,
+        .citation-list {
+          grid-template-columns: 1fr;
+        }
       }
       .citation-box {
         background: linear-gradient(135deg, #8b9dc3 0%, #a8b5d1 100%);
@@ -833,14 +849,24 @@ body <- dashboardBody(
         color: #1a1a2e;
       }
       .citation-text {
-        font-size: 16px;
-        line-height: 1.8;
+        font-size: 14px;
+        line-height: 1.6;
         background: rgba(255,255,255,0.7);
-        padding: 20px;
+        padding: 16px;
         border-radius: 10px;
         border-left: 4px solid rgba(26, 26, 46, 0.3);
         color: #1a1a2e;
         font-weight: 400;
+        height: 100%;
+      }
+      .citation-link {
+        color: #1a1a2e;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      .citation-link:hover {
+        color: #5a3e9e;
+        text-decoration: underline;
       }
       .citation-warning {
         margin-top: 15px;
@@ -914,43 +940,13 @@ body <- dashboardBody(
             )
           ),
 
-          # Grid con citazione e info
+          # Grid con info in alto e citazioni a tutta larghezza
           div(
             class = "content-grid",
 
-            # Citation Box
+            # Info Panel (riga superiore, due card affiancate)
             div(
-              class = "citation-box",
-              div(
-                class = "citation-title",
-                icon("quote-left"),
-                "How to Cite"
-              ),
-              div(
-                class = "citation-text",
-                strong("Aria, M., & Cuccurullo, C."),
-                " (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. ",
-                em("Journal of Informetrics"),
-                ", 11(4), 959-975."
-              ),
-              div(
-                class = "citation-text",
-                style = "margin-top: 8px;",
-                strong("Aria, M., & Cuccurullo, C."),
-                " (2026). Science Mapping Analysis - A primer with Biblioshiny. ",
-                em("McGraw-Hill"),
-                ", ISBN: 978-88-386-2297-7."
-              ),
-              div(
-                class = "citation-warning",
-                icon("exclamation-triangle"),
-                "Failure to cite is a license violation"
-              )
-            ),
-
-            # Info Panel
-            div(
-              class = "info-panel",
+              class = "home-info-row",
 
               div(
                 class = "info-card",
@@ -977,6 +973,60 @@ body <- dashboardBody(
                   class = "website-link"
                 ),
                 " for tutorials and examples."
+              )
+            ),
+
+            # Citation Box (a tutta larghezza, 3 citazioni in 3 colonne)
+            div(
+              class = "citation-box",
+              div(
+                class = "citation-title",
+                icon("quote-left"),
+                "How to Cite"
+              ),
+              div(
+                class = "citation-list",
+                div(
+                  class = "citation-text",
+                  "Aria, M., & Cuccurullo, C. (2017). ",
+                  tags$a(
+                    strong("bibliometrix: An R-tool for comprehensive science mapping analysis. "),
+                    href = "https://doi.org/10.1016/j.joi.2017.08.007",
+                    target = "_blank",
+                    class = "citation-link"
+                  ),
+                  em("Journal of Informetrics"),
+                  ", 11(4), 959-975."
+                ),
+                div(
+                  class = "citation-text",
+                  "Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026). ",
+                  tags$a(
+                    strong("Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. A demonstration through the replication of a study. "),
+                    href = "https://doi.org/10.1016/j.joi.2026.101837",
+                    target = "_blank",
+                    class = "citation-link"
+                  ),
+                  em("Journal of Informetrics"),
+                  "."
+                ),
+                div(
+                  class = "citation-text",
+                  "Aria, M., & Cuccurullo, C. (2026). ",
+                  tags$a(
+                    strong("Science Mapping Analysis - A primer with Biblioshiny. "),
+                    href = "https://book.bibliometrix.org",
+                    target = "_blank",
+                    class = "citation-link"
+                  ),
+                  em("McGraw-Hill"),
+                  ", ISBN: 978-88-386-2297-7."
+                )
+              ),
+              div(
+                class = "citation-warning",
+                icon("exclamation-triangle"),
+                "Failure to cite is a license violation"
               )
             )
           )

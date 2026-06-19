@@ -11,6 +11,18 @@ bibentry(bibtype="Article",
            "bibliometrix: An R-tool for comprehensive science mapping analysis,",
            "Journal of informetrics, 11(4), 959-975, Elsevier."))
 
+bibentry(bibtype="Article",
+         title = "Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. A demonstration through the replication of a study",
+         author = "Massimo Aria and Corrado Cuccurullo and Luca D'Aniello and Maria Spano",
+         journal = "Journal of Informetrics",
+         year = "2026",
+         doi = "10.1016/j.joi.2026.101837",
+         textVersion =
+           paste("Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026),",
+           "Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping.",
+           "A demonstration through the replication of a study,",
+           "Journal of Informetrics, DOI: 10.1016/j.joi.2026.101837."))
+
 bibentry(bibtype="Book",
          title = "Science Mapping Analysis - A primer with Biblioshiny",
          author = "Massimo Aria and Corrado Cuccurullo",

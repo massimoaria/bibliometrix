@@ -4,7 +4,19 @@
 \alias{applyCitationMatching}
 \title{applyCitationMatching (Deprecated)}
 \usage{
-applyCitationMatching(M, threshold = 0.9, method = "jw", min_chars = 20)
+applyCitationMatching(
+  M,
+  threshold = 0.9,
+  method = "jw",
+  min_chars = 20,
+  max_block_size = 100,
+  use_iso4 = TRUE,
+  use_doi = TRUE,
+  use_exact = TRUE,
+  fuzzy = TRUE,
+  use_postproc = TRUE,
+  title_guard = FALSE
+)
 }
 \arguments{
 \item{M}{A bibliometrix data frame, typically created by \code{\link{convert2df}}.
@@ -16,17 +28,41 @@ Must contain the columns:
 }}
 
 \item{threshold}{Numeric value between 0 and 1 indicating the similarity threshold
-for matching citations. Default is 0.85. See \code{\link{normalize_citations}}
+for matching citations. Default is 0.90. See \code{\link{normalize_citations}}
 for details on selecting appropriate thresholds.}
 
 \item{method}{String distance method to use for fuzzy matching. Options include:
 \itemize{
   \item "jw" (default): Jaro-Winkler distance, optimized for bibliographic strings
   \item "lv": Levenshtein distance
+  \item "osa": Optimal String Alignment distance
+  \item "lcs": Longest Common Subsequence distance
   \item Other methods supported by \code{\link[stringdist]{stringdistmatrix}}
 }}
 
-\item{min_chars}{Minimum characters for valid citations (default: 20)}
+\item{min_chars}{Minimum characters for valid citations (default: 20).}
+
+\item{max_block_size}{Integer. Blocks with at least this many unique normalized
+strings skip within-block fuzzy matching and fall back to exact matching only
+(default: 100). Passed to \code{\link{normalize_citations}}.}
+
+\item{use_iso4}{Logical. Enable ISO 4 / LTWA journal normalization (default \code{TRUE}).}
+
+\item{use_doi}{Logical. Enable DOI-based exact matching (default \code{TRUE}).}
+
+\item{use_exact}{Logical. Enable exact normalized-string and punctuation-invariant
+matching (default \code{TRUE}).}
+
+\item{fuzzy}{Logical. Enable within-block (WoS deterministic and Scopus fuzzy)
+matching (default \code{TRUE}).}
+
+\item{use_postproc}{Logical. Enable Phase 4.5 metadata-based post-processing
+merge (default \code{TRUE}). These five logical switches are intended primarily
+for ablation analyses and are passed through to \code{\link{normalize_citations}}.}
+
+\item{title_guard}{Logical. Enable the optional Phase 4.6 series part-marker
+cluster purification that splits over-merged multi-part works (default
+\code{FALSE}). Passed through to \code{\link{normalize_citations}}.}
 }
 \value{
 Same as \code{\link{applyReferenceMatching}}.

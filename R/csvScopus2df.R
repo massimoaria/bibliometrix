@@ -31,6 +31,15 @@ csvScopus2df <- function(file) {
   #DATA$AU <- gsub(",", ";", DATA$AU)
   DATA$AU <- gsub(",", "", DATA$AU)
 
+  # Scopus "Author full names" (AF) carries a trailing Scopus Author ID per author
+  # — "REID, MONIQUE (34873313300); DU PLESSIS, STAN (6603911971)". Strip the IDs
+  # (they break author-name matching/display, e.g. Author Profile, when AF is used
+  # as the author field) and normalize the author separator to ";".
+  if ("AF" %in% names(DATA)) {
+    DATA$AF <- gsub("\\s*\\([0-9]+\\)", "", DATA$AF)
+    DATA$AF <- trimws(gsub("\\s*;\\s*", ";", DATA$AF))
+  }
+
   ### store raw affiliation format to extract link among authors and affiliations
   DATA$C1raw <- DATA$C1
   ###

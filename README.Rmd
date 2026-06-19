@@ -108,6 +108,14 @@ This framework ensures transparency and reproducibility, mapping
 each analytical step to a specific section of the resulting
 research paper.
 
+The SAAS workflow is described in detail in:
+
+Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026).
+**Biblioshiny and the SAAS Workflow: An integrated framework for
+transparent and reproducible science mapping. A demonstration through
+the replication of a study**, *Journal of Informetrics*.
+(<https://doi.org/10.1016/j.joi.2026.101837>)
+
 ## The Book
 
 <p align="center">
@@ -280,6 +288,14 @@ If you use this package for your research, please cite it as:
 Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for
 comprehensive science mapping analysis**, *Journal of Informetrics*,
 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
+
+If you use Biblioshiny and its SAAS workflow, please also cite:
+
+Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026)
+**Biblioshiny and the SAAS Workflow: An integrated framework for
+transparent and reproducible science mapping. A demonstration through
+the replication of a study**, *Journal of Informetrics*, DOI:
+10.1016/j.joi.2026.101837
 
 ## Community
 
@@ -756,14 +772,20 @@ scientific knowledge evolves and builds upon previous research.
 ### The Book
 
 Aria, M. & Cuccurullo, C. (2026). **Science Mapping Analysis: A
-Primer with Biblioshiny**, *McGraw-Hill Education*. ISBN: 978-88-386-2297-7.
+Primer with Biblioshiny**, *McGraw-Hill Education*. ISBN: 978-88-386-2297-7 (<https://book.bibliometrix.org>)
 
-### Core bibliometrix publication
+### Core bibliometrix publications
 
 Aria, M. & Cuccurullo, C. (2017). **bibliometrix: An R-tool for
 comprehensive science mapping analysis**, *Journal of Informetrics*,
 11(4), pp 959-975, Elsevier, DOI: 10.1016/j.joi.2017.08.007
 (<https://doi.org/10.1016/j.joi.2017.08.007>)
+
+Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026).
+**Biblioshiny and the SAAS Workflow: An integrated framework for
+transparent and reproducible science mapping. A demonstration through
+the replication of a study**, *Journal of Informetrics*.
+(<https://doi.org/10.1016/j.joi.2026.101837>)
 
 ### Recent methodological advances
 

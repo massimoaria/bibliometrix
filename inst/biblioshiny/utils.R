@@ -5711,9 +5711,19 @@ addGgplotsWb <- function(
       next
     }
 
+    # Include the (period-unique) sheet name in the file name. Otherwise two
+    # sheets written within the same second (e.g. consecutive Thematic
+    # Evolution periods in the report loop) collide on
+    # "figureImage_<i>_<ts>.png": the later period overwrites the former's PNG,
+    # and since openxlsx::insertImage only reads the file at saveWorkbook time,
+    # both sheets end up showing the same (last-written) image.
+    safeSheet <- gsub("[^A-Za-z0-9]+", "_", sheetname)
     fileName <- file.path(
       getWD(),
-      paste0("figureImage_", i, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".png")
+      paste0(
+        "figureImage_", safeSheet, "_", i, "_",
+        format(Sys.time(), "%Y%m%d_%H%M%S"), ".png"
+      )
     )
 
     written <- tryCatch({

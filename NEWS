@@ -1,3 +1,16 @@
+bibliometrix V.5.4.1.9001 (development version)
+
+New Features
+- OpenAlex CSV import - new web-export format: convert2df(dbsource = "openalex") now reads the new OpenAlex "Export to CSV" layout (human-readable headers such as Work ID, Title, Author, Source, Author IDs, Institution) in addition to the legacy dotted-path column names (id, authorships.author.display_name, ...). The paper identifier was renamed by OpenAlex from "id" to "Work ID".
+- OpenAlex CSV - field validation & fault tolerance: csvOA2df() now validates the available metadata. It stops with a clear, actionable message when a required field is missing (Work ID, Title, Author, Source, Year) and warns about missing recommended fields, while the import still proceeds. In Biblioshiny these are surfaced as a dialog / notification, so an incomplete OpenAlex CSV no longer crashes the app.
+- completeMetadata() - OpenAlex enrichment by Work ID: records are now looked up on OpenAlex by their Work ID (id_oa) when the DOI is absent (typical of minimal OpenAlex CSV exports), instead of being skipped. The OpenAlex pass is no longer disabled for OpenAlex-sourced collections, so fields omitted from a partial CSV export (abstract, affiliations, references, ...) can be downloaded from the OpenAlex API.
+
+Bug Fixes and Improvements
+- OpenAlex CSV import no longer crashes on sparse collections: missing optional columns are now created as NA_character_ (a logical NA broke strsplit() in biblioAnalysis()), and the DT (document type) column is always present (defaults to ARTICLE, since the web CSV export does not include the work type).
+- Biblioshiny - Missing Data audit: wcTable() now treats an all-NA Science Categories (WC) column as missing, fixing a "missing value where TRUE/FALSE needed" crash on import of OpenAlex collections without subject categories.
+- Biblioshiny - Metadata completion modal: eligibility now counts records with a DOI or an OpenAlex Work ID, and OpenAlex enrichment is offered for OpenAlex collections (previously deselected by default). Labels and help text updated accordingly.
+- Biblioshiny - Import Info & References: added a dedicated OpenAlex section documenting the minimum and recommended metadata to select when exporting, and the need to enrich the collection via the OpenAlex API to obtain cited references.
+
 bibliometrix V.5.4.1
 
 Bug Fixes and Improvements

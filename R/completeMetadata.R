@@ -1,18 +1,18 @@
 #' Complete missing metadata via DOI lookup against Crossref and OpenAlex
 #'
 #' Given a bibliometrix collection produced by \code{\link{convert2df}}, this
-#' function takes the subset of records that have a DOI but are missing one
-#' or more of the analysis-relevant fields, queries the Crossref REST API
+#' function takes the subset of records that have a usable lookup key (a DOI or
+#' an OpenAlex Work ID) but are missing one or more of the analysis-relevant
+#' fields, queries the Crossref REST API
 #' (\url{https://api.crossref.org/works}) and/or OpenAlex (via
-#' \pkg{openalexR}) using the DOI as the lookup key, and fills the gaps
-#' with the values returned by those sources. Existing non-empty values
-#' are never overwritten.
+#' \pkg{openalexR}) and fills the gaps with the values returned by those
+#' sources. Existing non-empty values are never overwritten.
 #'
 #' When both sources are enabled, OpenAlex runs first (broader coverage of
-#' AB/CR/C1/TC) and Crossref then fills the residual gaps. If the input
-#' collection was originally imported from OpenAlex (\code{M$DB[1] ==
-#' "OPENALEX"}), the OpenAlex pass is automatically skipped because re-querying
-#' it would not add information.
+#' AB/CR/C1/TC) and Crossref then fills the residual gaps. OpenAlex records are
+#' looked up by their \strong{Work ID} (\code{id_oa}) when available - which is
+#' essential for collections imported from a minimal OpenAlex CSV export that
+#' omitted the DOI - and by DOI otherwise. Crossref is always keyed by DOI.
 #'
 #' The vacancy predicate matches the one used by \code{\link{missingData}}:
 #' a cell is considered missing when it is \code{NA} or one of
@@ -27,8 +27,8 @@
 #' @param M Bibliometrix data frame produced by \code{\link{convert2df}}.
 #' @param sources Character vector of enrichment sources.
 #'   Default \code{c("openalex", "crossref")}. Order is irrelevant; OpenAlex
-#'   always runs before Crossref. \code{"openalex"} is skipped if
-#'   \code{M$DB[1] == "OPENALEX"}.
+#'   always runs before Crossref. OpenAlex records are looked up by Work ID
+#'   (\code{id_oa}) when present, otherwise by DOI.
 #' @param fields Character vector of WoS-codified fields to attempt to fill.
 #'   Default \code{c("AB","AU","C1","CR","DT","LA","PY","RP","SO","TC","TI")}.
 #'   \code{TC} is filled only by OpenAlex.
@@ -90,23 +90,15 @@ completeMetadata <- function(
   if (length(unknown) > 0) {
     stop("Unsupported sources: ", paste(unknown, collapse = ", "))
   }
-  ## If the collection itself comes from OpenAlex, re-querying it makes no
-  ## sense -- transparently drop the OpenAlex pass.
-  if (
-    "openalex" %in%
-      sources &&
-      "DB" %in% names(M) &&
-      length(M$DB) > 0 &&
-      !is.na(M$DB[1]) &&
-      toupper(M$DB[1]) == "OPENALEX"
-  ) {
-    if (isTRUE(verbose)) {
-      message(
-        "[completeMetadata] Source DB is OPENALEX; skipping OpenAlex pass."
-      )
-    }
-    sources <- setdiff(sources, "openalex")
-  }
+  ## NOTE: OpenAlex collections used to skip the OpenAlex pass (re-querying the
+  ## same DB seemed pointless). This is wrong for partial OpenAlex CSV web
+  ## exports, where the user selected only a few columns: re-querying OpenAlex
+  ## DOES add the omitted fields (abstract, affiliations, references, ...).
+  ## We therefore keep the OpenAlex pass and, for OpenAlex collections, look the
+  ## records up by their OpenAlex Work ID (id_oa) rather than the DOI - which
+  ## may be missing in a minimal export. A full OpenAlex API import already has
+  ## every field, so its records are simply not flagged as "missing" and no
+  ## query is issued.
 
   ## Field filtering -- always-skip set
   always_skip <- c("ID", "WC")
@@ -154,8 +146,11 @@ completeMetadata <- function(
     }
   }
 
-  ## Snapshot eligible rows: DOI present and at least one target field empty.
+  ## Snapshot eligible rows: a usable lookup key (DOI or OpenAlex Work ID) is
+  ## present and at least one target field is empty.
   doi_norm <- .normalize_doi(M$DI)
+  oa_id_norm <- .normalize_oa_id(if ("id_oa" %in% names(M)) M$id_oa else NULL, nrow(M))
+  has_key <- !is.na(doi_norm) | !is.na(oa_id_norm)
   target_present <- intersect(fields, names(M))
   if (length(target_present) == 0) {
     return(list(
@@ -169,7 +164,7 @@ completeMetadata <- function(
   for (f in target_present) {
     any_missing <- any_missing | .is_vacant(M[[f]])
   }
-  eligible_idx <- which(!is.na(doi_norm) & any_missing)
+  eligible_idx <- which(has_key & any_missing)
   if (length(eligible_idx) == 0) {
     if (isTRUE(verbose)) {
       message("[completeMetadata] No eligible records.")
@@ -196,14 +191,25 @@ completeMetadata <- function(
 
   ## ---- Pass 1: OpenAlex (preferred when available) ------------------------
   if ("openalex" %in% sources) {
+    ## Choose the OpenAlex lookup key: the Work ID (id_oa) when the collection
+    ## carries one (typical for OpenAlex imports, and the only key available
+    ## when the CSV export omitted the DOI), otherwise the DOI.
+    if (any(!is.na(oa_id_norm))) {
+      oa_key_type <- "id"
+      oa_keys <- oa_id_norm
+    } else {
+      oa_key_type <- "doi"
+      oa_keys <- .normalize_doi(M_out$DI)
+    }
     eligible_idx_oa <- .recompute_eligible(M_out, fields, eligible_idx)
+    eligible_idx_oa <- eligible_idx_oa[!is.na(oa_keys[eligible_idx_oa])]
     if (length(eligible_idx_oa) > 0) {
-      oa_dois <- .normalize_doi(M_out$DI)[eligible_idx_oa]
       enriched_oa <- .enrich_from_openalex(
-        oa_dois,
+        oa_keys[eligible_idx_oa],
         fields,
         email,
         oa_apikey,
+        key_type = oa_key_type,
         progress = progress,
         verbose = verbose
       )
@@ -212,7 +218,8 @@ completeMetadata <- function(
         enriched_oa,
         eligible_idx_oa,
         fields,
-        source_label = "openalex"
+        source_label = "openalex",
+        keys = oa_keys
       )
       M_out <- merged_oa$M
       if (!is.null(merged_oa$prov)) {
@@ -231,11 +238,12 @@ completeMetadata <- function(
   ## ---- Pass 2: Crossref (fills residual gaps) -----------------------------
   if ("crossref" %in% sources) {
     cr_fields <- setdiff(fields, "TC") # Crossref cannot provide TC
+    cr_keys <- .normalize_doi(M_out$DI) # Crossref is always keyed by DOI
     eligible_idx_cr <- .recompute_eligible(M_out, cr_fields, eligible_idx)
+    eligible_idx_cr <- eligible_idx_cr[!is.na(cr_keys[eligible_idx_cr])]
     if (length(eligible_idx_cr) > 0 && length(cr_fields) > 0) {
-      cr_dois <- .normalize_doi(M_out$DI)[eligible_idx_cr]
       enriched_cr <- .enrich_from_crossref(
-        cr_dois,
+        cr_keys[eligible_idx_cr],
         cr_fields,
         email,
         batch_size = batch_size,
@@ -247,7 +255,8 @@ completeMetadata <- function(
         enriched_cr,
         eligible_idx_cr,
         cr_fields,
-        source_label = "crossref"
+        source_label = "crossref",
+        keys = cr_keys
       )
       M_out <- merged_cr$M
       if (!is.null(merged_cr$prov)) {
@@ -344,6 +353,23 @@ completeMetadata <- function(
   ok <- grepl("^10\\.[0-9]{4,9}/", s)
   s[!ok] <- NA_character_
   tolower(s)
+}
+
+#' @noRd
+.normalize_oa_id <- function(x, n = length(x)) {
+  ## Normalize OpenAlex Work IDs to the bare "W<digits>" form used by the
+  ## openalexR `openalex_id` filter. Returns NA for anything that is not a
+  ## valid Work ID (so DOI-only collections fall back to DOI lookup).
+  if (is.null(x)) {
+    return(rep(NA_character_, n))
+  }
+  s <- trimws(as.character(x))
+  s <- sub("^https?://openalex\\.org/", "", s, ignore.case = TRUE)
+  s <- toupper(s)
+  s[s %in% c("", "NA", "NONE")] <- NA_character_
+  ok <- grepl("^W[0-9]+$", s)
+  s[!ok] <- NA_character_
+  s
 }
 
 #' @noRd
@@ -489,10 +515,10 @@ completeMetadata <- function(
   parsed <- lapply(results, function(it) .crossref_item_to_row(it, fields))
   parsed <- parsed[!vapply(parsed, is.null, logical(1))]
   if (length(parsed) == 0) {
-    return(list(by_doi = list(), fail_count = fail_count))
+    return(list(by_key = list(), fail_count = fail_count))
   }
   list(
-    by_doi = stats::setNames(
+    by_key = stats::setNames(
       parsed,
       vapply(parsed, function(r) r$DI, character(1))
     ),
@@ -859,27 +885,32 @@ completeMetadata <- function(
   enriched,
   eligible_idx,
   fields,
-  source_label = "crossref"
+  source_label = "crossref",
+  keys = NULL
 ) {
   filled <- stats::setNames(integer(length(fields)), fields)
   prov_rows <- list()
 
-  if (length(enriched$by_doi) == 0) {
+  if (length(enriched$by_key) == 0) {
     return(list(M = M, prov = NULL, filled = filled))
   }
 
-  doi_norm <- .normalize_doi(M$DI)
+  ## Per-row lookup key aligned with M (DOI or OpenAlex Work ID). Falls back to
+  ## the DOI for backward compatibility when no key vector is supplied.
+  if (is.null(keys)) {
+    keys <- .normalize_doi(M$DI)
+  }
   ts <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 
   ## Make sure SR exists for provenance
   has_sr <- "SR" %in% names(M)
 
   for (i in eligible_idx) {
-    di <- doi_norm[i]
+    di <- keys[i]
     if (is.na(di)) {
       next
     }
-    rec <- enriched$by_doi[[di]]
+    rec <- enriched$by_key[[di]]
     if (is.null(rec)) {
       next
     }
@@ -927,20 +958,22 @@ completeMetadata <- function(
 
 #' @noRd
 .enrich_from_openalex <- function(
-  dois,
+  keys,
   fields,
   email,
   oa_apikey,
+  key_type = c("doi", "id"),
   progress = NULL,
   verbose = TRUE
 ) {
+  key_type <- match.arg(key_type)
   if (!requireNamespace("openalexR", quietly = TRUE)) {
     if (isTRUE(verbose)) {
       message(
         "[completeMetadata] openalexR is not installed; skipping OpenAlex pass."
       )
     }
-    return(list(by_doi = list(), fail_count = length(unique(dois))))
+    return(list(by_key = list(), fail_count = length(unique(keys))))
   }
 
   ## OpenAlex polite pool / API key plumbing -- set as env vars + options for
@@ -956,7 +989,7 @@ completeMetadata <- function(
     Sys.setenv(openalexR.apikey = oa_apikey)
   }
 
-  uniq <- unique(dois)
+  uniq <- unique(keys)
   ## OpenAlex accepts up to 50 IDs per filter request.
   oa_batch <- 50L
   chunks <- split(uniq, ceiling(seq_along(uniq) / oa_batch))
@@ -967,12 +1000,23 @@ completeMetadata <- function(
   for (i in seq_along(chunks)) {
     chunk <- chunks[[i]]
     fetched <- tryCatch(
-      openalexR::oa_fetch(
-        entity = "works",
-        doi = chunk,
-        output = "list",
-        verbose = FALSE
-      ),
+      if (key_type == "id") {
+        ## Look up by OpenAlex Work ID (e.g. "W2755950973"); the only key
+        ## available when a minimal OpenAlex CSV export omitted the DOI.
+        openalexR::oa_fetch(
+          entity = "works",
+          openalex_id = paste(chunk, collapse = "|"),
+          output = "list",
+          verbose = FALSE
+        )
+      } else {
+        openalexR::oa_fetch(
+          entity = "works",
+          doi = chunk,
+          output = "list",
+          verbose = FALSE
+        )
+      },
       error = function(e) {
         if (isTRUE(verbose)) {
           message(sprintf(
@@ -1006,7 +1050,7 @@ completeMetadata <- function(
   }
 
   if (length(works) == 0) {
-    return(list(by_doi = list(), fail_count = fail_count))
+    return(list(by_key = list(), fail_count = fail_count))
   }
 
   ## CR field requires resolving referenced_works (a second batch of fetches).
@@ -1029,14 +1073,25 @@ completeMetadata <- function(
   })
   parsed <- parsed[!vapply(parsed, is.null, logical(1))]
   if (length(parsed) == 0) {
-    return(list(by_doi = list(), fail_count = fail_count))
+    return(list(by_key = list(), fail_count = fail_count))
+  }
+
+  ## Key the parsed records by whatever lookup key was used so the merge step
+  ## can match them back to the collection rows.
+  key_of <- if (key_type == "id") {
+    vapply(parsed, function(r) r$ID_OA %||% NA_character_, character(1))
+  } else {
+    vapply(parsed, function(r) r$DI %||% NA_character_, character(1))
+  }
+  keep <- !is.na(key_of) & nzchar(key_of)
+  parsed <- parsed[keep]
+  key_of <- key_of[keep]
+  if (length(parsed) == 0) {
+    return(list(by_key = list(), fail_count = fail_count))
   }
 
   list(
-    by_doi = stats::setNames(
-      parsed,
-      vapply(parsed, function(r) r$DI, character(1))
-    ),
+    by_key = stats::setNames(parsed, key_of),
     fail_count = fail_count
   )
 }
@@ -1095,21 +1150,28 @@ completeMetadata <- function(
 
 #' @noRd
 .openalex_work_to_row <- function(w, fields, ref_lookup) {
+  ## OpenAlex Work ID (e.g. "W2755950973"), used as the lookup key when the
+  ## collection has no DOI.
+  id_oa <- .normalize_oa_id(.coalesce_chr(w$id), 1L)
+
   doi <- .coalesce_chr(w$doi)
-  if (is.na(doi)) {
-    return(NULL)
+  if (!is.na(doi)) {
+    doi <- tolower(sub(
+      "^https?://(dx\\.)?doi\\.org/",
+      "",
+      doi,
+      ignore.case = TRUE
+    ))
+    if (!nzchar(doi)) {
+      doi <- NA_character_
+    }
   }
-  doi <- tolower(sub(
-    "^https?://(dx\\.)?doi\\.org/",
-    "",
-    doi,
-    ignore.case = TRUE
-  ))
-  if (!nzchar(doi)) {
+  ## A record is usable if it can be keyed by either the DOI or the Work ID.
+  if (is.na(doi) && is.na(id_oa)) {
     return(NULL)
   }
 
-  out <- list(DI = doi)
+  out <- list(DI = doi, ID_OA = id_oa)
 
   if ("TI" %in% fields) {
     out$TI <- .coalesce_chr(w$title %||% w$display_name)

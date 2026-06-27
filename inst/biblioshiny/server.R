@@ -1543,13 +1543,59 @@ To ensure the functionality of Biblioshiny,
           )
         },
         openalex = {
-          withProgress(message = 'Conversion in progress', value = 0, {
-            M <- convert2df(
-              inFile$datapath,
-              dbsource = input$dbsource,
-              format = "csv"
+          # Fault tolerance: an OpenAlex CSV without the required fields must not
+          # crash the app. Capture conversion warnings (missing recommended
+          # fields) and errors (missing required fields) and surface them to the
+          # user via a notification / dialog.
+          oa_warnings <- character(0)
+          M <- withProgress(message = 'Conversion in progress', value = 0, {
+            tryCatch(
+              withCallingHandlers(
+                convert2df(
+                  inFile$datapath,
+                  dbsource = input$dbsource,
+                  format = "csv"
+                ),
+                warning = function(w) {
+                  oa_warnings <<- c(oa_warnings, conditionMessage(w))
+                  invokeRestart("muffleWarning")
+                }
+              ),
+              error = function(e) {
+                showModal(modalDialog(
+                  title = tags$strong(
+                    icon("exclamation-triangle"),
+                    " OpenAlex import: missing required fields"
+                  ),
+                  tags$p("The selected OpenAlex CSV could not be imported:"),
+                  tags$pre(
+                    style = "white-space: pre-wrap;",
+                    conditionMessage(e)
+                  ),
+                  footer = modalButton("OK"),
+                  easyClose = TRUE
+                ))
+                NULL
+              }
             )
           })
+
+          # Abort gracefully if required fields were missing
+          if (is.null(M)) {
+            return(NULL)
+          }
+
+          # Inform the user about missing recommended fields (non-blocking)
+          if (length(oa_warnings) > 0) {
+            showNotification(
+              HTML(paste(
+                "<strong>OpenAlex import notice</strong><br>",
+                paste(gsub("\n", "<br>", oa_warnings), collapse = "<br>")
+              )),
+              duration = 15,
+              type = "warning"
+            )
+          }
 
           # Resolve cited references if requested
           if (isTRUE(input$importFetchRefs)) {
@@ -2896,14 +2942,24 @@ To ensure the functionality of Biblioshiny,
     } else {
       preselect <- all_fields
     }
-    n_eligible <- sum(!is.na(.bib_doi_norm(values$M$DI)))
+    ## A record is enrichable if it has a usable lookup key: a DOI (used by both
+    ## OpenAlex and Crossref) OR an OpenAlex Work ID (id_oa, used by OpenAlex).
+    ## The Work ID makes OpenAlex enrichment possible even for minimal OpenAlex
+    ## CSV exports that omitted the DOI.
+    has_doi <- !is.na(.bib_doi_norm(values$M$DI))
+    oa_id_col <- if ("id_oa" %in% names(values$M)) values$M$id_oa else NULL
+    has_oa_id <- !is.na(.bib_oa_id_norm(oa_id_col))
+    if (length(has_oa_id) == 0) has_oa_id <- rep(FALSE, nrow(values$M))
+    n_eligible <- sum(has_doi | has_oa_id)
 
-    ## Auto-disable OpenAlex when the source DB is OpenAlex itself.
     db_is_oa <- length(values$M$DB) > 0 &&
       !is.na(values$M$DB[1]) &&
       toupper(values$M$DB[1]) == "OPENALEX"
 
-    default_sources <- if (db_is_oa) "crossref" else c("openalex", "crossref")
+    ## OpenAlex enrichment is always available now: for OpenAlex collections it
+    ## looks records up by Work ID (filling fields omitted from the CSV export);
+    ## for other databases it uses the DOI.
+    default_sources <- c("openalex", "crossref")
 
     ## Read polite email and OpenAlex API key from biblioshiny Settings.
     polite_email <- if (!is.null(values$oaPoliteEmail) &&
@@ -2929,10 +2985,10 @@ To ensure the functionality of Biblioshiny,
 
     removeModal()
     showModal(modalDialog(
-      title = "Complete missing metadata via DOI lookup",
+      title = "Complete missing metadata via DOI / OpenAlex Work ID lookup",
       tagList(
         p(HTML(sprintf(
-          "We will query the selected sources for the %d records that have a DOI and try to fill the selected fields. <b>Existing values are never overwritten.</b>",
+          "We will query the selected sources for the %d records that have a DOI or an OpenAlex Work ID and try to fill the selected fields. <b>Existing values are never overwritten.</b>",
           n_eligible
         ))),
         checkboxGroupInput(
@@ -2944,7 +3000,7 @@ To ensure the functionality of Biblioshiny,
         ),
         if (db_is_oa) {
           helpText(HTML(
-            "<small><i>The collection was imported from OpenAlex; the OpenAlex pass is unavailable for this dataset.</i></small>"
+            "<small><i>The collection was imported from OpenAlex. OpenAlex looks records up by their Work ID, so it can fill fields that were not selected in the CSV export (Crossref still requires a DOI).</i></small>"
           ))
         },
         helpText(HTML(creds_html)),
@@ -3144,6 +3200,19 @@ To ensure the functionality of Biblioshiny,
     s <- sub("^doi:\\s*", "", s, ignore.case = TRUE)
     ok <- grepl("^10\\.[0-9]{4,9}/", s)
     s[!ok] <- NA_character_
+    s
+  }
+
+  ## Local helper: OpenAlex Work ID normaliser, mirroring completeMetadata()'s
+  ## .normalize_oa_id(). Used so the eligibility count includes records that can
+  ## be enriched via Work ID even when they have no DOI.
+  .bib_oa_id_norm <- function(x) {
+    if (is.null(x)) return(character(0))
+    s <- trimws(as.character(x))
+    s <- sub("^https?://openalex\\.org/", "", s, ignore.case = TRUE)
+    s <- toupper(s)
+    s[s %in% c("", "NA", "NONE")] <- NA_character_
+    s[!grepl("^W[0-9]+$", s)] <- NA_character_
     s
   }
 
@@ -5046,8 +5115,9 @@ To ensure the functionality of Biblioshiny,
       choices = sort(unique(values$SCdf$WC)),
       selected = sort(unique(values$SCdf$WC))
     )
-    if (length(unique(values$SCdf$WC)) == 1) {
-      if (unique(values$SCdf$WC) == "N.A.") shinyjs::hide("subject_category")
+    uniqueWC <- unique(values$SCdf$WC)
+    if (length(uniqueWC) == 1 && (is.na(uniqueWC) || uniqueWC == "N.A.")) {
+      shinyjs::hide("subject_category")
     } else {
       shinyjs::show("subject_category")
     }

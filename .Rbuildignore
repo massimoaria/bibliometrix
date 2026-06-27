@@ -35,3 +35,5 @@ Rubbish
 CRAN-SUBMISSION
 ^\.positai$
 ^tasks$
+^graphify-out$
+^raw$

@@ -23,3 +23,7 @@ _gh-pages
 CRAN-SUBMISSION
 
 /.quarto/
+
+# graphify
+graphify-out/
+raw/

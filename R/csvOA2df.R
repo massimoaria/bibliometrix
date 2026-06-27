@@ -33,6 +33,12 @@ csvOA2df <- function(file) {
   # Save original column names before pipe replacement (for dual-path detection)
   DATA_ORIG_NAMES <- names(DATA)
 
+  # Validate that the OpenAlex CSV contains the fields bibliometrix needs.
+  # Stops gracefully (with guidance) if a REQUIRED field is missing; otherwise
+  # warns about missing RECOMMENDED fields. Biblioshiny catches the error and
+  # shows it to the user instead of crashing.
+  validate_OA_fields(DATA, DATA_ORIG_NAMES)
+
   DATA <- DATA %>% distinct(id_oa, .keep_all = TRUE)
 
   # replace | with ;
@@ -49,33 +55,29 @@ csvOA2df <- function(file) {
       gsub("|", ";", x, fixed = TRUE)
     }))
 
-  # Defensive checks for columns that may be missing in new format
-  missing_cols <- c()
-  if (!"CR" %in% names(DATA)) {
-    DATA$CR <- NA
-    missing_cols <- c(missing_cols, "Cited References (CR)")
-  }
-  if (!"NR" %in% names(DATA)) DATA$NR <- NA
-  if (!"VL" %in% names(DATA)) DATA$VL <- NA
-  if (!"IS" %in% names(DATA)) DATA$IS <- NA
-  if (!"DE" %in% names(DATA)) DATA$DE <- NA
-  if (!"ID" %in% names(DATA)) DATA$ID <- NA
-  if (!"TOPICS" %in% names(DATA)) DATA$TOPICS <- NA
-  if (!"WC" %in% names(DATA)) DATA$WC <- NA
-  if (!"SDG" %in% names(DATA)) DATA$SDG <- NA
-  if (!"MESH" %in% names(DATA)) DATA$MESH <- NA
-  if (!"SO_ID" %in% names(DATA)) DATA$SO_ID <- NA
-  if (!"AU_CO" %in% names(DATA)) DATA$AU_CO <- NA
-
-  if (length(missing_cols) > 0) {
-    warning(
-      "\nThe OpenAlex CSV does not contain the following fields: ",
-      paste(missing_cols, collapse = ", "), ".",
-      "\nSome analyses (e.g., citation network, co-citation, bibliographic coupling) may not be available.",
-      "\nTo get full metadata, consider using the OpenAlex API import instead.",
-      call. = FALSE
-    )
-  }
+  # Create defaults for optional columns that may be absent in the CSV, so that
+  # downstream string operations never fail. Character placeholders MUST use
+  # NA_character_ (a logical NA would break functions such as strsplit() in
+  # biblioAnalysis when the whole column is missing - see AU_CO).
+  if (!"CR" %in% names(DATA)) DATA$CR <- NA_character_
+  if (!"NR" %in% names(DATA)) DATA$NR <- NA_character_
+  if (!"VL" %in% names(DATA)) DATA$VL <- NA_character_
+  if (!"IS" %in% names(DATA)) DATA$IS <- NA_character_
+  if (!"DE" %in% names(DATA)) DATA$DE <- NA_character_
+  if (!"ID" %in% names(DATA)) DATA$ID <- NA_character_
+  if (!"TOPICS" %in% names(DATA)) DATA$TOPICS <- NA_character_
+  if (!"WC" %in% names(DATA)) DATA$WC <- NA_character_
+  if (!"SDG" %in% names(DATA)) DATA$SDG <- NA_character_
+  if (!"MESH" %in% names(DATA)) DATA$MESH <- NA_character_
+  if (!"SO_ID" %in% names(DATA)) DATA$SO_ID <- NA_character_
+  if (!"AU_CO" %in% names(DATA)) DATA$AU_CO <- NA_character_
+  if (!"PD" %in% names(DATA)) DATA$PD <- NA_character_
+  if (!"DI" %in% names(DATA)) DATA$DI <- NA_character_
+  # Document type: the new OpenAlex CSV web-export does not include the work
+  # "type". DT must always exist (biblioshiny filters and reports rely on it),
+  # so default it to "ARTICLE" - the dominant OpenAlex type. The user has
+  # already been warned about it by validate_OA_fields().
+  if (!"DT" %in% names(DATA)) DATA$DT <- "ARTICLE"
 
   DATA$AF <- DATA$AU
   if (!"AB" %in% names(DATA)) DATA$AB <- ""
@@ -180,6 +182,73 @@ csvOA2df <- function(file) {
   return(DATA)
 }
 
+# Required fields (human-readable OpenAlex export column = internal tag).
+# Without these bibliometrix cannot build a meaningful bibliographic data frame.
+oaRequiredFields <- function() {
+  c(
+    "Work ID" = "id_oa",
+    "Title"   = "TI",
+    "Author"  = "AU",
+    "Source"  = "SO",
+    "Year"    = "PY"
+  )
+}
+
+# Validate the fields available in an OpenAlex CSV (after relabelling).
+# - If any REQUIRED field is missing -> stop() with guidance on which columns to
+#   select when exporting from OpenAlex. Biblioshiny catches this and shows a
+#   dialog instead of crashing.
+# - Missing RECOMMENDED fields -> a single warning(); the import still proceeds.
+validate_OA_fields <- function(DATA, orig_names = names(DATA)) {
+  nm <- names(DATA)
+  required <- oaRequiredFields()
+
+  ## ---- Required fields ----
+  req_missing <- required[!(required %in% nm)]
+  if (length(req_missing) > 0) {
+    stop(
+      "The OpenAlex CSV is missing the following REQUIRED field(s): ",
+      paste(names(req_missing), collapse = ", "), ".\n",
+      "bibliometrix cannot create a bibliographic data frame without them.\n",
+      "When exporting from OpenAlex (Works > Export > CSV), make sure to select ",
+      "at least these columns: ",
+      paste(names(required), collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+
+  ## ---- Recommended fields ----
+  has <- function(canon) canon %in% nm
+  recommended <- c(
+    "Citation count"       = has("TC"),
+    "DOI"                  = has("DI"),
+    "Author IDs"           = has("AU_ID"),
+    "ORCID"                = has("OI"),
+    "Institution"          = has("C1_NAMES") || ("authorships.affiliations" %in% orig_names),
+    "Country"              = has("AU_CO"),
+    "Language"             = has("LA"),
+    "Abstract"             = has("AB"),
+    "Corresponding author" = has("corresponding_author_ids") || has("AU_CORRESPONDING"),
+    "Cited References"     = has("CR"),
+    "Document Type"        = has("DT"),
+    "Keywords"             = has("DE")
+  )
+  rec_missing <- names(recommended)[!recommended]
+  if (length(rec_missing) > 0) {
+    warning(
+      "The OpenAlex CSV does not contain the following recommended field(s): ",
+      paste(rec_missing, collapse = ", "), ".\n",
+      "The collection was imported, but analyses that rely on these fields ",
+      "(e.g., citation/co-citation networks, affiliations, countries, keyword ",
+      "analysis) may be limited or unavailable.\n",
+      "For full metadata, re-export from OpenAlex including these columns, or ",
+      "use the OpenAlex API import.",
+      call. = FALSE
+    )
+  }
+  invisible(TRUE)
+}
+
 relabelling_OA <- function(DATA) {
   ## column re-labelling
   label <- names(DATA)
@@ -235,6 +304,31 @@ relabelling_OA <- function(DATA) {
   label[label %in% "best_oa_location.license"] <- "OA_LICENSE"
   label[label %in% "open_access.is_oa"] <- "OA"
   label[label %in% "open_access.oa_status"] <- "OA_STATUS"
+
+  # Newest OpenAlex CSV web-export format (human-readable headers).
+  # OpenAlex renamed the columns in its web "Export to CSV" output; in
+  # particular the paper identifier is now "Work ID" instead of "id".
+  # These mappings make csvOA2df compatible with both the old dotted-path
+  # column names and the new human-readable ones.
+  label[label %in% "Work ID"] <- "id_oa"
+  label[label %in% "Title"] <- "TI"
+  label[label %in% "Author"] <- "AU"
+  label[label %in% "Author IDs"] <- "AU_ID"
+  label[label %in% "ORCID"] <- "OI"
+  label[label %in% "Year"] <- "PY"
+  label[label %in% "Citation count"] <- "TC"
+  label[label %in% "Reference count"] <- "NR"
+  label[label %in% "Source"] <- "SO"
+  label[label %in% "Source IDs"] <- "SO_ID"
+  label[label %in% "DOI"] <- "DI"
+  label[label %in% "Language"] <- "LA"
+  label[label %in% "Country"] <- "AU_CO"
+  label[label %in% "Abstract"] <- "AB"
+  label[label %in% "Open access"] <- "OA"
+  label[label %in% "Institution"] <- "C1_NAMES"
+  label[label %in% "Institution IDs"] <- "C1_IDS"
+  label[label %in% "Corresponding author"] <- "corresponding_author_ids"
+  label[label %in% "Corresponding institution"] <- "corresponding_institution_ids"
 
   names(DATA) <- label
   return(DATA)
@@ -353,7 +447,7 @@ convert_iso2_to_country <- function(df_column, countries_df) {
   
   # Funzione per tradurre un singolo elemento (es: "IT;IT;FR")
   translate_entry <- function(entry) {
-    if (is.na(entry) || entry == "" || grepl("^;+\\s*$", entry)) return(NA)
+    if (is.na(entry) || entry == "" || grepl("^;+\\s*$", entry)) return(NA_character_)
     iso_codes <- unlist(strsplit(entry, ";"))
     country_names <- iso_to_country[iso_codes]
     # Rimuove NA e unifica nomi duplicati

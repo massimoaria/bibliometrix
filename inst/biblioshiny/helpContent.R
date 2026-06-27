@@ -120,17 +120,17 @@ helpContent <- function() {
           <td style='padding:8px; border:1px solid #bbb;'><i>OpenAlex</i></td>
           <td style='padding:8px; border:1px solid #bbb;'>
             <ul style='margin:0; padding-left:18px;'>
-              <li>'Excel'</li>
+              <li>'CSV / Excel' (web export)</li>
               <li>'API'</li>
             </ul>
           </td>
           <td style='padding:8px; border:1px solid #bbb;'>
             <ul style='margin:0; padding-left:18px;'>
-              <li>All but with limited reference info (only Ids)</li>
-              <li>All but with limited reference info (only Ids)</li>
+              <li>User-selected columns; <strong>no</strong> cited references (see OpenAlex section below)</li>
+              <li>All metadata, including cited references</li>
             </ul>
           </td>
-          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>Excel</td>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold;'>API</td>
         </tr>
         <tr style='background-color:#f5f5f5;'>
           <td style='padding:8px; border:1px solid #bbb;'><i>Dimensions</i></td>
@@ -194,6 +194,59 @@ helpContent <- function() {
         </tr>
       </tbody>
     </table>
+
+    <hr style='margin-top:25px; margin-bottom:20px;'>
+
+    <h3>🅾️ Importing from OpenAlex</h3>
+
+    <p><strong>OpenAlex</strong> can be imported into Biblioshiny in two ways:</p>
+    <ul>
+      <li><strong>CSV / Excel web export</strong> &mdash; downloaded from the OpenAlex website using the <em>Export</em> button (<code>Works &gt; Export</code>). When exporting, OpenAlex lets you <strong>choose which columns (metadata fields) to include</strong>. The set of available analyses in Biblioshiny depends directly on the columns you select.</li>
+      <li><strong>OpenAlex API</strong> &mdash; retrieved programmatically (via the <code>openalexR</code> package or the API import option). This returns the <strong>full metadata</strong>, including the list of <strong>cited references</strong> needed for citation-based analyses.</li>
+    </ul>
+
+    <h4>⚠️ Which columns to select in the web export?</h4>
+    <p>When you export a CSV/Excel file from the OpenAlex website, make sure to include <strong>at least the required fields</strong>. If any of them is missing, Biblioshiny cannot build the bibliographic collection and the import is stopped with an explanatory message.</p>
+
+    <table style='width:100%; border-collapse:collapse; margin-top:10px; font-size:14px;'>
+      <thead>
+        <tr style='background-color:#dcdcdc; text-align:left;'>
+          <th style='padding:8px; border:1px solid #bbb;'>Level</th>
+          <th style='padding:8px; border:1px solid #bbb;'>OpenAlex export columns</th>
+          <th style='padding:8px; border:1px solid #bbb;'>Why they are needed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style='padding:8px; border:1px solid #bbb; color:#c0392b; font-weight:bold; white-space:nowrap;'>Required<br>(minimum set)</td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <strong>Work ID</strong>, <strong>Title</strong>, <strong>Author</strong>, <strong>Source</strong>, <strong>Year</strong>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>Unique identifier (de-duplication, short reference), document, author and source identification, and publication year. Without these the collection cannot be created.</td>
+        </tr>
+        <tr style='background-color:#f5f5f5;'>
+          <td style='padding:8px; border:1px solid #bbb; font-weight:bold; white-space:nowrap;'>Recommended</td>
+          <td style='padding:8px; border:1px solid #bbb;'>
+            <strong>Citation count</strong>, <strong>DOI</strong>, <strong>Author IDs</strong>, <strong>ORCID</strong>,
+            <strong>Institution</strong> &amp; <strong>Institution IDs</strong>, <strong>Country</strong>,
+            <strong>Language</strong>, <strong>Abstract</strong>,
+            <strong>Corresponding author</strong> &amp; <strong>Corresponding institution</strong>,
+            <strong>Keywords / Concepts</strong>
+          </td>
+          <td style='padding:8px; border:1px solid #bbb;'>Enable impact analysis, author disambiguation, affiliation and country analysis, language filtering, text/content analysis (abstract, keywords) and corresponding-author analysis. The import still works without them, but the related analyses are limited or unavailable. A warning lists the missing fields.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>🔗 Cited references: enrich your collection via the API</h4>
+    <p>The OpenAlex <strong>web CSV/Excel export does not include the cited references</strong> (and does not include the document type). Therefore <strong>citation-based analyses</strong> &mdash; such as <em>Historical Direct Citation Network</em>, <em>Co-citation</em> and <em>Bibliographic Coupling</em> &mdash; are <strong>not available</strong> from a plain web export.</p>
+    <p>To obtain them you can:</p>
+    <ul>
+      <li>Import the collection through the <strong>OpenAlex API</strong> (recommended for complete metadata), or</li>
+      <li>After importing a CSV/Excel file, use the <strong>“Fetch/Resolve cited references”</strong> option, which downloads the missing reference data for your documents directly from the <strong>OpenAlex API</strong>.</li>
+    </ul>
+    <p style='font-size:13px; color:#555;'><em>Note:</em> reference enrichment via the API requires an internet connection and may take some time for large collections.</p>
+
     </div>
     </body>"
 

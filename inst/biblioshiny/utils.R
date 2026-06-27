@@ -415,8 +415,11 @@ read_journal_list <- function(file_path) {
 }
 
 wcTable <- function(M) {
-  # Function to extract Science Category (WC) information from metadata
-  if ("WC" %in% names(M)) {
+  # Function to extract Science Category (WC) information from metadata.
+  # The WC column may be present but entirely empty/NA (e.g. an OpenAlex CSV
+  # exported without the subject/topic field): treat that as missing, otherwise
+  # SCdf$WC becomes all-NA and downstream NA comparisons crash biblioshiny.
+  if ("WC" %in% names(M) && !all(is.na(M$WC) | trimws(M$WC) == "")) {
     WC <- strsplit(M$WC, ";")
     df <- data.frame(
       SR = rep(M$SR, lengths(WC)),
@@ -425,6 +428,7 @@ wcTable <- function(M) {
     )
 
     df$WC <- trimws(df$WC) # Remove leading and trailing whitespace
+    df$WC[is.na(df$WC) | df$WC == ""] <- "N.A." # never leave NA/empty categories
   } else {
     df <- data.frame(SR = M$SR, WC = "N.A.", stringsAsFactors = FALSE)
   }

@@ -21,8 +21,8 @@ completeMetadata(
 
 \item{sources}{Character vector of enrichment sources.
 Default \code{c("openalex", "crossref")}. Order is irrelevant; OpenAlex
-always runs before Crossref. \code{"openalex"} is skipped if
-\code{M$DB[1] == "OPENALEX"}.}
+always runs before Crossref. OpenAlex records are looked up by Work ID
+(\code{id_oa}) when present, otherwise by DOI.}
 
 \item{fields}{Character vector of WoS-codified fields to attempt to fill.
 Default \code{c("AB","AU","C1","CR","DT","LA","PY","RP","SO","TC","TI")}.
@@ -67,19 +67,19 @@ Provenance is attached to the returned collection as
 }
 \description{
 Given a bibliometrix collection produced by \code{\link{convert2df}}, this
-function takes the subset of records that have a DOI but are missing one
-or more of the analysis-relevant fields, queries the Crossref REST API
+function takes the subset of records that have a usable lookup key (a DOI or
+an OpenAlex Work ID) but are missing one or more of the analysis-relevant
+fields, queries the Crossref REST API
 (\url{https://api.crossref.org/works}) and/or OpenAlex (via
-\pkg{openalexR}) using the DOI as the lookup key, and fills the gaps
-with the values returned by those sources. Existing non-empty values
-are never overwritten.
+\pkg{openalexR}) and fills the gaps with the values returned by those
+sources. Existing non-empty values are never overwritten.
 }
 \details{
 When both sources are enabled, OpenAlex runs first (broader coverage of
-AB/CR/C1/TC) and Crossref then fills the residual gaps. If the input
-collection was originally imported from OpenAlex (\code{M$DB[1] ==
-"OPENALEX"}), the OpenAlex pass is automatically skipped because re-querying
-it would not add information.
+AB/CR/C1/TC) and Crossref then fills the residual gaps. OpenAlex records are
+looked up by their \strong{Work ID} (\code{id_oa}) when available - which is
+essential for collections imported from a minimal OpenAlex CSV export that
+omitted the DOI - and by DOI otherwise. Crossref is always keyed by DOI.
 
 The vacancy predicate matches the one used by \code{\link{missingData}}:
 a cell is considered missing when it is \code{NA} or one of

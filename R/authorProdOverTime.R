@@ -72,7 +72,7 @@ authorProdOverTime <- function(M, k = 10, graph = TRUE) {
   x <- c(0.5, 1.5 * k / 10)
   y <- c(min(df$year), min(df$year) + diff(range(df2$year)) * 0.125)
 
-  data("logo", envir = environment())
+  data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
   g <- ggplot(df2, aes(x = Author, y = year, text = paste("Author: ", Author, "\nYear: ", year, "\nN. of Articles: ", freq, "\nTotal Citations per Year: ", round(TCpY, 2)))) +

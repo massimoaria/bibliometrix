@@ -57,7 +57,7 @@ bib2df <- function(D, dbsource = "isi") {
 
   rm(DATA)
   bibtag <- NULL
-  data("bibtag", envir = environment())
+  data("bibtag", package = "bibliometrix", envir = environment())
   bibtag <- as.data.frame(bibtag)
 
   Tag <- tolower(names(df))

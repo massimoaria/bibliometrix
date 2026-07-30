@@ -346,7 +346,7 @@ thematicMap <- function(
     vjustvar = c(0, 1.0, 0, 1)
   )
 
-  data("logo", envir = environment())
+  data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
   x <- c(

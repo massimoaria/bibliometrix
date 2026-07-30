@@ -42,7 +42,7 @@ dimensions2df <- function(file, format = "csv") {
   # Encoding(DATA) <- "UTF-8"
 
   bibtag <- NULL
-  data("bibtag", envir = environment())
+  data("bibtag", package = "bibliometrix", envir = environment())
   bibtag <- as.data.frame(bibtag)
 
 

@@ -171,7 +171,7 @@ csvOA2df <- function(file) {
   if ("RP" %in% names(DATA)) DATA$RP <- toupper(DATA$RP)
   if ("AU_CO" %in% names(DATA) && !all(is.na(DATA$AU_CO))) DATA$AU_CO <- toupper(DATA$AU_CO)
   if ("AU1_CO" %in% names(DATA) && !all(is.na(DATA$AU1_CO))) DATA$AU1_CO <- toupper(DATA$AU1_CO)
-  data("countries", envir = environment())
+  data("countries", package = "bibliometrix", envir = environment())
   DATA$AU_CO <- convert_iso2_to_country(DATA$AU_CO, countries)
   DATA$AU1_CO <- convert_iso2_to_country(DATA$AU1_CO, countries)
   DATA$AB_raw <- AB

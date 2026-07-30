@@ -97,7 +97,7 @@ collabByRegionPlot <- function(
     verbose = TRUE) {
   row.names(NetMatrix) <- colnames(NetMatrix) <- tolower(row.names(NetMatrix))
   labelCo <- data.frame(countries = row.names(NetMatrix))
-  data("countries", envir = environment())
+  data("countries", package = "bibliometrix", envir = environment())
   countries <- countries %>% mutate(countries = tolower(countries))
 
   labelCo <- labelCo %>%

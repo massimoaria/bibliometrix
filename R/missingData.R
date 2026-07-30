@@ -30,7 +30,10 @@ missingData <- function(M) {
     sum(is.na(M[, x]) | M[, x] %in% c("NA,0000,NA", "NA", "", "none"))
   })
 
-  if (sum(as.numeric(M$TC), na.rm = T) == 0) {
+  ## Guard on the column being present: assigning missing_counts["TC"] when the
+  ## collection has no TC column would append a 6th element to a 5-element
+  ## vector and break the data.frame() below.
+  if ("TC" %in% cols && sum(as.numeric(M$TC), na.rm = T) == 0) {
     missing_counts["TC"] <- nrow(M)
   }
   # calculate the percentage of missing values in each column

@@ -200,7 +200,7 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
 
   km.res$centers <- centers[, c(2, 3, 1)]
 
-  data("logo", envir = environment())
+  data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
   df_clust <- km.res$data.clust %>%

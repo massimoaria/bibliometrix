@@ -196,7 +196,7 @@ rpys <- function(
   RPYS <- RPYS %>%
     mutate(diffMedian = if_else(diffMedian > minLimit, diffMedian, minLimit))
 
-  data("logo", envir = environment())
+  data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
   x <- c(min(RPYS$Year), min(RPYS$Year) + diff(range(RPYS$Year)) * 0.125) + 1

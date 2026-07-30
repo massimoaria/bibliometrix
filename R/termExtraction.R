@@ -83,7 +83,7 @@ termExtraction <- function(M, Field = "TI", ngrams = 1, stemming = FALSE, langua
   }
 
   # load stopwords
-  data("stopwords", envir = environment())
+  data("stopwords", package = "bibliometrix", envir = environment())
   data("stop_words", envir = environment(), package = "tidytext")
   stop_words <- stop_words %>% as.data.frame()
 

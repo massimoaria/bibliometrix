@@ -51,6 +51,16 @@ metaTagExtraction <- function(M, Field = "CR_AU", sep = ";", aff.disamb = TRUE) 
     M$CR <- gsub("DOI;", "DOI ", as.character(M$CR))
   }
 
+  ## RP and C1 empty strings have to be treated as missing values:
+  ## RP == "" survives the is.na() checks in AU_UN() (wiping out all
+  ## affiliations) and overwrites valid C1 data in AU1_CO()
+  if ("RP" %in% names(M)) {
+    M$RP[which(trimws(M$RP) == "")] <- NA
+  }
+  if ("C1" %in% names(M)) {
+    M$C1[which(trimws(M$C1) == "")] <- NA
+  }
+
 
   ### SR field creation
 
@@ -233,7 +243,7 @@ CR_SO <- function(M, sep) {
 AU_CO <- function(M) {
   # Countries
   size <- dim(M)[1]
-  data("countries", envir = environment())
+  data("countries", package = "bibliometrix", envir = environment())
   countries <- as.character(countries[[1]])
   if (M$DB[1] %in% c("ISI", "PUBMED")) {
     countries <- as.character(sapply(countries, function(s) paste0(s, ".", collapse = "")))
@@ -333,7 +343,7 @@ AU1_CO <- function(M, sep) {
   } else {
     size <- dim(M)[1]
     # Countries
-    data("countries", envir = environment())
+    data("countries", package = "bibliometrix", envir = environment())
     countries <- as.character(countries[[1]])
     countries <- paste(" ", countries, " ", sep = "")
     M$AU1_CO <- NA

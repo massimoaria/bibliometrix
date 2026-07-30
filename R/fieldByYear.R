@@ -74,7 +74,7 @@ fieldByYear <- function(M,
     dplyr::filter(between(year_med, timespan[1], timespan[2])) %>%
     mutate(item = fct_reorder(item, freq))
 
-  data("logo", envir = environment())
+  data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
   yrange <- range(unlist(df[, which(regexpr("year", names(df)) > -1)]))

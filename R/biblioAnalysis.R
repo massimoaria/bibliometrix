@@ -182,7 +182,7 @@ biblioAnalysis <- function(M, sep = ";") {
     FAffiliation <- lapply(listAFF, function(l) l[1])
 
     # Countries
-    data("countries", envir = environment())
+    data("countries", package = "bibliometrix", envir = environment())
     countries <- as.character(countries[[1]])
 
     ### new code{

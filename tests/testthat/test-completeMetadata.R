@@ -108,7 +108,7 @@ test_that(".merge_enrichment fills only missing cells and records provenance", {
     stringsAsFactors = FALSE
   )
   enriched <- list(
-    by_doi = list(
+    by_key = list(
       "10.1234/a" = list(DI = "10.1234/a",
                       AB = "new abstract A",
                       TI = "new title A",
@@ -153,7 +153,7 @@ test_that(".merge_enrichment is a no-op when nothing is missing", {
     stringsAsFactors = FALSE
   )
   enriched <- list(
-    by_doi = list("10.1234/a" = list(DI = "10.1234/a",
+    by_key = list("10.1234/a" = list(DI = "10.1234/a",
                                   AB = "x", TI = "y")),
     fail_count = 0L
   )
@@ -192,27 +192,49 @@ test_that("completeMetadata short-circuits when no eligible records", {
 
 # ----- Phase 2: OpenAlex source -----------------------------------------------
 
-test_that("completeMetadata auto-disables OpenAlex when M$DB is OPENALEX", {
-  ## We construct a one-row collection with DB=OPENALEX and a DOI that
-  ## triggers eligibility. With sources=c("openalex","crossref") and an
-  ## offline-impossible Crossref endpoint, we just verify that we DO NOT
-  ## crash on missing openalexR network and that the function attempts only
-  ## Crossref. We block real traffic by setting fields to ones the local
-  ## fallback path can short-circuit.
+test_that("completeMetadata queries OpenAlex collections by Work ID", {
+  ## Historical behaviour auto-disabled the OpenAlex pass whenever M$DB was
+  ## OPENALEX. That is wrong for partial OpenAlex CSV web exports, which carry
+  ## only the columns the user selected: re-querying OpenAlex is exactly what
+  ## fills the omitted fields. The pass now runs, and is keyed by the OpenAlex
+  ## Work ID (id_oa) whenever the collection carries one -- the DOI may be
+  ## absent from a minimal export.
   M <- data.frame(
-    SR = "a",
-    DI = "10.1234/anything",
+    SR = c("a", "b"),
+    DI = c(NA_character_, "10.1234/anything"),
+    id_oa = c("https://openalex.org/W123", "W456"),
     AB = NA_character_,
     DB = "OPENALEX",
-    TC = "0",
     stringsAsFactors = FALSE
   )
-  ## Use sources = "openalex" alone -> auto-disabled -> empty source set ->
-  ## function returns the original collection unchanged with empty report.
+
+  ns <- asNamespace("bibliometrix")
+  orig_oa <- get(".enrich_from_openalex", envir = ns)
+  try(unlockBinding(".enrich_from_openalex", ns), silent = TRUE)
+  on.exit(assign(".enrich_from_openalex", orig_oa, envir = ns), add = TRUE)
+
+  ## Stub the client so the test stays offline and we can inspect the key
+  ## vector the function chose to look records up by.
+  seen <- NULL
+  assign(".enrich_from_openalex",
+         function(keys, fields, email, oa_apikey,
+                  key_type = c("doi", "id"),
+                  progress = NULL, verbose = TRUE) {
+           seen <<- list(keys = keys, key_type = match.arg(key_type))
+           list(by_key = list("W123" = list(AB = "AB from OA")),
+                fail_count = 0L)
+         },
+         envir = ns)
+
   res <- completeMetadata(M, sources = "openalex",
-                          fields = c("AB","TC"), verbose = FALSE)
-  expect_identical(res$M, M)
-  expect_equal(nrow(res$report), 0L)
+                          fields = "AB", verbose = FALSE)
+
+  ## Work IDs, not DOIs -- row 'a' has no DOI at all and must still be queried.
+  expect_equal(seen$key_type, "id")
+  expect_setequal(seen$keys, c("W123", "W456"))
+  expect_equal(res$M$AB[1], "AB from OA")
+  expect_true(is.na(res$M$AB[2]))
+  expect_equal(unique(res$report$source), "openalex")
 })
 
 test_that("completeMetadata silently drops TC when only Crossref is selected", {
@@ -354,7 +376,7 @@ test_that("completeMetadata report aggregates rows per source", {
          function(dois, fields, email, batch_size = 20,
                   progress = NULL, verbose = TRUE) {
            list(
-             by_doi = list(
+             by_key = list(
                "10.1234/aaa" = list(DI = "10.1234/aaa", TI = "T from CR"),
                "10.1234/bbb" = list(DI = "10.1234/bbb", AB = "AB from CR")
              ),
@@ -363,10 +385,11 @@ test_that("completeMetadata report aggregates rows per source", {
          },
          envir = ns)
   assign(".enrich_from_openalex",
-         function(dois, fields, email, oa_apikey,
+         function(keys, fields, email, oa_apikey,
+                  key_type = c("doi", "id"),
                   progress = NULL, verbose = TRUE) {
            list(
-             by_doi = list(
+             by_key = list(
                "10.1234/aaa" = list(DI = "10.1234/aaa",
                                     AB = "AB from OA",
                                     TC = "42")

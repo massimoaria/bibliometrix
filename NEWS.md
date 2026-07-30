@@ -12,6 +12,11 @@
 - **Biblioshiny — Missing Data audit**: `wcTable()` now treats an all-`NA` Science Categories (`WC`) column as missing, fixing a *"missing value where TRUE/FALSE needed"* crash on import of OpenAlex collections without subject categories.
 - **Biblioshiny — Metadata completion modal**: eligibility now counts records with a **DOI or an OpenAlex Work ID**, and OpenAlex enrichment is offered for OpenAlex collections (previously deselected by default). Labels and help text updated accordingly.
 - **Biblioshiny — Import Info & References**: added a dedicated **OpenAlex** section documenting the minimum and recommended metadata to select when exporting, and the need to enrich the collection via the OpenAlex API to obtain cited references.
+- **`missingData()` no longer fails on collections without a `TC` column**: the collection-level rule that flags an all-zero citation column as fully missing assigned `missing_counts["TC"]` unconditionally. Since `sum(as.numeric(NULL))` is `0`, the branch fired even when the data frame had no `TC` column at all, appending a spurious element to the counts vector and aborting with *"arguments imply differing number of rows"*. The assignment is now guarded on the column being present. `completeMetadata()`, which calls `missingData()` on entry, was affected by the same crash.
+
+## Technical Improvements
+- **Test suite realigned with the OpenAlex Work ID refactoring**: the `completeMetadata()` unit tests still built the old `by_doi` enrichment payload (now `by_key`, since lookups may be keyed by DOI *or* Work ID) and stubbed `.enrich_from_openalex()` without its new `key_type` argument, so `R CMD check` failed on all three platforms. The OpenAlex tests now cover the current contract — lookup by `id_oa` with `key_type = "id"` — and stub the client so they run offline instead of issuing a real API request.
+- **CI**: `actions/checkout` bumped from v4 to v5; v4 targets the Node.js 20 runtime, deprecated on GitHub Actions runners.
 
 # bibliometrix 5.4.1
 

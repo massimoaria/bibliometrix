@@ -23,6 +23,7 @@ Rubbish
 ^.positai$
 ^inst/biblioshiny/rsconnect
 ^rsconnect
+HANDOFF.md
 
 ^data-raw$
 ^CRAN-SUBMISSION$

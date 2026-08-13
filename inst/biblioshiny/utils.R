@@ -5839,7 +5839,12 @@ plot2png <- function(p, filename, type = "vis", dpi = 300, height = 7) {
   switch(
     type,
     vis = {
-      visSave(p, html_name)
+      # selfcontained = FALSE: visSave() defaults to TRUE, which routes through
+      # rmarkdown::pandoc_self_contained_html() and aborts with "Saving a widget
+      # with selfcontained = TRUE requires pandoc" on installations without it.
+      # The page is only ever loaded locally by biblioShot() and deleted right
+      # after, so the sidecar "_files" directory is harmless.
+      visSave(p, html_name, selfcontained = FALSE)
     },
     plotly = {
       htmlwidgets::saveWidget(p, file = html_name, selfcontained = FALSE)
@@ -5879,7 +5884,14 @@ plotlySankey2png <- function(p, filename, dpi = 300, height = 7) {
     ", vw, vh, img_scale))
 
   html_name <- paste0(tools::file_path_sans_ext(filename), ".html")
-  htmlwidgets::saveWidget(export_plot, file = html_name, selfcontained = TRUE)
+  # selfcontained = FALSE: bundling the widget into a single file requires
+  # pandoc, which is not part of the bibliometrix dependency chain, so
+  # selfcontained = TRUE aborted the export on any installation without it
+  # (Saving a widget with selfcontained = TRUE requires pandoc). The page is
+  # loaded locally via file:// by the chromote session below and removed
+  # afterwards together with its "_files" directory, so the split form is
+  # equivalent here.
+  htmlwidgets::saveWidget(export_plot, file = html_name, selfcontained = FALSE)
 
   b <- chromote::ChromoteSession$new(width = vw, height = vh)
   tryCatch({

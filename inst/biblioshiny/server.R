@@ -14664,10 +14664,40 @@ To ensure the functionality of Biblioshiny,
     values$random_seed <- input$random_seed
   })
 
+  # Renders the Gemini API-key status line.
+  #
+  # The previous implementation assigned `output$status <- renderText(...)`
+  # from *inside* `renderUI()`. `status` is not an output id declared in ui.R
+  # (the panel only holds `uiOutput("apiStatus")`), and `renderUI()` never
+  # returned any UI, so every message — success and failure alike — was
+  # silently dropped: a user pasting an invalid key got no feedback at all.
+  # The status is now a plain reactive value rendered by a single output.
+  geminiStatusUI <- function(message, type = c("info", "success", "error")) {
+    type <- match.arg(type)
+    div(
+      style = paste0(
+        "white-space: pre-wrap; word-break: break-word; font-weight: 600; ",
+        "color: ",
+        switch(type, info = "#3c8dbc", success = "#00a65a", error = "#dd4b39"),
+        ";"
+      ),
+      message
+    )
+  }
+
   output$apiStatus <- renderUI({
-    if (values$geminiAPI) {
-      last <- showGeminiAPI()
-      output$status <- renderText(paste0("✅ API key has been set: ", last))
+    st <- values$geminiStatus
+    if (!is.null(st)) {
+      return(geminiStatusUI(st$message, st$type))
+    }
+    # No interaction yet: reflect the key restored from disk at startup.
+    if (isTRUE(values$geminiAPI)) {
+      geminiStatusUI(
+        paste0("✅ API key has been set: ", showGeminiAPI()),
+        "success"
+      )
+    } else {
+      NULL
     }
   })
 
@@ -14706,6 +14736,7 @@ To ensure the functionality of Biblioshiny,
             "Gemini 2.5 Flash" = "2.5-flash",
             "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
             "Gemini 3.0 Flash" = "3-flash-preview",
+            "Gemini 3.5 Flash Lite" = "3.5-flash-lite",
             "Gemma 4 31B (experimental)" = "gemma-4-31b-it",
             "Gemma 4 26B (experimental)" = "gemma-4-26b-a4b-it"
           ),
@@ -14751,6 +14782,19 @@ To ensure the functionality of Biblioshiny,
           "Requests per Day: 500",
           tags$br(),
           "Latency time: Medium"
+        ))
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '3.5-flash-lite'",
+        helpText(strong("Works with both free and paid API keys")),
+        helpText(em(
+          "Higher quality than Gemini 2.5 Flash at Flash-Lite speed",
+          " (thinking level set to \"minimal\").",
+          tags$br(),
+          "Latency time: Low",
+          tags$br(),
+          "Current rate limits depend on your key tier and are shown in",
+          " Google AI Studio (Rate limits)."
         ))
       ),
       conditionalPanel(
@@ -14813,12 +14857,13 @@ To ensure the functionality of Biblioshiny,
   })
 
   observeEvent(input$set_key, {
-    key <- input$api_key
+    key <- trimws(input$api_key)
 
     # Show validating message
-    output$apiStatus <- renderUI({
-      output$status <- renderText("Validating API key...")
-    })
+    values$geminiStatus <- list(
+      type = "info",
+      message = "⏳ Validating API key..."
+    )
 
     # Async: validate API key in background
     promises::future_promise(
@@ -14829,17 +14874,13 @@ To ensure the functionality of Biblioshiny,
     ) %...>%
       (function(last) {
         if (!last$valid) {
-          output$apiStatus <- renderUI({
-            output$status <- renderText(last$message)
-          })
+          values$geminiStatus <- list(type = "error", message = last$message)
           values$geminiAPI <- FALSE
         } else {
-          output$apiStatus <- renderUI({
-            output$status <- renderText(paste0(
-              "✅ API key has been set: ",
-              last$message
-            ))
-          })
+          values$geminiStatus <- list(
+            type = "success",
+            message = paste0("✅ API key has been set: ", last$message)
+          )
           values$geminiAPI <- TRUE
           home <- homeFolder()
           path_gemini_key <- paste0(
@@ -14847,17 +14888,18 @@ To ensure the functionality of Biblioshiny,
             "/.biblio_gemini_key.txt",
             collapse = ""
           )
-          Sys.setenv(GEMINI_API_KEY = key)
-          writeLines(key, path_gemini_key)
+          # Persist the validated (trimmed) key, not the raw input: a key
+          # pasted with a trailing space or newline would otherwise be saved
+          # broken and fail on the next launch.
+          Sys.setenv(GEMINI_API_KEY = last$key)
+          writeLines(last$key, path_gemini_key)
         }
       }) %...!%
       (function(err) {
-        output$apiStatus <- renderUI({
-          output$status <- renderText(paste(
-            "Error validating key:",
-            conditionMessage(err)
-          ))
-        })
+        values$geminiStatus <- list(
+          type = "error",
+          message = paste("❌ Error validating key:", conditionMessage(err))
+        )
         values$geminiAPI <- FALSE
       })
   })
@@ -14867,10 +14909,12 @@ To ensure the functionality of Biblioshiny,
       home <- homeFolder()
       path_gemini_key <- paste0(home, "/.biblio_gemini_key.txt", collapse = "")
       file.remove(path_gemini_key)
+      Sys.setenv(GEMINI_API_KEY = "")
       values$geminiAPI <- FALSE
-      output$apiStatus <- renderUI({
-        output$status <- renderText(paste0("❌ API key has been removed"))
-      })
+      values$geminiStatus <- list(
+        type = "info",
+        message = "❌ API key has been removed"
+      )
     }
   })
 

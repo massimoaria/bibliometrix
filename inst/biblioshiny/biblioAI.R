@@ -166,6 +166,23 @@ gemini_ai <- function(
     )
   }
 
+  # Gemini 3.x Flash-Lite models expose a "thinking level" instead of the 2.5
+  # thinking budget. Google recommends "minimal" for these models: it keeps the
+  # 2.5-Flash-class latency while retaining the sharper 3.x reasoning. Only the
+  # models listed here understand the field — sending it to a 2.5 model or to a
+  # Gemma model is an error, and forcing it on the Pro models would needlessly
+  # cripple them.
+  minimal_thinking_models <- c("3.5-flash-lite")
+  if (model %in% minimal_thinking_models) {
+    generation_config$thinkingConfig <- list(thinkingLevel = "minimal")
+    # 3.5 Flash-Lite tops out at 65536 output tokens, below the "huge" preset
+    # used by the content-analysis panel.
+    generation_config$maxOutputTokens <- min(
+      generation_config$maxOutputTokens,
+      65536
+    )
+  }
+
   # Build URL
   model_query <- if (is_gemma) {
     paste0(model, ":generateContent")
@@ -510,7 +527,25 @@ gemini_ai <- function(
 
 
 setGeminiAPI <- function(api_key) {
-  # 1. Controllo validità dell'API key
+  # 1. Controlli offline: inutile spendere una chiamata di rete (con relativo
+  #    ciclo di retry) su una chiave che non può funzionare.
+  if (is.null(api_key) || !is.character(api_key) || nchar(trimws(api_key)) == 0) {
+    return(list(
+      valid = FALSE,
+      message = "❌ API key must be a non-empty string."
+    ))
+  }
+
+  api_key <- trimws(api_key)
+
+  if (nchar(api_key) < 10) {
+    return(list(
+      valid = FALSE,
+      message = "❌ API key seems too short. Please verify your key."
+    ))
+  }
+
+  # 2. Controllo validità dell'API key
   apiCheck <- gemini_ai(
     image = NULL,
     prompt = "Hello",
@@ -523,27 +558,37 @@ setGeminiAPI <- function(api_key) {
   contains_http_error <- grepl("HTTP\\s*[1-5][0-9]{2}", apiCheck)
 
   if (contains_http_error) {
+    # Google AI Studio has started issuing some accounts OAuth-style tokens
+    # prefixed with "AQ." instead of the classic "AIzaSy..." API key. Those
+    # tokens are rejected by the generativelanguage.googleapis.com REST
+    # endpoint Biblio AI calls, so they can never work here. The generic
+    # "check your key" message leaves the user with nothing to act on, so
+    # name the problem. The hint is added only *after* the live check fails,
+    # so a key that Google later starts accepting is not pre-emptively
+    # blocked.
+    hint <- if (startsWith(api_key, "AQ.")) {
+      paste0(
+        "\n\nYour key starts with \"AQ.\": that is an OAuth-style token, not a ",
+        "Gemini API key. The Gemini REST API used by Biblio AI only accepts ",
+        "classic keys starting with \"AIzaSy\". In Google AI Studio ",
+        "(https://aistudio.google.com/apikey) create the key inside a Google ",
+        "Cloud project — the project-scoped flow still issues \"AIzaSy\" keys."
+      )
+    } else {
+      ""
+    }
+
     return(list(
       valid = FALSE,
-      message = "❌ API key seems be not valid! Please, check it or your connection."
+      message = paste0(
+        "❌ Google refused this API key.\n",
+        apiCheck,
+        hint
+      )
     ))
   }
 
-  if (is.null(api_key) || !is.character(api_key) || nchar(api_key) == 0) {
-    return(list(
-      valid = FALSE,
-      message = "❌ API key must be a non-empty string."
-    ))
-  }
-
-  if (nchar(api_key) < 10) {
-    return(list(
-      valid = FALSE,
-      message = "❌ API key seems too short. Please verify your key."
-    ))
-  }
-
-  # 2. Mostra solo gli ultimi 4 caratteri per feedback
+  # 3. Mostra solo gli ultimi 4 caratteri per feedback
   last_chars <- 4
   last <- substr(
     api_key,
@@ -551,11 +596,12 @@ setGeminiAPI <- function(api_key) {
     nchar(api_key)
   )
 
-  # 3. Imposta la variabile d'ambiente
+  # 4. Imposta la variabile d'ambiente
   Sys.setenv(GEMINI_API_KEY = api_key)
 
   return(list(
     valid = TRUE,
+    key = api_key,
     message = paste0(
       paste0(rep("*", nchar(api_key) - 4), collapse = ""),
       last,
@@ -1757,17 +1803,23 @@ plot2pngGemini <- function(p, filename, zoom = 2, type = "vis") {
   # remove file extensions from filename
   filename_html <- tools::file_path_sans_ext(filename)
   temp_html <- paste0(filename_html, ".html")
+  # selfcontained = FALSE everywhere: inlining the widget dependencies needs
+  # pandoc, which bibliometrix does not depend on, and the page here is only a
+  # scratch file screenshotted by biblioShot() and thrown away.
   switch(
     type,
     vis = {
-      visSave(p, temp_html)
+      visSave(p, temp_html, selfcontained = FALSE)
     },
     plotly = {
-      htmlwidgets::saveWidget(p, file = temp_html, selfcontained = TRUE)
+      htmlwidgets::saveWidget(p, file = temp_html, selfcontained = FALSE)
     }
   )
 
   biblioShot(temp_html, zoom = zoom, file = filename, delay = 2.5)
+
+  unlink(temp_html)
+  unlink(paste0(filename_html, "_files"), recursive = TRUE)
 }
 
 getWD <- function() {

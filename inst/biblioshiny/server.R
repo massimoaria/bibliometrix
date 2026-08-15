@@ -14733,23 +14733,38 @@ To ensure the functionality of Biblioshiny,
         label = "Select the Gemini Model",
         choices = list(
           "Free tier" = c(
-            "Gemini 2.5 Flash" = "2.5-flash",
-            "Gemini 2.5 Flash Lite" = "2.5-flash-lite",
-            "Gemini 3.0 Flash" = "3-flash-preview",
             "Gemini 3.5 Flash Lite" = "3.5-flash-lite",
+            "Gemini 3.0 Flash" = "3-flash-preview",
             "Gemma 4 31B (experimental)" = "gemma-4-31b-it",
             "Gemma 4 26B (experimental)" = "gemma-4-26b-a4b-it"
           ),
           "Paid API key required" = c(
             "Gemini 3.1 Pro" = "3.1-pro-preview",
             "Gemini Pro Latest" = "pro-latest"
+          ),
+          # Still served to keys created before Google retired the 2.5 family,
+          # so they stay selectable — but they 404 on newer keys and must not
+          # be the default any more.
+          "Legacy (not available for recently created API keys)" = c(
+            "Gemini 2.5 Flash" = "2.5-flash",
+            "Gemini 2.5 Flash Lite" = "2.5-flash-lite"
           )
         ),
         selected = ifelse(
           is.null(values$gemini_api_model),
-          "2.5-flash-lite",
+          "3.5-flash-lite",
           values$gemini_api_model
         )
+      ),
+      conditionalPanel(
+        condition = "input.gemini_api_model == '2.5-flash' || input.gemini_api_model == '2.5-flash-lite'",
+        helpText(strong(style = "color: #d9534f;", "Legacy model")),
+        helpText(em(
+          "Google no longer serves the Gemini 2.5 family to API keys created",
+          " recently: those keys get \"this model is no longer available to",
+          " new users\" (HTTP 404). Keep it only if it already works for you,",
+          " otherwise choose a Gemini 3.x model."
+        ))
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == '2.5-flash'",
@@ -14858,6 +14873,10 @@ To ensure the functionality of Biblioshiny,
 
   observeEvent(input$set_key, {
     key <- trimws(input$api_key)
+    # Snapshot the selected model (no reactive refs inside the promise): the
+    # validator uses it only to warn when that model is not in the key's
+    # catalogue — it never gates the key itself on a single model.
+    selected_model <- values$gemini_api_model
 
     # Show validating message
     values$geminiStatus <- list(
@@ -14868,7 +14887,7 @@ To ensure the functionality of Biblioshiny,
     # Async: validate API key in background
     promises::future_promise(
       {
-        setGeminiAPI(key)
+        setGeminiAPI(key, model = selected_model)
       },
       seed = TRUE
     ) %...>%

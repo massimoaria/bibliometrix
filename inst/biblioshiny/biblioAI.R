@@ -526,7 +526,92 @@ gemini_ai <- function(
 }
 
 
-setGeminiAPI <- function(api_key) {
+# Ask Google which models this key can actually use (ListModels).
+#
+# Key validation must NOT be tied to any single model. The previous check
+# probed generateContent on a hard-coded model; when Google retired
+# gemini-2.5-flash for newly created keys the probe began returning HTTP 404,
+# so every new user was told "Google refused this API key" — whatever model
+# they had chosen in Settings. ListModels answers the only question the
+# validator needs to ask ("does the Generative Language API accept this
+# key?") and no model retirement can break it. As a bonus it returns the
+# catalogue, so the selected model can be checked against it.
+.geminiAvailableModels <- function(api_key, timeout = 30) {
+  req <- httr2::request(
+    "https://generativelanguage.googleapis.com/v1beta/models"
+  ) |>
+    httr2::req_url_query(key = api_key, pageSize = 1000) |>
+    httr2::req_timeout(timeout) |>
+    httr2::req_error(is_error = function(resp) FALSE)
+
+  resp <- tryCatch(
+    httr2::req_perform(req),
+    error = function(e) {
+      structure(
+        list(message = conditionMessage(e)),
+        class = "gemini_conn_error"
+      )
+    }
+  )
+
+  if (inherits(resp, "gemini_conn_error")) {
+    return(list(
+      ok = FALSE,
+      offline = TRUE,
+      models = character(0),
+      message = paste0(
+        "❌ Could not reach the Google servers (connection error): ",
+        resp$message,
+        "\nPlease check your internet connection or proxy and try again."
+      )
+    ))
+  }
+
+  if (httr2::resp_status(resp) != 200) {
+    api_msg <- tryCatch(
+      {
+        msg <- jsonlite::fromJSON(
+          httr2::resp_body_string(resp)
+        )$error$message
+        if (is.null(msg) || !nzchar(msg)) NULL else msg
+      },
+      error = function(e) NULL
+    )
+    return(list(
+      ok = FALSE,
+      offline = FALSE,
+      models = character(0),
+      message = paste0(
+        "❌ HTTP ",
+        httr2::resp_status(resp),
+        if (is.null(api_msg)) "" else paste0(": ", api_msg)
+      )
+    ))
+  }
+
+  # Names come back fully qualified ("models/gemini-2.5-flash"); keep only the
+  # bare id so it can be compared with the values used by the model selector.
+  models <- tryCatch(
+    {
+      parsed <- jsonlite::fromJSON(
+        httr2::resp_body_string(resp),
+        simplifyVector = FALSE
+      )
+      vapply(
+        parsed$models,
+        function(m) {
+          if (is.null(m$name)) "" else sub("^models/", "", m$name)
+        },
+        character(1)
+      )
+    },
+    error = function(e) character(0)
+  )
+
+  list(ok = TRUE, offline = FALSE, models = models, message = "")
+}
+
+setGeminiAPI <- function(api_key, model = NULL) {
   # 1. Controlli offline: inutile spendere una chiamata di rete (con relativo
   #    ciclo di retry) su una chiave che non può funzionare.
   if (is.null(api_key) || !is.character(api_key) || nchar(trimws(api_key)) == 0) {
@@ -545,19 +630,18 @@ setGeminiAPI <- function(api_key) {
     ))
   }
 
-  # 2. Controllo validità dell'API key
-  apiCheck <- gemini_ai(
-    image = NULL,
-    prompt = "Hello",
-    model = "2.5-flash",
-    image_type = "png",
-    retry_503 = 5,
-    api_key = api_key
-  )
+  # 2. Controllo validità dell'API key (model-agnostic, vedi
+  #    .geminiAvailableModels)
+  catalogue <- .geminiAvailableModels(api_key)
 
-  contains_http_error <- grepl("HTTP\\s*[1-5][0-9]{2}", apiCheck)
+  if (!catalogue$ok) {
+    # A network failure says nothing about the key: report it as such instead
+    # of blaming the key the user just pasted.
+    if (isTRUE(catalogue$offline)) {
+      return(list(valid = FALSE, message = catalogue$message))
+    }
 
-  if (contains_http_error) {
+    apiCheck <- catalogue$message
     # Google AI Studio has started issuing some accounts OAuth-style tokens
     # prefixed with "AQ." instead of the classic "AIzaSy..." API key. Those
     # tokens are rejected by the generativelanguage.googleapis.com REST
@@ -588,7 +672,32 @@ setGeminiAPI <- function(api_key) {
     ))
   }
 
-  # 3. Mostra solo gli ultimi 4 caratteri per feedback
+  # 3. La chiave è valida. Se il modello selezionato non è nel catalogo di
+  #    QUESTA chiave, segnalalo subito: Google ritira i modelli più vecchi per
+  #    le chiavi create di recente, e senza avviso l'utente scoprirebbe il
+  #    problema solo alla prima analisi, sotto forma di HTTP 404.
+  warning_msg <- ""
+  if (
+    !is.null(model) && length(model) == 1 && !is.na(model) && nzchar(model) &&
+      length(catalogue$models) > 0
+  ) {
+    model_id <- if (startsWith(model, "gemma")) {
+      model
+    } else {
+      paste0("gemini-", model)
+    }
+    if (!(model_id %in% catalogue$models)) {
+      warning_msg <- paste0(
+        "\n⚠️ The model currently selected in Settings (",
+        model_id,
+        ") is not available for this API key — Google retires older models ",
+        "for newly created keys. Pick another model from \"Select the Gemini ",
+        "Model\" (the newest Flash / Flash-Lite entries are the safe choice)."
+      )
+    }
+  }
+
+  # 4. Mostra solo gli ultimi 4 caratteri per feedback
   last_chars <- 4
   last <- substr(
     api_key,
@@ -596,15 +705,17 @@ setGeminiAPI <- function(api_key) {
     nchar(api_key)
   )
 
-  # 4. Imposta la variabile d'ambiente
+  # 5. Imposta la variabile d'ambiente
   Sys.setenv(GEMINI_API_KEY = api_key)
 
   return(list(
     valid = TRUE,
     key = api_key,
+    models = catalogue$models,
     message = paste0(
       paste0(rep("*", nchar(api_key) - 4), collapse = ""),
       last,
+      warning_msg,
       collapse = ""
     )
   ))
@@ -642,9 +753,11 @@ loadGeminiModel = function(file) {
   if (file.exists(file)) {
     model <- readLines(file, warn = FALSE)
   } else {
-    model <- c("2.5-flash-lite", "medium")
+    # Default for a fresh install: must be a model Google still serves to
+    # newly created API keys. The 2.5 family is no longer offered to them.
+    model <- c("3.5-flash-lite", "medium")
   }
-  if (length(model == 1)) {
+  if (length(model) == 1) {
     model <- c(model, "medium")
   }
   return(model)

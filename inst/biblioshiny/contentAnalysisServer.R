@@ -3437,7 +3437,9 @@ Avg sentence length: %.1f words",
     # Get model from Biblioshiny settings or use default
     model <- values$gemini_api_model
     if (is.null(model) || !nzchar(model)) {
-      model <- "2.5-flash-lite"
+      # Keep aligned with loadGeminiModel(): the fallback must be a model
+      # Google still serves to newly created API keys.
+      model <- "3.5-flash-lite"
     }
 
     # Use "huge" as default output size

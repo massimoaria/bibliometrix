@@ -93,9 +93,33 @@ openAlexUI <- function() {
 
             # Help text for search syntax
             div(
-              style = "margin-bottom: 15px; font-size: 12px; color: #666;",
+              style = "margin-bottom: 8px; font-size: 12px; color: #666;",
               HTML(
                 "<strong>Search tips:</strong> Use quotes for exact phrases (e.g., \"science mapping\"). Boolean operators AND, OR, NOT must be UPPERCASE."
+              )
+            ),
+
+            # Stemming switch: mirrors the "Enable stemming" option of the
+            # OpenAlex website. Checked here == stemming disabled on the API.
+            div(
+              style = "margin-bottom: 15px;",
+              div(
+                style = "display: inline-block;",
+                title = paste(
+                  "Stemming makes OpenAlex match word variants:",
+                  "\"bone\" also retrieves \"bones\".",
+                  "Check this box to match your terms exactly, as when you turn",
+                  "\"Enable stemming\" off on the OpenAlex website.",
+                  "Quotes and Boolean operators keep working either way."
+                ),
+                checkboxInput(
+                  "oaExactMatch",
+                  label = HTML(
+                    "<strong>Exact match</strong> &ndash; disable stemming (unchecked, <em>bone</em> also matches <em>bones</em>)"
+                  ),
+                  value = FALSE,
+                  width = "100%"
+                )
               )
             ),
 
@@ -827,7 +851,10 @@ openAlexServer <- function(input, output, session, values) {
       return()
     }
 
-    search_filters <- build_query_filters(queryList)
+    search_filters <- build_query_filters(
+      queryList,
+      exact = isTRUE(input$oaExactMatch)
+    )
 
     # Add date range filter
     if (showDateRange()) {
@@ -843,9 +870,15 @@ openAlexServer <- function(input, output, session, values) {
   })
 
   # Helper function to get field name for filter
-  # Fields that can be filtered directly on the /works endpoint
-  get_filter_name <- function(field) {
-    switch(
+  # Fields that can be filtered directly on the /works endpoint.
+  #
+  # OpenAlex exposes an ".exact" variant of every search filter, which disables
+  # stemming: with "title.search" the term "bones" also matches "bone", with
+  # "title.search.exact" it does not. It is the API counterpart of the
+  # "Enable stemming" switch on the OpenAlex website (exact = stemming off).
+  # Boolean operators, parentheses and quoted phrases work in both variants.
+  get_filter_name <- function(field, exact = FALSE) {
+    filter_name <- switch(
       field,
       "title" = "title.search",
       "abstract" = "abstract.search",
@@ -853,6 +886,12 @@ openAlexServer <- function(input, output, session, values) {
       "default" = "default.search",
       NULL
     )
+
+    if (is.null(filter_name) || !isTRUE(exact)) {
+      return(filter_name)
+    }
+
+    paste0(filter_name, ".exact")
   }
 
   # Entity-based fields require a two-step approach:
@@ -894,7 +933,7 @@ openAlexServer <- function(input, output, session, values) {
   }
 
   # Helper function to build query filters
-  build_query_filters <- function(queryList) {
+  build_query_filters <- function(queryList, exact = FALSE) {
     if (length(queryList) == 0) {
       return(list())
     }
@@ -908,7 +947,7 @@ openAlexServer <- function(input, output, session, values) {
     for (i in seq_along(queryList)) {
       item <- queryList[[i]]
       field <- item$field
-      filter_name <- get_filter_name(field)
+      filter_name <- get_filter_name(field, exact = exact)
 
       if (!is.null(filter_name)) {
         # Direct works filter (title, abstract, etc.)

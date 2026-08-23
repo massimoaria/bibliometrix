@@ -7161,3 +7161,52 @@ drawPrismaFlowDiagram <- function(db_name = "Web of Science",
   grid::popViewport()
   invisible(NULL)
 }
+
+## Write a bibliographic collection to file, in Excel or RData format.
+##
+## An Excel cell cannot hold more than 32767 characters, a limit the CR field
+## regularly exceeds: in that case the user is warned that the column will be
+## truncated and pointed at the RData format, and the export proceeds anyway.
+saveCollectionFile <- function(M, file, fmt) {
+  if (!identical(fmt, "xlsx")) {
+    save(list = "M", file = file, envir = environment())
+    return(invisible(NULL))
+  }
+
+  truncated <- FALSE
+  if ("CR" %in% names(M)) {
+    truncated <- sum(nchar(M$CR) > 32767, na.rm = TRUE) > 0
+  }
+
+  if (isTRUE(truncated)) {
+    show_alert(
+      text = tags$span(
+        tags$h4(
+          "Some documents have too long a list of references that cannot be saved in excel (>32767 characters).",
+          style = "color: firebrick;"
+        ),
+        tags$br(),
+        tags$h4(
+          "Data in the column CR could be truncated.",
+          style = "color: firebrick;"
+        )
+      ),
+      title = "Please save the collection using the 'RData' format",
+      type = "warning",
+      width = "50%",
+      closeOnEsc = TRUE,
+      closeOnClickOutside = TRUE,
+      html = FALSE,
+      showConfirmButton = TRUE,
+      showCancelButton = FALSE,
+      btn_labels = "OK",
+      btn_colors = "#913333",
+      timer = 0,
+      imageUrl = "",
+      animation = TRUE
+    )
+  }
+
+  suppressWarnings(openxlsx::write.xlsx(M, file = file))
+  invisible(NULL)
+}

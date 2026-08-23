@@ -6126,14 +6126,20 @@ To ensure the functionality of Biblioshiny,
 
   observeEvent(input$reportDLC, {
     if (!is.null(values$DLC)) {
-      values$DLC$residuals <- values$DLC$residuals %>%
+      # Reshape a local copy, never values$DLC itself: the two conversions
+      # below are not idempotent, so writing them back would make a second
+      # click on the same results abort on a duplicated "Year" column and
+      # leave the session hanging. values$DLC is also shared with the plots,
+      # the summary panel and the download handlers, none of which read
+      # residuals or base_year.
+      list_df <- values$DLC
+      list_df$residuals <- list_df$residuals %>%
         as.data.frame() %>%
         tibble::rownames_to_column("Year") %>%
         rename(Residuals = ".")
-      values$DLC$base_year <- values$DLC$base_year %>%
+      list_df$base_year <- list_df$base_year %>%
         as.data.frame() %>%
         rename(base_year = ".")
-      list_df <- values$DLC
       list_plot <- list(
         ggplotLifeCycle(values$DLC, plot_type = c("annual")),
         ggplotLifeCycle(values$DLC, plot_type = c("cumulative"))

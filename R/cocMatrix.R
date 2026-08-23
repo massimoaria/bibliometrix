@@ -221,10 +221,10 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   }
 
 
-  WF <- WF[, !is.na(uniqueField)]
+  WF <- WF[, !is.na(uniqueField), drop = FALSE]
   ind <- which(colnames(WF) == "NA")
   if (length(ind) > 0) {
-    WF <- WF[, -ind]
+    WF <- WF[, -ind, drop = FALSE]
   }
 
   return(WF)

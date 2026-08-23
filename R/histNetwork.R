@@ -190,14 +190,28 @@ wos <- function(M, min.citations, sep, network, verbose) {
 
     # NetMatrix
     WLCR <- cocMatrix(M, "LCR", sep = ";")
-    missingLABEL <- setdiff((M$LABEL), colnames(WLCR))
-    colLab <- c(colnames(WLCR), missingLABEL)
-    WLCR <- cbind(WLCR, matrix(0, nrow(WLCR), length(missingLABEL)))
-    WLCR <- as.data.frame(as.matrix(WLCR))
-    colnames(WLCR) <- colLab
-    LABEL <- (row.names(WLCR))
-    WLCR <- as.matrix(WLCR[LABEL])
-    # row.names(WLCR) <- LABEL
+    if (!is.matrix(WLCR) && !inherits(WLCR, "Matrix")) {
+      # No local citation at all: the LCR column is empty and cocMatrix()
+      # returns NA. Return the empty network with the same shape the
+      # populated one has, a square LABEL x LABEL matrix of zeros.
+      if (isTRUE(verbose)) {
+        cat("\nNo local citation found: the historiograph network is empty\n")
+      }
+      WLCR <- matrix(
+        0,
+        nrow = nrow(M), ncol = nrow(M),
+        dimnames = list(M$LABEL, M$LABEL)
+      )
+    } else {
+      missingLABEL <- setdiff((M$LABEL), colnames(WLCR))
+      colLab <- c(colnames(WLCR), missingLABEL)
+      WLCR <- cbind(WLCR, matrix(0, nrow(WLCR), length(missingLABEL)))
+      WLCR <- as.data.frame(as.matrix(WLCR))
+      colnames(WLCR) <- colLab
+      LABEL <- (row.names(WLCR))
+      WLCR <- as.matrix(WLCR[LABEL])
+      # row.names(WLCR) <- LABEL
+    }
   } else {
     WLCR <- NULL
   }

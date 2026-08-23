@@ -49,3 +49,31 @@ test_that("histNetwork costruisce rete storica", {
   )
   expect_type(histResults, "list")
 })
+
+test_that("histNetwork restituisce una matrice quadrata con poche citazioni locali", {
+  M <- metaTagExtraction(load_wos_fixture(), Field = "SR")
+  h <- suppressWarnings(suppressMessages(
+    histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE)
+  ))
+  expect_true(is.matrix(h$NetMatrix))
+  expect_equal(nrow(h$NetMatrix), ncol(h$NetMatrix))
+  expect_identical(rownames(h$NetMatrix), colnames(h$NetMatrix))
+  expect_true(sum(h$NetMatrix) > 0)
+})
+
+test_that("histNetwork non fallisce senza citazioni locali", {
+  # Nessun riferimento corrisponde a un documento della collezione: la colonna
+  # LCR resta vuota e cocMatrix() restituisce NA invece di una matrice
+  M <- metaTagExtraction(load_wos_fixture(), Field = "SR")
+  M$CR <- "SMITH J, 1900, NOWHERE J DOI 10.0000/NONE"
+  expect_no_error(
+    suppressWarnings(suppressMessages(
+      capture.output(h <- histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE))
+    ))
+  )
+  expect_true(is.matrix(h$NetMatrix))
+  expect_equal(dim(h$NetMatrix), c(nrow(M), nrow(M)))
+  expect_identical(rownames(h$NetMatrix), colnames(h$NetMatrix))
+  expect_equal(sum(h$NetMatrix), 0)
+  expect_equal(sum(h$LCS), 0)
+})

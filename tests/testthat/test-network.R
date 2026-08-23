@@ -36,6 +36,28 @@ test_that("cocMatrix crea matrice bipartita sparsa", {
   expect_equal(nrow(WA), nrow(M))
 })
 
+test_that("cocMatrix mantiene due dimensioni con un solo termine distinto", {
+  # Un solo termine distinto produceva un vettore invece di una matrice
+  mk <- function(de) {
+    M <- data.frame(
+      AU = "A;B", SO = "S", PY = 2020, TC = 1, DE = de,
+      SR = paste0("D", seq_along(de)), stringsAsFactors = FALSE
+    )
+    row.names(M) <- M$SR
+    class(M) <- c("bibliometrixDB", "data.frame")
+    M
+  }
+
+  WF <- cocMatrix(mk(c("X", "X", "X")), Field = "DE", type = "matrix", sep = ";")
+  expect_equal(dim(WF), c(3L, 1L))
+
+  WS <- cocMatrix(mk(c("X", "X", "X")), Field = "DE", type = "sparse", sep = ";")
+  expect_equal(dim(WS), c(3L, 1L))
+
+  # il caso multi-termine resta invariato
+  expect_equal(dim(cocMatrix(mk(c("X", "Y", "X")), Field = "DE", type = "matrix", sep = ";")), c(3L, 2L))
+})
+
 test_that("networkStat calcola statistiche di rete", {
   M <- load_wos_fixture()
   NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")

@@ -15,6 +15,8 @@ mergeDbSources(..., remove.duplicated = TRUE, verbose = TRUE)
 }
 \value{
 the value returned from \code{mergeDbSources} is a bibliographic data frame.
+  When the sources belong to different databases, the original cited references are
+  returned in the \code{CR_raw} column and \code{CR} is empty (see \emph{Details}).
 }
 \description{
 Merge bibliographic data frames from different databases (WoS,SCOPUS, Lens, Openalex, etc-) into a single one.
@@ -22,6 +24,29 @@ Merge bibliographic data frames from different databases (WoS,SCOPUS, Lens, Open
 \details{
 bibliographic data frames are obtained by the converting function \code{\link{convert2df}}.
 The function merges data frames identifying common tag fields and duplicated records.
+
+
+When the collections to merge come from \strong{more than one database}, the cited
+references field \code{CR} is renamed \code{CR_raw} and \code{CR} is emptied
+(set to the string \code{"NA"} for every document).
+
+This is intentional, not a loss of data. Each database writes its references in its
+own format -- WoS uses \code{AUTHOR, YEAR, JOURNAL, DOI ...} strings, Scopus writes
+full free-text citations, OpenAlex and Lens use identifiers -- so the same cited work
+appears under different strings depending on the source. Keeping them in a single
+\code{CR} column would make every reference-based measure count the same work more
+than once. The original strings are preserved verbatim in \code{CR_raw}.
+
+The practical consequence is that reference-based analyses --
+\code{\link{biblioNetwork}} with \code{analysis = "co-citation"} or
+\code{"coupling"}, \code{\link{histNetwork}}, and local citation counts --
+are \strong{not available} on a multi-database merged collection. Everything that
+does not rely on \code{CR} (authors, sources, keywords, affiliations, countries,
+collaboration and co-word networks) is unaffected. To run a citation analysis, work
+on the single-database collections before merging them.
+
+Merging collections that all come from the \emph{same} database leaves \code{CR}
+untouched.
 }
 \examples{
 

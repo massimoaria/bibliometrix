@@ -4948,20 +4948,46 @@ To ensure the functionality of Biblioshiny,
   #### Journal Ranking list ----
   observeEvent(input$journal_ranking_upload, {
     req(input$journal_ranking_upload)
-    # Load the journal ranking data
-    ranking <- read_journal_ranking(input$journal_ranking_upload$datapath)
+    # Load the journal ranking data. read_journal_ranking() rejects a file
+    # without a name and a ranking column, and an error raised here would
+    # abort the observer and grey out the session, so report it instead.
+    ranking <- tryCatch(
+      read_journal_ranking(input$journal_ranking_upload$datapath),
+      error = function(e) {
+        showNotification(
+          paste("Journal ranking list not loaded:", conditionMessage(e)),
+          type = "error",
+          duration = 10
+        )
+        NULL
+      }
+    )
+
     if (!is.null(ranking)) {
-      SOnotRanked <- setdiff(values$Morig$SO, ranking$SO)
+      hit <- matchJournalRanking(values$Morig, ranking)
+
+      SOnotRanked <- unique(values$Morig$SO[!hit$keep])
       if (length(SOnotRanked) > 0) {
         ranking <- bind_rows(
           ranking,
           data.frame(
             SO = SOnotRanked,
-            Ranking = rep("Not Ranked", length(SOnotRanked))
+            Ranking = rep("Not Ranked", length(SOnotRanked)),
+            stringsAsFactors = FALSE
           )
         )
       }
+
+      # Say how many sources were recognised and on which key. Unmatched
+      # journals are labelled "Not Ranked", so without this the loss is
+      # indistinguishable from a journal the list genuinely does not rank.
+      showNotification(
+        rankingMatchReport(values$Morig, hit, ranking),
+        type = "message",
+        duration = 12
+      )
     }
+
     values$journal_ranking <- ranking
     shinyjs::show("journal_ranking_subset")
   })
@@ -5281,12 +5307,11 @@ To ensure the functionality of Biblioshiny,
     }
 
     if (inherits(values$journal_ranking, "data.frame")) {
-      soR <- values$journal_ranking %>%
-        dplyr::filter(Ranking %in% input$journal_ranking_subset) %>%
-        pull(SO) %>%
-        unique()
-      M <- M %>%
-        dplyr::filter(SO %in% soR) # filter by journal ranking
+      # filter by journal ranking, on the ISSN where the list carries one and
+      # on the journal name otherwise
+      selectedRanking <- values$journal_ranking %>%
+        dplyr::filter(Ranking %in% input$journal_ranking_subset)
+      M <- M[matchJournalRanking(M, selectedRanking)$keep, , drop = FALSE]
     }
 
     M <- M %>%

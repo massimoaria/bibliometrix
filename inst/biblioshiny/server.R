@@ -5329,11 +5329,44 @@ To ensure the functionality of Biblioshiny,
       size = "l",
       uiOutput("dataFiltered"),
       footer = tagList(
-        #downloadButton("collection.save", "Save Filtered Data"),
-        modalButton("Close")
+        div(
+          style = "display: flex; align-items: center; justify-content: flex-end; gap: 10px;",
+          div(
+            # .modal-footer right-aligns its text: the selectize box would
+            # render its label flush right without this.
+            style = "margin-bottom: 0; min-width: 170px; text-align: left;",
+            selectInput(
+              "saveFiltered_file",
+              label = NULL,
+              choices = c("Excel" = "xlsx", "R Data Format" = "RData"),
+              selected = "xlsx",
+              width = "100%"
+            )
+          ),
+          downloadButton("collectionFiltered.save", "Save Filtered Data"),
+          modalButton("Close")
+        )
       )
     ))
   })
+
+  # Export of the filtered collection. It needs an id of its own: the Export
+  # Collection button on the Import or Load page already owns "collection.save",
+  # and two UI elements bound to the same output are not addressable.
+  output$collectionFiltered.save <- downloadHandler(
+    filename = function() {
+      paste0(
+        "Bibliometrix-Filtered-Data-",
+        Sys.Date(),
+        ".",
+        input$saveFiltered_file
+      )
+    },
+    content = function(file) {
+      req(values$M)
+      saveCollectionFile(values$M, file, input$saveFiltered_file)
+    }
+  )
 
   output$dataFiltered <- renderUI({
     DTfiltered()

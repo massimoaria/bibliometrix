@@ -32,3 +32,11 @@ load_lens_fixture <- function() {
     convert2df(fixture_path("lens_sample.csv"), dbsource = "lens", format = "csv")
   ))
 }
+
+# Export WoS in cui i riferimenti citati usano la forma "Cognome, Iniziali,"
+# invece della classica "Cognome Iniziali," (issue #640).
+load_wos_newformat_fixture <- function() {
+  suppressWarnings(suppressMessages(
+    convert2df(fixture_path("wos_newformat_sample.txt"), dbsource = "wos", format = "plaintext")
+  ))
+}

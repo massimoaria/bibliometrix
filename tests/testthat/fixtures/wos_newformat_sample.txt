@@ -1,0 +1,66 @@
+FN Clarivate Analytics Web of Science
+VR 1.0
+PT J
+AU Aaker, JL
+AF Aaker, Jennifer L.
+TI Dimensions of brand personality
+SO JOURNAL OF MARKETING RESEARCH
+LA English
+DT Article
+DE Brand personality; Consumer research
+C1 [Aaker, Jennifer L.] Stanford Univ, Stanford, CA 94305 USA.
+RP Aaker, JL (corresponding author), Stanford Univ, Stanford, CA 94305 USA.
+CR Belk, RW, 1988, J CONSUM RES, V15, P139, DOI 10.1086/209154
+   Bantel, KA, 1989, STRATEGIC MANAGE J, V10, P107, DOI DOI 10.1002/smj.4250100709
+TC 120
+J9 J MARKETING RES
+PY 1997
+VL 34
+BP 347
+DI 10.2307/3151897
+UT WOS:A1997XR27700005
+ER
+
+PT J
+AU Abratt, R
+AF Abratt, Russell
+TI A new approach to the corporate image management process
+SO JOURNAL OF MARKETING MANAGEMENT
+LA English
+DT Article
+DE Corporate image; Marketing management
+C1 [Abratt, Russell] Univ Witwatersrand, Johannesburg, South Africa.
+RP Abratt, R (corresponding author), Univ Witwatersrand, Johannesburg, South Africa.
+CR Aaker, JL, 1997, J MARKETING RES, V34, P347, DOI 10.2307/3151897
+   Belk, RW, 1988, J CONSUM RES, V15, P139, DOI 10.1086/209154
+TC 45
+J9 J MARKETING MANAG
+PY 1999
+VL 5
+BP 63
+DI 10.1080/0267257X.1999.9964088
+UT WOS:A1999BB12300004
+ER
+
+PT J
+AU Balmer, JMT
+AF Balmer, John M. T.
+TI Corporate identity and the advent of corporate marketing
+SO JOURNAL OF GENERAL MANAGEMENT
+LA English
+DT Article
+DE Corporate identity; Corporate marketing
+C1 [Balmer, John M. T.] Univ Bradford, Bradford, W Yorkshire, England.
+RP Balmer, JMT (corresponding author), Univ Bradford, Bradford, W Yorkshire, England.
+CR Aaker, JL, 1997, J MARKETING RES, V34, P347, DOI 10.2307/3151897
+   Abratt, R, 1999, J MARKETING MANAG, V5, P63, DOI 10.1080/0267257X.1999.9964088
+TC 30
+J9 J GEN MANAG
+PY 2001
+VL 21
+BP 24
+DI 10.1177/030630700102100102
+UT WOS:000170123400002
+ER
+
+EF

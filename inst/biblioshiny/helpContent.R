@@ -594,10 +594,11 @@ helpContent <- function() {
     <li><strong>Function:</strong> Filters journals based on quality rankings (e.g., Q1, Q2, Q3, Q4 quartiles; A*, A, B, C grades).</li>
     <li><strong>How to Use:</strong>
       <ol>
-        <li>Prepare a file (<code>.csv</code> or <code>.xlsx</code>) with <strong>two columns and headers</strong>:
+        <li>Prepare a file (<code>.csv</code> or <code>.xlsx</code>) with <strong>headers</strong>:
           <ul>
-            <li><strong>Column 1:</strong> Journal titles (must match exactly or closely)</li>
-            <li><strong>Column 2:</strong> Ranking categories (e.g., Q1, Q2, A*, B)</li>
+            <li><strong>Journal titles</strong> in the first column</li>
+            <li><strong>Ranking categories</strong> in the second column (e.g., Q1, Q2, A*, B)</li>
+            <li><strong>Optionally, one or more ISSN columns</strong>, in any position: every column whose header mentions <code>ISSN</code> (<code>ISSN</code>, <code>eISSN</code>, <code>ISSN-L</code>, <code>Print ISSN</code>, ...) is used as a matching key</li>
           </ul>
         </li>
         <li>Upload the file via <strong>Browse...</strong></li>
@@ -611,6 +612,7 @@ helpContent <- function() {
         <li>Filter by national rankings (e.g., Italian VQR, Australian ABDC, UK ABS).</li>
       </ul>
     </li>
+    <li><strong>Matching:</strong> journals are matched on their <strong>ISSN or eISSN</strong> when the file provides one, and on the <strong>journal title</strong> otherwise. Title matching is exact, so a difference in punctuation, in an abbreviation or between <code>&amp;</code> and <code>and</code> is enough to miss a journal &mdash; supplying the ISSN is the reliable option. After the upload a message reports how many sources of your collection were recognised and on which key; whatever is not recognised is listed as <strong>Not Ranked</strong>.</li>
     <li><strong>Example File Format:</strong></li>
   </ul>
   <code>
@@ -619,6 +621,12 @@ helpContent <- function() {
   Scientometrics,Q1<br>
   Library Quarterly,Q2<br>
   Online Information Review,Q3
+  </code>
+  <p>with ISSN columns:</p>
+  <code>
+  Journal,ISSN,eISSN,Quartile<br>
+  Journal of Informetrics,1751-1577,1875-5879,Q1<br>
+  Scientometrics,0138-9130,1588-2861,Q1
   </code>
   
   <h4>Source by Bradford Law Zones</h4>

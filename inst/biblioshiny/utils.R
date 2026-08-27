@@ -366,6 +366,14 @@ total_downloads <- function(
 # }
 
 # FILTER FUNCTIONS ----
+## Read an uploaded journal ranking list.
+##
+## The first two columns that are NOT an ISSN remain the journal name and its
+## ranking, so a plain two-column file behaves exactly as before. Any column
+## whose header mentions ISSN -- "ISSN", "eISSN", "ISSN-L", "Print ISSN", ...
+## -- is collected as an additional matching key, wherever it sits in the
+## file. Journals can then be matched on their identifier rather than on the
+## spelling of their title (issue #643).
 read_journal_ranking <- function(file_path) {
   ext <- tools::file_ext(file_path)
 
@@ -381,13 +389,125 @@ read_journal_ranking <- function(file_path) {
       )
     )
   )
-  journals <- journals %>% select(1, 2)
-  # journals <- journals[!is.na(journals)]
-  # journals <- toupper(trimws(journals))
-  names(journals) <- c("SO", "Ranking")
-  journals <- journals %>%
-    mutate(SO = toupper(trimws(SO)))
-  return(journals)
+  journals <- as.data.frame(journals, stringsAsFactors = FALSE)
+
+  issnIdx <- grep("issn", names(journals), ignore.case = TRUE)
+  otherIdx <- setdiff(seq_along(journals), issnIdx)
+
+  if (length(otherIdx) < 2) {
+    stop(
+      "The ranking file needs a journal name column and a ranking column, ",
+      "besides any ISSN column."
+    )
+  }
+
+  out <- data.frame(
+    SO = toupper(trimws(as.character(journals[[otherIdx[1]]]))),
+    Ranking = as.character(journals[[otherIdx[2]]]),
+    stringsAsFactors = FALSE
+  )
+
+  out$ISSN <- if (length(issnIdx) > 0) {
+    do.call(
+      paste,
+      c(lapply(issnIdx, function(i) as.character(journals[[i]])), sep = ";")
+    )
+  } else {
+    NA_character_
+  }
+
+  return(out)
+}
+
+## --- Journal ranking matching -------------------------------------------
+##
+## The ranking list used to be matched against the collection on the journal
+## name alone, compared exactly after trimming and upper-casing. Any
+## difference in punctuation, abbreviation or "&" vs "AND" therefore dropped
+## the journal, and because unmatched sources are labelled "Not Ranked" the
+## loss was invisible. The ISSN is unambiguous, so it is tried first and the
+## name is kept as a fallback -- an ISSN-only match would silently return
+## nothing on the exports that carry no ISSN at all (issue #643).
+
+## ISSN columns of a bibliometrix collection. WoS exports use SN/EI, the
+## Scopus and OpenAlex CSV paths use ISSN/ISSN_I.
+issnColumns <- function(M) {
+  intersect(c("SN", "EI", "ISSN", "ISSN_I", "EISSN"), names(M))
+}
+
+## Normalized ISSNs found in each element of x. A single cell may hold more
+## than one, separated by ";", "," or whitespace. Anything that is not eight
+## digits (a final "X" check digit included) is discarded.
+extractISSN <- function(x) {
+  parts <- strsplit(as.character(x), "[;,/|[:space:]]+")
+  lapply(parts, function(p) {
+    p <- toupper(gsub("[^0-9Xx]", "", p))
+    # NA has to be dropped explicitly: nchar(NA_character_) is NA, not a
+    # number, so a length test alone lets it through -- and NA %in% NA is
+    # TRUE, which would match every document with no ISSN against every
+    # ranking row with no ISSN.
+    unique(p[!is.na(p) & nchar(p) == 8])
+  })
+}
+
+## Documents of M whose journal belongs to `ranking`, by ISSN or by name.
+matchJournalRanking <- function(M, ranking) {
+  byISSN <- rep(FALSE, nrow(M))
+
+  wanted <- unique(unlist(extractISSN(ranking$ISSN)))
+  cols <- issnColumns(M)
+  if (length(wanted) > 0 && length(cols) > 0) {
+    for (cl in cols) {
+      byISSN <- byISSN |
+        vapply(extractISSN(M[[cl]]), function(v) any(v %in% wanted), logical(1))
+    }
+  }
+
+  byName <- toupper(trimws(M$SO)) %in% toupper(trimws(ranking$SO))
+
+  list(keep = byISSN | byName, byISSN = byISSN, byName = byName)
+}
+
+## One-line summary of what an uploaded ranking list actually matched, in
+## sources and in documents, and on which key.
+rankingMatchReport <- function(M, hit, ranking) {
+  sources <- unique(toupper(trimws(M$SO)))
+  matchedSources <- unique(toupper(trimws(M$SO[hit$keep])))
+
+  hasISSN <- length(unique(unlist(extractISSN(ranking$ISSN)))) > 0
+  key <- if (!hasISSN) {
+    paste(
+      "The list carries no ISSN column, so journals were matched on their",
+      "name alone: add an ISSN or eISSN column to match them by identifier."
+    )
+  } else if (length(issnColumns(M)) == 0) {
+    paste(
+      "The collection carries no ISSN field, so journals were matched on",
+      "their name alone."
+    )
+  } else {
+    onlyISSN <- sum(hit$byISSN & !hit$byName)
+    paste0(
+      "Matched by ISSN: ",
+      sum(hit$byISSN),
+      " documents (",
+      onlyISSN,
+      " of them missed by the journal name)."
+    )
+  }
+
+  paste0(
+    "Journal ranking list loaded. Recognised ",
+    length(matchedSources),
+    " of ",
+    length(sources),
+    " sources (",
+    sum(hit$keep),
+    " of ",
+    nrow(M),
+    " documents); the rest are listed as 'Not Ranked'. ",
+    key
+  )
 }
 
 read_journal_list <- function(file_path) {

@@ -77,3 +77,17 @@ test_that("histNetwork non fallisce senza citazioni locali", {
   expect_equal(sum(h$NetMatrix), 0)
   expect_equal(sum(h$LCS), 0)
 })
+
+test_that("histNetwork trova le citazioni locali nei nuovi export WoS", {
+  # Prima della normalizzazione dei riferimenti in isi2df() questa collezione
+  # restituiva "Matrix is empty!!" e zero citazioni locali (#640)
+  M <- suppressMessages(metaTagExtraction(load_wos_newformat_fixture(), Field = "SR"))
+  h <- suppressWarnings(suppressMessages(
+    histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE)
+  ))
+  expect_true(is.matrix(h$NetMatrix))
+  expect_equal(dim(h$NetMatrix), c(3L, 3L))
+  # Aaker 1997 e' citato da Abratt e Balmer, Abratt 1999 da Balmer
+  expect_equal(sum(h$LCS), 3)
+  expect_equal(sum(h$NetMatrix > 0), 3)
+})

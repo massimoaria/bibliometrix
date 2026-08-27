@@ -85,6 +85,9 @@ Please, take a look at the vignettes:
   df$TI_raw <- TI
   df$DE_raw <- DE
 
+  # Cited references
+  if ("CR" %in% names(df)) df$CR <- normalizeCRisi(df$CR)
+
   # add sep ; to affiliations
   df$C1 <- trim(gsub("\\[.*?\\]", "", df$C1)) # to remove author info in square brackets
   df$C1 <- gsub("\\.", ".;", df$C1)
@@ -92,4 +95,40 @@ Please, take a look at the vignettes:
   df <- df[names(df) != "Paper"]
 
   return(df)
+}
+
+### Normalize the cited references of a WoS export
+###
+### Two shapes turn up in WoS plaintext exports that the positional parsers
+### downstream (histNetwork(), CR_AU(), CR_SO(), ...) cannot read:
+###
+### 1. The cited author written as "Surname, Initials," where the classic
+###    format has "Surname Initials,". The extra comma shifts every field of
+###    the reference by one, so the parsers pick up the initials where they
+###    expect the year and the year where they expect the source, and no
+###    cited item can be matched back to a document of the collection.
+###    The two name fields are rejoined only when the year sits where the
+###    shift would put it, so references already in the classic format --
+###    and entries such as "[ANONYMOUS], 1996, ..." -- are left untouched.
+###
+### 2. A repeated DOI tag ("DOI DOI 10.1234/x"). Splitting on "DOI" then
+###    yields an empty string, so those references lose their DOI entirely.
+###    The tag is also repeated inside the bracketed multi-DOI form that WoS
+###    uses when it carries the same DOI twice, "DOI [DOI 10.1234/X,
+###    10.1234/x]"; the brackets are stripped later in convert2df(), so the
+###    duplication has to be undone here or it reappears afterwards.
+###
+### Input and output are the ";"-separated CR strings, one per document.
+normalizeCRisi <- function(CR) {
+  # "SURNAME, INITIALS, YEAR" -> "SURNAME INITIALS, YEAR"
+  CR <- gsub(
+    "(^|;)([^,;]+),[[:space:]]*([^,;]{1,12}),[[:space:]]*((19|20)[0-9]{2})(?=[[:space:]]*([,;]|$))",
+    "\\1\\2 \\3, \\4",
+    CR,
+    perl = TRUE
+  )
+
+  # "DOI DOI 10.1234/x"   -> "DOI 10.1234/x"
+  # "DOI [DOI 10.1234/X, " -> "DOI [10.1234/X, "
+  gsub("DOI[[:space:]]+(\\[?)[[:space:]]*DOI[[:space:]]+", "DOI \\1", CR)
 }

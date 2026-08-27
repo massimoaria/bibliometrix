@@ -66,3 +66,53 @@ test_that("convert2df segnala dbsource non valido", {
     ))
   )
 })
+
+test_that("normalizeCRisi ricompone l'autore citato scritto con la virgola", {
+  # "Cognome, Iniziali, Anno" sfasa di uno tutti i campi del riferimento
+  expect_equal(
+    normalizeCRisi("AAKER, JL, 1997, J MARKETING RES, V34, P347, DOI 10.2307/3151897"),
+    "AAKER JL, 1997, J MARKETING RES, V34, P347, DOI 10.2307/3151897"
+  )
+
+  # la forma classica resta invariata
+  classic <- "ARIA M, 2017, J INFORMETR, V11, P959, DOI 10.1016/J.JOI.2017.08.007"
+  expect_equal(normalizeCRisi(classic), classic)
+
+  # "[ANONYMOUS], 1996, ..." ha gia' l'anno in posizione 2: non va toccato
+  anon <- "[ANONYMOUS], 1996, WHOS TOPS WHO DECIDE"
+  expect_equal(normalizeCRisi(anon), anon)
+
+  # piu' riferimenti separati da ";" nella stessa stringa
+  expect_equal(
+    normalizeCRisi("AAKER, JL, 1997, J MARKETING RES;ARIA M, 2017, J INFORMETR;BALMER, JMT, 1991, J GEN MANAG"),
+    "AAKER JL, 1997, J MARKETING RES;ARIA M, 2017, J INFORMETR;BALMER JMT, 1991, J GEN MANAG"
+  )
+
+  # riferimento senza fonte, l'anno chiude la stringa
+  expect_equal(normalizeCRisi("SMITH, JK, 2001"), "SMITH JK, 2001")
+})
+
+test_that("normalizeCRisi rimuove il tag DOI ripetuto", {
+  expect_equal(
+    normalizeCRisi("ABRATT R., 1989, J MARKETING MANAG, V5, P63, DOI DOI 10.1080/X"),
+    "ABRATT R., 1989, J MARKETING MANAG, V5, P63, DOI 10.1080/X"
+  )
+
+  # forma multi-DOI tra parentesi: le parentesi vengono tolte dopo, in
+  # convert2df(), quindi la duplicazione va sciolta qui
+  expect_equal(
+    normalizeCRisi("BOCK RD, 1997, ED MEAS, DOI [DOI 10.1111/X, 10.1111/x]"),
+    "BOCK RD, 1997, ED MEAS, DOI [10.1111/X, 10.1111/x]"
+  )
+})
+
+test_that("convert2df normalizza i riferimenti dei nuovi export WoS", {
+  M <- load_wos_newformat_fixture()
+  expect_equal(nrow(M), 3)
+
+  refs <- trimws(unlist(strsplit(M$CR, ";")))
+  # l'anno torna in seconda posizione in tutti i riferimenti
+  f2 <- trimws(unlist(lapply(strsplit(refs, ",", fixed = TRUE), "[", 2)))
+  expect_true(all(grepl("^(19|20)[0-9]{2}$", f2)))
+  expect_false(any(grepl("DOI DOI", refs)))
+})

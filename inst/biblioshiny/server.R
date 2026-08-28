@@ -10,11 +10,21 @@ source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
 source("Htmlboxformat.R", local = TRUE)
 
-suppressMessages(res <- libraries())
+# Not wrapped in suppressMessages(): libraries() reports here which package
+# could not be installed and why, and package startup chatter is already
+# silenced inside it by suppressPackageStartupMessages().
+res <- libraries()
 
-if (!res) {
+if (!isTRUE(res$ok)) {
   stop(
-    "Biblioshiny cannot be loaded, some packages are missing. Please check your internet connection and try again."
+    "Biblioshiny cannot start. These packages could not be loaded:\n  ",
+    paste(res$missing, collapse = "\n  "),
+    "\n\nInstall them from the R console with:\n\n  install.packages(c(",
+    paste0("\"", res$missing_names, "\"", collapse = ", "),
+    "))\n\nthen run biblioshiny() again. If the installation itself fails, the message\n",
+    "it prints says why: no network, no write permission on the library path, a\n",
+    "missing system library, or no binary for this version of R.\n",
+    call. = FALSE
   )
 }
 

@@ -43,7 +43,21 @@ libraries <- function() {
     }
 
     if (need_install) {
-      install.packages(pkg)
+      # install.packages() signals most failures as a warning and returns
+      # normally, so a package that could not be installed used to fall through
+      # to require() and be reported as a generic "missing package". Capture the
+      # reason here and let the caller show it.
+      msg <- tryCatch(
+        {
+          install.packages(pkg)
+          NULL
+        },
+        error = function(e) conditionMessage(e),
+        warning = function(w) conditionMessage(w)
+      )
+      if (!is.null(msg)) {
+        message(sprintf("Could not install '%s': %s", pkg, msg))
+      }
     }
 
     return(require(pkg, character.only = TRUE, quietly = TRUE))
@@ -88,12 +102,24 @@ libraries <- function() {
     "promises"
   )
 
+  # The names of the packages that failed are what the user actually needs: the
+  # old return value was a single logical, so Biblioshiny could only say that
+  # "some packages are missing" and blame the internet connection, which sent
+  # users looking for a connectivity problem they did not have.
+  pkg_names <- vapply(pkgs, function(p) parse_pkg(p)$name, character(1), USE.NAMES = FALSE)
+
   suppressPackageStartupMessages({
-    results <- vapply(pkgs, safe_install, logical(1))
+    results <- vapply(pkgs, safe_install, logical(1), USE.NAMES = FALSE)
     all_ok <- all(results)
   })
 
-  return(all_ok)
+  return(list(
+    ok = all_ok,
+    # kept with the version requirement, for the human-readable list ...
+    missing = pkgs[!results],
+    # ... and bare, so the suggested install.packages() call can be pasted as is
+    missing_names = pkg_names[!results]
+  ))
 }
 
 messageItem2 <- function(

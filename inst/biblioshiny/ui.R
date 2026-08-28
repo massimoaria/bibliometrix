@@ -7,7 +7,7 @@ source("openalex_api.R", local = TRUE)
 source("pubmed_api.R", local = TRUE)
 source("Htmlboxformat.R", local = TRUE)
 
-suppressMessages(libraries())
+libraries()
 
 # UI components ----
 ## Title ----

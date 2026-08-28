@@ -41,3 +41,33 @@ test_that("libraries() non segnala nulla quando tutto si carica", {
   expect_length(res$missing, 0)
   expect_length(res$missing_names, 0)
 })
+
+test_that("i sorgenti di Biblioshiny sono puro ASCII", {
+  # In una localizzazione MBCS (cinese, giapponese, coreano, cirillico su
+  # Windows) R ignora encoding = "UTF-8" e decodifica i file con la codepage di
+  # sistema: un carattere non-ASCII si corrompe e, se cade dentro una stringa,
+  # il file non si parsa piu' e Biblioshiny non parte (issue #589). I caratteri
+  # non-ASCII vanno scritti come escape \u{...} o, nell'HTML, come entita'
+  # numeriche: il sorgente resta ASCII e il valore a runtime non cambia.
+  dir <- system.file("biblioshiny", package = "bibliometrix")
+  skip_if(dir == "", "cartella biblioshiny non disponibile")
+
+  files <- list.files(dir, pattern = "[.]R$", full.names = TRUE)
+  expect_gt(length(files), 0)
+
+  offenders <- character(0)
+  for (f in files) {
+    raw <- readBin(f, "raw", file.info(f)$size)
+    if (any(raw >= as.raw(128))) offenders <- c(offenders, basename(f))
+  }
+  expect_equal(offenders, character(0))
+})
+
+test_that("i sorgenti di Biblioshiny si parsano", {
+  dir <- system.file("biblioshiny", package = "bibliometrix")
+  skip_if(dir == "", "cartella biblioshiny non disponibile")
+
+  for (f in list.files(dir, pattern = "[.]R$", full.names = TRUE)) {
+    expect_no_error(parse(f))
+  }
+})

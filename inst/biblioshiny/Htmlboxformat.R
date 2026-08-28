@@ -95,7 +95,7 @@ htmlBoxFormat <- function(
   # Header
   header_cols <- paste0(
     sprintf(
-      '<th class="sortable-header" data-col="%d" style="%s background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%%; transform: translateY(-50%%);">⇅</span></th>',
+      '<th class="sortable-header" data-col="%d" style="%s background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 12px 25px 12px 10px; position: relative; white-space: nowrap;">%s <span class="sort-icon" style="color: #ccc; font-size: 0.9em; position: absolute; right: 8px; top: 50%%; transform: translateY(-50%%);">\u{21C5}</span></th>',
       0:(ncol(df) - 1),
       sapply(1:ncol(df), get_align),
       col_names
@@ -139,7 +139,7 @@ htmlBoxFormat <- function(
     vals[is.na(vals)] <- ""
     sort_vals <- gsub("<.*?>", "", vals)
     # Apply decimal formatting to:
-    #  - explicit numeric columns (always — user opted in)
+    #  - explicit numeric columns (always - user opted in)
     #  - auto-detected numeric columns that contain at least one decimal value
     #    (so integers in a "rounded" column display as "29.0" alongside "30.5",
     #    while pure-integer columns like years stay as "2020" instead of "2020.00")
@@ -160,14 +160,14 @@ htmlBoxFormat <- function(
   }
 
   # Column-oriented JSON: {s: [[col1_vals], [col2_vals], ...], d: [[col1_vals], [col2_vals], ...], n: nrow}
-  # jsonlite serializes character vectors very efficiently in C — no nested R list overhead
+  # jsonlite serializes character vectors very efficiently in C - no nested R list overhead
   data_json <- jsonlite::toJSON(
     list(s = sort_cols, d = disp_cols, n = nrow(df)),
     auto_unbox = TRUE,
     na = "string"
   )
 
-  # UI Structure — empty tbody, data delivered via JSON script tag
+  # UI Structure - empty tbody, data delivered via JSON script tag
   aligns_json <- jsonlite::toJSON(aligns, auto_unbox = TRUE)
   numeric_cols_json <- jsonlite::toJSON(numeric_cols_idx, auto_unbox = FALSE)
 
@@ -270,7 +270,7 @@ htmlBoxFormat <- function(
           var dataEl = document.getElementById("data_" + tid);
           var raw = JSON.parse(dataEl.textContent);
           // Transform column-oriented {s:[[col1],[col2],...], d:[[col1],[col2],...], n:nrow}
-          // into row-oriented [{s:sortVal, d:dispVal}, ...] per row — fast in JS
+          // into row-oriented [{s:sortVal, d:dispVal}, ...] per row \u{2014} fast in JS
           var nCols = raw.s.length;
           var allData = new Array(raw.n);
           for (var r = 0; r < raw.n; r++) {
@@ -318,7 +318,7 @@ htmlBoxFormat <- function(
               if (hasSummary) {
                 var tdS = document.createElement("td");
                 tdS.style.cssText = "text-align: center; padding: 8px; border-bottom: 1px solid #eee;";
-                var safeVal = row[0].s.replace(/\x27/g, "\\\x27");
+                var safeVal = row[0].s.replace(/\u{0027}/g, "\\\u{0027}");
                 tdS.innerHTML = "<button class=\\"btn btn-xs btn-info\\" onclick=\\"Shiny.setInputValue(\\x27button_id\\x27, \\x27" + safeVal + "\\x27, {priority: \\x27event\\x27})\\" title=\\"AI Summary\\"><i class=\\"fa fa-robot\\"></i></button>";
                 tr.appendChild(tdS);
               }

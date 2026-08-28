@@ -131,7 +131,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                       )
                     ),
                     helpText(
-                      "💾 The 'Save' button will save the text with DOI and citation format info for easy reloading.",
+                      "\U{1F4BE} The 'Save' button will save the text with DOI and citation format info for easy reloading.",
                       style = "margin-top: 5px; font-size: 11px; color: #666; font-style: italic;"
                     )
                   )
@@ -1656,7 +1656,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                     id = "pdf_import_details",
                     open = NA, # Open by default
                     tags$summary(
-                      "1. Import PDF File ▼",
+                      "1. Import PDF File \u{25BC}",
                       style = "font-weight: bold; cursor: pointer; color: #2E86AB; font-size: 16px; padding: 8px 0;"
                     ),
                     br(),
@@ -1706,7 +1706,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                       choices = list(
                         "Author-year (Smith, 2020)" = "author_year",
                         "Numeric brackets [1]" = "numeric_bracketed",
-                        "Numeric superscript¹" = "numeric_superscript"
+                        "Numeric superscript\u{00B9}" = "numeric_superscript"
                         # ,"All formats (may have false positives)" = "all"
                       ),
                       selected = character(0), # NO DEFAULT SELECTION
@@ -1826,7 +1826,7 @@ content_analysis_tab <- function(id = "content_analysis") {
                   tags$details(
                     open = NA, # Open by default
                     tags$summary(
-                      "1. Load Saved Text File ▼",
+                      "1. Load Saved Text File \u{25BC}",
                       style = "font-weight: bold; color: #2E86AB; font-size: 16px; padding: 8px 0; margin-bottom: 15px; display: block;"
                     ),
 
@@ -1872,7 +1872,7 @@ content_analysis_tab <- function(id = "content_analysis") {
 
                 tags$details(
                   tags$summary(
-                    "2. Analysis Parameters ▼",
+                    "2. Analysis Parameters \u{25BC}",
                     style = "font-weight: bold; cursor: pointer; color: #27ae60; font-size: 16px; padding: 8px 0;"
                   ),
                   br(),

@@ -175,7 +175,7 @@ server <- function(input, output, session) {
     chromote::set_default_chromote_object(
       chromote::Chromote$new(chromote::Chrome$new(
         args = c(
-          "--headless=new", # Usa la nuova modalità headless
+          "--headless=new", # Usa la nuova modalit\u{00E0} headless
           "--disable-gpu", # Disabilita GPU
           "--no-sandbox", # Necessario per server
           "--disable-dev-shm-usage", # Evita problemi memoria condivisa
@@ -2848,7 +2848,7 @@ To ensure the functionality of Biblioshiny,
       ## column as numeric (which would strip the HTML and reformat the
       ## values with formatC(), killing the badge).
       bg    <- if (d < 0) "#1d8fe1" else "#b22222"
-      arrow <- if (d < 0) "&#9660;" else "&#9650;"   # ▼ or ▲
+      arrow <- if (d < 0) "&#9660;" else "&#9650;"   # \u{25BC} or \u{25B2}
       sprintf(
         '<span style="display:block;background-color:%s;color:white;padding:4px;border-radius:3px;text-align:center;font-weight:700;font-size:13px;">%s %.2f</span>',
         bg, arrow, abs(d)
@@ -5160,7 +5160,7 @@ To ensure the functionality of Biblioshiny,
   })
 
   observe({
-    req(values$Morig) # assicurati che i dati siano già caricati
+    req(values$Morig) # assicurati che i dati siano gi\u{00E0} caricati
     CO <- sort(unique(
       values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)
     ))
@@ -5255,7 +5255,7 @@ To ensure the functionality of Biblioshiny,
         "OCEANIA",
         "Unknown"
       )
-    ) # supponendo sia già calcolato
+    ) # supponendo sia gi\u{00E0} calcolato
     CO <- sort(unique(
       values$COdf %>% dplyr::filter(continent %in% input$region) %>% pull(CO)
     ))
@@ -11401,7 +11401,7 @@ To ensure the functionality of Biblioshiny,
     # if paused show the button "export_coc" else hide it
     if (values$paused_coc) {
       output$export_cocUI <- renderUI({
-        actionButton("export_coc", "⬇ Export", width = "90%")
+        actionButton("export_coc", "\u{2B07} Export", width = "90%")
       })
     } else {
       output$export_cocUI <- renderUI({})
@@ -13978,7 +13978,7 @@ To ensure the functionality of Biblioshiny,
     values$paused_col <- !values$paused_col
     if (values$paused_col) {
       output$export_colUI <- renderUI({
-        actionButton("export_col", "⬇ Export", width = "90%")
+        actionButton("export_col", "\u{2B07} Export", width = "90%")
       })
     } else {
       output$export_colUI <- renderUI({})
@@ -14761,7 +14761,7 @@ To ensure the functionality of Biblioshiny,
   # The previous implementation assigned `output$status <- renderText(...)`
   # from *inside* `renderUI()`. `status` is not an output id declared in ui.R
   # (the panel only holds `uiOutput("apiStatus")`), and `renderUI()` never
-  # returned any UI, so every message — success and failure alike — was
+  # returned any UI, so every message \u{2014} success and failure alike \u{2014} was
   # silently dropped: a user pasting an invalid key got no feedback at all.
   # The status is now a plain reactive value rendered by a single output.
   geminiStatusUI <- function(message, type = c("info", "success", "error")) {
@@ -14785,7 +14785,7 @@ To ensure the functionality of Biblioshiny,
     # No interaction yet: reflect the key restored from disk at startup.
     if (isTRUE(values$geminiAPI)) {
       geminiStatusUI(
-        paste0("✅ API key has been set: ", showGeminiAPI()),
+        paste0("\u{2705} API key has been set: ", showGeminiAPI()),
         "success"
       )
     } else {
@@ -14835,7 +14835,7 @@ To ensure the functionality of Biblioshiny,
             "Gemini Pro Latest" = "pro-latest"
           ),
           # Still served to keys created before Google retired the 2.5 family,
-          # so they stay selectable — but they 404 on newer keys and must not
+          # so they stay selectable \u{2014} but they 404 on newer keys and must not
           # be the default any more.
           "Legacy (not available for recently created API keys)" = c(
             "Gemini 2.5 Flash" = "2.5-flash",
@@ -14915,7 +14915,7 @@ To ensure the functionality of Biblioshiny,
       ),
       conditionalPanel(
         condition = "input.gemini_api_model == 'gemma-4-31b-it' || input.gemini_api_model == 'gemma-4-26b-a4b-it'",
-        helpText(strong(style = "color: #d9534f;", "Experimental — open Gemma models")),
+        helpText(strong(style = "color: #d9534f;", "Experimental \u{2014} open Gemma models")),
         helpText(em(
           "Free tier, low latency, no extra setup (same Google API key).",
           tags$br(),
@@ -14923,7 +14923,7 @@ To ensure the functionality of Biblioshiny,
           " temporary errors. Calls are retried automatically; if they keep",
           " failing, switch back to a Gemini model.",
           tags$br(),
-          "Analytical quality is lower than Gemini Flash — best used as a fallback."
+          "Analytical quality is lower than Gemini Flash \u{2014} best used as a fallback."
         ))
       )
     )
@@ -14967,13 +14967,13 @@ To ensure the functionality of Biblioshiny,
     key <- trimws(input$api_key)
     # Snapshot the selected model (no reactive refs inside the promise): the
     # validator uses it only to warn when that model is not in the key's
-    # catalogue — it never gates the key itself on a single model.
+    # catalogue \u{2014} it never gates the key itself on a single model.
     selected_model <- values$gemini_api_model
 
     # Show validating message
     values$geminiStatus <- list(
       type = "info",
-      message = "⏳ Validating API key..."
+      message = "\u{23F3} Validating API key..."
     )
 
     # Async: validate API key in background
@@ -14990,7 +14990,7 @@ To ensure the functionality of Biblioshiny,
         } else {
           values$geminiStatus <- list(
             type = "success",
-            message = paste0("✅ API key has been set: ", last$message)
+            message = paste0("\u{2705} API key has been set: ", last$message)
           )
           values$geminiAPI <- TRUE
           home <- homeFolder()
@@ -15009,7 +15009,7 @@ To ensure the functionality of Biblioshiny,
       (function(err) {
         values$geminiStatus <- list(
           type = "error",
-          message = paste("❌ Error validating key:", conditionMessage(err))
+          message = paste("\u{274C} Error validating key:", conditionMessage(err))
         )
         values$geminiAPI <- FALSE
       })
@@ -15024,7 +15024,7 @@ To ensure the functionality of Biblioshiny,
       values$geminiAPI <- FALSE
       values$geminiStatus <- list(
         type = "info",
-        message = "❌ API key has been removed"
+        message = "\u{274C} API key has been removed"
       )
     }
   })

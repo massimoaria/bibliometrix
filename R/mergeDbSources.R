@@ -148,6 +148,18 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
     }
   }
 
+  ## AU_CO and AU1_CO are derived from the addresses, and in a merged collection
+  ## they are stale: a source where they had already been extracted brings its
+  ## own values, while the documents coming from the other sources keep an empty
+  ## one, so every country measure reads those as "no country" -- the merge of a
+  ## collection carrying AU_CO with one that does not silently under-counts
+  ## international collaboration. Drop them and let the analyses recompute from
+  ## C1/RP, which is what a freshly converted collection looks like anyway.
+  derived <- intersect(c("AU_CO", "AU1_CO"), names(M))
+  if (length(derived) > 0) {
+    M <- M[, setdiff(names(M), derived), drop = FALSE]
+  }
+
   M <- metaTagExtraction(M, "SR")
   row.names(M) <- M$SR
 

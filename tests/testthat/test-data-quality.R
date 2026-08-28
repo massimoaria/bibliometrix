@@ -59,3 +59,23 @@ test_that("normalizeCitationScore calcola NCS", {
   )
   expect_true(is.data.frame(NCS))
 })
+
+test_that("metaTagExtraction AU1_CO regge una collezione senza affiliazioni", {
+  # Le esportazioni Lens.org non contengono mai le affiliazioni: ne' C1 ne' RP.
+  M <- load_lens_fixture()
+  expect_false("C1" %in% names(M))
+  expect_false("RP" %in% names(M))
+
+  M2 <- expect_no_error(suppressWarnings(suppressMessages(
+    metaTagExtraction(M, "AU1_CO", ";")
+  )))
+  expect_true("AU1_CO" %in% names(M2))
+  expect_true(all(is.na(M2$AU1_CO)))
+  expect_equal(nrow(M2), nrow(M))
+})
+
+test_that("metaTagExtraction AU1_CO non cambia con le affiliazioni presenti", {
+  M <- load_wos_fixture()
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU1_CO", ";")))
+  expect_true(sum(!is.na(M2$AU1_CO)) == nrow(M2))
+})

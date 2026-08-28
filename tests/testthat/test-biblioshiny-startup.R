@@ -71,3 +71,38 @@ test_that("i sorgenti di Biblioshiny si parsano", {
     expect_no_error(parse(f))
   }
 })
+
+test_that("i sorgenti Biblioshiny non chiamano is_online()", {
+  # utils.R definisce is_Online(); il vecchio nome is_online() e' esportato da
+  # httr2, che l'app carica, quindi una chiamata rimasta al nome vecchio non
+  # produce alcun errore: si risolve in silenzio su curl::has_internet(), che
+  # sonda la connettivita' in generale invece dell'host che interessa. E'
+  # esattamente quello che era successo in biblioAI.R (#570).
+  dir <- system.file("biblioshiny", package = "bibliometrix")
+  skip_if(dir == "", "cartella biblioshiny non disponibile")
+
+  offenders <- character(0)
+  for (f in list.files(dir, pattern = "[.]R$", full.names = TRUE)) {
+    txt <- readLines(f, warn = FALSE)
+    if (any(grepl("(^|[^_[:alnum:].])is_online[[:space:]]*\\(", txt))) {
+      offenders <- c(offenders, basename(f))
+    }
+  }
+  expect_equal(offenders, character(0))
+})
+
+test_that("check_online considera raggiungibile un host che risponde con un errore HTTP", {
+  # Un 404 dimostra che il server ha risposto: la domanda e' la raggiungibilita',
+  # non l'esito della richiesta. La radice dell'endpoint Gemini risponde 404, e
+  # trattarla come offline bloccherebbe Biblio AI per tutti (#570).
+  path <- system.file("biblioshiny", "utils.R", package = "bibliometrix")
+  skip_if(path == "", "utils.R non disponibile")
+  skip_on_cran()
+
+  e <- new.env(parent = globalenv())
+  suppressWarnings(suppressMessages(sys.source(path, envir = e)))
+  skip_if_not(is.function(e$check_online))
+
+  # host inesistente: errore di trasporto, quindi davvero non raggiungibile
+  expect_false(e$check_online(host = "https://no.such.host.invalid", timeout = 2))
+})

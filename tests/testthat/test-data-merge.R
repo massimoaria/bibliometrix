@@ -122,3 +122,24 @@ test_that("mergeDbSources non riporta i nomi completi a iniziali", {
   expect_true("DU PLESSIS STAN" %in% post)
   expect_false(any(grepl(",", post)))
 })
+
+test_that("mergeDbSources non lascia campi paese stantii", {
+  # Lens porta un AU_CO vuoto, WoS non ha ancora il campo: dopo bind_rows i
+  # documenti WoS resterebbero senza paese e MCP verrebbe sottostimato.
+  M_wos <- load_wos_fixture()
+  M_lens <- load_lens_fixture()
+  expect_true("AU_CO" %in% names(M_lens))
+  expect_false("AU_CO" %in% names(M_wos))
+
+  M <- suppressWarnings(suppressMessages(
+    mergeDbSources(M_wos, M_lens, remove.duplicated = TRUE, verbose = FALSE)
+  ))
+  expect_false("AU_CO" %in% names(M))
+  expect_false("AU1_CO" %in% names(M))
+
+  # ricalcolato dalle affiliazioni, il lato WoS ritrova i suoi paesi
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_CO", ";")))
+  co <- M2$AU_CO[!is.na(M2$AU_CO) & trimws(M2$AU_CO) != "NA"]
+  expect_true(length(co) >= nrow(M_wos))
+  expect_true(any(grepl(";", co))) # almeno una collaborazione internazionale
+})

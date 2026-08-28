@@ -3096,6 +3096,33 @@ ValueBoxes <- function(M) {
   return(df)
 }
 
+## Country analyses need affiliations ----
+## Some sources carry no affiliation at all: a Lens.org export never includes
+## them, and a PubMed or OpenAlex CSV may omit them depending on the fields
+## selected at export time. AU_CO is then empty for every document, and every
+## country panel used to fail somewhere deeper with a technical message
+## ("missing value where TRUE/FALSE needed", "Join columns in `x` must be
+## present in the data"). Detect the condition once and say it plainly.
+hasCountryData <- function(M) {
+  # Both AU_CO and AU1_CO are derived from the addresses, so the affiliations
+  # are what actually decides this -- and reading them costs nothing, whereas
+  # re-extracting AU_CO would walk the whole collection. The literal string
+  # "NA" is checked too: the extraction writes it where an address is missing.
+  nonEmpty <- function(x) {
+    !is.null(x) && any(!is.na(x) & nchar(trimws(x)) > 0 & trimws(x) != "NA")
+  }
+  nonEmpty(M$C1) || nonEmpty(M$RP) || nonEmpty(M$AU_CO)
+}
+
+noCountryDataMessage <- function() {
+  paste(
+    "This collection contains no affiliation data, so country-level analyses",
+    "are not available. Lens.org exports never include affiliations; PubMed",
+    "and OpenAlex exports may omit them depending on the fields selected when",
+    "the file was downloaded."
+  )
+}
+
 countryCollab <- function(M) {
   sep <- ";"
   if (!("AU_CO" %in% names(M))) {
@@ -4479,17 +4506,24 @@ countrycollaboration_plotly <- function(
   COedges <- tab <- count.duplicates(COedges)
   COedges <- COedges[COedges$count >= min.edges, ]
 
-  # Calcola gli spessori degli edge normalizzati
-  edge_weights <- sqrt(COedges$count)
-  # Normalizza tra min_edgesize e edgesize
-  if (length(unique(edge_weights)) > 1) {
-    COedges$width <- min_edgesize +
-      (edge_weights - min(edge_weights)) /
-        (max(edge_weights) - min(edge_weights)) *
-        (edgesize - min_edgesize)
-  } else {
-    # Se tutti gli edge hanno lo stesso peso, usa il valore medio
-    COedges$width <- (min_edgesize + edgesize) / 2
+  # Una collezione puo' legittimamente non avere alcuna coppia di paesi sopra la
+  # soglia: pochi documenti, oppure nessuna collaborazione internazionale. La
+  # mappa resta significativa (la coropleta c'e'), quindi la si disegna senza
+  # archi invece di assegnare uno scalare a un data frame di zero righe, che
+  # fallirebbe con "replacement has 1 row, data has 0".
+  if (nrow(COedges) > 0) {
+    # Calcola gli spessori degli edge normalizzati
+    edge_weights <- sqrt(COedges$count)
+    # Normalizza tra min_edgesize e edgesize
+    if (length(unique(edge_weights)) > 1) {
+      COedges$width <- min_edgesize +
+        (edge_weights - min(edge_weights)) /
+          (max(edge_weights) - min(edge_weights)) *
+          (edgesize - min_edgesize)
+    } else {
+      # Se tutti gli edge hanno lo stesso peso, usa il valore medio
+      COedges$width <- (min_edgesize + edgesize) / 2
+    }
   }
 
   # Crea la mappa base con choropleth (SENZA legenda)
@@ -4515,7 +4549,8 @@ countrycollaboration_plotly <- function(
     )
 
   # Aggiungi le linee di collaborazione curve con spessore controllato
-  for (i in 1:nrow(COedges)) {
+  # seq_len(): con zero archi 1:nrow() itererebbe su 1 e 0.
+  for (i in seq_len(nrow(COedges))) {
     # Crea arco geodetico
     path <- geosphere::gcIntermediate(
       c(COedges$Longitude.x[i], COedges$Latitude.x[i]),

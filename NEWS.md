@@ -1,4 +1,4 @@
-# bibliometrix (development version)
+# bibliometrix 5.5.0
 
 ## New Features
 - **Biblioshiny — OpenAlex search: exact match (stemming off)**: the OpenAlex query builder gained an **Exact match** checkbox. By default OpenAlex applies stemming to search filters, so *bone* also retrieves *bones* and *surgery* also retrieves *surgeries*, which can inflate the result count well beyond what the user intended. When the box is checked, Biblioshiny queries the `.exact` variant of the search filter (`title.search.exact`, `abstract.search.exact`, `title_and_abstract.search.exact`, `default.search.exact`), the API counterpart of the *Enable stemming* switch on the OpenAlex website. Quoted phrases, parentheses and the AND/OR/NOT operators work in both modes, and `Author`/`Concept` rows are unaffected since they resolve to entity IDs.

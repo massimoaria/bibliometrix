@@ -40,3 +40,11 @@ load_wos_newformat_fixture <- function() {
     convert2df(fixture_path("wos_newformat_sample.txt"), dbsource = "wos", format = "plaintext")
   ))
 }
+
+# Export WoS in formato BibTeX in cui il campo Author va a capo su piu' righe
+# (issue #590).
+load_wos_bibtex_fixture <- function() {
+  suppressWarnings(suppressMessages(
+    convert2df(fixture_path("wos_bibtex_sample.bib"), dbsource = "isi", format = "bibtex")
+  ))
+}

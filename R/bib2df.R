@@ -102,7 +102,16 @@ Please, take a look at the vignettes:
     gsub("---", ";", x)
   }))
 
-  df1$AU <- gsub(" and;| and ", ";", df1$AU)
+  # In a BibTeX file the author separator is always " and ", never the end of a
+  # line, so a "---" inside AU marks where the exporter wrapped a long field and
+  # not the start of a new author. WoS wraps at ~72 characters, and when the wrap
+  # falls right after the comma of a name ("Selvanathan,\n   Saroja") turning it
+  # into ";" splits one author into two: a bare surname and a bare given name.
+  # Unwrap the field first, then split it on the real separator.
+  if ("AU" %in% names(df1)) {
+    df1$AU <- trimES(gsub("---", " ", df[["AU"]]))
+    df1$AU <- gsub("\\s+and\\s+", ";", df1$AU)
+  }
 
   ### replace "---" with " "
   otherTags <- setdiff(names(df), tagsComma)

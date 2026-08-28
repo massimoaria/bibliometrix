@@ -116,3 +116,28 @@ test_that("convert2df normalizza i riferimenti dei nuovi export WoS", {
   expect_true(all(grepl("^(19|20)[0-9]{2}$", f2)))
   expect_false(any(grepl("DOI DOI", refs)))
 })
+
+test_that("convert2df non spezza gli autori BibTeX andati a capo", {
+  M <- load_wos_bibtex_fixture()
+  expect_equal(nrow(M), 3)
+
+  # Record 1: l'a capo cade dopo la virgola di "Selvanathan, Saroja".
+  expect_equal(
+    M$AF[1],
+    "SELVANATHAN ELIYATHAMBY A;JAYASINGHE MANEKA;SELVANATHAN SAROJA"
+  )
+  expect_equal(M$AU[1], "SELVANATHAN EA;JAYASINGHE M;SELVANATHAN S")
+
+  # Record 2: l'a capo cade subito dopo "and", senza spazi residui.
+  expect_equal(M$AF[2], "MARASINGHE SUMUDU;SIMPSON GREG D;NEWSOME DAVID")
+  expect_equal(M$AU[2], "MARASINGHE S;SIMPSON GD;NEWSOME D")
+
+  # Record 3: campo su una riga sola, invariato.
+  expect_equal(M$AF[3], "SHINDE KIRAN")
+  expect_equal(M$AU[3], "SHINDE K")
+
+  # Nessun autore ridotto al solo cognome o al solo nome di battesimo.
+  authors <- trimws(unlist(strsplit(M$AF, ";")))
+  expect_true(all(grepl(" ", authors)))
+  expect_false(any(grepl("^\\s", unlist(strsplit(M$AF, ";")))))
+})

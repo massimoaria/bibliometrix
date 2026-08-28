@@ -8215,12 +8215,17 @@ To ensure the functionality of Biblioshiny,
       k <- input$MostRelCountriesK
       logoGrid <- values$logoGrid
 
-      TABCo <- tryCatch({
-        countryCollab(M_data)
-      }, error = function(e) {
-        showNotification(paste("Countries error:", e$message), type = "error", duration = 8)
-        return(NULL)
-      })
+      TABCo <- if (!hasCountryData(M_data)) {
+        showNotification(noCountryDataMessage(), type = "warning", duration = 12)
+        NULL
+      } else {
+        tryCatch({
+          countryCollab(M_data)
+        }, error = function(e) {
+          showNotification(paste("Countries error:", e$message), type = "error", duration = 8)
+          NULL
+        })
+      }
     })
     req(TABCo)
     {
@@ -8392,6 +8397,10 @@ To ensure the functionality of Biblioshiny,
 
   ### Country Production ----
   output$countryProdPlot <- renderPlotly({
+    if (!hasCountryData(values$M)) {
+      showNotification(noCountryDataMessage(), type = "warning", duration = 12)
+      req(FALSE)
+    }
     values$mapworld <- mapworld(values$M, values)
     plot.ly(
       values$mapworld$g,
@@ -13710,6 +13719,10 @@ To ensure the functionality of Biblioshiny,
           )
         },
         COL_CO = {
+          if (!hasCountryData(M_data)) {
+            showNotification(noCountryDataMessage(), type = "warning", duration = 12)
+            return(NULL)
+          }
           if (!("AU_CO" %in% names(M_data))) {
             M_data <- bibliometrix::metaTagExtraction(
               M_data,
@@ -14098,6 +14111,11 @@ To ensure the functionality of Biblioshiny,
     M_data <- values$M
     wm_min_edges <- input$WMedges.min
     wm_edgesize <- input$WMedgesize * 2
+
+    if (!hasCountryData(M_data)) {
+      showNotification(noCountryDataMessage(), type = "warning", duration = 12)
+      return(NULL)
+    }
 
     WMmap <- tryCatch({
       withProgress(message = 'World Collaboration Map: computing...', value = 0, {

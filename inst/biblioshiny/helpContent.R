@@ -3,13 +3,13 @@ helpContent <- function() {
   biblioAI <-
     "<body>
     <div class='container'>
-    <h3>🧠 Biblio AI: AI-Powered Bibliometric Analysis</h3>
+    <h3>&#x1F9E0; Biblio AI: AI-Powered Bibliometric Analysis</h3>
     
-    <p>Starting from version <strong>5.0</strong>, <em>Biblioshiny</em> introduces <strong>Biblio AI</strong>, a new suite of features powered by Google's <strong>Gemini</strong> models. This integration allows users to receive <em>automatic interpretations</em>, <em>critical insights</em>, and <em>narrative summaries</em> of their bibliometric results – directly within the platform.</p>
+    <p>Starting from version <strong>5.0</strong>, <em>Biblioshiny</em> introduces <strong>Biblio AI</strong>, a new suite of features powered by Google's <strong>Gemini</strong> models. This integration allows users to receive <em>automatic interpretations</em>, <em>critical insights</em>, and <em>narrative summaries</em> of their bibliometric results &#x2013; directly within the platform.</p>
     
     <p><strong>Note:</strong> Biblio AI requires a <strong>Chrome-based browser</strong> (such as Google Chrome or Microsoft Edge) installed on your computer to work correctly.</p>
     
-    <h4>✨ What does Biblio AI do?</h4>
+    <h4>&#x2728; What does Biblio AI do?</h4>
     <p>Biblio AI enhances the core analytical modules of <em>Biblioshiny</em> by providing contextual, AI-generated commentary on several results, such as:</p>
     <ul>
       <li><strong>Overview:</strong> High-level summaries of key bibliometric indicators and collection features.</li>
@@ -24,7 +24,7 @@ helpContent <- function() {
     </ul>
     <p>In each of these sections, users can activate the <strong>Biblio AI</strong> panel to access dynamic text explanations, perfect for use in scientific writing, presentations, or reporting.</p>
     
-    <h4>🔧 How to enable Biblio AI?</h4>
+    <h4>&#x1F527; How to enable Biblio AI?</h4>
     <p>To enable Biblio AI, follow these simple steps:</p>
     <ol>
       <li><strong>Register</strong> at <a href='https://makersuite.google.com/' target='_blank'>Google AI Studio</a> (free access available).</li>
@@ -33,7 +33,7 @@ helpContent <- function() {
     </ol>
     <p>The interface will guide you through the secure and local setup. Your API key is used only on your device to interact with the AI model.</p>
     
-    <h4>🎯 Why use Biblio AI?</h4>
+    <h4>&#x1F3AF; Why use Biblio AI?</h4>
     <ul>
       <li>Reduces time spent interpreting complex outputs.</li>
       <li>Supports scientific writing and research reporting.</li>
@@ -47,7 +47,7 @@ helpContent <- function() {
   info <-
     "<body>
     <div class='container'>
-    <h3>📚 Supported Bibliographic Databases and Suggested File Formats</h3>
+    <h3>&#x1F4DA; Supported Bibliographic Databases and Suggested File Formats</h3>
     
     <p><strong>Biblioshiny</strong> imports and analyzes collections exported from the following bibliographic databases:</p>
     <ul>
@@ -197,7 +197,7 @@ helpContent <- function() {
 
     <hr style='margin-top:25px; margin-bottom:20px;'>
 
-    <h3>🅾️ Importing from OpenAlex</h3>
+    <h3>&#x1F17E;&#xFE0F; Importing from OpenAlex</h3>
 
     <p><strong>OpenAlex</strong> can be imported into Biblioshiny in two ways:</p>
     <ul>
@@ -205,7 +205,7 @@ helpContent <- function() {
       <li><strong>OpenAlex API</strong> &mdash; retrieved programmatically (via the <code>openalexR</code> package or the API import option). This returns the <strong>full metadata</strong>, including the list of <strong>cited references</strong> needed for citation-based analyses.</li>
     </ul>
 
-    <h4>⚠️ Which columns to select in the web export?</h4>
+    <h4>&#x26A0;&#xFE0F; Which columns to select in the web export?</h4>
     <p>When you export a CSV/Excel file from the OpenAlex website, make sure to include <strong>at least the required fields</strong>. If any of them is missing, Biblioshiny cannot build the bibliographic collection and the import is stopped with an explanatory message.</p>
 
     <table style='width:100%; border-collapse:collapse; margin-top:10px; font-size:14px;'>
@@ -238,12 +238,12 @@ helpContent <- function() {
       </tbody>
     </table>
 
-    <h4>🔗 Cited references: enrich your collection via the API</h4>
+    <h4>&#x1F517; Cited references: enrich your collection via the API</h4>
     <p>The OpenAlex <strong>web CSV/Excel export does not include the cited references</strong> (and does not include the document type). Therefore <strong>citation-based analyses</strong> &mdash; such as <em>Historical Direct Citation Network</em>, <em>Co-citation</em> and <em>Bibliographic Coupling</em> &mdash; are <strong>not available</strong> from a plain web export.</p>
     <p>To obtain them you can:</p>
     <ul>
       <li>Import the collection through the <strong>OpenAlex API</strong> (recommended for complete metadata), or</li>
-      <li>After importing a CSV/Excel file, use the <strong>“Fetch/Resolve cited references”</strong> option, which downloads the missing reference data for your documents directly from the <strong>OpenAlex API</strong>.</li>
+      <li>After importing a CSV/Excel file, use the <strong>&#x201C;Fetch/Resolve cited references&#x201D;</strong> option, which downloads the missing reference data for your documents directly from the <strong>OpenAlex API</strong>.</li>
     </ul>
     <p style='font-size:13px; color:#555;'><em>Note:</em> reference enrichment via the API requires an internet connection and may take some time for large collections.</p>
 
@@ -254,10 +254,10 @@ helpContent <- function() {
   publications <-
     "<body>
     <div class='container'>
-    <h3>📖 Main Authors' References (Bibliometrics)</h3>
+    <h3>&#x1F4D6; Main Authors' References (Bibliometrics)</h3>
     
     <ul>
-      <li><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></li>
+      <li><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></li>
       <li><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</li>
       
       <li><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2024).</strong> <i>Comparative science mapping: a novel conceptual structure analysis with metadata.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-024-05161-6' target='_blank'>https://doi.org/10.1007/s11192-024-05161-6</a></li>
@@ -338,11 +338,11 @@ helpContent <- function() {
                                             <path d='M 160 90 Q 170 80 180 90 L 185 95 L 190 90' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/>
                                             <text x='170' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>SEARCH</text>
                                             <text x='170' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Data Collection</text>
-                                            <text x='50' y='290' font-size='13' fill='#333'>• API Integration</text>
-                                            <text x='50' y='310' font-size='13' fill='#333'>• Database Export</text>
-                                            <text x='50' y='330' font-size='13' fill='#333'>• Query Design</text>
-                                            <text x='50' y='350' font-size='13' fill='#333'>• PubMed, OpenAlex</text>
-                                            <text x='50' y='370' font-size='13' fill='#333'>• Web of Science</text>
+                                            <text x='50' y='290' font-size='13' fill='#333'>&#x2022; API Integration</text>
+                                            <text x='50' y='310' font-size='13' fill='#333'>&#x2022; Database Export</text>
+                                            <text x='50' y='330' font-size='13' fill='#333'>&#x2022; Query Design</text>
+                                            <text x='50' y='350' font-size='13' fill='#333'>&#x2022; PubMed, OpenAlex</text>
+                                            <text x='50' y='370' font-size='13' fill='#333'>&#x2022; Web of Science</text>
                                             </g>
                                             
                                             <!-- APPRAISAL Box -->
@@ -352,11 +352,11 @@ helpContent <- function() {
                                             <path d='M 455 100 L 465 110 L 485 85' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/>
                                             <text x='470' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>APPRAISAL</text>
                                             <text x='470' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Quality Assessment</text>
-                                            <text x='350' y='290' font-size='13' fill='#333'>• Data Filtering</text>
-                                            <text x='350' y='310' font-size='13' fill='#333'>• Quality Control</text>
-                                            <text x='350' y='330' font-size='13' fill='#333'>• Duplicate Removal</text>
-                                            <text x='350' y='350' font-size='13' fill='#333'>• Field Validation</text>
-                                            <text x='350' y='370' font-size='13' fill='#333'>• Data Cleaning</text>
+                                            <text x='350' y='290' font-size='13' fill='#333'>&#x2022; Data Filtering</text>
+                                            <text x='350' y='310' font-size='13' fill='#333'>&#x2022; Quality Control</text>
+                                            <text x='350' y='330' font-size='13' fill='#333'>&#x2022; Duplicate Removal</text>
+                                            <text x='350' y='350' font-size='13' fill='#333'>&#x2022; Field Validation</text>
+                                            <text x='350' y='370' font-size='13' fill='#333'>&#x2022; Data Cleaning</text>
                                             </g>
                                             
                                             <!-- ANALYSIS Box -->
@@ -366,25 +366,25 @@ helpContent <- function() {
                                             <path d='M 755 115 L 770 90 L 785 115 M 770 90 L 770 110' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/>
                                             <text x='770' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>ANALYSIS</text>
                                             <text x='770' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Deep Investigation</text>
-                                            <text x='650' y='290' font-size='13' fill='#333'>• Bibliometric Analysis</text>
-                                            <text x='650' y='310' font-size='13' fill='#333'>• Network Analysis</text>
-                                            <text x='650' y='330' font-size='13' fill='#333'>• Citation Analysis</text>
-                                            <text x='650' y='350' font-size='13' fill='#333'>• Conceptual Structure</text>
-                                            <text x='650' y='370' font-size='13' fill='#333'>• Content Analysis</text>
+                                            <text x='650' y='290' font-size='13' fill='#333'>&#x2022; Bibliometric Analysis</text>
+                                            <text x='650' y='310' font-size='13' fill='#333'>&#x2022; Network Analysis</text>
+                                            <text x='650' y='330' font-size='13' fill='#333'>&#x2022; Citation Analysis</text>
+                                            <text x='650' y='350' font-size='13' fill='#333'>&#x2022; Conceptual Structure</text>
+                                            <text x='650' y='370' font-size='13' fill='#333'>&#x2022; Content Analysis</text>
                                             </g>
                                             
                                             <!-- SYNTHESIS Box -->
                                             <g id='synthesis'>
                                             <rect x='940' y='50' width='260' height='200' rx='15' fill='url(#synthesisGrad)' />
                                             <circle cx='1070' cy='100' r='30' fill='white' opacity='0.3'/>
-                                            <text x='1070' y='108' font-size='32' fill='white' text-anchor='middle' font-weight='bold'>∑</text>
+                                            <text x='1070' y='108' font-size='32' fill='white' text-anchor='middle' font-weight='bold'>&#x2211;</text>
                                             <text x='1070' y='165' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>SYNTHESIS</text>
                                             <text x='1070' y='195' font-size='14' fill='white' text-anchor='middle' opacity='0.9'>Results & Reporting</text>
-                                            <text x='950' y='290' font-size='13' fill='#333'>• Report Generation</text>
-                                            <text x='950' y='310' font-size='13' fill='#333'>• Key Insights</text>
-                                            <text x='950' y='330' font-size='13' fill='#333'>• Visualization</text>
-                                            <text x='950' y='350' font-size='13' fill='#333'>• AI Summary</text>
-                                            <text x='950' y='370' font-size='13' fill='#333'>• Publication Output</text>
+                                            <text x='950' y='290' font-size='13' fill='#333'>&#x2022; Report Generation</text>
+                                            <text x='950' y='310' font-size='13' fill='#333'>&#x2022; Key Insights</text>
+                                            <text x='950' y='330' font-size='13' fill='#333'>&#x2022; Visualization</text>
+                                            <text x='950' y='350' font-size='13' fill='#333'>&#x2022; AI Summary</text>
+                                            <text x='950' y='370' font-size='13' fill='#333'>&#x2022; Publication Output</text>
                                             </g>
                                             
                                             <!-- Bottom Tools and Features -->
@@ -396,56 +396,56 @@ helpContent <- function() {
                                             <g transform='translate(60, 480)'>
                                             <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
                                             <text x='130' y='30' font-size='16' font-weight='bold' fill='#667eea' text-anchor='middle'>Science Mapping</text>
-                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Co-citation Analysis</text>
-                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Bibliographic Coupling</text>
-                                            <text x='15' y='110' font-size='12' fill='#333'>✓ Co-word Analysis</text>
-                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Thematic Evolution</text>
-                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Trend Topics</text>
-                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Three Fields Plot</text>
-                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Historiograph</text>
-                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Factorial Analysis</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>&#x2713; Co-citation Analysis</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>&#x2713; Bibliographic Coupling</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>&#x2713; Co-word Analysis</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>&#x2713; Thematic Evolution</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>&#x2713; Trend Topics</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>&#x2713; Three Fields Plot</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>&#x2713; Historiograph</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>&#x2713; Factorial Analysis</text>
                                             </g>
                                             
                                             <!-- Column 2 -->
                                             <g transform='translate(340, 480)'>
                                             <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
                                             <text x='130' y='30' font-size='16' font-weight='bold' fill='#66BB6A' text-anchor='middle'>Network Analysis</text>
-                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Collaboration Networks</text>
-                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Country Collaboration</text>
-                                            <text x='15' y='110' font-size='12' fill='#333'>✓ Institution Networks</text>
-                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Author Networks</text>
-                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Citation Networks</text>
-                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Co-occurrence Networks</text>
-                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Community Detection</text>
-                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Centrality Measures</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>&#x2713; Collaboration Networks</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>&#x2713; Country Collaboration</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>&#x2713; Institution Networks</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>&#x2713; Author Networks</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>&#x2713; Citation Networks</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>&#x2713; Co-occurrence Networks</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>&#x2713; Community Detection</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>&#x2713; Centrality Measures</text>
                                             </g>
                                             
                                             <!-- Column 3 -->
                                             <g transform='translate(620, 480)'>
                                             <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
                                             <text x='130' y='30' font-size='16' font-weight='bold' fill='#FFA726' text-anchor='middle'>AI-Enhanced Analysis</text>
-                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Biblio AI Assistant</text>
-                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Document Summarization</text>
-                                            <text x='15' y='110' font-size='12' fill='#333'>✓ PDF Content Analysis</text>
-                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Citation Context Extraction</text>
-                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Reference Matching</text>
-                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Readability Metrics</text>
-                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Topic Modeling</text>
-                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Natural Language Processing</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>&#x2713; Biblio AI Assistant</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>&#x2713; Document Summarization</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>&#x2713; PDF Content Analysis</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>&#x2713; Citation Context Extraction</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>&#x2713; Reference Matching</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>&#x2713; Readability Metrics</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>&#x2713; Topic Modeling</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>&#x2713; Natural Language Processing</text>
                                             </g>
                                             
                                             <!-- Column 4 -->
                                             <g transform='translate(900, 480)'>
                                             <rect width='260' height='260' rx='10' fill='white' stroke='#dee2e6' stroke-width='1'/>
                                             <text x='130' y='30' font-size='16' font-weight='bold' fill='#AB47BC' text-anchor='middle'>Visualization</text>
-                                            <text x='15' y='60' font-size='12' fill='#333'>✓ Interactive Plots</text>
-                                            <text x='15' y='85' font-size='12' fill='#333'>✓ Network Graphs</text>
-                                            <text x='15' y='110' font-size='12' fill='#333'>✓ Thematic Maps</text>
-                                            <text x='15' y='135' font-size='12' fill='#333'>✓ Word Clouds</text>
-                                            <text x='15' y='160' font-size='12' fill='#333'>✓ Sankey Diagrams</text>
-                                            <text x='15' y='185' font-size='12' fill='#333'>✓ Heatmaps</text>
-                                            <text x='15' y='210' font-size='12' fill='#333'>✓ Time Series Plots</text>
-                                            <text x='15' y='235' font-size='12' fill='#333'>✓ Export Options</text>
+                                            <text x='15' y='60' font-size='12' fill='#333'>&#x2713; Interactive Plots</text>
+                                            <text x='15' y='85' font-size='12' fill='#333'>&#x2713; Network Graphs</text>
+                                            <text x='15' y='110' font-size='12' fill='#333'>&#x2713; Thematic Maps</text>
+                                            <text x='15' y='135' font-size='12' fill='#333'>&#x2713; Word Clouds</text>
+                                            <text x='15' y='160' font-size='12' fill='#333'>&#x2713; Sankey Diagrams</text>
+                                            <text x='15' y='185' font-size='12' fill='#333'>&#x2713; Heatmaps</text>
+                                            <text x='15' y='210' font-size='12' fill='#333'>&#x2713; Time Series Plots</text>
+                                            <text x='15' y='235' font-size='12' fill='#333'>&#x2713; Export Options</text>
                                             </g>
                                             </g>
                                             
@@ -490,15 +490,15 @@ helpContent <- function() {
   filters <-
     "<body>
   <div class='container'>
-  <h3>🔍 Filters: Refining Your Bibliometric Collection</h3>
+  <h3>&#x1F50D; Filters: Refining Your Bibliometric Collection</h3>
   
-  <p>The <strong>Filters</strong> module provides a comprehensive set of tools to refine and subset your bibliographic collection based on multiple metadata criteria. By applying filters, you can focus your analysis on specific document types, time periods, geographic regions, journals, or citation thresholds—enabling more targeted and meaningful bibliometric insights.</p>
+  <p>The <strong>Filters</strong> module provides a comprehensive set of tools to refine and subset your bibliographic collection based on multiple metadata criteria. By applying filters, you can focus your analysis on specific document types, time periods, geographic regions, journals, or citation thresholds&#x2014;enabling more targeted and meaningful bibliometric insights.</p>
   
   <p>Filters are organized into <strong>four thematic panels</strong>, each addressing different aspects of bibliographic metadata. At the top of the page, a <strong>real-time summary</strong> displays how many documents, sources, and authors remain after applying your filter selections.</p>
   
   <br>
   
-  <h4>📊 Real-Time Filter Summary</h4>
+  <h4>&#x1F4CA; Real-Time Filter Summary</h4>
   <p>Located at the top of the Filters page, this summary updates dynamically as you adjust filter settings:</p>
   <ul>
     <li><strong>Documents:</strong> Shows the number of documents currently selected (e.g., '898 of 898' means all documents are included; '450 of 898' means 450 documents match your filter criteria).</li>
@@ -510,7 +510,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>1️⃣ General Filters</h4>
+  <h4>1&#xFE0F;&#x20E3; General Filters</h4>
   <p>The <strong>General</strong> panel provides fundamental filters applicable to most bibliometric collections:</p>
   
   <h4>Document Type</h4>
@@ -519,7 +519,7 @@ helpContent <- function() {
     <li><strong>How to Use:</strong> 
       <ul>
         <li>By default, all document types are selected (shown in the filter box).</li>
-        <li>To <strong>exclude</strong> a document type, click on its name in the filter box—it will be removed.</li>
+        <li>To <strong>exclude</strong> a document type, click on its name in the filter box&#x2014;it will be removed.</li>
         <li>To <strong>include</strong> a previously excluded type, click on it in the list below the filter box.</li>
       </ul>
     </li>
@@ -535,7 +535,7 @@ helpContent <- function() {
   <h4>Language</h4>
   <ul>
     <li><strong>Function:</strong> Filters documents by publication language (e.g., English, Spanish, French, German, Chinese).</li>
-    <li><strong>Interaction:</strong> Similar to Document Type—click to select/deselect languages.</li>
+    <li><strong>Interaction:</strong> Similar to Document Type&#x2014;click to select/deselect languages.</li>
     <li><strong>Note:</strong> Most bibliometric databases predominantly index English-language publications. Non-English documents may represent a small fraction (<5%) of typical collections.</li>
   </ul>
   
@@ -560,7 +560,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>2️⃣ Journal (J) Filters</h4>
+  <h4>2&#xFE0F;&#x20E3; Journal (J) Filters</h4>
   <p>The <strong>Journal</strong> panel enables filtering based on publication venues, journal rankings, or Bradford's Law zones:</p>
   
   <h4>Upload a List of Journals</h4>
@@ -657,7 +657,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>3️⃣ Author's Country (AU) Filters</h4>
+  <h4>3&#xFE0F;&#x20E3; Author's Country (AU) Filters</h4>
   <p>The <strong>Author's Country</strong> panel enables geographic filtering based on author affiliations:</p>
   
   <h4>Region</h4>
@@ -690,7 +690,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>4️⃣ Documents (DOC) Filters</h4>
+  <h4>4&#xFE0F;&#x20E3; Documents (DOC) Filters</h4>
   <p>The <strong>Documents</strong> panel provides citation-based filters with interactive histograms:</p>
   
   <h4>Total Citations</h4>
@@ -700,7 +700,7 @@ helpContent <- function() {
       <ul>
         <li>Use the <strong>slider</strong> below the histogram to set minimum and maximum citation thresholds.</li>
         <li>The histogram shows the distribution of citation counts across documents, helping you identify highly-cited outliers.</li>
-        <li>Example: Set minimum = 50 to include only documents with ≥50 citations.</li>
+        <li>Example: Set minimum = 50 to include only documents with &#x2265;50 citations.</li>
       </ul>
     </li>
     <li><strong>Use Cases:</strong>
@@ -716,7 +716,7 @@ helpContent <- function() {
   <ul>
     <li><strong>Function:</strong> Filters documents by their <strong>average annual citation rate</strong>, calculated as: <code>Total Citations / (Current Year - Publication Year)</code>.</li>
     <li><strong>Why Use This?</strong> Raw citation counts are biased toward older publications. Citations per year normalizes for document age, enabling fairer comparison between recent and historical works.</li>
-    <li><strong>How to Use:</strong> Adjust the slider to set citation-per-year thresholds (e.g., ≥5 citations/year).</li>
+    <li><strong>How to Use:</strong> Adjust the slider to set citation-per-year thresholds (e.g., &#x2265;5 citations/year).</li>
     <li><strong>Use Cases:</strong>
       <ul>
         <li>Identify <strong>rapidly accumulating citations</strong> (indicators of emerging influence).</li>
@@ -728,7 +728,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🎛️ Filter Workflow</h4>
+  <h4>&#x1F39B;&#xFE0F; Filter Workflow</h4>
   <p>Follow these steps to apply filters effectively:</p>
   
   <ol>
@@ -743,7 +743,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>💡 Best Practices</h4>
+  <h4>&#x1F4A1; Best Practices</h4>
   <ul>
     <li><strong>Avoid over-filtering:</strong> Very small subsets (<100 documents) may not provide robust results for network or clustering analyses. Aim for at least 200-300 documents when possible.</li>
     <li><strong>Document your filters:</strong> Record which filters you applied for reproducibility and transparency in research reporting (e.g., 'Filtered to Q1 journals, 2010-2020, English-language articles only').</li>
@@ -755,7 +755,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>⚠️ Important Considerations</h4>
+  <h4>&#x26A0;&#xFE0F; Important Considerations</h4>
   <ul>
     <li><strong>Citation Data Availability:</strong> Citation counts depend on database indexing. Web of Science and Scopus provide citation data; PubMed and some other databases do not. Missing citation data will result in empty histograms in the Documents panel.</li>
     <li><strong>Affiliation Data Quality:</strong> Author country filters rely on affiliation metadata, which may be incomplete or inconsistent, especially in older publications or non-WoS/Scopus databases.</li>
@@ -766,7 +766,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🔍 Use Case Examples</h4>
+  <h4>&#x1F50D; Use Case Examples</h4>
   
   <p><strong>Example 1: Analyzing Top-Tier Recent Research</strong></p>
   <ul>
@@ -776,7 +776,7 @@ helpContent <- function() {
         <li>Document Type: Article, Review</li>
         <li>Publication Year: 2015-2020</li>
         <li>Source by Bradford Law Zones: Core</li>
-        <li>Total Citations per Year: ≥10</li>
+        <li>Total Citations per Year: &#x2265;10</li>
       </ul>
     </li>
     <li><strong>Outcome:</strong> A curated subset of influential papers from leading journals, suitable for identifying emerging research fronts.</li>
@@ -801,7 +801,7 @@ helpContent <- function() {
     <li><strong>Filters Applied:</strong>
       <ul>
         <li>Publication Year: 1970-1990</li>
-        <li>Total Citations: ≥100</li>
+        <li>Total Citations: &#x2265;100</li>
         <li>Document Type: Article</li>
       </ul>
     </li>
@@ -810,13 +810,13 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📚 References</h4>
-  <p><strong>Bradford, S. C. (1934).</strong> <i>Sources of information on specific subjects.</i> <strong>Engineering</strong>, 137, 85–86.</p>
+  <h4>&#x1F4DA; References</h4>
+  <p><strong>Bradford, S. C. (1934).</strong> <i>Sources of information on specific subjects.</i> <strong>Engineering</strong>, 137, 85&#x2013;86.</p>
   
-  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
   
-  <p><strong>Garfield, E. (2009).</strong> <i>From the science of science to Scientometrics: visualizing the history of science with HistCite software.</i> <strong>Journal of Informetrics</strong>, 3(3), 173–179. <a href='https://doi.org/10.1016/j.joi.2009.03.009' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.009</a></p>
+  <p><strong>Garfield, E. (2009).</strong> <i>From the science of science to Scientometrics: visualizing the history of science with HistCite software.</i> <strong>Journal of Informetrics</strong>, 3(3), 173&#x2013;179. <a href='https://doi.org/10.1016/j.joi.2009.03.009' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.009</a></p>
   </div>
   </body>"
 
@@ -824,11 +824,11 @@ helpContent <- function() {
   authorProfile <-
     "<body>
     <div class='container'>
-    <h3>👤 Author Profile Overview</h3>
+    <h3>&#x1F464; Author Profile Overview</h3>
     
     <p>The Author Profile page provides a <strong>dual-perspective bibliometric overview</strong> of each author included in the collection:</p>
     
-    <h4>🔹 Global Profile</h4>
+    <h4>&#x1F539; Global Profile</h4>
     <p>The <strong>Global Profile</strong> presents the author's complete scientific output, based on metadata retrieved from <a href='https://openalex.org' target='_blank'>OpenAlex</a> via the <code>openalexR</code> R package. This profile includes <em>all publications authored by the researcher</em>, regardless of whether they are part of the current collection.</p>
 
     <p><strong>Main features of the Global Profile include:</strong></p>
@@ -843,7 +843,7 @@ helpContent <- function() {
     <p><strong>Data Source:</strong> OpenAlex API (via <code>openalexR</code>)<br>
     <strong>Unique Identifier:</strong> OpenAlex Author ID (e.g., <code>A5014455237</code>)</p>
     
-    <h4>🔸 Local Profile</h4>
+    <h4>&#x1F538; Local Profile</h4>
     <p>The <strong>Local Profile</strong> focuses exclusively on the subset of the author's publications that are included in the <em>user-defined collection</em> currently under analysis in the project.</p>
     
     <p><strong>Main features of the Local Profile include:</strong></p>
@@ -858,7 +858,7 @@ helpContent <- function() {
     
     <p>This local profile helps contextualize the author's role and impact <strong>within the specific research topic or dataset</strong> under investigation.</p>
     
-    <h4>🔄 Interpretation and Use</h4>
+    <h4>&#x1F504; Interpretation and Use</h4>
     <p>The <strong>Global Profile</strong> offers a broad, external view of the author's overall scholarly influence, while the <strong>Local Profile</strong> highlights their specific relevance <em>within the current study</em>.</p>
 
     <p>This dual visualization is particularly useful for:</p>
@@ -868,14 +868,14 @@ helpContent <- function() {
       <li>Evaluating thematic alignment of authors with the collection's focus</li>
     </ul>
     
-    <h4>📚 References</h4>
+    <h4>&#x1F4DA; References</h4>
     <p><strong>Priem, J. et al. (2022).</strong> <i>OpenAlex: A fully-open index of scholarly works, authors, venues, institutions, and concepts.</i> Retrieved from <a href='https://openalex.org' target='_blank'>https://openalex.org</a></p>
       
-    <p><strong>Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024).</strong> <i>openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.</i> <strong>R Journal</strong>, 15(4), 167–180. <a href='https://doi.org/10.32614/RJ-2023-089' target='_blank'>https://doi.org/10.32614/RJ-2023-089</a></p>
+    <p><strong>Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2024).</strong> <i>openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.</i> <strong>R Journal</strong>, 15(4), 167&#x2013;180. <a href='https://doi.org/10.32614/RJ-2023-089' target='_blank'>https://doi.org/10.32614/RJ-2023-089</a></p>
         
     <p><strong>Aria, M. et al. (2023).</strong> <i>openalexR: An R package for programmatic access to OpenAlex metadata.</i> <strong>CRAN</strong>. Retrieved from <a href='https://cran.r-project.org/package=openalexR' target='_blank'>https://cran.r-project.org/package=openalexR</a></p>
         
-    <p><strong>Hirsch, J.E. (2005).</strong> <i>An index to quantify an individual's scientific research output.</i> <strong>Proceedings of the National Academy of Sciences</strong>, 102(46), 16569–16572. <a href='https://doi.org/10.1073/pnas.0507655102' target='_blank'>https://doi.org/10.1073/pnas.0507655102</a></p>
+    <p><strong>Hirsch, J.E. (2005).</strong> <i>An index to quantify an individual's scientific research output.</i> <strong>Proceedings of the National Academy of Sciences</strong>, 102(46), 16569&#x2013;16572. <a href='https://doi.org/10.1073/pnas.0507655102' target='_blank'>https://doi.org/10.1073/pnas.0507655102</a></p>
     </div>
     </body>"
 
@@ -883,11 +883,11 @@ helpContent <- function() {
   referenceMatching <-
     "<body>
     <div class='container'>
-    <h3>🔗 Reference Matching: Algorithm and Usage</h3>
+    <h3>&#x1F517; Reference Matching: Algorithm and Usage</h3>
     
     <p>The <strong>Reference Matching</strong> module implements an advanced algorithm to identify and link cited references within a bibliometric collection to the actual documents present in the dataset. This process enables accurate <em>citation network analysis</em>, <em>co-citation studies</em>, and identification of <strong>highly-cited works within the collection</strong>.</p>
     
-    <h4>🔬 Algorithm Overview</h4>
+    <h4>&#x1F52C; Algorithm Overview</h4>
     <p>The reference matching algorithm follows a multi-step procedure designed to maximize accuracy while handling noisy and incomplete bibliographic data:</p>
     
     <ol>
@@ -907,18 +907,18 @@ helpContent <- function() {
         <ul>
           <li><strong>DOI matching</strong> (if available): exact match = 100% confidence</li>
           <li><strong>First author similarity:</strong> string distance (Jaro-Winkler or Levenshtein)</li>
-          <li><strong>Year match:</strong> exact or within ±1 year tolerance</li>
+          <li><strong>Year match:</strong> exact or within &#xB1;1 year tolerance</li>
           <li><strong>Journal/source similarity:</strong> string distance between normalized titles</li>
           <li><strong>Volume and page matching:</strong> exact or fuzzy comparison</li>
         </ul>
       </li>
       
-      <li><strong>Threshold-Based Assignment:</strong> A reference is matched to a document if the combined similarity score exceeds a predefined threshold (typically 0.85–0.95). The threshold can be adjusted by the user to balance precision and recall.</li>
+      <li><strong>Threshold-Based Assignment:</strong> A reference is matched to a document if the combined similarity score exceeds a predefined threshold (typically 0.85&#x2013;0.95). The threshold can be adjusted by the user to balance precision and recall.</li>
       
       <li><strong>Ambiguity Resolution:</strong> In cases where a reference matches multiple documents, the algorithm selects the candidate with the highest similarity score. If scores are nearly identical, the match is flagged for manual review.</li>
     </ol>
     
-    <h4>💡 Usage in Biblioshiny</h4>
+    <h4>&#x1F4A1; Usage in Biblioshiny</h4>
     <p>To perform reference matching in <strong>Biblioshiny</strong>, follow these steps:</p>
     
     <ol>
@@ -946,15 +946,15 @@ helpContent <- function() {
       <li><strong>Export matched data:</strong> The matched citation network can be exported for further analysis in external tools (e.g., Gephi, Pajek) or used directly in Biblioshiny for advanced network analysis.</li>
     </ol>
     
-    <h4>⚙️ Key Parameters and Options</h4>
+    <h4>&#x2699;&#xFE0F; Key Parameters and Options</h4>
     <ul>
-      <li><strong>Matching Threshold:</strong> Minimum similarity score (0–1) required for a match. Default: 0.90. Lower values increase recall but may introduce false positives.</li>
-      <li><strong>Fuzzy Year Matching:</strong> Allows matches within ±1 year (useful for handling publication date discrepancies). Default: enabled.</li>
+      <li><strong>Matching Threshold:</strong> Minimum similarity score (0&#x2013;1) required for a match. Default: 0.90. Lower values increase recall but may introduce false positives.</li>
+      <li><strong>Fuzzy Year Matching:</strong> Allows matches within &#xB1;1 year (useful for handling publication date discrepancies). Default: enabled.</li>
       <li><strong>DOI Priority:</strong> When a DOI is available, it overrides other matching criteria. Default: enabled.</li>
-      <li><strong>Manual Review Mode:</strong> Flags ambiguous matches (score between 0.85–0.90) for user verification. Default: disabled.</li>
+      <li><strong>Manual Review Mode:</strong> Flags ambiguous matches (score between 0.85&#x2013;0.90) for user verification. Default: disabled.</li>
     </ul>
     
-    <h4>📊 Applications</h4>
+    <h4>&#x1F4CA; Applications</h4>
     <p>Reference matching is essential for several bibliometric analyses:</p>
     <ul>
       <li><strong>Co-citation analysis:</strong> Identify documents frequently cited together, revealing intellectual structure.</li>
@@ -963,7 +963,7 @@ helpContent <- function() {
       <li><strong>Citation networks:</strong> Construct directed citation graphs for network-based metrics (PageRank, betweenness centrality).</li>
     </ul>
     
-    <h4>⚠️ Important Notes</h4>
+    <h4>&#x26A0;&#xFE0F; Important Notes</h4>
     <ul>
       <li>Reference matching quality depends heavily on the completeness and accuracy of the <code>CR</code> field in the original data export.</li>
       <li>Incomplete or poorly formatted references (e.g., missing author names, incorrect years) may result in lower matching rates.</li>
@@ -971,13 +971,13 @@ helpContent <- function() {
       <li>Always verify ambiguous matches manually, especially for high-stakes analyses.</li>
     </ul>
     
-    <h4>📚 References</h4>
-    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    <h4>&#x1F4DA; References</h4>
+    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
     
     <p><strong>Garfield, E. (1979).</strong> <i>Citation indexing: Its theory and application in science, technology, and humanities.</i> New York: Wiley.</p>
     
-    <p><strong>Small, H. (1973).</strong> <i>Co-citation in the scientific literature: A new measure of the relationship between two documents.</i> <strong>Journal of the American Society for Information Science</strong>, 24(4), 265–269. <a href='https://doi.org/10.1002/asi.4630240406' target='_blank'>https://doi.org/10.1002/asi.4630240406</a></p>
+    <p><strong>Small, H. (1973).</strong> <i>Co-citation in the scientific literature: A new measure of the relationship between two documents.</i> <strong>Journal of the American Society for Information Science</strong>, 24(4), 265&#x2013;269. <a href='https://doi.org/10.1002/asi.4630240406' target='_blank'>https://doi.org/10.1002/asi.4630240406</a></p>
     </div>
     </body>"
 
@@ -985,13 +985,13 @@ helpContent <- function() {
   importOrLoad <-
     "<body>
     <div class='container'>
-    <h3>📥 Import or Load: Building Your Bibliometric Collection</h3>
+    <h3>&#x1F4E5; Import or Load: Building Your Bibliometric Collection</h3>
     
     <p>The <strong>Import or Load</strong> module is the starting point for any bibliometric analysis in <strong>Biblioshiny</strong>. This section allows users to build their bibliographic collection by either <em>importing raw files</em> from supported databases or <em>loading pre-processed bibliometrix files</em> saved in previous sessions.</p>
     
     <br>
     
-    <h4>📂 Three Import Options</h4>
+    <h4>&#x1F4C2; Three Import Options</h4>
     <p><strong>Biblioshiny</strong> offers three flexible ways to create or load a bibliographic collection:</p>
     
     <h4>1. Import Raw File(s)</h4>
@@ -1021,7 +1021,7 @@ helpContent <- function() {
     <ul>
       <li>Files from different databases can be merged later using the <strong>Merge Collections</strong> module</li>
       <li>For best results, export the <strong>full record with cited references</strong> from the source database</li>
-      <li>Some databases (e.g., Web of Science, Scopus) have export limits—download data in batches if necessary</li>
+      <li>Some databases (e.g., Web of Science, Scopus) have export limits&#x2014;download data in batches if necessary</li>
       <li>Always check the <strong>file format requirements</strong> in the <a href='#'>Info section</a> before exporting from databases</li>
     </ul>
     
@@ -1047,12 +1047,12 @@ helpContent <- function() {
     <ul>
       <li>Select from pre-loaded example datasets covering various research domains</li>
       <li>Ideal for exploring the platform's analytical capabilities</li>
-      <li>No file upload required—start analyzing immediately</li>
+      <li>No file upload required&#x2014;start analyzing immediately</li>
     </ul>
     
     <br>
     
-    <h4>🔍 Post-Import Features</h4>
+    <h4>&#x1F50D; Post-Import Features</h4>
     <p>After successfully importing or loading a collection, you can:</p>
     <ul>
       <li><strong>View Collection Metadata:</strong> Preview document details in a sortable, filterable table</li>
@@ -1063,7 +1063,7 @@ helpContent <- function() {
     
     <br>
     
-    <h4>💾 Exporting Collections</h4>
+    <h4>&#x1F4BE; Exporting Collections</h4>
     <p>Once your collection is loaded, you can export it in multiple formats:</p>
     <ul>
       <li><strong>.rdata</strong>: Recommended for preserving all metadata and R-specific structures</li>
@@ -1072,18 +1072,18 @@ helpContent <- function() {
     
     <br>
     
-    <h4>⚠️ Best Practices</h4>
+    <h4>&#x26A0;&#xFE0F; Best Practices</h4>
     <ul>
       <li><strong>Always save your processed collections</strong> after importing raw files to avoid re-conversion</li>
       <li><strong>Use descriptive filenames</strong> when exporting (e.g., <code>management_wos_1990-2020.rdata</code>)</li>
-      <li><strong>Check conversion results carefully</strong>—some database exports may have formatting issues that require manual correction</li>
+      <li><strong>Check conversion results carefully</strong>&#x2014;some database exports may have formatting issues that require manual correction</li>
       <li><strong>For large collections (>5,000 documents)</strong>, consider applying filters early to improve performance</li>
     </ul>
     
     <br>
     
-    <h4>📚 References</h4>
-    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    <h4>&#x1F4DA; References</h4>
+    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
     </div>
     </body>"
@@ -1092,13 +1092,13 @@ helpContent <- function() {
   api <-
     "<body>
     <div class='container'>
-    <h3>🌐 API: Gathering Data from Bibliographic Databases</h3>
+    <h3>&#x1F310; API: Gathering Data from Bibliographic Databases</h3>
     
     <p>The <strong>API</strong> module enables users to retrieve bibliographic data directly from supported databases using their <strong>Application Programming Interfaces (APIs)</strong>. This feature eliminates the need for manual file downloads and allows for <em>dynamic, reproducible data collection</em> based on custom search queries.</p>
     
     <br>
     
-    <h4>🔌 Supported APIs</h4>
+    <h4>&#x1F50C; Supported APIs</h4>
     <p><strong>Biblioshiny</strong> currently integrates with the following bibliographic database APIs:</p>
     <ul>
       <li><strong>PubMed</strong>: Access to biomedical and life sciences literature via the NCBI Entrez API</li>
@@ -1109,7 +1109,7 @@ helpContent <- function() {
     
     <br>
     
-    <h4>🔧 How to Use the API Module</h4>
+    <h4>&#x1F527; How to Use the API Module</h4>
     <p>The API workflow consists of three main steps:</p>
     
     <h4>Step 1: Configure API Query</h4>
@@ -1123,7 +1123,7 @@ helpContent <- function() {
           <li><strong>Dimensions:</strong> Full-text search across titles, abstracts, and author names</li>
         </ul>
       </li>
-      <li><strong>Start Year / End Year:</strong> Define the temporal range for your query (e.g., 1990–2025)</li>
+      <li><strong>Start Year / End Year:</strong> Define the temporal range for your query (e.g., 1990&#x2013;2025)</li>
       <li><strong>Additional Filters:</strong> Some APIs allow filtering by document type, language, or publication venue</li>
     </ul>
     
@@ -1167,7 +1167,7 @@ helpContent <- function() {
     
     <br>
     
-    <h4>🔑 API Authentication</h4>
+    <h4>&#x1F511; API Authentication</h4>
     <p>Some databases require <strong>API keys</strong> or <strong>institutional access</strong>:</p>
     
     <ul>
@@ -1177,10 +1177,10 @@ helpContent <- function() {
     
     <p>To configure API keys in Biblioshiny, navigate to <strong>Settings</strong> and enter your credentials in the <strong>API Configuration</strong> section.</p>
     
-    <h4>📊 Advantages of API-Based Data Collection</h4>
+    <h4>&#x1F4CA; Advantages of API-Based Data Collection</h4>
     <ul>
       <li><strong>Reproducibility:</strong> Queries can be saved and re-executed to update datasets with new publications</li>
-      <li><strong>Efficiency:</strong> No manual file downloads or conversions—data is ready for analysis immediately</li>
+      <li><strong>Efficiency:</strong> No manual file downloads or conversions&#x2014;data is ready for analysis immediately</li>
       <li><strong>Flexibility:</strong> Combine data from multiple APIs using the <strong>Merge Collections</strong> module</li>
       <li><strong>Up-to-Date Data:</strong> Retrieve the latest publications without waiting for database export files</li>
       <li><strong>Large-Scale Retrieval:</strong> Automate collection of thousands of records with a single query</li>
@@ -1188,20 +1188,20 @@ helpContent <- function() {
     
     <br>
     
-    <h4>⚠️ Important Considerations</h4>
+    <h4>&#x26A0;&#xFE0F; Important Considerations</h4>
     <ul>
       <li><strong>Rate Limits:</strong> Respect API rate limits to avoid temporary bans. Biblioshiny automatically throttles requests, but excessive use may still trigger restrictions</li>
       <li><strong>Metadata Completeness:</strong> API-retrieved data may have fewer metadata fields than manual exports (e.g., PubMed lacks detailed affiliation data)</li>
-      <li><strong>Query Syntax:</strong> Each database has unique query syntax—consult the <a href='#'>Info section</a> for database-specific guidelines</li>
-      <li><strong>Network Stability:</strong> Large queries (>5,000 records) require a stable internet connection—consider splitting into smaller batches if interrupted</li>
+      <li><strong>Query Syntax:</strong> Each database has unique query syntax&#x2014;consult the <a href='#'>Info section</a> for database-specific guidelines</li>
+      <li><strong>Network Stability:</strong> Large queries (>5,000 records) require a stable internet connection&#x2014;consider splitting into smaller batches if interrupted</li>
     </ul>
     
     <br>
     
-    <h4>📚 References</h4>
+    <h4>&#x1F4DA; References</h4>
     <p><strong>Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2023).</strong> <i>openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.</i> <strong>R Journal</strong>, 15(4). <a href='https://doi.org/10.32614/rj-2023-089' target='_blank'>https://doi.org/10.32614/rj-2023-089</a></p>
     
-    <p><strong>NCBI Resource Coordinators. (2018).</strong> <i>Database resources of the National Center for Biotechnology Information.</i> <strong>Nucleic Acids Research</strong>, 46(D1), D8–D13. <a href='https://doi.org/10.1093/nar/gkx1095' target='_blank'>https://doi.org/10.1093/nar/gkx1095</a></p>
+    <p><strong>NCBI Resource Coordinators. (2018).</strong> <i>Database resources of the National Center for Biotechnology Information.</i> <strong>Nucleic Acids Research</strong>, 46(D1), D8&#x2013;D13. <a href='https://doi.org/10.1093/nar/gkx1095' target='_blank'>https://doi.org/10.1093/nar/gkx1095</a></p>
     </div>
     </body>"
 
@@ -1209,23 +1209,23 @@ helpContent <- function() {
   mergeCollections <-
     "<body>
     <div class='container'>
-    <h3>🔀 Merge Collections: Combining Data from Multiple Sources</h3>
+    <h3>&#x1F500; Merge Collections: Combining Data from Multiple Sources</h3>
     
     <p>The <strong>Merge Collections</strong> module allows users to combine bibliographic datasets from different databases (Web of Science, Scopus, OpenAlex, PubMed, etc.) into a single unified collection. This functionality is essential for <strong>comprehensive literature reviews</strong>, <strong>cross-database validation</strong>, and maximizing <strong>metadata coverage</strong> by leveraging the strengths of multiple sources.</p>
     
     <br>
     
-    <h4>🎯 Why Merge Collections?</h4>
+    <h4>&#x1F3AF; Why Merge Collections?</h4>
     <ul>
-      <li><strong>Broader Coverage:</strong> Different databases index different journals and document types—merging increases the comprehensiveness of your dataset</li>
-      <li><strong>Complementary Metadata:</strong> Scopus may provide detailed affiliation data, while Web of Science offers comprehensive citation links—combining them enriches your analysis</li>
+      <li><strong>Broader Coverage:</strong> Different databases index different journals and document types&#x2014;merging increases the comprehensiveness of your dataset</li>
+      <li><strong>Complementary Metadata:</strong> Scopus may provide detailed affiliation data, while Web of Science offers comprehensive citation links&#x2014;combining them enriches your analysis</li>
       <li><strong>Validation:</strong> Cross-referencing records from multiple sources improves data quality and identifies discrepancies</li>
       <li><strong>Deduplication:</strong> Automatically removes duplicate records that appear in multiple databases</li>
     </ul>
     
     <br>
     
-    <h4>🔧 How to Merge Collections</h4>
+    <h4>&#x1F527; How to Merge Collections</h4>
     <p>The merge process in <strong>Biblioshiny</strong> is straightforward:</p>
     
     <ol>
@@ -1250,7 +1250,7 @@ helpContent <- function() {
     
     <br>
     
-    <h4>🔬 Merge Algorithm Overview</h4>
+    <h4>&#x1F52C; Merge Algorithm Overview</h4>
     <p>The merge process follows a sophisticated multi-stage algorithm implemented by the <code>mergeDbSources()</code> function:</p>
     
     <h4>Stage 1: Database Identification and Ordering</h4>
@@ -1288,7 +1288,7 @@ helpContent <- function() {
           <li>Remove all punctuation and special characters</li>
           <li>Convert to lowercase</li>
           <li>Remove extra whitespace</li>
-          <li>Example: 'Science Mapping: A Review' → 'science mapping a review'</li>
+          <li>Example: 'Science Mapping: A Review' &#x2192; 'science mapping a review'</li>
         </ul>
       </li>
       <li><strong>Matching Criterion:</strong> Two documents are duplicates if they have:
@@ -1319,7 +1319,7 @@ helpContent <- function() {
     
     <br>
     
-    <h4>📊 Merge Statistics and Validation</h4>
+    <h4>&#x1F4CA; Merge Statistics and Validation</h4>
     <p>After merging, the system provides detailed statistics:</p>
     <ul>
       <li><strong>Total Documents Before Merge:</strong> Sum of all input collections</li>
@@ -1345,28 +1345,28 @@ helpContent <- function() {
     
     <br>
     
-    <h4>📌 Best Practices</h4>
+    <h4>&#x1F4CC; Best Practices</h4>
     <ul>
       <li><strong>Always enable duplicate removal</strong> unless you have a specific reason to retain duplicates</li>
-      <li><strong>Prioritize Web of Science or Scopus</strong> as the primary source—these databases generally have the most complete metadata</li>
+      <li><strong>Prioritize Web of Science or Scopus</strong> as the primary source&#x2014;these databases generally have the most complete metadata</li>
       <li><strong>Use OpenAlex to supplement coverage</strong> for open-access publications or gray literature</li>
-      <li><strong>Validate merge results</strong> by checking the distribution of <code>DB_Original</code> values—extreme imbalances may indicate incomplete data from one source</li>
+      <li><strong>Validate merge results</strong> by checking the distribution of <code>DB_Original</code> values&#x2014;extreme imbalances may indicate incomplete data from one source</li>
       <li><strong>Save merged collections immediately</strong> to avoid re-processing</li>
     </ul>
     
     <br>
     
-    <h4>⚠️ Important Considerations</h4>
+    <h4>&#x26A0;&#xFE0F; Important Considerations</h4>
     <ul>
-      <li><strong>Citation Data:</strong> Merged collections reset the <code>CR</code> (Cited References) field—you'll need to run <strong>Reference Matching</strong> again after merging</li>
-      <li><strong>Field Coverage:</strong> Some databases provide richer metadata than others—merging doesn't 'fill in' missing fields unless duplicates are detected</li>
-      <li><strong>Large Collections:</strong> Merging collections >10,000 documents may take several minutes—be patient and avoid interrupting the process</li>
-      <li><strong>Database-Specific Analyses:</strong> Some analyses are database-specific—merged collections may lose this granularity</li>
+      <li><strong>Citation Data:</strong> Merged collections reset the <code>CR</code> (Cited References) field&#x2014;you'll need to run <strong>Reference Matching</strong> again after merging</li>
+      <li><strong>Field Coverage:</strong> Some databases provide richer metadata than others&#x2014;merging doesn't 'fill in' missing fields unless duplicates are detected</li>
+      <li><strong>Large Collections:</strong> Merging collections >10,000 documents may take several minutes&#x2014;be patient and avoid interrupting the process</li>
+      <li><strong>Database-Specific Analyses:</strong> Some analyses are database-specific&#x2014;merged collections may lose this granularity</li>
     </ul>
     
     <br>
     
-    <h4>🔍 Example Use Cases</h4>
+    <h4>&#x1F50D; Example Use Cases</h4>
     <ul>
       <li><strong>Systematic Literature Review:</strong> Combine Web of Science, Scopus, and PubMed to ensure no relevant publications are missed</li>
       <li><strong>Open Science Research:</strong> Merge OpenAlex with traditional databases to include preprints and institutional repositories</li>
@@ -1376,13 +1376,13 @@ helpContent <- function() {
     
     <br>
     
-    <h4>📚 References</h4>
-    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    <h4>&#x1F4DA; References</h4>
+    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
     
-    <p><strong>Visser, M., van Eck, N. J., & Waltman, L. (2021).</strong> <i>Large-scale comparison of bibliographic data sources: Scopus, Web of Science, Dimensions, Crossref, and Microsoft Academic.</i> <strong>Quantitative Science Studies</strong>, 2(1), 20–41. <a href='https://doi.org/10.1162/qss_a_00112' target='_blank'>https://doi.org/10.1162/qss_a_00112</a></p>
+    <p><strong>Visser, M., van Eck, N. J., & Waltman, L. (2021).</strong> <i>Large-scale comparison of bibliographic data sources: Scopus, Web of Science, Dimensions, Crossref, and Microsoft Academic.</i> <strong>Quantitative Science Studies</strong>, 2(1), 20&#x2013;41. <a href='https://doi.org/10.1162/qss_a_00112' target='_blank'>https://doi.org/10.1162/qss_a_00112</a></p>
     
-    <p><strong>Martín-Martín, A., Thelwall, M., Orduna-Malea, E., & Delgado López-Cózar, E. (2021).</strong> <i>Google Scholar, Microsoft Academic, Scopus, Dimensions, Web of Science, and OpenCitations' COCI: a multidisciplinary comparison of coverage via citations.</i> <strong>Scientometrics</strong>, 126(1), 871–906. <a href='https://doi.org/10.1007/s11192-020-03690-4' target='_blank'>https://doi.org/10.1007/s11192-020-03690-4</a></p>
+    <p><strong>Mart&#xED;n-Mart&#xED;n, A., Thelwall, M., Orduna-Malea, E., & Delgado L&#xF3;pez-C&#xF3;zar, E. (2021).</strong> <i>Google Scholar, Microsoft Academic, Scopus, Dimensions, Web of Science, and OpenCitations' COCI: a multidisciplinary comparison of coverage via citations.</i> <strong>Scientometrics</strong>, 126(1), 871&#x2013;906. <a href='https://doi.org/10.1007/s11192-020-03690-4' target='_blank'>https://doi.org/10.1007/s11192-020-03690-4</a></p>
     </div>
     </body>"
 
@@ -1390,7 +1390,7 @@ helpContent <- function() {
   mainInformation <-
     "<body>
   <div class='container'>
-  <h3>📊 Main Information: Overview of Your Bibliometric Collection</h3>
+  <h3>&#x1F4CA; Main Information: Overview of Your Bibliometric Collection</h3>
   
   <p>The <strong>Main Information</strong> page provides a comprehensive, at-a-glance summary of the key bibliometric indicators for your collection. This dashboard-style interface displays <strong>12 core metrics</strong> organized into visual cards, allowing you to quickly assess the scope, composition, and characteristics of your dataset.</p>
   
@@ -1398,7 +1398,7 @@ helpContent <- function() {
   
     <br>
     
-  <h4>📈 Core Metrics Explained</h4>
+  <h4>&#x1F4C8; Core Metrics Explained</h4>
   <p>The Main Information dashboard displays the following indicators:</p>
   
   <h4>1. Timespan</h4>
@@ -1423,7 +1423,7 @@ helpContent <- function() {
   <h4>4. Annual Growth Rate</h4>
   <ul>
     <li><strong>Definition:</strong> The average percentage increase in the number of publications per year over the collection's timespan.</li>
-    <li><strong>Formula:</strong> Compound Annual Growth Rate (CAGR) calculated as: <code>[(N_final / N_initial)^(1/years) - 1] × 100</code></li>
+    <li><strong>Formula:</strong> Compound Annual Growth Rate (CAGR) calculated as: <code>[(N_final / N_initial)^(1/years) - 1] &#xD7; 100</code></li>
     <li><strong>Interpretation:</strong> A positive growth rate indicates an <em>expanding research field</em>, while negative or near-zero values suggest maturity or decline. High growth rates (>10%) often signal <strong>emerging topics</strong> attracting increasing scholarly attention.</li>
   </ul>
   
@@ -1478,7 +1478,7 @@ helpContent <- function() {
   
     <br>
     
-  <h4>🧠 Biblio AI Integration</h4>
+  <h4>&#x1F9E0; Biblio AI Integration</h4>
   <p>If <strong>Biblio AI</strong> is enabled, you can click the <strong>Biblio AI</strong> tab to receive an <em>automated narrative summary</em> of these indicators. The AI-generated text provides contextualized interpretations, highlights notable patterns, and offers insights suitable for inclusion in research reports or presentations.</p>
   
   <p><strong>Example AI-generated insights:</strong></p>
@@ -1490,7 +1490,7 @@ helpContent <- function() {
   
     <br>
     
-  <h4>📋 Viewing Options</h4>
+  <h4>&#x1F4CB; Viewing Options</h4>
   <p>The Main Information page offers three viewing modes via tabs at the top:</p>
   <ul>
     <li><strong>Plot:</strong> Visual card-based dashboard (default view) with color-coded metrics</li>
@@ -1500,7 +1500,7 @@ helpContent <- function() {
   
     <br>
     
-  <h4>💡 How to Use Main Information</h4>
+  <h4>&#x1F4A1; How to Use Main Information</h4>
   <p>This section is designed for multiple purposes:</p>
   <ul>
     <li><strong>Initial Data Assessment:</strong> Quickly validate that your collection has been imported correctly and contains the expected number of documents and metadata fields.</li>
@@ -1511,9 +1511,9 @@ helpContent <- function() {
   
     <br>
     
-  <h4>📌 Best Practices</h4>
+  <h4>&#x1F4CC; Best Practices</h4>
   <ul>
-    <li><strong>Always review Main Information first</strong> before proceeding to advanced analyses—it helps identify potential data quality issues (e.g., missing years, incomplete author data).</li>
+    <li><strong>Always review Main Information first</strong> before proceeding to advanced analyses&#x2014;it helps identify potential data quality issues (e.g., missing years, incomplete author data).</li>
     <li><strong>Compare with field benchmarks:</strong> Contextualize your indicators by comparing them with known norms for your discipline (e.g., citation rates, collaboration patterns).</li>
     <li><strong>Document your collection:</strong> Use the 'Brief Description' text box (visible in the Import/Load section) to record search queries, inclusion criteria, and data sources for reproducibility.</li>
     <li><strong>Export summary statistics:</strong> Save the table view as a reference for your research documentation or supplementary materials.</li>
@@ -1521,7 +1521,7 @@ helpContent <- function() {
   
     <br>
     
-  <h4>⚠️ Important Considerations</h4>
+  <h4>&#x26A0;&#xFE0F; Important Considerations</h4>
   <ul>
     <li><strong>Database Bias:</strong> Indicators reflect the coverage and indexing policies of the source database(s). Web of Science and Scopus have different journal lists, which affects metrics like citation counts and international co-authorship.</li>
     <li><strong>Citation Lag:</strong> Recent documents (<2 years old) typically have lower citation counts due to insufficient time for accumulation. Average citations per document may be biased downward if your collection includes many recent papers.</li>
@@ -1531,7 +1531,7 @@ helpContent <- function() {
   
     <br>
     
-  <h4>🔍 Next Steps</h4>
+  <h4>&#x1F50D; Next Steps</h4>
   <p>After reviewing the Main Information dashboard, proceed to more detailed analyses:</p>
   <ul>
     <li><strong>Filters:</strong> Refine your collection by applying metadata filters (e.g., document type, time range, subject category)</li>
@@ -1543,11 +1543,11 @@ helpContent <- function() {
   
     <br>
     
-  <h4>📚 References</h4>
-  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <h4>&#x1F4DA; References</h4>
+  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
   
-  <p><strong>Zupic, I., & Čater, T. (2015).</strong> <i>Bibliometric methods in management and organization.</i> <strong>Organizational Research Methods</strong>, 18(3), 429–472. <a href='https://doi.org/10.1177/1094428114562629' target='_blank'>https://doi.org/10.1177/1094428114562629</a></p>
+  <p><strong>Zupic, I., & &#x10C;ater, T. (2015).</strong> <i>Bibliometric methods in management and organization.</i> <strong>Organizational Research Methods</strong>, 18(3), 429&#x2013;472. <a href='https://doi.org/10.1177/1094428114562629' target='_blank'>https://doi.org/10.1177/1094428114562629</a></p>
   </div>
   </body>"
 
@@ -1555,7 +1555,7 @@ helpContent <- function() {
   lifeCycle <-
     "<body>
   <div class='container'>
-  <h3>📈 Life Cycle of Scientific Production: Modeling Research Topic Evolution</h3>
+  <h3>&#x1F4C8; Life Cycle of Scientific Production: Modeling Research Topic Evolution</h3>
   
   <p>The <strong>Life Cycle of Scientific Production</strong> module implements a <strong>logistic growth model</strong> to analyze the temporal dynamics of research topics. This approach, grounded in the theory of <em>scientific paradigms</em> and <em>innovation diffusion</em>, allows researchers to identify the current developmental stage of a field, predict future trends, and estimate when a topic will reach maturity or saturation.</p>
   
@@ -1563,12 +1563,12 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📐 The Logistic Growth Model</h4>
+  <h4>&#x1F4D0; The Logistic Growth Model</h4>
   <p>The life cycle analysis is based on the <strong>logistic growth function</strong>, which models how the cumulative number of publications evolves over time:</p>
   
   <p><strong>Formula:</strong></p>
   <code>
-  P(t) = K / (1 + exp(-b(t - t₀)))
+  P(t) = K / (1 + exp(-b(t - t&#x2080;)))
   </code>
   
   <p>Where:</p>
@@ -1576,14 +1576,14 @@ helpContent <- function() {
     <li><strong>P(t)</strong>: Cumulative number of publications at time <code>t</code></li>
     <li><strong>K</strong>: Saturation level (maximum total publications the topic will produce)</li>
     <li><strong>b</strong>: Growth rate parameter (determines the steepness of the curve)</li>
-    <li><strong>t₀</strong>: Inflection point (time when growth rate is highest)</li>
+    <li><strong>t&#x2080;</strong>: Inflection point (time when growth rate is highest)</li>
   </ul>
   
   <p>The <strong>annual publication rate</strong> is derived as the first derivative of P(t), producing a bell-shaped curve that peaks at the inflection point and gradually declines as the topic approaches saturation.</p>
   
   <br>
   
-  <h4>🔬 Model Overview: Key Parameters</h4>
+  <h4>&#x1F52C; Model Overview: Key Parameters</h4>
   <p>The <strong>Model Overview</strong> section displays four fundamental indicators derived from the fitted logistic model:</p>
   
   <h4>1. Saturation (K)</h4>
@@ -1619,7 +1619,7 @@ helpContent <- function() {
     <li><strong>Example:</strong> Peak Annual = 592 pubs/year means the topic will generate approximately 592 publications annually at its zenith.</li>
   </ul>
   
-  <h4>4. Growth Duration (Δ<sub>t</sub>)</h4>
+  <h4>4. Growth Duration (&#x394;<sub>t</sub>)</h4>
   <ul>
     <li><strong>Definition:</strong> The estimated time span (in years) from the topic's emergence (10% of K) to near-saturation (90% of K).</li>
     <li><strong>Interpretation:</strong>
@@ -1634,20 +1634,20 @@ helpContent <- function() {
   
   <br>
   
-  <h4>✅ Model Fit Quality</h4>
+  <h4>&#x2705; Model Fit Quality</h4>
   <p>The <strong>Model Fit Quality</strong> section assesses how well the logistic curve fits the observed publication data using four statistical metrics:</p>
   
-  <h4>1. R² (Coefficient of Determination)</h4>
+  <h4>1. R&#xB2; (Coefficient of Determination)</h4>
   <ul>
     <li><strong>Range:</strong> 0 to 1 (higher is better)</li>
     <li><strong>Interpretation:</strong> Proportion of variance in publication counts explained by the model.
       <ul>
-        <li><strong>R² > 0.90:</strong> Excellent fit—the logistic model accurately captures the publication trend.</li>
-        <li><strong>0.70 < R² < 0.90:</strong> Good fit—the model is reasonable but may not capture all nuances (e.g., fluctuations due to external events).</li>
-        <li><strong>R² < 0.70:</strong> Poor fit—the logistic model may not be appropriate for this dataset (non-logistic growth pattern, data quality issues).</li>
+        <li><strong>R&#xB2; > 0.90:</strong> Excellent fit&#x2014;the logistic model accurately captures the publication trend.</li>
+        <li><strong>0.70 < R&#xB2; < 0.90:</strong> Good fit&#x2014;the model is reasonable but may not capture all nuances (e.g., fluctuations due to external events).</li>
+        <li><strong>R&#xB2; < 0.70:</strong> Poor fit&#x2014;the logistic model may not be appropriate for this dataset (non-logistic growth pattern, data quality issues).</li>
       </ul>
     </li>
-    <li><strong>Example:</strong> R² = 0.953 indicates an excellent fit, with 95.3% of publication variance explained by the model.</li>
+    <li><strong>Example:</strong> R&#xB2; = 0.953 indicates an excellent fit, with 95.3% of publication variance explained by the model.</li>
   </ul>
   
   <h4>2. RMSE (Root Mean Squared Error)</h4>
@@ -1668,11 +1668,11 @@ helpContent <- function() {
     <li><strong>Interpretation:</strong> Lower BIC values indicate better models. BIC is more conservative than AIC and favors simpler models.</li>
   </ul>
   
-  <p><strong>Overall Assessment:</strong> Biblioshiny automatically classifies model fit as <strong>Excellent</strong>, <strong>Good</strong>, or <strong>Poor</strong> based primarily on R² values. An 'Excellent' fit (R² > 0.90) validates the use of logistic growth assumptions for forecasting.</p>
+  <p><strong>Overall Assessment:</strong> Biblioshiny automatically classifies model fit as <strong>Excellent</strong>, <strong>Good</strong>, or <strong>Poor</strong> based primarily on R&#xB2; values. An 'Excellent' fit (R&#xB2; > 0.90) validates the use of logistic growth assumptions for forecasting.</p>
   
   <br>
   
-  <h4>📍 Current Status</h4>
+  <h4>&#x1F4CD; Current Status</h4>
   <p>This section provides a snapshot of the topic's present state relative to its life cycle trajectory:</p>
   
   <ul>
@@ -1693,14 +1693,14 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🏁 Milestone Years</h4>
+  <h4>&#x1F3C1; Milestone Years</h4>
   <p>The <strong>Milestone Years</strong> section predicts when the topic will reach specific saturation thresholds:</p>
   
   <ul>
-    <li><strong>10% of K:</strong> Emergence milestone—marks the topic's transition from niche to recognized research area.</li>
+    <li><strong>10% of K:</strong> Emergence milestone&#x2014;marks the topic's transition from niche to recognized research area.</li>
     <li><strong>50% of K (Midpoint):</strong> The inflection point where growth rate is highest. This coincides with the Peak Year (T<sub>m</sub>).</li>
-    <li><strong>90% of K:</strong> Maturity milestone—indicates the topic is approaching saturation, with declining annual growth.</li>
-    <li><strong>99% of K:</strong> Near-complete saturation—the topic has exhausted most of its research potential.</li>
+    <li><strong>90% of K:</strong> Maturity milestone&#x2014;indicates the topic is approaching saturation, with declining annual growth.</li>
+    <li><strong>99% of K:</strong> Near-complete saturation&#x2014;the topic has exhausted most of its research potential.</li>
   </ul>
   
   <p><strong>Example:</strong></p>
@@ -1717,7 +1717,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🚀 Forecast</h4>
+  <h4>&#x1F680; Forecast</h4>
   <p>The <strong>Forecast</strong> section projects future publication output based on the fitted logistic model:</p>
   
   <ul>
@@ -1738,7 +1738,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📊 Visualizations</h4>
+  <h4>&#x1F4CA; Visualizations</h4>
   <p>The <strong>Plot</strong> tab provides two complementary graphs:</p>
   
   <h4>1. Life Cycle - Annual Publications</h4>
@@ -1773,7 +1773,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🧠 Biblio AI Integration</h4>
+  <h4>&#x1F9E0; Biblio AI Integration</h4>
   <p>The <strong>Biblio AI</strong> tab allows you to generate AI-powered narrative interpretations of the life cycle analysis. Key features include:</p>
   
   <ul>
@@ -1789,21 +1789,21 @@ helpContent <- function() {
   
   <p>This contextual information helps Biblio AI produce more accurate and domain-relevant interpretations.</p>
   
-  <h4>💡 Use Cases</h4>
+  <h4>&#x1F4A1; Use Cases</h4>
   <ul>
     <li><strong>Identifying Emerging Topics:</strong> Detect rapidly growing fields in their early stages (10-30% of K) for strategic research investment.</li>
     <li><strong>Timing Research Entry:</strong> Avoid entering saturated fields (>90% of K) where novelty is harder to achieve.</li>
     <li><strong>Forecasting Resource Needs:</strong> Predict future publication volumes to plan journal submissions, conferences, or funding opportunities.</li>
     <li><strong>Comparative Life Cycle Analysis:</strong> Run the analysis on multiple subtopics to identify which are growing vs. declining.</li>
-    <li><strong>Paradigm Shift Detection:</strong> Poor model fit (R² < 0.70) may signal non-logistic patterns caused by disruptive innovations or paradigm shifts.</li>
+    <li><strong>Paradigm Shift Detection:</strong> Poor model fit (R&#xB2; < 0.70) may signal non-logistic patterns caused by disruptive innovations or paradigm shifts.</li>
   </ul>
   
   <br>
   
-  <h4>📌 Best Practices</h4>
+  <h4>&#x1F4CC; Best Practices</h4>
   <ul>
     <li><strong>Ensure sufficient data:</strong> Logistic models require at least 10-15 years of publication data for reliable fitting. Collections with <10 years may produce unstable forecasts.</li>
-    <li><strong>Check model fit:</strong> Always review R² and visual fit before interpreting forecasts. Poor fits (R² < 0.70) indicate the logistic model may not be appropriate.</li>
+    <li><strong>Check model fit:</strong> Always review R&#xB2; and visual fit before interpreting forecasts. Poor fits (R&#xB2; < 0.70) indicate the logistic model may not be appropriate.</li>
     <li><strong>Consider external events:</strong> The model assumes smooth, uninterrupted growth. Real-world shocks (e.g., pandemics, funding cuts, technological breakthroughs) can invalidate long-term forecasts.</li>
     <li><strong>Use relative comparisons:</strong> Life cycle parameters (K, Peak Year) are most informative when comparing multiple topics or time periods within the same field.</li>
     <li><strong>Validate forecasts periodically:</strong> Re-run the analysis with updated data every 2-3 years to recalibrate predictions.</li>
@@ -1811,7 +1811,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>⚠️ Important Considerations</h4>
+  <h4>&#x26A0;&#xFE0F; Important Considerations</h4>
   <ul>
     <li><strong>Database Coverage:</strong> The model reflects only publications indexed in your source database(s). Incomplete coverage (e.g., missing journals, preprints) can distort saturation estimates.</li>
     <li><strong>Definition Drift:</strong> Topic boundaries may shift over time (e.g., 'artificial intelligence' in 1990 vs. 2020), affecting the validity of K estimates.</li>
@@ -1822,8 +1822,8 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🔍 Interpreting Fit Quality Issues</h4>
-  <p>If your model shows poor fit (R² < 0.70), consider these potential causes:</p>
+  <h4>&#x1F50D; Interpreting Fit Quality Issues</h4>
+  <p>If your model shows poor fit (R&#xB2; < 0.70), consider these potential causes:</p>
   <ul>
     <li><strong>Insufficient Data:</strong> Too few years or highly irregular publication patterns.</li>
     <li><strong>Non-Logistic Growth:</strong> The topic may exhibit exponential, linear, or cyclic growth rather than logistic.</li>
@@ -1836,16 +1836,16 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📚 References</h4>
-  <p><strong>Aria, M., Misuraca, M., & Spano, M. (2020).</strong> <i>Mapping the evolution of social research and data science on 30 years of Social Indicators Research.</i> <strong>Social Indicators Research</strong>, 149, 803–831. <a href='https://doi.org/10.1007/s11205-020-02281-3' target='_blank'>https://doi.org/10.1007/s11205-020-02281-3</a></p>
+  <h4>&#x1F4DA; References</h4>
+  <p><strong>Aria, M., Misuraca, M., & Spano, M. (2020).</strong> <i>Mapping the evolution of social research and data science on 30 years of Social Indicators Research.</i> <strong>Social Indicators Research</strong>, 149, 803&#x2013;831. <a href='https://doi.org/10.1007/s11205-020-02281-3' target='_blank'>https://doi.org/10.1007/s11205-020-02281-3</a></p>
   
-  <p><strong>Bettencourt, L. M., Kaiser, D. I., & Kaur, J. (2009).</strong> <i>Scientific discovery and topological transitions in collaboration networks.</i> <strong>Journal of Informetrics</strong>, 3(3), 210–221. <a href='https://doi.org/10.1016/j.joi.2009.03.001' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.001</a></p>
+  <p><strong>Bettencourt, L. M., Kaiser, D. I., & Kaur, J. (2009).</strong> <i>Scientific discovery and topological transitions in collaboration networks.</i> <strong>Journal of Informetrics</strong>, 3(3), 210&#x2013;221. <a href='https://doi.org/10.1016/j.joi.2009.03.001' target='_blank'>https://doi.org/10.1016/j.joi.2009.03.001</a></p>
   
   <p><strong>Rogers, E. M. (2003).</strong> <i>Diffusion of Innovations</i> (5th ed.). New York: Free Press.</p>
   
-  <p><strong>Small, H., & Upham, S. P. (2009).</strong> <i>Citation structure of an emerging research area on the verge of application.</i> <strong>Scientometrics</strong>, 79(2), 365–375. <a href='https://doi.org/10.1007/s11192-009-0424-0' target='_blank'>https://doi.org/10.1007/s11192-009-0424-0</a></p>
+  <p><strong>Small, H., & Upham, S. P. (2009).</strong> <i>Citation structure of an emerging research area on the verge of application.</i> <strong>Scientometrics</strong>, 79(2), 365&#x2013;375. <a href='https://doi.org/10.1007/s11192-009-0424-0' target='_blank'>https://doi.org/10.1007/s11192-009-0424-0</a></p>
   
-  <p><strong>Wang, Q. (2018).</strong> <i>A bibliometric model for identifying emerging research topics.</i> <strong>Journal of the Association for Information Science and Technology</strong>, 69(2), 290–304. <a href='https://doi.org/10.1002/asi.23930' target='_blank'>https://doi.org/10.1002/asi.23930</a></p>
+  <p><strong>Wang, Q. (2018).</strong> <i>A bibliometric model for identifying emerging research topics.</i> <strong>Journal of the Association for Information Science and Technology</strong>, 69(2), 290&#x2013;304. <a href='https://doi.org/10.1002/asi.23930' target='_blank'>https://doi.org/10.1002/asi.23930</a></p>
   </div>
   </body>"
 
@@ -1853,11 +1853,11 @@ helpContent <- function() {
   threeFieldPlot <-
     "<body>
     <div class='container'>
-    <h3>🔀 Three-Field Plot</h3>
+    <h3>&#x1F500; Three-Field Plot</h3>
     
     <p>The <strong>Three-Field Plot</strong> is an advanced visualization tool that reveals the relationships among three distinct bibliographic dimensions through an interactive <strong>Sankey diagram</strong>. This plot enables researchers to explore the complex connections between different metadata fields, making it particularly useful for understanding how research topics, authors, sources, and references are interconnected within a scientific domain.</p>
     
-    <h4>🎯 Purpose and Application</h4>
+    <h4>&#x1F3AF; Purpose and Application</h4>
     <p>The Three-Field Plot serves multiple analytical purposes:</p>
     <ul>
       <li><strong>Relationship Mapping:</strong> Visualizes how elements from three different bibliographic fields are associated with each other</li>
@@ -1866,7 +1866,7 @@ helpContent <- function() {
       <li><strong>Author-Topic Associations:</strong> Shows which authors are working on which topics and citing which foundational works</li>
     </ul>
     
-    <h4>📊 How It Works</h4>
+    <h4>&#x1F4CA; How It Works</h4>
     <p>The visualization consists of three vertical columns representing different bibliographic fields:</p>
     <ul>
       <li><strong>Left Field:</strong> Typically represents sources (cited references, journals) or temporal information</li>
@@ -1876,7 +1876,7 @@ helpContent <- function() {
     
     <p>The width of each flow (colored band) is proportional to the frequency of co-occurrence between elements. Thicker flows indicate stronger associations, while thinner ones represent weaker connections.</p>
     
-    <h4>⚙️ Configuration Options</h4>
+    <h4>&#x2699;&#xFE0F; Configuration Options</h4>
     <p>The <strong>Options</strong> panel allows you to customize the plot:</p>
     <ul>
       <li><strong>Left Field:</strong> Select from available metadata fields (e.g., Cited References, Sources, Authors' Countries)</li>
@@ -1885,17 +1885,17 @@ helpContent <- function() {
       <li><strong>Number of Items:</strong> Control how many top elements to display for each field (typically 10-30 items per field)</li>
     </ul>
     
-    <h4>💡 Common Field Combinations</h4>
+    <h4>&#x1F4A1; Common Field Combinations</h4>
     <p>Some particularly insightful field combinations include:</p>
     <ul>
-      <li><strong>References → Authors → Keywords:</strong> Shows which foundational works are cited by which authors working on which topics</li>
-      <li><strong>Sources → Authors → Countries:</strong> Maps the geographical distribution of authors publishing in specific journals</li>
-      <li><strong>Keywords → Authors → Cited References:</strong> Reveals the intellectual foundations of different research themes</li>
-      <li><strong>Authors' Countries → Authors → Keywords:</strong> Identifies national research specializations and thematic focuses</li>
-      <li><strong>Publication Year → Authors → Keywords:</strong> Tracks temporal evolution of author productivity and topic emergence</li>
+      <li><strong>References &#x2192; Authors &#x2192; Keywords:</strong> Shows which foundational works are cited by which authors working on which topics</li>
+      <li><strong>Sources &#x2192; Authors &#x2192; Countries:</strong> Maps the geographical distribution of authors publishing in specific journals</li>
+      <li><strong>Keywords &#x2192; Authors &#x2192; Cited References:</strong> Reveals the intellectual foundations of different research themes</li>
+      <li><strong>Authors' Countries &#x2192; Authors &#x2192; Keywords:</strong> Identifies national research specializations and thematic focuses</li>
+      <li><strong>Publication Year &#x2192; Authors &#x2192; Keywords:</strong> Tracks temporal evolution of author productivity and topic emergence</li>
     </ul>
     
-    <h4>🔍 Interpretation Guidelines</h4>
+    <h4>&#x1F50D; Interpretation Guidelines</h4>
     <ul>
       <li><strong>Flow Thickness:</strong> A thick flow between two elements indicates a strong association (high co-occurrence frequency)</li>
       <li><strong>Multiple Connections:</strong> Elements with many outgoing or incoming flows are central nodes in the network</li>
@@ -1904,17 +1904,17 @@ helpContent <- function() {
       <li><strong>Cross-field Patterns:</strong> Look for patterns where multiple elements from one field connect to the same element in another field, indicating convergence or interdisciplinarity</li>
     </ul>
     
-    <h4>📌 Best Practices</h4>
+    <h4>&#x1F4CC; Best Practices</h4>
     <ul>
       <li><strong>Start Simple:</strong> Begin with a small number of items (10-15 per field) to avoid visual clutter, then increase if needed</li>
-      <li><strong>Logical Sequences:</strong> Arrange fields in a logical flow (e.g., past → present, source → output, context → content)</li>
+      <li><strong>Logical Sequences:</strong> Arrange fields in a logical flow (e.g., past &#x2192; present, source &#x2192; output, context &#x2192; content)</li>
       <li><strong>Interactive Exploration:</strong> Hover over flows and nodes to see exact frequencies and connections</li>
       <li><strong>Export Results:</strong> Use the plot in presentations to illustrate complex relationships in an accessible way</li>
       <li><strong>Combine with Networks:</strong> Use Three-Field Plots alongside network analyses for complementary perspectives on your data</li>
       <li><strong>Context Matters:</strong> Always interpret the plot in the context of your research question and domain knowledge</li>
     </ul>
     
-    <h4>⚠️ Limitations</h4>
+    <h4>&#x26A0;&#xFE0F; Limitations</h4>
     <ul>
       <li><strong>Aggregation Effects:</strong> The plot shows aggregate patterns and may obscure individual document-level details</li>
       <li><strong>Top-N Selection:</strong> Only the most frequent items are displayed; rare but potentially important connections may be hidden</li>
@@ -1922,7 +1922,7 @@ helpContent <- function() {
       <li><strong>Visual Complexity:</strong> With too many items, the plot can become difficult to interpret; reduce the number of items if necessary</li>
     </ul>
     
-    <h4>🤖 Biblio AI Integration</h4>
+    <h4>&#x1F916; Biblio AI Integration</h4>
     <p>When <strong>Biblio AI</strong> is enabled, you can generate automatic interpretations of the Three-Field Plot. The AI will:</p>
     <ul>
       <li>Identify the most important flows and connections</li>
@@ -1931,11 +1931,11 @@ helpContent <- function() {
       <li>Suggest potential interpretations based on the observed patterns</li>
     </ul>
     
-    <h4>📚 Key References</h4>
-    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    <h4>&#x1F4DA; Key References</h4>
+    <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
     
-    <p><strong>Chen, C. (2017).</strong> <i>Science Mapping: A Systematic Review of the Literature.</i> <strong>Journal of Data and Information Science</strong>, 2(2), 1–40. <a href='https://doi.org/10.1515/jdis-2017-0006' target='_blank'>https://doi.org/10.1515/jdis-2017-0006</a></p>
+    <p><strong>Chen, C. (2017).</strong> <i>Science Mapping: A Systematic Review of the Literature.</i> <strong>Journal of Data and Information Science</strong>, 2(2), 1&#x2013;40. <a href='https://doi.org/10.1515/jdis-2017-0006' target='_blank'>https://doi.org/10.1515/jdis-2017-0006</a></p>
     
     </div>
     </body>"
@@ -1944,7 +1944,7 @@ helpContent <- function() {
   contentAnalysis <-
     "<body>
   <div class='container'>
-  <h3>📄 Scientific Article Content Analysis</h3>
+  <h3>&#x1F4C4; Scientific Article Content Analysis</h3>
   
   <p><strong>Content Analysis</strong> is a specialized feature in <em>Biblioshiny</em> that enables researchers to perform deep, AI-enhanced analysis of individual scientific articles in PDF format. This tool goes beyond traditional bibliometric analysis by examining the full text of documents, extracting citations with their surrounding context, and revealing patterns in how research is cited and discussed within scholarly narratives.</p>
   
@@ -1960,7 +1960,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🎯 Purpose and Applications</h4>
+  <h4>&#x1F3AF; Purpose and Applications</h4>
   <p><strong>Content Analysis</strong> is particularly valuable for:</p>
   <ul>
     <li><strong>Understanding Citation Context:</strong> Examining how and where references are cited within a paper, distinguishing between peripheral mentions and substantive discussions.</li>
@@ -1973,14 +1973,14 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📥 Step 1: Import PDF File</h4>
+  <h4>&#x1F4E5; Step 1: Import PDF File</h4>
   <p>The analysis begins by uploading a scientific article in PDF format. The system supports both single-column and multi-column layouts (specify the number of columns for accurate text extraction).</p>
   
   <p><strong>Citation Format Detection:</strong> The tool uses AI-enhanced extraction to identify citations in multiple formats:</p>
   <ul>
     <li><strong>Author-year format:</strong> (Smith, 2020) or Smith et al. (2015)</li>
     <li><strong>Numeric brackets:</strong> [1] or [15-17]</li>
-    <li><strong>Numeric superscripts:</strong> ¹ or ²³</li>
+    <li><strong>Numeric superscripts:</strong> &#xB9; or &#xB2;&#xB3;</li>
     <li><strong>Mixed formats:</strong> The system can handle documents with inconsistent citation styles (though results may be less reliable)</li>
   </ul>
   
@@ -1996,7 +1996,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>⚙️ Step 2: Analysis Parameters</h4>
+  <h4>&#x2699;&#xFE0F; Step 2: Analysis Parameters</h4>
   <p>Users can customize the extraction and analysis through several key parameters:</p>
   
   <h5>Context Window Size (words)</h5>
@@ -2024,11 +2024,11 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📊 Analysis Results and Tabs</h4>
+  <h4>&#x1F4CA; Analysis Results and Tabs</h4>
   
   <br>
   
-  <h5>1️⃣ Descriptive Statistics</h5>
+  <h5>1&#xFE0F;&#x20E3; Descriptive Statistics</h5>
   <p>Provides an overview of the document's structural and linguistic characteristics:</p>
   
   <p><strong>Document Metrics:</strong></p>
@@ -2066,7 +2066,7 @@ helpContent <- function() {
   
   <br>
   
-  <h5>2️⃣ Word Trends</h5>
+  <h5>2&#xFE0F;&#x20E3; Word Trends</h5>
   <p>Visualizes how selected terms are distributed across the document's sections. This analysis helps understand the <em>thematic flow</em> and identify where specific concepts are emphasized.</p>
   
   <p><strong>Features:</strong></p>
@@ -2099,7 +2099,7 @@ helpContent <- function() {
   
   <br>
   
-  <h5>3️⃣ In-Context Citations</h5>
+  <h5>3&#xFE0F;&#x20E3; In-Context Citations</h5>
   <p>Displays each extracted citation with its surrounding context window, enabling <strong>qualitative citation analysis</strong>. This is one of the most powerful features for understanding <em>why</em> and <em>how</em> sources are cited.</p>
   
   <p><strong>Features:</strong></p>
@@ -2134,7 +2134,7 @@ helpContent <- function() {
   
   <br>
   
-  <h5>4️⃣ Network Analysis</h5>
+  <h5>4&#xFE0F;&#x20E3; Network Analysis</h5>
   <p>Generates a <strong>citation co-occurrence network</strong> that visualizes which references are cited near each other in the text. This reveals the intellectual structure and conceptual clusters within the paper.</p>
   
   <p><strong>Network Construction:</strong></p>
@@ -2166,7 +2166,7 @@ helpContent <- function() {
   
   <br>
   
-  <h5>5️⃣ References</h5>
+  <h5>5&#xFE0F;&#x20E3; References</h5>
   <p>Displays the complete <strong>bibliography</strong> extracted from the document. References are automatically parsed and enriched with metadata from <strong>Crossref</strong> and <strong>OpenAlex</strong> databases when DOIs are available.</p>
   
   <p><strong>Features:</strong></p>
@@ -2216,7 +2216,7 @@ helpContent <- function() {
   
   <br>
   
-  <h5>6️⃣ BiblioAI Summary</h5>
+  <h5>6&#xFE0F;&#x20E3; BiblioAI Summary</h5>
   <p>Uses <strong>Google Gemini</strong> AI models to generate intelligent, context-aware summaries of the analyzed document. This feature transforms raw PDF content into structured, actionable insights.</p>
   
   <p><strong>Summary Types:</strong></p>
@@ -2279,7 +2279,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🧠 Integration with Biblio AI</h4>
+  <h4>&#x1F9E0; Integration with Biblio AI</h4>
   <p><strong>Content Analysis</strong> is fully integrated with the <strong>Biblio AI</strong> ecosystem. Throughout the analysis tabs, users can activate AI-assisted interpretation panels that:</p>
   <ul>
     <li>Explain patterns in the citation network (e.g., why certain clusters form)</li>
@@ -2292,7 +2292,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>💡 Advanced Use Cases</h4>
+  <h4>&#x1F4A1; Advanced Use Cases</h4>
   
   <h5>1. Citation Context Mining for Meta-Research</h5>
   <p>Researchers studying citation practices can use Content Analysis to:</p>
@@ -2340,19 +2340,19 @@ helpContent <- function() {
   
   <br>
   
-  <h4>📌 Best Practices</h4>
+  <h4>&#x1F4CC; Best Practices</h4>
   <ul>
     <li><strong>PDF Quality Matters:</strong> Text-based PDFs (not scanned images) produce the most accurate results. Use OCR pre-processing for image-based PDFs.</li>
     <li><strong>Check Citation Parsing:</strong> Always review the 'Citations Found' count. If it seems unusually low, try enabling AI-enhanced extraction or manually specifying the citation format.</li>
     <li><strong>Balance Context Windows:</strong> Larger windows provide richer qualitative data but increase processing time and data volume. Start with default settings (20 words) and adjust based on your analytical needs.</li>
     <li><strong>Export for Deep Dives:</strong> For complex citation function analysis or qualitative coding, export the citation contexts to CSV and work with specialized qualitative data analysis software.</li>
-    <li><strong>Combine with Traditional Bibliometrics:</strong> Content Analysis is designed to complement, not replace, traditional bibliometric methods. Use it alongside tools like <em>Data → Overview</em> or <em>Conceptual Structure</em> for a complete picture.</li>
+    <li><strong>Combine with Traditional Bibliometrics:</strong> Content Analysis is designed to complement, not replace, traditional bibliometric methods. Use it alongside tools like <em>Data &#x2192; Overview</em> or <em>Conceptual Structure</em> for a complete picture.</li>
     <li><strong>Mind the Model Limits:</strong> AI-powered features (enhanced extraction, BiblioAI summaries) have rate limits and token constraints. For very long documents (>50 pages), summaries may truncate; consider analyzing sections separately.</li>
   </ul>
   
   <br>
   
-  <h4>⚠️ Limitations and Considerations</h4>
+  <h4>&#x26A0;&#xFE0F; Limitations and Considerations</h4>
   <ul>
     <li><strong>Citation Format Variability:</strong> Non-standard or inconsistent citation formats may result in incomplete extraction. Manual verification is recommended for critical analyses.</li>
     <li><strong>Automatic Section Detection:</strong> The system attempts to identify standard sections (Introduction, Methods, etc.) using heuristics. Papers with unconventional structures may be segmented incorrectly. Use 'Equal-length segments' as a fallback.</li>
@@ -2365,31 +2365,31 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🔄 Integration with Biblioshiny Workflow</h4>
+  <h4>&#x1F504; Integration with Biblioshiny Workflow</h4>
   <p><strong>Content Analysis</strong> complements other Biblioshiny modules:</p>
   <ul>
     <li><strong>Import Phase:</strong> After collecting a bibliographic dataset (e.g., from Web of Science), use Content Analysis to deeply examine a few key highly-cited papers identified in <em>Most Local Cited Documents</em>.</li>
     <li><strong>Conceptual Structure Analysis:</strong> Once you've identified thematic clusters using co-word analysis or MCA, select representative papers from each cluster and use Content Analysis to understand how those themes are discussed and cited within individual papers.</li>
-    <li><strong>Intellectual Structure:</strong> After running co-citation or bibliographic coupling networks, use Content Analysis on the central nodes to see <em>why</em> they're central—are they cited together because they address the same method, theory, or empirical finding?</li>
+    <li><strong>Intellectual Structure:</strong> After running co-citation or bibliographic coupling networks, use Content Analysis on the central nodes to see <em>why</em> they're central&#x2014;are they cited together because they address the same method, theory, or empirical finding?</li>
     <li><strong>Trend Topics:</strong> When you identify an emerging trend, analyze a seminal paper from that trend to understand its intellectual roots and citation context.</li>
   </ul>
   
   <br>
   
-  <h4>📚 Key References</h4>
+  <h4>&#x1F4DA; Key References</h4>
   
   <p><strong>Main References on Bibliometrix and Content Analysis Tools:</strong></p>
   	
   <p><strong>Aria, M., & Cuccurullo, C. (2025).</strong> <i>contentanalysis: Scientific Content and Citation Analysis from PDF Documents.</i> <strong>[R package]</strong>. <a href='https://doi.org/10.32614/CRAN.package.contentanalysis' target='_blank'>https://doi.org/10.32614/CRAN.package.contentanalysis</a></p>
   
-  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959–975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
   
   <p><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2024).</strong> <i>Comparative science mapping: a novel conceptual structure analysis with metadata.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-024-05161-6' target='_blank'>https://doi.org/10.1007/s11192-024-05161-6</a></p>
   
   <p><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2022).</strong> <i>Thematic Analysis as a New Culturomic Tool: The Social Media Coverage on COVID-19 Pandemic in Italy.</i> <strong>Sustainability</strong>, 14(6), 3643. <a href='https://doi.org/10.3390/su14063643' target='_blank'>https://doi.org/10.3390/su14063643</a></p>
   
-  <p><strong>Aria, M., Misuraca, M., & Spano, M. (2020).</strong> <i>Mapping the evolution of social research and data science on 30 years of Social Indicators Research.</i> <strong>Social Indicators Research</strong>, 149, 803–831. <a href='https://doi.org/10.1007/s11205-020-02281-3' target='_blank'>https://doi.org/10.1007/s11205-020-02281-3</a></p>
+  <p><strong>Aria, M., Misuraca, M., & Spano, M. (2020).</strong> <i>Mapping the evolution of social research and data science on 30 years of Social Indicators Research.</i> <strong>Social Indicators Research</strong>, 149, 803&#x2013;831. <a href='https://doi.org/10.1007/s11205-020-02281-3' target='_blank'>https://doi.org/10.1007/s11205-020-02281-3</a></p>
   
   <br>
   
@@ -2405,7 +2405,7 @@ helpContent <- function() {
   
   <br>
   
-  <h4>🎓 Further Reading</h4>
+  <h4>&#x1F393; Further Reading</h4>
   <p>For more information on using Content Analysis and related techniques, see:</p>
   <ul>
     <li><strong>bibliometrix documentation:</strong> <a href='https://www.bibliometrix.org' target='_blank'>https://www.bibliometrix.org</a></li>

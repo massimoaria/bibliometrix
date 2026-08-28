@@ -60,7 +60,7 @@ header <- shinydashboardPlus::dashboardHeader(
   tags$li(
     class = "dropdown",
     tags$a(
-      title = "Total downloads from CRAN", # ← Tooltip
+      title = "Total downloads from CRAN", # \u{2190} Tooltip
       icon("cloud-arrow-down", lib = "font-awesome"),
       tags$span(
         HTML(suppressWarnings(format_abbreviated(total_downloads(
@@ -935,7 +935,7 @@ body <- dashboardBody(
               p(
                 class = "ai-description",
                 strong("Biblio AI"),
-                " – A powerful AI assistant for science mapping"
+                " \u{2013} A powerful AI assistant for science mapping"
               )
             )
           ),
@@ -1786,11 +1786,11 @@ body <- dashboardBody(
                   tags$small(
                     tags$b("Guidelines:"),
                     br(),
-                    "• 0.90-0.95: Conservative (fewer false positives)",
+                    "\u{2022} 0.90-0.95: Conservative (fewer false positives)",
                     br(),
-                    "• 0.85-0.90: Balanced (recommended)",
+                    "\u{2022} 0.85-0.90: Balanced (recommended)",
                     br(),
-                    "• 0.75-0.80: Aggressive (more matching)"
+                    "\u{2022} 0.75-0.80: Aggressive (more matching)"
                   )
                 ),
 
@@ -8454,7 +8454,7 @@ body <- dashboardBody(
                         style = "padding-left: 8px;",
                         numericInput(
                           "TMalpha",
-                          label = "α Parameter (Balancing Occurrence vs. Centrality)",
+                          label = "\u{03B1} Parameter (Balancing Occurrence vs. Centrality)",
                           value = 0.5,
                           min = 0,
                           max = 1,
@@ -8890,7 +8890,7 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "TEalpha",
-                            label = "α Parameter (Balancing Occurrence vs. Centrality)",
+                            label = "\u{03B1} Parameter (Balancing Occurrence vs. Centrality)",
                             value = 0.5,
                             min = 0,
                             max = 1,

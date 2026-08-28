@@ -304,7 +304,7 @@ content_analysis_server <- function(input, output, session, values) {
       return(
         div(
           style = "color: red; padding: 20px;",
-          "Errore: Il file selezionato non è un PDF"
+          "Errore: Il file selezionato non \u{00E8} un PDF"
         )
       )
     }
@@ -668,7 +668,7 @@ content_analysis_server <- function(input, output, session, values) {
       )
     }
 
-    # C'è un DOI, verifica se è stato auto-rilevato
+    # C'\u{00E8} un DOI, verifica se \u{00E8} stato auto-rilevato
     auto_detected <- FALSE
 
     if (!is.null(input$pdf_file)) {
@@ -1273,14 +1273,14 @@ content_analysis_server <- function(input, output, session, values) {
 
       text_content <- sprintf(
         "TEXT STATISTICS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}
 
-🔤 Characters:      %s
-📄 Words:           %s
-✏️ Sentences:       %s
-🗣 Syllables:       %s
+\U{1F524} Characters:      %s
+\U{1F4C4} Words:           %s
+\u{270F}\u{FE0F} Sentences:       %s
+\U{1F5E3} Syllables:       %s
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}
 
 %s
 Avg words/sentence: %.1f
@@ -1316,32 +1316,32 @@ Lexical diversity:  %.3f",
         switch(
           index_name,
           "flesch_kincaid" = if (value <= 12) {
-            "✓"
+            "\u{2713}"
           } else if (value <= 16) {
-            "◆"
+            "\u{25C6}"
           } else {
-            "▲"
+            "\u{25B2}"
           },
           "flesch_ease" = if (value >= 60) {
-            "✓"
+            "\u{2713}"
           } else if (value >= 30) {
-            "◆"
+            "\u{25C6}"
           } else {
-            "▲"
+            "\u{25B2}"
           },
           "ari" = if (value <= 12) {
-            "✓"
+            "\u{2713}"
           } else if (value <= 16) {
-            "◆"
+            "\u{25C6}"
           } else {
-            "▲"
+            "\u{25B2}"
           },
           "gunning" = if (value <= 12) {
-            "✓"
+            "\u{2713}"
           } else if (value <= 16) {
-            "◆"
+            "\u{25C6}"
           } else {
-            "▲"
+            "\u{25B2}"
           }
         )
       }
@@ -1371,17 +1371,17 @@ Lexical diversity:  %.3f",
 
       text_content <- sprintf(
         "READABILITY INDICES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}
 
-📚 Flesch-Kincaid:  %5.1f  %s  %s
-📖 Reading Ease:    %5.1f  %s  %s  
-🤖 ARI Index:       %5.1f  %s  %s
-☁️ Gunning Fog:     %5.1f  %s  %s
+\U{1F4DA} Flesch-Kincaid:  %5.1f  %s  %s
+\U{1F4D6} Reading Ease:    %5.1f  %s  %s  
+\U{1F916} ARI Index:       %5.1f  %s  %s
+\u{2601}\u{FE0F} Gunning Fog:     %5.1f  %s  %s
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}\u{2501}
 
-Sentences: %s • Words: %s
-Syllables: %s • Complex: %s (%.1f%%)
+Sentences: %s \u{2022} Words: %s
+Syllables: %s \u{2022} Complex: %s (%.1f%%)
 Avg sentence length: %.1f words",
         indices$flesch_kincaid_grade,
         get_symbol("flesch_kincaid", indices$flesch_kincaid_grade),
@@ -1772,7 +1772,7 @@ Avg sentence length: %.1f words",
 
             div(
               style = "margin-bottom: 10px; font-size: 12px; color: #666;",
-              span(paste("Citation", i, "•"), style = "font-weight: bold;"),
+              span(paste("Citation", i, "\u{2022}"), style = "font-weight: bold;"),
               span(
                 section_name,
                 style = paste0(
@@ -1781,7 +1781,7 @@ Avg sentence length: %.1f words",
                   "; font-weight: bold; margin-left: 8px;"
                 )
               ),
-              span(paste("• Position:", context$citation_position_in_text))
+              span(paste("\u{2022} Position:", context$citation_position_in_text))
             ),
 
             div(
@@ -1829,7 +1829,7 @@ Avg sentence length: %.1f words",
 
             div(
               style = "margin-top: 10px; font-size: 11px; color: #888;",
-              paste("Context words:", context$context_word_count, "•"),
+              paste("Context words:", context$context_word_count, "\u{2022}"),
               if (!is.na(context$is_narrative) && context$is_narrative) {
                 span(
                   "Narrative citation",
@@ -1843,14 +1843,14 @@ Avg sentence length: %.1f words",
               },
               if (has_reference) {
                 span(
-                  " • ",
+                  " \u{2022} ",
                   icon("book", style = "color: #27ae60;"),
                   " Reference matched (hover to view)",
                   style = "color: #27ae60; font-weight: bold;"
                 )
               } else {
                 span(
-                  " • ",
+                  " \u{2022} ",
                   icon("times-circle", style = "color: #e74c3c;"),
                   " No reference matched",
                   style = "color: #999; font-style: italic;"
@@ -3145,7 +3145,7 @@ Avg sentence length: %.1f words",
           icon("user", style = "color: #3498db;"),
           tags$span(
             style = "margin-left: 5px;",
-            paste0(ref$ref_first_author, n_auth, " • ", ref$ref_year)
+            paste0(ref$ref_first_author, n_auth, " \u{2022} ", ref$ref_year)
           )
         )
       }
@@ -3304,7 +3304,7 @@ Avg sentence length: %.1f words",
               "Author: ",
               ref$ref_first_author,
               n_auth,
-              " • Year: ",
+              " \u{2022} Year: ",
               ref$ref_year,
               "\n"
             )
@@ -3474,12 +3474,12 @@ Avg sentence length: %.1f words",
         # Check if result is an error message
         if (is.character(result) && length(result) == 1) {
           if (
-            grepl("^❌", result) || grepl("Error", result, ignore.case = TRUE)
+            grepl("^\u{274C}", result) || grepl("Error", result, ignore.case = TRUE)
           ) {
             showNotification(
               HTML(paste0(
                 "<strong>AI Request Failed</strong><br/>",
-                gsub("❌ ", "", result)
+                gsub("\u{274C} ", "", result)
               )),
               type = "error",
               duration = 10
@@ -4573,7 +4573,7 @@ Avg sentence length: %.1f words",
         dpi
       ))
     } else {
-      # No network — proceed directly
+      # No network \u{2014} proceed directly
       shinyjs::runjs(
         'Shiny.setInputValue("ca_network_canvas", {data: null}, {priority: "event"});'
       )
@@ -5023,7 +5023,7 @@ create_oa_details_html <- function(oa_data) {
             )
           )
 
-          # Se oa_status non è nei valori conosciuti, usa closed come default
+          # Se oa_status non \u{00E8} nei valori conosciuti, usa closed come default
           current_status <- if (oa_status %in% names(oa_colors)) {
             oa_status
           } else {
@@ -5083,7 +5083,7 @@ create_oa_details_html <- function(oa_data) {
         )
       ),
 
-      # Authors Section - PIÙ COMPATTA
+      # Authors Section - PI\u{00D9} COMPATTA
       if (!is.null(authors_html)) {
         div(
           class = "box box-primary",

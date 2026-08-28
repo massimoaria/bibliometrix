@@ -45,7 +45,7 @@ lifeCycleSummaryUI <- function(results) {
                                                 )
                                      ),
                                      shiny::div(class = "lifecycle-metric",
-                                                shiny::div(class = "lifecycle-metric-label", "Peak Year (tₘ)"),
+                                                shiny::div(class = "lifecycle-metric-label", "Peak Year (t\u{2098})"),
                                                 shiny::div(class = "lifecycle-metric-value",
                                                            round(params$tm_year, 0)
                                                 )
@@ -59,7 +59,7 @@ lifeCycleSummaryUI <- function(results) {
                                      ), # delta symbol for duration 
                                      
                                      shiny::div(class = "lifecycle-metric",
-                                                shiny::div(class = "lifecycle-metric-label", "Growth Duration (Δₜ)"),
+                                                shiny::div(class = "lifecycle-metric-label", "Growth Duration (\u{0394}\u{209C})"),
                                                 shiny::div(class = "lifecycle-metric-value",
                                                            round(params$delta_t, 1),
                                                            shiny::span(class = "lifecycle-metric-unit", "years")
@@ -83,7 +83,7 @@ lifeCycleSummaryUI <- function(results) {
                           ),
                           shiny::div(class = "lifecycle-grid",
                                      shiny::div(class = "lifecycle-metric",
-                                                shiny::div(class = "lifecycle-metric-label", "R²"),
+                                                shiny::div(class = "lifecycle-metric-label", "R\u{00B2}"),
                                                 shiny::div(class = "lifecycle-metric-value",
                                                            sprintf("%.3f", metrics$R_squared)
                                                 )

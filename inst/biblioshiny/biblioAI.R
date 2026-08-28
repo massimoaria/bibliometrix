@@ -83,7 +83,7 @@ openrouter_ai <- function(
   if (!is.null(resp$choices)) {
     return(resp$choices[[1]]$message$content)
   } else {
-    return(paste("❌ Errore API:", resp$error$message))
+    return(paste("\u{274C} Errore API:", resp$error$message))
   }
 }
 
@@ -169,7 +169,7 @@ gemini_ai <- function(
   # Gemini 3.x Flash-Lite models expose a "thinking level" instead of the 2.5
   # thinking budget. Google recommends "minimal" for these models: it keeps the
   # 2.5-Flash-class latency while retaining the sharper 3.x reasoning. Only the
-  # models listed here understand the field — sending it to a 2.5 model or to a
+  # models listed here understand the field \u{2014} sending it to a 2.5 model or to a
   # Gemma model is an error, and forcing it on the Pro models would needlessly
   # cripple them.
   minimal_thinking_models <- c("3.5-flash-lite")
@@ -209,7 +209,7 @@ gemini_ai <- function(
 
     for (img_path in image) {
       if (!file.exists(img_path)) {
-        return(paste0("❌ Error: Image file does not exist: ", img_path))
+        return(paste0("\u{274C} Error: Image file does not exist: ", img_path))
       }
 
       image_data <- tryCatch(
@@ -220,7 +220,7 @@ gemini_ai <- function(
       )
 
       if (is.null(image_data)) {
-        return(paste0("❌ Failed to encode image: ", img_path))
+        return(paste0("\u{274C} Failed to encode image: ", img_path))
       }
 
       parts <- append(
@@ -244,7 +244,7 @@ gemini_ai <- function(
     }
     for (doc_path in docs) {
       if (!file.exists(doc_path)) {
-        return(paste0("❌ Error: Document file does not exist: ", doc_path))
+        return(paste0("\u{274C} Error: Document file does not exist: ", doc_path))
       }
 
       doc_data <- tryCatch(
@@ -255,7 +255,7 @@ gemini_ai <- function(
       )
 
       if (is.null(doc_data)) {
-        return(paste0("❌ Failed to encode document: ", doc_path))
+        return(paste0("\u{274C} Failed to encode document: ", doc_path))
       }
 
       doc_type <- tools::file_ext(doc_path) |> tolower()
@@ -303,7 +303,7 @@ gemini_ai <- function(
 
   # Helper: parse a Gemini 429 body into the human message, the server-suggested
   # retry delay (seconds, from the RetryInfo detail) and whether the violated
-  # quota is a per-DAY cap — which a retry cannot clear, unlike a per-minute one.
+  # quota is a per-DAY cap \u{2014} which a retry cannot clear, unlike a per-minute one.
   parse_api_error <- function(resp) {
     out <- list(message = NULL, retry_delay = NA_real_, is_daily = FALSE)
     tryCatch(
@@ -353,7 +353,7 @@ gemini_ai <- function(
     resp <- tryCatch(
       req_perform(req),
       error = function(e) {
-        # Transport-level failure (timeout, DNS, no network) — not an HTTP
+        # Transport-level failure (timeout, DNS, no network) \u{2014} not an HTTP
         # status. Flag it so it is handled separately from HTTP errors.
         structure(
           list(connection_error = TRUE, message = e$message),
@@ -366,22 +366,22 @@ gemini_ai <- function(
     if (inherits(resp, "gemini_conn_error")) {
       if (attempt < retry_503) {
         message(paste0(
-          "⚠️ Connection error - retrying (attempt ",
+          "\u{26A0}\u{FE0F} Connection error - retrying (attempt ",
           attempt, "/", retry_503, ")..."
         ))
         Sys.sleep(min(2^attempt, 16))
         next
       }
       return(paste0(
-        "❌ Request failed (connection error): ", resp$message,
+        "\u{274C} Request failed (connection error): ", resp$message,
         "\nPlease check your internet connection and try again."
       ))
     }
 
     # 429 = RESOURCE_EXHAUSTED: a quota / rate-limit response, NOT server
     # overload. On a paid tier this is typically the per-MINUTE request cap
-    # (RPM) hit by a burst — low-RPM models such as Gemini Pro (~25 RPM) trip
-    # far sooner than Flash (1000+ RPM) — or shared-capacity throttling on the
+    # (RPM) hit by a burst \u{2014} low-RPM models such as Gemini Pro (~25 RPM) trip
+    # far sooner than Flash (1000+ RPM) \u{2014} or shared-capacity throttling on the
     # newest flagship models. Gemini reports how long to wait (RetryInfo) and
     # whether the cap is per-day (a retry cannot clear that), so honour both
     # instead of hammering with a fixed backoff and masking the real cause.
@@ -400,10 +400,10 @@ gemini_ai <- function(
       )
       if (is_billing) {
         return(paste0(
-          "❌ HTTP 429: ",
+          "\u{274C} HTTP 429: ",
           paste0(msg, "\n\n"),
           "This model needs available billing/prepayment credits on the key's ",
-          "Google Cloud project — retrying will not help. Top up or enable ",
+          "Google Cloud project \u{2014} retrying will not help. Top up or enable ",
           "billing at https://ai.studio/projects , or switch to a Flash model ",
           "(e.g. Gemini 2.5 Flash), which is often covered separately. Note ",
           "that restricted promotional/EDU credits may not apply to the Pro ",
@@ -411,10 +411,10 @@ gemini_ai <- function(
         ))
       }
 
-      # Per-day quota exhausted: retrying is futile — report and stop.
+      # Per-day quota exhausted: retrying is futile \u{2014} report and stop.
       if (isTRUE(err$is_daily)) {
         return(paste0(
-          "❌ HTTP 429: ",
+          "\u{274C} HTTP 429: ",
           if (!is.null(msg)) paste0(msg, "\n\n") else "",
           "You have reached the per-DAY request quota for this model. ",
           "Retrying will not help until it resets (around midnight Pacific ",
@@ -431,7 +431,7 @@ gemini_ai <- function(
           min(2^attempt, 16)
         }
         message(paste0(
-          "⚠️ HTTP 429 (rate limited) - waiting ", round(wait),
+          "\u{26A0}\u{FE0F} HTTP 429 (rate limited) - waiting ", round(wait),
           "s before retry (attempt ", attempt, "/", retry_503, ")..."
         ))
         Sys.sleep(wait)
@@ -439,7 +439,7 @@ gemini_ai <- function(
       }
 
       return(paste0(
-        "❌ HTTP 429: ",
+        "\u{274C} HTTP 429: ",
         if (!is.null(err$message)) paste0(err$message, "\n\n") else "",
         "This is a per-minute rate-limit (RPM) or shared-capacity response, ",
         "not a server outage. The request was retried ", retry_503,
@@ -453,7 +453,7 @@ gemini_ai <- function(
     if (resp$status_code %in% c(500, 502, 503, 504)) {
       if (attempt < retry_503) {
         message(paste0(
-          "⚠️ HTTP ", resp$status_code,
+          "\u{26A0}\u{FE0F} HTTP ", resp$status_code,
           " (transient server error) - retrying (attempt ",
           attempt,
           "/",
@@ -465,7 +465,7 @@ gemini_ai <- function(
       } else {
         return(
           paste0(
-            "❌ HTTP ", resp$status_code,
+            "\u{274C} HTTP ", resp$status_code,
             ": the AI service is temporarily unavailable.\n",
             "The Google Gemini servers are currently overloaded or unstable.\n",
             "All retry attempts failed (",
@@ -488,7 +488,7 @@ gemini_ai <- function(
           "Please check your API key. It seems to be not valid!"
         }
       )
-      return(paste0("❌ HTTP ", resp$status_code, ": ", msg))
+      return(paste0("\u{274C} HTTP ", resp$status_code, ": ", msg))
     }
     # Other HTTP errors
     if (resp$status_code != 200) {
@@ -502,10 +502,10 @@ gemini_ai <- function(
         }
       )
 
-      return(paste0("❌ HTTP ", resp$status_code, ": ", msg))
+      return(paste0("\u{274C} HTTP ", resp$status_code, ": ", msg))
     }
 
-    # Successful response — concatenate answer text, skipping any "thought"
+    # Successful response \u{2014} concatenate answer text, skipping any "thought"
     # parts (thinking models such as Gemma 4 return their reasoning in a
     # separate part flagged with thought = TRUE).
     candidates <- httr2::resp_body_json(resp)$candidates
@@ -517,7 +517,7 @@ gemini_ai <- function(
     answer <- answer[!is.na(answer) & nzchar(answer)]
     if (length(answer) == 0) {
       return(paste0(
-        "❌ The model returned an empty response. ",
+        "\u{274C} The model returned an empty response. ",
         "Please try again or select a different AI model."
       ))
     }
@@ -531,7 +531,7 @@ gemini_ai <- function(
 # Key validation must NOT be tied to any single model. The previous check
 # probed generateContent on a hard-coded model; when Google retired
 # gemini-2.5-flash for newly created keys the probe began returning HTTP 404,
-# so every new user was told "Google refused this API key" — whatever model
+# so every new user was told "Google refused this API key" \u{2014} whatever model
 # they had chosen in Settings. ListModels answers the only question the
 # validator needs to ask ("does the Generative Language API accept this
 # key?") and no model retirement can break it. As a bonus it returns the
@@ -560,7 +560,7 @@ gemini_ai <- function(
       offline = TRUE,
       models = character(0),
       message = paste0(
-        "❌ Could not reach the Google servers (connection error): ",
+        "\u{274C} Could not reach the Google servers (connection error): ",
         resp$message,
         "\nPlease check your internet connection or proxy and try again."
       )
@@ -582,7 +582,7 @@ gemini_ai <- function(
       offline = FALSE,
       models = character(0),
       message = paste0(
-        "❌ HTTP ",
+        "\u{274C} HTTP ",
         httr2::resp_status(resp),
         if (is.null(api_msg)) "" else paste0(": ", api_msg)
       )
@@ -613,11 +613,11 @@ gemini_ai <- function(
 
 setGeminiAPI <- function(api_key, model = NULL) {
   # 1. Controlli offline: inutile spendere una chiamata di rete (con relativo
-  #    ciclo di retry) su una chiave che non può funzionare.
+  #    ciclo di retry) su una chiave che non pu\u{00F2} funzionare.
   if (is.null(api_key) || !is.character(api_key) || nchar(trimws(api_key)) == 0) {
     return(list(
       valid = FALSE,
-      message = "❌ API key must be a non-empty string."
+      message = "\u{274C} API key must be a non-empty string."
     ))
   }
 
@@ -626,11 +626,11 @@ setGeminiAPI <- function(api_key, model = NULL) {
   if (nchar(api_key) < 10) {
     return(list(
       valid = FALSE,
-      message = "❌ API key seems too short. Please verify your key."
+      message = "\u{274C} API key seems too short. Please verify your key."
     ))
   }
 
-  # 2. Controllo validità dell'API key (model-agnostic, vedi
+  # 2. Controllo validit\u{00E0} dell'API key (model-agnostic, vedi
   #    .geminiAvailableModels)
   catalogue <- .geminiAvailableModels(api_key)
 
@@ -656,7 +656,7 @@ setGeminiAPI <- function(api_key, model = NULL) {
         "Gemini API key. The Gemini REST API used by Biblio AI only accepts ",
         "classic keys starting with \"AIzaSy\". In Google AI Studio ",
         "(https://aistudio.google.com/apikey) create the key inside a Google ",
-        "Cloud project — the project-scoped flow still issues \"AIzaSy\" keys."
+        "Cloud project \u{2014} the project-scoped flow still issues \"AIzaSy\" keys."
       )
     } else {
       ""
@@ -665,15 +665,15 @@ setGeminiAPI <- function(api_key, model = NULL) {
     return(list(
       valid = FALSE,
       message = paste0(
-        "❌ Google refused this API key.\n",
+        "\u{274C} Google refused this API key.\n",
         apiCheck,
         hint
       )
     ))
   }
 
-  # 3. La chiave è valida. Se il modello selezionato non è nel catalogo di
-  #    QUESTA chiave, segnalalo subito: Google ritira i modelli più vecchi per
+  # 3. La chiave \u{00E8} valida. Se il modello selezionato non \u{00E8} nel catalogo di
+  #    QUESTA chiave, segnalalo subito: Google ritira i modelli pi\u{00F9} vecchi per
   #    le chiavi create di recente, e senza avviso l'utente scoprirebbe il
   #    problema solo alla prima analisi, sotto forma di HTTP 404.
   warning_msg <- ""
@@ -688,9 +688,9 @@ setGeminiAPI <- function(api_key, model = NULL) {
     }
     if (!(model_id %in% catalogue$models)) {
       warning_msg <- paste0(
-        "\n⚠️ The model currently selected in Settings (",
+        "\n\u{26A0}\u{FE0F} The model currently selected in Settings (",
         model_id,
-        ") is not available for this API key — Google retires older models ",
+        ") is not available for this API key \u{2014} Google retires older models ",
         "for newly created keys. Pick another model from \"Select the Gemini ",
         "Model\" (the newest Flash / Flash-Lite entries are the safe choice)."
       )
@@ -859,12 +859,12 @@ biblioAiPrompts <- function(values, activeTab) {
         "Please provide a comprehensive interpretation covering:\n",
         "1. GROWTH PATTERN: Describe the overall growth trajectory (exponential, linear, or saturation phase). ",
         "Identify the inflection point where growth rate changes.\n",
-        "2. MODEL FIT: Evaluate how well the logistic curve fits the observed data based on the provided metrics (R², RMSE, etc.). ",
+        "2. MODEL FIT: Evaluate how well the logistic curve fits the observed data based on the provided metrics (R\u{00B2}, RMSE, etc.). ",
         "Comment on any systematic deviations.\n",
         "3. KEY PARAMETERS: Interpret the logistic model parameters:\n",
         "   - K (carrying capacity): the estimated maximum cumulative production\n",
         "   - r (growth rate): the intrinsic rate of increase\n",
-        "   - t₀ (inflection point): when maximum growth rate occurred\n",
+        "   - t\u{2080} (inflection point): when maximum growth rate occurred\n",
         "4. TRENDS AND PHASES: Identify distinct phases in the publication timeline:\n",
         "   - Emergence phase (slow initial growth)\n",
         "   - Expansion phase (rapid growth)\n",
@@ -893,11 +893,11 @@ biblioAiPrompts <- function(values, activeTab) {
     "authorsProdOverTime" = {
       docs <- apot2Docs(values$AUProdOverTime, n = 3) %>% merge_df_to_string()
       prompt <- paste0(
-        "Provide an interpretation of this 'Authors’ Production Over Time' plot, which displays bibliometric trends",
+        "Provide an interpretation of this 'Authors\u{2019} Production Over Time' plot, which displays bibliometric trends",
         " for the top authors in the field. For each author, the red horizontal line represents their scientific timeline,",
         " indicating the span of their active publishing years. Each bubble corresponds to a publication year: its size reflects",
         " the number of articles published that year, while the color intensity represents the total number of citations per year (TC/year).",
-        " Analyze the evolution of individual authors’ productivity and impact, identifying key periods of activity, citation peaks, ",
+        " Analyze the evolution of individual authors\u{2019} productivity and impact, identifying key periods of activity, citation peaks, ",
         "and possible shifts in research influence over time. A list of the most three cited-per-year articles for each author is provided: ",
         docs
       )
@@ -905,7 +905,7 @@ biblioAiPrompts <- function(values, activeTab) {
     "correspAuthorCountry" = {
       countries <- merge_df_to_string(country2collab(values$TABCo))
       prompt <- paste0(
-        "Provide an interpretation of this 'Corresponding Author’s Country Collaboration Plot'. The plot displays the number of scientific publications",
+        "Provide an interpretation of this 'Corresponding Author\u{2019}s Country Collaboration Plot'. The plot displays the number of scientific publications",
         " by corresponding authors for each country, distinguishing between Single Country Publications (SCP) and Multiple Country Publications (MCP). ",
         "SCP represents articles authored exclusively within one country, while MCP refers to collaborative works involving authors from different countries. ",
         "The MCP Ratio, calculated as MCP divided by the total number of publications, indicates the extent of international collaboration. ",
@@ -1012,7 +1012,7 @@ biblioAiPrompts <- function(values, activeTab) {
     "collabWorldMap" = {
       #values$WMGemini
       prompt <- paste0(
-        "Provide an interpretation of this ‘Countries’ Collaboration World Map’. The map visualizes international scientific ",
+        "Provide an interpretation of this \u{2018}Countries\u{2019} Collaboration World Map\u{2019}. The map visualizes international scientific ",
         "collaboration by showing, for each country, the total number of articles with at least one contributing author. ",
         "The color intensity of each country is proportional to its research output. The connecting lines represent collaborative ",
         "links between countries, based on co-authorship across all authors (not only corresponding authors). ",
@@ -1021,12 +1021,12 @@ biblioAiPrompts <- function(values, activeTab) {
     },
     "bradford" = {
       prompt <- paste0(
-        "Provide an interpretation of this Bradford bibliograph and Bradford’s Law analysis. ",
+        "Provide an interpretation of this Bradford bibliograph and Bradford\u{2019}s Law analysis. ",
         "The plot shows the cumulative number of articles (y-axis) against the logarithm of source rank (x-axis). ",
         "The solid black line is the empirical curve and the dashed red line is the theoretical fitted Bradford distribution: C(r) = a + b * log(r). ",
         "The three shaded zones represent the Bradford zones: Zone 1 (core journals), Zone 2 (intermediate), and Zone 3 (periphery). ",
         "Each zone contains approximately one-third of the total articles, but the number of journals increases geometrically (ratio 1:k:k^2). ",
-        "Focus on: (1) the degree of concentration vs dispersion in the field’s publication landscape, ",
+        "Focus on: (1) the degree of concentration vs dispersion in the field\u{2019}s publication landscape, ",
         "(2) the shape of the curve (steep initial drop = high concentration, flatter = more dispersion), ",
         "(3) how well the empirical data fits the theoretical Bradford distribution (R-squared and KS test), ",
         "(4) the Bradford multiplier k and what it reveals about the zone structure, ",
@@ -1035,22 +1035,22 @@ biblioAiPrompts <- function(values, activeTab) {
     },
     "lotka" = {
       prompt <- paste0(
-        "Provide an interpretation of this Lotka’s Law plot and analysis. ",
+        "Provide an interpretation of this Lotka\u{2019}s Law plot and analysis. ",
         "The plot shows the author productivity distribution: the percentage of authors (y-axis) who published a given number of documents (x-axis). ",
         "Three curves are displayed: (1) the solid black line is the empirical distribution, ",
-        "(2) the dashed red line is the theoretical Lotka’s Law with Beta=2 (inverse square law), ",
+        "(2) the dashed red line is the theoretical Lotka\u{2019}s Law with Beta=2 (inverse square law), ",
         "(3) the dot-dash blue line is the fitted generalized inverse power law with the estimated Beta. ",
-        "Lotka’s Law states that f(n) = C / n^Beta, where f(n) is the proportion of authors publishing n articles. ",
+        "Lotka\u{2019}s Law states that f(n) = C / n^Beta, where f(n) is the proportion of authors publishing n articles. ",
         "Focus on: (1) how well the empirical data fits the theoretical (Beta=2) and fitted distributions (KS test results), ",
         "(2) the estimated Beta value and what it reveals about productivity concentration in the field, ",
         "(3) the proportion of single-paper authors vs prolific authors, ",
         "(4) whether Beta > 2 (more concentrated, typical of niche fields) or Beta < 2 (more dispersed, typical of broad fields), ",
-        "(5) implications for the field’s author productivity patterns."
+        "(5) implications for the field\u{2019}s author productivity patterns."
       )
     },
     {
       prompt <- paste0(
-        "Provide an interpretation of this plot creted with ‘bibliometrix R Package’"
+        "Provide an interpretation of this plot creted with \u{2018}bibliometrix R Package\u{2019}"
       )
     }
   )
@@ -1230,7 +1230,7 @@ geminiParameterPrompt <- function(values, activeTab, input) {
 
 
 geminiWaitingMessage <- function(values, activeTab) {
-  messageTxt <- "⌛ Thinking..."
+  messageTxt <- "\u{231B} Thinking..."
 
   switch(
     activeTab,
@@ -1343,7 +1343,7 @@ geminiPrepareImage <- function(obj, type, prompt, key, desc, values) {
     return(list(
       prompt = NULL,
       image_paths = NULL,
-      error_msg = '⚠️ **Note**: Biblio AI requires an active internet connection to work.'
+      error_msg = '\u{26A0}\u{FE0F} **Note**: Biblio AI requires an active internet connection to work.'
     ))
   }
   # Check Chrome browser
@@ -1351,7 +1351,7 @@ geminiPrepareImage <- function(obj, type, prompt, key, desc, values) {
     return(list(
       prompt = NULL,
       image_paths = NULL,
-      error_msg = '⚠️ **Note**: Biblio AI requires a **Chrome-based browser** (such as Google Chrome or Microsoft Edge) installed on your computer to work correctly.'
+      error_msg = '\u{26A0}\u{FE0F} **Note**: Biblio AI requires a **Chrome-based browser** (such as Google Chrome or Microsoft Edge) installed on your computer to work correctly.'
     ))
   }
 

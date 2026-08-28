@@ -332,7 +332,7 @@ total_downloads <- function(
     }
   )
 
-  # Se già nel tryCatch è tornato "NA", esci subito
+  # Se gi\u{00E0} nel tryCatch \u{00E8} tornato "NA", esci subito
   if (identical(json_text, "NA")) {
     return(NA)
   }
@@ -681,18 +681,18 @@ merge_files <- function(files) {
 ## dynamic watch emoji icons ---
 watchEmoji <- function(i) {
   emoji <- c(
-    "🕐",
-    "🕑",
-    "🕒",
-    "🕓",
-    "🕔",
-    "🕕",
-    "🕖",
-    "🕗",
-    "🕘",
-    "🕙",
-    "🕚",
-    "🕛"
+    "\U{1F550}",
+    "\U{1F551}",
+    "\U{1F552}",
+    "\U{1F553}",
+    "\U{1F554}",
+    "\U{1F555}",
+    "\U{1F556}",
+    "\U{1F557}",
+    "\U{1F558}",
+    "\U{1F559}",
+    "\U{1F55A}",
+    "\U{1F55B}"
   )
   # i is a positive int number, reduce it to an int from 1 to 12
   multiple <- floor(i / 12)
@@ -847,7 +847,7 @@ ggplotLifeCycle <- function(results, plot_type = c("annual", "cumulative")) {
         "text",
         x = max(complete_curve$year),
         y = max_annual * 1.05,
-        label = sprintf("R² = %.3f", R2),
+        label = sprintf("R\u{00B2} = %.3f", R2),
         hjust = 1,
         size = 4
       ) +
@@ -1020,7 +1020,7 @@ plotLifeCycle <- function(results, plot_type = c("annual", "cumulative")) {
       plotly::layout(
         title = list(
           text = sprintf(
-            "Life Cycle - Annual Publications<br><sup>R² = %.3f | Peak = %.0f publications in %.1f</sup>",
+            "Life Cycle - Annual Publications<br><sup>R\u{00B2} = %.3f | Peak = %.0f publications in %.1f</sup>",
             metrics$R_squared,
             params$peak_annual,
             params$tm_year
@@ -1431,7 +1431,7 @@ create_empty_author_bio_card <- function(
             style = "margin: 0 0 5px 0; color: #BDC3C7; font-weight: 400;"
           ),
           p(
-            "📍 Country not available",
+            "\U{1F4CD} Country not available",
             style = "margin: 0 0 10px 0; color: #BDC3C7;"
           )
         ),
@@ -1765,7 +1765,7 @@ create_author_bio_card <- function(
             institution_link,
             style = "margin: 0 0 5px 0; color: #7F8C8D; font-weight: 400;"
           ),
-          p(paste("📍", country), style = "margin: 0 0 10px 0; color: #95A5A6;")
+          p(paste("\U{1F4CD}", country), style = "margin: 0 0 10px 0; color: #95A5A6;")
         ),
         column(
           4,
@@ -2178,7 +2178,7 @@ create_local_author_bio_card <- function(
         style = "margin: 0 0 10px 0; color: #2C3E50; font-weight: 600;"
       ),
       p(
-        "📊 Local Collection Profile",
+        "\U{1F4CA} Local Collection Profile",
         style = "margin: 0 0 10px 0; color: #7F8C8D; font-style: italic;"
       )
     ),
@@ -2307,7 +2307,7 @@ create_empty_local_author_bio_card <- function(
       div(
         style = "text-align: center; color: #95A5A6;",
         tags$div(
-          "📊",
+          "\U{1F4CA}",
           style = "font-size: 48px; margin-bottom: 10px; opacity: 0.3;"
         ),
         br(),
@@ -2326,7 +2326,7 @@ create_empty_local_author_bio_card <- function(
       div(
         style = "color: #95A5A6;",
         tags$div(
-          "🏷️",
+          "\U{1F3F7}\u{FE0F}",
           style = "font-size: 36px; margin-bottom: 10px; opacity: 0.3;"
         ),
         br(),
@@ -2345,7 +2345,7 @@ create_empty_local_author_bio_card <- function(
       div(
         style = "text-align: center; color: #95A5A6;",
         tags$div(
-          "📄",
+          "\U{1F4C4}",
           style = "font-size: 48px; margin-bottom: 10px; opacity: 0.3;"
         ),
         br(),
@@ -2380,7 +2380,7 @@ create_empty_local_author_bio_card <- function(
         style = "margin: 0 0 10px 0; color: #95A5A6; font-weight: 600;"
       ),
       p(
-        "📊 Local Collection Profile",
+        "\U{1F4CA} Local Collection Profile",
         style = "margin: 0 0 10px 0; color: #BDC3C7; font-style: italic;"
       )
     ),
@@ -2389,7 +2389,7 @@ create_empty_local_author_bio_card <- function(
     div(
       style = "margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; 
                  border-radius: 8px; color: #856404;",
-      tags$span("ℹ️", style = "margin-right: 8px; font-size: 16px;"),
+      tags$span("\u{2139}\u{FE0F}", style = "margin-right: 8px; font-size: 16px;"),
       strong("Information: "),
       message
     ),
@@ -2753,12 +2753,12 @@ check_online <- function(
 #   success <- any(grepl("time=", result, ignore.case = TRUE))
 #
 #   if (success) {
-#     # message("✅ Host is reachable.")
+#     # message("\u{2705} Host is reachable.")
 #     # Extract average latency (optional)
 #     latency_line <- result[grepl("time=", result)]
 #     times <- as.numeric(sub(".*time=([0-9.]+).*", "\\1", latency_line))
 #     avg_time <- mean(times, na.rm = TRUE)
-#     # message(sprintf("📶 Average latency: %.1f ms", avg_time))
+#     # message(sprintf("\U{1F4F6} Average latency: %.1f ms", avg_time))
 #     if (avg_time < 200) {
 #       return(TRUE)
 #     } else {
@@ -4575,7 +4575,7 @@ countrycollaboration_plotly <- function(
         text = paste0(
           "<b>",
           COedges$V1[i],
-          " ↔ ",
+          " \u{2194} ",
           COedges$V2[i],
           "</b>",
           "<br>Collaborations: ",
@@ -5865,7 +5865,7 @@ addGgplotsWb <- function(
     # or an unrecognised class would skip every writer branch below and
     # then crash openxlsx::insertImage with "File does not exist".
     if (is.null(p)) {
-      warning(sprintf("Plot %d for sheet '%s' is NULL — skipped from report.",
+      warning(sprintf("Plot %d for sheet '%s' is NULL \u{2014} skipped from report.",
                       i, sheetname), call. = FALSE)
       next
     }
@@ -5919,7 +5919,7 @@ addGgplotsWb <- function(
         TRUE
       } else {
         warning(sprintf(
-          "Plot %d for sheet '%s' has unsupported class (%s) — skipped from report.",
+          "Plot %d for sheet '%s' has unsupported class (%s) \u{2014} skipped from report.",
           i, sheetname, paste(class(p), collapse = "/")
         ), call. = FALSE)
         FALSE
@@ -6239,7 +6239,7 @@ addScreenWb <- function(df, wb, width = 14, height = 8, dpi = 75) {
         if (is.null(fileName) || is.na(fileName) || !nzchar(fileName) ||
             !file.exists(fileName)) {
           warning(sprintf(
-            "Screenshot file '%s' for sheet '%s' is missing — skipped from report.",
+            "Screenshot file '%s' for sheet '%s' is missing \u{2014} skipped from report.",
             fileName %||% "<NA>", sh
           ), call. = FALSE)
           next

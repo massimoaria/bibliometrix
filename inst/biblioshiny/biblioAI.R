@@ -1,3 +1,7 @@
+## Host of the Gemini REST API. Used to check that the service is reachable
+## before an analysis, rather than probing connectivity in general.
+GEMINI_ENDPOINT_HOST <- "https://generativelanguage.googleapis.com"
+
 ## OpenRouter AI function
 openrouter_ai <- function(
   image = NULL,
@@ -1338,12 +1342,27 @@ geminiFieldName <- function(activeTab) {
 
 ## Prepare image files for Gemini (synchronous part of geminiPromptImage)
 geminiPrepareImage <- function(obj, type, prompt, key, desc, values) {
-  # Check internet connection
-  if (!is_online()) {
+  # Check that the Gemini endpoint is reachable.
+  #
+  # This used to call the lower-case is_online, which no longer exists in the
+  # app: utils.R renamed it is_Online and this call site was not updated. R
+  # resolved the old name against httr2's function of that name -- that is,
+  # curl::has_internet() -- which probes generic connectivity and returns FALSE
+  # behind a proxy or with filtered DNS even when the endpoint is perfectly
+  # reachable, blocking Biblio AI on a working network.
+  #
+  # The question that matters here is whether the service about to be called can
+  # be reached, so the probe targets the Gemini endpoint rather than the network
+  # at large.
+  if (!is_Online(url = GEMINI_ENDPOINT_HOST)) {
     return(list(
       prompt = NULL,
       image_paths = NULL,
-      error_msg = '\u{26A0}\u{FE0F} **Note**: Biblio AI requires an active internet connection to work.'
+      error_msg = paste0(
+        '\u{26A0}\u{FE0F} **Note**: Biblio AI could not reach ',
+        GEMINI_ENDPOINT_HOST,
+        '. Check your internet connection, and any proxy or firewall that may be blocking it.'
+      )
     ))
   }
   # Check Chrome browser

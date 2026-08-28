@@ -2715,18 +2715,25 @@ check_online <- function(
       }
     )
   } else if (method == "http") {
-    # Richiesta HTTP
+    # Richiesta HTTP.
+    #
+    # La domanda e' se l'host risponde, non se la richiesta ha successo: un 401,
+    # un 403 o un 404 provano che il server e' raggiungibile. url() invece
+    # solleva un errore su qualunque stato diverso da 2xx, quindi l'endpoint di
+    # Gemini - che sulla radice risponde 404 - risultava irraggiungibile.
+    # Solo un errore di trasporto (DNS, connessione rifiutata, timeout) significa
+    # davvero offline.
+    if (!grepl("^https?://", host)) {
+      host <- paste0("https://", host)
+    }
     tryCatch(
       {
-        # check if host start with http or https and add if missing
-        if (!grepl("^https?://", host)) {
-          host <- paste0("https://", host)
-        }
-
-        # con <- url("https://www.google.com", open = "rb")
-        con <- url(host, open = "rb")
-        on.exit(close(con))
-        readLines(con, n = 1, warn = FALSE)
+        httr2::request(host) |>
+          httr2::req_method("HEAD") |>
+          httr2::req_timeout(timeout) |>
+          # qualunque stato HTTP e' una risposta, quindi l'host c'e'
+          httr2::req_error(is_error = function(resp) FALSE) |>
+          httr2::req_perform()
         return(TRUE)
       },
       error = function(e) {

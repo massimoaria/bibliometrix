@@ -29,6 +29,13 @@ utils::globalVariables(c("num"))
 #' Merging collections that all come from the \emph{same} database leaves \code{CR}
 #' untouched.
 #'
+#' Author names are left as the single collections carry them: the merge only
+#' harmonises how the databases punctuate them (Scopus writes the full names as
+#' \code{REID, MONIQUE}, WoS as \code{REID MONIQUE}). Import the collections you
+#' intend to merge with the \strong{same author name format} -- full names for all
+#' of them, or surname and initials for all of them -- so that their \code{AU}
+#' fields are comparable.
+#'
 #' @param ... are the bibliographic data frames to merge.
 #' @param remove.duplicated is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.
 #' @param verbose is logical.  If TRUE, information on duplicate documents is printed on the screen.
@@ -123,21 +130,21 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
 
     ## author data cleaning
     if ("AU" %in% names(M)) {
-      M$AU <- gsub(",", " ", M$AU)
-      AUlist <- strsplit(M$AU, ";")
-      AU <- lapply(AUlist, function(l) {
-        l <- trim(l)
-        name <- strsplit(l, " ")
-        lastname <- unlist(lapply(name, function(ln) {
-          ln[1]
-        }))
-        firstname <- lapply(name, function(ln) {
-          f <- paste(substr(ln[-1], 1, 1), collapse = " ")
-        })
-        AU <- paste(lastname, unlist(firstname), sep = " ", collapse = ";")
-        return(AU)
-      })
-      M$AU <- unlist(AU)
+      # Every converter already emits author names in the WoS form -- surname,
+      # a space, then the initials -- so the only thing that differs between
+      # databases is how they punctuate the name: Scopus writes the full names
+      # as "REID, MONIQUE", WoS as "REID MONIQUE". Harmonise the punctuation
+      # and the separator, and nothing else.
+      #
+      # This used to rebuild every name as the surname plus the first letter of
+      # a single token, which silently discarded information: "SELVANATHAN EA"
+      # became "SELVANATHAN E" and "LAW CCH" became "LAW C", so authors sharing
+      # a first initial were merged into one, and a collection imported with
+      # Author Name Format = Fullname had its full names pushed back to
+      # initials, undoing the choice made at import.
+      M$AU <- gsub("\\.", "", M$AU)
+      M$AU <- trimES(gsub(",", " ", M$AU))
+      M$AU <- trimws(gsub("\\s*;\\s*", ";", M$AU))
     }
   }
 

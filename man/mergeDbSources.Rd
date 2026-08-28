@@ -47,6 +47,13 @@ on the single-database collections before merging them.
 
 Merging collections that all come from the \emph{same} database leaves \code{CR}
 untouched.
+
+Author names are left as the single collections carry them: the merge only
+harmonises how the databases punctuate them (Scopus writes the full names as
+\code{REID, MONIQUE}, WoS as \code{REID MONIQUE}). Import the collections you
+intend to merge with the \strong{same author name format} -- full names for all
+of them, or surname and initials for all of them -- so that their \code{AU}
+fields are comparable.
 }
 \examples{
 

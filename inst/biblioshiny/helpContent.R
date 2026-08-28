@@ -259,8 +259,16 @@ helpContent <- function() {
     <ul>
       <li><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></li>
       <li><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</li>
+
+      <li><strong>Aria, M., Cuccurullo, C., D'Aniello, L., &amp; Spano, M. (2026).</strong> <i>Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. A demonstration through the replication of a study.</i> <strong>Journal of Informetrics</strong>, 20(3), 101837. <a href='https://doi.org/10.1016/j.joi.2026.101837' target='_blank'>https://doi.org/10.1016/j.joi.2026.101837</a></li>
+
+      <li><strong>Aria, M., D'Aniello, L., &amp; Spano, M. (2026).</strong> <i>A multi-phase reference matching algorithm for bibliometric analysis: design, implementation, and evaluation.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-026-05763-2' target='_blank'>https://doi.org/10.1007/s11192-026-05763-2</a></li>
       
       <li><strong>Aria, M., Cuccurullo, C., D'Aniello, L., Misuraca, M., & Spano, M. (2024).</strong> <i>Comparative science mapping: a novel conceptual structure analysis with metadata.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-024-05161-6' target='_blank'>https://doi.org/10.1007/s11192-024-05161-6</a></li>
+
+      <li><strong>Angelelli, M., Ciavolino, E., Ringle, C. M., Sarstedt, M., &amp; Aria, M. (2025).</strong> <i>Conceptual structure and thematic evolution in partial least squares structural equation modeling research.</i> <strong>Quality &amp; Quantity</strong>, 59(3), 2753&#x2013;2798. <a href='https://doi.org/10.1007/s11135-025-02071-4' target='_blank'>https://doi.org/10.1007/s11135-025-02071-4</a></li>
+
+      <li><strong>Aria, M., D'Aniello, L., Grassia, M. G., Marino, M., Mazza, R., &amp; Stavolo, A. (2024).</strong> <i>Mapping the evolution of gender dysphoria research: a comprehensive bibliometric study.</i> <strong>Quality &amp; Quantity</strong>, 58(6), 5351&#x2013;5375. <a href='https://doi.org/10.1007/s11135-024-01902-0' target='_blank'>https://doi.org/10.1007/s11135-024-01902-0</a></li>
 
       <li><strong>Aria, M., Le, T., Cuccurullo, C., Belfiore, A., & Choe, J. (2023).</strong> <i>openalexR: An R-Tool for Collecting Bibliometric Data from OpenAlex.</i> <strong>R Journal</strong>, 15(4). <a href='https://doi.org/10.32614/rj-2023-089' target='_blank'>https://doi.org/10.32614/rj-2023-089</a></li>
 
@@ -278,6 +286,8 @@ helpContent <- function() {
             
       <li><strong>Cuccurullo, C., Aria, M., & Sarto, F. (2013).</strong> <i>Twenty years of research on performance management in business and public administration domains.</i> <strong>Academy of Management Proceedings</strong>, Vol. 2013, No. 1, p. 14270. <a href='https://doi.org/10.5465/AMBPP.2013.14270abstract' target='_blank'>https://doi.org/10.5465/AMBPP.2013.14270abstract</a></li>
               
+      <li><strong>Ciavolino, E., Aria, M., Cheah, J.-H., &amp; Rold&#xE1;n, J. L. (2022).</strong> <i>A tale of PLS Structural Equation Modelling: Episode I &#x2014; A Bibliometrix Citation Analysis.</i> <strong>Social Indicators Research</strong>, 164(3), 1323&#x2013;1348. <a href='https://doi.org/10.1007/s11205-022-02994-7' target='_blank'>https://doi.org/10.1007/s11205-022-02994-7</a></li>
+                
       <li><strong>Belfiore, A., Salatino, A., & Osborne, F. (2022).</strong> <i>Characterising Research Areas in the field of AI.</i> <strong>arXiv</strong> preprint. <a href='https://doi.org/10.48550/arXiv.2205.13471' target='_blank'>https://doi.org/10.48550/arXiv.2205.13471</a></li>
                 
       <li><strong>Belfiore, A., Cuccurullo, C., & Aria, M. (2022).</strong> <i>IoT in healthcare: A scientometric analysis.</i> <strong>Technological Forecasting and Social Change</strong>, 184, 122001. <a href='https://doi.org/10.1016/j.techfore.2022.122001' target='_blank'>https://doi.org/10.1016/j.techfore.2022.122001</a></li>
@@ -480,6 +490,10 @@ helpContent <- function() {
                                             <p style='color: white; margin: 10px 0 0 0; font-size: 0.85em; opacity: 0.9;'>
                                             Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. 
                                           <em>Journal of Informetrics</em>, 11(4), 959-975.
+                                          </p>
+                                            <p style='color: white; margin: 6px 0 0 0; font-size: 0.85em; opacity: 0.9;'>
+                                            Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026). Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. 
+                                          <em>Journal of Informetrics</em>, 20(3), 101837.
                                           </p>
                                             </div>
                                             </div>
@@ -972,6 +986,8 @@ helpContent <- function() {
     </ul>
     
     <h4>&#x1F4DA; References</h4>
+    <p><strong>Aria, M., D'Aniello, L., &amp; Spano, M. (2026).</strong> <i>A multi-phase reference matching algorithm for bibliometric analysis: design, implementation, and evaluation.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-026-05763-2' target='_blank'>https://doi.org/10.1007/s11192-026-05763-2</a></p>
+    
     <p><strong>Aria, M., & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&#x2013;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
     
@@ -2711,6 +2727,8 @@ helpContent <- function() {
     <p><strong>Kessler, M. M. (1963).</strong> <i>Bibliographic coupling between scientific papers.</i> <strong>American Documentation</strong>, 14(1), 10-25. <a href='https://doi.org/10.1002/asi.5090140103' target='_blank'>https://doi.org/10.1002/asi.5090140103</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    
+    <p><strong>Aria, M., D'Aniello, L., &amp; Spano, M. (2026).</strong> <i>A multi-phase reference matching algorithm for bibliometric analysis: design, implementation, and evaluation.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-026-05763-2' target='_blank'>https://doi.org/10.1007/s11192-026-05763-2</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
 
     <p><strong>Small, H. (1999).</strong> <i>Visualizing science by citation mapping.</i> <strong>Journal of the American Society for Information Science</strong>, 50(9), 799-813. <a href='https://doi.org/10.1002/(SICI)1097-4571(1999)50:9<799::AID-ASI9>3.0.CO;2-G' target='_blank'>DOI link</a></p>
@@ -2769,6 +2787,8 @@ helpContent <- function() {
     <p><strong>Garfield, E., Pudovkin, A. I., & Istomin, V. S. (2003).</strong> <i>Why do we need algorithmic historiography?</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 54(5), 400-412. <a href='https://doi.org/10.1002/asi.10226' target='_blank'>https://doi.org/10.1002/asi.10226</a></p>
 
     <p><strong>Aria, M. & Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+    
+    <p><strong>Aria, M., D'Aniello, L., &amp; Spano, M. (2026).</strong> <i>A multi-phase reference matching algorithm for bibliometric analysis: design, implementation, and evaluation.</i> <strong>Scientometrics</strong>. <a href='https://doi.org/10.1007/s11192-026-05763-2' target='_blank'>https://doi.org/10.1007/s11192-026-05763-2</a></p>
   <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
 
     <p><strong>Lucio-Arias, D., & Leydesdorff, L. (2008).</strong> <i>Main-path analysis and path-dependent transitions in HistCite-based historiograms.</i> <strong>Journal of the American Society for Information Science and Technology</strong>, 59(12), 1948-1962. <a href='https://doi.org/10.1002/asi.20903' target='_blank'>https://doi.org/10.1002/asi.20903</a></p>

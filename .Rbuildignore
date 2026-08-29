@@ -38,3 +38,4 @@ CRAN-SUBMISSION
 ^tasks$
 ^graphify-out$
 ^raw$
+^revdep$

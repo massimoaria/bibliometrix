@@ -1,7 +1,7 @@
 Package: bibliometrix
 Type: Package
 Title: Comprehensive Science Mapping Analysis
-Version: 5.4.1.9001
+Version: 5.5.0
 Authors@R: c(
     person(given = "Massimo",
            family = "Aria",
@@ -18,7 +18,7 @@ Description: Tool for quantitative research in scientometrics and bibliometrics.
     Cuccurullo C. (2017) <doi:10.1016/j.joi.2017.08.007>.
     'bibliometrix' provides various routines for importing bibliographic data from 'SCOPUS',
     'Clarivate Analytics Web of Science' (<https://www.webofknowledge.com/>), 'Digital Science Dimensions' 
-	(<https://www.dimensions.ai/>), 'OpenAlex' (<https://openalex.org/>), 'Cochrane Library' (<https://www.cochranelibrary.com/>),  'Lens' (<https://lens.org>), 
+	(<https://www.dimensions.ai/>), 'OpenAlex' (<https://openalex.org/>), 'Cochrane Library' (<https://www.cochranelibrary.com/>),  'Lens' (<https://www.lens.org/>), 
 	and 'PubMed' (<https://pubmed.ncbi.nlm.nih.gov/>) databases, performing bibliometric analysis 
     and building networks for co-citation, coupling, scientific collaboration and co-word analysis.
 License: GPL-3
@@ -69,4 +69,4 @@ Suggests:
     wordcloud2
 NeedsCompilation: no
 Config/testthat/edition: 3
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

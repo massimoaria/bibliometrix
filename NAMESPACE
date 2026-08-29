@@ -79,283 +79,307 @@ import(stats)
 import(stringi)
 import(tidytext)
 import(visNetwork)
-importFrom(Matrix,"%&%")
-importFrom(Matrix,"diag<-")
-importFrom(Matrix,Arith)
-importFrom(Matrix,Cholesky)
-importFrom(Matrix,Compare)
-importFrom(Matrix,Diagonal)
-importFrom(Matrix,Logic)
-importFrom(Matrix,Math)
-importFrom(Matrix,Math2)
-importFrom(Matrix,Matrix)
-importFrom(Matrix,MatrixClass)
-importFrom(Matrix,Ops)
-importFrom(Matrix,Summary)
-importFrom(Matrix,abIseq)
-importFrom(Matrix,abIseq1)
-importFrom(Matrix,all.equal)
-importFrom(Matrix,anyDuplicatedT)
-importFrom(Matrix,as.array)
-importFrom(Matrix,as.matrix)
-importFrom(Matrix,band)
-importFrom(Matrix,bandSparse)
-importFrom(Matrix,bdiag)
-importFrom(Matrix,cbind2)
-importFrom(Matrix,chol)
-importFrom(Matrix,chol2inv)
-importFrom(Matrix,coerce)
-importFrom(Matrix,colMeans)
-importFrom(Matrix,colSums)
-importFrom(Matrix,condest)
-importFrom(Matrix,cov2cor)
-importFrom(Matrix,crossprod)
-importFrom(Matrix,det)
-importFrom(Matrix,determinant)
-importFrom(Matrix,diag)
-importFrom(Matrix,diagN2U)
-importFrom(Matrix,diagU2N)
-importFrom(Matrix,diff)
-importFrom(Matrix,drop)
-importFrom(Matrix,drop0)
-importFrom(Matrix,expand)
-importFrom(Matrix,expm)
-importFrom(Matrix,fac2sparse)
-importFrom(Matrix,forceSymmetric)
-importFrom(Matrix,format)
-importFrom(Matrix,formatSpMatrix)
-importFrom(Matrix,formatSparseM)
-importFrom(Matrix,head)
-importFrom(Matrix,image)
-importFrom(Matrix,invPerm)
-importFrom(Matrix,is.null.DN)
-importFrom(Matrix,isDiagonal)
-importFrom(Matrix,isLDL)
-importFrom(Matrix,isSymmetric)
-importFrom(Matrix,isTriangular)
-importFrom(Matrix,kronecker)
-importFrom(Matrix,lu)
-importFrom(Matrix,mean)
-importFrom(Matrix,nnzero)
-importFrom(Matrix,norm)
-importFrom(Matrix,onenormest)
-importFrom(Matrix,pack)
-importFrom(Matrix,print)
-importFrom(Matrix,printSpMatrix)
-importFrom(Matrix,printSpMatrix2)
-importFrom(Matrix,qr)
-importFrom(Matrix,qr.Q)
-importFrom(Matrix,qr.R)
-importFrom(Matrix,qr.coef)
-importFrom(Matrix,qr.fitted)
-importFrom(Matrix,qr.qty)
-importFrom(Matrix,qr.qy)
-importFrom(Matrix,qr.resid)
-importFrom(Matrix,qrR)
-importFrom(Matrix,rankMatrix)
-importFrom(Matrix,rbind2)
-importFrom(Matrix,rcond)
-importFrom(Matrix,readHB)
-importFrom(Matrix,readMM)
-importFrom(Matrix,rep2abI)
-importFrom(Matrix,rowMeans)
-importFrom(Matrix,rowSums)
-importFrom(Matrix,rsparsematrix)
-importFrom(Matrix,show)
-importFrom(Matrix,skewpart)
-importFrom(Matrix,solve)
-importFrom(Matrix,spMatrix)
-importFrom(Matrix,sparse.model.matrix)
-importFrom(Matrix,sparseMatrix)
-importFrom(Matrix,sparseVector)
-importFrom(Matrix,summary)
-importFrom(Matrix,symmpart)
-importFrom(Matrix,t)
-importFrom(Matrix,tail)
-importFrom(Matrix,tcrossprod)
-importFrom(Matrix,tril)
-importFrom(Matrix,triu)
-importFrom(Matrix,uniqTsparse)
-importFrom(Matrix,unpack)
-importFrom(Matrix,update)
-importFrom(Matrix,updown)
-importFrom(Matrix,which)
-importFrom(Matrix,writeMM)
-importFrom(SnowballC,getStemLanguages)
-importFrom(SnowballC,wordStem)
-importFrom(dplyr,"%>%")
-importFrom(dplyr,across)
-importFrom(dplyr,anti_join)
-importFrom(dplyr,any_of)
-importFrom(dplyr,arrange)
-importFrom(dplyr,as_tibble)
-importFrom(dplyr,between)
-importFrom(dplyr,bind_cols)
-importFrom(dplyr,bind_rows)
-importFrom(dplyr,case_when)
-importFrom(dplyr,coalesce)
-importFrom(dplyr,count)
-importFrom(dplyr,cummean)
-importFrom(dplyr,desc)
-importFrom(dplyr,distinct)
-importFrom(dplyr,everything)
-importFrom(dplyr,first)
-importFrom(dplyr,group_by)
-importFrom(dplyr,group_split)
-importFrom(dplyr,if_all)
-importFrom(dplyr,if_else)
-importFrom(dplyr,inner_join)
-importFrom(dplyr,join_by)
-importFrom(dplyr,lead)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,n_distinct)
-importFrom(dplyr,pick)
-importFrom(dplyr,pull)
-importFrom(dplyr,reframe)
-importFrom(dplyr,relocate)
-importFrom(dplyr,rename)
-importFrom(dplyr,rename_with)
-importFrom(dplyr,right_join)
-importFrom(dplyr,row_number)
-importFrom(dplyr,rowwise)
-importFrom(dplyr,select)
-importFrom(dplyr,slice)
-importFrom(dplyr,slice_head)
-importFrom(dplyr,slice_max)
-importFrom(dplyr,slice_tail)
-importFrom(dplyr,summarise)
-importFrom(dplyr,summarize)
-importFrom(dplyr,tibble)
-importFrom(dplyr,ungroup)
-importFrom(dplyr,where)
-importFrom(grDevices,adjustcolor)
-importFrom(grDevices,as.raster)
-importFrom(grDevices,chull)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,heat.colors)
-importFrom(grDevices,pdf)
-importFrom(graphics,abline)
-importFrom(graphics,axis)
-importFrom(graphics,barplot)
-importFrom(graphics,legend)
-importFrom(graphics,lines)
-importFrom(graphics,par)
-importFrom(graphics,plot)
-importFrom(graphics,points)
-importFrom(igraph,"E<-")
-importFrom(igraph,"V<-")
-importFrom(igraph,E)
-importFrom(igraph,V)
-importFrom(igraph,arpack_defaults)
-importFrom(igraph,as_adjacency_matrix)
-importFrom(igraph,as_edgelist)
-importFrom(igraph,as_long_data_frame)
-importFrom(igraph,authority_score)
-importFrom(igraph,betweenness)
-importFrom(igraph,centr_betw)
-importFrom(igraph,centr_clo)
-importFrom(igraph,centr_degree)
-importFrom(igraph,centr_eigen)
-importFrom(igraph,closeness)
-importFrom(igraph,cluster_edge_betweenness)
-importFrom(igraph,cluster_fast_greedy)
-importFrom(igraph,cluster_infomap)
-importFrom(igraph,cluster_leading_eigen)
-importFrom(igraph,cluster_leiden)
-importFrom(igraph,cluster_louvain)
-importFrom(igraph,cluster_optimal)
-importFrom(igraph,cluster_spinglass)
-importFrom(igraph,cluster_walktrap)
-importFrom(igraph,count_multiple)
-importFrom(igraph,decompose.graph)
-importFrom(igraph,degree)
-importFrom(igraph,degree_distribution)
-importFrom(igraph,delete.edges)
-importFrom(igraph,delete.vertices)
-importFrom(igraph,delete_edges)
-importFrom(igraph,delete_vertices)
-importFrom(igraph,diameter)
-importFrom(igraph,edge_density)
-importFrom(igraph,eigen_centrality)
-importFrom(igraph,get.edgelist)
-importFrom(igraph,graph.adjacency)
-importFrom(igraph,graph_attr)
-importFrom(igraph,graph_from_adjacency_matrix)
-importFrom(igraph,graph_from_data_frame)
-importFrom(igraph,graph_from_incidence_matrix)
-importFrom(igraph,hub_score)
-importFrom(igraph,induced_subgraph)
-importFrom(igraph,layout.auto)
-importFrom(igraph,layout.circle)
-importFrom(igraph,layout.fruchterman.reingold)
-importFrom(igraph,layout.kamada.kawai)
-importFrom(igraph,layout.mds)
-importFrom(igraph,layout.norm)
-importFrom(igraph,layout.sphere)
-importFrom(igraph,layout.star)
-importFrom(igraph,layout_with_fr)
-importFrom(igraph,mean_distance)
-importFrom(igraph,membership)
-importFrom(igraph,modularity)
-importFrom(igraph,norm_coords)
-importFrom(igraph,page.rank)
-importFrom(igraph,page_rank)
-importFrom(igraph,plot.igraph)
-importFrom(igraph,simplify)
-importFrom(igraph,transitivity)
-importFrom(igraph,vcount)
-importFrom(igraph,write.graph)
+importFrom(Matrix,
+  "%&%",
+  "diag<-",
+  Arith,
+  Cholesky,
+  Compare,
+  Diagonal,
+  Logic,
+  Math,
+  Math2,
+  Matrix,
+  MatrixClass,
+  Ops,
+  Summary,
+  abIseq,
+  abIseq1,
+  all.equal,
+  anyDuplicatedT,
+  as.array,
+  as.matrix,
+  band,
+  bandSparse,
+  bdiag,
+  cbind2,
+  chol,
+  chol2inv,
+  coerce,
+  colMeans,
+  colSums,
+  condest,
+  cov2cor,
+  crossprod,
+  det,
+  determinant,
+  diag,
+  diagN2U,
+  diagU2N,
+  diff,
+  drop,
+  drop0,
+  expand,
+  expm,
+  fac2sparse,
+  forceSymmetric,
+  format,
+  formatSpMatrix,
+  formatSparseM,
+  head,
+  image,
+  invPerm,
+  is.null.DN,
+  isDiagonal,
+  isLDL,
+  isSymmetric,
+  isTriangular,
+  kronecker,
+  lu,
+  mean,
+  nnzero,
+  norm,
+  onenormest,
+  pack,
+  print,
+  printSpMatrix,
+  printSpMatrix2,
+  qr,
+  qr.Q,
+  qr.R,
+  qr.coef,
+  qr.fitted,
+  qr.qty,
+  qr.qy,
+  qr.resid,
+  qrR,
+  rankMatrix,
+  rbind2,
+  rcond,
+  readHB,
+  readMM,
+  rep2abI,
+  rowMeans,
+  rowSums,
+  rsparsematrix,
+  show,
+  skewpart,
+  solve,
+  spMatrix,
+  sparse.model.matrix,
+  sparseMatrix,
+  sparseVector,
+  summary,
+  symmpart,
+  t,
+  tail,
+  tcrossprod,
+  tril,
+  triu,
+  uniqTsparse,
+  unpack,
+  update,
+  updown,
+  which,
+  writeMM
+)
+importFrom(SnowballC,
+  getStemLanguages,
+  wordStem
+)
+importFrom(dplyr,
+  "%>%",
+  across,
+  anti_join,
+  any_of,
+  arrange,
+  as_tibble,
+  between,
+  bind_cols,
+  bind_rows,
+  case_when,
+  coalesce,
+  count,
+  cummean,
+  desc,
+  distinct,
+  everything,
+  first,
+  group_by,
+  group_split,
+  if_all,
+  if_else,
+  inner_join,
+  join_by,
+  lead,
+  left_join,
+  mutate,
+  n,
+  n_distinct,
+  pick,
+  pull,
+  reframe,
+  relocate,
+  rename,
+  rename_with,
+  right_join,
+  row_number,
+  rowwise,
+  select,
+  slice,
+  slice_head,
+  slice_max,
+  slice_tail,
+  summarise,
+  summarize,
+  tibble,
+  ungroup,
+  where
+)
+importFrom(grDevices,
+  adjustcolor,
+  as.raster,
+  chull,
+  colorRampPalette,
+  dev.off,
+  heat.colors,
+  pdf
+)
+importFrom(graphics,
+  abline,
+  axis,
+  barplot,
+  legend,
+  lines,
+  par,
+  plot,
+  points
+)
+importFrom(igraph,
+  "E<-",
+  "V<-",
+  E,
+  V,
+  arpack_defaults,
+  as_adjacency_matrix,
+  as_edgelist,
+  as_long_data_frame,
+  authority_score,
+  betweenness,
+  centr_betw,
+  centr_clo,
+  centr_degree,
+  centr_eigen,
+  closeness,
+  cluster_edge_betweenness,
+  cluster_fast_greedy,
+  cluster_infomap,
+  cluster_leading_eigen,
+  cluster_leiden,
+  cluster_louvain,
+  cluster_optimal,
+  cluster_spinglass,
+  cluster_walktrap,
+  count_multiple,
+  decompose.graph,
+  degree,
+  degree_distribution,
+  delete.edges,
+  delete.vertices,
+  delete_edges,
+  delete_vertices,
+  diameter,
+  edge_density,
+  eigen_centrality,
+  get.edgelist,
+  graph.adjacency,
+  graph_attr,
+  graph_from_adjacency_matrix,
+  graph_from_data_frame,
+  graph_from_incidence_matrix,
+  hub_score,
+  induced_subgraph,
+  layout.auto,
+  layout.circle,
+  layout.fruchterman.reingold,
+  layout.kamada.kawai,
+  layout.mds,
+  layout.norm,
+  layout.sphere,
+  layout.star,
+  layout_with_fr,
+  mean_distance,
+  membership,
+  modularity,
+  norm_coords,
+  page.rank,
+  page_rank,
+  plot.igraph,
+  simplify,
+  transitivity,
+  vcount,
+  write.graph
+)
 importFrom(methods,new)
 importFrom(openxlsx,write.xlsx)
-importFrom(plotly,add_annotations)
-importFrom(plotly,add_lines)
-importFrom(plotly,config)
-importFrom(plotly,ggplotly)
-importFrom(plotly,layout)
-importFrom(plotly,plot_ly)
-importFrom(plotly,subplot)
-importFrom(plotly,toRGB)
-importFrom(purrr,map2_dfr)
-importFrom(purrr,map_chr)
-importFrom(purrr,map_df)
-importFrom(purrr,map_dfr)
-importFrom(rscopus,affiliation_retrieval)
-importFrom(rscopus,author_df_orig)
-importFrom(rscopus,author_search)
-importFrom(rscopus,get_complete_author_info)
+importFrom(plotly,
+  add_annotations,
+  add_lines,
+  config,
+  ggplotly,
+  layout,
+  plot_ly,
+  subplot,
+  toRGB
+)
+importFrom(purrr,
+  map2_dfr,
+  map_chr,
+  map_df,
+  map_dfr
+)
+importFrom(rscopus,
+  affiliation_retrieval,
+  author_df_orig,
+  author_search,
+  get_complete_author_info
+)
 importFrom(stringdist,stringdistmatrix)
-importFrom(stringr,fixed)
-importFrom(stringr,regex)
-importFrom(stringr,str_detect)
-importFrom(stringr,str_extract)
-importFrom(stringr,str_extract_all)
-importFrom(stringr,str_locate)
-importFrom(stringr,str_locate_all)
-importFrom(stringr,str_remove)
-importFrom(stringr,str_remove_all)
-importFrom(stringr,str_replace_all)
-importFrom(stringr,str_split)
-importFrom(stringr,str_squish)
-importFrom(stringr,str_to_upper)
-importFrom(stringr,str_trim)
+importFrom(stringr,
+  fixed,
+  regex,
+  str_detect,
+  str_extract,
+  str_extract_all,
+  str_locate,
+  str_locate_all,
+  str_remove,
+  str_remove_all,
+  str_replace_all,
+  str_split,
+  str_squish,
+  str_to_upper,
+  str_trim
+)
 importFrom(tibble,rownames_to_column)
-importFrom(tidyr,drop_na)
-importFrom(tidyr,expand_grid)
-importFrom(tidyr,gather)
-importFrom(tidyr,pivot_longer)
-importFrom(tidyr,pivot_wider)
-importFrom(tidyr,replace_na)
-importFrom(tidyr,separate)
-importFrom(tidyr,spread)
-importFrom(tidyr,starts_with)
-importFrom(tidyr,unite)
-importFrom(tidyr,unnest)
-importFrom(utils,adist)
-importFrom(utils,capture.output)
-importFrom(utils,data)
-importFrom(utils,download.file)
-importFrom(utils,read.csv)
-importFrom(utils,write.csv)
+importFrom(tidyr,
+  drop_na,
+  expand_grid,
+  gather,
+  pivot_longer,
+  pivot_wider,
+  replace_na,
+  separate,
+  spread,
+  starts_with,
+  unite,
+  unnest
+)
+importFrom(utils,
+  adist,
+  capture.output,
+  data,
+  download.file,
+  read.csv,
+  write.csv
+)

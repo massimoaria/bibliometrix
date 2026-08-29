@@ -689,7 +689,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-08-28 14:57:11
+#> $ query_timestamp             <dttm> 2026-08-28 15:16:23
 ```
 
 This function provides comprehensive author profiles including:

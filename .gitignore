@@ -28,3 +28,10 @@ CRAN-SUBMISSION
 # graphify
 graphify-out/
 raw/
+
+# revdepcheck: i report .md sono versionabili, gli artefatti no
+revdep/checks/
+revdep/library/
+revdep/checks.noindex/
+revdep/library.noindex/
+revdep/data.sqlite

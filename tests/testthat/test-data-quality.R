@@ -133,3 +133,63 @@ test_that("metaTagExtraction AU_UN non lascia i marcatori interni nei risultati"
   expect_equal(M2$AU1_UN[2], "UNIV OSLO")
   expect_true(is.na(M2$AU1_UN[3]))
 })
+
+test_that("metaTagExtraction AU_UN tiene insieme i nomi di ente che contengono virgole", {
+  # "National Heart, Lung, and Blood Institute" veniva spezzato sulle virgole e
+  # dell'ente restava il solo pezzo con il tag: "AND BLOOD INSTITUTE" (#431).
+  C1 <- c(
+    "NATIONAL HEART, LUNG, AND BLOOD INSTITUTE, BETHESDA, MD, USA",
+    "DEPT OF MEDICINE, NATIONAL HEART, LUNG, AND BLOOD INSTITUTE, BETHESDA, USA",
+    "NATL HEART LUNG AND BLOOD INST, BETHESDA, MD USA"
+  )
+  M <- data.frame(
+    AU = paste0("AUTHOR A", seq_along(C1)),
+    C1 = C1,
+    RP = NA_character_,
+    DB = "ISI",
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_UN", ";")))
+  expect_equal(
+    M2$AU_UN,
+    c(
+      "NATIONAL HEART LUNG AND BLOOD INSTITUTE",
+      "NATIONAL HEART LUNG AND BLOOD INSTITUTE",
+      "NATL HEART LUNG AND BLOOD INST"
+    )
+  )
+})
+
+test_that("metaTagExtraction AU_UN non scambia una qualifica per un ente", {
+  # I tag delle istituzioni sono prefissi: SCI compare in SCIENTIST, RES in
+  # RESEARCHER, INST in INSTRUCTOR. "Nurse Scientist" veniva restituito al posto
+  # dell'ospedale che seguiva (#431).
+  C1 <- c(
+    "NURSE SCIENTIST, CHILDRENS HOSPITAL OF PHILADELPHIA, PHILADELPHIA, PA, USA",
+    "DATA SCIENTIST, MAYO CLINIC, ROCHESTER, MN, USA",
+    "NURSE SCIENTIST, PHILADELPHIA, PA, USA",
+    "COLLEGE OF FAMILY PHYSICIANS, TORONTO, CANADA"
+  )
+  M <- data.frame(
+    AU = paste0("AUTHOR A", seq_along(C1)),
+    C1 = C1,
+    RP = NA_character_,
+    DB = "ISI",
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_UN", ";")))
+  # l'ultima riga non e' una qualifica ma un ente, e resta com'e'
+  expect_equal(
+    M2$AU_UN,
+    c(
+      "CHILDRENS HOSPITAL OF PHILADELPHIA",
+      "MAYO CLINIC",
+      NA_character_,
+      "COLLEGE OF FAMILY PHYSICIANS"
+    )
+  )
+})

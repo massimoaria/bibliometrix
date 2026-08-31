@@ -586,6 +586,34 @@ dropAffPlaceholders <- function(x) {
   return(x)
 }
 
+### the job titles that the institution tags match by accident: SCI in
+### SCIENTIST, RES in RESEARCHER, INST in INSTRUCTOR, ARCH in ARCHITECT
+isJobTitle <- function(x) {
+  modifiers <- "SENIOR|JUNIOR|CHIEF|LEAD|HEAD|STAFF|PRINCIPAL|ASSOCIATE|ASSISTANT|CLINICAL|RESEARCH|DATA|NURSE|POSTDOCTORAL|VISITING|ADJUNCT|FORMER"
+  titles <- "SCIENTIST|RESEARCHER|CLINICIAN|TECHNICIAN|TECHNOLOGIST|INSTRUCTOR|ACADEMIC|ARCHITECT"
+  ## the whole part has to be the title: COLLEGE OF FAMILY PHYSICIANS and
+  ## INSTITUTE OF ACADEMIC MEDICINE are institutions, NURSE SCIENTIST is not
+  grepl(paste0("^((", modifiers, ")[[:space:]]+)*(", titles, ")S?$"), trim(x))
+}
+
+### an institution can carry commas in its own name ("National Heart, Lung, and
+### Blood Institute"): when the part holding the tag opens with the conjunction,
+### the name started in the parts before it
+joinNameParts <- function(affL, k, back = 2) {
+  if (!grepl("^(AND|&)[[:space:]]", trim(affL[k]))) {
+    return(affL[k])
+  }
+  first <- k
+  for (j in seq_len(min(back, k - 1))) {
+    prev <- trim(affL[k - j])
+    ## a numbered or long part is a separate item of the address, not the
+    ## beginning of the name
+    if (prev == "" || grepl("[[:digit:]]", prev) || length(unlist(strsplit(prev, "[[:space:]]+"))) > 3) break
+    first <- k - j
+  }
+  paste(trim(affL[first:k]), collapse = " ")
+}
+
 ### remove non interesting field
 ND <- function(affL, indd) {
   ## indd holds positions in affL: drop the matches carrying digits (street
@@ -593,7 +621,8 @@ ND <- function(affL, indd) {
   ## compacted vector shifted the match onto a later fragment of the address,
   ## most often the city.
   ind <- indd[!grepl("[[:digit:]]", affL[indd])]
+  ind <- ind[!isJobTitle(affL[ind])]
   cond <- length(ind) < 1
-  r <- list(affL = affL[ind[1]], cond = cond)
+  r <- list(affL = if (cond) NA_character_ else joinNameParts(affL, ind[1]), cond = cond)
   return(r)
 }

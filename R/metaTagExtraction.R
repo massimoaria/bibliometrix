@@ -514,10 +514,10 @@ AU_UN <- function(M, sep) {
 
       if (length(indd) == 0) {
         index <- append(index, "NOTREPORTED")
-      } else if (grepl("[[:digit:]]", affL[indd[1]])) {
+      } else if (isTRUE(ND(affL, indd)$cond)) {
         index <- append(index, "NOTDECLARED")
       } else {
-        index <- append(index, affL[indd[1]])
+        index <- append(index, ND(affL, indd)$affL)
       }
     }
     # index=unique(c(ind1,ind2,ind3,ind4,ind5,ind6,ind7,ind8))
@@ -534,6 +534,11 @@ AU_UN <- function(M, sep) {
   M$AU1_UN <- gsub("\\\\&", "AND", M$AU1_UN)
   M$AU1_UN <- gsub("\\&", "AND", M$AU1_UN)
 
+  ## the placeholders are internal markers, not affiliations: they were dropped
+  ## from AU_UN and carried through to the results in AU1_UN
+  M$AU1_UN[is.na(AFF)] <- NA
+  M$AU1_UN <- dropAffPlaceholders(M$AU1_UN)
+
   ## identification of NR affiliations
   M$AU_UN_NR <- NA
   listAFF2 <- strsplit(M$AU_UN, sep)
@@ -548,12 +553,7 @@ AU_UN <- function(M, sep) {
     }
   }
   M$AU_UN[is.na(AFF)] <- NA
-  M$AU_UN[M$AU_UN == "NOTDECLARED"] <- NA
-  M$AU_UN[M$AU_UN == "NOTREPORTED"] <- NA
-  M$AU_UN <- gsub("NOTREPORTED;", "", M$AU_UN)
-  M$AU_UN <- gsub(";NOTREPORTED", "", M$AU_UN)
-  M$AU_UN <- gsub("NOTDECLARED;", "", M$AU_UN)
-  M$AU_UN <- gsub("NOTDECLARED", "", M$AU_UN)
+  M$AU_UN <- dropAffPlaceholders(M$AU_UN)
 
   return(M)
 }
@@ -573,11 +573,27 @@ removeLastChar <- function(C, last = ".") {
   C[ind] <- substr(C[ind], 1, (nchar(C[ind]) - 1))
   return(C)
 }
+
+### drop the markers left by the affiliation selection above
+dropAffPlaceholders <- function(x) {
+  ## the markers have to go before the bare ones are turned into NA: a value
+  ## made of nothing but markers used to survive as a literal "NOTREPORTED"
+  for (p in c("NOTREPORTED", "NOTDECLARED")) {
+    x <- gsub(paste0(p, ";"), "", x, fixed = TRUE)
+    x <- gsub(paste0(";", p), "", x, fixed = TRUE)
+  }
+  x[x %in% c("NOTREPORTED", "NOTDECLARED", "")] <- NA
+  return(x)
+}
+
 ### remove non interesting field
 ND <- function(affL, indd) {
-  aff <- affL[!grepl("[[:digit:]]", affL)]
+  ## indd holds positions in affL: drop the matches carrying digits (street
+  ## numbers, PO boxes, postal codes) and index affL itself. Indexing the
+  ## compacted vector shifted the match onto a later fragment of the address,
+  ## most often the city.
   ind <- indd[!grepl("[[:digit:]]", affL[indd])]
   cond <- length(ind) < 1
-  r <- list(affL = aff[ind[1]], cond = cond)
+  r <- list(affL = affL[ind[1]], cond = cond)
   return(r)
 }

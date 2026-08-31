@@ -79,3 +79,117 @@ test_that("metaTagExtraction AU1_CO non cambia con le affiliazioni presenti", {
   M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU1_CO", ";")))
   expect_true(sum(!is.na(M2$AU1_CO)) == nrow(M2))
 })
+
+test_that("metaTagExtraction AU_UN non scivola sulla citta' quando l'indirizzo ha numeri civici", {
+  # Le parti dell'indirizzo che contengono cifre (numero civico, casella postale,
+  # CAP) vanno scartate, ma gli indici della parte con il tag restano riferiti
+  # alla stringa intera: prima l'affiliazione slittava sul frammento successivo.
+  C1 <- c(
+    "3400 SPRUCE ST, UNIV PENN, PHILADELPHIA, PA USA",
+    "PO BOX 100, UNIV OSLO, OSLO, NORWAY",
+    "BLDG 10 ROOM 2C146, NATL CANCER INST, BETHESDA, MD USA",
+    "UNIV PENN, PHILADELPHIA, PA USA"
+  )
+  M <- data.frame(
+    AU = paste0("AUTHOR A", seq_along(C1)),
+    C1 = C1,
+    RP = NA_character_,
+    DB = "ISI",
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_UN", ";")))
+  expect_equal(
+    M2$AU_UN,
+    c("UNIV PENN", "UNIV OSLO", "NATL CANCER INST", "UNIV PENN")
+  )
+})
+
+test_that("metaTagExtraction AU_UN non lascia i marcatori interni nei risultati", {
+  # NOTREPORTED e NOTDECLARED marcano le parti dell'indirizzo in cui nessuna
+  # istituzione e' riconoscibile. AU_UN li ripuliva, AU1_UN no: comparivano
+  # nelle analisi dell'affiliazione dell'autore corrispondente come se fossero
+  # il nome di un ente.
+  RP <- c(
+    "SMITH, J.; EMAIL: SMITH@EXAMPLE.COM",
+    "JONES, A.; UNIV OSLO, OSLO, NORWAY; EMAIL: JONES@EXAMPLE.COM",
+    "BROWN, K."
+  )
+  M <- data.frame(
+    AU = paste0("AUTHOR A", seq_along(RP)),
+    C1 = RP,
+    RP = RP,
+    DB = "SCOPUS",
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_UN", ";")))
+  for (field in c("AU_UN", "AU1_UN")) {
+    expect_false(any(grepl("NOTREPORTED|NOTDECLARED", M2[[field]])), info = field)
+    expect_false(any(M2[[field]] %in% ""), info = field)
+  }
+  expect_equal(M2$AU1_UN[2], "UNIV OSLO")
+  expect_true(is.na(M2$AU1_UN[3]))
+})
+
+test_that("metaTagExtraction AU_UN tiene insieme i nomi di ente che contengono virgole", {
+  # "National Heart, Lung, and Blood Institute" veniva spezzato sulle virgole e
+  # dell'ente restava il solo pezzo con il tag: "AND BLOOD INSTITUTE" (#431).
+  C1 <- c(
+    "NATIONAL HEART, LUNG, AND BLOOD INSTITUTE, BETHESDA, MD, USA",
+    "DEPT OF MEDICINE, NATIONAL HEART, LUNG, AND BLOOD INSTITUTE, BETHESDA, USA",
+    "NATL HEART LUNG AND BLOOD INST, BETHESDA, MD USA"
+  )
+  M <- data.frame(
+    AU = paste0("AUTHOR A", seq_along(C1)),
+    C1 = C1,
+    RP = NA_character_,
+    DB = "ISI",
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_UN", ";")))
+  expect_equal(
+    M2$AU_UN,
+    c(
+      "NATIONAL HEART LUNG AND BLOOD INSTITUTE",
+      "NATIONAL HEART LUNG AND BLOOD INSTITUTE",
+      "NATL HEART LUNG AND BLOOD INST"
+    )
+  )
+})
+
+test_that("metaTagExtraction AU_UN non scambia una qualifica per un ente", {
+  # I tag delle istituzioni sono prefissi: SCI compare in SCIENTIST, RES in
+  # RESEARCHER, INST in INSTRUCTOR. "Nurse Scientist" veniva restituito al posto
+  # dell'ospedale che seguiva (#431).
+  C1 <- c(
+    "NURSE SCIENTIST, CHILDRENS HOSPITAL OF PHILADELPHIA, PHILADELPHIA, PA, USA",
+    "DATA SCIENTIST, MAYO CLINIC, ROCHESTER, MN, USA",
+    "NURSE SCIENTIST, PHILADELPHIA, PA, USA",
+    "COLLEGE OF FAMILY PHYSICIANS, TORONTO, CANADA"
+  )
+  M <- data.frame(
+    AU = paste0("AUTHOR A", seq_along(C1)),
+    C1 = C1,
+    RP = NA_character_,
+    DB = "ISI",
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+
+  M2 <- suppressWarnings(suppressMessages(metaTagExtraction(M, "AU_UN", ";")))
+  # l'ultima riga non e' una qualifica ma un ente, e resta com'e'
+  expect_equal(
+    M2$AU_UN,
+    c(
+      "CHILDRENS HOSPITAL OF PHILADELPHIA",
+      "MAYO CLINIC",
+      NA_character_,
+      "COLLEGE OF FAMILY PHYSICIANS"
+    )
+  )
+})

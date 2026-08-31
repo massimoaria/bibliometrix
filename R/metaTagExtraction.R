@@ -514,10 +514,10 @@ AU_UN <- function(M, sep) {
 
       if (length(indd) == 0) {
         index <- append(index, "NOTREPORTED")
-      } else if (grepl("[[:digit:]]", affL[indd[1]])) {
+      } else if (isTRUE(ND(affL, indd)$cond)) {
         index <- append(index, "NOTDECLARED")
       } else {
-        index <- append(index, affL[indd[1]])
+        index <- append(index, ND(affL, indd)$affL)
       }
     }
     # index=unique(c(ind1,ind2,ind3,ind4,ind5,ind6,ind7,ind8))
@@ -534,6 +534,11 @@ AU_UN <- function(M, sep) {
   M$AU1_UN <- gsub("\\\\&", "AND", M$AU1_UN)
   M$AU1_UN <- gsub("\\&", "AND", M$AU1_UN)
 
+  ## the placeholders are internal markers, not affiliations: they were dropped
+  ## from AU_UN and carried through to the results in AU1_UN
+  M$AU1_UN[is.na(AFF)] <- NA
+  M$AU1_UN <- dropAffPlaceholders(M$AU1_UN)
+
   ## identification of NR affiliations
   M$AU_UN_NR <- NA
   listAFF2 <- strsplit(M$AU_UN, sep)
@@ -548,12 +553,7 @@ AU_UN <- function(M, sep) {
     }
   }
   M$AU_UN[is.na(AFF)] <- NA
-  M$AU_UN[M$AU_UN == "NOTDECLARED"] <- NA
-  M$AU_UN[M$AU_UN == "NOTREPORTED"] <- NA
-  M$AU_UN <- gsub("NOTREPORTED;", "", M$AU_UN)
-  M$AU_UN <- gsub(";NOTREPORTED", "", M$AU_UN)
-  M$AU_UN <- gsub("NOTDECLARED;", "", M$AU_UN)
-  M$AU_UN <- gsub("NOTDECLARED", "", M$AU_UN)
+  M$AU_UN <- dropAffPlaceholders(M$AU_UN)
 
   return(M)
 }
@@ -573,11 +573,56 @@ removeLastChar <- function(C, last = ".") {
   C[ind] <- substr(C[ind], 1, (nchar(C[ind]) - 1))
   return(C)
 }
+
+### drop the markers left by the affiliation selection above
+dropAffPlaceholders <- function(x) {
+  ## the markers have to go before the bare ones are turned into NA: a value
+  ## made of nothing but markers used to survive as a literal "NOTREPORTED"
+  for (p in c("NOTREPORTED", "NOTDECLARED")) {
+    x <- gsub(paste0(p, ";"), "", x, fixed = TRUE)
+    x <- gsub(paste0(";", p), "", x, fixed = TRUE)
+  }
+  x[x %in% c("NOTREPORTED", "NOTDECLARED", "")] <- NA
+  return(x)
+}
+
+### the job titles that the institution tags match by accident: SCI in
+### SCIENTIST, RES in RESEARCHER, INST in INSTRUCTOR, ARCH in ARCHITECT
+isJobTitle <- function(x) {
+  modifiers <- "SENIOR|JUNIOR|CHIEF|LEAD|HEAD|STAFF|PRINCIPAL|ASSOCIATE|ASSISTANT|CLINICAL|RESEARCH|DATA|NURSE|POSTDOCTORAL|VISITING|ADJUNCT|FORMER"
+  titles <- "SCIENTIST|RESEARCHER|CLINICIAN|TECHNICIAN|TECHNOLOGIST|INSTRUCTOR|ACADEMIC|ARCHITECT"
+  ## the whole part has to be the title: COLLEGE OF FAMILY PHYSICIANS and
+  ## INSTITUTE OF ACADEMIC MEDICINE are institutions, NURSE SCIENTIST is not
+  grepl(paste0("^((", modifiers, ")[[:space:]]+)*(", titles, ")S?$"), trim(x))
+}
+
+### an institution can carry commas in its own name ("National Heart, Lung, and
+### Blood Institute"): when the part holding the tag opens with the conjunction,
+### the name started in the parts before it
+joinNameParts <- function(affL, k, back = 2) {
+  if (!grepl("^(AND|&)[[:space:]]", trim(affL[k]))) {
+    return(affL[k])
+  }
+  first <- k
+  for (j in seq_len(min(back, k - 1))) {
+    prev <- trim(affL[k - j])
+    ## a numbered or long part is a separate item of the address, not the
+    ## beginning of the name
+    if (prev == "" || grepl("[[:digit:]]", prev) || length(unlist(strsplit(prev, "[[:space:]]+"))) > 3) break
+    first <- k - j
+  }
+  paste(trim(affL[first:k]), collapse = " ")
+}
+
 ### remove non interesting field
 ND <- function(affL, indd) {
-  aff <- affL[!grepl("[[:digit:]]", affL)]
+  ## indd holds positions in affL: drop the matches carrying digits (street
+  ## numbers, PO boxes, postal codes) and index affL itself. Indexing the
+  ## compacted vector shifted the match onto a later fragment of the address,
+  ## most often the city.
   ind <- indd[!grepl("[[:digit:]]", affL[indd])]
+  ind <- ind[!isJobTitle(affL[ind])]
   cond <- length(ind) < 1
-  r <- list(affL = aff[ind[1]], cond = cond)
+  r <- list(affL = if (cond) NA_character_ else joinNameParts(affL, ind[1]), cond = cond)
   return(r)
 }

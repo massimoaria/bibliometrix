@@ -57,6 +57,9 @@ biblioAnalysis <- function(M, sep = ";") {
   Authors <- NULL
   Authors_frac <- NULL
   FirstAuthors <- NULL
+  nAU <- 0
+  AuSingleAuthoredArt <- 0
+  AuMultiAuthoredArt <- 0
   PY <- NULL
   FAffiliation <- NULL
   Affiliation <- NULL
@@ -250,33 +253,36 @@ countryCollaboration <- function(M, Country, k, sep) {
   if (!("AU_CO" %in% names(M))) {
     M <- metaTagExtraction(M, Field = "AU_CO", sep)
   }
-  M$SCP <- 0
-  M$SCP_CO <- NA
-  for (i in 1:dim(M)[1]) {
-    if (!is.na(M$AU_CO[i])) {
-      co <- M$AU_CO[i]
-      co <- table(unlist(strsplit(co, ";")))
-      if (length(co) == 1) {
-        M$SCP[i] <- 1
+  M$SCP <- numeric(nrow(M))
+  M$SCP_CO <- character(nrow(M))
+  if (nrow(M) > 0) {
+    for (i in seq_len(nrow(M))) {
+      if (!is.na(M$AU_CO[i])) {
+        co <- M$AU_CO[i]
+        co <- table(unlist(strsplit(co, ";")))
+        if (length(co) == 1) {
+          M$SCP[i] <- 1
+        }
+        M$SCP_CO[i] <- M$AU1_CO[i]
+      } else {
+        M$SCP[i] <- NA
       }
-      M$SCP_CO[i] <- M$AU1_CO[i]
-    } else {
-      M$SCP[i] <- NA
     }
   }
 
-  if (k == 0) {
+  if (is.null(k) || k == 0 || length(Country) == 0) {
     return(data.frame(Country = character(0), SCP = numeric(0), MCP = numeric(0)))
   }
 
-  CO <- names(Country)[1:k]
+  CO <- names(Country)[seq_len(min(k, length(Country)))]
 
-  df <- data.frame(Country = rep(NA, k), SCP = rep(0, k))
-  for (i in 1:length(CO)) {
+  df <- data.frame(Country = rep(NA_character_, length(CO)), SCP = rep(0, length(CO)), stringsAsFactors = FALSE)
+  for (i in seq_along(CO)) {
     co <- CO[i]
     df$Country[i] <- co
-    df$SCP[i] <- sum(M$SCP[M$SCP_CO == co], na.rm = T)
+    df$SCP[i] <- sum(M$SCP[M$SCP_CO == co], na.rm = TRUE)
   }
-  df$MCP <- as.numeric(tableTag(M, "AU1_CO")[1:k]) - df$SCP
+  co_counts <- as.numeric(tableTag(M, "AU1_CO")[seq_len(length(CO))])
+  df$MCP <- co_counts - df$SCP
   return(df)
 }

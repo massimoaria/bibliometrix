@@ -1,4 +1,4 @@
-utils::globalVariables(c("PY", "TC"))
+utils::globalVariables(c("PY", "PYear", "TC"))
 
 #' Bibliometric Analysis
 #'
@@ -53,10 +53,23 @@ utils::globalVariables(c("PY", "TC"))
 #' @export
 
 biblioAnalysis <- function(M, sep = ";") {
+  ## Nothing can be measured on an empty collection: every distribution below is
+  ## empty and every ratio is 0/0. Say so here, rather than failing later inside
+  ## an aggregation with a message that does not name the cause.
+  if (nrow(M) == 0) {
+    stop("biblioAnalysis() needs a collection with at least one document.", call. = FALSE)
+  }
+
   # initialize variables
   Authors <- NULL
   Authors_frac <- NULL
   FirstAuthors <- NULL
+  ## Assigned only when the collection carries AU, and read unconditionally by
+  ## the result list below. NULL is what every other unavailable field is set to
+  ## here; 0 would instead assert "documents with no authors".
+  nAU <- NULL
+  AuSingleAuthoredArt <- NULL
+  AuMultiAuthoredArt <- NULL
   PY <- NULL
   FAffiliation <- NULL
   Affiliation <- NULL
@@ -98,7 +111,7 @@ biblioAnalysis <- function(M, sep = ";") {
     fracAU <- rep(1 / nAU, nAU)
     AU <- unlist(listAU)
 
-    Authors <- sort(table(AU), decreasing = TRUE)
+    Authors <- tableSort(table(AU))
     Authors_frac <- aggregate(fracAU, by = list(AU), "sum")
     names(Authors_frac) <- c("Author", "Frequency")
     Authors_frac <- Authors_frac[order(-Authors_frac$Frequency), ]
@@ -120,13 +133,18 @@ biblioAnalysis <- function(M, sep = ";") {
   if ("TC" %in% Tags) {
     TC <- as.numeric(M$TC)
     CurrentYear <- as.numeric(format(Sys.Date(), "%Y"))
-    TCperYear <- TC / (CurrentYear - PY + 1)
+    ## Some exports carry no publication year. The citation age is then unknown,
+    ## but the citation counts are not, so the year is carried as a full-length
+    ## vector of NA: recycling NULL would give TCperYear length zero and the
+    ## data frame below columns of two different lengths.
+    PYear <- if (is.null(PY)) rep(NA_real_, nrow(M)) else PY
+    TCperYear <- TC / (CurrentYear - PYear + 1)
     if (!("DI" %in% names(M))) M$DI <- ""
-    MostCitedPapers <- data.frame(M$SR, M$DI, TC, TCperYear, PY) %>%
-      group_by(PY) %>%
+    MostCitedPapers <- data.frame(M$SR, M$DI, TC, TCperYear, PYear) %>%
+      group_by(PYear) %>%
       mutate(NTC = TC / mean(TC)) %>%
       ungroup() %>%
-      select(-PY) %>%
+      select(-PYear) %>%
       arrange(desc(TC)) %>%
       as.data.frame()
 
@@ -153,7 +171,7 @@ biblioAnalysis <- function(M, sep = ";") {
   # Sources
   if ("SO" %in% Tags) {
     SO <- gsub(",", "", M$SO, fixed = TRUE)
-    SO <- sort(table(SO), decreasing = TRUE)
+    SO <- tableSort(table(SO))
   }
 
   # All Affiliations, First Affiliation and Countries
@@ -173,7 +191,7 @@ biblioAnalysis <- function(M, sep = ";") {
       }
     })) # fractional frequencies
     AFF <- trim.leading(unlist(listAFF)) # delete spaces
-    Affiliation <- sort(table(AFF), decreasing = TRUE)
+    Affiliation <- tableSort(table(AFF))
     Affiliation_frac <- aggregate(fracAFF, by = list(AFF), "sum")
     names(Affiliation_frac) <- c("Affiliation", "Frequency")
     Affiliation_frac <- Affiliation_frac[order(-Affiliation_frac$Frequency), ]
@@ -279,4 +297,19 @@ countryCollaboration <- function(M, Country, k, sep) {
   }
   df$MCP <- as.numeric(tableTag(M, "AU1_CO")[1:k]) - df$SCP
   return(df)
+}
+
+## A frequency table ordered by decreasing count.
+## sort() on a table holding a single entry returns a plain named vector: the
+## table class is dropped and with it the name of the tabulated variable, so
+## as.data.frame() names the column after the expression that produced it and
+## plot.bibliometrix(), which maps that name, cannot find it. A collection of one
+## document, or one whose authors are all the same person, ends up in that state.
+## Subsetting with drop = FALSE keeps both.
+tableSort <- function(x) {
+  y <- sort(x, decreasing = TRUE)
+  if (is.table(y)) {
+    return(y)
+  }
+  x[order(-as.numeric(x)), drop = FALSE]
 }

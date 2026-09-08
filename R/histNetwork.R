@@ -61,6 +61,15 @@ histNetwork <- function(M, min.citations, sep = ";", network = TRUE, verbose = T
   M$TC[is.na(M$TC)] <- 0
 
   if (db == "ISI") db <- "WOS"
+  # OpenAlex and Lens resolve local citations by native record id (CRids/CR against id_oa,
+  # CR against UT). When the cited references were ADDED by metadata enrichment
+  # (completeMetadata, Biblioshiny "Complete missing metadata") they are WoS-format strings
+  # carrying DOIs, and no id is left to match on: a minimal OpenAlex CSV export ships no
+  # references at all, so there is nothing to preserve in CRids. The id matcher then matches
+  # nothing and every LCS comes back 0. Hand those collections to the generic SR + DOI
+  # matcher instead. A collection whose references DO carry ids keeps the exact id matching,
+  # which is the better one: it also counts the references that have no DOI.
+  if (db %in% c("OPENALEX", "LENS") && !refIdsMatchable(M, db, sep)) db <- "ENRICHED"
   switch(db,
     WOS = {
       results <- wos(M = M, min.citations = min.citations, sep = sep, network = network, verbose = verbose)
@@ -75,7 +84,13 @@ histNetwork <- function(M, min.citations, sep = ";", network = TRUE, verbose = T
       results <- lens(M = M, min.citations = min.citations, sep = sep, network = network, verbose = verbose)
     },
     {
-      cat("\nDatabase not compatible with direct citation analysis\n")
+      # Any other database (PubMed, Cochrane, Dimensions -- or an OpenAlex/Lens collection
+      # whose references came from enrichment) that nonetheless CARRIES cited references:
+      # the WoS-style matcher is database-agnostic. match_by_doi = TRUE because a reference
+      # rebuilt from an external source rarely reproduces SR_FULL exactly (author initials,
+      # abbreviated journal), so the DOI is what ties it back to the collection. The
+      # has_cr/has_crids guard above already returned for collections with no references.
+      results <- wos(M = M, min.citations = min.citations, sep = sep, network = network, verbose = verbose, match_by_doi = TRUE)
     }
   )
 
@@ -83,7 +98,23 @@ histNetwork <- function(M, min.citations, sep = ";", network = TRUE, verbose = T
 }
 
 
-wos <- function(M, min.citations, sep, network, verbose) {
+# TRUE when the collection's own record ids (OpenAlex id_oa, Lens UT) appear among its cited
+# references, i.e. when the id-based local-citation matcher can find anything at all.
+refIdsMatchable <- function(M, db, sep = ";") {
+  idcol <- switch(db, OPENALEX = "id_oa", LENS = "UT", NULL)
+  if (is.null(idcol) || !(idcol %in% names(M))) {
+    return(FALSE)
+  }
+  cr <- if ("CRids" %in% names(M) && any(!is.na(M$CRids) & M$CRids != "")) M$CRids else M$CR
+  if (is.null(cr)) {
+    return(FALSE)
+  }
+  refs <- unique(trimws(unlist(strsplit(as.character(cr), sep))))
+  any(refs %in% M[[idcol]])
+}
+
+
+wos <- function(M, min.citations, sep, network, verbose, match_by_doi = FALSE) {
   if (isTRUE(verbose)) {
     cat("\nWOS DB:\nSearching local citations (LCS) by reference items (SR) and DOIs...\n")
   }
@@ -130,6 +161,19 @@ wos <- function(M, min.citations, sep, network, verbose) {
   M$LABEL <- paste(M$SR_FULL, "DOI", toupper(M$DI))
 
   CR$LABEL <- paste(CR$SR, "DOI", CR$DI)
+
+  if (isTRUE(match_by_doi)) {
+    # Enriched collections: the reference string is rebuilt from an external source (e.g.
+    # OpenAlex), so its SR part (author initials, journal abbreviation) rarely reproduces
+    # SR_FULL exactly and the exact SR + DOI label below would never match. When a reference
+    # carries a DOI that belongs to a document of the collection, rewrite its LABEL to that
+    # document's canonical LABEL, so the exact join still counts it as a local citation.
+    # The WOS and SCOPUS branches call with match_by_doi = FALSE: behaviour unchanged.
+    doi_idx <- match(toupper(CR$DI), toupper(M$DI))
+    doi_idx[CR$DI == ""] <- NA
+    hit <- !is.na(doi_idx)
+    CR$LABEL[hit] <- M$LABEL[doi_idx[hit]]
+  }
 
   # By reference
   L <- left_join(M, CR, by = c("LABEL"))

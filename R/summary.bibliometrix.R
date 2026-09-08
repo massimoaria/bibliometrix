@@ -68,6 +68,16 @@ summary.bibliometrix <- function(object, ...) {
   K <- k
   Co <- NULL
   AC <- NULL
+  ## Sections a collection may not support at all. They are read by the result
+  ## list at the end of the function, so they have to exist even when the
+  ## section that builds them is skipped.
+  A <- NULL
+  AA <- NULL
+  MostCitedPapers <- NULL
+
+  ## A figure that the collection cannot support is reported as NA. Pasting a
+  ## zero-length value would leave the label followed by a gap.
+  orNA <- function(x) if (length(x) == 0) "NA" else x
 
   TCm <- format(mean(as.numeric(object$TotalCitation), na.rm = TRUE), digits = 4)
   TCmy <- format(mean(as.numeric(object$MostCitedPapers$TCperYear), na.rm = TRUE), digits = 4)
@@ -75,16 +85,23 @@ summary.bibliometrix <- function(object, ...) {
   MYfP <- as.numeric(substr(Sys.time(), 1, 4)) - mean(object$Years, na.rm = TRUE)
 
   # CAGR
-  Y <- table(object$Years)
-  ny <- diff(range(as.numeric(names(Y)))) # dim(Y)[1]
-  CAGR <- as.numeric(round(((Y[length(Y)] / Y[1])^(1 / (ny)) - 1) * 100, 2))
+  ## An export without the publication year has neither a timespan nor a growth
+  ## rate: the table would be empty and the range it is divided by degenerate.
+  hasYears <- sum(!is.na(object$Years)) > 0
+  CAGR <- NA
+  if (hasYears) {
+    Y <- table(object$Years)
+    ny <- diff(range(as.numeric(names(Y)))) # dim(Y)[1]
+    CAGR <- as.numeric(round(((Y[length(Y)] / Y[1])^(1 / (ny)) - 1) * 100, 2))
+  }
   #
 
   # IntColl<- sum(object$CountryCollaboration$MCP)/object$Articles*100
 
   # Main Information about data
   MainInfo <- toupper("\n\nMain Information about data\n\n")
-  MainInfo[length(MainInfo) + 1] <- paste("Timespan                             ", min(object$Years, na.rm = T), ":", max(object$Years, na.rm = T), "\n")
+  Timespan <- if (hasYears) paste(min(object$Years, na.rm = TRUE), ":", max(object$Years, na.rm = TRUE)) else "NA"
+  MainInfo[length(MainInfo) + 1] <- paste("Timespan                             ", Timespan, "\n")
   MainInfo[length(MainInfo) + 1] <- paste("Sources (Journals, Books, etc)       ", length(object$Sources), "\n")
   MainInfo[length(MainInfo) + 1] <- paste("Documents                            ", object$Articles, "\n")
   MainInfo[length(MainInfo) + 1] <- paste("Annual Growth Rate %                 ", format(CAGR, digits = 4), "\n")
@@ -102,15 +119,15 @@ summary.bibliometrix <- function(object, ...) {
   MainInfo[length(MainInfo) + 1] <- paste("Keywords Plus (ID)                   ", length(object$ID), "\n")
   MainInfo[length(MainInfo) + 1] <- paste("Author's Keywords (DE)               ", length(object$DE), "\n")
   MainInfo[length(MainInfo) + 1] <- toupper("\nAuthors\n")
-  MainInfo[length(MainInfo) + 1] <- paste("Authors                              ", object$nAuthors, "\n")
+  MainInfo[length(MainInfo) + 1] <- paste("Authors                              ", orNA(object$nAuthors), "\n")
   MainInfo[length(MainInfo) + 1] <- paste("Author Appearances                   ", object$Appearances, "\n")
-  MainInfo[length(MainInfo) + 1] <- paste("Authors of single-authored docs      ", object$AuSingleAuthoredArt, "\n")
+  MainInfo[length(MainInfo) + 1] <- paste("Authors of single-authored docs      ", orNA(object$AuSingleAuthoredArt), "\n")
   # MainInfo[length(MainInfo)+1]=paste("Authors of multi-authored documents  ",object$AuMultiAuthoredArt,"\n")
   MainInfo[length(MainInfo) + 1] <- toupper("\nAuthors Collaboration\n")
   MainInfo[length(MainInfo) + 1] <- paste("Single-authored docs                 ", as.character(round(sum(object$nAUperPaper == 1), 0)), "\n") # format(sum(object$nAUperPaper==1),digits=0),"\n")
-  MainInfo[length(MainInfo) + 1] <- paste("Documents per Author                 ", format(object$Articles / object$nAuthors, digits = 3), "\n")
+  MainInfo[length(MainInfo) + 1] <- paste("Documents per Author                 ", orNA(format(object$Articles / object$nAuthors, digits = 3)), "\n")
   # MainInfo[length(MainInfo)+1]=paste("Authors per Document                 ",format(object$nAuthors/object$Articles,digits=3),"\n")
-  MainInfo[length(MainInfo) + 1] <- paste("Co-Authors per Doc                   ", format(mean(object$nAUperPaper), digits = 3), "\n")
+  MainInfo[length(MainInfo) + 1] <- paste("Co-Authors per Doc                   ", orNA(if (length(object$nAUperPaper) > 0) format(mean(object$nAUperPaper), digits = 3) else NULL), "\n")
   MainInfo[length(MainInfo) + 1] <- paste("International co-authorships %       ", format(object$IntColl, digits = 4), "\n")
   # MainInfo[length(MainInfo)+1]=paste("Collaboration Index                  ",CollIndex,"\n")
   MainInfo[length(MainInfo) + 1] <- paste("\n")
@@ -133,12 +150,17 @@ summary.bibliometrix <- function(object, ...) {
     line <- readline()
   }
 
-  if (isTRUE(verbose)) cat("\nAnnual Scientific Production\n\n")
-  Y <- data.frame(table(object$Years))
-  names(Y) <- c("Year   ", "Articles")
-  if (isTRUE(verbose)) {
-    print(Y, row.names = FALSE)
-    cat("\n")
+  if (hasYears) {
+    if (isTRUE(verbose)) cat("\nAnnual Scientific Production\n\n")
+    Y <- data.frame(table(object$Years))
+    names(Y) <- c("Year   ", "Articles")
+    if (isTRUE(verbose)) {
+      print(Y, row.names = FALSE)
+      cat("\n")
+    }
+  } else {
+    Y <- NULL
+    if (isTRUE(verbose)) cat("\nAnnual Scientific Production is not available: the collection carries no publication year\n\n")
   }
   #  ny=dim(Y)[1]
   # ny=max(as.numeric(levels(Y[,1])),na.rm=TRUE)-min(as.numeric(levels(Y[,1])),na.rm=TRUE)
@@ -155,22 +177,27 @@ summary.bibliometrix <- function(object, ...) {
 
 
   # Most Productive Authors
-  if (isTRUE(verbose)) {
-    cat("\nMost Productive Authors\n\n")
-  }
-  if (K == Inf) {
-    k <- length(object$Authors)
-  }
-  A <- data.frame(cbind(object$Authors[1:k]))
-  A$MPA <- row.names(A)
-  A <- A[, c(2, 1)]
-  A[, 3:4] <- object$AuthorsFrac[1:k, ]
-  names(A) <- c("Authors       ", "Articles", "Authors       ", "Articles Fractionalized")
-  A <- format(A, justify = "left", digits = 3)
-  row.names(A) <- 1:k
-  if (isTRUE(verbose)) {
-    print(A, row.names = TRUE)
-    cat("\n")
+  ## An export that omits the author field supports none of this section.
+  if (!is.null(object$Authors)) {
+    if (isTRUE(verbose)) {
+      cat("\nMost Productive Authors\n\n")
+    }
+    if (K == Inf) {
+      k <- length(object$Authors)
+    }
+    A <- data.frame(cbind(object$Authors[1:k]))
+    A$MPA <- row.names(A)
+    A <- A[, c(2, 1)]
+    A[, 3:4] <- object$AuthorsFrac[1:k, ]
+    names(A) <- c("Authors       ", "Articles", "Authors       ", "Articles Fractionalized")
+    A <- format(A, justify = "left", digits = 3)
+    row.names(A) <- 1:k
+    if (isTRUE(verbose)) {
+      print(A, row.names = TRUE)
+      cat("\n")
+    }
+  } else if (isTRUE(verbose)) {
+    cat("\nMost Productive Authors is not available: the collection carries no author\n\n")
   }
 
   if (pause == TRUE & isTRUE(verbose)) {
@@ -179,18 +206,23 @@ summary.bibliometrix <- function(object, ...) {
   }
 
   # Most Cited Manuscipts
-  if (isTRUE(verbose)) {
-    cat("\nTop manuscripts per citations\n\n")
-  }
-  if (K == Inf) {
-    k <- dim(object$MostCitedPapers)[1]
-  }
-  MostCitedPapers <- object$MostCitedPapers[1:k, ]
-  MostCitedPapers <- format(MostCitedPapers, justify = "left", digits = 3)
-  row.names(MostCitedPapers) <- 1:k
-  if (isTRUE(verbose)) {
-    print(MostCitedPapers, row.names = TRUE)
-    cat("\n")
+  ## Without the times-cited field there is no ranking to print.
+  if (!is.null(object$MostCitedPapers)) {
+    if (isTRUE(verbose)) {
+      cat("\nTop manuscripts per citations\n\n")
+    }
+    if (K == Inf) {
+      k <- dim(object$MostCitedPapers)[1]
+    }
+    MostCitedPapers <- object$MostCitedPapers[1:k, ]
+    MostCitedPapers <- format(MostCitedPapers, justify = "left", digits = 3)
+    row.names(MostCitedPapers) <- 1:k
+    if (isTRUE(verbose)) {
+      print(MostCitedPapers, row.names = TRUE)
+      cat("\n")
+    }
+  } else if (isTRUE(verbose)) {
+    cat("\nTop manuscripts per citations is not available: the collection carries no times-cited field\n\n")
   }
 
   if (pause == TRUE & isTRUE(verbose)) {
@@ -233,31 +265,36 @@ summary.bibliometrix <- function(object, ...) {
     }
 
     # Total Citation per Country
-    if (isTRUE(verbose)) {
-      cat("\nTotal Citations per Country\n\n")
-    }
+    ## Citations per country need the times-cited field. Without it the data
+    ## frame below is built with a single column and then grouped on a name it
+    ## does not contain.
+    if (!is.null(object$TotalCitation)) {
+      if (isTRUE(verbose)) {
+        cat("\nTotal Citations per Country\n\n")
+      }
 
-    Co2 <- data.frame(Country = object$CO, TotalCitation = object$TotalCitation)
-    Co2 <- Co2[!is.na(Co2[, 1]), ]
-    AC <- Co2 %>%
-      group_by(Country) %>%
-      summarise("TC" = sum(TotalCitation), "Average Article Citations" = sum(TotalCitation) / length(TotalCitation)) %>%
-      arrange(-TC) # %>% as.data.frame(.data)
+      Co2 <- data.frame(Country = object$CO, TotalCitation = object$TotalCitation)
+      Co2 <- Co2[!is.na(Co2[, 1]), ]
+      AC <- Co2 %>%
+        group_by(Country) %>%
+        summarise("TC" = sum(TotalCitation), "Average Article Citations" = sum(TotalCitation) / length(TotalCitation)) %>%
+        arrange(-TC) # %>% as.data.frame(.data)
 
-    AC <- as.data.frame(AC)
+      AC <- as.data.frame(AC)
 
-    names(AC) <- c("Country     ", "Total Citations", "Average Article Citations")
-    AC <- format(AC, justify = "left", digits = 3)[1:kk, ]
-    row.names(AC) <- 1:kk
-    if (isTRUE(verbose)) {
-      print(AC, row.names = TRUE)
-      cat("\n")
-    }
+      names(AC) <- c("Country     ", "Total Citations", "Average Article Citations")
+      AC <- format(AC, justify = "left", digits = 3)[1:kk, ]
+      row.names(AC) <- 1:kk
+      if (isTRUE(verbose)) {
+        print(AC, row.names = TRUE)
+        cat("\n")
+      }
 
 
-    if (pause == TRUE & isTRUE(verbose)) {
-      cat("Hit <Return> to see next table: ")
-      line <- readline()
+      if (pause == TRUE & isTRUE(verbose)) {
+        cat("Hit <Return> to see next table: ")
+        line <- readline()
+      }
     }
   }
 

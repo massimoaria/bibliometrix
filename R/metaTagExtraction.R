@@ -46,6 +46,14 @@
 #' @export
 
 metaTagExtraction <- function(M, Field = "CR_AU", sep = ";", aff.disamb = TRUE) {
+  ## Every branch below selects on M$DB[1]. A collection assembled by hand, or
+  ## one whose DB column was dropped along the way, made those tests read NULL[1]
+  ## and stopped with "argument is of length zero". An unknown source is not an
+  ## error: it simply matches none of the database-specific branches.
+  if (!("DB" %in% names(M))) {
+    M$DB <- ""
+  }
+
   ### data cleaning
   if ("CR" %in% names(M)) {
     M$CR <- gsub("DOI;", "DOI ", as.character(M$CR))

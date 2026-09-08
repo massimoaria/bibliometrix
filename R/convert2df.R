@@ -301,7 +301,7 @@ convert2df <- function(
       openalex_api = {
         id_field <- "id_oa"
       },
-      dimneisons = {
+      dimensions = {
         id_field <- "UT"
       },
       pubmed = {

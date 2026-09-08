@@ -1,0 +1,82 @@
+name: Bug report
+description: Something in bibliometrix or Biblioshiny does not work as documented
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The two fields that decide whether an issue can be
+        acted on are the **verbatim traceback** and the output of
+        **`sessionInfo()`**. Please paste what the console printed, unedited --
+        a description written after the fact, by you or by an AI assistant, is
+        not enough to locate a fault.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reprex
+    attributes:
+      label: Code that reproduces it
+      description: >
+        The smallest sequence of calls that shows the problem. If it is a
+        Biblioshiny problem, name the page and the control you used instead.
+      render: r
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: The error, verbatim, and the traceback
+      description: >
+        The error message exactly as printed, followed by the output of
+        `traceback()` run in the same session right after the error.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: session-info
+    attributes:
+      label: Output of sessionInfo()
+      render: text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database and export format
+      description: Most defects are specific to one importer.
+      options:
+        - Web of Science (plaintext)
+        - Web of Science (BibTeX)
+        - Scopus (CSV)
+        - Scopus (BibTeX)
+        - OpenAlex (CSV)
+        - OpenAlex (API)
+        - PubMed
+        - Lens.org
+        - Dimensions
+        - Cochrane
+        - Several, merged
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: data
+    attributes:
+      label: The collection
+      description: >
+        A handful of records that reproduce the problem is far more useful than
+        a full export. If the data cannot be shared, say so and describe its
+        shape: how many documents, and which fields are present or empty.
+    validations:
+      required: false

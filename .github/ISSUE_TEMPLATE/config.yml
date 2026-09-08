@@ -1,0 +1,10 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation and function reference
+    url: https://www.bibliometrix.org
+    about: Guides for bibliometrix and Biblioshiny, and the reference of every function.
+  - name: The bibliometrix book
+    url: https://book.bibliometrix.org
+    about: >
+      Worked science mapping analyses. Questions about how to perform an
+      analysis are usually answered here rather than by an issue.

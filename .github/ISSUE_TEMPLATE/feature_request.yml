@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an analysis, an option or an improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: >
+        Describe the analysis you want to perform and why the current functions
+        do not support it. The scientific motivation matters more than the
+        implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+      description: >
+        The function, argument or Biblioshiny control you would expect, and what
+        it would return. References to the literature are welcome.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do instead today
+      description: The workaround you are using, if any.
+    validations:
+      required: false

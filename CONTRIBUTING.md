@@ -8,11 +8,18 @@ This file records the conventions of this repository. Most of them are not
 guessable from the outside, so please read the section that applies to you
 before you start.
 
+- [Code of conduct](#code-of-conduct)
 - [Reporting a bug](#reporting-a-bug)
 - [Suggesting a feature](#suggesting-a-feature)
 - [Sending a pull request](#sending-a-pull-request)
 - [Setting up a development environment](#setting-up-a-development-environment)
 - [Conventions of this repository](#conventions-of-this-repository)
+
+## Code of conduct
+
+Everyone taking part in this project is expected to follow the
+[Code of Conduct](CODE_OF_CONDUCT.md). It is the Contributor Covenant 2.1.
+Unacceptable behaviour can be reported to aria@unina.it.
 
 ## Reporting a bug
 

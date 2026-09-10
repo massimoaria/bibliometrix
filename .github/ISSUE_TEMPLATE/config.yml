@@ -8,3 +8,9 @@ contact_links:
     about: >
       Worked science mapping analyses. Questions about how to perform an
       analysis are usually answered here rather than by an issue.
+  - name: Questions about using bibliometrix
+    url: https://github.com/massimoaria/bibliometrix/blob/master/SUPPORT.md
+    about: >
+      Running an analysis, choosing an indicator, reading a result: these go to
+      info@bibliometrix.org rather than to an issue. SUPPORT.md says where each
+      kind of question belongs.

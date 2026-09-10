@@ -5,6 +5,10 @@ bibentry(bibtype="Article",
          author = "Massimo Aria and Corrado Cuccurullo",
          journal = "Journal of Informetrics",
          year = "2017",
+         volume = "11",
+         number = "4",
+         pages = "959--975",
+         publisher = "Elsevier",
          doi = "10.1016/j.joi.2017.08.007",
          textVersion =
            paste("Aria, M., & Cuccurullo, C. (2017),",
@@ -16,12 +20,16 @@ bibentry(bibtype="Article",
          author = "Massimo Aria and Corrado Cuccurullo and Luca D'Aniello and Maria Spano",
          journal = "Journal of Informetrics",
          year = "2026",
+         volume = "20",
+         number = "3",
+         pages = "101837",
+         publisher = "Elsevier",
          doi = "10.1016/j.joi.2026.101837",
          textVersion =
            paste("Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026),",
            "Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping.",
            "A demonstration through the replication of a study,",
-           "Journal of Informetrics, DOI: 10.1016/j.joi.2026.101837."))
+           "Journal of Informetrics, 20(3), 101837, Elsevier."))
 
 bibentry(bibtype="Book",
          title = "Science Mapping Analysis - A primer with Biblioshiny",

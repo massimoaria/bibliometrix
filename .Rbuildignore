@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+^CITATION\.cff$
 ^[^/]*\.txt$
 ^[^/]*\.bib$
 ^[^/]*\.ini$

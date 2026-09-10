@@ -380,9 +380,17 @@ extract_collapsed_affiliations <- function(affiliations, id_oa) {
   })
 }
 
+# Split one of the ';'-joined multi-value columns into its elements.
+# Two different producers fill those columns and they do not agree on the
+# separator: the conversion at the top of csvOA2df() turns the CSV's '|' into
+# ';' with no space, while extract_collapsed_affiliations() joins C1 and C1_ID
+# with '; '. Splitting on ';' alone therefore leaves a leading blank on every
+# element but the first, so trim on both sides here rather than at each call.
+split_field <- function(x) stringr::str_trim(stringr::str_split(x, ";")[[1]])
+
 # Funzione aggiornata per sostituire corresponding_author_ids e corresponding_institution_ids con nome e affiliazione
 replace_corresponding_info <- function(data) {
-  data$corresponding_author_ids <- unlist(lapply(strsplit(data$corresponding_author_ids, ";"), function(l) l[1]))
+  data$corresponding_author_ids <- unlist(lapply(strsplit(data$corresponding_author_ids, ";"), function(l) stringr::str_trim(l[1])))
   data %>%
     rowwise() %>%
     mutate(
@@ -391,10 +399,10 @@ replace_corresponding_info <- function(data) {
         !is.na(corresponding_author_ids) && corresponding_author_ids != "",
         {
           # Ottieni la lista di autori e ID
-          author_names <- stringr::str_split(AU, ";")[[1]]
-          author_ids <- stringr::str_split(AU_ID, ";")[[1]]
+          author_names <- split_field(AU)
+          author_ids <- split_field(AU_ID)
           # Trova l'indice dell'ID autore corrispondente
-          matching_index <- which(author_ids == corresponding_author_ids, "")
+          matching_index <- which(author_ids == corresponding_author_ids)
           if (length(matching_index) > 0) author_names[matching_index] else NA_character_
         },
         NA_character_
@@ -405,10 +413,10 @@ replace_corresponding_info <- function(data) {
         !is.na(corresponding_institution_ids) && corresponding_institution_ids != "",
         {
           # Ottieni la lista di affiliazioni e ID
-          institution_names <- stringr::str_split(C1, ";")[[1]]
-          institution_ids <- stringr::str_split(C1_ID, ";")[[1]] %>% stringr::str_trim()
+          institution_names <- split_field(C1)
+          institution_ids <- split_field(C1_ID)
           # Rimuovi il prefisso dell'ID istituzionale per la corrispondenza
-          corresponding_ids <- stringr::str_split(corresponding_institution_ids, ";")[[1]] %>%
+          corresponding_ids <- split_field(corresponding_institution_ids) %>%
             stringr::str_replace_all("https://openalex.org/", "")
           # Trova le affiliazioni corrispondenti e uniscile
           matching_affiliations <- institution_names[institution_ids %in% corresponding_ids]
@@ -422,8 +430,8 @@ replace_corresponding_info <- function(data) {
         !is.na(corresponding_author_ids) && corresponding_author_ids != "",
         {
           # Ottieni la lista delle nazioni e degli ID
-          author_countries <- stringr::str_split(AU_CO, ";")[[1]]
-          author_ids <- stringr::str_split(AU_ID, ";")[[1]]
+          author_countries <- split_field(AU_CO)
+          author_ids <- split_field(AU_ID)
           # Trova l'indice dell'ID autore corrispondente
           matching_index <- which(author_ids == corresponding_author_ids)
           if (length(matching_index) > 0) author_countries[matching_index] else NA_character_

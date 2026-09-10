@@ -91,6 +91,17 @@ Before you open it:
   waits.
 - **Do not reformat code you are not changing.** A whitespace sweep hides the
   actual change in the diff.
+- **Do not squash, and do not rebase a branch that is already pushed.** Leave
+  the commits as you made them: a branch whose history shows the failing test
+  first and the fix second is easier to review than one square commit, and the
+  pull request is merged with a merge commit anyway, so the shape of your
+  history does not affect ours. To pick up new work on `develop`, merge it in
+  (`git merge origin/develop`) rather than rebasing; rewriting commits that are
+  already on GitHub invalidates the review comments attached to them.
+- **Write the commit message for someone reading `git log` in two years.** A
+  subject line that says what changed, and a body that says why, if the subject
+  is not enough. Prefixes such as `fix(module):` are neither required nor
+  discouraged.
 
 Note on continuous integration: `R-CMD-check` currently runs on pushes to
 `master` and on pull requests whose base is `master`. A pull request against
@@ -115,10 +126,22 @@ sources live in `inst/biblioshiny/`.
 
 ## Conventions of this repository
 
-- **`R/`, `inst/biblioshiny/` and `NEWS` must stay pure ASCII.** Non-ASCII
-  characters in the Biblioshiny sources break the app in non-UTF-8 locales, and
-  a test enforces it. Write them as `\u` escapes, or as numeric character
-  references in HTML. `NEWS.md` is exempt.
+- **`inst/biblioshiny/` must stay pure ASCII, and a test enforces it.** In an
+  MBCS locale R ignores `encoding = "UTF-8"` and decodes the file with the
+  system codepage: a non-ASCII character is corrupted, and if it falls inside a
+  string the file no longer parses and Biblioshiny does not start (issue #589).
+  Write such characters as `\u` escapes, or in HTML as numeric character
+  references; the source stays ASCII and the value at run time is unchanged.
+- **Keep `NEWS` ASCII too, but transliterate rather than escape.** `NEWS` is
+  plain text, read by `news()` and shown verbatim: a `\u` escape would appear
+  as the six characters you typed. So write a contributor's name as `Benzecri`,
+  not as `Benzecr\u00ec`, and keep the accented spelling for `NEWS.md`, which
+  is Markdown and is exempt. If a name cannot survive transliteration, spell it
+  in `NEWS.md` and use the plain form in `NEWS`.
+- **`R/` is UTF-8 and may hold non-ASCII characters.** `DESCRIPTION` declares
+  `Encoding: UTF-8`, so `R CMD check` accepts them and several files already
+  use them. Prefer ASCII in new code all the same, for the same reason as
+  above, but this one is a preference and not a rule.
 - **Every user-visible change gets a `NEWS` entry.** Entries here are written to
   explain the defect, not just to name it: what went wrong, in which situation,
   and what the reader will now see instead.

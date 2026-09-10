@@ -33,6 +33,16 @@ load_lens_fixture <- function() {
   ))
 }
 
+# Export OpenAlex nel formato "vecchio": le affiliazioni arrivano nella colonna
+# authorships.affiliations e l'autore corrispondente in corresponding_author_ids
+# (issue #666). E' il percorso che passa per extract_collapsed_affiliations() e
+# replace_corresponding_info(), diverso da quello di openalex_sample.csv.
+load_openalex_oldformat_fixture <- function() {
+  suppressWarnings(suppressMessages(
+    convert2df(fixture_path("openalex_oldformat_sample.csv"), dbsource = "openalex", format = "csv")
+  ))
+}
+
 # Export WoS in cui i riferimenti citati usano la forma "Cognome, Iniziali,"
 # invece della classica "Cognome Iniziali," (issue #640).
 load_wos_newformat_fixture <- function() {

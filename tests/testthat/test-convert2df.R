@@ -141,3 +141,19 @@ test_that("convert2df non spezza gli autori BibTeX andati a capo", {
   expect_true(all(grepl(" ", authors)))
   expect_false(any(grepl("^\\s", unlist(strsplit(M$AF, ";")))))
 })
+
+test_that("replace_corresponding_info matches corresponding author ID without syntax error", {
+  df_oa <- data.frame(
+    corresponding_author_ids = "A1",
+    corresponding_institution_ids = "I1",
+    AU = "SMITH J; DOE J",
+    AU_ID = "A1; A2",
+    C1 = "UNIV A; UNIV B",
+    C1_ID = "I1; I2",
+    AU_CO = "USA; CANADA",
+    stringsAsFactors = FALSE
+  )
+  res <- replace_corresponding_info(df_oa)
+  expect_equal(res$corresponding_author_name, "SMITH J")
+})
+

@@ -394,7 +394,7 @@ replace_corresponding_info <- function(data) {
           author_names <- stringr::str_split(AU, ";")[[1]]
           author_ids <- stringr::str_split(AU_ID, ";")[[1]]
           # Trova l'indice dell'ID autore corrispondente
-          matching_index <- which(author_ids == corresponding_author_ids, "")
+          matching_index <- which(author_ids == corresponding_author_ids)
           if (length(matching_index) > 0) author_names[matching_index] else NA_character_
         },
         NA_character_

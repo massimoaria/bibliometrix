@@ -141,3 +141,48 @@ test_that("convert2df non spezza gli autori BibTeX andati a capo", {
   expect_true(all(grepl(" ", authors)))
   expect_false(any(grepl("^\\s", unlist(strsplit(M$AF, ";")))))
 })
+
+test_that("convert2df non lascia spazi nell'autore corrispondente OpenAlex", {
+  # issue #666. Nel formato "vecchio" C1 e C1_ID sono uniti da
+  # extract_collapsed_affiliations() con "; ", mentre AU e AU_ID arrivano dalla
+  # conversione '|' -> ';' senza spazio. replace_corresponding_info() divideva
+  # su ";" senza tagliare: l'affiliazione dell'autore corrispondente usciva con
+  # uno spazio davanti ogni volta che il corrispondente non era il primo autore,
+  # e la stessa universita' finiva contata come due valori distinti.
+  M <- load_openalex_oldformat_fixture()
+  expect_equal(nrow(M), 3)
+
+  # Nessun RP con spazi in testa o in coda.
+  expect_equal(M$RP, trimws(M$RP))
+
+  # W1 ha il corrispondente in seconda posizione, W3 in prima: stessa
+  # affiliazione, quindi uno stesso valore e non due.
+  expect_equal(M$RP[1], M$RP[3])
+  expect_equal(M$RP[1], "UNIVERSITY OF CAMPANIA LUIGI VANVITELLI, CASERTA, ITALY")
+  expect_equal(M$RP[2], "UNIVERSITY OF NAPLES FEDERICO II, NAPLES, ITALY")
+  expect_length(unique(M$RP), 2)
+
+  expect_equal(M$AU1_CO, rep("ITALY", 3))
+})
+
+test_that("replace_corresponding_info tollera il separatore con spazio", {
+  # issue #666. Con AU_ID unito da "; " il confronto fra gli ID non trovava piu'
+  # il corrispondente: nome e paese uscivano NA mentre l'affiliazione, il cui
+  # split era gia' tagliato, si risolveva. Il difetto era quindi invisibile nel
+  # solo caso in cui il corrispondente e' il primo autore.
+  data <- data.frame(
+    corresponding_author_ids = "A2",
+    corresponding_institution_ids = "I2",
+    AU = "SMITH J; DOE J",
+    AU_ID = "A1; A2",
+    C1 = "UNIV A; UNIV B",
+    C1_ID = "I1; I2",
+    AU_CO = "USA; CANADA",
+    stringsAsFactors = FALSE
+  )
+  res <- as.data.frame(replace_corresponding_info(data))
+
+  expect_equal(res$corresponding_author_name, "DOE J")
+  expect_equal(res$RP, "UNIV B")
+  expect_equal(res$AU1_CO, "CANADA")
+})

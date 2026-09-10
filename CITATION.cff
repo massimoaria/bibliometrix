@@ -1,82 +1,120 @@
+# ------------------------------------------------
+# CITATION.cff file created with {cffr} R package
+# See also: https://docs.ropensci.org/cffr/
+# ------------------------------------------------
+ 
 cff-version: 1.2.0
-message: "To cite bibliometrix in publications, please use the article below. The package ships the full list of citable works in inst/CITATION, which citation(\"bibliometrix\") prints in R."
-title: "bibliometrix: Comprehensive Science Mapping Analysis"
+message: 'To cite bibliometrix in publications, please use:'
 type: software
+license: GPL-3.0-only
+title: 'bibliometrix: Comprehensive Science Mapping Analysis'
+version: 5.5.0.9000
+doi: 10.1016/j.joi.2017.08.007
+identifiers:
+- type: doi
+  value: 10.32614/CRAN.package.bibliometrix
+- type: url
+  value: https://www.k-synth.com
+abstract: Tool for quantitative research in scientometrics and bibliometrics. It implements
+  the comprehensive workflow for science mapping analysis proposed in Aria M. and
+  Cuccurullo C. (2017) <https://doi.org/10.1016/j.joi.2017.08.007>. 'bibliometrix'
+  provides various routines for importing bibliographic data from 'SCOPUS', 'Clarivate
+  Analytics Web of Science' (<https://www.webofknowledge.com/>), 'Digital Science
+  Dimensions' (<https://www.dimensions.ai/>), 'OpenAlex' (<https://openalex.org/>),
+  'Cochrane Library' (<https://www.cochranelibrary.com/>), 'Lens' (<https://www.lens.org/>),
+  and 'PubMed' (<https://pubmed.ncbi.nlm.nih.gov/>) databases, performing bibliometric
+  analysis and building networks for co-citation, coupling, scientific collaboration
+  and co-word analysis.
 authors:
+- family-names: Aria
+  given-names: Massimo
+  email: aria@unina.it
+  orcid: https://orcid.org/0000-0002-8517-9411
+- family-names: Cuccurullo
+  given-names: Corrado
+  email: cuccurullocorrado@gmail.com
+  orcid: https://orcid.org/0000-0002-7401-8575
+preferred-citation:
+  type: article
+  title: 'bibliometrix: An R-tool for comprehensive science mapping analysis'
+  authors:
   - family-names: Aria
     given-names: Massimo
     email: aria@unina.it
-    orcid: "https://orcid.org/0000-0002-8517-9411"
-    affiliation: "University of Naples Federico II"
+    orcid: https://orcid.org/0000-0002-8517-9411
   - family-names: Cuccurullo
     given-names: Corrado
     email: cuccurullocorrado@gmail.com
-    orcid: "https://orcid.org/0000-0002-7401-8575"
-    affiliation: "University of Campania Luigi Vanvitelli"
-abstract: "Tool for quantitative research in scientometrics and bibliometrics. It implements the comprehensive workflow for science mapping analysis proposed in Aria M. and Cuccurullo C. (2017), imports bibliographic data from Scopus, Clarivate Analytics Web of Science, Digital Science Dimensions, OpenAlex, Cochrane Library, Lens and PubMed, performs bibliometric analysis and builds networks for co-citation, coupling, scientific collaboration and co-word analysis."
-keywords:
-  - bibliometrics
-  - scientometrics
-  - science-mapping
-  - bibliometric-analysis
-  - co-citation
-  - co-word-analysis
-  - biblioshiny
-  - r
-license: GPL-3.0-only
-version: 5.5.0
-date-released: "2026-08-29"
-url: "https://www.bibliometrix.org"
-repository-code: "https://github.com/massimoaria/bibliometrix"
-repository-artifact: "https://CRAN.R-project.org/package=bibliometrix"
-preferred-citation:
-  type: article
-  title: "bibliometrix: An R-tool for comprehensive science mapping analysis"
-  authors:
-    - family-names: Aria
-      given-names: Massimo
-      orcid: "https://orcid.org/0000-0002-8517-9411"
-    - family-names: Cuccurullo
-      given-names: Corrado
-      orcid: "https://orcid.org/0000-0002-7401-8575"
-  journal: "Journal of Informetrics"
-  year: 2017
-  volume: 11
-  issue: 4
-  start: 959
-  end: 975
-  doi: "10.1016/j.joi.2017.08.007"
+    orcid: https://orcid.org/0000-0002-7401-8575
+  journal: Journal of Informetrics
+  year: '2017'
+  volume: '11'
+  issue: '4'
   publisher:
     name: Elsevier
+  doi: 10.1016/j.joi.2017.08.007
+  start: '959'
+  end: '975'
+repository: https://CRAN.R-project.org/package=bibliometrix
+repository-code: https://github.com/massimoaria/bibliometrix
+url: https://www.bibliometrix.org
+contact:
+- family-names: Aria
+  given-names: Massimo
+  email: aria@unina.it
+  orcid: https://orcid.org/0000-0002-8517-9411
+keywords:
+- bibliometric-analysis
+- bibliometrics
+- citation
+- citation-network
+- citations
+- co-authors
+- co-occurence
+- co-word-analysis
+- correspondence-analysis
+- coupling
+- isi-web
+- journal
+- manuscript
+- quantitative-analysis
+- scholars
+- science
+- science-mapping
+- scientific
+- scientometrics
+- scopus
 references:
-  - type: article
-    title: "Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. A demonstration through the replication of a study"
-    authors:
-      - family-names: Aria
-        given-names: Massimo
-        orcid: "https://orcid.org/0000-0002-8517-9411"
-      - family-names: Cuccurullo
-        given-names: Corrado
-        orcid: "https://orcid.org/0000-0002-7401-8575"
-      - family-names: D'Aniello
-        given-names: Luca
-      - family-names: Spano
-        given-names: Maria
-    journal: "Journal of Informetrics"
-    year: 2026
-    doi: "10.1016/j.joi.2026.101837"
-    publisher:
-      name: Elsevier
-  - type: book
-    title: "Science Mapping Analysis - A primer with Biblioshiny"
-    authors:
-      - family-names: Aria
-        given-names: Massimo
-        orcid: "https://orcid.org/0000-0002-8517-9411"
-      - family-names: Cuccurullo
-        given-names: Corrado
-        orcid: "https://orcid.org/0000-0002-7401-8575"
-    year: 2026
-    isbn: "978-88-386-2297-7"
-    publisher:
-      name: McGraw-Hill
+- type: article
+  title: 'Biblioshiny and the SAAS Workflow: An integrated framework for transparent
+    and reproducible science mapping. A demonstration through the replication of a
+    study'
+  authors:
+  - family-names: Aria
+    given-names: Massimo
+  - family-names: Cuccurullo
+    given-names: Corrado
+  - family-names: D'Aniello
+    given-names: Luca
+  - family-names: Spano
+    given-names: Maria
+  journal: Journal of Informetrics
+  year: '2026'
+  volume: '20'
+  issue: '3'
+  publisher:
+    name: Elsevier
+  doi: 10.1016/j.joi.2026.101837
+  start: '101837'
+- type: book
+  title: Science Mapping Analysis - A primer with Biblioshiny
+  authors:
+  - family-names: Aria
+    given-names: Massimo
+  - family-names: Cuccurullo
+    given-names: Corrado
+  publisher:
+    name: McGraw-Hill
+  year: '2026'
+  isbn: 978-88-386-2297-7
+

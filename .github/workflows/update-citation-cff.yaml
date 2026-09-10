@@ -1,0 +1,70 @@
+# Keeps CITATION.cff in step with DESCRIPTION and inst/CITATION, which is what
+# GitHub reads for the "Cite this repository" button (issue #671).
+#
+# It runs on `develop` and not on `master`: `master` requires a pull request, so
+# a push from GITHUB_TOKEN is rejected there. The regenerated file reaches
+# `master` with the next develop -> master merge, like every other change.
+on:
+  push:
+    branches: [develop]
+    paths:
+      - DESCRIPTION
+      - inst/CITATION
+      - .github/workflows/update-citation-cff.yaml
+  workflow_dispatch:
+
+name: Update CITATION.cff
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-citation-cff
+  cancel-in-progress: false
+
+jobs:
+  update-citation-cff:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      # `packages` replaces the default `deps::.`, so the package's own ~40
+      # dependencies are not installed: cffr reads DESCRIPTION and inst/CITATION
+      # as files and needs neither the package nor its dependencies.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: any::cffr
+
+      - name: Regenerate CITATION.cff
+        shell: Rscript {0}
+        run: |
+          # dependencies = FALSE: with TRUE every Imports entry is added as a
+          # `references` item, 42 of them, burying the three works that matter.
+          # `message` keeps the citHeader() wording of inst/CITATION.
+          # cff_write() validates against the CFF 1.2.0 schema and errors if the
+          # result is not valid, so a bad DESCRIPTION fails the job here.
+          cffr::cff_write(
+            "DESCRIPTION",
+            dependencies = FALSE,
+            keys = list(message = "To cite bibliometrix in publications, please use:")
+          )
+
+      - name: Commit if it changed
+        run: |
+          if git diff --quiet -- CITATION.cff; then
+            echo "CITATION.cff is already in step with DESCRIPTION and inst/CITATION."
+            exit 0
+          fi
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CITATION.cff
+          git commit -m "Regenerate CITATION.cff from DESCRIPTION and inst/CITATION"
+          git push origin HEAD:develop

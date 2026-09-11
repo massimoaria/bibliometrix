@@ -90,24 +90,36 @@ lotka <- function(M) {
   Fitted_betaEmp <- Fitted_betaEmp / sum(Fitted_betaEmp)
 
   ## 5. KS goodness-of-fit tests ----
-  # Test 1: Empirical vs theoretical (Beta = 2)
-  ks_theoretical <- suppressWarnings(
-    ks.test(AuthorProd[, 3], Theoretical_beta2, exact = FALSE)
-  )
+  if (nrow(AuthorProd) >= 2) {
+    # Test 1: Empirical vs theoretical (Beta = 2)
+    ks_theoretical <- suppressWarnings(
+      ks.test(AuthorProd[, 3], Theoretical_beta2, exact = FALSE)
+    )
 
-  # Test 2: Empirical vs fitted (empirical Beta)
-  ks_fitted <- suppressWarnings(
-    ks.test(AuthorProd[, 3], Fitted_betaEmp, exact = FALSE)
-  )
+    # Test 2: Empirical vs fitted (empirical Beta)
+    ks_fitted <- suppressWarnings(
+      ks.test(AuthorProd[, 3], Fitted_betaEmp, exact = FALSE)
+    )
+
+    ks_theo_stat <- as.numeric(ks_theoretical$statistic)
+    ks_theo_pvalue <- ks_theoretical$p.value
+    ks_fit_stat <- as.numeric(ks_fitted$statistic)
+    ks_fit_pvalue <- ks_fitted$p.value
+  } else {
+    ks_theo_stat <- NA
+    ks_theo_pvalue <- NA
+    ks_fit_stat <- NA
+    ks_fit_pvalue <- NA
+  }
 
   stat <- list(
     Beta = Beta,
     C = C,
     R2 = R2,
-    ks.theo.stat = as.numeric(ks_theoretical$statistic),
-    ks.theo.pvalue = ks_theoretical$p.value,
-    ks.fit.stat = as.numeric(ks_fitted$statistic),
-    ks.fit.pvalue = ks_fitted$p.value
+    ks.theo.stat = ks_theo_stat,
+    ks.theo.pvalue = ks_theo_pvalue,
+    ks.fit.stat = ks_fit_stat,
+    ks.fit.pvalue = ks_fit_pvalue
   )
 
   ## 6. Prepare plot data ----
@@ -206,27 +218,33 @@ lotka <- function(M) {
     ))
 
   # Version with logo for export
-  x_logo <- c(
-    max(AuthorProd$N.Articles) - diff(range(AuthorProd$N.Articles)) * 0.10,
-    max(AuthorProd$N.Articles)
-  ) +
-    1
-  y_logo <- c(
-    min(AuthorProd$Freq * 100),
-    min(AuthorProd$Freq * 100) + diff(range(AuthorProd$Freq * 100)) * 0.10
-  )
+  x_range <- diff(range(AuthorProd$N.Articles))
+  y_range <- diff(range(AuthorProd$Freq * 100))
 
-  data("logo", package = "bibliometrix", envir = environment())
-  logoGrid <- grid::rasterGrob(logo, interpolate = TRUE)
-
-  g <- g_shiny +
-    ggplot2::annotation_custom(
-      logoGrid,
-      xmin = x_logo[1],
-      xmax = x_logo[2],
-      ymin = y_logo[1],
-      ymax = y_logo[2]
+  if (x_range > 0 && y_range > 0) {
+    x_logo <- c(
+      max(AuthorProd$N.Articles) - x_range * 0.10,
+      max(AuthorProd$N.Articles)
+    ) + 1
+    y_logo <- c(
+      min(AuthorProd$Freq * 100),
+      min(AuthorProd$Freq * 100) + y_range * 0.10
     )
+
+    data("logo", package = "bibliometrix", envir = environment())
+    logoGrid <- grid::rasterGrob(logo, interpolate = TRUE)
+
+    g <- g_shiny +
+      ggplot2::annotation_custom(
+        logoGrid,
+        xmin = x_logo[1],
+        xmax = x_logo[2],
+        ymin = y_logo[1],
+        ymax = y_logo[2]
+      )
+  } else {
+    g <- g_shiny
+  }
 
   ## 8. Clean table for output ----
   AuthorProd_out <- AuthorProd[, c("N.Articles", "N.Authors", "Freq")]

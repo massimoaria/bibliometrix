@@ -20,3 +20,13 @@ test_that("bradford funziona e restituisce zone", {
   expect_true(is.data.frame(BR$table))
   expect_true("Zone" %in% names(BR$table))
 })
+
+test_that("lotka handles homogeneous collections with single publication per author", {
+  M <- data.frame(AU = c("AUTHOR A", "AUTHOR B", "AUTHOR C"))
+  class(M) <- c("bibliometrixDB", "data.frame")
+  expect_no_error(L <- lotka(M))
+  expect_type(L, "list")
+  expect_true(is.na(L$ks.theo.stat))
+  expect_true(is.na(L$ks.fit.stat))
+})
+

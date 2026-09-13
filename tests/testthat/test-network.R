@@ -83,3 +83,41 @@ test_that("networkPlot genera output senza errori", {
   expect_true("graph" %in% names(net))
   expect_true(inherits(net$graph, "igraph"))
 })
+
+# Una rete in cui nessuna coppia di elementi e' collegata resta senza nodi dopo
+# la rimozione degli isolati. clusteringNetwork() confrontava allora una
+# modularita' NaN e si fermava con "missing value where TRUE/FALSE needed";
+# con walktrap, apply() su una lista di archi vuota dava "argument is of length
+# zero". Basta una collezione filtrata su un solo anno (nessuna coppia di autori
+# che scrive insieme) o su una sola rivista (nessuna coppia di keyword).
+
+test_that("networkPlot rifiuta una rete in cui nessuna coppia e' collegata", {
+  NM <- Matrix::Matrix(diag(c(3, 2, 1)), sparse = TRUE)
+  dimnames(NM) <- list(c("A", "B", "C"), c("A", "B", "C"))
+  expect_error(
+    networkPlot(NM, n = 3, remove.isolates = TRUE, verbose = FALSE, cluster = "louvain", seed = 1),
+    "no two items of this network are linked, so once"
+  )
+  # Un solo legame, ma sotto edges.min: stesso caso, e il messaggio lo dice.
+  NM[1, 2] <- NM[2, 1] <- 1
+  expect_error(
+    networkPlot(NM, n = 3, remove.isolates = TRUE, edges.min = 2, verbose = FALSE, cluster = "louvain", seed = 1),
+    "linked at least 2 times \\(edges.min\\)"
+  )
+})
+
+test_that("clusteringNetwork accetta un grafo senza archi", {
+  g <- igraph::make_empty_graph(3, directed = FALSE)
+  igraph::V(g)$name <- c("a", "b", "c")
+  for (cl in c("louvain", "leiden", "walktrap")) {
+    expect_no_error(res <- suppressWarnings(clusteringNetwork(g, cl, seed = 1)))
+    expect_equal(length(igraph::V(res$bsk.network)$community), 3)
+  }
+})
+
+test_that("clusteringNetwork con seed resta invariato su un grafo con archi", {
+  g <- igraph::make_graph(c(1, 2, 2, 3, 3, 1, 4, 5, 5, 6, 6, 4, 3, 4), directed = FALSE)
+  a <- suppressWarnings(clusteringNetwork(g, "louvain", seed = 7))
+  expect_equal(max(a$net_groups$membership), 2)
+  expect_equal(igraph::modularity(g, a$net_groups$membership), 0.3571429, tolerance = 1e-6)
+})

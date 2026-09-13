@@ -47,7 +47,12 @@ sourceGrowth <- function(M, top = 5, cdf = TRUE) {
   ind <- Matrix::colSums(PYSO)
   deg <- sort(ind, decreasing = T)[top]
   sonames <- colnames(PYSO)[ind >= deg]
-  PYSO <- as.data.frame(as.matrix(PYSO[, ind >= deg]))
+  # drop = FALSE: with a single publication year PYSO has one row, and
+  # PYSO[, cols] collapsed it to a vector that as.matrix() turned into a
+  # column -- the table came out transposed and the names assigned below no
+  # longer matched ("'names' attribute [n] must be the same length as the
+  # vector [2]").
+  PYSO <- as.data.frame(as.matrix(PYSO[, ind >= deg, drop = FALSE]))
 
   PYSO <- cbind(as.numeric(colnames(WPY)), PYSO)
 

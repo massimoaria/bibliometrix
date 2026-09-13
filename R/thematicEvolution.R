@@ -301,7 +301,37 @@ thematicEvolution <- function(
   ### for colors
   nodes <- nodes %>%
     mutate(label = name) %>%
-    separate(sep = "--", col = "name", into = c("name", "group")) %>%
+    separate(sep = "--", col = "name", into = c("name", "group"))
+
+  # The nodes of the evolution are the clusters joined by an inclusion edge, so
+  # a period none of whose themes shares a word with an adjacent period has no
+  # node at all. factor(group, labels = 1:K) then met fewer levels than labels
+  # and stopped inside a dplyr verb ("invalid 'labels'"), naming neither the
+  # period nor the cause.
+  unlinked <- setdiff(Y, unique(nodes$group))
+  if (length(unlinked) == K) {
+    stop(
+      "thematicEvolution(): no theme of any period shares a word with a theme ",
+      "of an adjacent period, so there is no evolution to trace. Choose ",
+      "different cut points, or lower minFreq so that more words enter each map.",
+      call. = FALSE
+    )
+  }
+  if (length(unlinked) > 0) {
+    stop(
+      "thematicEvolution(): the themes of ",
+      if (length(unlinked) == 1) "the period " else "the periods ",
+      paste(unlinked, collapse = ", "),
+      " share no word with those of the adjacent ",
+      if (length(unlinked) == 1) "period" else "periods",
+      ", so there is no evolution to trace across ",
+      if (length(unlinked) == 1) "it" else "them",
+      ". Choose different cut points, or lower minFreq so that more words enter each map.",
+      call. = FALSE
+    )
+  }
+
+  nodes <- nodes %>%
     mutate(slice = factor(group, labels = 1:K))
   Nodes <- data.frame()
   for (i in 1:K) {

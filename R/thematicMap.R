@@ -200,7 +200,11 @@ thematicMap <- function(
   )
 
   if (nrow(NetMatrix) > 0) {
-    Net <- networkPlot(
+    # A matrix with rows can still hold no link between two distinct terms:
+    # networkPlot() then refuses it. For the thematic map that is the same case
+    # as an empty matrix, and keeps the same contract -- NULL, which
+    # thematicEvolution() reports by period.
+    Net <- tryCatch(networkPlot(
       NetMatrix,
       normalize = "association",
       Title = "Keyword co-occurrences",
@@ -220,7 +224,14 @@ thematicMap <- function(
       label.n = n,
       seed = seed,
       verbose = FALSE
-    )
+    ), error = function(e) {
+      if (!startsWith(conditionMessage(e), "networkPlot(): ")) stop(e)
+      NULL
+    })
+    if (is.null(Net)) {
+      cat("\n\nNo two terms of the network are linked!\nThe analysis cannot be performed\n\n")
+      return()
+    }
   } else {
     cat("\n\nNetwork matrix is empty!\nThe analysis cannot be performed\n\n")
     return()
@@ -310,6 +321,21 @@ thematicMap <- function(
     mutate(rcentrality = rank(centrality), rdensity = rank(density)) %>%
     left_join(., df_lab_top, by = "groups") %>%
     rename(label = cluster_label)
+
+  # A network can exist while no map does: when none of its terms reaches
+  # minfreq, df_lab is filtered down to nothing and so is the cluster table.
+  # The quadrant limits below were then computed on empty vectors (Inf / -Inf)
+  # and the annotation frame stopped with "arguments imply differing number of
+  # rows: 0, 4". Return NULL, as for an empty network, so that a caller --
+  # thematicEvolution() among them -- can name the cause.
+  if (nrow(df) == 0) {
+    cat(
+      "\n\nNo term of the network occurs at least ", minfreq,
+      " times, the count minfreq gives on this collection",
+      "\nThe analysis cannot be performed\n\n", sep = ""
+    )
+    return()
+  }
 
   meandens = mean(df$rdensity)
   meancentr = mean(df$rcentrality)

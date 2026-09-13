@@ -105,3 +105,40 @@ test_that("timeslice ordina da se' i tagli passati alla rinfusa", {
     timeslice(scientometrics, breaks = c(1995, 2005))
   )
 })
+
+# I documenti senza anno di pubblicazione non appartengono a nessun periodo e
+# vengono scartati di proposito: cut() li manda a NA e split() li elimina.
+# Sono una rarita', ma lo scarto va detto, altrimenti le fette contengono meno
+# documenti della collezione senza che nulla lo segnali.
+
+test_that("timeslice dice quanti documenti non hanno l'anno", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  scientometrics$PY <- as.numeric(scientometrics$PY)
+
+  one <- scientometrics
+  one$PY[1] <- NA
+  expect_message(timeslice(one, breaks = 2000), "1 document has no publication year")
+
+  five <- scientometrics
+  five$PY[1:5] <- NA
+  expect_message(timeslice(five, breaks = 2000), "5 documents have no publication year")
+})
+
+test_that("timeslice tace quando gli anni ci sono tutti", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  scientometrics$PY <- as.numeric(scientometrics$PY)
+  expect_equal(sum(is.na(scientometrics$PY)), 0)
+  expect_no_message(timeslice(scientometrics, breaks = 2000))
+})
+
+test_that("timeslice scarta davvero i documenti senza anno", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  scientometrics$PY <- as.numeric(scientometrics$PY)
+  five <- scientometrics
+  five$PY[1:5] <- NA
+  sl <- suppressMessages(timeslice(five, breaks = 2000))
+  expect_equal(sum(vapply(sl, nrow, integer(1))), nrow(five) - 5)
+})

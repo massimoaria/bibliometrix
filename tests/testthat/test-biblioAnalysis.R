@@ -134,3 +134,29 @@ test_that("logoDelta non restituisce mai un'estensione nulla", {
   expect_equal(logoDelta(2020), 1)
   expect_equal(logoDelta(c(NA, NA)), 1)
 })
+
+# sourceGrowth() su una collezione di un solo anno. PYSO ha una riga sola, e
+# PYSO[, colonne] la riduceva a un vettore che as.matrix() trasformava in una
+# colonna: la tabella usciva trasposta e l'assegnazione dei nomi si fermava con
+# "'names' attribute [4] must be the same length as the vector [2]".
+
+test_that("sourceGrowth su un solo anno restituisce una riga, non una tabella trasposta", {
+  skip_if_not_installed("bibliometrixData")
+  data(management, package = "bibliometrixData")
+  class(management) <- c("bibliometrixDB", "data.frame")
+  SG <- sourceGrowth(management[management$PY == 2019, ], top = 3)
+  expect_equal(nrow(SG), 1)
+  expect_equal(names(SG)[1], "Year")
+  expect_equal(SG$Year, 2019)
+  expect_true(all(vapply(SG[, -1, drop = FALSE], is.numeric, logical(1))))
+})
+
+test_that("sourceGrowth su piu' anni non cambia", {
+  skip_if_not_installed("bibliometrixData")
+  data(management, package = "bibliometrixData")
+  class(management) <- c("bibliometrixDB", "data.frame")
+  SG <- sourceGrowth(management, top = 5)
+  expect_equal(names(SG)[1], "Year")
+  expect_equal(nrow(SG), length(min(management$PY):max(management$PY)))
+  expect_true(ncol(SG) >= 6)
+})

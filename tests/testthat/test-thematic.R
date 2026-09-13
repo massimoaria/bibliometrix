@@ -188,3 +188,43 @@ test_that("thematicEvolution nomina il periodo i cui termini non raggiungono min
     "the period 1985-1995 holds 26 documents"
   )
 })
+
+# I nodi della thematic evolution sono i cluster uniti da un arco di inclusione:
+# un periodo i cui temi non condividono parole con un periodo adiacente non ha
+# nodi, e factor(group, labels = 1:K) trovava meno livelli che etichette,
+# fermandosi dentro un verbo dplyr con "invalid 'labels'".
+
+evolution_disjoint_fixture <- function() {
+  set.seed(1)
+  kw1 <- c("ALPHA", "BETA", "GAMMA", "DELTA")
+  kw2 <- c("OMEGA", "SIGMA", "THETA", "KAPPA")
+  mk <- function(i, kw, y) {
+    data.frame(
+      AU = paste0("AUTHOR", i, " A"), DE = paste(sample(kw, 3), collapse = ";"),
+      ID = "", PY = y, TC = i, SO = "JOURNAL", TI = paste("TITLE", i), DI = "",
+      DT = "ARTICLE", DB = "SCOPUS", stringsAsFactors = FALSE
+    )
+  }
+  M <- rbind(
+    do.call(rbind, lapply(1:12, function(i) mk(i, kw1, 2010 + i %% 3))),
+    do.call(rbind, lapply(13:24, function(i) mk(i, kw2, 2020 + i %% 6)))
+  )
+  M$SR <- paste0("AUTHOR", seq_len(nrow(M)), ", ", M$PY, ", JOURNAL")
+  class(M) <- c("bibliometrixDB", "data.frame")
+  M
+}
+
+test_that("thematicEvolution rifiuta periodi i cui temi non condividono parole", {
+  skip_on_cran()
+  M <- evolution_disjoint_fixture()
+  # Due periodi a vocabolario disgiunto: nessun arco di inclusione, nessun nodo.
+  expect_error(
+    suppressWarnings(capture.output(thematicEvolution(M, field = "DE", years = 2015, n = 50, minFreq = 1))),
+    "no theme of any period shares a word"
+  )
+  # Tre periodi: il secondo e il terzo condividono il vocabolario, il primo no.
+  expect_error(
+    suppressWarnings(capture.output(thematicEvolution(M, field = "DE", years = c(2015, 2022), n = 50, minFreq = 1))),
+    "the themes of the period 2010-2012 share no word"
+  )
+})

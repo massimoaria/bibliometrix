@@ -92,3 +92,21 @@ test_that("thematicMap disegna una mappa con un solo cluster", {
   on.exit(grDevices::dev.off(), add = TRUE)
   expect_no_error(print(TM$map))
 })
+
+test_that("thematicEvolution nomina il periodo che non ha una rete", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  class(scientometrics) <- c("bibliometrixDB", "data.frame")
+  # Senza punti di taglio i periodi sono cinque di uguale ampiezza, e il primo
+  # raccoglie 2 documenti soli: la sua rete di co-occorrenze e' vuota,
+  # thematicMap() restituisce NULL e prima il chiamante si fermava su "no
+  # applicable method for 'filter' applied to an object of class NULL".
+  expect_error(
+    suppressMessages(thematicEvolution(
+      scientometrics,
+      field = "ID", years = NULL, n = 100, minFreq = 2
+    )),
+    "holds 2 documents and yields no co-occurrence network"
+  )
+})

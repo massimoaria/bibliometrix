@@ -29,7 +29,12 @@
 timeslice <- function(M, breaks = NA, k = 5) {
   M$PY <- as.numeric(M$PY)
   period <- list()
-  if (is.na(breaks[1]) & is.numeric(k)) {
+  # "breaks not provided" has to cover NULL as well as the NA default, which
+  # is how a caller holding no cut points naturally expresses it: NULL[1] is
+  # NULL, so is.na() on it is logical(0) and this test stopped with "argument
+  # is of length zero" instead of falling back on k. A zero-length numeric
+  # already fell back, because numeric(0)[1] is NA.
+  if ((length(breaks) == 0 || is.na(breaks[1])) && is.numeric(k)) {
     breaks <- (floor(seq(min(M$PY, na.rm = TRUE) - 1, max(M$PY, na.rm = TRUE), length.out = k + 1)))
   } else {
     breaks <- c(min(M$PY, na.rm = TRUE) - 1, breaks, max(M$PY, na.rm = TRUE))

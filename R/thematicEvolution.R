@@ -128,6 +128,26 @@ thematicEvolution <- function(
       subgraphs = FALSE,
       seed = seed
     )
+    # thematicMap() returns NULL when the co-occurrence network of the slice is
+    # empty, which happens when the period holds too few documents or none of
+    # its terms reaches minFreq. Reading resk$params then stopped with "no
+    # applicable method for 'filter' applied to an object of class NULL",
+    # naming neither the period nor the cause.
+    if (is.null(resk)) {
+      stop(
+        "thematicEvolution(): the period ",
+        Y[k],
+        " holds ",
+        nrow(Mk),
+        if (nrow(Mk) == 1) " document" else " documents",
+        " and yields no co-occurrence network, so the evolution cannot be ",
+        "built across it. Choose cut points that give that period more ",
+        "documents; if it already holds enough, its terms do not reach ",
+        "minFreq.",
+        call. = FALSE
+      )
+    }
+
     resk$params <- resk$params %>% dplyr::filter(params != "minfreq")
     res[[k]] <- resk
     net[[k]] <- resk$net

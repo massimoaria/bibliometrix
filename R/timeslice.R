@@ -38,11 +38,32 @@ timeslice <- function(M, breaks = NA, k = 5) {
     breaks <- (floor(seq(min(M$PY, na.rm = TRUE) - 1, max(M$PY, na.rm = TRUE), length.out = k + 1)))
   } else {
     breaks <- c(min(M$PY, na.rm = TRUE) - 1, breaks, max(M$PY, na.rm = TRUE))
+    # cut() needs its bounds distinct. A cut point on the last year, or on the
+    # year before the first, repeats one of the two added here, and cut() then
+    # stopped with "'breaks' are not unique" - a complaint about a vector the
+    # caller never wrote.
+    repeated <- unique(breaks[duplicated(breaks)])
+    if (length(repeated) > 0) {
+      stop(
+        "timeslice(): ",
+        paste(repeated, collapse = ", "),
+        if (length(repeated) > 1) " are repeated bounds" else " is a repeated bound",
+        ". Cut points have to be distinct and to fall inside ",
+        min(M$PY, na.rm = TRUE),
+        "-",
+        max(M$PY, na.rm = TRUE),
+        ", the years this collection covers.",
+        call. = FALSE
+      )
+    }
   }
-  df <- cut(M$PY, breaks)
-  N <- levels(df)
-  ind <- as.numeric(df)
-  df <- split(M, ind)
-  names(df) <- N
+  # Split on the factor, not on as.numeric() of it. A period holding no
+  # document -- a gap in the publication years, or a cut point outside them --
+  # is a level of the factor but not a group of the split, so the names were
+  # one or more longer than the list they were assigned to and the function
+  # stopped with "'names' attribute [3] must be the same length as the vector
+  # [2]". Splitting on the factor keeps every level, empty ones included, and
+  # names them itself.
+  df <- split(M, cut(M$PY, breaks))
   return(df)
 }

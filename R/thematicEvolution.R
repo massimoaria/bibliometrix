@@ -117,6 +117,21 @@ thematicEvolution <- function(
 
   for (k in 1:K) {
     Mk <- list_df[[k]]
+
+    # An empty period has no years to be named by -- min() of nothing is Inf,
+    # which would label it "Inf--Inf" below -- so it is reported by the
+    # interval timeslice() cut it at. A gap in the publication years is enough
+    # to produce one.
+    if (nrow(Mk) == 0) {
+      stop(
+        "thematicEvolution(): the period ",
+        names(list_df)[k],
+        " holds no document, so the evolution cannot be built across it. ",
+        "Choose cut points that leave no period empty.",
+        call. = FALSE
+      )
+    }
+
     Y[k] <- paste(min(Mk$PY), "-", max(Mk$PY), sep = "", collapse = "")
     resk <- thematicMap(
       Mk,

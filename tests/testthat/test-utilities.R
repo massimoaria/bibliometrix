@@ -48,3 +48,60 @@ test_that("timeslice con punti di taglio espliciti non cambia", {
   expect_length(sl, 3)
   expect_equal(sum(vapply(sl, nrow, integer(1))), nrow(scientometrics))
 })
+
+# Un periodo che non contiene documenti e' un livello del fattore prodotto da
+# cut() ma non un gruppo di split(): i nomi erano piu' lunghi della lista a cui
+# venivano assegnati e timeslice() si fermava con "'names' attribute [3] must
+# be the same length as the vector [2]". Basta un buco negli anni di
+# pubblicazione, non serve un taglio fuori intervallo.
+
+gap_collection <- function() {
+  data(scientometrics, package = "bibliometrixData")
+  scientometrics$PY <- as.numeric(scientometrics$PY)
+  G <- scientometrics[scientometrics$PY <= 1995 | scientometrics$PY >= 2005, ]
+  class(G) <- c("bibliometrixDB", "data.frame")
+  G
+}
+
+test_that("timeslice tiene un periodo vuoto invece di fermarsi", {
+  skip_if_not_installed("bibliometrixData")
+  G <- gap_collection()
+  expect_equal(sum(G$PY > 1995 & G$PY < 2005), 0) # il buco c'e' davvero
+  expect_no_error(sl <- timeslice(G, breaks = c(1996, 2004)))
+  expect_length(sl, 3)
+  expect_equal(unname(vapply(sl, nrow, integer(1))[2]), 0)
+  expect_equal(sum(vapply(sl, nrow, integer(1))), nrow(G)) # nessun documento perso
+})
+
+test_that("timeslice accetta tagli fuori dall'intervallo degli anni", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  expect_length(timeslice(scientometrics, breaks = 1800), 2)
+  expect_length(timeslice(scientometrics, breaks = 2100), 2)
+  # il taglio non e' nell'intervallo, quindi un periodo resta vuoto
+  expect_equal(min(vapply(timeslice(scientometrics, breaks = 1800), nrow, integer(1))), 0)
+})
+
+test_that("timeslice nomina il taglio che ripete un estremo", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  yr <- as.numeric(scientometrics$PY)
+  expect_error(
+    timeslice(scientometrics, breaks = max(yr, na.rm = TRUE)),
+    "is a repeated bound"
+  )
+  expect_error(
+    timeslice(scientometrics, breaks = max(yr, na.rm = TRUE)),
+    "fall inside 1985-2015"
+  )
+  expect_error(timeslice(scientometrics, breaks = c(2000, 2000)), "2000 is a repeated bound")
+})
+
+test_that("timeslice ordina da se' i tagli passati alla rinfusa", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  expect_identical(
+    timeslice(scientometrics, breaks = c(2005, 1995)),
+    timeslice(scientometrics, breaks = c(1995, 2005))
+  )
+})

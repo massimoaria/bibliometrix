@@ -124,3 +124,18 @@ test_that("i punti di taglio danno sempre almeno due periodi", {
   }
   expect_gte(length(timeslice(scientometrics, breaks = NULL)), 2)
 })
+
+test_that("thematicEvolution nomina il periodo vuoto con il suo intervallo", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  scientometrics$PY <- as.numeric(scientometrics$PY)
+  G <- scientometrics[scientometrics$PY <= 1995 | scientometrics$PY >= 2005, ]
+  class(G) <- c("bibliometrixDB", "data.frame")
+  # Un periodo senza documenti non ha anni da cui prendere un nome - min() di
+  # niente e' Inf - quindi viene riportato con l'intervallo del taglio.
+  expect_error(
+    suppressMessages(thematicEvolution(G, field = "ID", years = c(1996, 2004), n = 100, minFreq = 2)),
+    "the period \\(1996,2004\\] holds no document"
+  )
+})

@@ -55,6 +55,22 @@ lotka <- function(M) {
     return(NA)
   }
 
+  ## 0. Refuse a collection Lotka's law cannot be fitted to ----
+  # Each of the cases below used to end inside str_split(), aggregate() or
+  # ks.test() with a message naming none of them (#674).
+  if (!("AU" %in% names(M))) {
+    stop(
+      "lotka() needs the author field: this collection does not carry AU.",
+      call. = FALSE
+    )
+  }
+  if (nrow(M) == 0) {
+    stop(
+      "lotka() needs a collection with at least one document.",
+      call. = FALSE
+    )
+  }
+
   ## 1. Author Productivity table ----
   AUdf <- M %>%
     mutate(
@@ -66,10 +82,34 @@ lotka <- function(M) {
     count(listAU, sort = TRUE, name = "Freq") %>%
     rename(AU = listAU)
 
+  if (all(is.na(AUdf$AU) | trimws(AUdf$AU) == "")) {
+    stop(
+      "lotka() found no author name in the AU field of this collection.",
+      call. = FALSE
+    )
+  }
+
   AuthorProd <- aggregate(AUdf, by = list(AUdf$Freq), "length")
   AuthorProd[, 2] <- as.numeric(AuthorProd[, 2])
   AuthorProd[, 3] <- AuthorProd[, 2] / sum(AuthorProd[, 2])
   names(AuthorProd) <- c("N.Articles", "N.Authors", "Freq")
+
+  # Lotka's law is a line fitted through the productivity distribution. With a
+  # single point there is no slope to estimate: lm() returns an NA coefficient,
+  # ks.test() aborts with "not enough 'y' data", and the logo box of the plot
+  # collapses to a point, whose zero-by-zero viewport ratio stops the plot from
+  # drawing with "missing value where TRUE/FALSE needed" (#674).
+  if (nrow(AuthorProd) < 2) {
+    nDocs <- AuthorProd$N.Articles[1]
+    stop(
+      "lotka() needs authors with at least two different publication counts: ",
+      "every author in this collection has written ",
+      nDocs,
+      if (nDocs == 1) " document" else " documents",
+      ", so the productivity distribution is a single point.",
+      call. = FALSE
+    )
+  }
 
   nAuthors <- sum(AuthorProd$N.Authors)
 

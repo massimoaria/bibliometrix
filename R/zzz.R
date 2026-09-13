@@ -819,9 +819,20 @@ adjust_positions_oblique <- function(
 ) {
   df_adj <- df
 
+  # A single point has nothing to be separated from, and an empty frame has no
+  # point at all. Without this the loop below ran anyway: 1:(nrow - 1) counts
+  # down when nrow is 1 -- 1:0 is c(1, 0) -- so the inner loop read a row that
+  # does not exist, dist became NA, and the function stopped on "missing value
+  # where TRUE/FALSE needed" rather than returning the frame untouched.
+  if (nrow(df_adj) < 2) {
+    return(df_adj)
+  }
+
   for (iter in 1:max_iter) {
     moved <- FALSE
-    for (i in 1:(nrow(df_adj) - 1)) {
+    # seq_len() rather than 1:(nrow - 1), so the range cannot count down again
+    # if the guard above is ever loosened.
+    for (i in seq_len(nrow(df_adj) - 1)) {
       for (j in (i + 1):nrow(df_adj)) {
         xi <- df_adj[[xvar]][i]
         yi <- df_adj[[yvar]][i]

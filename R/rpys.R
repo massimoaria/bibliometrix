@@ -199,10 +199,10 @@ rpys <- function(
   data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
-  x <- c(min(RPYS$Year), min(RPYS$Year) + diff(range(RPYS$Year)) * 0.125) + 1
+  x <- c(min(RPYS$Year), min(RPYS$Year) + logoDelta(RPYS$Year, frac = 0.125)) + 1
   y <- c(
     max(c(RPYS$Citations, RPYS$diffMedian)) -
-      diff(range(c(RPYS$Citations, RPYS$diffMedian))) * 0.125,
+      logoDelta(c(RPYS$Citations, RPYS$diffMedian), frac = 0.125),
     max(c(RPYS$Citations, RPYS$diffMedian))
   )
 

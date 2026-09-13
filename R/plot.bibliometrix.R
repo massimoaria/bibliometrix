@@ -304,18 +304,3 @@ plot.bibliometrix <- function(x, ...) {
   }
   invisible(graphs)
 }
-
-## Extent of the box the logo is drawn in, as a fraction of the range of the
-## values on that axis. A collection of a single document -- or one whose values
-## are all equal -- has a range of zero: the box collapses to a line and grid
-## stops on a raster whose ratio is undefined ("missing value where TRUE/FALSE
-## needed"). One unit of that axis is used instead, which is one document or one
-## year.
-logoDelta <- function(v, frac = 0.15, fallback = 1) {
-  v <- v[is.finite(v)]
-  if (length(v) == 0) {
-    return(fallback)
-  }
-  d <- diff(range(v)) * frac
-  if (d == 0) fallback else d
-}

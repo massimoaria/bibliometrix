@@ -176,8 +176,8 @@ couplingMap <- function(M, analysis = "documents", field = "CR", n = 500, label.
 
   data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
-  x <- c(max(df$rcentrality) - 0.02 - diff(range(df$rcentrality)) * 0.125, max(df$rcentrality) - 0.02) + 0.5
-  y <- c(min(df$rimpact), min(df$rimpact) + diff(range(df$rimpact)) * 0.125)
+  x <- c(max(df$rcentrality) - 0.02 - logoDelta(df$rcentrality, frac = 0.125), max(df$rcentrality) - 0.02) + 0.5
+  y <- c(min(df$rimpact), min(df$rimpact) + logoDelta(df$rimpact, frac = 0.125))
 
   g <- ggplot(df, aes(x = rcentrality, y = rimpact, text = (words))) +
     geom_point(group = "NA", aes(size = log(as.numeric(freq))), shape = 20, col = adjustcolor(df$color, alpha.f = 0.5)) # Use hollow circles

@@ -80,7 +80,7 @@ fieldByYear <- function(M,
   yrange <- range(unlist(df[, which(regexpr("year", names(df)) > -1)]))
 
   x <- c(0 + 0.5, 0.05 + length(levels(df$item)) * 0.125) + 1
-  y <- c(yrange[2] - 0.02 - diff(yrange) * 0.125, yrange[2] - 0.02)
+  y <- c(yrange[2] - 0.02 - logoDelta(yrange, frac = 0.125), yrange[2] - 0.02)
 
   g <- ggplot(df, aes(
     x = item, y = year_med,

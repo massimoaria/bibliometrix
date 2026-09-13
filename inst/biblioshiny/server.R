@@ -5908,11 +5908,11 @@ To ensure the functionality of Biblioshiny,
 
     names(Y) = c("Year", "Freq")
     x <- c(
-      max(Y$Year) - 0.02 - diff(range(Y$Year)) * 0.125,
+      max(Y$Year) - 0.02 - logoDelta(Y$Year, frac = 0.125),
       max(Y$Year) - 0.02
     ) +
       1
-    y <- c(min(Y$Freq), min(Y$Freq) + diff(range(Y$Freq)) * 0.125)
+    y <- c(min(Y$Freq), min(Y$Freq) + logoDelta(Y$Freq, frac = 0.125))
 
     g = ggplot2::ggplot(
       Y,
@@ -6027,13 +6027,13 @@ To ensure the functionality of Biblioshiny,
     Table2$group = "A"
 
     x <- c(
-      max(Table2$Year) - 0.02 - diff(range(Table2$Year)) * 0.125,
+      max(Table2$Year) - 0.02 - logoDelta(Table2$Year, frac = 0.125),
       max(Table2$Year) - 0.02
     ) +
       1
     y <- c(
       min(Table2$MeanTCperYear),
-      min(Table2$MeanTCperYear) + diff(range(Table2$MeanTCperYear)) * 0.125
+      min(Table2$MeanTCperYear) + logoDelta(Table2$MeanTCperYear, frac = 0.125)
     )
 
     g <- ggplot(
@@ -6867,10 +6867,10 @@ To ensure the functionality of Biblioshiny,
 
     x <- c(
       min(values$SODF$Year) + 0.02,
-      min(values$SODF$Year) + 0.02 + diff(range(values$SODF$Year)) * 0.15
+      min(values$SODF$Year) + 0.02 + logoDelta(values$SODF$Year, frac = 0.15)
     )
     y <- c(
-      max(values$SODF$Freq) - diff(range(values$SODF$Freq)) * 0.15,
+      max(values$SODF$Freq) - logoDelta(values$SODF$Freq, frac = 0.15),
       max(values$SODF$Freq)
     )
 
@@ -8261,7 +8261,7 @@ To ensure the functionality of Biblioshiny,
           dplyr::summarize(Freq = sum(Freq))
         x <- c(0.5, 0.5 + length(levels(xx2$Country)) * 0.125) + 1
         y <- c(
-          max(xx2$Freq) - 0.02 - diff(range(xx2$Freq)) * 0.125,
+          max(xx2$Freq) - 0.02 - logoDelta(xx2$Freq, frac = 0.125),
           max(xx2$Freq) - 0.02
         )
 
@@ -10402,10 +10402,10 @@ To ensure the functionality of Biblioshiny,
 
     x <- c(
       min(values$DF$Year) + 0.02,
-      min(values$DF$Year) + 0.02 + diff(range(values$DF$Year)) * 0.20
+      min(values$DF$Year) + 0.02 + logoDelta(values$DF$Year, frac = 0.20)
     )
     y <- c(
-      max(values$DF$Freq) - diff(range(values$DF$Freq)) * 0.20,
+      max(values$DF$Freq) - logoDelta(values$DF$Freq, frac = 0.20),
       max(values$DF$Freq)
     )
 

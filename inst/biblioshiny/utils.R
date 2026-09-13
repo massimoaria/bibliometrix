@@ -1,5 +1,12 @@
 ### COMMON FUNCTIONS ####
 
+## Extent of the logo box on one axis, shared with the package (R/zzz.R).
+## A collection whose values on that axis are all equal -- one year, one
+## document -- has a range of zero: the box collapses to a point, the grid
+## viewport ratio is 0/0, and the plot stops with "missing value where
+## TRUE/FALSE needed" instead of drawing.
+logoDelta <- bibliometrix:::logoDelta
+
 ## Count records in a bibliographic file without full conversion ----
 #' @description Lightweight record counter for bibliographic files.
 #'   Returns the number of publications contained in one or more files
@@ -2597,7 +2604,7 @@ freqPlot <- function(
   string.max = 70
 ) {
   xl <- c(
-    max(xx[, x]) - 0.02 - diff(range(xx[, x])) * 0.125,
+    max(xx[, x]) - 0.02 - logoDelta(xx[, x], frac = 0.125),
     max(xx[, x]) - 0.02
   ) +
     1
@@ -3436,11 +3443,11 @@ AffiliationOverTime <- function(values, n) {
   x <- c(
     min(values$AffOverTime$Year) + 0.02,
     min(values$AffOverTime$Year) + 0.02 +
-      diff(range(values$AffOverTime$Year)) * 0.15
+      logoDelta(values$AffOverTime$Year, frac = 0.15)
   )
   y <- c(
     max(values$AffOverTime$Articles) -
-      diff(range(values$AffOverTime$Articles)) * 0.15,
+      logoDelta(values$AffOverTime$Articles, frac = 0.15),
     max(values$AffOverTime$Articles)
   )
 
@@ -3569,11 +3576,11 @@ CountryOverTime <- function(values, n) {
   x <- c(
     min(values$CountryOverTime$Year) + 0.02,
     min(values$CountryOverTime$Year) + 0.02 +
-      diff(range(values$CountryOverTime$Year)) * 0.15
+      logoDelta(values$CountryOverTime$Year, frac = 0.15)
   )
   y <- c(
     max(values$CountryOverTime$Articles) -
-      diff(range(values$CountryOverTime$Articles)) * 0.15,
+      logoDelta(values$CountryOverTime$Articles, frac = 0.15),
     max(values$CountryOverTime$Articles)
   )
 

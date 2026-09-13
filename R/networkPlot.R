@@ -273,6 +273,19 @@ networkPlot <-
       }
     }
 
+    # A network in which no two items are linked is empty once its isolates are
+    # removed. Nothing below is defined on zero vertices: clusteringNetwork()
+    # compared a NaN modularity and stopped with "missing value where TRUE/FALSE
+    # needed", naming neither the network nor the cause.
+    if (igraph::vcount(bsk.network) == 0) {
+      stop(
+        "networkPlot(): no two items of this network are linked",
+        if (edges.min > 1) paste0(" at least ", edges.min, " times (edges.min)") else "",
+        ", so once the unlinked items are removed there is no network left.",
+        call. = FALSE
+      )
+    }
+
     # Community Detection
 
     cl <- clusteringNetwork(bsk.network, cluster, seed = seed)
@@ -467,7 +480,9 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
 
       current_modularity <- modularity(bsk.network, result$membership)
 
-      if (current_modularity > best_modularity) {
+      # The modularity of a graph without edges is NaN, and NaN > -Inf is NA:
+      # keep the first run instead of stopping on the comparison.
+      if (is.null(best_result) || isTRUE(current_modularity > best_modularity)) {
         best_modularity <- current_modularity
         best_result <- result
       }
@@ -537,7 +552,11 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
   El <- as.data.frame(get.edgelist(bsk.network, names = F))
 
   colorlist <- colorlist()
-  E(bsk.network)$color <- apply(El, 1, function(x) {
+  # apply() over a zero-row edge list still calls the function once, on an
+  # empty row, to learn the type of its result -- and the comparison inside
+  # stops with "argument is of length zero". A graph without edges has no edge
+  # to colour.
+  if (nrow(El) > 0) E(bsk.network)$color <- apply(El, 1, function(x) {
     if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]) {
       C <- colorlist[V(bsk.network)$community[x[1]]]
     } else {

@@ -105,7 +105,13 @@ thematicEvolution <- function(
   assign.evolution.colors = list(assign = TRUE, alpha = 0.5)
 ) {
   list_df <- timeslice(M, breaks = years)
+  # K is the number of periods, and it is always at least two: timeslice()
+  # builds its cut points as c(min(PY) - 1, years, max(PY)), so any years
+  # vector gives length(years) + 1 periods, and no years at all falls back on
+  # k = 5. A branch refusing K < 2 sat after the loop below -- printing the
+  # string "Error" and returning NULL -- and has been removed as unreachable.
   K <- length(list_df)
+
   S <- net <- res <- list()
   Y <- NULL
 
@@ -153,10 +159,6 @@ thematicEvolution <- function(
     net[[k]] <- resk$net
   }
 
-  if (K < 2) {
-    print("Error")
-    return()
-  }
   incMatrix <- list()
   for (k in 2:K) {
     res1 <- res[[(k - 1)]]

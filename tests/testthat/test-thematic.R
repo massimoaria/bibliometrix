@@ -110,3 +110,17 @@ test_that("thematicEvolution nomina il periodo che non ha una rete", {
     "holds 2 documents and yields no co-occurrence network"
   )
 })
+
+test_that("i punti di taglio danno sempre almeno due periodi", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  # E' l'invariante per cui il ramo che rifiutava meno di due periodi in
+  # thematicEvolution() era irraggiungibile, e per cui e' stato rimosso:
+  # timeslice() costruisce i tagli come c(min(PY) - 1, years, max(PY)), quindi
+  # un vettore di n tagli da n + 1 periodi, e nessun taglio ripiega su k = 5.
+  for (yrs in list(2000, c(1995, 2005), c(1990, 2000, 2010))) {
+    expect_gte(length(timeslice(scientometrics, breaks = yrs)), 2)
+    expect_equal(length(timeslice(scientometrics, breaks = yrs)), length(yrs) + 1)
+  }
+  expect_gte(length(timeslice(scientometrics, breaks = NULL)), 2)
+})

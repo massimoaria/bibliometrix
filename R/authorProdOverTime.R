@@ -70,7 +70,7 @@ authorProdOverTime <- function(M, k = 10, graph = TRUE) {
   df2$Author <- factor(df2$Author, levels = AU$AU[1:k])
 
   x <- c(0.5, 1.5 * k / 10)
-  y <- c(min(df$year), min(df$year) + diff(range(df2$year)) * 0.125)
+  y <- c(min(df$year), min(df$year) + logoDelta(df2$year, frac = 0.125))
 
   data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)

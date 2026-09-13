@@ -350,8 +350,8 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
     }
 
     ## logo coordinates
-    xl <- c(rangex[2] - 0.02 - diff(rangex) * 0.125, rangex[2] - 0.02)
-    yl <- c(rangey[1], rangey[1] + diff(rangey) * 0.125) + 0.02
+    xl <- c(rangex[2] - 0.02 - logoDelta(rangex, frac = 0.125), rangex[2] - 0.02)
+    yl <- c(rangey[1], rangey[1] + logoDelta(rangey, frac = 0.125)) + 0.02
     b_doc <- b_doc + annotation_custom(logo, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2])
     ##
 
@@ -411,8 +411,8 @@ conceptualStructure <- function(M, field = "ID", ngrams = 1, method = "MCA", qua
       )
 
     ## logo coordinates
-    xl <- c(rangex[2] - 0.02 - diff(rangex) * 0.125, rangex[2] - 0.02)
-    yl <- c(rangey[1], rangey[1] + diff(rangey) * 0.125) + 0.02
+    xl <- c(rangex[2] - 0.02 - logoDelta(rangex, frac = 0.125), rangex[2] - 0.02)
+    yl <- c(rangey[1], rangey[1] + logoDelta(rangey, frac = 0.125)) + 0.02
     b_doc_TC <- b_doc_TC + annotation_custom(logo, xmin = xl[1], xmax = xl[2], ymin = yl[1], ymax = yl[2])
     ##
 
@@ -601,11 +601,11 @@ plotCoord <- function(g, side = "b") {
 
   coord <- c(xmin, xmax, ymin, ymax)
 
-  xl <- c(xmax - 0.02 - diff(c(xmin, xmax)) * 0.125, xmax - 0.02)
+  xl <- c(xmax - 0.02 - logoDelta(c(xmin, xmax), frac = 0.125), xmax - 0.02)
   if (side == "b") {
-    yl <- c(ymin, ymin + diff(c(ymin, ymax)) * 0.125) + 0.02
+    yl <- c(ymin, ymin + logoDelta(c(ymin, ymax), frac = 0.125)) + 0.02
   } else {
-    yl <- c(ymax - 0.02 - diff(c(ymin, ymax)) * 0.125, ymax - 0.02)
+    yl <- c(ymax - 0.02 - logoDelta(c(ymin, ymax), frac = 0.125), ymax - 0.02)
   }
   coord <- c(xl, yl)
 }

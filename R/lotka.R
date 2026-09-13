@@ -247,13 +247,13 @@ lotka <- function(M) {
 
   # Version with logo for export
   x_logo <- c(
-    max(AuthorProd$N.Articles) - diff(range(AuthorProd$N.Articles)) * 0.10,
+    max(AuthorProd$N.Articles) - logoDelta(AuthorProd$N.Articles, frac = 0.10),
     max(AuthorProd$N.Articles)
   ) +
     1
   y_logo <- c(
     min(AuthorProd$Freq * 100),
-    min(AuthorProd$Freq * 100) + diff(range(AuthorProd$Freq * 100)) * 0.10
+    min(AuthorProd$Freq * 100) + logoDelta(AuthorProd$Freq * 100, frac = 0.10)
   )
 
   data("logo", package = "bibliometrix", envir = environment())

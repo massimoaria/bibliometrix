@@ -303,8 +303,8 @@ bradford <- function(M) {
     ))
 
   # Version with logo for export
-  x_logo <- c(xmax - 0.02 - (xmax - 0) * 0.10, xmax - 0.02)
-  y_logo <- c(0, ymax * 0.08)
+  x_logo <- c(xmax - 0.02 - logoDelta(c(0, xmax), frac = 0.10), xmax - 0.02)
+  y_logo <- c(0, logoDelta(c(0, ymax), frac = 0.08))
   data("logo", package = "bibliometrix", envir = environment())
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 

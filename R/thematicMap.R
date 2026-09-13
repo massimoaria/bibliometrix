@@ -350,11 +350,11 @@ thematicMap <- function(
   logo <- grid::rasterGrob(logo, interpolate = TRUE)
 
   x <- c(
-    max(df$rcentrality) - 0.02 - diff(range(df$rcentrality)) * 0.125,
+    max(df$rcentrality) - 0.02 - logoDelta(df$rcentrality, frac = 0.125),
     max(df$rcentrality) - 0.02
   ) +
     0.6
-  y <- c(min(df$rdensity), min(df$rdensity) + diff(range(df$rdensity)) * 0.125)
+  y <- c(min(df$rdensity), min(df$rdensity) + logoDelta(df$rdensity, frac = 0.125))
 
   if (!isTRUE(repel)) {
     df <- adjust_positions_oblique(

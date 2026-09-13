@@ -28,6 +28,24 @@
 #' @export
 timeslice <- function(M, breaks = NA, k = 5) {
   M$PY <- as.numeric(M$PY)
+
+  # A document with no publication year belongs to no period: cut() sends it
+  # to NA and split() discards it. Dropping them is intended -- they are rare
+  # and there is no period they could go in -- but say how many, otherwise the
+  # slices quietly hold fewer documents than the collection did.
+  missingPY <- sum(is.na(M$PY))
+  if (missingPY > 0) {
+    message(
+      "timeslice(): ",
+      missingPY,
+      if (missingPY == 1) {
+        " document has no publication year and is in no period."
+      } else {
+        " documents have no publication year and are in no period."
+      }
+    )
+  }
+
   period <- list()
   # "breaks not provided" has to cover NULL as well as the NA default, which
   # is how a caller holding no cut points naturally expresses it: NULL[1] is

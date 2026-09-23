@@ -50,7 +50,7 @@ Hindex <- function(M, field = "author", elements = NULL, sep = ";", years = Inf)
   # elements=paste("\\\b",elements,"\\\b",sep="")
   M$TC <- as.numeric(M$TC)
   M$PY <- as.numeric(M$PY)
-  M <- M %>% dplyr::filter(!is.na(TC) | !is.na(TC))
+  M <- M %>% dplyr::filter(!is.na(TC))
   # M <- M[M$TC>0,]
 
   Today <- as.numeric(substr(Sys.time(), 1, 4))
@@ -78,11 +78,13 @@ Hindex <- function(M, field = "author", elements = NULL, sep = ";", years = Inf)
 
   h_calc <- function(x) {
     h <- tail(which(1:length(x) <= sort(x, decreasing = T)), 1) # [1]-1
+    if (length(h) == 0) return(0L)
     return(h)
   }
 
   g_calc <- function(x) {
     g <- tail(which(1:length(x) <= cummean(sort(x, decreasing = T))), 1)
+    if (length(g) == 0) return(0L)
     return(g)
   }
 

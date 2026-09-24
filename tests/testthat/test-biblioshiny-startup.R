@@ -106,3 +106,30 @@ test_that("check_online considera raggiungibile un host che risponde con un erro
   # host inesistente: errore di trasporto, quindi davvero non raggiungibile
   expect_false(e$check_online(host = "https://no.such.host.invalid", timeout = 2))
 })
+
+test_that("total_downloads restituisce NA quando la lettura di cranlogs fallisce", {
+  # check_online() considera raggiungibile un host che risponde con un errore
+  # HTTP (#570), quindi readLines() puo' fallire dopo il controllo: la funzione
+  # e' chiamata dalla UI e un errore qui impediva l'avvio di Biblioshiny (#690).
+  path <- system.file("biblioshiny", "utils.R", package = "bibliometrix")
+  skip_if(path == "", "utils.R non disponibile")
+
+  e <- new.env(parent = globalenv())
+  for (x in as.list(parse(path))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), "total_downloads")) {
+      eval(x, envir = e)
+    }
+  }
+  skip_if_not(is.function(e$total_downloads))
+  e$is_Online <- function(...) TRUE
+  e$check_online <- function(...) TRUE
+
+  e$readLines <- function(...) stop("cannot open the connection")
+  expect_identical(e$total_downloads("bibliometrix"), NA)
+
+  e$readLines <- function(...) {
+    '[{"start":"2016-01-01","end":"2026-09-24","downloads":1234567,"package":"bibliometrix"}]'
+  }
+  expect_identical(e$total_downloads("bibliometrix"), 1234567L)
+})

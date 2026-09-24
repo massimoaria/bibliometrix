@@ -339,8 +339,9 @@ total_downloads <- function(
     }
   )
 
-  # Se gi\u{00E0} nel tryCatch \u{00E8} tornato "NA", esci subito
-  if (identical(json_text, "NA")) {
+  # tryCatch returns a logical NA when readLines() fails: check_online() calls
+  # a host that answers with an HTTP error reachable, so the read can still fail
+  if (!is.character(json_text)) {
     return(NA)
   }
 

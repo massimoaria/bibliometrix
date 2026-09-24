@@ -191,4 +191,3 @@ test_that("threeFieldsPlot mappa correttamente campi con dimensioni differenti",
   expect_true(any(links$from == "dave" & links$to == "journal_y"))
   expect_true(any(links$from == "eve" & links$to == "journal_z"))
 })
-

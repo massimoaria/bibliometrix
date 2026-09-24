@@ -153,3 +153,41 @@ test_that("utils.R di Biblioshiny prende logoDelta dal pacchetto", {
   expect_true(any(grepl("logoDelta <- bibliometrix:::logoDelta", src, fixed = TRUE)))
   expect_true(is.function(logoDelta))
 })
+
+test_that("threeFieldsPlot mappa correttamente campi con dimensioni differenti", {
+  M <- data.frame(
+    SR = c("P1", "P2", "P3"),
+    DE = c("AI", "DATA", "DATA"),
+    AU = c("ALICE; BOB", "CHARLIE; DAVE", "EVE"),
+    SO = c("JOURNAL_X", "JOURNAL_Y", "JOURNAL_Z"),
+    PY = c(2021, 2022, 2023),
+    TC = c(1, 1, 1),
+    stringsAsFactors = FALSE
+  )
+
+  p <- threeFieldsPlot(M, fields = c("DE", "AU", "SO"), n = c(2, 5, 3))
+  expect_true(inherits(p, "plotly"))
+
+  labels <- p$x$attrs[[1]]$node$label
+  links <- data.frame(
+    from  = labels[p$x$attrs[[1]]$link$source + 1],
+    to    = labels[p$x$attrs[[1]]$link$target + 1],
+    value = p$x$attrs[[1]]$link$value,
+    stringsAsFactors = FALSE
+  )
+
+  expect_true(any(links$from == "ai" & links$to == "alice"))
+  expect_true(any(links$from == "ai" & links$to == "bob"))
+  expect_true(any(links$from == "data" & links$to == "charlie"))
+  expect_true(any(links$from == "data" & links$to == "dave"))
+  expect_true(any(links$from == "data" & links$to == "eve"))
+
+  expect_false(any(links$from == "data" & links$to == "alice"))
+  expect_false(any(links$from == "data" & links$to == "bob"))
+
+  expect_true(any(links$from == "alice" & links$to == "journal_x"))
+  expect_true(any(links$from == "bob" & links$to == "journal_x"))
+  expect_true(any(links$from == "charlie" & links$to == "journal_y"))
+  expect_true(any(links$from == "dave" & links$to == "journal_y"))
+  expect_true(any(links$from == "eve" & links$to == "journal_z"))
+})

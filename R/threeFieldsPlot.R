@@ -193,13 +193,12 @@ threeFieldsPlot <- function(M, fields = c("DE", "AU", "SO"), n = c(20, 20, 20)) 
 
 ## function to melt data
 meltx <- function(LM) {
-  var1 <- rep((1:nrow(LM)), ncol(LM))
-  var2 <- sort(var1)
   LMM <-
     data.frame(
-      Var1 = rownames(LM)[var1],
-      Var2 = colnames(LM)[var2],
-      value = matrix(LM, length(LM), 1)
+      Var1 = rep(rownames(LM), times = ncol(LM)),
+      Var2 = rep(colnames(LM), each = nrow(LM)),
+      value = as.vector(LM),
+      stringsAsFactors = FALSE
     )
   return(LMM)
 }

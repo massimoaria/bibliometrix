@@ -39,27 +39,71 @@ dominance <- function(results, k = 10) {
     return(NA)
   }
 
-  Nmf <- table(results$FirstAuthors[results$nAUperPaper > 1])
-  FA <- names(Nmf)
-  # FA=gsub(" ", "", FA, fixed = TRUE)  # delete spaces
+  empty_df <- data.frame(
+    "Author" = character(0),
+    "Dominance Factor" = numeric(0),
+    "Tot Articles" = numeric(0),
+    "Single-Authored" = numeric(0),
+    "Multi-Authored" = numeric(0),
+    "First-Authored" = numeric(0),
+    "Rank by Articles" = integer(0),
+    "Rank by DF" = integer(0),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+
+  if (is.null(results$Authors) || length(results$Authors) == 0 ||
+      is.null(results$FirstAuthors) || is.null(results$nAUperPaper)) {
+    return(empty_df)
+  }
 
   AU <- names(results$Authors)
+  Tot <- as.numeric(results$Authors)
 
+  single_table <- table(results$FirstAuthors[results$nAUperPaper == 1])
+  Single <- as.numeric(single_table[AU])
+  Single[is.na(Single)] <- 0
 
-  Tot <- Single <- rep(NA, length(FA))
-  for (i in 1:length(FA)) {
-    Single[i] <- sum(results$FirstAuthors[results$nAUperPaper == 1] == FA[i])
-    Tot[i] <- results$Authors[FA[i] == AU]
+  Multi <- Tot - Single
+
+  valid <- Multi > 0
+  AU <- AU[valid]
+  Tot <- Tot[valid]
+  Single <- Single[valid]
+  Multi <- Multi[valid]
+
+  if (length(AU) == 0) {
+    return(empty_df)
   }
-  Dominance <- Nmf / (Tot - Single)
 
-  D <- data.frame("Author" = FA, "Dominance Factor" = as.numeric(Dominance), "Articles" = Tot, "Single-Authored" = Single, "Multi-Authored" = Tot - Single, "First-Author" = as.numeric(Nmf))
-  D <- D[order(-D[, 3]), ]
-  D <- D[1:k, ]
+  first_table <- table(results$FirstAuthors[results$nAUperPaper > 1])
+  First <- as.numeric(first_table[AU])
+  First[is.na(First)] <- 0
+
+  Dominance <- First / Multi
+
+  D <- data.frame(
+    "Author" = AU,
+    "Dominance Factor" = Dominance,
+    "Articles" = Tot,
+    "Single-Authored" = Single,
+    "Multi-Authored" = Multi,
+    "First-Author" = First,
+    stringsAsFactors = FALSE
+  )
+
+  D <- D[order(-D$Articles), ]
+  k_clamped <- max(0L, min(as.integer(k), nrow(D)))
+  if (k_clamped > 0) {
+    D <- D[1:k_clamped, , drop = FALSE]
+  } else {
+    return(empty_df)
+  }
+
   D$RankbyArticles <- rank(-D$Articles, ties.method = "min")
   D <- D[order(-D$Dominance.Factor), ]
   D$RankDF <- rank(-D$Dominance.Factor, ties.method = "min")
   names(D) <- c("Author", "Dominance Factor", "Tot Articles", "Single-Authored", "Multi-Authored", "First-Authored", "Rank by Articles", "Rank by DF")
-  row.names(D) <- 1:k
+  row.names(D) <- 1:nrow(D)
   return(D)
 }

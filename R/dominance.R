@@ -4,6 +4,8 @@
 #' @param results is an object of the class '\code{bibliometrix}' for which the analysis of the authors' dominance ranking is desired.
 #' @param k is an integer, used for table formatting (number of authors). Default value is 10.
 #' @return The function \code{dominance} returns a data frame with cases corresponding to the first \code{k} most productive authors and variables to typical field of a dominance analysis.
+#' Only authors with at least one multi-authored article are considered, since the Dominance Factor is not defined otherwise.
+#' If fewer than \code{k} such authors exist, all of them are returned.
 #'
 #' the data frame variables are:
 #' \tabular{lll}{

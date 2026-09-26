@@ -160,3 +160,84 @@ test_that("sourceGrowth su piu' anni non cambia", {
   expect_equal(nrow(SG), length(min(management$PY):max(management$PY)))
   expect_true(ncol(SG) >= 6)
 })
+
+# dominance() escludeva i co-autori che non hanno mai pubblicato da primo
+# autore in articoli a piu' autori (FAA = 0), e aggiungeva righe spurie di NA
+# quando k superava il numero di autori disponibili (#694).
+
+test_that("dominance include co-autori con zero primi autorati e delimita k", {
+  M <- data.frame(
+    SR = paste("Paper", 1:12),
+    TI = paste("Paper", 1:12),
+    AU = c(
+      rep("ALICE; PROF_SILVA", 4),
+      "BOB; PROF_SILVA",
+      rep("OTHER; PROF_SILVA", 5),
+      "BOB", "BOB"
+    ),
+    AU_CO = NA_character_,
+    PY = 2024,
+    SO = "TEST JOURNAL",
+    TC = 1,
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+  res <- biblioAnalysis(M)
+
+  DF <- dominance(res, k = 5)
+  expect_equal(nrow(DF), 4)
+  expect_false(any(is.na(DF$Author)))
+  expect_equal(row.names(DF), as.character(1:4))
+
+  expect_true("PROF_SILVA" %in% DF$Author)
+  ps <- DF[DF$Author == "PROF_SILVA", ]
+  expect_equal(ps$"Dominance Factor", 0.0)
+  expect_equal(ps$"Tot Articles", 10)
+  expect_equal(ps$"Single-Authored", 0)
+  expect_equal(ps$"Multi-Authored", 10)
+  expect_equal(ps$"First-Authored", 0)
+  expect_equal(ps$"Rank by Articles", 1)
+  expect_equal(ps$"Rank by DF", 4)
+
+  # Altri autori con FAA > 0 e k ridotto
+  DF2 <- dominance(res, k = 2)
+  expect_equal(nrow(DF2), 2)
+  expect_equal(sort(DF2$Author), c("OTHER", "PROF_SILVA"))
+  expect_equal(DF2$"Rank by Articles", c(2, 1))
+  expect_equal(DF2$"Rank by DF", c(1, 2))
+  expect_equal(row.names(DF2), as.character(1:2))
+})
+
+test_that("dominance gestisce casi limite di borda senza errori", {
+  # Solo articoli a singolo autore
+  M_solo <- data.frame(
+    SR = c("P1", "P2"),
+    TI = c("Paper 1", "Paper 2"),
+    AU = c("SOLO_A", "SOLO_B"),
+    AU_CO = NA_character_,
+    PY = 2024,
+    SO = "JOURNAL",
+    TC = 1,
+    stringsAsFactors = FALSE
+  )
+  class(M_solo) <- c("bibliometrixDB", "data.frame")
+  res_solo <- biblioAnalysis(M_solo)
+  DF_solo <- dominance(res_solo)
+  expect_equal(nrow(DF_solo), 0)
+  expect_equal(ncol(DF_solo), 8)
+
+  # k = 0
+  DF_zero <- dominance(res_solo, k = 0)
+  expect_equal(nrow(DF_zero), 0)
+  expect_equal(ncol(DF_zero), 8)
+
+  # Oggetto vuoto o privo di autori
+  res_empty <- structure(list(Authors = NULL), class = "bibliometrix")
+  DF_empty <- dominance(res_empty)
+  expect_equal(nrow(DF_empty), 0)
+  expect_equal(ncol(DF_empty), 8)
+
+  # Input che non e' un oggetto bibliometrix
+  expect_true(is.na(dominance(data.frame())))
+})
+

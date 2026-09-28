@@ -702,6 +702,12 @@ remove_diacritics <- function(x) {
 #' @keywords internal
 
 convert_scopus_new_to_classic <- function(citation) {
+  # Papers without references reach here as NA (e.g. CR rebuilt by a join
+  # after reference matching, #696); if (NA) would fail below
+  if (is.na(citation) || !nzchar(trimws(citation))) {
+    return(citation)
+  }
+
   # Check if citation ends with year in parentheses: (YYYY)
   if (!str_detect(citation, "\\(\\d{4}\\)\\s*$")) {
     return(citation) # Not new format, return unchanged

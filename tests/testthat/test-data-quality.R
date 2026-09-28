@@ -31,6 +31,19 @@ test_that("metaTagExtraction estrae CR_SO", {
   expect_true("CR_SO" %in% names(M2))
 })
 
+test_that("metaTagExtraction estrae CR_SO da Scopus con CR mancante (#696)", {
+  M <- load_scopus_fixture()
+  M$CR[1] <- NA
+  M2 <- metaTagExtraction(M, Field = "CR_SO", sep = ";")
+  expect_true(is.na(M2$CR_SO[1]))
+  expect_identical(
+    M2$CR_SO[-1],
+    metaTagExtraction(M[-1, ], Field = "CR_SO", sep = ";")$CR_SO
+  )
+  expect_identical(convert_scopus_new_to_classic(NA_character_), NA_character_)
+  expect_identical(convert_scopus_new_to_classic(""), "")
+})
+
 test_that("metaTagExtraction estrae AU_CO (paese autore)", {
   M <- load_wos_fixture()
   M2 <- metaTagExtraction(M, Field = "AU_CO", sep = ";")

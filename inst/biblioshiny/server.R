@@ -4142,13 +4142,16 @@ To ensure the functionality of Biblioshiny,
             values$M$CR_original <- values$M$CR
           }
 
+          # Documents none of whose references survives the matching are
+          # absent from CR_normalized: they keep their original CR (#696)
           values$M <- values$M %>%
             mutate(CR_original = CR) %>%
-            select(-CR) %>%
             left_join(
-              refMatch_results()$CR_normalized %>% select(SR, CR),
+              refMatch_results()$CR_normalized %>% select(SR, CR_norm = CR),
               by = "SR"
-            )
+            ) %>%
+            mutate(CR = coalesce(CR_norm, CR)) %>%
+            select(-CR_norm)
 
           if (input$refMatch_addStats) {
             stats <- refMatch_results()$CR_normalized %>%
@@ -4719,12 +4722,14 @@ To ensure the functionality of Biblioshiny,
             M_normalized$CR_original <- M_normalized$CR
           }
 
+          # Documents absent from CR_normalized keep their original CR (#696)
           M_normalized <- M_normalized %>%
-            select(-CR) %>%
             left_join(
-              refMatch_results()$CR_normalized %>% select(SR, CR),
+              refMatch_results()$CR_normalized %>% select(SR, CR_norm = CR),
               by = "SR"
-            )
+            ) %>%
+            mutate(CR = coalesce(CR_norm, CR)) %>%
+            select(-CR_norm)
 
           if (input$refMatch_addStats) {
             stats <- refMatch_results()$CR_normalized %>%

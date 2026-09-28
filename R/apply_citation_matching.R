@@ -2175,7 +2175,9 @@ applyReferenceMatching <- function(
   CR_df <- tibble(
     SR = rep(M$SR, lengths(CR)),
     CR = trimws(unlist(CR))
-  )
+  ) %>%
+    # A document without references (CR = NA or "") has nothing to match
+    dplyr::filter(!is.na(CR), nzchar(CR))
 
   # === NEW: Pre-processing for new Scopus format ===
   if ("DB" %in% names(M)) {

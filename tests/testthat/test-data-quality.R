@@ -44,6 +44,15 @@ test_that("metaTagExtraction estrae CR_SO da Scopus con CR mancante (#696)", {
   expect_identical(convert_scopus_new_to_classic(""), "")
 })
 
+test_that("applyReferenceMatching ignora i documenti Scopus senza CR (#696)", {
+  M <- load_scopus_fixture()
+  M$CR[1] <- NA
+  M$CR[2] <- ""
+  invisible(capture.output(res <- applyReferenceMatching(M)))
+  expect_false(any(c(M$SR[1], M$SR[2]) %in% res$CR_normalized$SR))
+  expect_setequal(res$CR_normalized$SR, M$SR[-(1:2)])
+})
+
 test_that("metaTagExtraction estrae AU_CO (paese autore)", {
   M <- load_wos_fixture()
   M2 <- metaTagExtraction(M, Field = "AU_CO", sep = ";")

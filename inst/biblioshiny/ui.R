@@ -990,7 +990,9 @@ body <- dashboardBody(
                   class = "citation-text",
                   "Aria, M., & Cuccurullo, C. (2017). ",
                   tags$a(
-                    strong("bibliometrix: An R-tool for comprehensive science mapping analysis. "),
+                    strong(
+                      "bibliometrix: An R-tool for comprehensive science mapping analysis. "
+                    ),
                     href = "https://doi.org/10.1016/j.joi.2017.08.007",
                     target = "_blank",
                     class = "citation-link"
@@ -1002,7 +1004,9 @@ body <- dashboardBody(
                   class = "citation-text",
                   "Aria, M., Cuccurullo, C., D'Aniello, L., & Spano, M. (2026). ",
                   tags$a(
-                    strong("Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. A demonstration through the replication of a study. "),
+                    strong(
+                      "Biblioshiny and the SAAS Workflow: An integrated framework for transparent and reproducible science mapping. A demonstration through the replication of a study. "
+                    ),
                     href = "https://doi.org/10.1016/j.joi.2026.101837",
                     target = "_blank",
                     class = "citation-link"
@@ -1014,7 +1018,9 @@ body <- dashboardBody(
                   class = "citation-text",
                   "Aria, M., & Cuccurullo, C. (2026). ",
                   tags$a(
-                    strong("Science Mapping Analysis - A primer with Biblioshiny. "),
+                    strong(
+                      "Science Mapping Analysis - A primer with Biblioshiny. "
+                    ),
                     href = "https://book.bibliometrix.org",
                     target = "_blank",
                     class = "citation-link"
@@ -9779,7 +9785,7 @@ body <- dashboardBody(
                           "Inclusion" = "inclusion",
                           "Equivalence" = "equivalence"
                         ),
-                        selected = "association"
+                        selected = "salton"
                       )
                     )
                   ),

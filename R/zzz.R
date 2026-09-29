@@ -105,15 +105,11 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom rscopus author_search
 #' @importFrom rscopus get_complete_author_info
 #' @importFrom igraph as_long_data_frame
-#' @importFrom igraph get.edgelist
 #' @importFrom igraph graph_from_data_frame
 #' @importFrom igraph as_adjacency_matrix
-#' @importFrom igraph graph.adjacency
 #' @importFrom igraph as_edgelist
 #' @importFrom igraph degree
 #' @importFrom igraph plot.igraph
-#' @importFrom igraph delete.vertices
-#' @importFrom igraph decompose.graph
 #' @importFrom igraph E
 #' @importFrom igraph E<-
 #' @importFrom igraph V
@@ -132,23 +128,10 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom igraph delete_edges delete_vertices layout_with_fr modularity norm_coords
 #' @importFrom igraph closeness
 #' @importFrom igraph induced_subgraph
-#' @importFrom igraph page.rank
 #' @importFrom igraph eigen_centrality
-#' @importFrom igraph arpack_defaults
-#' @importFrom igraph authority_score
 #' @importFrom igraph page_rank
-#' @importFrom igraph hub_score
-#' @importFrom igraph graph_from_incidence_matrix
 #' @importFrom igraph graph_from_adjacency_matrix
 #' @importFrom igraph simplify
-#' @importFrom igraph layout.auto
-#' @importFrom igraph layout.circle
-#' @importFrom igraph layout.sphere
-#' @importFrom igraph layout.mds
-#' @importFrom igraph layout.kamada.kawai
-#' @importFrom igraph layout.fruchterman.reingold
-#' @importFrom igraph layout.star
-#' @importFrom igraph write.graph
 #' @importFrom igraph cluster_walktrap
 #' @importFrom igraph cluster_leiden
 #' @importFrom igraph cluster_optimal
@@ -160,9 +143,8 @@ utils::globalVariables(c("matches", "KW_Merged"))
 #' @importFrom igraph cluster_spinglass
 #' @importFrom igraph count_multiple
 #' @importFrom igraph membership
-#' @importFrom igraph layout.norm
-#' @importFrom igraph delete.edges
 #' @importFrom igraph betweenness
+#' @importFrom igraph hits_scores layout_as_star layout_in_circle layout_nicely layout_on_sphere layout_with_kk layout_with_mds write_graph
 #' @importFrom Matrix %&%
 #' @importFrom Matrix abIseq
 #' @importFrom Matrix abIseq1

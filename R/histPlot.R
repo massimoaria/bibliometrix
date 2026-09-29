@@ -147,9 +147,9 @@ histPlot <- function(histResults, n = 20, size = 5, labelsize = 5, remove.isolat
     return(list(net = bsk.network, g = NULL, graph.data = NULL, layout = NULL, axis = NULL, params = params))
   }
 
-  dg <- decompose.graph(bsk.network)
+  dg <- igraph::decompose(bsk.network)
 
-  layout_m <- as.data.frame(layout.fruchterman.reingold(bsk.network))
+  layout_m <- as.data.frame(layout_with_fr(bsk.network))
   names(layout_m) <- c("x", "y")
   layout_m$name <- V(bsk.network)$name
   layout_m$years <- V(bsk.network)$years
@@ -314,5 +314,5 @@ histPlot <- function(histResults, n = 20, size = 5, labelsize = 5, remove.isolat
 
 delete.isolates <- function(graph, mode = "all") {
   isolates <- which(degree(graph, mode = mode) == 0) - 1
-  delete.vertices(graph, names(isolates))
+  delete_vertices(graph, names(isolates))
 }

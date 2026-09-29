@@ -378,7 +378,7 @@ networkPlot <-
         suppressWarnings(as.numeric(closeness(
           bsk.network
         ))),
-        as.numeric(page.rank(bsk.network)$vector)
+        as.numeric(page_rank(bsk.network)$vector)
       )
       names(cluster_res) <- c(
         "vertex",
@@ -474,7 +474,7 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
           bsk.network,
           objective_function = "modularity",
           n_iterations = 3,
-          resolution_parameter = 0.75
+          resolution = 0.75
         )
       }
 
@@ -509,7 +509,7 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
           bsk.network,
           objective_function = "modularity",
           n_iterations = 3,
-          resolution_parameter = 0.75
+          resolution = 0.75
         )
       },
       louvain = {
@@ -549,7 +549,7 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
 
   V(bsk.network)$color <- colorlist[net_groups$membership]
   V(bsk.network)$community <- net_groups$membership
-  El <- as.data.frame(get.edgelist(bsk.network, names = F))
+  El <- as.data.frame(as_edgelist(bsk.network, names = F))
 
   colorlist <- colorlist()
   # apply() over a zero-row edge list still calls the function once, on an
@@ -597,7 +597,7 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
     )
 
     # Extract edgelist
-    row <- get.edgelist(bsk.network)
+    row <- as_edgelist(bsk.network)
 
     # Save or initialize original weights
     if (is.null(E(bsk.network)$weight[1])) {
@@ -637,25 +637,25 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
   switch(
     type,
     auto = {
-      l <- layout.auto(bsk.network)
+      l <- layout_nicely(bsk.network)
     },
     circle = {
-      l <- layout.circle(bsk.network)
+      l <- layout_in_circle(bsk.network)
     },
     star = {
-      l <- layout.star(bsk.network)
+      l <- layout_as_star(bsk.network)
     },
     sphere = {
-      l <- layout.sphere(bsk.network)
+      l <- layout_on_sphere(bsk.network)
     },
     mds = {
-      l <- layout.mds(bsk.network)
+      l <- layout_with_mds(bsk.network)
     },
     fruchterman = {
       l <- layout_with_fr(bsk.network)
     },
     kamada = {
-      l <- layout.kamada.kawai(bsk.network)
+      l <- layout_with_kk(bsk.network)
     }
   )
 

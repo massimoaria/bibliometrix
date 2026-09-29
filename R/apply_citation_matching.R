@@ -2230,9 +2230,15 @@ applyReferenceMatching <- function(
     title_guard = title_guard
   )
 
-  # Join with SR
+  # Join with SR. normalize_citations() returns one row per occurrence, so a
+  # reference cited k times would join k x k rows. Occurrences of one string
+  # share their match (only FILTERED_ ids differ, and those rows are dropped
+  # below), so one row per string gives the same result.
   result <- CR_df %>%
-    left_join(matched, by = c("CR" = "CR_original"))
+    left_join(
+      dplyr::distinct(matched, CR_original, .keep_all = TRUE),
+      by = c("CR" = "CR_original")
+    )
 
   # Remove invalid entries: filtered citations and short canonical forms
   result <- result %>%

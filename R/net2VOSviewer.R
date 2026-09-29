@@ -55,7 +55,7 @@ net2VOSviewer <- function(net, vos.path = NULL) {
       netfile,
       sep = ""
     )
-    write.graph(
+    write_graph(
       graph = net,
       file = netfile,
       format = "pajek"

@@ -136,7 +136,7 @@ networkStat <- function(object, stat = "network", type = "degree") {
         # Eigenvector centrality.
         # Eigenvector centrality is another measure of centrality.
         # The eigenvector centrality ofeach node can be found by computing the leading
-        EC <- eigen_centrality(net, directed = FALSE, scale = TRUE, weights = NULL, options = arpack_defaults)$vector
+        EC <- eigen_centrality(net, directed = FALSE, weights = NULL)$vector
       },
       pagerank = {
         # PageRank ranking of vertices
@@ -153,24 +153,24 @@ networkStat <- function(object, stat = "network", type = "degree") {
         # many incoming links from hubs, presumably because of their high-quality relevant information.
 
         # Hubs
-        HS <- hub_score(net, weights = NA)$vector
+        HS <- hits_scores(net, weights = NA)$hub
       },
       authority = {
         # Authorities
-        AS <- authority_score(net, weights = NA)$vector
+        AS <- hits_scores(net, weights = NA)$authority
       },
       all = {
         DC <- degree(net, v = V(net), mode = c("all"), loops = TRUE, normalized = TRUE)
         CC <- suppressWarnings(closeness(net, vids = V(net), mode = c("all"), normalized = TRUE))
         BC <- betweenness(net, v = V(net), directed = FALSE, weights = NULL, normalized = TRUE)
-        EC <- eigen_centrality(net, directed = FALSE, scale = TRUE, weights = NULL, options = arpack_defaults)$vector
+        EC <- eigen_centrality(net, directed = FALSE, weights = NULL)$vector
         PR <- page_rank(net,
           algo = c("prpack"), vids = V(net),
           directed = FALSE, damping = 0.85, personalized = NULL, weights = NULL,
           options = NULL
         )$vector
-        HS <- hub_score(net, weights = NA)$vector
-        AS <- authority_score(net, weights = NA)$vector
+        HS <- hits_scores(net, weights = NA)$hub
+        AS <- hits_scores(net, weights = NA)$authority
       }
     )
 

@@ -552,18 +552,15 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
   El <- as.data.frame(as_edgelist(bsk.network, names = F))
 
   colorlist <- colorlist()
-  # apply() over a zero-row edge list still calls the function once, on an
-  # empty row, to learn the type of its result -- and the comparison inside
-  # stops with "argument is of length zero". A graph without edges has no edge
-  # to colour.
-  if (nrow(El) > 0) E(bsk.network)$color <- apply(El, 1, function(x) {
-    if (V(bsk.network)$community[x[1]] == V(bsk.network)$community[x[2]]) {
-      C <- colorlist[V(bsk.network)$community[x[1]]]
-    } else {
-      C <- "gray70"
-    }
-    return(C)
-  })
+  # An edge inside a community takes the colour of the community, an edge
+  # between communities is grey. Computed on the whole edge list at once: an
+  # apply() over the edges read the vertex attribute again for every edge. A
+  # graph without edges has no edge to colour.
+  if (nrow(El) > 0) {
+    community <- V(bsk.network)$community
+    c_from <- community[El[, 1]]
+    E(bsk.network)$color <- ifelse(c_from == community[El[, 2]], colorlist[c_from], "gray70")
+  }
   E(bsk.network)$lty <- 1
   E(bsk.network)$lty[E(bsk.network)$color == "gray70"] <- 5
 
@@ -606,28 +603,15 @@ switchLayout <- function(bsk.network, type, community.repulsion) {
       original_weights <- E(bsk.network)$weight
     }
 
-    # Apply new weighting scheme with gradual growth
-    new_weights <- numeric(nrow(row))
-
-    for (i in 1:nrow(row)) {
-      node1 <- row[i, 1]
-      node2 <- row[i, 2]
-
-      comm1 <- membership[which(names(membership) == node1)]
-      comm2 <- membership[which(names(membership) == node2)]
-
-      if (comm1 == comm2) {
-        # INTRA-COMMUNITY Edge
-        # Moderate increase with sub-linear growth
-        multiplier <- 1 + (repulsion_strength^0.7) * 1.5
-        new_weights[i] <- original_weights[i] * multiplier
-      } else {
-        # INTER-COMMUNITY Edge
-        # Gradual reduction with attenuated exponential function
-        divisor <- 1 + exp(repulsion_strength * 1.2) - 1
-        new_weights[i] <- original_weights[i] / divisor
-      }
-    }
+    # Apply new weighting scheme with gradual growth: intra-community edges are
+    # strengthened, inter-community edges weakened
+    comm1 <- unname(membership)[match(row[, 1], names(membership))]
+    comm2 <- unname(membership)[match(row[, 2], names(membership))]
+    # INTRA-COMMUNITY Edge: moderate increase with sub-linear growth
+    multiplier <- 1 + (repulsion_strength^0.7) * 1.5
+    # INTER-COMMUNITY Edge: gradual reduction with attenuated exponential function
+    divisor <- 1 + exp(repulsion_strength * 1.2) - 1
+    new_weights <- ifelse(comm1 == comm2, original_weights * multiplier, original_weights / divisor)
 
     # Apply new weights
     E(bsk.network)$weight <- new_weights

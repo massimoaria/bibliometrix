@@ -197,3 +197,34 @@ test_that("clusteringNetwork con seed resta invariato su un grafo con archi", {
   expect_equal(max(a$net_groups$membership), 2)
   expect_equal(igraph::modularity(g, a$net_groups$membership), 0.3571429, tolerance = 1e-6)
 })
+
+# La colorazione degli archi e i pesi di community.repulsion erano calcolati
+# arco per arco (apply() e un ciclo con which() sui nomi): su una rete di
+# 1000 riferimenti co-citati, 120.000 archi, erano i tre quarti del tempo di
+# networkPlot(). Ora sono vettoriali; il risultato deve restare lo stesso.
+
+test_that("clusteringNetwork colora gli archi interni e grigi quelli tra comunita'", {
+  g <- igraph::make_graph(c(1, 2, 2, 3, 3, 1, 4, 5, 5, 6, 6, 4, 3, 4), directed = FALSE)
+  igraph::V(g)$name <- letters[1:6]
+  res <- suppressWarnings(clusteringNetwork(g, "louvain", seed = 7))
+  comm <- igraph::V(res$bsk.network)$community
+  el <- igraph::as_edgelist(res$bsk.network, names = FALSE)
+  inside <- comm[el[, 1]] == comm[el[, 2]]
+  expect_equal(igraph::E(res$bsk.network)$color[inside], colorlist()[comm[el[inside, 1]]])
+  expect_equal(igraph::E(res$bsk.network)$color[!inside], "gray70")
+  expect_equal(igraph::E(res$bsk.network)$lty, ifelse(inside, 1, 5))
+})
+
+test_that("switchLayout rafforza gli archi interni e indebolisce quelli tra comunita'", {
+  g <- igraph::make_graph(c(1, 2, 2, 3, 3, 1, 4, 5, 5, 6, 6, 4, 3, 4), directed = FALSE)
+  igraph::V(g)$name <- letters[1:6]
+  igraph::V(g)$community <- c(1, 1, 1, 2, 2, 2)
+  igraph::E(g)$weight <- 2
+  w <- igraph::E(switchLayout(g, "circle", 0.5)$bsk.network)$weight
+  inside <- c(rep(TRUE, 6), FALSE)
+  expect_true(all(w[inside] > 2))
+  expect_true(all(w[!inside] < 2))
+  expect_equal(length(unique(w[inside])), 1L)
+  # senza repulsione i pesi restano quelli di partenza
+  expect_equal(igraph::E(switchLayout(g, "circle", 0)$bsk.network)$weight, rep(2, 7))
+})

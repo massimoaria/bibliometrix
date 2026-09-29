@@ -53,6 +53,17 @@ test_that("applyReferenceMatching ignora i documenti Scopus senza CR (#696)", {
   expect_setequal(res$CR_normalized$SR, M$SR[-(1:2)])
 })
 
+# normalize_citations() restituisce una riga per occorrenza: ricollegarla sul
+# testo della citazione moltiplicava un riferimento citato k volte in k x k
+# righe, con il warning many-to-many di dplyr. Una riga per stringa deve dare
+# lo stesso risultato, senza warning.
+test_that("applyReferenceMatching unisce ogni citazione una sola volta", {
+  M <- load_scopus_fixture()
+  expect_no_warning(invisible(capture.output(res <- applyReferenceMatching(M))))
+  expect_false(anyDuplicated(res$full_data) > 0)
+  expect_setequal(unique(res$full_data$CR_canonical), res$summary$CR_canonical)
+})
+
 test_that("metaTagExtraction estrae AU_CO (paese autore)", {
   M <- load_wos_fixture()
   M2 <- metaTagExtraction(M, Field = "AU_CO", sep = ";")

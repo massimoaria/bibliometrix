@@ -101,6 +101,54 @@ test_that("normalizeSimilarity calcola indici di similarita", {
   expect_true(inherits(S, "Matrix") || is.matrix(S))
 })
 
+# normalizeSimilarity() costruiva matrici dense n x n con outer(): su una
+# co-citazione di 10.000 riferimenti erano quasi 5 GB. Ora lavora solo sulle
+# celle non nulle; i valori e la classe restituita devono restare quelli di
+# prima, cioe' della formula applicata alla matrice densa.
+
+test_that("normalizeSimilarity coincide con la formula densa per ogni indice", {
+  C <- Matrix::Matrix(c(
+    4, 2, 0, 1, 0,
+    2, 3, 1, 0, 0,
+    0, 1, 2, 0, 0,
+    1, 0, 0, 1, 0,
+    0, 0, 0, 0, 0
+  ), 5, sparse = TRUE)
+  dimnames(C) <- list(letters[1:5], letters[1:5])
+  A <- as.matrix(C)
+  D <- diag(A)
+  ref <- list(
+    association = A / outer(D, D),
+    inclusion = A / outer(D, D, pmin),
+    jaccard = A / (outer(D, D, "+") - A),
+    salton = A / sqrt(outer(D, D)),
+    equivalence = (A / sqrt(outer(D, D)))^2
+  )
+  for (ty in names(ref)) {
+    r <- ref[[ty]]
+    r[is.nan(r)] <- 0
+    S <- normalizeSimilarity(C, type = ty)
+    expect_s4_class(S, "dsCMatrix")
+    expect_equal(as.matrix(S), r, info = ty)
+    # la stessa matrice passata come matrix di base
+    expect_equal(as.matrix(normalizeSimilarity(A, type = ty)), r, info = ty)
+  }
+})
+
+test_that("normalizeSimilarity resta sparsa e simmetrica su una rete reale", {
+  M <- load_wos_fixture()
+  NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
+  S <- normalizeSimilarity(NetMatrix, type = "association")
+  expect_s4_class(S, "dsCMatrix")
+  expect_equal(Matrix::nnzero(S), Matrix::nnzero(NetMatrix))
+  expect_equal(dimnames(S), dimnames(NetMatrix))
+})
+
+test_that("normalizeSimilarity rifiuta un tipo sconosciuto", {
+  C <- Matrix::Matrix(diag(2), sparse = TRUE)
+  expect_error(normalizeSimilarity(C, type = "cosine"), "type must be one of")
+})
+
 test_that("networkPlot genera output senza errori", {
   skip_on_cran()
   M <- load_wos_fixture()

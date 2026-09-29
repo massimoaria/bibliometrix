@@ -13228,6 +13228,7 @@ To ensure the functionality of Biblioshiny,
     cit_edgesize <- input$citedgesize
     cit_cluster <- input$cocitCluster
     cit_repulsion <- input$cocit.repulsion / 2
+    cit_normalize <- if (input$citnormalize == "none") NULL else input$citnormalize
     shortlabel <- (cit_shortlabel == "Yes")
 
     if (label.n > n) {
@@ -13309,7 +13310,7 @@ To ensure the functionality of Biblioshiny,
       withProgress(message = 'Co-citation Network: computing...', value = 0, {
         bibliometrix::networkPlot(
           NetRefs,
-          normalize = NULL,
+          normalize = cit_normalize,
           Title = net_title,
           type = cit_layout,
           size.cex = TRUE,

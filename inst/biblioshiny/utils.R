@@ -4318,7 +4318,7 @@ intellectualStructure <- function(input, values) {
 
   values$cocitnet <- networkPlot(
     values$NetRefs,
-    normalize = NULL,
+    normalize = if (input$citnormalize == "none") NULL else input$citnormalize,
     Title = values$Title,
     type = input$citlayout,
     size.cex = TRUE,

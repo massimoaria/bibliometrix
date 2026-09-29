@@ -52,33 +52,40 @@
 #' @export
 
 normalizeSimilarity <- function(NetMatrix, type = "association") {
-  diag <- Matrix::diag
-  D <- diag(NetMatrix)
-  # S=NetMatrix
-  switch(type,
-    association = {
-      S <- NetMatrix / ((outer(D, D, "*")))
-    },
-    inclusion = {
-      S <- NetMatrix / outer(D, D, function(a, b) {
-        mapply(min, a, b)
-      })
-    },
-    jaccard = {
-      S <- NetMatrix / (outer(D, D, "+") - NetMatrix)
-    },
-    salton = {
-      S <- NetMatrix / (sqrt(outer(D, D, "*")))
-    },
-    equivalence = {
-      S <- (NetMatrix / sqrt(outer(D, D, "*")))^2
-    }
-  )
+  types <- c("association", "inclusion", "jaccard", "salton", "equivalence")
+  if (!(type %in% types)) {
+    stop("normalizeSimilarity(): type must be one of ", paste0('"', types, '"', collapse = ", "), call. = FALSE)
+  }
+  if (nrow(NetMatrix) != ncol(NetMatrix)) {
+    stop("normalizeSimilarity(): NetMatrix must be a square co-occurrence matrix", call. = FALSE)
+  }
 
-  S <- as.matrix(S)
-  S[is.nan(S)] <- 0
-  S <- Matrix(S, sparse = TRUE)
-  # if (class(S)!="dgCMatrix"){S=as.matrix(S)}
+  # Each index divides c_ij by a function of the diagonal counts c_ii and c_jj,
+  # so it is computed only on the non-zero entries (i, j, x) of the sparse
+  # matrix: a zero co-occurrence stays zero, and no dense n x n matrix is built.
+  S <- methods::as(methods::as(methods::as(NetMatrix, "CsparseMatrix"), "generalMatrix"), "dMatrix")
+  D <- Matrix::diag(S)
+  i <- S@i + 1L
+  j <- rep.int(seq_len(ncol(S)), diff(S@p))
+  x <- S@x
+
+  S@x <- switch(type,
+    association = x / (D[i] * D[j]),
+    inclusion = x / pmin(D[i], D[j]),
+    jaccard = x / (D[i] + D[j] - x),
+    salton = x / sqrt(D[i] * D[j]),
+    equivalence = (x / sqrt(D[i] * D[j]))^2
+  )
+  # 0/0 (an item that never occurs) is set to zero, as before
+  S@x[is.nan(S@x)] <- 0
+  S <- Matrix::drop0(S)
+
+  # Return the storage class Matrix() chose for the dense result (dsCMatrix when
+  # symmetric). Every index is symmetric in i and j, so symmetry is tested
+  # exactly: the tolerant test of Matrix compares n^2-long sparse vectors and
+  # misses it on large matrices.
+  if (Matrix::isSymmetric(S, tol = 0)) S <- Matrix::forceSymmetric(S, uplo = "U")
+  S <- Matrix(S, sparse = TRUE, forceCheck = TRUE)
 
   return(S)
 }

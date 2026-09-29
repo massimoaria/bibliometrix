@@ -132,8 +132,10 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   }
   Fi <- lapply(Fi, trim.leading)
   if (Field == "CR") {
-    Fi <- lapply(Fi, function(l) l <- l[nchar(l) > 10])
-  } ## delete not congruent references
+    # delete not congruent references, but keep OpenAlex work ids (W + digits),
+    # which can be as short as 7 characters
+    Fi <- lapply(Fi, function(l) l <- l[nchar(l) > 10 | grepl("^W[0-9]+$", l)])
+  }
 
   ## Scelta dell'informazione contenuta in CR da utilizzare (Reference, Autore, Affiliation, ecc.)
 

@@ -40,3 +40,4 @@ CRAN-SUBMISSION
 ^graphify-out$
 ^raw$
 ^revdep$
+^dev$

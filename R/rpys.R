@@ -353,14 +353,6 @@ yearExtract <- function(string, db) {
   return(y)
 }
 
-reduceRefs <- function(A) {
-  ind <- unlist(regexec("*V[0-9]", A))
-  A[ind > -1] <- substr(A[ind > -1], 1, (ind[ind > -1] - 1))
-  ind <- unlist(regexec("*DOI ", A))
-  A[ind > -1] <- substr(A[ind > -1], 1, (ind[ind > -1] - 1))
-  return(A)
-}
-
 refCleaning <- function(l, db) {
   if (db == "ISI") {
     l <- gsub("\\).*", ")", l)

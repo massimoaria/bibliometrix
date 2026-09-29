@@ -241,7 +241,11 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
 reduceRefs <- function(A) {
   ind <- unlist(regexec("*V[0-9]", A))
   A[ind > -1] <- substr(A[ind > -1], 1, (ind[ind > -1] - 1))
-  ind <- unlist(regexec("*DOI ", A))
-  A[ind > -1] <- substr(A[ind > -1], 1, (ind[ind > -1] - 1))
+  # the DOI tag follows a separator: matching a bare "DOI " cut at the first
+  # occurrence, which for an author named Doi ("DOI K, 2006, PHYS MED BIOL")
+  # is the surname itself and left an empty reference. The kept prefix ends
+  # with the space before the tag, exactly as before.
+  ind <- unlist(regexec(" DOI ", A))
+  A[ind > -1] <- substr(A[ind > -1], 1, ind[ind > -1])
   return(A)
 }

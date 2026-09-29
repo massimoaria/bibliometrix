@@ -251,3 +251,29 @@ test_that("switchLayout rafforza gli archi interni e indebolisce quelli tra comu
   # senza repulsione i pesi restano quelli di partenza
   expect_equal(igraph::E(switchLayout(g, "circle", 0)$bsk.network)$weight, rep(2, 7))
 })
+
+# reduceRefs() tagliava al primo "DOI " della stringa: per un autore di nome Doi
+# ("DOI K, 2006, PHYS MED BIOL") era il cognome, e il riferimento diventava ""
+# in cocMatrix(Field = "CR"), nelle reti di co-citazione e in rpys().
+
+test_that("reduceRefs taglia al tag DOI, non al cognome Doi", {
+  expect_equal(reduceRefs("DOI K 2006 PHYS MED BIOL V51 PR5 DOI 10.1088/X"), "DOI K 2006 PHYS MED BIOL ")
+  expect_equal(reduceRefs("KANDOI S 2019 J CLEAN PROD DOI 10.1016/X"), "KANDOI S 2019 J CLEAN PROD ")
+  # i riferimenti normali restano quelli di prima, spazio finale compreso
+  expect_equal(reduceRefs("ARIA M 2017 J INFORMETR V11 P959 DOI 10.1016/J.JOI"), "ARIA M 2017 J INFORMETR ")
+  expect_equal(reduceRefs("SMITH J 2001 BOOK TITLE DOI 10.1/X"), "SMITH J 2001 BOOK TITLE ")
+})
+
+test_that("cocMatrix tiene i riferimenti di un autore di nome Doi", {
+  M <- data.frame(
+    SR = c("D1", "D2"), DB = "ISI",
+    CR = c("DOI K, 2006, PHYS MED BIOL, V51, PR5, DOI 10.1088/0031-9155/51/13/R02;ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+           "DOI K, 2006, PHYS MED BIOL, V51, PR5"),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WF <- cocMatrix(M, Field = "CR", sep = ";")
+  expect_true("DOI K 2006 PHYS MED BIOL " %in% colnames(WF))
+  expect_false("" %in% colnames(WF))
+  expect_equal(sum(WF[, "DOI K 2006 PHYS MED BIOL "]), 2)
+})

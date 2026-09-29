@@ -134,9 +134,12 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   }
   Fi <- lapply(Fi, trim.leading)
   if (Field == "CR") {
-    # delete not congruent references, but keep OpenAlex work ids (W + digits),
-    # which can be as short as 7 characters
-    Fi <- lapply(Fi, function(l) l <- l[nchar(l) > 10 | grepl("^W[0-9]+$", l)])
+    # normalize the references, then delete the not congruent ones (see
+    # .congruent_cr()); the column names are taken from the same strings
+    Fi <- lapply(Fi, function(l) {
+      l <- .normalize_cr(l[!is.na(l)])
+      l[.congruent_cr(l)]
+    })
   }
 
   ## Scelta dell'informazione contenuta in CR da utilizzare (Reference, Autore, Affiliation, ecc.)
@@ -145,26 +148,8 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   allField <- unlist(Fi)
   allField <- allField[!is.na(allField)]
 
-  if (Field == "CR") {
-    ind <- which(substr(allField, 1, 1) != "(")
-    S <- allField
-    S[ind] <- gsub("\\).*", ")", allField[ind])
-    S[-ind] <- substr(S[-ind], 1, 100)
-    S <- gsub(",", " ", S)
-    S <- gsub(";", " ", S)
-    S <- reduceRefs(S)
-    allField <- trimES(S)
-    Fi <- lapply(Fi, function(l) {
-      l <- gsub("\\).*", ")", l)
-      l <- gsub(",", " ", l)
-      l <- gsub(";", " ", l)
-      l <- l[nchar(l) > 0]
-      l <- reduceRefs(l)
-      l <- trimES(l)
-      return(l)
-    })
-  } else {
-    # normalize reference names
+  if (Field != "CR") {
+    # CR is already normalized above
     S <- gsub("\\,", ";", allField)
     S <- sub("\\;", ",", S)
     S <- sub("\\;", ",", S)
@@ -237,6 +222,27 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
 
   return(WF)
 }
+
+# Normalized form of a cited reference, the unit of cocMatrix(Field = "CR"). A
+# reference opening with "(" keeps its parentheses (cut at 100 characters); any
+# other is cut after the first ")". The column names and the cells of the
+# matrix are both built from it.
+.normalize_cr <- function(x) {
+  ind <- which(substr(x, 1, 1) != "(")
+  x[ind] <- gsub("\\).*", ")", x[ind])
+  if (length(ind) < length(x)) {
+    x[-ind] <- substr(x[-ind], 1, 100)
+  }
+  x <- gsub(",", " ", x)
+  x <- gsub(";", " ", x)
+  trimES(reduceRefs(x))
+}
+
+# A normalized reference is congruent when it is longer than 10 characters or
+# is an OpenAlex work id (W + digits, as short as 7 characters). Applied after
+# normalization: a fragment such as "2-Q, DOI 10.1002/(SICI)..." (the tail of a
+# Wiley SICI DOI split on its own ";") is long before and "2-Q " after.
+.congruent_cr <- function(x) nchar(x) > 10 | grepl("^W[0-9]+$", x)
 
 reduceRefs <- function(A) {
   ind <- unlist(regexec("*V[0-9]", A))

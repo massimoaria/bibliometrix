@@ -277,3 +277,25 @@ test_that("cocMatrix tiene i riferimenti di un autore di nome Doi", {
   expect_false("" %in% colnames(WF))
   expect_equal(sum(WF[, "DOI K 2006 PHYS MED BIOL "]), 2)
 })
+
+# cocMatrix(Field = "CR") scartava i riferimenti corti PRIMA di normalizzarli,
+# quindi teneva i frammenti dei DOI SICI di Wiley spezzati sul loro ";"
+# ("2-Q, DOI 10.1002/(SICI)..." diventa "2-Q "); e i nomi delle colonne e le
+# celle erano normalizzati in due modi diversi per i riferimenti che iniziano
+# con "(", che finivano in colonne vuote.
+
+test_that("cocMatrix scarta i frammenti SICI e non lascia colonne vuote", {
+  M <- data.frame(
+    SR = c("D1", "D2"), DB = "ISI",
+    CR = c(
+      "SMITH J, 2001, BUS STRATEG ENVIRON, V5, P1, DOI 10.1002/(SICI)1099-0836(199603)5:1<1::AID-BSE38>3.0.CO;2-Q, DOI 10.1002/(SICI)1099-0836(199603)5:13.0.CO;ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+      "(ANONYMOUS), 2010, REPORT OF THE WORKING GROUP (PART 2), P1;ROSSI A, 2005, SCIENTOMETRICS, V2, P3"
+    ),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WF <- cocMatrix(M, Field = "CR", sep = ";")
+  expect_false(any(nchar(colnames(WF)) <= 10))
+  expect_true(all(Matrix::colSums(WF) > 0))
+  expect_equal(ncol(WF), 3L)
+})

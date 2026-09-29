@@ -58,6 +58,34 @@ test_that("cocMatrix mantiene due dimensioni con un solo termine distinto", {
   expect_equal(dim(cocMatrix(mk(c("X", "Y", "X")), Field = "DE", type = "matrix", sep = ";")), c(3L, 2L))
 })
 
+# Con OpenAlex CR contiene gli id dei work citati (W + cifre). Il filtro che
+# scarta le stringhe di riferimento con 10 caratteri o meno eliminava gli id
+# piu' corti (7-10 caratteri): l'1,7% dei riferimenti di una raccolta reale,
+# in tutte le analisi basate su CR.
+
+test_that("cocMatrix mantiene gli id OpenAlex corti in CR", {
+  M <- data.frame(
+    SR = c("D1", "D2", "D3"), DB = "OPENALEX",
+    CR = c("W1234567; W2741809807; W99887766", "W1234567; W99887766", "W2741809807"),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WR <- cocMatrix(M, Field = "CR", sep = ";")
+  expect_setequal(colnames(WR), c("W1234567", "W2741809807", "W99887766"))
+  expect_equal(as.numeric(Matrix::rowSums(WR)), c(3, 2, 1))
+})
+
+test_that("cocMatrix scarta ancora le stringhe CR troppo corte che non sono id", {
+  M <- data.frame(
+    SR = c("D1", "D2"), DB = "ISI",
+    CR = c("ANONYMOUS;SMITH J, 2001, J INFORMETR, V1, P1", "SMITH J, 2001, J INFORMETR, V1, P1;NO TITLE"),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WR <- cocMatrix(M, Field = "CR", sep = ";")
+  expect_equal(ncol(WR), 1L)
+})
+
 test_that("networkStat calcola statistiche di rete", {
   M <- load_wos_fixture()
   NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")

@@ -86,6 +86,29 @@ test_that("cocMatrix scarta ancora le stringhe CR troppo corte che non sono id",
   expect_equal(ncol(WR), 1L)
 })
 
+# Con short = TRUE cocMatrix() scarta gli elementi di frequenza < 2, ma contava
+# le occorrenze: un riferimento ripetuto nello stesso CR (84 casi in
+# management) aveva frequenza 2 pur essendo citato da un solo documento, e
+# restava in una matrice che conta documenti.
+
+test_that("cocMatrix short = TRUE conta i documenti, non le occorrenze", {
+  M <- data.frame(
+    SR = c("D1", "D2", "D3"), DB = "ISI",
+    CR = c(
+      "SMITH J, 2001, J INFORMETR, V1, P1;SMITH J, 2001, J INFORMETR, V1, P1;ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+      "ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+      "BIANCHI C, 2010, RES POLICY, V3, P4"
+    ),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WR <- cocMatrix(M, Field = "CR", sep = ";", short = TRUE)
+  expect_equal(trimws(colnames(WR)), "ROSSI A 2005 SCIENTOMETRICS")
+  # con conteggio pieno la matrice conta le occorrenze, e il filtro pure
+  WF <- cocMatrix(M, Field = "CR", sep = ";", short = TRUE, binary = FALSE)
+  expect_setequal(trimws(colnames(WF)), c("SMITH J 2001 J INFORMETR", "ROSSI A 2005 SCIENTOMETRICS"))
+})
+
 test_that("networkStat calcola statistiche di rete", {
   M <- load_wos_fixture()
   NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")

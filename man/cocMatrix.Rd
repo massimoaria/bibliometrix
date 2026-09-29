@@ -46,7 +46,9 @@ column of the data frame. The default is \code{sep = ";"}.}
 
 \item{binary}{is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency.}
 
-\item{short}{is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.}
+\item{short}{is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
+With \code{binary = TRUE} the frequency of an item is the number of documents containing it, so an item
+repeated inside a single document is deleted; with \code{binary = FALSE} it is the number of occurrences.}
 
 \item{remove.terms}{is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.}
 

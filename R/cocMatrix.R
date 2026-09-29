@@ -37,6 +37,8 @@ utils::globalVariables(c("item", "SR"))
 #' column of the data frame. The default is \code{sep = ";"}.
 #' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency.
 #' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
+#' With \code{binary = TRUE} the frequency of an item is the number of documents containing it, so an item
+#' repeated inside a single document is deleted; with \code{binary = FALSE} it is the number of occurrences.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @return a bipartite network matrix with cases corresponding to manuscripts and variables to the
@@ -185,7 +187,11 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
     if ("NA" %in% uniqueField[1:n]) n <- n + 1
     uniqueField <- uniqueField[1:n]
   } else if (isTRUE(short)) {
-    uniqueField <- names(tabField[tabField > 1]) # remove items with frequency<2
+    # remove items with frequency < 2. With binary counting the matrix counts
+    # documents, so an item repeated inside a single document (e.g. a reference
+    # listed twice in the same CR) still has frequency 1
+    freq <- if (isTRUE(binary)) table(unlist(lapply(Fi, unique))) else tabField
+    uniqueField <- uniqueField[uniqueField %in% names(freq)[freq > 1]]
   }
 
   if (length(uniqueField) < 1) {

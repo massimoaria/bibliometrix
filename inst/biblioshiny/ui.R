@@ -9765,6 +9765,24 @@ body <- dashboardBody(
                       )
                     )
                   ),
+                  fluidRow(
+                    column(
+                      12,
+                      selectInput(
+                        "citnormalize",
+                        label = strong("Normalization Method"),
+                        choices = c(
+                          "None" = "none",
+                          "Association" = "association",
+                          "Jaccard" = "jaccard",
+                          "Salton" = "salton",
+                          "Inclusion" = "inclusion",
+                          "Equivalence" = "equivalence"
+                        ),
+                        selected = "association"
+                      )
+                    )
+                  ),
                   hr(style = "margin: 15px 0; border-top: 1px solid #ddd;"),
                   div(
                     style = "background-color: #f0f4f8; padding: 12px; border-radius: 5px; margin-bottom: 10px;",

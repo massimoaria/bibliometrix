@@ -181,7 +181,9 @@ CR_AU <- function(M, sep) {
   size <- dim(M)
   CR <- M$CR
   listCAU <- strsplit(as.character(CR), sep)
-  listCAU <- lapply(listCAU, function(l) l <- l[nchar(l) > 10]) ## delete not congruent references
+  # delete not congruent references, and references that are record identifiers
+  # (OpenAlex works, Lens ids): an identifier names no author
+  listCAU <- lapply(listCAU, function(l) l <- l[nchar(l) > 10 & !isReferenceId(l)])
 
   # vector of cited authors
   for (i in 1:size[1]) {
@@ -191,6 +193,12 @@ CR_AU <- function(M, sep) {
 
   M$CR_AU <- CCR
   return(M)
+}
+
+# TRUE for a cited reference that is a record identifier rather than a
+# reference string: an OpenAlex work id (W + digits) or a Lens id
+isReferenceId <- function(x) {
+  grepl("^W[0-9]+$|^[0-9]{3}-[0-9]{3}-[0-9]{3}-[0-9]{3}-[0-9X]{3}$", trimws(x))
 }
 
 ### CR_SO field

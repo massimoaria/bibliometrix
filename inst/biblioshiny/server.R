@@ -13247,7 +13247,9 @@ To ensure the functionality of Biblioshiny,
       values$citField <- cit_field
       values$citSep <- cit_sep
       values$citShortlabel <- cit_shortlabel
-      NetRefs <- switch(
+      # biblioNetwork() stops, naming the cause, when the field holds no item
+      # (e.g. cited authors or sources of references that are record identifiers)
+      NetRefs <- tryCatch(switch(
         cit_field,
         CR = {
           bibliometrix::biblioNetwork(
@@ -13293,7 +13295,12 @@ To ensure the functionality of Biblioshiny,
             sep = cit_sep
           )
         }
-      )
+      ), error = function(e) {
+        showNotification(paste("Co-citation Network error:", conditionMessage(e)), type = "error", duration = 10)
+        NULL
+      })
+      if (is.null(NetRefs)) values$NetRefs <- matrix(NA, 1, 1) # rebuild on the next run
+      req(NetRefs)
       values$NetRefs <- NetRefs
       values$Title <- switch(
         cit_field,

@@ -109,6 +109,34 @@ test_that("cocMatrix short = TRUE conta i documenti, non le occorrenze", {
   expect_setequal(trimws(colnames(WF)), c("SMITH J 2001 J INFORMETR", "ROSSI A 2005 SCIENTOMETRICS"))
 })
 
+# Con OpenAlex (import da API) e Lens il campo CR contiene identificativi dei
+# record, non stringhe di riferimento. CR_AU prendeva la parte prima della prima
+# virgola, cioe' l'identificativo stesso, e la co-citazione degli "autori" era
+# una rete di ID; con CR_AU vuoto biblioNetwork() si fermava con "requires
+# numeric/complex matrix/vector arguments", come gia' accadeva per Lens.
+
+test_that("metaTagExtraction CR_AU non tratta gli identificativi come autori citati", {
+  M <- data.frame(
+    SR = c("A", "B"), DB = "OPENALEX", stringsAsFactors = FALSE,
+    CR = c("W1234567; W2741809807", "SMITH J, 2001, J INFORMETR, V1, P1;W2741809807")
+  )
+  M <- metaTagExtraction(M, Field = "CR_AU", sep = ";")
+  expect_equal(M$CR_AU, c("", "SMITH J"))
+  L <- data.frame(SR = "A", DB = "LENS", CR = "013-507-404-965-47X;112-233-445-566-77X", stringsAsFactors = FALSE)
+  expect_equal(metaTagExtraction(L, Field = "CR_AU", sep = ";")$CR_AU, "")
+})
+
+test_that("biblioNetwork nomina il campo vuoto invece di fermarsi in crossprod()", {
+  M <- data.frame(
+    SR = c("A", "B", "C"), DB = "OPENALEX", stringsAsFactors = FALSE,
+    CR = c("W1234567;W2741809807", "W1234567;W99887766", "W2741809807")
+  )
+  M <- metaTagExtraction(M, Field = "CR_AU", sep = ";")
+  expect_error(biblioNetwork(M, analysis = "co-citation", network = "authors"), "record identifiers")
+  expect_error(biblioNetwork(M[, c("SR", "DB", "CR")], analysis = "co-citation", network = "sources"),
+               "not a column of M; create it with metaTagExtraction")
+})
+
 test_that("networkStat calcola statistiche di rete", {
   M <- load_wos_fixture()
   NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")

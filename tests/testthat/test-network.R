@@ -137,6 +137,19 @@ test_that("biblioNetwork nomina il campo vuoto invece di fermarsi in crossprod()
                "not a column of M; create it with metaTagExtraction")
 })
 
+# fieldMatrixOrStop() controllava che il campo fosse una colonna di M prima di
+# chiamare cocMatrix(), ma cocMatrix() costruisce KW_Merged da se': la rete di
+# co-occorrenza di tutte le keyword si fermava sulle raccolte che non hanno
+# ancora quella colonna, come i dataset di bibliometrixData.
+
+test_that("biblioNetwork costruisce la co-occorrenza di all_keywords senza la colonna KW_Merged", {
+  data(scientometrics, package = "bibliometrixData", envir = environment())
+  expect_false("KW_Merged" %in% names(scientometrics))
+  NetMatrix <- biblioNetwork(scientometrics, analysis = "co-occurrences", network = "all_keywords", n = 30)
+  expect_equal(nrow(NetMatrix), ncol(NetMatrix))
+  expect_gt(nrow(NetMatrix), 0)
+})
+
 test_that("networkStat calcola statistiche di rete", {
   M <- load_wos_fixture()
   NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")

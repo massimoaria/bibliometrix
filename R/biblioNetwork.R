@@ -209,7 +209,8 @@ biblioNetwork <-
 # crossprod() then stopped with "requires numeric/complex matrix/vector
 # arguments". Name the field instead.
 fieldMatrixOrStop <- function(M, Field, ...) {
-  if (!(Field %in% names(M))) {
+  # cocMatrix() builds KW_Merged itself (mergeKeywords()), so it need not be a column yet
+  if (!(Field %in% names(M)) && Field != "KW_Merged") {
     stop("biblioNetwork(): the field ", Field, " is not a column of M",
          if (Field %in% c("CR_AU", "CR_SO", "AU_CO", "AU_UN")) paste0("; create it with metaTagExtraction(M, Field = \"", Field, "\")"),
          call. = FALSE)

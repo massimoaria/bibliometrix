@@ -602,24 +602,6 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       "SYNTHESIS"
     ),
 
-    # Coupling - will get ID 'menu-coupling' via JavaScript (hidden initially)
-    menuItem(
-      "Coupling",
-      tabName = "couplingMenu",
-      icon = fa_i(name = "link"),
-      startExpanded = FALSE,
-      menuSubItem(
-        "Bibliographic Coupling",
-        tabName = "couplingNetwork",
-        icon = icon("chevron-right", lib = "glyphicon")
-      ),
-      menuSubItem(
-        "Multiplex Coupling",
-        tabName = "multiplexCoupling",
-        icon = icon("chevron-right", lib = "glyphicon")
-      )
-    ),
-
     # Conceptual Structure - will get ID 'menu-conceptual' via JavaScript (hidden initially)
     menuItem(
       "Conceptual Structure",
@@ -682,6 +664,24 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       menuSubItem(
         "Countries' Collaboration World Map",
         tabName = "collabWorldMap",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
+
+    # Coupling - will get ID 'menu-coupling' via JavaScript (hidden initially)
+    menuItem(
+      "Coupling",
+      tabName = "couplingMenu",
+      icon = fa_i(name = "link"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Bibliographic Coupling",
+        tabName = "couplingNetwork",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Multiplex Coupling",
+        tabName = "multiplexCoupling",
         icon = icon("chevron-right", lib = "glyphicon")
       )
     ),

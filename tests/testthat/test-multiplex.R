@@ -308,3 +308,10 @@ test_that("with OpenAlex configured, schools are named from the titles of their 
   cl <- suppressMessages(multiplexClusters(mcFixture()))$clusters
   expect_true(any(grepl("OpenAlex", cl$schools$label_source)))
 })
+
+test_that("terms of digits and punctuation are not topics", {
+  M <- mk(CR = c(refs(1, 2), refs(1, 2), refs(1, 3)), DE = c("INDUSTRY 4;0;5G", "INDUSTRY 4;0;5G", "4.0;COVID-19"))
+  L <- mpTopicLayer(M, "DE", min.freq = 1)
+  expect_false(any(c("0", "4.0") %in% colnames(L$inc)))
+  expect_true(all(c("INDUSTRY 4", "5G", "COVID-19") %in% colnames(L$inc)))
+})

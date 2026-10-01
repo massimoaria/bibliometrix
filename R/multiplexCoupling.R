@@ -423,6 +423,10 @@ mpTopicLayer <- function(M, fields = c("DE", "ID"), min.freq = 2, ngrams = 1, st
     i = trip$i, j = match(trip$term, terms), x = trip$x, # the same term in two fields is summed
     dims = c(nrow(M), length(terms)), dimnames = list(M$SR, terms)
   )
+  # a term of digits and punctuation only carries no meaning by itself: Web of
+  # Science exports some keywords split ("Industry 4; 0"), and "0" would name
+  # a theme
+  W <- W[, !grepl("^[[:digit:][:punct:][:space:]]+$", colnames(W)), drop = FALSE]
   mpMakeLayer(mpFilterFeatures(W, min.freq), weight = "idf", tf = tf)
 }
 

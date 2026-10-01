@@ -11,11 +11,10 @@ utils::globalVariables(c(
 #'
 #' \tabular{lll}{
 #' \code{"matrix"}     \tab \tab schools x themes: documents and standardized residuals; a link is a red cell with at least \code{min.link} documents\cr
-#' \code{"links"}      \tab \tab schools on the left, themes on the right, one line per link: a school with several lines is branching, a theme with several lines is convergent\cr
+#' \code{"links"}      \tab \tab schools on the left, themes on the right, one flow per link: a school with several flows is branching, a theme with several flows is convergent (interactive: a sankey diagram, with nodes that can be dragged)\cr
 #' \code{"plane"}      \tab \tab pairs of schools by roots and topic proximity; the pairs linked to the same theme are named with it\cr
 #' \code{"clusters"}   \tab \tab schools and themes by cohesion in the two layers\cr
 #' \code{"trajectory"} \tab \tab pairs of schools from their first to their last period (needs \code{\link{multiplexEvolution}})\cr
-#' \code{"alluvial"}   \tab \tab flows of documents from schools to themes (interactive only)\cr
 #' \code{"network"}    \tab \tab the documents, with the edges coloured by layer (interactive only)}
 #'
 #' @param x an object of class \code{"biblioMultiplex"} with clusters, or of
@@ -45,7 +44,7 @@ utils::globalVariables(c(
 #'
 #' @export
 multiplexPlot <- function(x,
-                          type = c("matrix", "links", "plane", "clusters", "trajectory", "alluvial", "network"),
+                          type = c("matrix", "links", "plane", "clusters", "trajectory", "network"),
                           interactive = FALSE,
                           n.labels = 12,
                           min.size = 10,
@@ -65,7 +64,6 @@ multiplexPlot <- function(x,
     links = mpLinksPlot(x, interactive),
     plane = mpPlanePlot(x, interactive, n.labels, min.size),
     clusters = mpClustersPlot(x, interactive),
-    alluvial = mpAlluvial(x),
     network = mpNetwork(x, max.nodes)
   )
 }
@@ -120,6 +118,7 @@ mpMatrixPlot <- function(mc, interactive = FALSE) {
 
 # schools on the left, themes on the right, one line per link (width = documents)
 mpLinksPlot <- function(mc, interactive = FALSE) {
+  if (interactive) return(mpLinksSankey(mc))
   cl <- mc$clusters
   lk <- cl$links
   S <- cl$schools
@@ -174,18 +173,7 @@ mpLinksPlot <- function(mc, interactive = FALSE) {
       ggplot2::theme_void() +
       ggplot2::theme(legend.position = "bottom")
   )
-  g <- mpTheme(g)
-  if (!interactive) return(g)
-  # plotly ignores hjust: the names of the schools go left of their points,
-  # those of the themes right
-  p <- plotly::plotly_build(plotly::ggplotly(g, tooltip = "text"))
-  for (k in seq_along(p$x$data)) {
-    d <- p$x$data[[k]]
-    if (identical(d$mode, "text")) {
-      p$x$data[[k]]$textposition <- ifelse(d$x < 0.5, "middle left", "middle right")
-    }
-  }
-  p
+  mpTheme(g)
 }
 
 # themes linked to both schools of each pair ("-> T1 patents"), "" when none
@@ -317,30 +305,71 @@ mpTrajectoryPlot <- function(ev, interactive = FALSE, n.pairs = 12) {
   )
 }
 
-# flows of documents from schools to themes (plotly sankey); links opaque
-mpAlluvial <- function(mc, min.flow = 3) {
+# The links as a sankey diagram, as plotThematicEvolution() and
+# threeFieldsPlot() draw theirs: schools on the left, themes on the right, one
+# flow per link (width = documents). Every school has its colour and its flows
+# take it, so the themes a branching school feeds can be followed; themes are
+# coloured by their structure. Nodes can be dragged.
+mpLinksSankey <- function(mc) {
   cl <- mc$clusters
-  tab <- as.data.frame(cl$contingency, stringsAsFactors = FALSE)
-  names(tab) <- c("school", "theme", "Freq")
-  tab <- tab[tab$Freq >= min.flow, ]
-  tab$school <- as.integer(tab$school)
-  tab$theme <- as.integer(tab$theme)
-  tab$res <- cl$residuals[cbind(tab$school, tab$theme)]
-  is_link <- paste(tab$school, tab$theme) %in% paste(cl$links$school, cl$links$theme)
-  lr <- mpSchoolLabels(cl)
-  lt <- mpThemeLabels(cl)
-  cols <- colorlist()[((seq_along(lr) - 1) %% length(colorlist())) + 1]
-  p <- plotly::plot_ly(
-    type = "sankey", arrangement = "snap",
-    node = list(label = c(lr, lt), pad = 12, thickness = 14, color = c(cols, rep("#BBBBBB", length(lt)))),
-    link = list(source = tab$school - 1, target = length(lr) + tab$theme - 1, value = tab$Freq,
-                color = mapply(grDevices::adjustcolor, cols[tab$school], alpha.f = ifelse(is_link, 0.7, 0.15),
-                               USE.NAMES = FALSE),
-                customdata = sprintf("%d documents, standardized residual %.1f%s", tab$Freq, tab$res,
-                                     ifelse(is_link, " (link)", "")),
-                hovertemplate = "%{source.label} -> %{target.label}<br>%{customdata}<extra></extra>")
+  lk <- cl$links
+  if (!nrow(lk)) stop("multiplexPlot(): no school is linked to a theme", call. = FALSE)
+  S <- cl$schools[sort(unique(lk$school)), ]
+  Tm <- cl$themes[sort(unique(lk$theme)), ]
+  # schools by number, themes at the mean rank of their schools (weighted by
+  # documents), so that flows cross as little as possible
+  S$rank <- seq_len(nrow(S))
+  sr <- S$rank[match(lk$school, S$cluster)]
+  bary <- tapply(sr * lk$n, lk$theme, sum) / tapply(lk$n, lk$theme, sum)
+  Tm <- Tm[order(bary[as.character(Tm$cluster)], -Tm$size), ]
+  pos <- function(k) (seq_len(k) - 0.5) / k
+  school_cols <- colorlist()[((S$cluster - 1) %% length(colorlist())) + 1]
+  theme_cols <- c(convergence = MP_COLORS[["convergence"]], consolidation = MP_COLORS[["consolidation"]],
+                  dispersed = MP_COLORS[["dispersed"]])[Tm$structure]
+  struct_school <- c(branching = "branching school", consolidation = "consolidated school",
+                     dispersed = "dispersed school")
+  struct_theme <- c(convergence = "convergent theme", consolidation = "consolidated theme",
+                    dispersed = "dispersed theme")
+  node_text <- c(
+    sprintf("%s<br>%d documents, %s, %d linked themes<br>%s", mpSchoolLabels(cl)[S$cluster], S$size,
+            struct_school[S$structure], S$n_themes, S$terms),
+    sprintf("%s<br>%d documents, %s, %d linked schools<br>%s", mpThemeLabels(cl)[Tm$cluster], Tm$size,
+            struct_theme[Tm$structure], Tm$n_schools, Tm$terms)
   )
-  plotly::layout(p, title = "Schools -> themes (opaque: links)")
+  src <- match(lk$school, S$cluster) - 1
+  tgt <- nrow(S) + match(lk$theme, Tm$cluster) - 1
+  link_text <- sprintf("%s -> %s<br>%d documents: %.0f%% of the school, %.0f%% of the theme<br>standardized residual %.1f",
+                       mpSchoolLabels(cl)[lk$school], mpThemeLabels(cl)[lk$theme], lk$n,
+                       100 * lk$share_school, 100 * lk$share_theme, lk$residual)
+  p <- plotly::plot_ly(
+    type = "sankey",
+    arrangement = "snap",
+    node = list(
+      label = c(mpSchoolLabels(cl)[S$cluster], mpThemeLabels(cl)[Tm$cluster]),
+      x = c(rep(0.001, nrow(S)), rep(0.999, nrow(Tm))),
+      y = c(pos(nrow(S)), pos(nrow(Tm))),
+      color = c(school_cols, unname(theme_cols)),
+      pad = 6,
+      thickness = 16,
+      customdata = node_text,
+      hovertemplate = "%{customdata}<extra></extra>"
+    ),
+    link = list(
+      source = src,
+      target = tgt,
+      value = lk$n,
+      color = vapply(school_cols[match(lk$school, S$cluster)], grDevices::adjustcolor, "", alpha.f = 0.45,
+                     USE.NAMES = FALSE),
+      customdata = link_text,
+      hovertemplate = "%{customdata}<extra></extra>"
+    )
+  )
+  p <- plotly::layout(p, margin = list(l = 50, r = 50, b = 60, t = 80, pad = 4))
+  p <- plotly::add_annotations(
+    p, x = c(0, 1), y = 1.06, text = c("SCHOOLS (roots)", "THEMES (topics)"),
+    showarrow = FALSE, xanchor = c("left", "right"), font = list(size = 15)
+  )
+  plotly::config(p, displaylogo = FALSE)
 }
 
 # the documents, coloured by school, edges coloured by layer

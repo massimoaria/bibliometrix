@@ -6,7 +6,7 @@
 \usage{
 multiplexPlot(
   x,
-  type = c("matrix", "links", "plane", "clusters", "trajectory", "alluvial", "network"),
+  type = c("matrix", "links", "plane", "clusters", "trajectory", "network"),
   interactive = FALSE,
   n.labels = 12,
   min.size = 10,
@@ -42,11 +42,10 @@ It draws the results of \code{\link{multiplexClusters}} and
 \details{
 \tabular{lll}{
 \code{"matrix"}     \tab \tab schools x themes: documents and standardized residuals; a link is a red cell with at least \code{min.link} documents\cr
-\code{"links"}      \tab \tab schools on the left, themes on the right, one line per link: a school with several lines is branching, a theme with several lines is convergent\cr
+\code{"links"}      \tab \tab schools on the left, themes on the right, one flow per link: a school with several flows is branching, a theme with several flows is convergent (interactive: a sankey diagram, with nodes that can be dragged)\cr
 \code{"plane"}      \tab \tab pairs of schools by roots and topic proximity; the pairs linked to the same theme are named with it\cr
 \code{"clusters"}   \tab \tab schools and themes by cohesion in the two layers\cr
 \code{"trajectory"} \tab \tab pairs of schools from their first to their last period (needs \code{\link{multiplexEvolution}})\cr
-\code{"alluvial"}   \tab \tab flows of documents from schools to themes (interactive only)\cr
 \code{"network"}    \tab \tab the documents, with the edges coloured by layer (interactive only)}
 }
 \examples{

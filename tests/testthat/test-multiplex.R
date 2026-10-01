@@ -220,7 +220,9 @@ test_that("every plot renders, static and interactive", {
     expect_no_error(print(g), message = tp)
     expect_s3_class(multiplexPlot(mc, tp, interactive = TRUE), "plotly")
   }
-  expect_s3_class(multiplexPlot(mc, "alluvial"), "plotly")
+  sk <- plotly::plotly_build(multiplexPlot(mc, "links", interactive = TRUE))
+  expect_equal(sk$x$data[[1]]$type, "sankey")
+  expect_equal(length(sk$x$data[[1]]$link$value), nrow(mc$clusters$links))
   expect_s3_class(multiplexPlot(mc, "network"), "visNetwork")
   ev <- multiplexEvolution(mc, years = c(2012, 2016, 2018), min.docs = 3)
   expect_s3_class(multiplexPlot(ev, "trajectory"), "ggplot")

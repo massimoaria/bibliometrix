@@ -241,3 +241,37 @@ test_that("dominance gestisce casi limite di borda senza errori", {
   expect_true(is.na(dominance(data.frame())))
 })
 
+
+test_that("dominancePlot disegna i quadranti e unisce gli autori sovrapposti", {
+  DF <- data.frame(
+    Author = c("A", "B", "C", "D", "E"),
+    "Dominance Factor" = c(1, 0.6, 0.2, 0, 0),
+    "Tot Articles" = c(2, 8, 9, 3, 3),
+    "Single-Authored" = 0,
+    "Multi-Authored" = c(2, 8, 9, 3, 3),
+    "First-Authored" = c(2, 5, 2, 0, 0),
+    "Rank by Articles" = c(5, 2, 1, 3, 3),
+    "Rank by DF" = 1:5,
+    check.names = FALSE
+  )
+  g <- dominancePlot(DF)
+  expect_s3_class(g, "ggplot")
+  pts <- g$data
+  # D ed E hanno le stesse coordinate: un solo punto con i due nomi
+  expect_equal(nrow(pts), 4)
+  expect_equal(pts$Label[pts$Articles == 3], "D\nE")
+  expect_equal(
+    as.character(pts$Quadrant),
+    c("Leaders", "Prolific leaders", "Prolific co-authors", "Co-authors")
+  )
+  pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(print(g))
+  expect_no_error(print(dominancePlot(DF[1, ], labels = FALSE)))
+})
+
+test_that("dominancePlot rifiuta un input che non viene da dominance()", {
+  expect_error(dominancePlot(data.frame(x = 1)), "returned by dominance")
+  DF_empty <- dominance(structure(list(Authors = NULL), class = "bibliometrix"))
+  expect_error(dominancePlot(DF_empty), "no authors")
+})

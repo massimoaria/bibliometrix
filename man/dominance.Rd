@@ -41,4 +41,6 @@ DF
 \code{\link{biblioAnalysis}} function for bibliometric analysis
 
 \code{\link{summary}} method for class '\code{bibliometrix}'
+
+\code{\link{dominancePlot}} to plot the dominance ranking
 }

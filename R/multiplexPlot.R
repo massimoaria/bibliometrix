@@ -390,27 +390,32 @@ mpLinksSankey <- function(mc) {
 
 # Clicking a node of the sankey greys out everything not connected to it:
 # its flows and the nodes at their other end keep their colour. Clicking the
-# same node again, or a double click, restores the colours. Attached as a
+# same node again, clicking outside the nodes or a double click restores the
+# colours. The nodes can be dragged, and plotly then never receives the click
+# of a real mouse (no plotly_click): a click is recognised here as a mouse
+# press and release on the same node, less than 5 pixels apart. Attached as a
 # render hook, which is what htmlwidgets::onRender() does, so that htmlwidgets
 # need not be declared (it is installed with plotly).
 mpSankeyHighlight <- function(p) {
   js <- "
 function(el) {
-  var orig = null, selected = null;
+  var orig = null, selected = null, down = null;
   var arr = function(v) { return [].concat(v); };
+  var save = function() {
+    if (orig === null) {
+      var tr = el.data[0];
+      orig = {node: arr(tr.node.color).slice(), link: arr(tr.link.color).slice()};
+    }
+  };
   var restore = function() {
-    if (orig === null) return;
+    if (orig === null || selected === null) return;
     selected = null;
     Plotly.restyle(el, {'node.color': [orig.node], 'link.color': [orig.link]}, [0]);
   };
-  el.on('plotly_click', function(ev) {
-    var pt = ev && ev.points && ev.points[0];
-    if (!pt || (pt.sourceLinks === undefined && pt.targetLinks === undefined)) return;
-    var tr = el.data[0];
-    if (orig === null) orig = {node: arr(tr.node.color).slice(), link: arr(tr.link.color).slice()};
-    var k = (pt.pointNumber !== undefined) ? pt.pointNumber : pt.index;
-    if (selected === k) { restore(); return; }
+  var highlight = function(k) {
+    save();
     selected = k;
+    var tr = el.data[0];
     var src = arr(tr.link.source), tgt = arr(tr.link.target), keep = {};
     keep[k] = true;
     var lc = src.map(function(s, i) {
@@ -420,8 +425,21 @@ function(el) {
     });
     var nc = orig.node.map(function(c, i) { return keep[i] ? c : 'rgba(205,205,205,0.6)'; });
     Plotly.restyle(el, {'node.color': [nc], 'link.color': [lc]}, [0]);
-  });
-  el.on('plotly_doubleclick', restore);
+  };
+  el.addEventListener('mousedown', function(e) {
+    var g = e.target.closest ? e.target.closest('.sankey-node') : null;
+    var k = (g && g.__data__ && g.__data__.node) ? g.__data__.node.pointNumber : null;
+    down = {k: k, x: e.clientX, y: e.clientY};
+  }, true);
+  el.addEventListener('mouseup', function(e) {
+    if (down === null) return;
+    var moved = Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y);
+    var k = down.k;
+    down = null;
+    if (moved > 5) return;
+    if (k === null || k === undefined || selected === k) restore(); else highlight(k);
+  }, true);
+  el.addEventListener('dblclick', restore);
 }"
   p$jsHooks$render <- c(p$jsHooks$render, list(list(code = js, data = NULL)))
   p

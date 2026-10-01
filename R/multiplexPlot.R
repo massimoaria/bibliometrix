@@ -369,7 +369,47 @@ mpLinksSankey <- function(mc) {
     p, x = c(0, 1), y = 1.06, text = c("SCHOOLS (roots)", "THEMES (topics)"),
     showarrow = FALSE, xanchor = c("left", "right"), font = list(size = 15)
   )
-  plotly::config(p, displaylogo = FALSE)
+  p <- plotly::config(p, displaylogo = FALSE)
+  mpSankeyHighlight(p)
+}
+
+# Clicking a node of the sankey greys out everything not connected to it:
+# its flows and the nodes at their other end keep their colour. Clicking the
+# same node again, or a double click, restores the colours. Attached as a
+# render hook, which is what htmlwidgets::onRender() does, so that htmlwidgets
+# need not be declared (it is installed with plotly).
+mpSankeyHighlight <- function(p) {
+  js <- "
+function(el) {
+  var orig = null, selected = null;
+  var arr = function(v) { return [].concat(v); };
+  var restore = function() {
+    if (orig === null) return;
+    selected = null;
+    Plotly.restyle(el, {'node.color': [orig.node], 'link.color': [orig.link]}, [0]);
+  };
+  el.on('plotly_click', function(ev) {
+    var pt = ev && ev.points && ev.points[0];
+    if (!pt || (pt.sourceLinks === undefined && pt.targetLinks === undefined)) return;
+    var tr = el.data[0];
+    if (orig === null) orig = {node: arr(tr.node.color).slice(), link: arr(tr.link.color).slice()};
+    var k = (pt.pointNumber !== undefined) ? pt.pointNumber : pt.index;
+    if (selected === k) { restore(); return; }
+    selected = k;
+    var src = arr(tr.link.source), tgt = arr(tr.link.target), keep = {};
+    keep[k] = true;
+    var lc = src.map(function(s, i) {
+      var on = (s === k || tgt[i] === k);
+      if (on) { keep[s] = true; keep[tgt[i]] = true; }
+      return on ? orig.link[i] : 'rgba(220,220,220,0.35)';
+    });
+    var nc = orig.node.map(function(c, i) { return keep[i] ? c : 'rgba(205,205,205,0.6)'; });
+    Plotly.restyle(el, {'node.color': [nc], 'link.color': [lc]}, [0]);
+  });
+  el.on('plotly_doubleclick', restore);
+}"
+  p$jsHooks$render <- c(p$jsHooks$render, list(list(code = js, data = NULL)))
+  p
 }
 
 # the documents, coloured by school, edges coloured by layer

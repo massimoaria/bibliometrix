@@ -330,17 +330,32 @@ mpLinksSankey <- function(mc) {
                      dispersed = "dispersed school")
   struct_theme <- c(convergence = "convergent theme", consolidation = "consolidated theme",
                     dispersed = "dispersed theme")
+  # tooltips: the name, the three main labels, then the figures
+  bullets <- function(terms) {
+    vapply(strsplit(terms, "; ", fixed = TRUE), function(t) {
+      paste0("&#8226; ", t, collapse = "<br>")
+    }, "")
+  }
+  linkedNames <- function(ids, labels) {
+    vapply(strsplit(ids, ",", fixed = TRUE), function(k) {
+      if (!length(k)) "none" else paste0("<br>&#8226; ", labels[as.integer(k)], collapse = "")
+    }, "")
+  }
   node_text <- c(
-    sprintf("%s<br>%d documents, %s, %d linked themes<br>%s", mpSchoolLabels(cl)[S$cluster], S$size,
-            struct_school[S$structure], S$n_themes, S$terms),
-    sprintf("%s<br>%d documents, %s, %d linked schools<br>%s", mpThemeLabels(cl)[Tm$cluster], Tm$size,
-            struct_theme[Tm$structure], Tm$n_schools, Tm$terms)
+    sprintf("<b>%s</b><br><br><i>Main labels</i><br>%s<br><br>Documents: %d<br>Structure: %s<br><br><i>Linked themes (%d)</i>%s",
+            mpSchoolLabels(cl)[S$cluster], bullets(S$terms), S$size, struct_school[S$structure],
+            S$n_themes, linkedNames(S$themes, mpThemeLabels(cl))),
+    sprintf("<b>%s</b><br><br><i>Main labels</i><br>%s<br><br>Documents: %d<br>Structure: %s<br><br><i>Linked schools (%d)</i>%s",
+            mpThemeLabels(cl)[Tm$cluster], bullets(Tm$terms), Tm$size, struct_theme[Tm$structure],
+            Tm$n_schools, linkedNames(Tm$schools, mpSchoolLabels(cl)))
   )
   src <- match(lk$school, S$cluster) - 1
   tgt <- nrow(S) + match(lk$theme, Tm$cluster) - 1
-  link_text <- sprintf("%s -> %s<br>%d documents: %.0f%% of the school, %.0f%% of the theme<br>standardized residual %.1f",
-                       mpSchoolLabels(cl)[lk$school], mpThemeLabels(cl)[lk$theme], lk$n,
-                       100 * lk$share_school, 100 * lk$share_theme, lk$residual)
+  link_text <- sprintf(
+    "<b>%s</b> &#8594; <b>%s</b><br><br>Documents: %d<br>Share of the school: %.0f%%<br>Share of the theme: %.0f%%<br>Standardized residual: %.1f",
+    mpSchoolLabels(cl)[lk$school], mpThemeLabels(cl)[lk$theme], lk$n,
+    100 * lk$share_school, 100 * lk$share_theme, lk$residual
+  )
   p <- plotly::plot_ly(
     type = "sankey",
     arrangement = "snap",

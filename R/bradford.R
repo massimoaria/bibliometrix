@@ -80,7 +80,7 @@ bradford <- function(M) {
 
   Z <- rep("Zone 3", nSO)
   Z[seq_len(zone1_end)] <- "Zone 1"
-  if (zone1_end < nSO) {
+  if (zone2_end > zone1_end) {
     Z[(zone1_end + 1):zone2_end] <- "Zone 2"
   }
   df$Zone <- Z

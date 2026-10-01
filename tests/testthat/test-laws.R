@@ -21,6 +21,22 @@ test_that("bradford funziona e restituisce zone", {
   expect_true("Zone" %in% names(BR$table))
 })
 
+test_that("bradford assegna Zone 1 correttamente anche con una rivista dominante", {
+  M <- data.frame(
+    SO = c(rep("CORE JOURNAL", 70), rep("JOURNAL B", 15), rep("JOURNAL C", 10), rep("JOURNAL D", 5)),
+    stringsAsFactors = FALSE
+  )
+  BR <- bradford(M)
+  expect_true("Zone 1" %in% BR$table$Zone)
+  expect_equal(BR$table$Zone[BR$table$Rank == 1], "Zone 1")
+  expect_equal(sum(BR$table$Zone == "Zone 1"), 1)
+  expect_equal(sum(BR$table$Zone == "Zone 2"), 0)
+  expect_equal(sum(BR$table$Zone == "Zone 3"), 3)
+  pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(print(BR$graph))
+})
+
 # Collezioni che la legge di Lotka non puo' descrivere (#674). Prima di questi
 # controlli lotka() moriva dentro str_split(), aggregate() o ks.test() con un
 # messaggio che non nominava nessuno dei tre.

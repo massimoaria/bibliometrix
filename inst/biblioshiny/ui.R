@@ -609,7 +609,7 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       icon = fa_i(name = "link"),
       startExpanded = FALSE,
       menuSubItem(
-        "Classic Coupling",
+        "Bibliographic Coupling",
         tabName = "couplingNetwork",
         icon = icon("chevron-right", lib = "glyphicon")
       ),
@@ -7645,7 +7645,7 @@ body <- dashboardBody(
       "couplingNetwork",
       fluidPage(
         fluidRow(
-          column(10, h3(strong("Classic Coupling"), align = "center")),
+          column(10, h3(strong("Bibliographic Coupling"), align = "center")),
           div(
             style = style_bttn, title = t_run,
             column(1, do.call("actionBttn", c(run_bttn, list(inputId = "applyCpl"))))

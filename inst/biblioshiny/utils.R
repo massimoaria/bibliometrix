@@ -7013,7 +7013,7 @@ updateMenuVisibility <- function(session, values) {
     out <- c(out, "Most Local Cited References", "References Spectroscopy")
   }
   if (!isTRUE(CR)) {
-    out <- c(out, "Co-citation Network", "Classic Coupling", "Multiplex Coupling")
+    out <- c(out, "Co-citation Network", "Bibliographic Coupling", "Multiplex Coupling")
   }
   if (!(isTRUE(DB_TC) & isTRUE(CR))) {
     out <- c(out, "Historiograph")

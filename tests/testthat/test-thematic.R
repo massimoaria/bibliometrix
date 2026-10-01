@@ -228,3 +228,11 @@ test_that("thematicEvolution rifiuta periodi i cui temi non condividono parole",
     "the themes of the period 2010-2012 share no word"
   )
 })
+
+test_that("couplingMap restituisce la modularity della community detection", {
+  skip_if_not_installed("bibliometrixData")
+  data(management, package = "bibliometrixData")
+  CM <- couplingMap(management, analysis = "authors", field = "CR", n = 100, minfreq = 3)
+  expect_true(is.numeric(CM$modularity) && length(CM$modularity) == 1)
+  expect_identical(CM$modularity, CM$net$modularity)
+})

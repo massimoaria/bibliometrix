@@ -43,7 +43,8 @@ utils::globalVariables(c(
 #' \code{data}\tab   \tab A list of units following in each cluster\cr
 #' \code{nclust}\tab   \tab The number of clusters\cr
 #' \code{NCS}\tab     \tab The Normalized Citation Score dataframe\cr
-#' \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
+#' \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)\cr
+#' \code{modularity}\tab    \tab The modularity (Q) of the community detection}
 #'
 #' @examples
 #' \dontrun{
@@ -230,7 +231,7 @@ couplingMap <- function(M, analysis = "documents", field = "CR", n = 500, label.
   )
   params <- data.frame(params = names(unlist(params)), values = unlist(params), row.names = NULL)
 
-  results <- list(map = g, clusters = df, data = df_lab, nclust = dim(df)[1], NCS = D, net = Net, params = params)
+  results <- list(map = g, clusters = df, data = df_lab, nclust = dim(df)[1], NCS = D, net = Net, modularity = Net$modularity, params = params)
   return(results)
 }
 

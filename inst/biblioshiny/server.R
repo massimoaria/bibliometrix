@@ -10973,24 +10973,32 @@ To ensure the functionality of Biblioshiny,
     req(values$CM)
     #cmData=values$CM$clusters[,c(7,1:4,6)]
     cmData <- values$CM$clusters
-    renderBibliobox(
-      cmData,
-      nrow = 10,
-      filename = "CouplingMap_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 4:5,
-      dom = FALSE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$CM$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        cmData,
+        nrow = 10,
+        filename = "CouplingMap_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 4:5,
+        dom = FALSE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
@@ -14472,6 +14480,7 @@ To ensure the functionality of Biblioshiny,
   observe({ .toggleDownloadBtn("AIplot.save", !is.null(values$AIplot)) })
   observe({ .toggleDownloadBtn("APOTplot.save", !is.null(values$AUProdOverTime)) })
   observe({ .toggleDownloadBtn("LLplot.save", !is.null(values$LLplot)) })
+  observe({ .toggleDownloadBtn("DOMplot.save", !is.null(values$DOMplot)) })
   observe({
     .toggleDownloadBtn(
       "exportAuthorCard",
@@ -14480,7 +14489,6 @@ To ensure the functionality of Biblioshiny,
   })
   # Affiliations
   observe({ .toggleDownloadBtn("AFFplot.save", !is.null(values$AFFplot)) })
-  observe({ .toggleDownloadBtn("DOMplot.save", !is.null(values$DOMplot)) })
   observe({ .toggleDownloadBtn("AffOverTimeplot.save", !is.null(values$AffOverTimePlot)) })
   # Countries
   observe({ .toggleDownloadBtn("MRCOplot.save", !is.null(values$MRCOplot)) })

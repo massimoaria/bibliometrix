@@ -2934,6 +2934,50 @@ helpContent <- function() {
     </div>
     </body>"
 
+  authorsDominance <-
+    "<body>
+  <div class='container'>
+  <h3>Authors' Dominance</h3>
+
+  <p>The <strong>Dominance Factor</strong> (DF), proposed by Kumar &amp; Kumar (2008), measures how often an author leads the collaborations they take part in. It is the share of an author's <em>multi-authored</em> articles in which they are the <em>first</em> author:</p>
+
+  <p style='text-align:center;'><strong>DF = FAA / MAA</strong></p>
+
+  <p>where <em>FAA</em> is the number of multi-authored articles the author signs as first author, and <em>MAA</em> is the number of multi-authored articles the author signs in any position. Single-authored articles are left out: an author with no multi-authored article has no Dominance Factor and is not shown.</p>
+
+  <br>
+
+  <h4>How to Read the Plot</h4>
+
+  <p>Biblioshiny selects the most productive authors of the collection (the <em>Number of Authors</em> option) and places each of them by:</p>
+  <ul>
+    <li><strong>x axis</strong>: the number of articles of the author in the collection;</li>
+    <li><strong>y axis</strong>: the Dominance Factor, from 0 (never first author) to 1 (always first author);</li>
+    <li><strong>point size</strong>: the number of multi-authored articles, the denominator of the DF.</li>
+  </ul>
+
+  <p>Two dashed lines split the authors into four groups: the vertical one is the median productivity of the plotted authors, the horizontal one is DF = 0.5, above which an author is first author in at least half of their multi-authored articles.</p>
+  <ul>
+    <li><strong>Prolific leaders</strong>: above the median productivity, DF &ge; 0.5;</li>
+    <li><strong>Leaders</strong>: up to the median productivity, DF &ge; 0.5;</li>
+    <li><strong>Prolific co-authors</strong>: above the median productivity, DF &lt; 0.5;</li>
+    <li><strong>Co-authors</strong>: up to the median productivity, DF &lt; 0.5.</li>
+  </ul>
+
+  <p>Each bubble is named above. When two names would overlap, or a name would cover another bubble, only the author with the higher DF is named; hover over a bubble to see the names of all its authors. Authors with the same number of articles, multi-authored articles and DF fall on the same point, which is drawn once with their names stacked. A low DF does not mean low quality: in fields where authors are listed alphabetically, or where the senior author signs last, the first position says little about who led the work.</p>
+
+  <br>
+
+  <h4>References</h4>
+
+  <p><strong>Kumar, S. &amp; Kumar, S. (2008).</strong> <i>Collaboration in research productivity in oil seed research institutes of India.</i> Proceedings of the Fourth International Conference on Webometrics, Informetrics and Scientometrics &amp; Ninth COLLNET Meeting, Berlin, Germany.</p>
+
+  <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+  <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
+
+    </div>
+    </body>"
+
   lotkaLaw <-
     "<body>
   <div class='container'>
@@ -3151,6 +3195,7 @@ helpContent <- function() {
     trendTopics = trendTopics,
     bradfordLaw = bradfordLaw,
     lotkaLaw = lotkaLaw,
+    authorsDominance = authorsDominance,
     rpys = rpys,
     prisma = prisma
   ))

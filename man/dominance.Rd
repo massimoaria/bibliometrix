@@ -7,7 +7,8 @@
 dominance(results, k = 10)
 }
 \arguments{
-\item{results}{is an object of the class '\code{bibliometrix}' for which the analysis of the authors' dominance ranking is desired.}
+\item{results}{is a bibliographic data frame (as returned by \code{\link{convert2df}}) or an object of the class '\code{bibliometrix}' returned by \code{\link{biblioAnalysis}}.
+Passing the data frame is faster, since only the author field \code{AU} is needed; both give the same ranking.}
 
 \item{k}{is an integer, used for table formatting (number of authors). Default value is 10.}
 }
@@ -28,12 +29,11 @@ the data frame variables are:
 \code{Rank by DF}    \tab   \tab Author Ranking by Dominance Factor}
 }
 \description{
-It calculates the authors' dominance ranking from an object of the class '\code{bibliometrix}' as proposed by Kumar & Kumar, 2008.
+It calculates the authors' dominance ranking as proposed by Kumar & Kumar, 2008.
 }
 \examples{
 data(scientometrics, package = "bibliometrixData")
-results <- biblioAnalysis(scientometrics)
-DF <- dominance(results)
+DF <- dominance(scientometrics)
 DF
 
 }

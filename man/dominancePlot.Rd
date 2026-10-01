@@ -4,12 +4,14 @@
 \alias{dominancePlot}
 \title{Plot the authors' dominance ranking}
 \usage{
-dominancePlot(DF, labels = TRUE)
+dominancePlot(DF, labels = TRUE, logo = TRUE)
 }
 \arguments{
 \item{DF}{is a data frame returned by \code{\link{dominance}}.}
 
-\item{labels}{is logical. If TRUE, the authors' names are drawn next to their points. Default is \code{labels = TRUE}.}
+\item{labels}{is logical. If TRUE, the authors' names are drawn above their points. When two names would overlap, only the one of the author with the higher Dominance Factor is drawn. Default is \code{labels = TRUE}.}
+
+\item{logo}{is logical. If TRUE, the bibliometrix logo is drawn in the bottom-right corner. Set it to FALSE for a plot converted with \code{plotly::ggplotly()}, which cannot draw it. Default is \code{logo = TRUE}.}
 }
 \value{
 The function \code{dominancePlot} returns a plot in ggplot2 format.

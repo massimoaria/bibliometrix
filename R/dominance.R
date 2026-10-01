@@ -1,7 +1,8 @@
 #' Authors' dominance ranking
 #'
-#' It calculates the authors' dominance ranking from an object of the class '\code{bibliometrix}' as proposed by Kumar & Kumar, 2008.
-#' @param results is an object of the class '\code{bibliometrix}' for which the analysis of the authors' dominance ranking is desired.
+#' It calculates the authors' dominance ranking as proposed by Kumar & Kumar, 2008.
+#' @param results is a bibliographic data frame (as returned by \code{\link{convert2df}}) or an object of the class '\code{bibliometrix}' returned by \code{\link{biblioAnalysis}}.
+#' Passing the data frame is faster, since only the author field \code{AU} is needed; both give the same ranking.
 #' @param k is an integer, used for table formatting (number of authors). Default value is 10.
 #' @return The function \code{dominance} returns a data frame with cases corresponding to the first \code{k} most productive authors and variables to typical field of a dominance analysis.
 #' Only authors with at least one multi-authored article are considered, since the Dominance Factor is not defined otherwise.
@@ -22,8 +23,7 @@
 #'
 #' @examples
 #' data(scientometrics, package = "bibliometrixData")
-#' results <- biblioAnalysis(scientometrics)
-#' DF <- dominance(results)
+#' DF <- dominance(scientometrics)
 #' DF
 #'
 #' @seealso \code{\link{biblioAnalysis}} function for bibliometric analysis
@@ -37,8 +37,10 @@ dominance <- function(results, k = 10) {
 
   # options(warn=-1)
 
-  if (!inherits(results, "bibliometrix")) {
-    cat('\n argument "results" have to be an object of class "bibliometrix"\n')
+  if (is.data.frame(results) && "AU" %in% names(results)) {
+    results <- dominanceAuthors(results$AU)
+  } else if (!inherits(results, "bibliometrix")) {
+    cat('\n argument "results" have to be a bibliographic data frame or an object of class "bibliometrix"\n')
     return(NA)
   }
 
@@ -109,4 +111,15 @@ dominance <- function(results, k = 10) {
   names(D) <- c("Author", "Dominance Factor", "Tot Articles", "Single-Authored", "Multi-Authored", "First-Authored", "Rank by Articles", "Rank by DF")
   row.names(D) <- 1:nrow(D)
   return(D)
+}
+
+# The three author statistics of biblioAnalysis() that dominance() uses,
+# computed the same way from the AU field alone
+dominanceAuthors <- function(AU, sep = ";") {
+  listAU <- lapply(strsplit(as.character(AU), sep), trim)
+  list(
+    Authors = tableSort(table(unlist(listAU))),
+    FirstAuthors = vapply(listAU, function(l) l[1], character(1)),
+    nAUperPaper = lengths(listAU)
+  )
 }

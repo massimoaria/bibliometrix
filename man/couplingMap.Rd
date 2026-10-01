@@ -63,7 +63,8 @@ a list containing:
 \code{data}\tab   \tab A list of units following in each cluster\cr
 \code{nclust}\tab   \tab The number of clusters\cr
 \code{NCS}\tab     \tab The Normalized Citation Score dataframe\cr
-\code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
+\code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)\cr
+\code{modularity}\tab    \tab The modularity (Q) of the community detection}
 }
 \description{
 It performs a coupling network analysis and plots community detection results on a bi-dimensional map (Coupling Map).

@@ -241,3 +241,75 @@ test_that("dominance gestisce casi limite di borda senza errori", {
   expect_true(is.na(dominance(data.frame())))
 })
 
+
+test_that("dominancePlot disegna i quadranti e unisce gli autori sovrapposti", {
+  DF <- data.frame(
+    Author = c("A", "B", "C", "D", "E"),
+    "Dominance Factor" = c(1, 0.6, 0.2, 0, 0),
+    "Tot Articles" = c(2, 8, 9, 3, 3),
+    "Single-Authored" = 0,
+    "Multi-Authored" = c(2, 8, 9, 3, 3),
+    "First-Authored" = c(2, 5, 2, 0, 0),
+    "Rank by Articles" = c(5, 2, 1, 3, 3),
+    "Rank by DF" = 1:5,
+    check.names = FALSE
+  )
+  g <- dominancePlot(DF)
+  expect_s3_class(g, "ggplot")
+  pts <- g$data
+  # D ed E hanno le stesse coordinate: un solo punto con i due nomi
+  expect_equal(nrow(pts), 4)
+  expect_equal(pts$Label[pts$Articles == 3], "D\nE")
+  expect_equal(
+    as.character(pts$Quadrant),
+    c("Leaders", "Prolific leaders", "Prolific co-authors", "Co-authors")
+  )
+  pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(print(g))
+  expect_no_error(print(dominancePlot(DF[1, ], labels = FALSE)))
+})
+
+test_that("dominancePlot rifiuta un input che non viene da dominance()", {
+  expect_error(dominancePlot(data.frame(x = 1)), "returned by dominance")
+  DF_empty <- dominance(structure(list(Authors = NULL), class = "bibliometrix"))
+  expect_error(dominancePlot(DF_empty), "no authors")
+})
+
+test_that("dominance su M da' lo stesso risultato che su biblioAnalysis(M)", {
+  M <- data.frame(
+    AU = c("A;B", NA, "", "C", " A ; C;D", "B", "B;A"),
+    stringsAsFactors = FALSE
+  )
+  class(M) <- c("bibliometrixDB", "data.frame")
+  res <- suppressWarnings(biblioAnalysis(M))
+  for (k in c(2, 10)) expect_identical(dominance(M, k), dominance(res, k))
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData")
+  expect_identical(
+    dominance(scientometrics, 20),
+    dominance(biblioAnalysis(scientometrics), 20)
+  )
+})
+
+test_that("dominancePlot nomina solo la bolla con DF maggiore tra due vicine", {
+  DF <- data.frame(
+    Author = c("HIGH", "LOW", "FAR"),
+    "Dominance Factor" = c(0.52, 0.5, 0.1),
+    "Tot Articles" = c(10, 10, 30),
+    "Single-Authored" = 0,
+    "Multi-Authored" = c(10, 10, 30),
+    "First-Authored" = c(5, 5, 3),
+    "Rank by Articles" = c(2, 2, 1),
+    "Rank by DF" = 1:3,
+    check.names = FALSE
+  )
+  g <- dominancePlot(DF)
+  text_layer <- Filter(function(l) inherits(l$geom, "GeomText"), g$layers)
+  shown <- unlist(lapply(text_layer, function(l) l$data$Label))
+  expect_setequal(shown, c("HIGH", "FAR"))
+  # Con labels = FALSE resta solo il testo dei quadranti
+  expect_false(any(vapply(dominancePlot(DF, labels = FALSE)$layers,
+    function(l) inherits(l$geom, "GeomText") && "Label" %in% names(l$data),
+    logical(1))))
+})

@@ -478,6 +478,11 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
         icon = icon("chevron-right", lib = "glyphicon")
       ),
       menuSubItem(
+        "Authors' Dominance",
+        tabName = "authorsDominance",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
         "Authors' Local Impact",
         tabName = "authorImpact",
         icon = icon("chevron-right", lib = "glyphicon")
@@ -4204,6 +4209,131 @@ body <- dashboardBody(
                     10,
                     br(),
                     HTML(helpContent()$lotkaLaw)
+                  ),
+                  column(1)
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+    ##### authors dominance ----
+    tabItem(
+      "authorsDominance",
+      fluidPage(
+        fluidRow(
+          column(
+            8,
+            h3(strong("Authors' Dominance"), align = "center")
+          ),
+          div(
+            style = style_bttn,
+            title = t_run,
+            column(
+              1,
+              do.call(
+                "actionBttn",
+                c(
+                  run_bttn,
+                  list(
+                    inputId = "applyDominance"
+                  )
+                )
+              )
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_report,
+            column(
+              1,
+              do.call(
+                "actionBttn",
+                c(
+                  report_bttn,
+                  list(
+                    inputId = "reportDominance"
+                  )
+                )
+              )
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_export,
+            column(
+              1,
+              do.call(
+                "downloadBttn",
+                c(
+                  export_bttn,
+                  list(
+                    outputId = "DOMplot.save"
+                  )
+                )
+              )
+            )
+          ),
+          div(
+            column(
+              1,
+              dropdown(
+                h4(strong("Options: ")),
+                br(),
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(
+                    strong("Main Configuration"),
+                    style = "color: #2c3e50; margin-bottom: 10px;"
+                  ),
+                  numericInput(
+                    "dominanceK",
+                    label = ("Number of Authors"),
+                    value = 20,
+                    min = 1
+                  )
+                ),
+                style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
+                tooltip = tooltipOptions(title = "Options"),
+                color = "primary",
+                icon = icon("sliders"),
+                width = "300px"
+              )
+            ),
+            style = style_opt
+          )
+        ),
+        fluidRow(
+          tabsetPanel(
+            type = "tabs",
+            tabPanel(
+              "Plot",
+              shinycssloaders::withSpinner(plotlyOutput(
+                outputId = "dominancePlot",
+                height = "75vh",
+                width = "98.9%"
+              ))
+            ),
+            tabPanel(
+              "Table",
+              shinycssloaders::withSpinner(uiOutput(
+                outputId = "dominanceTable"
+              ))
+            ),
+            tabPanel(
+              "Info & References",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(
+                    10,
+                    br(),
+                    HTML(helpContent()$authorsDominance)
                   ),
                   column(1)
                 )

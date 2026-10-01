@@ -7659,6 +7659,95 @@ To ensure the functionality of Biblioshiny,
     }
   })
 
+  ### Authors' Dominance ----
+  DOMAuthors <- eventReactive(input$applyDominance, {
+    DF <- dominance(values$M, k = input$dominanceK)
+    if (!is.data.frame(DF) || nrow(DF) == 0) {
+      values$DOM <- NULL
+      values$DOMplot <- NULL
+      showNotification(
+        "No author with a multi-authored document: the Dominance Factor is not defined.",
+        type = "warning",
+        duration = 8
+      )
+      req(FALSE)
+    }
+    values$DOM <- DF
+    values$DOMplot <- dominancePlot(DF)
+    DF
+  })
+
+  output$DOMplot.save <- downloadHandler(
+    filename = function() {
+      paste("AuthorsDominance-", Sys.Date(), ".png", sep = "")
+    },
+    content <- function(file) {
+      req(values$DOMplot)
+      safe_ggsave(
+        filename = file,
+        plot = values$DOMplot,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * values$aspect,
+        bg = "white"
+      )
+    },
+    contentType = "png"
+  )
+
+  output$dominancePlot <- renderPlotly({
+    DF <- DOMAuthors()
+    # plotly cannot draw the logo; the names hidden to avoid overlaps are on hover
+    plot.ly(
+      dominancePlot(DF, logo = FALSE),
+      flip = FALSE,
+      side = "r",
+      aspectratio = 1.4,
+      size = 0.10
+    )
+  })
+
+  output$dominanceTable <- renderUI({
+    DOMAuthors()
+    renderBibliobox(
+      values$DOM,
+      nrow = 10,
+      filename = "Authors_Dominance",
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = 2,
+      dom = FALSE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  })
+
+  observeEvent(input$reportDominance, {
+    if (!is.null(values$DOM)) {
+      list_df <- list(values$DOM)
+      list_plot <- list(values$DOMplot)
+      wb <- addSheetToReport(
+        list_df,
+        list_plot,
+        sheetname = "AuthorsDominance",
+        wb = values$wb
+      )
+      values$wb <- wb
+      popUp(title = "Authors' Dominance", type = "success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type = "error")
+    }
+  })
+
   ### Authors Production Over Time ----
   AUoverTime <- eventReactive(input$applyAUoverTime, {
     values$AUProdOverTime <- authorProdOverTime(
@@ -10884,24 +10973,32 @@ To ensure the functionality of Biblioshiny,
     req(values$CM)
     #cmData=values$CM$clusters[,c(7,1:4,6)]
     cmData <- values$CM$clusters
-    renderBibliobox(
-      cmData,
-      nrow = 10,
-      filename = "CouplingMap_Clusters",
-      pagelength = TRUE,
-      left = NULL,
-      right = NULL,
-      numeric = 4:5,
-      dom = FALSE,
-      size = '100%',
-      filter = "top",
-      columnShort = NULL,
-      columnSmall = NULL,
-      round = 3,
-      title = "",
-      button = TRUE,
-      escape = FALSE,
-      selection = FALSE
+    Q <- values$CM$modularity
+    tagList(
+      tags$p(
+        style = "font-size:14px; margin-top:10px; margin-bottom:10px;",
+        tags$b("Community Detection Modularity (Q): "),
+        round(Q, 4)
+      ),
+      renderBibliobox(
+        cmData,
+        nrow = 10,
+        filename = "CouplingMap_Clusters",
+        pagelength = TRUE,
+        left = NULL,
+        right = NULL,
+        numeric = 4:5,
+        dom = FALSE,
+        size = '100%',
+        filter = "top",
+        columnShort = NULL,
+        columnSmall = NULL,
+        round = 3,
+        title = "",
+        button = TRUE,
+        escape = FALSE,
+        selection = FALSE
+      )
     )
   })
 
@@ -14383,6 +14480,7 @@ To ensure the functionality of Biblioshiny,
   observe({ .toggleDownloadBtn("AIplot.save", !is.null(values$AIplot)) })
   observe({ .toggleDownloadBtn("APOTplot.save", !is.null(values$AUProdOverTime)) })
   observe({ .toggleDownloadBtn("LLplot.save", !is.null(values$LLplot)) })
+  observe({ .toggleDownloadBtn("DOMplot.save", !is.null(values$DOMplot)) })
   observe({
     .toggleDownloadBtn(
       "exportAuthorCard",

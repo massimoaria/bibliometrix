@@ -11423,6 +11423,15 @@ To ensure the functionality of Biblioshiny,
     contentType = "png"
   )
 
+  output$MPXGeminiUI <- renderUI({
+    values$gemini_model_parameters <- geminiParameterPrompt(
+      values,
+      input$sidebarmenu,
+      input
+    )
+    geminiOutput(title = "", content = values$MPXGemini, values)
+  })
+
   observeEvent(input$reportMPX, {
     if (!is.null(values$MPX)) {
       popUp(title = NULL, type = "waiting")

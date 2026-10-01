@@ -2987,53 +2987,166 @@ helpContent <- function() {
   <div class='container'>
   <h3>Multiplex Coupling</h3>
 
-  <p>Two documents can be close in two different ways: they <strong>cite the same works</strong> (they share their <em>roots</em>, as in bibliographic coupling) or they <strong>talk about the same things</strong> (they share their <em>topics</em>, their keywords or words). The two kinds of closeness often disagree. <strong>Multiplex Coupling</strong> builds both on the same documents and compares them, to answer questions that a single network cannot: which intellectual traditions have branched out into several themes, and which themes bring together scholars who cite different literatures.</p>
+  <p>Two documents can be close in two different ways: they <strong>cite the same works</strong> (they share their <em>roots</em>, as in bibliographic coupling) or they <strong>talk about the same things</strong> (they share their <em>topics</em>, their keywords or words). The two kinds of closeness often disagree. <strong>Multiplex Coupling</strong> builds both on the same documents and compares them, to answer questions that a single network cannot: which intellectual traditions have branched out into several themes, and which themes bring together scholars who cite different literatures. A network made of several kinds of links on the same nodes is called a <em>multiplex</em> network: here the nodes are the documents and the links are of two kinds, roots and topics.</p>
+
+  <p>Bibliographic Coupling, the Co-occurrence Network and the Thematic Map look at one of the two maps at a time; Multiplex Coupling looks at where they agree and where they do not.</p>
+
+  <br>
+
+  <h4>Four Possible Situations</h4>
+
+  <p>Putting the two maps together, a group of documents can be in one of four situations:</p>
+
+  <table style='width:100%; border-collapse:collapse; margin:10px 0 15px 0; font-size:14px; text-align:center;'>
+    <tr>
+      <th style='padding:8px; border:1px solid #bbb; background-color:#dcdcdc;'></th>
+      <th style='padding:8px; border:1px solid #bbb; background-color:#dcdcdc;'>Different topics</th>
+      <th style='padding:8px; border:1px solid #bbb; background-color:#dcdcdc;'>Same topics</th>
+    </tr>
+    <tr>
+      <th style='padding:8px; border:1px solid #bbb; background-color:#dcdcdc;'>Same roots</th>
+      <td style='padding:10px; border:1px solid #bbb; vertical-align:top; width:42%; background-color:#DEEBF7;'><strong>Branching</strong><br>same roots, different topics<br><em>a school that spreads over several subjects</em></td>
+      <td style='padding:10px; border:1px solid #bbb; vertical-align:top; width:42%; background-color:#C6DBEF;'><strong>Consolidation</strong><br>same roots, same topics<br><em>a compact community</em></td>
+    </tr>
+    <tr>
+      <th style='padding:8px; border:1px solid #bbb; background-color:#dcdcdc;'>Different roots</th>
+      <td style='padding:10px; border:1px solid #bbb; vertical-align:top; width:42%; background-color:#F0F0F0;'><strong>Detachment</strong><br>different roots, different topics<br><em>no relation</em></td>
+      <td style='padding:10px; border:1px solid #bbb; vertical-align:top; width:42%; background-color:#F4CDC4;'><strong>Convergence</strong><br>different roots, same topics<br><em>different traditions meeting on one subject</em></td>
+    </tr>
+  </table>
+
+  <p>The two discordant situations are the most interesting ones, and the ones no single map can show:</p>
+  <ul>
+    <li><strong>Branching</strong>: a school with common roots that writes about several themes. For example, a school citing the classics of <em>technology forecasting</em> may write about roadmapping and product development, about patents and diffusion, and about text mining applied to technology.</li>
+    <li><strong>Convergence</strong>: a theme reached by scholars who cite different literatures. For example, a theme on <em>patents and nanotechnology</em> may be fed both by a school citing the economics of science and university-industry relations and by a school citing the tech-mining studies of nanotechnology.</li>
+  </ul>
+
+  <p>The same four words are used at two levels, which should not be confused: for <strong>schools and themes</strong> (the <em>Schools x Themes</em> and <em>Links</em> tabs), based on the links between them; and for <strong>pairs of schools</strong> (the <em>Pairs of Schools</em> tab), based on how close two schools are on average.</p>
 
   <br>
 
   <h4>How It Works</h4>
   <ol>
-    <li><strong>Two layers.</strong> The <em>roots</em> layer links documents that share cited references (only references cited by at least two documents). The <em>topic</em> layer links documents that share keywords (DE and ID, weighted by tf-idf); when keywords are missing in more than 20% of the documents, titles and abstracts are used instead.</li>
-    <li><strong>Nearest neighbours.</strong> In each layer every document keeps its <em>k</em> most similar documents (cosine similarity).</li>
-    <li><strong>Null model.</strong> Each layer is randomised many times keeping the number of references of every document and the number of citing documents of every reference: a pair is truly close when its similarity is higher than in almost all the randomisations.</li>
+    <li><strong>Two layers.</strong> The <em>roots</em> layer links documents that share cited references (only references cited by at least two documents). The <em>topic</em> layer links documents that share keywords (DE and ID, weighted by tf-idf); when keywords are missing in more than 20% of the documents, titles and abstracts are used instead. Terms of a single character, or made only of digits and punctuation, are not topics.</li>
+    <li><strong>Similarity.</strong> In each layer two documents are compared by the cosine of their lists of references (or of terms): 0 = nothing in common, 1 = the same list.</li>
+    <li><strong>Nearest neighbours.</strong> In each layer every document keeps its <em>k</em> most similar documents.</li>
+    <li><strong>Null model.</strong> Each layer is randomised many times keeping the number of references of every document and the number of citing documents of every reference: a pair is truly close when its similarity is higher than in almost all the randomisations. This separates the signal from what two documents would share by chance, for example because they both cite a very popular work.</li>
     <li><strong>Schools and themes.</strong> The documents are clustered in each layer: the clusters of the roots layer are the <strong>schools</strong>, those of the topic layer the <strong>themes</strong>. Many clustering runs are combined (consensus clustering), because a single run is not reproducible on the topic layer.</li>
     <li><strong>Names.</strong> A school is an intellectual root, so it is named after the <em>titles of its strong references</em> (the works most cited by its documents and concentrated in it); a theme is named after the <em>keywords of its documents</em>. The titles of the references come from the collection, when a reference is one of its documents, from the reference itself (Scopus writes the cited title) and from <strong>OpenAlex</strong>, which is queried only when you are online and have set both the OpenAlex API key and email in the Settings; the titles are kept for the session, so repeating the analysis downloads nothing. A school with fewer than five reference titles is named after its cited sources and its most representative reference. The <em>Schools</em> table tells how each school was named and also lists the keywords of its documents.</li>
-    <li><strong>Links.</strong> A school and a theme are <strong>linked</strong> when the theme holds more documents of the school than expected if schools and themes were independent (standardized residual above 2) and at least the chosen number of them (5 by default).</li>
+    <li><strong>Links.</strong> Schools and themes are crossed in a table that counts the documents of each school in each theme. A school and a theme are <strong>linked</strong> when the theme holds more documents of the school than expected if schools and themes were independent (standardized residual above 2) and at least the chosen number of them (5 by default).</li>
+    <li><strong>Evolution.</strong> The schools are defined once, on the whole collection; the collection is then split into periods, and in each period the proximity of every pair of schools is measured on their documents of that period.</li>
   </ol>
 
-  <p>The same links classify schools and themes:</p>
+  <p>The links classify schools and themes:</p>
   <ul>
     <li><strong>Branching school</strong>: linked to two or more themes, a tradition that has spread over several subjects;</li>
     <li><strong>Convergent theme</strong>: linked to two or more schools, a subject where different traditions meet;</li>
     <li><strong>Consolidated</strong>: a school linked to a single theme, or a theme linked to a single school;</li>
-    <li><strong>Dispersed</strong>: no link, the documents are spread over many clusters.</li>
+    <li><strong>Dispersed</strong> (no link): the documents are spread over many clusters, none of them strongly enough.</li>
   </ul>
 
   <br>
 
-  <h4>How to Read the Tabs</h4>
+  <h4>Options</h4>
   <ul>
-    <li><strong>Schools x Themes</strong>: rows are schools, columns are themes, each cell the number of documents. Red means more documents than expected, blue fewer. A link is a red cell with at least the chosen number of documents. A row with several links is a branching school; a column with several links is a convergent theme.</li>
-    <li><strong>Links</strong>: the same links as a Sankey diagram, schools on the left and themes on the right, one flow per link, wider for more documents. Each school has its own colour and so do its flows: a school with several flows is branching, and you can see <em>which</em> themes it branches into; a theme receiving flows of several colours is convergent, and you can see <em>which</em> schools it comes from. Click a school or a theme to grey out everything not connected to it (click it again, or click outside the nodes, to restore the colours); nodes can be dragged; hovering a flow shows its documents and residual. The exported PNG draws the links as lines.</li>
-    <li><strong>Pairs of Schools</strong>: every point is a pair of schools, placed by how close the two schools are in roots (horizontal) and in topics (vertical), relative to two random documents (0 = as close as two random documents). Top left are pairs of schools with different roots that write about similar things. Hovering a point shows the themes both schools are linked to.</li>
-    <li><strong>Cohesion</strong>: every school and theme placed by how similar its documents are to each other, in roots and in topics. Read schools by their height (low = shared roots but different topics) and themes by their horizontal position (left = different roots). It describes clusters, not links.</li>
-    <li><strong>Evolution</strong>: the collection is split into periods; the animation shows how close the pairs of schools are in each period. Schools moving up get closer in topics.</li>
-    <li><strong>Tables</strong>: schools, themes and links with all their measures; <em>Summary</em> reports the association between the two layers and the stability of the clusters.</li>
+    <li><strong>Number of documents</strong> and <strong>Most cited by</strong>: the analysis runs on the most cited documents of the collection (by global or local citations). 1,000 documents take less than a minute.</li>
+    <li><strong>Topics from</strong>: keywords (author keywords and Keywords Plus), titles and abstracts, or automatic (keywords, unless they are missing in more than 20% of the documents).</li>
+    <li><strong>Neighbours per document (k)</strong>: how many nearest neighbours every document keeps in each layer. Fewer neighbours give smaller and more numerous clusters.</li>
+    <li><strong>Clustering algorithm</strong>: Louvain, Leiden or Walktrap, used for both layers.</li>
+    <li><strong>Documents per link</strong>: the minimum number of documents of a school in a theme for a link.</li>
+    <li><strong>Null model permutations</strong>: how many randomisations of each layer; more permutations give a more precise test and a longer computation.</li>
+    <li><strong>Number of periods</strong> and <strong>Documents per school and period</strong>: the periods hold about the same number of documents; a school is followed in a period when it has at least that many documents in it.</li>
   </ul>
 
   <br>
 
-  <h4>Advice</h4>
+  <h4>How to Read the Plots</h4>
+
+  <p>Which plot answers which question:</p>
   <ul>
-    <li><strong>Stability.</strong> The <em>Summary</em> reports the agreement between single clustering runs (adjusted Rand index, 1 = identical). Themes are usually less stable than schools: read their number as an order of magnitude.</li>
+    <li><em>Which themes does a school write about? Which schools does a theme come from?</em> &rarr; <strong>Schools x Themes</strong> and <strong>Links</strong>, the only two plots built on the links of the classification;</li>
+    <li><em>Which pairs of schools are close in topics although they cite different works?</em> &rarr; <strong>Pairs of Schools</strong>;</li>
+    <li><em>How compact are the clusters?</em> &rarr; <strong>Cohesion</strong>;</li>
+    <li><em>Which schools are getting closer over time?</em> &rarr; <strong>Evolution</strong>.</li>
+  </ul>
+
+  <h5><strong>Schools x Themes</strong> (the main view)</h5>
+  <p>Rows are schools, columns are themes; each cell reports how many documents of the school belong to the theme. The colour tells whether they are more (red) or fewer (blue) than expected if schools and themes were independent; white is about as expected. A <strong>link</strong> is a red cell with at least the chosen number of documents. To read the classification:</p>
+  <ul>
+    <li>a <strong>row with one link</strong> is a consolidated school, a <strong>row with several links</strong> a branching school;</li>
+    <li>a <strong>column with several links</strong> is a convergent theme;</li>
+    <li>a row or a column with no link is dispersed.</li>
+  </ul>
+  <p>A large number in a blue cell is not a link: it only means that the school and the theme are both large.</p>
+
+  <h5><strong>Links</strong></h5>
+  <p>The same links as a Sankey diagram, schools on the left and themes on the right, one flow per link, wider for more documents. Each school has its own colour and so do its flows: a school with several flows is branching, and you can see <em>which</em> themes it branches into; a theme receiving flows of several colours is convergent, and you can see <em>which</em> schools it comes from. Themes are coloured by their structure: purple if convergent, green if consolidated. Schools and themes without links are not drawn. Click a school or a theme to grey out everything not connected to it (click it again, or click outside the nodes, to restore the colours); nodes can be dragged; hovering a node shows its name, main labels and figures, hovering a flow its documents, the share of the school and of the theme and the residual. The exported PNG draws the links as lines.</p>
+
+  <h5><strong>Pairs of Schools</strong></h5>
+  <p>Here the points are neither schools nor themes, but <strong>pairs of schools</strong>, sized by their documents. The horizontal axis is how close the two schools are in roots, the vertical axis how close they are in topics, both as an average over all their documents and relative to two random documents (log2 lift: 0 = as close as two random documents, 1 = twice as close). The dashed lines at 0 divide the plane into four regions, which describe <strong>the pair</strong>, not the classification of schools and themes:</p>
+  <ul>
+    <li><strong>top left</strong>, <em>close in topics only</em>: two schools with different roots that write about similar things, the most characteristic result of the method;</li>
+    <li><strong>top right</strong>, <em>close in both</em>;</li>
+    <li><strong>bottom right</strong>, <em>close in roots only</em>: the same literature, different subjects;</li>
+    <li><strong>bottom left</strong>, <em>close in neither</em>.</li>
+  </ul>
+  <p>The closeness in topics of a pair is an average over all documents, so it does not always match a single theme. When the two schools are <strong>linked to the same theme</strong>, the label names it after an arrow (<em>-&gt; T1 patents</em>), and these pairs are always labelled. Pairs without an arrow are close on average, over several themes, with no shared theme strong enough to be a link; on the other hand, a pair with an arrow may lie in the bottom left: distant on average, but meeting on one precise theme. The two readings complement each other: the plane tells how close two schools are overall, the arrow where they meet.</p>
+
+  <h5><strong>Cohesion</strong></h5>
+  <p>Every school (circle) and theme (triangle) is placed by how similar its documents are to each other, in roots (horizontal) and in topics (vertical), relative to random documents (log2 lift). The colour repeats the classification. Read schools by their height: a low school shares its roots but its documents write about different topics, as a branching school does. Read themes by their horizontal position: a theme on the left gathers documents with different roots, as a convergent theme does. The plot describes how compact each cluster is, not who it is linked to: for that, use <em>Schools x Themes</em> or <em>Links</em>.</p>
+
+  <h5><strong>Evolution</strong></h5>
+  <p>The same plane as <em>Pairs of Schools</em>, one frame per period: press play, or drag the slider, to see how the pairs move. Only the pairs with the clearest trend are drawn, coloured by it:</p>
+  <ul>
+    <li><strong>converging</strong>: closer in topics, not in roots;</li>
+    <li><strong>diverging</strong>: farther in topics, not in roots;</li>
+    <li><strong>consolidating</strong>: closer in both;</li>
+    <li><strong>drifting apart</strong>: farther in both.</li>
+  </ul>
+  <p>A point moving up is a pair of schools getting closer in topics. The exported PNG draws each pair as an arrow from its first to its last period.</p>
+
+  <br>
+
+  <h4>How to Read the Tables</h4>
+  <ul>
+    <li><strong>Schools</strong>: the name of each school (from the titles of its strong references), how it was named, its strongest references, the keywords of its documents, its structure, the linked themes and its cohesion in the two layers.</li>
+    <li><strong>Themes</strong>: the terms naming each theme, its structure, the linked schools and its cohesion.</li>
+    <li><strong>Links</strong>: one row per link, with its documents, the standardized residual (how far above the expected count it is) and the share of the school and of the theme it holds. A link holding a large share of the school is a main direction of that tradition; one holding a large share of the theme tells where the theme comes from.</li>
+    <li><strong>Summary</strong>: the number of schools and themes by structure, the agreement between the two layers (normalized mutual information: 0 = schools and themes unrelated, 1 = the same clusters) and the <strong>stability</strong> of the clusters, the agreement between single clustering runs (adjusted Rand index, 1 = identical).</li>
+  </ul>
+
+  <br>
+
+  <h4>Biblio AI</h4>
+  <p>The <em>Biblio AI</em> tab asks Google Gemini for an interpretation of the results. It receives the <em>Schools x Themes</em>, <em>Links</em> and <em>Pairs of Schools</em> plots, the list of schools (with their names, strongest references and linked themes), of themes and of links, the agreement between the two layers, the stability of the clusters and the options of the analysis. It discusses the traditions behind the schools, the branching schools, the convergent themes and the reliability of the results. You can add context about your collection or your research question in the text box before asking. Biblio AI needs a Gemini API key, set in the Settings, and a Chrome-based browser. As for every automatic interpretation, check it against the plots and the tables.</p>
+
+  <br>
+
+  <h4>Advice and Limits</h4>
+  <ul>
+    <li><strong>Stability.</strong> Themes are usually less stable than schools: read their number as an order of magnitude, and check the <em>Summary</em> before building on a single theme.</li>
     <li><strong>Neighbours.</strong> The number of neighbours <em>k</em> changes the clusters; 10 is a reasonable compromise, and trying 5 or 20 shows how robust a result is.</li>
     <li><strong>Scopus.</strong> Scopus writes the same reference in different ways: run <em>Reference Matching</em> (Data menu) first, or many shared references are missed.</li>
+    <li><strong>Sources without references.</strong> Collections without cited references (PubMed, the CSV export of OpenAlex) have no roots layer: the method cannot be applied.</li>
     <li><strong>Large collections.</strong> With many thousands of documents, raise the number of documents per link.</li>
   </ul>
 
   <br>
 
+  <h4>Glossary</h4>
+  <ul>
+    <li><strong>Bibliographic coupling</strong>: two documents are linked when they cite the same works; the more references in common, the stronger the link.</li>
+    <li><strong>Consensus clustering</strong>: repeating a clustering many times and keeping the groups the runs agree on.</li>
+    <li><strong>Lift</strong>: how much closer two documents, or two groups, are than two random documents; on a log2 scale, 0 = as random, 1 = twice as close.</li>
+    <li><strong>Null model</strong>: randomised versions of the data that keep some of their properties, used to tell what would happen by chance.</li>
+    <li><strong>Standardized residual</strong>: the difference between the observed and the expected number of documents in a cell, in units of standard deviation; above 2 is a strong association.</li>
+    <li><strong>tf-idf</strong>: the weight of a term, growing with its presence in a document and falling with its spread in the collection.</li>
+  </ul>
+
+  <br>
+
   <h4>References</h4>
+
 
   <p><strong>Kessler, M. M. (1963).</strong> <i>Bibliographic coupling between scientific papers.</i> <strong>American Documentation</strong>, 14(1), 10&ndash;25. <a href='https://doi.org/10.1002/asi.5090140103' target='_blank'>https://doi.org/10.1002/asi.5090140103</a></p>
 

@@ -60,7 +60,7 @@ test_that("neighbour pairs and the union of the layers are consistent", {
 test_that("documents without references or terms are left out and counted", {
   M <- mk(
     CR = c(refs(1, 2, 3), refs(1, 2), refs(2, 3), NA, refs(1, 3), refs(1, 2, 3)),
-    DE = c("A;B", "A;C", "B;C", "A;B", NA, "A;B;C")
+    DE = c("AA;BB", "AA;CC", "BB;CC", "AA;BB", NA, "AA;BB;CC")
   )
   mc <- multiplexCoupling(M, n = NULL, k = 2, n.sample = 100, n.perm = 9, verbose = FALSE)
   expect_equal(mc$info$dropped[["no_roots"]], 1)
@@ -69,7 +69,7 @@ test_that("documents without references or terms are left out and counted", {
 })
 
 test_that("collections that cannot be coupled are refused", {
-  M <- mk(CR = c(refs(1, 2), refs(1, 2), NA), DE = c("A", "A", "A"))
+  M <- mk(CR = c(refs(1, 2), refs(1, 2), NA), DE = c("AA", "AA", "AA"))
   expect_error(multiplexCoupling(M, verbose = FALSE), "fewer than 3 documents")
   expect_error(multiplexCoupling(M[, names(M) != "CR"], verbose = FALSE), "no CR field")
   expect_error(multiplexClusters(list()), "multiplexCoupling")
@@ -92,7 +92,7 @@ test_that("curveball preserves the degrees of documents and features", {
 test_that("the analysis is reproducible and leaves the session's random numbers alone", {
   M <- mk(
     CR = c(refs(1, 2, 3), refs(1, 2), refs(2, 3), refs(1, 3), refs(1, 2, 3), refs(3, 4), refs(2, 4)),
-    DE = c("A;B", "A;C", "B;C", "A;B", "A;B;C", "C;D", "B;D")
+    DE = c("AA;BB", "AA;CC", "BB;CC", "AA;BB", "AA;BB;CC", "CC;DD", "BB;DD")
   )
   set.seed(42)
   expected <- stats::runif(1)
@@ -110,11 +110,11 @@ test_that("population percentiles use mid-ranks", {
 })
 
 test_that("topic fields are merged by term", {
-  M <- mk(CR = c(refs(1, 2), refs(1, 2), refs(1, 3)), DE = c("A;B", "A", "B"))
-  M$ID <- c("A", "C", "C")
+  M <- mk(CR = c(refs(1, 2), refs(1, 2), refs(1, 3)), DE = c("AA;BB", "AA", "BB"))
+  M$ID <- c("AA", "CC", "CC")
   L <- mpTopicLayer(M, c("DE", "ID"), min.freq = 1)
-  expect_setequal(colnames(L$inc), c("A", "B", "C"))
-  expect_equal(as.numeric(L$inc["D1", "A"]), 1)
+  expect_setequal(colnames(L$inc), c("AA", "BB", "CC"))
+  expect_equal(as.numeric(L$inc["D1", "AA"]), 1)
 })
 
 test_that("topic.field = 'auto' uses keywords when they cover the documents, TI+AB otherwise", {
@@ -205,7 +205,7 @@ test_that("multiplexEvolution follows pairs of schools and classifies their tren
   if (nrow(cv)) expect_true(all(cv$slope_T >= 0.1 & cv$slope_R < 0.1))
   expect_output(print(ev), "Multiplex evolution")
   expect_error(multiplexEvolution(multiplexCoupling(mk(
-    CR = c(refs(1, 2), refs(1, 2), refs(1, 2)), DE = c("A", "A", "A")
+    CR = c(refs(1, 2), refs(1, 2), refs(1, 2)), DE = c("AA", "AA", "AA")
   ), n.perm = 9, n.sample = 10, verbose = FALSE)), "multiplexClusters")
 })
 
@@ -260,7 +260,7 @@ test_that("the reference index keeps DOIs and the titles of the collection", {
   M <- mk(
     CR = c(paste("SMITH J, 2001, J INFORMETR, V1, P1, DOI 10.1000/ABC;", refs(2)),
            paste("SMITH J, 2001, J INFORMETR, V1, P1, DOI 10.1000/abc;", refs(3))),
-    DE = c("A", "B")
+    DE = c("AA", "BB")
   )
   M$DI <- c("10.1000/abc", NA)
   M$TI <- c("A cited paper", "Another")
@@ -274,7 +274,7 @@ test_that("Web of Science placeholders are not cited works", {
   M <- mk(
     CR = c(paste("NO TITLE CAPTURED;", refs(1, 2)), paste("NO TITLE CAPTURED;", refs(1, 3)),
            paste("[ANONYMOUS], 2001, J X, V1, P1;", refs(2, 3)), paste("[ANONYMOUS], 2001, J X, V1, P1;", refs(1))),
-    DE = c("A;B", "A", "B", "A")
+    DE = c("AA;BB", "AA", "BB", "AA")
   )
   L <- mpRootsLayer(M)
   expect_false(any(grepl("NO TITLE|ANONYMOUS", colnames(L$inc))))
@@ -309,9 +309,9 @@ test_that("with OpenAlex configured, schools are named from the titles of their 
   expect_true(any(grepl("OpenAlex", cl$schools$label_source)))
 })
 
-test_that("terms of digits and punctuation are not topics", {
-  M <- mk(CR = c(refs(1, 2), refs(1, 2), refs(1, 3)), DE = c("INDUSTRY 4;0;5G", "INDUSTRY 4;0;5G", "4.0;COVID-19"))
+test_that("terms of one character, digits or punctuation are not topics", {
+  M <- mk(CR = c(refs(1, 2), refs(1, 2), refs(1, 3)), DE = c("INDUSTRY 4;0;5G;C", "INDUSTRY 4;0;5G;C", "4.0;COVID-19"))
   L <- mpTopicLayer(M, "DE", min.freq = 1)
-  expect_false(any(c("0", "4.0") %in% colnames(L$inc)))
+  expect_false(any(c("0", "4.0", "C") %in% colnames(L$inc)))
   expect_true(all(c("INDUSTRY 4", "5G", "COVID-19") %in% colnames(L$inc)))
 })

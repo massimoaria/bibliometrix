@@ -7893,6 +7893,23 @@ body <- dashboardBody(
               )
             ),
             tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              value = "ai",
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("MPXGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
+                )
+              )))
+            ),
+            tabPanel(
               "Info & References",
               value = "info",
               icon = icon("info-circle"),

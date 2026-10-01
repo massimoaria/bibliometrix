@@ -1022,6 +1022,30 @@ biblioAiPrompts <- function(values, activeTab) {
         "and the relevance of the most central and most strongly coupled units."
       )
     },
+    "multiplexCoupling" = {
+      prompt <- paste0(
+        "Provide an interpretation of this 'Multiplex Coupling' analysis. The same documents are linked in two layers: ",
+        "the roots layer links documents that share cited references (bibliographic coupling), the topic layer links ",
+        "documents that share keywords. The clusters of the roots layer are the schools (intellectual traditions, named ",
+        "after the titles of their strongest references), the clusters of the topic layer are the themes (named after the ",
+        "keywords of their documents). A school and a theme are linked when the theme holds more documents of the school ",
+        "than expected under independence (standardized residual above 2) and at least a minimum number of them. ",
+        "A school linked to two or more themes is branching (a tradition spread over several subjects), a theme linked to ",
+        "two or more schools is convergent (a subject where different traditions meet), a school or theme with a single ",
+        "link is consolidated, one with no link is dispersed. ",
+        "You have been provided with three plots: (1) the schools x themes matrix, where each cell is the number of ",
+        "documents and red cells hold more documents than expected; (2) the links between schools (left) and themes ",
+        "(right); (3) the plane of the pairs of schools, placed by how close the two schools are in roots (horizontal) ",
+        "and in topics (vertical), relative to two random documents: top left are schools with different roots that ",
+        "write about similar things. ",
+        "Please discuss: (1) the main schools and the intellectual traditions they represent, looking at their strongest ",
+        "references; (2) the branching schools and the themes they spread into; (3) the convergent themes and the ",
+        "traditions that meet in them; (4) the pairs of schools close in topics but distant in roots; (5) the overall ",
+        "agreement between the two layers and the stability of the clusters, and what it implies for the reliability ",
+        "of the results. ",
+        mpx2GeminiText(values$MPX)
+      )
+    },
     "collabWorldMap" = {
       #values$WMGemini
       prompt <- paste0(
@@ -1213,6 +1237,17 @@ geminiParameterPrompt <- function(values, activeTab, input) {
         merge_df_to_string(values$cplnet$params)
       )
     },
+    "multiplexCoupling" = {
+      req(values$MPX)
+      # the seed is in both the coupling and the clustering parameters
+      mpxParams <- rbind(values$MPX$params, values$MPX$clusters$params)
+      mpxParams <- mpxParams[!duplicated(mpxParams$params), ]
+      txt <- paste0(
+        txt,
+        " This analysis was performed with the following parameters: ",
+        merge_df_to_string(mpxParams)
+      )
+    },
     "collabWorldMap" = {
       req(values$WMmap)
     },
@@ -1319,6 +1354,10 @@ geminiWaitingMessage <- function(values, activeTab) {
       req(values$CPLnetwork$VIS)
       values$cplGemini <- messageTxt
     },
+    "multiplexCoupling" = {
+      req(values$MPX)
+      values$MPXGemini <- messageTxt
+    },
     "collabWorldMap" = {
       req(values$WMmap)
       values$WMGemini <- messageTxt
@@ -1355,6 +1394,7 @@ geminiFieldName <- function(activeTab) {
     "historiograph" = "histGemini",
     "collabNetwork" = "colGemini",
     "couplingNetwork" = "cplGemini",
+    "multiplexCoupling" = "MPXGemini",
     "collabWorldMap" = "WMGemini",
     "bradford" = "BradfordGemini",
     "lotka" = "LotkaGemini",
@@ -1576,6 +1616,10 @@ geminiPrepareAll <- function(values, activeTab, input) {
       obj <- values$CPLnetwork$VIS
       type <- "vis"
     },
+    "multiplexCoupling" = {
+      obj <- MPX2Gemini(values$MPX)
+      type <- "multi"
+    },
     "collabWorldMap" = {
       obj <- values$WMmap$g
       type <- "plotly"
@@ -1669,6 +1713,9 @@ geminiSave <- function(values, activeTab) {
     },
     "couplingNetwork" = {
       gemini <- values$cplGemini
+    },
+    "multiplexCoupling" = {
+      gemini <- values$MPXGemini
     },
     "collabWorldMap" = {
       gemini <- values$WMGemini
@@ -2032,6 +2079,53 @@ TE2Gemini <- function(nexus, plotTE) {
     ))
   }
   return(files)
+}
+
+## save the matrix, links and pairs plots of the multiplex coupling
+MPX2Gemini <- function(mc) {
+  plots <- c("matrix", "links", "plane")
+  files <- file.path(getWD(), paste0("Multiplex_", plots, ".png"))
+  for (i in seq_along(plots)) {
+    suppressMessages(ggsave(
+      filename = files[i],
+      plot = multiplexPlot(mc, plots[i]),
+      dpi = 100,
+      height = 8,
+      width = 13,
+      bg = "white"
+    ))
+  }
+  files
+}
+
+## schools, themes and links of the multiplex coupling as text for Biblio AI
+mpx2GeminiText <- function(mc) {
+  cl <- mc$clusters
+  s <- cl$schools
+  th <- cl$themes
+  schools <- paste0(
+    "S", s$cluster, " '", s$terms, "' (", s$size, " documents, ", s$structure,
+    ifelse(s$themes == "", "", paste0(", linked to ", gsub("(\\d+)", "T\\1", s$themes))),
+    "; strongest references: ", trimws(s$references), ")",
+    collapse = "; "
+  )
+  themes <- paste0(
+    "T", th$cluster, " '", th$terms, "' (", th$size, " documents, ", th$structure,
+    ifelse(th$schools == "", "", paste0(", linked to ", gsub("(\\d+)", "S\\1", th$schools))),
+    ")",
+    collapse = "; "
+  )
+  links <- paste0(
+    "S", cl$links$school, " -> T", cl$links$theme, ": ", cl$links$n, " documents, residual ",
+    round(cl$links$residual, 2),
+    collapse = "; "
+  )
+  paste0(
+    "SCHOOLS: ", schools, ". THEMES: ", themes, ". LINKS: ", links, ". ",
+    "Agreement between schools and themes (normalized mutual information): ", round(cl$NMI, 2), ". ",
+    "Stability of the clusters (adjusted Rand index between single clustering runs, 1 = identical): schools ",
+    round(cl$agreement[["schools"]], 2), ", themes ", round(cl$agreement[["themes"]], 2), "."
+  )
 }
 
 copy_to_clipboard <- function(x) {

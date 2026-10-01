@@ -4784,7 +4784,8 @@ igraph2vis <- function(
   net,
   shadow = TRUE,
   edgesize = 5,
-  noOverlap = TRUE
+  noOverlap = TRUE,
+  nodeTitles = NULL
 ) {
   LABEL <- igraph::V(g)$name
 
@@ -4883,9 +4884,17 @@ igraph2vis <- function(
 
   vn$nodes <- vn$nodes %>%
     mutate(
-      label = ifelse(label %in% labelToRemove, "", label),
-      title = id
+      label = ifelse(label %in% labelToRemove, "", label)
     )
+  # Node tooltip: default is the node id; callers may pass `nodeTitles`
+  # (a character vector keyed by node id) to show richer HTML tooltips,
+  # falling back to the id whenever a node has no entry.
+  if (is.null(nodeTitles)) {
+    vn$nodes$title <- vn$nodes$id
+  } else {
+    tt <- nodeTitles[as.character(vn$nodes$id)]
+    vn$nodes$title <- ifelse(is.na(tt), as.character(vn$nodes$id), unname(tt))
+  }
   ##
 
   VIS <-
@@ -6400,7 +6409,7 @@ dfLabel <- function() {
     "TreeMap",
     "Words Frequency over Time",
     "Trend Topics",
-    "Classic Coupling",
+    "Clustering by Coupling",
     "Multiplex Coupling",
     "Co-occurence Network",
     "Thematic Map",

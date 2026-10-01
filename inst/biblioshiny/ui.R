@@ -610,7 +610,7 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       startExpanded = FALSE,
       menuSubItem(
         "Classic Coupling",
-        tabName = "coupling",
+        tabName = "couplingNetwork",
         icon = icon("chevron-right", lib = "glyphicon")
       ),
       menuSubItem(
@@ -7380,7 +7380,7 @@ body <- dashboardBody(
         fluidRow(
           column(
             8,
-            h3(strong("Classic Coupling"), align = "center")
+            h3(strong("Clustering by Coupling"), align = "center")
           ),
           div(
             style = style_bttn,
@@ -7640,6 +7640,130 @@ body <- dashboardBody(
       )
     ),
     #### Conceptual Structure ----
+    ##### coupling network ----
+    tabItem(
+      "couplingNetwork",
+      fluidPage(
+        fluidRow(
+          column(10, h3(strong("Classic Coupling"), align = "center")),
+          div(
+            style = style_bttn, title = t_run,
+            column(1, do.call("actionBttn", c(run_bttn, list(inputId = "applyCpl"))))
+          ),
+          div(
+            column(
+              1,
+              dropdown(
+                h4(strong("Network Options"), style = "color: #2c3e50; margin-top: 0;"),
+                br(),
+                div(
+                  style = "background-color: #f0f4f8; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #3c8dbc;",
+                  h6(strong("Method Parameters"), style = "color: #34495e; margin-bottom: 10px; margin-top: 0;"),
+                  selectInput(
+                    "cplField",
+                    label = strong("Coupling unit"),
+                    choices = c(
+                      "Documents (by references)" = "references",
+                      "Authors" = "authors",
+                      "Sources" = "sources"
+                    ),
+                    selected = "references"
+                  ),
+                  fluidRow(
+                    column(6, selectInput("cpllayout", label = strong("Network Layout"),
+                      choices = c("Automatic layout" = "auto", "Circle" = "circle",
+                        "Fruchterman & Reingold" = "fruchterman", "Kamada & Kawai" = "kamada",
+                        "MultiDimensional Scaling" = "mds", "Sphere" = "sphere", "Star" = "star"),
+                      selected = "auto")),
+                    column(6, selectInput("cplCluster", label = strong("Clustering Algorithm"),
+                      choices = c("None" = "none", "Edge Betweenness" = "edge_betweenness",
+                        "InfoMap" = "infomap", "Leading Eigenvalues" = "leading_eigen",
+                        "Leiden" = "leiden", "Louvain" = "louvain", "Spinglass" = "spinglass",
+                        "Walktrap" = "walktrap"), selected = "louvain"))
+                  ),
+                  fluidRow(
+                    column(6, selectInput("cplnormalize", label = strong("Normalization Method"),
+                      choices = c("None" = "none", "Association" = "association", "Jaccard" = "jaccard",
+                        "Salton" = "salton", "Inclusion" = "inclusion", "Equivalence" = "equivalence"),
+                      selected = "association")),
+                    column(6, numericInput("cpl.repulsion", label = strong("Community Repulsion"),
+                      min = 0, max = 1, value = 0.1, step = 0.1))
+                  ),
+                  fluidRow(
+                    column(6, numericInput("cplNodes", label = "Number of Nodes", min = 5, max = 1000, value = 50, step = 1)),
+                    column(6, numericInput("cplLabels", label = "Number of Labels", min = 0, max = 1000, value = 1000, step = 1))
+                  ),
+                  fluidRow(
+                    column(6, numericInput("cpledges.min", label = "Min. number of edges", min = 0, max = 50, value = 1, step = 1)),
+                    column(6, selectInput("cpl.isolates", label = strong("Remove Isolated Nodes"),
+                      choices = c("Yes" = "yes", "No" = "no"), selected = "yes"))
+                  )
+                ),
+                div(
+                  style = "background-color: #e8f5e9; padding: 12px; border-radius: 8px; margin-bottom: 6px; border-left: 3px solid #4caf50;",
+                  h6(strong("Graphical Parameters"), style = "color: #34495e; margin-bottom: 10px; margin-top: 0;"),
+                  fluidRow(
+                    column(6, numericInput("cpllabelsize", label = "Label size", min = 0, max = 20, value = 3, step = 1)),
+                    column(6, selectInput("cpllabel.cex", label = strong("Scale label by degree"),
+                      choices = c("Yes" = "Yes", "No" = "No"), selected = "Yes"))
+                  ),
+                  fluidRow(
+                    column(6, numericInput("cpledgesize", label = "Edge size", min = 0, max = 5, value = 1, step = 1)),
+                    column(6, numericInput("cplAlpha", label = "Opacity", min = 0, max = 1, value = 0.7, step = 0.05))
+                  ),
+                  fluidRow(
+                    column(6, selectInput("cpl.shape", label = strong("Node shape"),
+                      choices = c("Dot" = "dot", "Square" = "square", "Triangle" = "triangle",
+                        "Star" = "star", "Box" = "box"), selected = "dot")),
+                    column(6, selectInput("cpl.curved", label = strong("Curved edges"),
+                      choices = c("No" = "No", "Yes" = "Yes"), selected = "No"))
+                  )
+                ),
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
+                style = "gradient",
+                tooltip = tooltipOptions(title = "Options"),
+                color = "primary",
+                icon = icon("sliders"),
+                width = "320px"
+              )
+            ),
+            style = style_opt
+          )
+        ),
+        fluidRow(
+          tabsetPanel(
+            id = "tabsCpl", type = "tabs",
+            tabPanel("Network",
+              shinycssloaders::withSpinner(visNetworkOutput("CPLPlot", height = "75vh"))),
+            tabPanel("Clusters",
+              shinycssloaders::withSpinner(uiOutput("CPLTable"))),
+            tabPanel(
+              title = tagList(
+                icon("microchip"),
+                tags$span(strong("Biblio AI"), style = "margin-left: 5px;")
+              ),
+              fluidPage(fluidRow(column(
+                12,
+                br(),
+                shinycssloaders::withSpinner(
+                  htmlOutput("CPLGeminiUI"),
+                  caption = HTML("<br><strong>Thinking...</strong>"),
+                  image = "ai_small2.gif",
+                  color = "#466fc4"
+                )
+              )))
+            ),
+            tabPanel("Info & References", icon = icon("info-circle"),
+              fluidPage(fluidRow(column(1), column(10, br(),
+                HTML(helpContent()$coupling)),
+                column(1)))
+            )
+          )
+        )
+      )
+    ),
     ##### multiplex coupling ----
     tabItem(
       "multiplexCoupling",

@@ -1013,6 +1013,15 @@ biblioAiPrompts <- function(values, activeTab) {
         ". Focus on the structure of the network, the presence of communities, and the relevance of the most connected terms."
       )
     },
+    "couplingNetwork" = {
+      prompt <- paste0(
+        "Provide an interpretation of this bibliographic 'coupling' network. ",
+        "Two units (documents, authors, sources or countries) are coupled when they share cited references; ",
+        "the more references they share, the stronger the link. ",
+        "Focus on the structure of the network, the presence of communities (research fronts), ",
+        "and the relevance of the most central and most strongly coupled units."
+      )
+    },
     "collabWorldMap" = {
       #values$WMGemini
       prompt <- paste0(
@@ -1196,6 +1205,14 @@ geminiParameterPrompt <- function(values, activeTab, input) {
         merge_df_to_string(values$colnet$params)
       )
     },
+    "couplingNetwork" = {
+      req(values$CPLnetwork$VIS)
+      txt <- paste0(
+        txt,
+        "  This graph was generated with the following parameters: ",
+        merge_df_to_string(values$cplnet$params)
+      )
+    },
     "collabWorldMap" = {
       req(values$WMmap)
     },
@@ -1298,6 +1315,10 @@ geminiWaitingMessage <- function(values, activeTab) {
       req(values$COLnetwork$VIS)
       values$colGemini <- messageTxt
     },
+    "couplingNetwork" = {
+      req(values$CPLnetwork$VIS)
+      values$cplGemini <- messageTxt
+    },
     "collabWorldMap" = {
       req(values$WMmap)
       values$WMGemini <- messageTxt
@@ -1333,6 +1354,7 @@ geminiFieldName <- function(activeTab) {
     "coCitationNetwork" = "cocitGemini",
     "historiograph" = "histGemini",
     "collabNetwork" = "colGemini",
+    "couplingNetwork" = "cplGemini",
     "collabWorldMap" = "WMGemini",
     "bradford" = "BradfordGemini",
     "lotka" = "LotkaGemini",
@@ -1550,6 +1572,10 @@ geminiPrepareAll <- function(values, activeTab, input) {
       obj <- values$COLnetwork$VIS
       type <- "vis"
     },
+    "couplingNetwork" = {
+      obj <- values$CPLnetwork$VIS
+      type <- "vis"
+    },
     "collabWorldMap" = {
       obj <- values$WMmap$g
       type <- "plotly"
@@ -1640,6 +1666,9 @@ geminiSave <- function(values, activeTab) {
     },
     "collabNetwork" = {
       gemini <- values$colGemini
+    },
+    "couplingNetwork" = {
+      gemini <- values$cplGemini
     },
     "collabWorldMap" = {
       gemini <- values$WMGemini

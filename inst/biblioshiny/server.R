@@ -11021,6 +11021,218 @@ To ensure the functionality of Biblioshiny,
     }
   })
 
+  ## Coupling Network ----
+  ## Document/author/source/country coupling via biblioNetwork(analysis="coupling")
+  ## + networkPlot + igraph2vis (same rendering pipeline as the co-occurrence net).
+
+  ## When coupling is computed "by references", every node is a document whose
+  ## label is its SR identifier. This helper resolves each SR to the article's
+  ## title, authors and DOI (joined from the loaded collection M) so the same
+  ## metadata can feed both the cluster table and the network node tooltips.
+  couplingDocMetadata <- function(M, ids) {
+    ids <- as.character(ids)
+    idx <- match(toupper(ids), toupper(M$SR))
+    getf <- function(f) {
+      if (f %in% names(M)) M[[f]][idx] else rep(NA_character_, length(ids))
+    }
+    ti <- getf("TI")
+    au <- getf("AU")
+    di <- getf("DI")
+    ti <- ifelse(is.na(ti) | ti == "", "", tools::toTitleCase(tolower(ti)))
+    au <- ifelse(is.na(au) | au == "", "", gsub("\\s*;\\s*", "; ", au))
+    di <- ifelse(is.na(di) | toupper(di) %in% c("NA", ""), NA_character_, di)
+    ## canonical SR casing from M (networkPlot lowercases node names)
+    sr <- ifelse(is.na(idx), ids, M$SR[idx])
+    data.frame(
+      SR = sr,
+      Title = ti,
+      Authors = au,
+      DOI = di,
+      stringsAsFactors = FALSE
+    )
+  }
+
+  observeEvent(input$applyCpl, {
+    if (is.null(values$M) || !nrow(values$M)) {
+      showNotification(
+        "Load a collection first.",
+        type = "warning",
+        duration = 4
+      )
+      return(NULL)
+    }
+    shinyjs::disable("applyCpl")
+    net <- switch(
+      input$cplField,
+      references = "references",
+      authors = "authors",
+      sources = "sources",
+      "references"
+    )
+    tryCatch(
+      {
+        M_data <- values$M
+        ## n = NULL -> full coupling matrix (the node count is the matrix dimension,
+        ## i.e. all documents/units, NOT the number of coupling references).
+        ## networkPlot(n = ...) then keeps the top input$cplNodes nodes by degree.
+        ## shortlabel = FALSE keeps the full SR identifier as the node name (only
+        ## relevant for network = "references"), so the node label IS the paper SR
+        ## and joins cleanly with M to resolve title/authors/DOI.
+        NetMatrix <- biblioNetwork(
+          M_data,
+          analysis = "coupling",
+          network = net,
+          n = NULL,
+          sep = ";",
+          shortlabel = FALSE
+        )
+        label.n <- min(input$cplLabels, input$cplNodes)
+        normalize <- if (input$cplnormalize == "none") {
+          NULL
+        } else {
+          input$cplnormalize
+        }
+        cplnet <- networkPlot(
+          NetMatrix,
+          n = input$cplNodes,
+          normalize = normalize,
+          Title = "Coupling Network",
+          type = input$cpllayout,
+          size.cex = TRUE,
+          size = 5,
+          remove.multiple = FALSE,
+          edgesize = input$cpledgesize * 3,
+          labelsize = input$cpllabelsize,
+          label.cex = (input$cpllabel.cex == "Yes"),
+          label.n = label.n,
+          edges.min = input$cpledges.min,
+          label.color = FALSE,
+          curved = (input$cpl.curved == "Yes"),
+          alpha = input$cplAlpha,
+          cluster = input$cplCluster,
+          remove.isolates = (input$cpl.isolates == "yes"),
+          community.repulsion = input$cpl.repulsion / 2,
+          seed = values$random_seed,
+          verbose = FALSE
+        )
+        values$cplnet <- cplnet
+
+        ## Coupling "by references" -> nodes are documents (SR). Enrich the cluster
+        ## table with title/authors/DOI and build rich HTML tooltips for the nodes.
+        nodeTitles <- NULL
+        clusterTable <- cplnet$cluster_res
+        if (identical(net, "references")) {
+          gids <- igraph::V(cplnet$graph)$name
+          meta <- couplingDocMetadata(M_data, gids)
+          nodeTitles <- setNames(
+            paste0(
+              "<div style='max-width:340px; white-space:normal;'>",
+              ifelse(
+                meta$Title == "",
+                "",
+                paste0("<b>", htmltools::htmlEscape(meta$Title), "</b><br>")
+              ),
+              ifelse(
+                meta$Authors == "",
+                "",
+                paste0("<i>", htmltools::htmlEscape(meta$Authors), "</i><br>")
+              ),
+              ifelse(
+                is.na(meta$DOI),
+                "",
+                paste0(
+                  "<a href='https://doi.org/",
+                  meta$DOI,
+                  "' target='_blank'>doi:",
+                  meta$DOI,
+                  "</a>"
+                )
+              ),
+              "</div>"
+            ),
+            gids
+          )
+          ## Cluster table: prepend Title/Authors/DOI (DOI as a clickable link).
+          tmeta <- couplingDocMetadata(M_data, clusterTable$vertex)
+          doiLink <- ifelse(
+            is.na(tmeta$DOI),
+            "",
+            paste0(
+              "<a href='https://doi.org/",
+              tmeta$DOI,
+              "' target='_blank'>",
+              tmeta$DOI,
+              "</a>"
+            )
+          )
+          clusterTable <- cbind(
+            data.frame(
+              Document = tmeta$SR,
+              Title = htmltools::htmlEscape(tmeta$Title),
+              Authors = htmltools::htmlEscape(tmeta$Authors),
+              DOI = doiLink,
+              stringsAsFactors = FALSE
+            ),
+            clusterTable[, setdiff(names(clusterTable), "vertex"), drop = FALSE]
+          )
+        }
+        values$cplClusterTable <- clusterTable
+
+        values$CPLnetwork <- igraph2vis(
+          g = cplnet$graph,
+          curved = (input$cpl.curved == "Yes"),
+          labelsize = input$cpllabelsize,
+          opacity = input$cplAlpha,
+          type = input$cpllayout,
+          shape = input$cpl.shape,
+          net = cplnet,
+          shadow = TRUE,
+          edgesize = input$cpledgesize,
+          noOverlap = TRUE,
+          nodeTitles = nodeTitles
+        )
+      },
+      error = function(err) {
+        showNotification(
+          paste("Coupling Network error:", conditionMessage(err)),
+          type = "error",
+          duration = 8
+        )
+      }
+    )
+    shinyjs::enable("applyCpl")
+  })
+
+  output$CPLPlot <- renderVisNetwork({
+    req(values$CPLnetwork$VIS)
+    values$CPLnetwork$VIS
+  })
+
+  output$CPLTable <- renderUI({
+    req(values$cplClusterTable)
+    renderBibliobox(
+      values$cplClusterTable,
+      nrow = 10,
+      filename = "Coupling_Network",
+      pagelength = TRUE,
+      dom = TRUE,
+      size = "70%",
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE,
+      scrollX = TRUE
+    )
+  })
+
+  output$CPLGeminiUI <- renderUI({
+    geminiOutput(title = "", content = values$cplGemini, values)
+  })
+
   ### Multiplex Coupling ----
   MPXResult <- eventReactive(input$applyMPX, {
     req(values$M)

@@ -2934,6 +2934,54 @@ helpContent <- function() {
     </div>
     </body>"
 
+  coupling <-
+    "<body>
+    <div class='container'>
+    <h3>&#128279; Coupling Network</h3>
+
+    <p>The <strong>Coupling Network</strong> maps the <strong>research front</strong> of a field: the body of work that scholars are actively building on right now. Two units are <strong>bibliographically coupled</strong> when they share one or more cited references &mdash; the more references they have in common, the stronger their coupling and the more likely they address a similar topic. Introduced by <strong>Kessler (1963)</strong>, coupling is the forward-looking counterpart of co-citation: while co-citation reveals the <em>knowledge base</em> a field rests upon, coupling reveals the <em>emerging themes</em> currently being developed.</p>
+
+    <h4>&#127891; Theoretical Foundations</h4>
+    <p>The coupling strength between two units is obtained from the unit &times; reference incidence matrix <strong>A</strong> as <strong>A &times; A<sup>T</sup></strong>, whose generic off-diagonal element counts the cited references shared by each pair of units. The network can be built on three different <strong>coupling units</strong>:</p>
+    <ul>
+      <li><strong>Documents (by references):</strong> two documents are linked when their reference lists overlap. Each node is a single paper, identified by its short reference (SR), and the network surfaces clusters of papers addressing the same current topic.</li>
+      <li><strong>Authors:</strong> two authors are linked when they cite the same references, revealing scholars working on related problems.</li>
+      <li><strong>Sources:</strong> two sources (journals) are linked when the documents they publish share references, revealing thematically related outlets.</li>
+    </ul>
+
+    <h4>&#9881;&#65039; Parameters and Options</h4>
+    <ul>
+      <li><strong>Coupling unit:</strong> documents (by references), authors, or sources.</li>
+      <li><strong>Normalization method:</strong> rescale the raw coupling counts (Association strength, Jaccard, Salton, Inclusion, Equivalence) or use none.</li>
+      <li><strong>Clustering algorithm:</strong> community detection method used to colour the network (Louvain, Leiden, Walktrap, Infomap, Edge-betweenness, Spinglass, Leading Eigenvalues, or none).</li>
+      <li><strong>Number of nodes / labels:</strong> keep the top units by degree and control how many node labels are displayed.</li>
+      <li><strong>Minimum number of edges &amp; remove isolated nodes:</strong> prune weak links and disconnected nodes to declutter the map.</li>
+      <li><strong>Community repulsion &amp; layout:</strong> tune how strongly clusters repel each other and the graph layout algorithm.</li>
+    </ul>
+
+    <h4>&#128270; Interpreting Results</h4>
+    <ul>
+      <li><strong>Node size:</strong> proportional to the number of shared references (the unit's coupling degree).</li>
+      <li><strong>Edge thickness:</strong> proportional to the coupling strength between two units.</li>
+      <li><strong>Clusters:</strong> groups of tightly coupled units represent distinct <strong>themes of the research front</strong> &mdash; sub-topics currently under active development.</li>
+      <li><strong>Central nodes:</strong> highly connected units that bridge much of the shared-reference structure of the field.</li>
+      <li><strong>Bridge nodes:</strong> units linking different clusters often represent integrative or interdisciplinary contributions.</li>
+    </ul>
+    <p>For coupling by references, hovering a node shows the paper's <strong>title, authors and DOI</strong>, and the <em>Clusters</em> table reports the same metadata for every document.</p>
+
+    <br>
+
+    <h5>&#128218; Key References</h5>
+
+    <p><strong>Kessler, M. M. (1963).</strong> <i>Bibliographic coupling between scientific papers.</i> <strong>American Documentation</strong>, 14(1), 10-25. <a href='https://doi.org/10.1002/asi.5090140103' target='_blank'>https://doi.org/10.1002/asi.5090140103</a></p>
+
+    <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959-975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    <p><strong>Aria, M., &amp; Cuccurullo, C. (2026).</strong> <i>Science Mapping Analysis: A Primer with Biblioshiny.</i> McGraw-Hill, New York, NY, USA. ISBN: 978-88-386-2297-7.</p>
+
+    </div>
+    </body>"
+
   multiplexCoupling <-
     "<body>
   <div class='container'>
@@ -3261,6 +3309,7 @@ helpContent <- function() {
     bradfordLaw = bradfordLaw,
     lotkaLaw = lotkaLaw,
     authorsDominance = authorsDominance,
+    coupling = coupling,
     multiplexCoupling = multiplexCoupling,
     rpys = rpys,
     prisma = prisma

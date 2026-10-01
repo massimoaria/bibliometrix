@@ -11237,6 +11237,21 @@ To ensure the functionality of Biblioshiny,
   MPXResult <- eventReactive(input$applyMPX, {
     req(values$M)
     topic_field <- if (input$mpxTopicField == "auto") "auto" else strsplit(input$mpxTopicField, ";")[[1]]
+    # the same data and options give the result again without computing it;
+    # whether OpenAlex is configured is part of the key, as it changes the
+    # names of the schools
+    cache_key <- make_cache_key(
+      fp = data_fingerprint(values$M), n = input$mpxN, select.by = input$mpxSelectBy,
+      topic = input$mpxTopicField, k = input$mpxK, n.perm = input$mpxNperm,
+      algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, periods = input$mpxPeriods,
+      min.docs = input$mpxMinDocs,
+      openalex = nzchar(Sys.getenv("openalexR.apikey")) && nzchar(Sys.getenv("openalexR.mailto"))
+    )
+    if (identical(cache_key, values$cache_MPX_key) && !is.null(values$cache_MPX_result)) {
+      values$MPX <- values$cache_MPX_result$mc
+      values$MPXev <- values$cache_MPX_result$ev
+      return(values$cache_MPX_result)
+    }
     res <- NULL
     withProgress(message = "Multiplex coupling", value = 0, {
       incProgress(0.05, detail = "roots and topic layers, null model")
@@ -11256,8 +11271,8 @@ To ensure the functionality of Biblioshiny,
         }
       )
       if (!is.null(mc)) {
-        incProgress(0.7, detail = "schools and themes")
-        mc <- multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink)
+        incProgress(0.6, detail = "schools and themes (school names from their references)")
+        mc <- multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, verbose = FALSE)
         incProgress(0.15, detail = "evolution")
         # periods of about the same number of documents
         PY <- mc$nodes$PY[!is.na(mc$nodes$PY)]
@@ -11274,6 +11289,8 @@ To ensure the functionality of Biblioshiny,
     req(res)
     values$MPX <- res$mc
     values$MPXev <- res$ev
+    values$cache_MPX_key <- cache_key
+    values$cache_MPX_result <- res
     res
   })
 
@@ -11329,8 +11346,9 @@ To ensure the functionality of Biblioshiny,
   mpxSchoolsDF <- function(mc) {
     s <- mc$clusters$schools
     data.frame(
-      School = paste0("S", s$cluster), Documents = s$size, Terms = s$terms, References = s$references,
-      Structure = s$structure, `Linked themes` = ifelse(s$themes == "", "",
+      School = paste0("S", s$cluster), Documents = s$size, `Name (from the roots)` = s$terms,
+      `Named from` = s$label_source, `Strongest references` = s$references,
+      `Keywords of its documents` = s$doc_terms, Structure = s$structure, `Linked themes` = ifelse(s$themes == "", "",
                                                         gsub("(\\d+)", "T\\1", s$themes)),
       `Roots cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
       check.names = FALSE, stringsAsFactors = FALSE
@@ -11359,7 +11377,7 @@ To ensure the functionality of Biblioshiny,
   }
 
   output$mpxSchoolsTable <- renderUI({
-    mpxTable(mpxSchoolsDF(MPXResult()$mc), "Multiplex_Schools", numeric = 7:8)
+    mpxTable(mpxSchoolsDF(MPXResult()$mc), "Multiplex_Schools", numeric = 9:10)
   })
   output$mpxThemesTable <- renderUI({
     mpxTable(mpxThemesDF(MPXResult()$mc), "Multiplex_Themes", numeric = 6:7)

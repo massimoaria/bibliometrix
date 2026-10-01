@@ -35,6 +35,7 @@ test_that("the roots layer reproduces the coupling indices of normalizeSimilarit
                             verbose = FALSE)
     W <- cocMatrix(M[match(mc$nodes$node, M$SR), ], Field = "CR")
     W <- W[, Matrix::colSums(W) >= 2]
+    W <- W[, !grepl("^(NO TITLE CAPTURED|\\[?ANONYMOUS\\]?)", colnames(W))] # not cited works
     expect_equal(mc$pairs$s_R, at(normalizeSimilarity(Matrix::tcrossprod(W), type = sim), mc$pairs),
                  info = nm)
   }
@@ -231,4 +232,79 @@ test_that("every plot renders, static and interactive", {
   expect_s3_class(multiplexPlot(ev, "trajectory"), "ggplot")
   expect_s3_class(multiplexPlot(ev, "trajectory", interactive = TRUE), "plotly")
   expect_error(multiplexPlot(mc, "trajectory"), "multiplexEvolution")
+})
+
+test_that("title terms are adjacent words of the same segment, without generic words", {
+  # "analysis" is a generic title word: no bigram with it
+  expect_false("co-citation analysis" %in% mpTitleTerms("Author co-citation analysis"))
+  tt <- mpTitleTerms("Forty years of the Journal of Business & Industrial Marketing: past research")
+  expect_false("journal business" %in% tt)
+  expect_false("business industrial" %in% tt)
+  expect_false("marketing past" %in% tt)
+  expect_false("forty" %in% tt)
+  expect_true("industrial marketing" %in% tt)
+  expect_true("absorptive capacity" %in% mpTitleTerms("Absorptive capacity: a new perspective on learning"))
+})
+
+test_that("Scopus references give their title, WoS references none", {
+  x <- c("Small, H., Co-citation in the scientific literature: A new measure (1973) J Am Soc Inf Sci, 24, pp. 265-269",
+         "Zupic, I., Cater, T., Bibliometric methods in management and organization (2015) Organ Res Methods, 18, pp. 429-472",
+         "SMALL H, 1973, J AM SOC INFORM SCI, V24, P265, DOI 10.1002/asi.4630240406")
+  t <- mpScopusTitle(x)
+  expect_equal(t[1], "Co-citation in the scientific literature: A new measure")
+  expect_equal(t[2], "Bibliometric methods in management and organization")
+  expect_true(is.na(t[3]))
+})
+
+test_that("the reference index keeps DOIs and the titles of the collection", {
+  M <- mk(
+    CR = c(paste("SMITH J, 2001, J INFORMETR, V1, P1, DOI 10.1000/ABC;", refs(2)),
+           paste("SMITH J, 2001, J INFORMETR, V1, P1, DOI 10.1000/abc;", refs(3))),
+    DE = c("A", "B")
+  )
+  M$DI <- c("10.1000/abc", NA)
+  M$TI <- c("A cited paper", "Another")
+  key <- .normalize_cr("SMITH J, 2001, J INFORMETR, V1, P1, DOI 10.1000/ABC")
+  idx <- mpReferenceIndex(M, M, key)
+  expect_equal(idx$doi, "10.1000/abc")
+  expect_equal(idx$title_local, "A cited paper")
+})
+
+test_that("Web of Science placeholders are not cited works", {
+  M <- mk(
+    CR = c(paste("NO TITLE CAPTURED;", refs(1, 2)), paste("NO TITLE CAPTURED;", refs(1, 3)),
+           paste("[ANONYMOUS], 2001, J X, V1, P1;", refs(2, 3)), paste("[ANONYMOUS], 2001, J X, V1, P1;", refs(1))),
+    DE = c("A;B", "A", "B", "A")
+  )
+  L <- mpRootsLayer(M)
+  expect_false(any(grepl("NO TITLE|ANONYMOUS", colnames(L$inc))))
+})
+
+test_that("OpenAlex titles come from the cache when they are there", {
+  assign("doi:10.9999/cached", "A cached title", envir = .mpCache)
+  testthat::local_mocked_bindings(oa_fetch = function(...) stop("no network in this test"), .package = "openalexR")
+  got <- mpFetchTitles("10.9999/cached", character(0), "x@y.z", "key", verbose = FALSE)
+  expect_equal(unname(got), "A cached title")
+  expect_equal(length(mpFetchTitles(character(0), character(0), "x@y.z", "key", verbose = FALSE)), 0)
+  rm("doi:10.9999/cached", envir = .mpCache)
+})
+
+test_that("schools are named after their roots, offline too", {
+  skip_if_not_installed("bibliometrixData")
+  mc <- mcFixture()
+  testthat::local_mocked_bindings(mpOpenAlexReady = function(...) list(ok = FALSE, reason = "offline test"))
+  cl <- suppressMessages(multiplexClusters(mc))$clusters
+  expect_true(all(nzchar(cl$schools$terms)))
+  expect_true(all(nzchar(cl$schools$doc_terms)))
+  expect_true(all(grepl("^titles of|^cited sources", cl$schools$label_source)))
+  expect_false(any(grepl("OpenAlex", cl$schools$label_source)))
+})
+
+test_that("with OpenAlex configured, schools are named from the titles of their references", {
+  skip_on_cran()
+  skip_if_offline("api.openalex.org")
+  skip_if_not_installed("bibliometrixData")
+  skip_if(!isTRUE(mpOpenAlexReady()$ok), "no OpenAlex API key and email configured")
+  cl <- suppressMessages(multiplexClusters(mcFixture()))$clusters
+  expect_true(any(grepl("OpenAlex", cl$schools$label_source)))
 })

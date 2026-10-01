@@ -12,7 +12,11 @@ multiplexClusters(
   res.crit = 2,
   min.link = 5,
   n.labels = 3,
-  seed = 1234
+  n.refs = 30,
+  email = NULL,
+  api.key = NULL,
+  seed = 1234,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -39,8 +43,18 @@ value may be preferable.}
 \item{n.labels}{is an integer. The number of terms and references that label
 a cluster. Default is 3.}
 
+\item{n.refs}{is an integer. The number of strong references of a school whose
+titles name it. Default is 30.}
+
+\item{email, api.key}{are characters. The email and the API key for OpenAlex. When
+\code{NULL} (default) they are read from the options and environment variables
+\code{openalexR.mailto} and \code{openalexR.apikey}, or from the files saved by
+Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answers.}
+
 \item{seed}{is an integer. The seed of the runs. The random number state of
 the session is restored on exit.}
+
+\item{verbose}{is logical. If TRUE, messages on how the schools are named.}
 }
 \value{
 the object \code{mc} with an element \code{clusters}, a list with:
@@ -60,6 +74,18 @@ literature) and \emph{themes} (clusters of the topic layer: documents about
 the same subject), and links them.
 }
 \details{
+A school is an intellectual root, so it is named after the titles of its
+strong references (the references frequent among its documents and
+concentrated in it), not after the keywords of its documents, which name the
+themes. The titles come from the collection, when a reference is one of its
+documents, from the reference string (Scopus writes the cited title) and from
+OpenAlex, by DOI or OpenAlex id. OpenAlex is queried only when the user is
+online and has configured both an OpenAlex API key and an email; the titles
+are kept in a cache for the R session, so that a repeated analysis downloads
+nothing. A school with fewer than five reference titles is named after its cited
+sources and its most representative reference. \code{schools$label_source}
+tells which, and \code{schools$doc_terms} keeps the keywords of its documents.
+
 A school and a theme are \emph{linked} when the theme holds more documents of
 the school than expected if schools and themes were independent
 (standardized residual above \code{res.crit}) and at least \code{min.link}

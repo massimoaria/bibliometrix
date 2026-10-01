@@ -249,6 +249,8 @@ mpClustersPlot <- function(mc, interactive = FALSE) {
     data.frame(layer = "theme (topic cluster)", cl$themes[, c("cluster", "size", "terms", "cohesion_R", "cohesion_T")],
                structure = cl$themes$structure, stringsAsFactors = FALSE)
   )
+  # a cluster of one document has no cohesion; one sharing nothing has 0
+  D <- D[is.finite(log2(D$cohesion_R)) & is.finite(log2(D$cohesion_T)), ]
   D$label <- mpFirstLabel(D$terms)
   D$text <- sprintf("%s %d: %s\n%d documents | roots cohesion %.2f | topic cohesion %.2f\n%s",
                     D$layer, D$cluster, D$terms, D$size, D$cohesion_R, D$cohesion_T, D$structure)

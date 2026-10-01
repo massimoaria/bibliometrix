@@ -5,6 +5,18 @@
 #' literature) and \emph{themes} (clusters of the topic layer: documents about
 #' the same subject), and links them.
 #'
+#' A school is an intellectual root, so it is named after the titles of its
+#' strong references (the references frequent among its documents and
+#' concentrated in it), not after the keywords of its documents, which name the
+#' themes. The titles come from the collection, when a reference is one of its
+#' documents, from the reference string (Scopus writes the cited title) and from
+#' OpenAlex, by DOI or OpenAlex id. OpenAlex is queried only when the user is
+#' online and has configured both an OpenAlex API key and an email; the titles
+#' are kept in a cache for the R session, so that a repeated analysis downloads
+#' nothing. A school with fewer than five reference titles is named after its cited
+#' sources and its most representative reference. \code{schools$label_source}
+#' tells which, and \code{schools$doc_terms} keeps the keywords of its documents.
+#'
 #' A school and a theme are \emph{linked} when the theme holds more documents of
 #' the school than expected if schools and themes were independent
 #' (standardized residual above \code{res.crit}) and at least \code{min.link}
@@ -37,6 +49,13 @@
 #'   value may be preferable.
 #' @param n.labels is an integer. The number of terms and references that label
 #'   a cluster. Default is 3.
+#' @param n.refs is an integer. The number of strong references of a school whose
+#'   titles name it. Default is 30.
+#' @param email,api.key are characters. The email and the API key for OpenAlex. When
+#'   \code{NULL} (default) they are read from the options and environment variables
+#'   \code{openalexR.mailto} and \code{openalexR.apikey}, or from the files saved by
+#'   Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answers.
+#' @param verbose is logical. If TRUE, messages on how the schools are named.
 #' @param seed is an integer. The seed of the runs. The random number state of
 #'   the session is restored on exit.
 #'
@@ -72,7 +91,11 @@ multiplexClusters <- function(mc,
                               res.crit = 2,
                               min.link = 5,
                               n.labels = 3,
-                              seed = 1234) {
+                              n.refs = 30,
+                              email = NULL,
+                              api.key = NULL,
+                              seed = 1234,
+                              verbose = TRUE) {
   if (!inherits(mc, "biblioMultiplex")) {
     stop("multiplexClusters() needs the result of multiplexCoupling()", call. = FALSE)
   }
@@ -99,6 +122,12 @@ multiplexClusters <- function(mc,
   }
   schools <- summarise(mR)
   themes <- summarise(mT)
+  # a school is an intellectual root: it is named after the titles of its
+  # strong references; the keywords of its documents are kept as doc_terms
+  roots_lab <- mpRootsLabels(mc, mR, n.labels, n.refs, email, api.key, verbose)
+  schools$doc_terms <- schools$terms
+  schools$terms <- roots_lab$terms
+  schools$label_source <- roots_lab$label_source
 
   # one set of school-theme links, read by row for the schools and by column
   # for the themes: a cell over-represented (residual > res.crit) with at least
@@ -133,6 +162,7 @@ multiplexClusters <- function(mc,
     NMI = igraph::compare(mR, mT, method = "nmi"),
     ARI = igraph::compare(mR, mT, method = "adjusted.rand"),
     agreement = c(schools = cR$agreement, themes = cT$agreement),
+    openalex = attr(roots_lab, "openalex"),
     modularity = c(schools = cR$modularity, themes = cT$modularity),
     params = data.frame(
       params = c("algorithm", "resolution", "n.runs", "res.crit", "min.link", "seed"),
@@ -151,6 +181,15 @@ printMultiplexClusters <- function(cl) {
               sum(cl$themes$structure == "convergence"), sum(cl$themes$structure == "consolidation"),
               sum(cl$themes$structure == "dispersed")))
   cat(sprintf("Links  : %d school-theme links; schools vs themes NMI %.2f\n", nrow(cl$links), cl$NMI))
+  if (!is.null(cl$schools$label_source)) {
+    oa <- grepl("OpenAlex", cl$schools$label_source)
+    ti <- grepl("^titles", cl$schools$label_source)
+    cat(sprintf("School names from the titles of their strong references: %d schools (%d with OpenAlex), from their cited sources: %d\n",
+                sum(ti), sum(oa), sum(!ti)))
+    if (!is.null(cl$openalex) && nzchar(cl$openalex) && cl$openalex != "not needed") {
+      cat("  OpenAlex not used:", cl$openalex, "\n")
+    }
+  }
   cat(sprintf("Agreement between single runs (ARI): schools %.2f, themes %.2f\n",
               cl$agreement[["schools"]], cl$agreement[["themes"]]))
 }
@@ -244,11 +283,10 @@ mpClusterLabels <- function(K, memb, n.labels = 3, short = identity) {
   }, "")
 }
 
-# first author and year of a reference string (identifiers are kept)
+# a reference as author, year and source (cut at 45 characters): author and
+# year alone made two papers of the same author and year look the same
 mpShortRef <- function(x) {
-  yr <- ifelse(grepl("[12][0-9]{3}", x), sub("^.*?([12][0-9]{3}).*$", "\\1", x, perl = TRUE), "")
-  au <- sub("^(\\S+( \\S+)?).*$", "\\1", x)
-  ifelse(yr == "", substr(x, 1, 30), paste(au, yr))
+  ifelse(nchar(x) > 45, paste0(substr(x, 1, 45), "..."), x)
 }
 
 mpStandardizedResiduals <- function(tab) {

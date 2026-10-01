@@ -139,6 +139,7 @@ multiplexCoupling <- function(M,
   if (anyDuplicated(M$SR)) {
     stop("multiplexCoupling(): the document identifiers (SR) of M are not unique", call. = FALSE)
   }
+  M_all <- M # the whole collection: titles of the cited references that are documents of it
   # local citations are counted on the whole collection, before any document is left out
   if (select.by == "LCS" && !is.null(n) && nrow(M) > n && !("LCS" %in% names(M))) {
     say("Counting local citations")
@@ -217,6 +218,7 @@ multiplexCoupling <- function(M,
   )
   XR <- mpLayerMatrix(L$R)
   XT <- mpLayerMatrix(L$T)
+  refs <- mpReferenceIndex(M, M_all, colnames(XR))
   nodes$n_refs <- as.numeric(Matrix::rowSums(XR > 0))
   nodes$n_terms <- as.numeric(Matrix::rowSums(XT > 0))
 
@@ -294,7 +296,7 @@ multiplexCoupling <- function(M,
   res <- list(
     pairs = pairs, nodes = nodes,
     layers = list(roots = toGraph(ER, ER$s), topics = toGraph(ET, ET$s), union = gU),
-    X_R = XR, X_T = XT,
+    X_R = XR, X_T = XT, refs = refs,
     info = list(
       dropped = dropped, n_nodes = nrow(nodes), n_refs = ncol(L$R$inc), n_terms = ncol(L$T$inc),
       keyword_coverage = kw_cov,
@@ -388,6 +390,9 @@ mpFilterFeatures <- function(W, min.freq) {
 
 mpRootsLayer <- function(M, min.freq = 2, weight = "none") {
   W <- mpFilterFeatures(mpFieldMatrix(M, "CR", binary = TRUE), min.freq)
+  # placeholders that Web of Science writes for unreadable references are not
+  # cited works: shared by unrelated documents, they would couple them
+  W <- W[, !grepl("^(NO TITLE CAPTURED|\\[?ANONYMOUS\\]?)", colnames(W)), drop = FALSE]
   W@x[] <- 1
   mpMakeLayer(W, weight = weight, tf = "binary")
 }

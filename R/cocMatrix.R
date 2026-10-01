@@ -37,6 +37,8 @@ utils::globalVariables(c("item", "SR"))
 #' column of the data frame. The default is \code{sep = ";"}.
 #' @param binary is a logical. If TRUE each cell contains a 0/1. if FALSE each cell contains the frequency.
 #' @param short is a logical. If TRUE all items with frequency<2 are deleted to reduce the matrix size.
+#' With \code{binary = TRUE} the frequency of an item is the number of documents containing it, so an item
+#' repeated inside a single document is deleted; with \code{binary = FALSE} it is the number of occurrences.
 #' @param remove.terms is a character vector. It contains a list of additional terms to delete from the documents before term extraction. The default is \code{remove.terms = NULL}.
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @return a bipartite network matrix with cases corresponding to manuscripts and variables to the
@@ -132,9 +134,12 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   }
   Fi <- lapply(Fi, trim.leading)
   if (Field == "CR") {
-    # delete not congruent references, but keep OpenAlex work ids (W + digits),
-    # which can be as short as 7 characters
-    Fi <- lapply(Fi, function(l) l <- l[nchar(l) > 10 | grepl("^W[0-9]+$", l)])
+    # normalize the references, then delete the not congruent ones (see
+    # .congruent_cr()); the column names are taken from the same strings
+    Fi <- lapply(Fi, function(l) {
+      l <- .normalize_cr(l[!is.na(l)])
+      l[.congruent_cr(l)]
+    })
   }
 
   ## Scelta dell'informazione contenuta in CR da utilizzare (Reference, Autore, Affiliation, ecc.)
@@ -143,26 +148,8 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   allField <- unlist(Fi)
   allField <- allField[!is.na(allField)]
 
-  if (Field == "CR") {
-    ind <- which(substr(allField, 1, 1) != "(")
-    S <- allField
-    S[ind] <- gsub("\\).*", ")", allField[ind])
-    S[-ind] <- substr(S[-ind], 1, 100)
-    S <- gsub(",", " ", S)
-    S <- gsub(";", " ", S)
-    S <- reduceRefs(S)
-    allField <- trimES(S)
-    Fi <- lapply(Fi, function(l) {
-      l <- gsub("\\).*", ")", l)
-      l <- gsub(",", " ", l)
-      l <- gsub(";", " ", l)
-      l <- l[nchar(l) > 0]
-      l <- reduceRefs(l)
-      l <- trimES(l)
-      return(l)
-    })
-  } else {
-    # normalize reference names
+  if (Field != "CR") {
+    # CR is already normalized above
     S <- gsub("\\,", ";", allField)
     S <- sub("\\;", ",", S)
     S <- sub("\\;", ",", S)
@@ -185,7 +172,11 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
     if ("NA" %in% uniqueField[1:n]) n <- n + 1
     uniqueField <- uniqueField[1:n]
   } else if (isTRUE(short)) {
-    uniqueField <- names(tabField[tabField > 1]) # remove items with frequency<2
+    # remove items with frequency < 2. With binary counting the matrix counts
+    # documents, so an item repeated inside a single document (e.g. a reference
+    # listed twice in the same CR) still has frequency 1
+    freq <- if (isTRUE(binary)) table(unlist(lapply(Fi, unique))) else tabField
+    uniqueField <- uniqueField[uniqueField %in% names(freq)[freq > 1]]
   }
 
   if (length(uniqueField) < 1) {
@@ -232,10 +223,35 @@ cocMatrix <- function(M, Field = "AU", type = "sparse", n = NULL, sep = ";", bin
   return(WF)
 }
 
+# Normalized form of a cited reference, the unit of cocMatrix(Field = "CR"). A
+# reference opening with "(" keeps its parentheses (cut at 100 characters); any
+# other is cut after the first ")". The column names and the cells of the
+# matrix are both built from it.
+.normalize_cr <- function(x) {
+  ind <- which(substr(x, 1, 1) != "(")
+  x[ind] <- gsub("\\).*", ")", x[ind])
+  if (length(ind) < length(x)) {
+    x[-ind] <- substr(x[-ind], 1, 100)
+  }
+  x <- gsub(",", " ", x)
+  x <- gsub(";", " ", x)
+  trimES(reduceRefs(x))
+}
+
+# A normalized reference is congruent when it is longer than 10 characters or
+# is an OpenAlex work id (W + digits, as short as 7 characters). Applied after
+# normalization: a fragment such as "2-Q, DOI 10.1002/(SICI)..." (the tail of a
+# Wiley SICI DOI split on its own ";") is long before and "2-Q " after.
+.congruent_cr <- function(x) nchar(x) > 10 | grepl("^W[0-9]+$", x)
+
 reduceRefs <- function(A) {
   ind <- unlist(regexec("*V[0-9]", A))
   A[ind > -1] <- substr(A[ind > -1], 1, (ind[ind > -1] - 1))
-  ind <- unlist(regexec("*DOI ", A))
-  A[ind > -1] <- substr(A[ind > -1], 1, (ind[ind > -1] - 1))
+  # the DOI tag follows a separator: matching a bare "DOI " cut at the first
+  # occurrence, which for an author named Doi ("DOI K, 2006, PHYS MED BIOL")
+  # is the surname itself and left an empty reference. The kept prefix ends
+  # with the space before the tag, exactly as before.
+  ind <- unlist(regexec(" DOI ", A))
+  A[ind > -1] <- substr(A[ind > -1], 1, ind[ind > -1])
   return(A)
 }

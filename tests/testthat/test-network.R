@@ -86,6 +86,70 @@ test_that("cocMatrix scarta ancora le stringhe CR troppo corte che non sono id",
   expect_equal(ncol(WR), 1L)
 })
 
+# Con short = TRUE cocMatrix() scarta gli elementi di frequenza < 2, ma contava
+# le occorrenze: un riferimento ripetuto nello stesso CR (84 casi in
+# management) aveva frequenza 2 pur essendo citato da un solo documento, e
+# restava in una matrice che conta documenti.
+
+test_that("cocMatrix short = TRUE conta i documenti, non le occorrenze", {
+  M <- data.frame(
+    SR = c("D1", "D2", "D3"), DB = "ISI",
+    CR = c(
+      "SMITH J, 2001, J INFORMETR, V1, P1;SMITH J, 2001, J INFORMETR, V1, P1;ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+      "ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+      "BIANCHI C, 2010, RES POLICY, V3, P4"
+    ),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WR <- cocMatrix(M, Field = "CR", sep = ";", short = TRUE)
+  expect_equal(trimws(colnames(WR)), "ROSSI A 2005 SCIENTOMETRICS")
+  # con conteggio pieno la matrice conta le occorrenze, e il filtro pure
+  WF <- cocMatrix(M, Field = "CR", sep = ";", short = TRUE, binary = FALSE)
+  expect_setequal(trimws(colnames(WF)), c("SMITH J 2001 J INFORMETR", "ROSSI A 2005 SCIENTOMETRICS"))
+})
+
+# Con OpenAlex (import da API) e Lens il campo CR contiene identificativi dei
+# record, non stringhe di riferimento. CR_AU prendeva la parte prima della prima
+# virgola, cioe' l'identificativo stesso, e la co-citazione degli "autori" era
+# una rete di ID; con CR_AU vuoto biblioNetwork() si fermava con "requires
+# numeric/complex matrix/vector arguments", come gia' accadeva per Lens.
+
+test_that("metaTagExtraction CR_AU non tratta gli identificativi come autori citati", {
+  M <- data.frame(
+    SR = c("A", "B"), DB = "OPENALEX", stringsAsFactors = FALSE,
+    CR = c("W1234567; W2741809807", "SMITH J, 2001, J INFORMETR, V1, P1;W2741809807")
+  )
+  M <- metaTagExtraction(M, Field = "CR_AU", sep = ";")
+  expect_equal(M$CR_AU, c("", "SMITH J"))
+  L <- data.frame(SR = "A", DB = "LENS", CR = "013-507-404-965-47X;112-233-445-566-77X", stringsAsFactors = FALSE)
+  expect_equal(metaTagExtraction(L, Field = "CR_AU", sep = ";")$CR_AU, "")
+})
+
+test_that("biblioNetwork nomina il campo vuoto invece di fermarsi in crossprod()", {
+  M <- data.frame(
+    SR = c("A", "B", "C"), DB = "OPENALEX", stringsAsFactors = FALSE,
+    CR = c("W1234567;W2741809807", "W1234567;W99887766", "W2741809807")
+  )
+  M <- metaTagExtraction(M, Field = "CR_AU", sep = ";")
+  expect_error(biblioNetwork(M, analysis = "co-citation", network = "authors"), "record identifiers")
+  expect_error(biblioNetwork(M[, c("SR", "DB", "CR")], analysis = "co-citation", network = "sources"),
+               "not a column of M; create it with metaTagExtraction")
+})
+
+# fieldMatrixOrStop() controllava che il campo fosse una colonna di M prima di
+# chiamare cocMatrix(), ma cocMatrix() costruisce KW_Merged da se': la rete di
+# co-occorrenza di tutte le keyword si fermava sulle raccolte che non hanno
+# ancora quella colonna, come i dataset di bibliometrixData.
+
+test_that("biblioNetwork costruisce la co-occorrenza di all_keywords senza la colonna KW_Merged", {
+  data(scientometrics, package = "bibliometrixData", envir = environment())
+  expect_false("KW_Merged" %in% names(scientometrics))
+  NetMatrix <- biblioNetwork(scientometrics, analysis = "co-occurrences", network = "all_keywords", n = 30)
+  expect_equal(nrow(NetMatrix), ncol(NetMatrix))
+  expect_gt(nrow(NetMatrix), 0)
+})
+
 test_that("networkStat calcola statistiche di rete", {
   M <- load_wos_fixture()
   NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "references", sep = ";")
@@ -227,4 +291,52 @@ test_that("switchLayout rafforza gli archi interni e indebolisce quelli tra comu
   expect_equal(length(unique(w[inside])), 1L)
   # senza repulsione i pesi restano quelli di partenza
   expect_equal(igraph::E(switchLayout(g, "circle", 0)$bsk.network)$weight, rep(2, 7))
+})
+
+# reduceRefs() tagliava al primo "DOI " della stringa: per un autore di nome Doi
+# ("DOI K, 2006, PHYS MED BIOL") era il cognome, e il riferimento diventava ""
+# in cocMatrix(Field = "CR"), nelle reti di co-citazione e in rpys().
+
+test_that("reduceRefs taglia al tag DOI, non al cognome Doi", {
+  expect_equal(reduceRefs("DOI K 2006 PHYS MED BIOL V51 PR5 DOI 10.1088/X"), "DOI K 2006 PHYS MED BIOL ")
+  expect_equal(reduceRefs("KANDOI S 2019 J CLEAN PROD DOI 10.1016/X"), "KANDOI S 2019 J CLEAN PROD ")
+  # i riferimenti normali restano quelli di prima, spazio finale compreso
+  expect_equal(reduceRefs("ARIA M 2017 J INFORMETR V11 P959 DOI 10.1016/J.JOI"), "ARIA M 2017 J INFORMETR ")
+  expect_equal(reduceRefs("SMITH J 2001 BOOK TITLE DOI 10.1/X"), "SMITH J 2001 BOOK TITLE ")
+})
+
+test_that("cocMatrix tiene i riferimenti di un autore di nome Doi", {
+  M <- data.frame(
+    SR = c("D1", "D2"), DB = "ISI",
+    CR = c("DOI K, 2006, PHYS MED BIOL, V51, PR5, DOI 10.1088/0031-9155/51/13/R02;ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+           "DOI K, 2006, PHYS MED BIOL, V51, PR5"),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WF <- cocMatrix(M, Field = "CR", sep = ";")
+  expect_true("DOI K 2006 PHYS MED BIOL " %in% colnames(WF))
+  expect_false("" %in% colnames(WF))
+  expect_equal(sum(WF[, "DOI K 2006 PHYS MED BIOL "]), 2)
+})
+
+# cocMatrix(Field = "CR") scartava i riferimenti corti PRIMA di normalizzarli,
+# quindi teneva i frammenti dei DOI SICI di Wiley spezzati sul loro ";"
+# ("2-Q, DOI 10.1002/(SICI)..." diventa "2-Q "); e i nomi delle colonne e le
+# celle erano normalizzati in due modi diversi per i riferimenti che iniziano
+# con "(", che finivano in colonne vuote.
+
+test_that("cocMatrix scarta i frammenti SICI e non lascia colonne vuote", {
+  M <- data.frame(
+    SR = c("D1", "D2"), DB = "ISI",
+    CR = c(
+      "SMITH J, 2001, BUS STRATEG ENVIRON, V5, P1, DOI 10.1002/(SICI)1099-0836(199603)5:1<1::AID-BSE38>3.0.CO;2-Q, DOI 10.1002/(SICI)1099-0836(199603)5:13.0.CO;ROSSI A, 2005, SCIENTOMETRICS, V2, P3",
+      "(ANONYMOUS), 2010, REPORT OF THE WORKING GROUP (PART 2), P1;ROSSI A, 2005, SCIENTOMETRICS, V2, P3"
+    ),
+    stringsAsFactors = FALSE
+  )
+  row.names(M) <- M$SR
+  WF <- cocMatrix(M, Field = "CR", sep = ";")
+  expect_false(any(nchar(colnames(WF)) <= 10))
+  expect_true(all(Matrix::colSums(WF) > 0))
+  expect_equal(ncol(WF), 3L)
 })

@@ -90,24 +90,24 @@ biblioNetwork <-
     if (analysis == "coupling") {
       switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep, short = short)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "AU", type = "sparse", n, sep, short = short)
+          WCR <- fieldMatrixOrStop(M, Field = "CR", type = "sparse", n, sep, short = short)
           CRA <- crossprod(WCR, WA)
           NetMatrix <- crossprod(CRA, CRA)
         },
         references = {
-          WCR <- Matrix::t(cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short))
+          WCR <- Matrix::t(fieldMatrixOrStop(M, Field = "CR", type = "sparse", n, sep, short = short))
           NetMatrix <- crossprod(WCR, WCR)
         },
         sources = {
-          WSO <- cocMatrix(M, Field = "SO", type = "sparse", n, sep, short = short)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
+          WSO <- fieldMatrixOrStop(M, Field = "SO", type = "sparse", n, sep, short = short)
+          WCR <- fieldMatrixOrStop(M, Field = "CR", type = "sparse", n, sep, short = short)
           CRSO <- crossprod(WCR, WSO)
           NetMatrix <- crossprod(CRSO, CRSO)
         },
         countries = {
-          WCO <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep, short = short)
-          WCR <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
+          WCO <- fieldMatrixOrStop(M, Field = "AU_CO", type = "sparse", n, sep, short = short)
+          WCR <- fieldMatrixOrStop(M, Field = "CR", type = "sparse", n, sep, short = short)
           CRCO <- crossprod(WCR, WCO)
           NetMatrix <- crossprod(CRCO, CRCO)
         }
@@ -117,25 +117,25 @@ biblioNetwork <-
     if (analysis == "co-occurrences") {
       switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "AU", type = "sparse", n, sep, short = short)
         },
         keywords = {
-          WA <- cocMatrix(M, Field = "ID", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
+          WA <- fieldMatrixOrStop(M, Field = "ID", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         author_keywords = {
-          WA <- cocMatrix(M, Field = "DE", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
+          WA <- fieldMatrixOrStop(M, Field = "DE", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         all_keywords = {
-          WA <- cocMatrix(M, Field = "KW_Merged", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
+          WA <- fieldMatrixOrStop(M, Field = "KW_Merged", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         titles = {
-          WA <- cocMatrix(M, Field = "TI_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
+          WA <- fieldMatrixOrStop(M, Field = "TI_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         abstracts = {
-          WA <- cocMatrix(M, Field = "AB_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
+          WA <- fieldMatrixOrStop(M, Field = "AB_TM", type = "sparse", n, sep, short = short, remove.terms = remove.terms, synonyms = synonyms)
         },
         sources = {
-          WA <- cocMatrix(M, Field = "SO", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "SO", type = "sparse", n, sep, short = short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
@@ -146,13 +146,13 @@ biblioNetwork <-
     if (analysis == "co-citation") {
       switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "CR_AU", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "CR_AU", type = "sparse", n, sep, short = short)
         },
         references = {
-          WA <- cocMatrix(M, Field = "CR", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "CR", type = "sparse", n, sep, short = short)
         },
         sources = {
-          WA <- cocMatrix(M, Field = "CR_SO", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "CR_SO", type = "sparse", n, sep, short = short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
@@ -161,13 +161,13 @@ biblioNetwork <-
     if (analysis == "collaboration") {
       switch(network,
         authors = {
-          WA <- cocMatrix(M, Field = "AU", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "AU", type = "sparse", n, sep, short = short)
         },
         universities = {
-          WA <- cocMatrix(M, Field = "AU_UN", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "AU_UN", type = "sparse", n, sep, short = short)
         },
         countries = {
-          WA <- cocMatrix(M, Field = "AU_CO", type = "sparse", n, sep, short = short)
+          WA <- fieldMatrixOrStop(M, Field = "AU_CO", type = "sparse", n, sep, short = short)
         }
       )
       NetMatrix <- crossprod(WA, WA)
@@ -204,6 +204,30 @@ biblioNetwork <-
     # }
     return(NetMatrix)
   }
+
+# cocMatrix() returns NA, or a message, when a field holds no item, and
+# crossprod() then stopped with "requires numeric/complex matrix/vector
+# arguments". Name the field instead.
+fieldMatrixOrStop <- function(M, Field, ...) {
+  # cocMatrix() builds KW_Merged itself (mergeKeywords()), so it need not be a column yet
+  if (!(Field %in% names(M)) && Field != "KW_Merged") {
+    stop("biblioNetwork(): the field ", Field, " is not a column of M",
+         if (Field %in% c("CR_AU", "CR_SO", "AU_CO", "AU_UN")) paste0("; create it with metaTagExtraction(M, Field = \"", Field, "\")"),
+         call. = FALSE)
+  }
+  W <- cocMatrix(M, Field = Field, ...)
+  if (!inherits(W, "Matrix") && !is.matrix(W)) {
+    why <- if (Field %in% c("CR_AU", "CR_SO") && "CR" %in% names(M) &&
+      mean(isReferenceId(unlist(strsplit(M$CR[!is.na(M$CR)], ";"))), na.rm = TRUE) > 0.9) {
+      paste0(": the cited references of this collection are record identifiers (OpenAlex, Lens), ",
+             "which name no cited author or source")
+    } else {
+      ""
+    }
+    stop("biblioNetwork(): the field ", Field, " holds no item to build the network on", why, call. = FALSE)
+  }
+  W
+}
 
 ### shortlabel
 labelShort <- function(NET, db = "isi") {

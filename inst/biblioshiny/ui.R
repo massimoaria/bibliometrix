@@ -200,7 +200,7 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
         addIdToMenuItem('Sources', 'menu-sources');
         addIdToMenuItem('Authors', 'menu-authors');
         addIdToMenuItem('Documents', 'menu-documents');
-        addIdToMenuItem('Clustering', 'menu-clustering');
+        addIdToMenuItem('Coupling', 'menu-coupling');
         addIdToMenuItem('Conceptual Structure', 'menu-conceptual');
         addIdToMenuItem('Intellectual Structure', 'menu-intellectual');
         addIdToMenuItem('Social Structure', 'menu-social');
@@ -602,18 +602,23 @@ sidebar <- shinydashboardPlus::dashboardSidebar(
       "SYNTHESIS"
     ),
 
-    # Clustering - will get ID 'menu-clustering' via JavaScript (hidden initially)
-    # menuItem(
-    #   "Clustering",
-    #   tabName = "clustering",
-    #   icon = fa_i(name = "spinner"),
-    #   startExpanded = FALSE,
-    #   menuSubItem(
-    #     "Clustering by Coupling",
-    #     tabName = "coupling",
-    #     icon = icon("chevron-right", lib = "glyphicon")
-    #   )
-    # ),
+    # Coupling - will get ID 'menu-coupling' via JavaScript (hidden initially)
+    menuItem(
+      "Coupling",
+      tabName = "couplingMenu",
+      icon = fa_i(name = "link"),
+      startExpanded = FALSE,
+      menuSubItem(
+        "Classic Coupling",
+        tabName = "coupling",
+        icon = icon("chevron-right", lib = "glyphicon")
+      ),
+      menuSubItem(
+        "Multiplex Coupling",
+        tabName = "multiplexCoupling",
+        icon = icon("chevron-right", lib = "glyphicon")
+      )
+    ),
 
     # Conceptual Structure - will get ID 'menu-conceptual' via JavaScript (hidden initially)
     menuItem(
@@ -7375,7 +7380,7 @@ body <- dashboardBody(
         fluidRow(
           column(
             8,
-            h3(strong("Clustering by Coupling"), align = "center")
+            h3(strong("Classic Coupling"), align = "center")
           ),
           div(
             style = style_bttn,
@@ -7635,6 +7640,150 @@ body <- dashboardBody(
       )
     ),
     #### Conceptual Structure ----
+    ##### multiplex coupling ----
+    tabItem(
+      "multiplexCoupling",
+      fluidPage(
+        fluidRow(
+          column(
+            8,
+            h3(strong("Multiplex Coupling"), align = "center")
+          ),
+          div(
+            style = style_bttn,
+            title = t_run,
+            column(
+              1,
+              do.call("actionBttn", c(run_bttn, list(inputId = "applyMPX")))
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = t_report,
+            column(
+              1,
+              do.call("actionBttn", c(report_bttn, list(inputId = "reportMPX")))
+            )
+          ),
+          div(
+            style = style_bttn,
+            title = "Export the plot of the active tab as PNG",
+            column(
+              1,
+              do.call("downloadBttn", c(export_bttn, list(outputId = "MPXplot.save")))
+            )
+          ),
+          div(
+            column(
+              1,
+              dropdown(
+                h4(strong("Options: ")),
+                br(),
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(strong("Documents and layers"), style = "color: #2c3e50; margin-bottom: 10px;"),
+                  fluidRow(
+                    column(6, numericInput("mpxN", "Number of documents", value = 1000, min = 50, step = 50)),
+                    column(6, selectInput("mpxSelectBy", "Most cited by",
+                                          choices = c("Global citations" = "TC", "Local citations" = "LCS")))
+                  ),
+                  fluidRow(
+                    column(6, selectInput("mpxTopicField", "Topics from",
+                                          choices = c("Automatic" = "auto", "Keywords (DE + ID)" = "DE;ID",
+                                                      "Titles and abstracts" = "TI;AB"))),
+                    column(6, numericInput("mpxK", "Neighbours per document (k)", value = 10, min = 3, max = 50))
+                  )
+                ),
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(strong("Schools and themes"), style = "color: #2c3e50; margin-bottom: 10px;"),
+                  fluidRow(
+                    column(6, selectInput("mpxAlgorithm", "Clustering algorithm",
+                                          choices = c("Louvain" = "louvain", "Leiden" = "leiden",
+                                                      "Walktrap" = "walktrap"))),
+                    column(6, numericInput("mpxMinLink", "Documents per link", value = 5, min = 1, step = 1))
+                  ),
+                  fluidRow(
+                    column(6, numericInput("mpxNperm", "Null model permutations", value = 99, min = 19, step = 20))
+                  )
+                ),
+                div(
+                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
+                  h5(strong("Evolution"), style = "color: #2c3e50; margin-bottom: 10px;"),
+                  fluidRow(
+                    column(6, numericInput("mpxPeriods", "Number of periods", value = 3, min = 2, max = 8)),
+                    column(6, numericInput("mpxMinDocs", "Documents per school and period", value = 5, min = 2))
+                  )
+                ),
+                style = "gradient",
+                right = TRUE,
+                animate = TRUE,
+                circle = TRUE,
+                tooltip = tooltipOptions(title = "Options"),
+                color = "primary",
+                icon = icon("sliders"),
+                width = "460px"
+              )
+            ),
+            style = style_opt
+          )
+        ),
+        fluidRow(
+          tabsetPanel(
+            id = "mpxTabs",
+            type = "tabs",
+            tabPanel(
+              "Schools x Themes",
+              value = "matrix",
+              shinycssloaders::withSpinner(plotlyOutput("mpxMatrix", height = "75vh"))
+            ),
+            tabPanel(
+              "Links",
+              value = "links",
+              shinycssloaders::withSpinner(plotlyOutput("mpxLinks", height = "80vh"))
+            ),
+            tabPanel(
+              "Pairs of Schools",
+              value = "plane",
+              shinycssloaders::withSpinner(plotlyOutput("mpxPlane", height = "75vh"))
+            ),
+            tabPanel(
+              "Cohesion",
+              value = "clusters",
+              shinycssloaders::withSpinner(plotlyOutput("mpxClusters", height = "75vh"))
+            ),
+            tabPanel(
+              "Evolution",
+              value = "trajectory",
+              shinycssloaders::withSpinner(plotlyOutput("mpxTrajectory", height = "75vh"))
+            ),
+            tabPanel(
+              "Tables",
+              value = "tables",
+              tabsetPanel(
+                type = "pills",
+                tabPanel("Schools", shinycssloaders::withSpinner(uiOutput("mpxSchoolsTable"))),
+                tabPanel("Themes", shinycssloaders::withSpinner(uiOutput("mpxThemesTable"))),
+                tabPanel("Links", shinycssloaders::withSpinner(uiOutput("mpxLinksTable"))),
+                tabPanel("Summary", verbatimTextOutput("mpxSummary"))
+              )
+            ),
+            tabPanel(
+              "Info & References",
+              value = "info",
+              icon = icon("info-circle"),
+              fluidPage(
+                fluidRow(
+                  column(1),
+                  column(10, br(), HTML(helpContent()$multiplexCoupling)),
+                  column(1)
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
     ##### co-occurrence network ----
     tabItem(
       "coOccurenceNetwork",

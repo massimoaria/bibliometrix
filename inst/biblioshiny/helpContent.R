@@ -2934,6 +2934,71 @@ helpContent <- function() {
     </div>
     </body>"
 
+  multiplexCoupling <-
+    "<body>
+  <div class='container'>
+  <h3>Multiplex Coupling</h3>
+
+  <p>Two documents can be close in two different ways: they <strong>cite the same works</strong> (they share their <em>roots</em>, as in bibliographic coupling) or they <strong>talk about the same things</strong> (they share their <em>topics</em>, their keywords or words). The two kinds of closeness often disagree. <strong>Multiplex Coupling</strong> builds both on the same documents and compares them, to answer questions that a single network cannot: which intellectual traditions have branched out into several themes, and which themes bring together scholars who cite different literatures.</p>
+
+  <br>
+
+  <h4>How It Works</h4>
+  <ol>
+    <li><strong>Two layers.</strong> The <em>roots</em> layer links documents that share cited references (only references cited by at least two documents). The <em>topic</em> layer links documents that share keywords (DE and ID, weighted by tf-idf); when keywords are missing in more than 20% of the documents, titles and abstracts are used instead.</li>
+    <li><strong>Nearest neighbours.</strong> In each layer every document keeps its <em>k</em> most similar documents (cosine similarity).</li>
+    <li><strong>Null model.</strong> Each layer is randomised many times keeping the number of references of every document and the number of citing documents of every reference: a pair is truly close when its similarity is higher than in almost all the randomisations.</li>
+    <li><strong>Schools and themes.</strong> The documents are clustered in each layer: the clusters of the roots layer are the <strong>schools</strong>, those of the topic layer the <strong>themes</strong>. Many clustering runs are combined (consensus clustering), because a single run is not reproducible on the topic layer.</li>
+    <li><strong>Links.</strong> A school and a theme are <strong>linked</strong> when the theme holds more documents of the school than expected if schools and themes were independent (standardized residual above 2) and at least the chosen number of them (5 by default).</li>
+  </ol>
+
+  <p>The same links classify schools and themes:</p>
+  <ul>
+    <li><strong>Branching school</strong>: linked to two or more themes, a tradition that has spread over several subjects;</li>
+    <li><strong>Convergent theme</strong>: linked to two or more schools, a subject where different traditions meet;</li>
+    <li><strong>Consolidated</strong>: a school linked to a single theme, or a theme linked to a single school;</li>
+    <li><strong>Dispersed</strong>: no link, the documents are spread over many clusters.</li>
+  </ul>
+
+  <br>
+
+  <h4>How to Read the Tabs</h4>
+  <ul>
+    <li><strong>Schools x Themes</strong>: rows are schools, columns are themes, each cell the number of documents. Red means more documents than expected, blue fewer. A link is a red cell with at least the chosen number of documents. A row with several links is a branching school; a column with several links is a convergent theme.</li>
+    <li><strong>Links</strong>: the same links drawn as lines, schools on the left and themes on the right, thicker for more documents. It shows at a glance <em>which</em> themes a school branches into and <em>which</em> schools a theme comes from.</li>
+    <li><strong>Pairs of Schools</strong>: every point is a pair of schools, placed by how close the two schools are in roots (horizontal) and in topics (vertical), relative to two random documents (0 = as close as two random documents). Top left are pairs of schools with different roots that write about similar things. Hovering a point shows the themes both schools are linked to.</li>
+    <li><strong>Cohesion</strong>: every school and theme placed by how similar its documents are to each other, in roots and in topics. Read schools by their height (low = shared roots but different topics) and themes by their horizontal position (left = different roots). It describes clusters, not links.</li>
+    <li><strong>Evolution</strong>: the collection is split into periods; the animation shows how close the pairs of schools are in each period. Schools moving up get closer in topics.</li>
+    <li><strong>Tables</strong>: schools, themes and links with all their measures; <em>Summary</em> reports the association between the two layers and the stability of the clusters.</li>
+  </ul>
+
+  <br>
+
+  <h4>Advice</h4>
+  <ul>
+    <li><strong>Stability.</strong> The <em>Summary</em> reports the agreement between single clustering runs (adjusted Rand index, 1 = identical). Themes are usually less stable than schools: read their number as an order of magnitude.</li>
+    <li><strong>Neighbours.</strong> The number of neighbours <em>k</em> changes the clusters; 10 is a reasonable compromise, and trying 5 or 20 shows how robust a result is.</li>
+    <li><strong>Scopus.</strong> Scopus writes the same reference in different ways: run <em>Reference Matching</em> (Data menu) first, or many shared references are missed.</li>
+    <li><strong>Large collections.</strong> With many thousands of documents, raise the number of documents per link.</li>
+  </ul>
+
+  <br>
+
+  <h4>References</h4>
+
+  <p><strong>Kessler, M. M. (1963).</strong> <i>Bibliographic coupling between scientific papers.</i> <strong>American Documentation</strong>, 14(1), 10&ndash;25. <a href='https://doi.org/10.1002/asi.5090140103' target='_blank'>https://doi.org/10.1002/asi.5090140103</a></p>
+
+  <p><strong>Battiston, F., Nicosia, V., &amp; Latora, V. (2014).</strong> <i>Structural measures for multiplex networks.</i> <strong>Physical Review E</strong>, 89(3), 032804. <a href='https://doi.org/10.1103/PhysRevE.89.032804' target='_blank'>https://doi.org/10.1103/PhysRevE.89.032804</a></p>
+
+  <p><strong>Lancichinetti, A., &amp; Fortunato, S. (2012).</strong> <i>Consensus clustering in complex networks.</i> <strong>Scientific Reports</strong>, 2, 336. <a href='https://doi.org/10.1038/srep00336' target='_blank'>https://doi.org/10.1038/srep00336</a></p>
+
+  <p><strong>Strona, G., Nappo, D., Boccacci, F., Fattorini, S., &amp; San-Miguel-Ayanz, J. (2014).</strong> <i>A fast and unbiased procedure to randomize ecological binary matrices with fixed row and column totals.</i> <strong>Nature Communications</strong>, 5, 4114. <a href='https://doi.org/10.1038/ncomms5114' target='_blank'>https://doi.org/10.1038/ncomms5114</a></p>
+
+  <p><strong>Aria, M. &amp; Cuccurullo, C. (2017).</strong> <i>bibliometrix: An R-tool for comprehensive science mapping analysis.</i> <strong>Journal of Informetrics</strong>, 11(4), 959&ndash;975. <a href='https://doi.org/10.1016/j.joi.2017.08.007' target='_blank'>https://doi.org/10.1016/j.joi.2017.08.007</a></p>
+
+    </div>
+    </body>"
+
   authorsDominance <-
     "<body>
   <div class='container'>
@@ -3196,6 +3261,7 @@ helpContent <- function() {
     bradfordLaw = bradfordLaw,
     lotkaLaw = lotkaLaw,
     authorsDominance = authorsDominance,
+    multiplexCoupling = multiplexCoupling,
     rpys = rpys,
     prisma = prisma
   ))

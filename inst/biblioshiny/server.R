@@ -501,7 +501,7 @@ To ensure the functionality of Biblioshiny,
           time = 0.3
         )
         shinyjs::show(
-          "menu-clustering",
+          "menu-coupling",
           anim = TRUE,
           animType = "fade",
           time = 0.3
@@ -11021,6 +11021,193 @@ To ensure the functionality of Biblioshiny,
     }
   })
 
+  ### Multiplex Coupling ----
+  MPXResult <- eventReactive(input$applyMPX, {
+    req(values$M)
+    topic_field <- if (input$mpxTopicField == "auto") "auto" else strsplit(input$mpxTopicField, ";")[[1]]
+    res <- NULL
+    withProgress(message = "Multiplex coupling", value = 0, {
+      incProgress(0.05, detail = "roots and topic layers, null model")
+      mc <- tryCatch(
+        multiplexCoupling(
+          values$M,
+          n = input$mpxN,
+          select.by = input$mpxSelectBy,
+          topic.field = topic_field,
+          k = input$mpxK,
+          n.perm = input$mpxNperm,
+          verbose = FALSE
+        ),
+        error = function(e) {
+          showNotification(paste("Multiplex Coupling:", conditionMessage(e)), type = "error", duration = 10)
+          NULL
+        }
+      )
+      if (!is.null(mc)) {
+        incProgress(0.7, detail = "schools and themes")
+        mc <- multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink)
+        incProgress(0.15, detail = "evolution")
+        # periods of about the same number of documents
+        PY <- mc$nodes$PY[!is.na(mc$nodes$PY)]
+        nper <- max(2, input$mpxPeriods)
+        years <- unique(floor(stats::quantile(PY, probs = seq_len(nper - 1) / nper, names = FALSE)))
+        years <- years[years < max(PY)]
+        ev <- tryCatch(
+          if (length(years)) multiplexEvolution(mc, years = years, min.docs = input$mpxMinDocs) else NULL,
+          error = function(e) NULL
+        )
+        res <- list(mc = mc, ev = ev)
+      }
+    })
+    req(res)
+    values$MPX <- res$mc
+    values$MPXev <- res$ev
+    res
+  })
+
+  mpxPlotly <- function(p) {
+    plotly::config(p, displaylogo = FALSE,
+                   modeBarButtonsToRemove = c("toImage", "sendDataToCloud", "pan2d", "select2d", "lasso2d",
+                                              "toggleSpikelines", "hoverClosestCartesian",
+                                              "hoverCompareCartesian"))
+  }
+
+  output$mpxMatrix <- renderPlotly({
+    mpxPlotly(multiplexPlot(MPXResult()$mc, "matrix", interactive = TRUE))
+  })
+  output$mpxLinks <- renderPlotly({
+    mpxPlotly(multiplexPlot(MPXResult()$mc, "links", interactive = TRUE))
+  })
+  output$mpxPlane <- renderPlotly({
+    mpxPlotly(multiplexPlot(MPXResult()$mc, "plane", interactive = TRUE))
+  })
+  output$mpxClusters <- renderPlotly({
+    mpxPlotly(multiplexPlot(MPXResult()$mc, "clusters", interactive = TRUE))
+  })
+  output$mpxTrajectory <- renderPlotly({
+    ev <- MPXResult()$ev
+    validate(need(!is.null(ev), "Not enough documents per school and period to follow the schools over time: lower the number of periods or of documents per school and period."))
+    p <- tryCatch(multiplexPlot(ev, "trajectory", interactive = TRUE), error = function(e) NULL)
+    validate(need(!is.null(p), "Every pair of schools is stable over the periods."))
+    mpxPlotly(p)
+  })
+
+  mpxTable <- function(df, filename, numeric = NULL) {
+    renderBibliobox(
+      df,
+      nrow = 10,
+      filename = filename,
+      pagelength = TRUE,
+      left = NULL,
+      right = NULL,
+      numeric = numeric,
+      dom = FALSE,
+      size = '100%',
+      filter = "top",
+      columnShort = NULL,
+      columnSmall = NULL,
+      round = 3,
+      title = "",
+      button = TRUE,
+      escape = FALSE,
+      selection = FALSE
+    )
+  }
+
+  mpxSchoolsDF <- function(mc) {
+    s <- mc$clusters$schools
+    data.frame(
+      School = paste0("S", s$cluster), Documents = s$size, Terms = s$terms, References = s$references,
+      Structure = s$structure, `Linked themes` = ifelse(s$themes == "", "",
+                                                        gsub("(\\d+)", "T\\1", s$themes)),
+      `Roots cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
+      check.names = FALSE, stringsAsFactors = FALSE
+    )
+  }
+  mpxThemesDF <- function(mc) {
+    s <- mc$clusters$themes
+    data.frame(
+      Theme = paste0("T", s$cluster), Documents = s$size, Terms = s$terms,
+      Structure = s$structure, `Linked schools` = ifelse(s$schools == "", "",
+                                                         gsub("(\\d+)", "S\\1", s$schools)),
+      `Roots cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
+      check.names = FALSE, stringsAsFactors = FALSE
+    )
+  }
+  mpxLinksDF <- function(mc) {
+    cl <- mc$clusters
+    l <- cl$links
+    data.frame(
+      School = paste0("S", l$school, " ", sub(";.*", "", cl$schools$terms[l$school])),
+      Theme = paste0("T", l$theme, " ", sub(";.*", "", cl$themes$terms[l$theme])),
+      Documents = l$n, `Standardized residual` = l$residual,
+      `Share of the school` = l$share_school, `Share of the theme` = l$share_theme,
+      check.names = FALSE, stringsAsFactors = FALSE
+    )
+  }
+
+  output$mpxSchoolsTable <- renderUI({
+    mpxTable(mpxSchoolsDF(MPXResult()$mc), "Multiplex_Schools", numeric = 7:8)
+  })
+  output$mpxThemesTable <- renderUI({
+    mpxTable(mpxThemesDF(MPXResult()$mc), "Multiplex_Themes", numeric = 6:7)
+  })
+  output$mpxLinksTable <- renderUI({
+    mpxTable(mpxLinksDF(MPXResult()$mc), "Multiplex_Links", numeric = 4:6)
+  })
+  output$mpxSummary <- renderPrint({
+    print(MPXResult()$mc)
+    ev <- MPXResult()$ev
+    if (!is.null(ev)) {
+      cat("\n")
+      print(ev)
+    }
+  })
+
+  # the plot of the active tab; the matrix from the tables and the help
+  mpxExportType <- function() {
+    if (isTRUE(input$mpxTabs %in% c("matrix", "links", "plane", "clusters", "trajectory"))) input$mpxTabs else "matrix"
+  }
+  output$MPXplot.save <- downloadHandler(
+    filename = function() {
+      paste0("MultiplexCoupling-", mpxExportType(), "-", Sys.Date(), ".png")
+    },
+    content <- function(file) {
+      req(values$MPX)
+      tp <- mpxExportType()
+      g <- if (tp == "trajectory") {
+        req(values$MPXev)
+        multiplexPlot(values$MPXev, "trajectory")
+      } else {
+        multiplexPlot(values$MPX, tp)
+      }
+      safe_ggsave(
+        filename = file,
+        plot = g,
+        dpi = values$dpi,
+        height = values$h,
+        width = values$h * values$aspect,
+        bg = "white"
+      )
+    },
+    contentType = "png"
+  )
+
+  observeEvent(input$reportMPX, {
+    if (!is.null(values$MPX)) {
+      popUp(title = NULL, type = "waiting")
+      mc <- values$MPX
+      list_df <- list(mc$params, mpxSchoolsDF(mc), mpxThemesDF(mc), mpxLinksDF(mc))
+      list_plot <- list(multiplexPlot(mc, "matrix"), multiplexPlot(mc, "links"), multiplexPlot(mc, "plane"))
+      wb <- addSheetToReport(list_df, list_plot, sheetname = "MultiplexCoupling", wb = values$wb)
+      values$wb <- wb
+      popUp(title = "Multiplex Coupling", type = "success")
+      values$myChoices <- sheets(values$wb)
+    } else {
+      popUp(type = "error")
+    }
+  })
+
   # CONCEPTUAL STRUCTURE ----
   ### Network approach ----
   #### Co-occurrences network ----
@@ -14508,6 +14695,7 @@ To ensure the functionality of Biblioshiny,
   observe({ .toggleDownloadBtn("TTplot.save", !is.null(values$trendTopics)) })
   # Clustering/Maps
   observe({ .toggleDownloadBtn("CMplot.save", !is.null(values$CM)) })
+  observe({ .toggleDownloadBtn("MPXplot.save", !is.null(values$MPX)) })
   observe({ .toggleDownloadBtn("FAplot.save", !is.null(values$CS)) })
   observe({ .toggleDownloadBtn("TMplot.save", !is.null(values$TM)) })
   observe({ .toggleDownloadBtn("TEplot.save", !is.null(values$nexus)) })

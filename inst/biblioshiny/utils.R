@@ -6349,6 +6349,7 @@ dfLabel <- function() {
     "WordFreqOverTime",
     "TrendTopics",
     "CouplingMap",
+    "MultiplexCoupling",
     "CoWordNet",
     "ThematicMap",
     "ThematicEvolution",
@@ -6399,7 +6400,8 @@ dfLabel <- function() {
     "TreeMap",
     "Words Frequency over Time",
     "Trend Topics",
-    "Clustering by Coupling",
+    "Classic Coupling",
+    "Multiplex Coupling",
     "Co-occurence Network",
     "Thematic Map",
     "Thematic Evolution",
@@ -6908,13 +6910,14 @@ updateMenuVisibility <- function(session, values) {
     )
   }
 
-  # Intellectual Structure - hide entire menu if no CR
+  # Intellectual Structure and Coupling - hide the entire menus if no CR
   if (!CR) {
     js_code <- paste0(
       js_code,
       "
     $('.sidebar-menu .treeview').each(function() {
-      if ($(this).find('> a > span').first().text().trim() === 'Intellectual Structure') {
+      var t = $(this).find('> a > span').first().text().trim();
+      if (t === 'Intellectual Structure' || t === 'Coupling') {
         $(this).hide();
       }
     });
@@ -6925,7 +6928,8 @@ updateMenuVisibility <- function(session, values) {
       js_code,
       "
     $('.sidebar-menu .treeview').each(function() {
-      if ($(this).find('> a > span').first().text().trim() === 'Intellectual Structure') {
+      var t = $(this).find('> a > span').first().text().trim();
+      if (t === 'Intellectual Structure' || t === 'Coupling') {
         $(this).show();
       }
     });
@@ -7000,7 +7004,7 @@ updateMenuVisibility <- function(session, values) {
     out <- c(out, "Most Local Cited References", "References Spectroscopy")
   }
   if (!isTRUE(CR)) {
-    out <- c(out, "Co-citation Network")
+    out <- c(out, "Co-citation Network", "Classic Coupling", "Multiplex Coupling")
   }
   if (!(isTRUE(DB_TC) & isTRUE(CR))) {
     out <- c(out, "Historiograph")

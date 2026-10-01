@@ -80,7 +80,9 @@ bradford <- function(M) {
 
   Z <- rep("Zone 3", nSO)
   Z[seq_len(zone1_end)] <- "Zone 1"
-  if (zone1_end < nSO) {
+  # When the core alone passes 2N/3, zone2_end == zone1_end and Zone 2 is empty;
+  # (zone1_end + 1):zone2_end would count down and overwrite the core (#703)
+  if (zone2_end > zone1_end) {
     Z[(zone1_end + 1):zone2_end] <- "Zone 2"
   }
   df$Zone <- Z
@@ -167,6 +169,8 @@ bradford <- function(M) {
     ),
     stringsAsFactors = FALSE
   )
+  # An empty zone has no width: its label would sit on top of its neighbour's
+  zone_labels <- zone_labels[c(n1, n2, n3) > 0, ]
 
   # Subtitle with fit statistics
   subtitle_text <- paste0(

@@ -236,9 +236,16 @@ test_that("multiplexEvolution follows pairs of roots and classifies their trend"
   expect_true(all(ev$long$A < ev$long$B))
   expect_true(all(ev$trajectories$periods >= 2))
   expect_true(all(ev$trajectories$trend %in%
-                    c("converging", "diverging", "drifting apart", "consolidating", "stable")))
-  cv <- ev$trajectories[ev$trajectories$trend == "converging", ]
+                    c("converging", "diverging", "drifting apart", "consolidating",
+                      "closer in references", "farther in references", "stable")))
+  tr <- ev$trajectories
+  cv <- tr[tr$trend == "converging", ]
   if (nrow(cv)) expect_true(all(cv$slope_T >= 0.1 & cv$slope_R < 0.1))
+  # stable only when neither slope reaches slope.min
+  st <- tr[tr$trend == "stable", ]
+  if (nrow(st)) expect_true(all(abs(st$slope_T) < 0.1 & abs(st$slope_R) < 0.1))
+  cr <- tr[tr$trend %in% c("closer in references", "farther in references"), ]
+  if (nrow(cr)) expect_true(all(abs(cr$slope_T) < 0.1 & abs(cr$slope_R) >= 0.1))
   expect_output(print(ev), "Multiplex evolution")
   expect_error(multiplexEvolution(multiplexCoupling(mk(
     CR = c(refs(1, 2), refs(1, 2), refs(1, 2)), DE = c("AA", "AA", "AA")
@@ -409,4 +416,25 @@ test_that("synonyms are merged before terms are removed in titles too", {
   expect_false("NETWORKS" %in% terms(synonyms = "NETWORK;NETWORKS"))
   expect_false(any(c("NETWORK", "NETWORKS") %in%
                      terms(synonyms = "NETWORK;NETWORKS", remove.terms = "network")))
+})
+
+test_that("the consensus reports its iterations and whether the runs agreed", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  cl <- mcFixture()$clusters
+  expect_s3_class(cl$consensus, "data.frame")
+  expect_equal(cl$consensus$layer, c("roots", "themes"))
+  expect_true(all(cl$consensus$iterations >= 1 & cl$consensus$iterations <= 10))
+  expect_type(cl$consensus$converged, "logical")
+})
+
+test_that("the QAP test of the association uses n.perm permutations", {
+  M <- mk(
+    CR = c(refs(1, 2), refs(1, 2), refs(2, 3), refs(2, 3), refs(3, 4), refs(3, 4)),
+    DE = c("AA;BB", "AA;BB", "BB;CC", "BB;CC", "CC;DD", "CC;DD")
+  )
+  mc <- multiplexCoupling(M, n = NULL, topic.field = "DE", n.perm = 9, verbose = FALSE)
+  # p = (1 + #{|rho_p| >= |rho|}) / (n.perm + 1): a multiple of 1/10
+  p <- mc$info$association$qap_p
+  expect_true(is.na(p) || abs(p * 10 - round(p * 10)) < 1e-9)
 })

@@ -70,7 +70,8 @@ the object \code{mc} with an element \code{clusters}, a list with:
 \code{unclustered} \tab \tab the number of documents in no root and in no theme\cr
 \code{plane}       \tab \tab the pairs of roots, with their references and topic proximity\cr
 \code{NMI}, \code{ARI} \tab \tab agreement between roots and themes\cr
-\code{agreement}, \code{modularity} \tab \tab stability and modularity of the two partitions}
+\code{agreement}, \code{modularity} \tab \tab stability and modularity of the two partitions\cr
+\code{consensus}   \tab \tab for each layer, the iterations of the consensus and whether all the runs agreed (if not after 10 iterations, the first run of the last one is kept)}
 }
 \description{
 It groups the documents of a \code{\link{multiplexCoupling}} into

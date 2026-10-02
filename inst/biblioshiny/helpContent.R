@@ -3103,8 +3103,11 @@ helpContent <- function() {
     <li><strong>converging</strong>: closer in topics, not in references;</li>
     <li><strong>diverging</strong>: farther in topics, not in references;</li>
     <li><strong>consolidating</strong>: closer in both;</li>
-    <li><strong>drifting apart</strong>: farther in both.</li>
+    <li><strong>drifting apart</strong>: farther in both;</li>
+    <li><strong>closer in references</strong>: closer in references, with topics that do not change;</li>
+    <li><strong>farther in references</strong>: farther in references, with topics that do not change.</li>
   </ul>
+  <p>A pair whose proximities change in neither layer is <strong>stable</strong>.</p>
   <p>A path going up is a pair of roots getting closer in topics; a path going right, closer in references. An arrow crossing into another area is a change of relation: for example, from <em>close in neither</em> to <em>close in topics only</em> is two roots with different references that start to work on the same themes. The exported PNG draws the same paths, with the name of each pair at its arrow.</p>
   <p>The <strong>Animation</strong> sub-tab follows one pair at a time, chosen among those that change area (numbered as in <em>Trajectories</em>, with the number of periods in which the pair is followed): press Play, and the pair moves slowly from period to period on the same four areas, leaving its path behind it; the dotted line is the whole route. Drag the slider to stop at a period.</p>
   <p>The <strong>Pairs</strong> sub-tab lists every pair of roots followed in at least two periods, with the same numbers: its periods, the areas it is in from the first to the last (<em>Areas</em>), whether it changes area, its trend and the slopes of its references and topic proximity per period. The stable pairs, and those that move within one area, are only here.</p>

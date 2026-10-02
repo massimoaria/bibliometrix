@@ -87,7 +87,8 @@ association between the layers and the percentiles. Default is 100000.}
 
 \item{n.perm}{is an integer. The number of randomisations of the null model
 (curveball algorithm, which keeps the number of references of every
-document and the number of citing documents of every reference). Default
+document and the number of citing documents of every reference), and of
+the permutation (QAP) test of the association between the layers. Default
 is 99.}
 
 \item{seed}{is an integer. The seed of the randomisations. The random number

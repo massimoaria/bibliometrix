@@ -78,7 +78,8 @@
 #' \code{unclustered} \tab \tab the number of documents in no root and in no theme\cr
 #' \code{plane}       \tab \tab the pairs of roots, with their references and topic proximity\cr
 #' \code{NMI}, \code{ARI} \tab \tab agreement between roots and themes\cr
-#' \code{agreement}, \code{modularity} \tab \tab stability and modularity of the two partitions}
+#' \code{agreement}, \code{modularity} \tab \tab stability and modularity of the two partitions\cr
+#' \code{consensus}   \tab \tab for each layer, the iterations of the consensus and whether all the runs agreed (if not after 10 iterations, the first run of the last one is kept)}
 #'
 #' @references
 #' Lancichinetti, A., & Fortunato, S. (2012). Consensus clustering in complex
@@ -183,6 +184,10 @@ multiplexClusters <- function(mc,
     ARI = igraph::compare(mR[both], mT[both], method = "adjusted.rand"),
     unclustered = c(roots = sum(is.na(mR)), themes = sum(is.na(mT))),
     agreement = c(roots = cR$agreement, themes = cT$agreement),
+    consensus = data.frame(
+      layer = c("roots", "themes"), iterations = c(cR$iterations, cT$iterations),
+      converged = c(cR$converged, cT$converged), stringsAsFactors = FALSE
+    ),
     openalex = attr(roots_lab, "openalex"),
     modularity = c(roots = cR$modularity, themes = cT$modularity),
     params = data.frame(
@@ -218,6 +223,11 @@ printMultiplexClusters <- function(cl) {
   }
   cat(sprintf("Agreement between single runs (ARI): roots %.2f, themes %.2f\n",
               cl$agreement[["roots"]], cl$agreement[["themes"]]))
+  if (!is.null(cl$consensus) && !all(cl$consensus$converged)) {
+    nc <- cl$consensus[!cl$consensus$converged, ]
+    cat(sprintf("Consensus without unanimity after %d iterations (%s): the first run of the last iteration is kept\n",
+                nc$iterations[1], paste(nc$layer, collapse = ", ")))
+  }
 }
 
 ## Internal helpers ----
@@ -276,25 +286,34 @@ mpClusterLayer <- function(g, algorithm = "louvain", resolution = 1, seed = 1234
   if (algorithm == "walktrap") {
     memb <- run(g, seed)
     agreement <- 1
+    iterations <- 1L
+    converged <- TRUE
   } else {
     seeds <- seed + seq_len(n.runs) - 1
     h <- g
     agreement <- NA_real_
+    converged <- FALSE
     for (iter in seq_len(max.iter)) {
       runs <- lapply(seeds, run, h = h)
       if (iter == 1) agreement <- mpMeanARI(runs)
       e <- igraph::as_edgelist(h, names = FALSE)
       together <- Reduce(`+`, lapply(runs, function(m) m[e[, 1]] == m[e[, 2]])) / length(runs)
-      if (all(together %in% c(0, 1))) break
+      if (all(together %in% c(0, 1))) {
+        converged <- TRUE
+        break
+      }
       keep <- together >= 0.5
       h <- igraph::subgraph_from_edges(h, which(keep), delete.vertices = FALSE)
       igraph::E(h)$weight <- together[keep]
     }
+    # without unanimity after max.iter iterations, the first run of the last
+    # one; the iterations and whether the runs agreed are reported
+    iterations <- iter
     memb <- runs[[1]]
   }
   # clusters numbered by decreasing size
   relabel <- match(memb, as.integer(names(sort(table(memb), decreasing = TRUE))))
-  list(membership = relabel, agreement = agreement,
+  list(membership = relabel, agreement = agreement, iterations = iterations, converged = converged,
        modularity = igraph::modularity(g, relabel, weights = igraph::E(g)$weight))
 }
 

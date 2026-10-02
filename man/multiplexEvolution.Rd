@@ -51,6 +51,8 @@ of every pair of roots seen in at least two periods:
 \code{diverging}      \tab \tab topics farther, references not\cr
 \code{consolidating}  \tab \tab both closer\cr
 \code{drifting apart} \tab \tab both farther\cr
+\code{closer in references}  \tab \tab references closer, topics stable\cr
+\code{farther in references} \tab \tab references farther, topics stable\cr
 \code{stable}         \tab \tab neither slope beyond \code{slope.min}}
 }
 \examples{

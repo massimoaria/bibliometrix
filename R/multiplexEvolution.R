@@ -14,6 +14,8 @@
 #' \code{diverging}      \tab \tab topics farther, references not\cr
 #' \code{consolidating}  \tab \tab both closer\cr
 #' \code{drifting apart} \tab \tab both farther\cr
+#' \code{closer in references}  \tab \tab references closer, topics stable\cr
+#' \code{farther in references} \tab \tab references farther, topics stable\cr
 #' \code{stable}         \tab \tab neither slope beyond \code{slope.min}}
 #'
 #' @param mc is an object of class \code{"biblioMultiplex"} with clusters,
@@ -101,7 +103,10 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
     traj$slope_T >= slope.min & traj$slope_R < slope.min, "converging",
     ifelse(traj$slope_T <= -slope.min & traj$slope_R > -slope.min, "diverging",
       ifelse(traj$slope_T <= -slope.min & traj$slope_R <= -slope.min, "drifting apart",
-        ifelse(traj$slope_T >= slope.min & traj$slope_R >= slope.min, "consolidating", "stable")))
+        ifelse(traj$slope_T >= slope.min & traj$slope_R >= slope.min, "consolidating",
+          # topics stable: the trend, if any, is in the references only
+          ifelse(traj$slope_R >= slope.min, "closer in references",
+            ifelse(traj$slope_R <= -slope.min, "farther in references", "stable")))))
   )
   traj$label_A <- cl$roots$terms[traj$A]
   traj$label_B <- cl$roots$terms[traj$B]

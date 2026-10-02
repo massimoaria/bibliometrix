@@ -438,7 +438,8 @@ mpClustersPlot <- function(mc, interactive = FALSE, floor = 1 / 16) {
 }
 
 MP_TREND_COLORS <- c(converging = "#7570B3", diverging = "#D95F02", `drifting apart` = "#666666",
-                     consolidating = "#1B9E77", stable = "#AAAAAA")
+                     consolidating = "#1B9E77", `closer in references` = "#E7298A",
+                     `farther in references` = "#A6761D", stable = "#AAAAAA")
 
 #' The pairs of roots of a multiplex evolution, numbered
 #'

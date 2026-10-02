@@ -70,7 +70,8 @@
 #'   association between the layers and the percentiles. Default is 100000.
 #' @param n.perm is an integer. The number of randomisations of the null model
 #'   (curveball algorithm, which keeps the number of references of every
-#'   document and the number of citing documents of every reference). Default
+#'   document and the number of citing documents of every reference), and of
+#'   the permutation (QAP) test of the association between the layers. Default
 #'   is 99.
 #' @param seed is an integer. The seed of the randomisations. The random number
 #'   state of the session is restored on exit.
@@ -246,7 +247,7 @@ multiplexCoupling <- function(M,
 
   ## Association between the layers, over all pairs ----
   say("Association between the layers on a sample of ", format(n.sample, big.mark = ","), " pairs")
-  assoc <- mpLayerAssociation(XR, XT, similarity, n.sample = n.sample, seed = seed)
+  assoc <- mpLayerAssociation(XR, XT, similarity, n.sample = n.sample, n.perm = n.perm, seed = seed)
 
   ## Typology of the pairs ----
   pairs$p_R <- mpPercentile(pairs$s_R, assoc$sample$s_R)

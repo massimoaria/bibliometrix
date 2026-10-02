@@ -1,7 +1,8 @@
 utils::globalVariables(c(
   "themes_lab", "roots_lab", "res", "n_lab", "text", "x", "y", "xend", "yend", "size",
   "structure", "label", "quadrant", "show", "x_first", "y_first", "x_last", "y_last",
-  "trend", "pair", "id", "group", "code", "cohesion_R", "cohesion_T", "layer", "relation", "short"
+  "trend", "pair", "id", "group", "code", "cohesion_R", "cohesion_T", "layer", "relation", "short",
+  "persists"
 ))
 
 #' Plot a multiplex coupling
@@ -123,6 +124,12 @@ mpMatrixPlot <- function(mc, interactive = FALSE) {
   if (interactive) plotly::ggplotly(g, tooltip = "text") else g
 }
 
+# the persistence of a link across k (multiplexRobustness()), for the tooltips
+mpPersistenceText <- function(p) {
+  if (is.null(p)) return("")
+  sprintf("\nPersists at the other k: %.0f%%", 100 * p)
+}
+
 # roots on the left, themes on the right, one line per link (width = documents)
 mpLinksPlot <- function(mc, interactive = FALSE) {
   if (interactive) return(mpLinksSankey(mc))
@@ -157,14 +164,22 @@ mpLinksPlot <- function(mc, interactive = FALSE) {
                               Tm$n_roots), stringsAsFactors = FALSE)
   )
   E <- data.frame(x = 0, y = S$y[lk$root], xend = 1, yend = Tm$y[match(lk$theme, Tm$cluster)], n = lk$n,
-                  text = sprintf("R%d -> T%d: %d documents (%.0f%% of the root, %.0f%% of the theme), residual %.1f",
-                                 lk$root, lk$theme, lk$n, 100 * lk$share_root, 100 * lk$share_theme, lk$residual))
+                  text = sprintf("R%d -> T%d: %d documents (%.0f%% of the root, %.0f%% of the theme), residual %.1f%s",
+                                 lk$root, lk$theme, lk$n, 100 * lk$share_root, 100 * lk$share_theme, lk$residual,
+                                 mpPersistenceText(lk$persistence)))
+  # with multiplexRobustness(), the links that do not persist at every k are dashed
+  robust <- !is.null(lk$persistence)
+  E$persists <- if (robust) ifelse(lk$persistence == 1, "at every k", "not at every k") else "at every k"
   min.link <- cl$params$values[cl$params$params == "min.link"]
   g <- suppressWarnings(
     ggplot2::ggplot() +
       ggplot2::geom_segment(data = E, ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                                                   linewidth = n, text = text),
+                                                   linewidth = n, linetype = persists, text = text),
                             colour = "grey55", alpha = 0.55, lineend = "round") +
+      ggplot2::scale_linetype_manual(values = c("at every k" = "solid", "not at every k" = "22"),
+                                     name = if (robust) paste0("link persists (k = ",
+                                                               paste(cl$robustness$k, collapse = ", "), ")") else NULL,
+                                     guide = if (robust) "legend" else "none") +
       ggplot2::geom_point(data = N, ggplot2::aes(x, y, size = size, colour = structure, text = text)) +
       ggplot2::geom_text(data = N[N$x == 0, ], ggplot2::aes(x - 0.04, y, label = label), hjust = 1, size = 3.3) +
       ggplot2::geom_text(data = N[N$x == 1, ], ggplot2::aes(x + 0.04, y, label = label), hjust = 0, size = 3.3) +
@@ -178,7 +193,7 @@ mpLinksPlot <- function(mc, interactive = FALSE) {
                     subtitle = sprintf("one line per link: more documents than expected (residual > 2), at least %s of them",
                                        min.link)) +
       ggplot2::theme_void() +
-      ggplot2::theme(legend.position = "bottom")
+      ggplot2::theme(legend.position = "bottom", legend.box = "vertical")
   )
   mpTheme(g)
 }
@@ -696,10 +711,13 @@ mpLinksSankey <- function(mc) {
   src <- match(lk$root, S$cluster) - 1
   tgt <- nrow(S) + match(lk$theme, Tm$cluster) - 1
   link_text <- sprintf(
-    "<b>%s</b> &#8594; <b>%s</b><br><br>Documents: %d<br>Share of the root: %.0f%%<br>Share of the theme: %.0f%%<br>Standardized residual: %.1f",
+    "<b>%s</b> &#8594; <b>%s</b><br><br>Documents: %d<br>Share of the root: %.0f%%<br>Share of the theme: %.0f%%<br>Standardized residual: %.1f%s",
     mpRootLabels(cl)[lk$root], mpThemeLabels(cl)[lk$theme], lk$n,
-    100 * lk$share_root, 100 * lk$share_theme, lk$residual
+    100 * lk$share_root, 100 * lk$share_theme, lk$residual,
+    gsub("\n", "<br>", mpPersistenceText(lk$persistence), fixed = TRUE)
   )
+  # with multiplexRobustness(), the links that do not persist at every k are paler
+  link_alpha <- if (is.null(lk$persistence)) rep(0.45, nrow(lk)) else ifelse(lk$persistence == 1, 0.55, 0.15)
   p <- plotly::plot_ly(
     type = "sankey",
     arrangement = "snap",
@@ -717,7 +735,7 @@ mpLinksSankey <- function(mc) {
       source = src,
       target = tgt,
       value = lk$n,
-      color = vapply(root_cols[match(lk$root, S$cluster)], grDevices::adjustcolor, "", alpha.f = 0.45,
+      color = mapply(grDevices::adjustcolor, root_cols[match(lk$root, S$cluster)], alpha.f = link_alpha,
                      USE.NAMES = FALSE),
       customdata = link_text,
       hovertemplate = "%{customdata}<extra></extra>"

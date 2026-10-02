@@ -149,35 +149,18 @@ multiplexClusters <- function(mc,
   roots$terms <- roots_lab$terms
   roots$label_source <- roots_lab$label_source
 
-  # one set of root-theme links, read by row for the roots and by column
-  # for the themes: a cell over-represented (residual > res.crit) with at least
-  # min.link documents
-  tab <- table(roots = mR, themes = mT)
-  ctab <- unclass(tab)
-  res <- mpStandardizedResiduals(ctab)
-  L <- res > res.crit & ctab >= min.link
-  by_root <- lapply(seq_len(nrow(L)), function(k) which(L[k, ]))
-  by_theme <- lapply(seq_len(ncol(L)), function(k) which(L[, k]))
-  lk <- which(L, arr.ind = TRUE)
-  links <- data.frame(
-    root = unname(lk[, 1]), theme = unname(lk[, 2]), n = ctab[lk], residual = res[lk],
-    share_root = (ctab / rowSums(ctab))[lk], share_theme = t(t(ctab) / colSums(ctab))[lk]
-  )
-  links <- links[order(links$root, -links$n), ]
-  rownames(links) <- NULL
-  roots$themes <- vapply(by_root, paste, "", collapse = ",")
-  roots$n_themes <- lengths(by_root)
-  roots$structure <- ifelse(lengths(by_root) >= 2, "branching",
-                              ifelse(lengths(by_root) == 1, "consolidation", "dispersed"))
-  themes$roots <- vapply(by_theme, paste, "", collapse = ",")
-  themes$n_roots <- lengths(by_theme)
-  themes$structure <- ifelse(lengths(by_theme) >= 2, "convergence",
-                             ifelse(lengths(by_theme) == 1, "consolidation", "dispersed"))
+  lt <- mpLinkTable(mR, mT, res.crit, min.link)
+  roots$themes <- vapply(lt$by_root, paste, "", collapse = ",")
+  roots$n_themes <- lengths(lt$by_root)
+  roots$structure <- lt$structure_roots
+  themes$roots <- vapply(lt$by_theme, paste, "", collapse = ",")
+  themes$n_roots <- lengths(lt$by_theme)
+  themes$structure <- lt$structure_themes
 
   both <- !is.na(mR) & !is.na(mT)
   mc$clusters <- list(
-    roots = roots, themes = themes, links = links,
-    contingency = tab, residuals = res,
+    roots = roots, themes = themes, links = lt$links,
+    contingency = lt$contingency, residuals = lt$residuals,
     membership = data.frame(node = mc$nodes$node, root = mR, theme = mT, stringsAsFactors = FALSE),
     plane = mpClusterPlane(UR, UT, mR, roots),
     NMI = igraph::compare(mR[both], mT[both], method = "nmi"),
@@ -228,9 +211,36 @@ printMultiplexClusters <- function(cl) {
     cat(sprintf("Consensus without unanimity after %d iterations (%s): the first run of the last iteration is kept\n",
                 nc$iterations[1], paste(nc$layer, collapse = ", ")))
   }
+  printMultiplexRobustness(cl)
 }
 
 ## Internal helpers ----
+
+# One set of root-theme links, read by row for the roots and by column for the
+# themes: a cell over-represented (residual > res.crit) with at least min.link
+# documents. Documents in no root or in no theme (NA) are not counted.
+mpLinkTable <- function(mR, mT, res.crit = 2, min.link = 5) {
+  tab <- table(roots = mR, themes = mT)
+  ctab <- unclass(tab)
+  res <- mpStandardizedResiduals(ctab)
+  L <- res > res.crit & ctab >= min.link
+  by_root <- lapply(seq_len(nrow(L)), function(k) which(L[k, ]))
+  by_theme <- lapply(seq_len(ncol(L)), function(k) which(L[, k]))
+  lk <- which(L, arr.ind = TRUE)
+  links <- data.frame(
+    root = unname(lk[, 1]), theme = unname(lk[, 2]), n = ctab[lk], residual = res[lk],
+    share_root = (ctab / rowSums(ctab))[lk], share_theme = t(t(ctab) / colSums(ctab))[lk]
+  )
+  links <- links[order(links$root, -links$n), ]
+  rownames(links) <- NULL
+  list(
+    contingency = tab, residuals = res, links = links, by_root = by_root, by_theme = by_theme,
+    structure_roots = ifelse(lengths(by_root) >= 2, "branching",
+                             ifelse(lengths(by_root) == 1, "consolidation", "dispersed")),
+    structure_themes = ifelse(lengths(by_theme) >= 2, "convergence",
+                              ifelse(lengths(by_theme) == 1, "consolidation", "dispersed"))
+  )
+}
 
 # rows of unit length, so that dot products are cosines
 mpUnitRows <- function(X) {

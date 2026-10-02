@@ -11300,6 +11300,12 @@ To ensure the functionality of Biblioshiny,
       s <- values$MPXsyn.terms
       ifelse(nzchar(s$synonyms), paste0(s$term, ";", s$synonyms), s$term)
     }
+    # other values of k for the robustness of roots, themes and links
+    robust_k <- if (identical(input$mpxRobust, "Y")) {
+      v <- suppressWarnings(as.numeric(strsplit(input$mpxRobustK, "[,; ]+")[[1]]))
+      v <- sort(unique(round(v[!is.na(v) & v >= 1 & v != input$mpxK])))
+      if (length(v)) v
+    }
     # the same data and options give the result again without computing it;
     # whether OpenAlex is configured is part of the key, as it changes the
     # names of the roots
@@ -11307,7 +11313,7 @@ To ensure the functionality of Biblioshiny,
       fp = data_fingerprint(values$M), n = input$mpxN, select.by = input$mpxSelectBy,
       topic = input$mpxTopicField, k = input$mpxK, n.perm = input$mpxNperm,
       algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, min.size = input$mpxMinSize,
-      remove.terms = remove.terms, synonyms = synonyms,
+      remove.terms = remove.terms, synonyms = synonyms, robust = robust_k,
       openalex = nzchar(Sys.getenv("openalexR.apikey")) && nzchar(Sys.getenv("openalexR.mailto"))
     )
     if (identical(cache_key, values$cache_MPX_key) && !is.null(values$cache_MPX_result)) {
@@ -11345,6 +11351,16 @@ To ensure the functionality of Biblioshiny,
           error = function(e) {
             showNotification(paste("Multiplex Coupling:", conditionMessage(e)), type = "error", duration = 10)
             NULL
+          }
+        )
+      }
+      if (!is.null(mc) && length(robust_k)) {
+        incProgress(0.05, detail = "robustness to k")
+        mc <- tryCatch(
+          multiplexRobustness(mc, k = robust_k, verbose = FALSE),
+          error = function(e) {
+            showNotification(paste("Multiplex Coupling, robustness:", conditionMessage(e)), type = "warning", duration = 10)
+            mc
           }
         )
       }
@@ -11457,13 +11473,17 @@ To ensure the functionality of Biblioshiny,
   mpxLinksDF <- function(mc) {
     cl <- mc$clusters
     l <- cl$links
-    data.frame(
+    d <- data.frame(
       Root = paste0("R", l$root, " ", sub(";.*", "", cl$roots$terms[l$root])),
       Theme = paste0("T", l$theme, " ", sub(";.*", "", cl$themes$terms[l$theme])),
       Documents = l$n, `Standardized residual` = l$residual,
       `Share of the root` = l$share_root, `Share of the theme` = l$share_theme,
       check.names = FALSE, stringsAsFactors = FALSE
     )
+    if (!is.null(l$persistence)) {
+      d$`Persists at the other k` <- l$persistence
+    }
+    d
   }
 
   # every pair of roots followed in two periods or more, with the areas it
@@ -11488,10 +11508,18 @@ To ensure the functionality of Biblioshiny,
     mpxTable(mpxThemesDF(MPXResult()$mc), "Multiplex_Themes", numeric = 6:7)
   })
   output$mpxLinksTable <- renderUI({
-    mpxTable(mpxLinksDF(MPXResult()$mc), "Multiplex_Links", numeric = 4:6)
+    d <- mpxLinksDF(MPXResult()$mc)
+    mpxTable(d, "Multiplex_Links", numeric = 4:ncol(d))
   })
   output$mpxSummary <- renderPrint({
     print(MPXResult()$mc)
+    rb <- MPXResult()$mc$clusters$robustness
+    if (!is.null(rb)) {
+      cat("\nRoots, themes and links at each k (ARI with the roots and themes of the analysis):\n")
+      s <- rb$summary
+      s[c("ARI_roots", "ARI_themes", "links_persisting")] <- round(s[c("ARI_roots", "ARI_themes", "links_persisting")], 2)
+      print(s, row.names = FALSE)
+    }
     ev <- MPXResult()$ev
     if (!is.null(ev)) {
       cat("\n")

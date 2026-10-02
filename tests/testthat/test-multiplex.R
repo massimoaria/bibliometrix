@@ -438,3 +438,36 @@ test_that("the QAP test of the association uses n.perm permutations", {
   p <- mc$info$association$qap_p
   expect_true(is.na(p) || abs(p * 10 - round(p * 10)) < 1e-9)
 })
+
+test_that("multiplexRobustness reports the persistence of links, roots and themes across k", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  mc <- mcFixture()
+  rb <- multiplexRobustness(mc, k = c(5, 10, 20), verbose = FALSE)
+  cl <- rb$clusters
+  # the k of mc is left out
+  expect_equal(cl$robustness$k, c(5, 20))
+  expect_equal(nrow(cl$robustness$summary), 3)
+  expect_equal(dim(cl$robustness$links), c(nrow(cl$links), 2))
+  for (x in list(cl$links, cl$roots, cl$themes)) {
+    expect_true(all(x$persistence >= 0 & x$persistence <= 1))
+  }
+  # nothing else changes
+  expect_equal(cl$membership, mc$clusters$membership)
+  expect_equal(cl$links[, names(mc$clusters$links)], mc$clusters$links)
+  expect_error(multiplexRobustness(mc, k = 10), "no value of k")
+  expect_output(print(rb), "Robustness to k")
+  expect_s3_class(multiplexPlot(rb, "links"), "ggplot")
+})
+
+test_that("the roots and themes of multiplexRobustness are those of a new analysis with that k", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  data(management, package = "bibliometrixData")
+  mc20 <- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19, k = 20, verbose = FALSE),
+                            verbose = FALSE)
+  ER <- mpKnn(mcFixture()$X_R, "cosine", 20)
+  gR <- mpEdgeGraph(mcFixture()$nodes$node, ER, ER$s)
+  mR <- mpDropSmall(mpClusterLayer(gR, "louvain", 1, 1234L, 20L)$membership, 5)
+  expect_identical(mR, mc20$clusters$membership$root)
+})

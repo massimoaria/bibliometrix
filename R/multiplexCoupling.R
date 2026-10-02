@@ -281,13 +281,7 @@ multiplexCoupling <- function(M,
   nodes$LA <- mpRowAlignment(XR, XT, similarity)
 
   ## Graphs ----
-  toGraph <- function(E, w) {
-    g <- igraph::make_empty_graph(nrow(nodes), directed = FALSE)
-    igraph::V(g)$name <- nodes$node
-    g <- igraph::add_edges(g, as.vector(t(as.matrix(E[, c("i", "j")]))))
-    igraph::E(g)$weight <- w
-    g
-  }
+  toGraph <- function(E, w) mpEdgeGraph(nodes$node, E, w)
   gU <- toGraph(pairs, pairs$s_R + pairs$s_T)
   igraph::E(gU)$s_R <- pairs$s_R
   igraph::E(gU)$s_T <- pairs$s_T
@@ -519,6 +513,15 @@ mpKnn <- function(X, type = "cosine", k = 10) {
   E <- data.frame(i = pmin(E$from, E$to), j = pmax(E$from, E$to), s = E$s)
   E <- E[!duplicated(E[, c("i", "j")]), ]
   E[order(E$i, E$j), , drop = FALSE]
+}
+
+# undirected graph on all the documents, with the edges (i, j) of E weighted by w
+mpEdgeGraph <- function(names, E, w) {
+  g <- igraph::make_empty_graph(length(names), directed = FALSE)
+  igraph::V(g)$name <- names
+  g <- igraph::add_edges(g, as.vector(t(as.matrix(E[, c("i", "j")]))))
+  igraph::E(g)$weight <- w
+  g
 }
 
 # exact similarity of a layer on a list of pairs (i, j)

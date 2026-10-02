@@ -7905,6 +7905,19 @@ body <- dashboardBody(
                   fluidRow(
                     column(6, numericInput("mpxNperm", "Null model permutations", value = 99, min = 19, step = 20)),
                     column(6, numericInput("mpxMinSize", "Documents per cluster", value = 5, min = 1, step = 1))
+                  ),
+                  fluidRow(
+                    column(6, selectInput("mpxRobust", "Robustness to k",
+                                          choices = c("Yes" = "Y", "No" = "N"), selected = "N")),
+                    column(6, conditionalPanel(
+                      condition = "input.mpxRobust == 'Y'",
+                      textInput("mpxRobustK", "Other values of k", value = "5, 20")
+                    ))
+                  ),
+                  conditionalPanel(
+                    condition = "input.mpxRobust == 'Y'",
+                    helpText("Roots and themes are found again at the other values of k, from the same layers: a few seconds more. Links that do not persist at every k are dashed (paler in the interactive plot).",
+                             style = "color: #666;")
                   )
                 ),
 

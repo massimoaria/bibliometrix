@@ -1,30 +1,30 @@
-#' Schools and themes of a multiplex coupling
+#' Roots and themes of a multiplex coupling
 #'
 #' It groups the documents of a \code{\link{multiplexCoupling}} into
-#' \emph{schools} (clusters of the roots layer: documents that cite the same
+#' \emph{roots} (clusters of the references layer: documents that cite the same
 #' literature) and \emph{themes} (clusters of the topic layer: documents about
 #' the same subject), and links them.
 #'
-#' A school is an intellectual root, so it is named after the titles of its
-#' strong references (the references frequent among its documents and
-#' concentrated in it), not after the keywords of its documents, which name the
-#' themes. The titles come from the collection, when a reference is one of its
+#' A root is the intellectual base its documents share, so it is named after
+#' the titles of its strong references (the references frequent among its
+#' documents and concentrated in it), not after the keywords of its documents,
+#' which name the themes. The titles come from the collection, when a reference is one of its
 #' documents, from the reference string (Scopus writes the cited title) and from
 #' OpenAlex, by DOI or OpenAlex id. OpenAlex is queried only when the user is
 #' online and has configured both an OpenAlex API key and an email; the titles
 #' are kept in a cache for the R session, so that a repeated analysis downloads
-#' nothing. A school with fewer than five reference titles is named after its cited
-#' sources and its most representative reference. \code{schools$label_source}
-#' tells which, and \code{schools$doc_terms} keeps the keywords of its documents.
+#' nothing. A root with fewer than five reference titles is named after its cited
+#' sources and its most representative reference. \code{roots$label_source}
+#' tells which, and \code{roots$doc_terms} keeps the keywords of its documents.
 #'
-#' A school and a theme are \emph{linked} when the theme holds more documents of
-#' the school than expected if schools and themes were independent
+#' A root and a theme are \emph{linked} when the theme holds more documents of
+#' the root than expected if roots and themes were independent
 #' (standardized residual above \code{res.crit}) and at least \code{min.link}
 #' of them. The same links classify both sides:
 #' \tabular{lll}{
-#' \code{branching} school   \tab \tab linked to two or more themes\cr
-#' \code{consolidation}      \tab \tab a school linked to one theme, or a theme linked to one school\cr
-#' \code{convergence} theme  \tab \tab linked to two or more schools\cr
+#' \code{branching} root     \tab \tab linked to two or more themes\cr
+#' \code{consolidation}      \tab \tab a root linked to one theme, or a theme linked to one root\cr
+#' \code{convergence} theme  \tab \tab linked to two or more roots\cr
 #' \code{dispersed}          \tab \tab no link}
 #'
 #' Each layer is clustered with consensus clustering (Lancichinetti & Fortunato,
@@ -32,6 +32,14 @@
 #' is not reproducible on the topic layer. \code{agreement} reports the mean
 #' adjusted Rand index between the single runs: the lower it is, the weaker the
 #' structure of the layer and the more cautiously its clusters should be read.
+#'
+#' A root or a theme of fewer than \code{min.size} documents is left out:
+#' its documents share almost nothing with the rest of the collection, and a
+#' cluster of two or three of them would be a root or a theme only in name.
+#' Those documents are in no root (or in no theme): their membership is
+#' \code{NA}, they are not counted in the roots x themes table, and
+#' \code{unclustered} reports how many they are. They still count in the
+#' baseline of the lifts (two random documents of the collection).
 #'
 #' @param mc is an object of class \code{"biblioMultiplex"} obtained by
 #'   \code{\link{multiplexCoupling}}.
@@ -42,31 +50,34 @@
 #'   Default is 1.
 #' @param n.runs is an integer. The number of runs combined by the consensus.
 #'   Default is 20.
-#' @param res.crit is a number. The standardized residual above which a school
+#' @param res.crit is a number. The standardized residual above which a root
 #'   and a theme can be linked. Default is 2.
 #' @param min.link is an integer. The minimum number of documents of a link.
 #'   Default is 5; on collections much larger than 2,000 documents a higher
 #'   value may be preferable.
+#' @param min.size is an integer. The minimum number of documents of a root
+#'   or a theme. Default is 5.
 #' @param n.labels is an integer. The number of terms and references that label
 #'   a cluster. Default is 3.
-#' @param n.refs is an integer. The number of strong references of a school whose
+#' @param n.refs is an integer. The number of strong references of a root whose
 #'   titles name it. Default is 30.
 #' @param email,api.key are characters. The email and the API key for OpenAlex. When
 #'   \code{NULL} (default) they are read from the options and environment variables
 #'   \code{openalexR.mailto} and \code{openalexR.apikey}, or from the files saved by
 #'   Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answers.
-#' @param verbose is logical. If TRUE, messages on how the schools are named.
+#' @param verbose is logical. If TRUE, messages on how the roots are named.
 #' @param seed is an integer. The seed of the runs. The random number state of
 #'   the session is restored on exit.
 #'
 #' @return the object \code{mc} with an element \code{clusters}, a list with:
 #' \tabular{lll}{
-#' \code{schools}, \code{themes} \tab \tab one row per cluster: size, labels, cohesion in the two layers, linked clusters, structure\cr
-#' \code{links}       \tab \tab one row per school-theme link: documents, residual, share of the school and of the theme\cr
-#' \code{contingency}, \code{residuals} \tab \tab the schools x themes table and its standardized residuals\cr
-#' \code{membership}  \tab \tab school and theme of every document\cr
-#' \code{plane}       \tab \tab the pairs of schools, with their roots and topic proximity\cr
-#' \code{NMI}, \code{ARI} \tab \tab agreement between schools and themes\cr
+#' \code{roots}, \code{themes} \tab \tab one row per cluster: size, labels, cohesion in the two layers, linked clusters, structure\cr
+#' \code{links}       \tab \tab one row per root-theme link: documents, residual, share of the root and of the theme\cr
+#' \code{contingency}, \code{residuals} \tab \tab the roots x themes table and its standardized residuals\cr
+#' \code{membership}  \tab \tab root and theme of every document (\code{NA} when in a cluster of fewer than \code{min.size} documents)\cr
+#' \code{unclustered} \tab \tab the number of documents in no root and in no theme\cr
+#' \code{plane}       \tab \tab the pairs of roots, with their references and topic proximity\cr
+#' \code{NMI}, \code{ARI} \tab \tab agreement between roots and themes\cr
 #' \code{agreement}, \code{modularity} \tab \tab stability and modularity of the two partitions}
 #'
 #' @references
@@ -90,6 +101,7 @@ multiplexClusters <- function(mc,
                               n.runs = 20,
                               res.crit = 2,
                               min.link = 5,
+                              min.size = 5,
                               n.labels = 3,
                               n.refs = 30,
                               email = NULL,
@@ -104,10 +116,17 @@ multiplexClusters <- function(mc,
   on.exit(restoreRNG(rng), add = TRUE)
   UR <- mpUnitRows(mc$X_R)
   UT <- mpUnitRows(mc$X_T)
-  cR <- mpClusterLayer(mc$layers$roots, algorithm, resolution, seed, n.runs)
+  cR <- mpClusterLayer(mc$layers$references, algorithm, resolution, seed, n.runs)
   cT <- mpClusterLayer(mc$layers$topics, algorithm, resolution, seed, n.runs)
-  mR <- cR$membership
-  mT <- cT$membership
+  # clusters smaller than min.size are left out: their documents (in no
+  # root, or in no theme) share almost nothing with the others. Clusters are
+  # numbered by decreasing size, so the ones kept stay 1, 2, ...
+  mR <- mpDropSmall(cR$membership, min.size)
+  mT <- mpDropSmall(cT$membership, min.size)
+  if (all(is.na(mR)) || all(is.na(mT))) {
+    stop("multiplexClusters(): no root or no theme has at least ", min.size,
+         " documents; lower min.size", call. = FALSE)
+  }
 
   summarise <- function(memb) {
     sR <- mpClusterSimilarity(UR, memb)
@@ -120,53 +139,55 @@ multiplexClusters <- function(mc,
       stringsAsFactors = FALSE
     )
   }
-  schools <- summarise(mR)
+  roots <- summarise(mR)
   themes <- summarise(mT)
-  # a school is an intellectual root: it is named after the titles of its
+  # a root is an intellectual base: it is named after the titles of its
   # strong references; the keywords of its documents are kept as doc_terms
   roots_lab <- mpRootsLabels(mc, mR, n.labels, n.refs, email, api.key, verbose)
-  schools$doc_terms <- schools$terms
-  schools$terms <- roots_lab$terms
-  schools$label_source <- roots_lab$label_source
+  roots$doc_terms <- roots$terms
+  roots$terms <- roots_lab$terms
+  roots$label_source <- roots_lab$label_source
 
-  # one set of school-theme links, read by row for the schools and by column
+  # one set of root-theme links, read by row for the roots and by column
   # for the themes: a cell over-represented (residual > res.crit) with at least
   # min.link documents
-  tab <- table(schools = mR, themes = mT)
+  tab <- table(roots = mR, themes = mT)
   ctab <- unclass(tab)
   res <- mpStandardizedResiduals(ctab)
   L <- res > res.crit & ctab >= min.link
-  by_school <- lapply(seq_len(nrow(L)), function(k) which(L[k, ]))
+  by_root <- lapply(seq_len(nrow(L)), function(k) which(L[k, ]))
   by_theme <- lapply(seq_len(ncol(L)), function(k) which(L[, k]))
   lk <- which(L, arr.ind = TRUE)
   links <- data.frame(
-    school = unname(lk[, 1]), theme = unname(lk[, 2]), n = ctab[lk], residual = res[lk],
-    share_school = (ctab / rowSums(ctab))[lk], share_theme = t(t(ctab) / colSums(ctab))[lk]
+    root = unname(lk[, 1]), theme = unname(lk[, 2]), n = ctab[lk], residual = res[lk],
+    share_root = (ctab / rowSums(ctab))[lk], share_theme = t(t(ctab) / colSums(ctab))[lk]
   )
-  links <- links[order(links$school, -links$n), ]
+  links <- links[order(links$root, -links$n), ]
   rownames(links) <- NULL
-  schools$themes <- vapply(by_school, paste, "", collapse = ",")
-  schools$n_themes <- lengths(by_school)
-  schools$structure <- ifelse(lengths(by_school) >= 2, "branching",
-                              ifelse(lengths(by_school) == 1, "consolidation", "dispersed"))
-  themes$schools <- vapply(by_theme, paste, "", collapse = ",")
-  themes$n_schools <- lengths(by_theme)
+  roots$themes <- vapply(by_root, paste, "", collapse = ",")
+  roots$n_themes <- lengths(by_root)
+  roots$structure <- ifelse(lengths(by_root) >= 2, "branching",
+                              ifelse(lengths(by_root) == 1, "consolidation", "dispersed"))
+  themes$roots <- vapply(by_theme, paste, "", collapse = ",")
+  themes$n_roots <- lengths(by_theme)
   themes$structure <- ifelse(lengths(by_theme) >= 2, "convergence",
                              ifelse(lengths(by_theme) == 1, "consolidation", "dispersed"))
 
+  both <- !is.na(mR) & !is.na(mT)
   mc$clusters <- list(
-    schools = schools, themes = themes, links = links,
+    roots = roots, themes = themes, links = links,
     contingency = tab, residuals = res,
-    membership = data.frame(node = mc$nodes$node, school = mR, theme = mT, stringsAsFactors = FALSE),
-    plane = mpClusterPlane(UR, UT, mR, schools),
-    NMI = igraph::compare(mR, mT, method = "nmi"),
-    ARI = igraph::compare(mR, mT, method = "adjusted.rand"),
-    agreement = c(schools = cR$agreement, themes = cT$agreement),
+    membership = data.frame(node = mc$nodes$node, root = mR, theme = mT, stringsAsFactors = FALSE),
+    plane = mpClusterPlane(UR, UT, mR, roots),
+    NMI = igraph::compare(mR[both], mT[both], method = "nmi"),
+    ARI = igraph::compare(mR[both], mT[both], method = "adjusted.rand"),
+    unclustered = c(roots = sum(is.na(mR)), themes = sum(is.na(mT))),
+    agreement = c(roots = cR$agreement, themes = cT$agreement),
     openalex = attr(roots_lab, "openalex"),
-    modularity = c(schools = cR$modularity, themes = cT$modularity),
+    modularity = c(roots = cR$modularity, themes = cT$modularity),
     params = data.frame(
-      params = c("algorithm", "resolution", "n.runs", "res.crit", "min.link", "seed"),
-      values = c(algorithm, resolution, n.runs, res.crit, min.link, seed),
+      params = c("algorithm", "resolution", "n.runs", "res.crit", "min.link", "min.size", "seed"),
+      values = c(algorithm, resolution, n.runs, res.crit, min.link, min.size, seed),
       stringsAsFactors = FALSE
     )
   )
@@ -174,24 +195,29 @@ multiplexClusters <- function(mc,
 }
 
 printMultiplexClusters <- function(cl) {
-  cat(sprintf("Schools: %d (%d branching, %d consolidated, %d dispersed)\n", nrow(cl$schools),
-              sum(cl$schools$structure == "branching"), sum(cl$schools$structure == "consolidation"),
-              sum(cl$schools$structure == "dispersed")))
+  cat(sprintf("Roots  : %d (%d branching, %d consolidated, %d dispersed)\n", nrow(cl$roots),
+              sum(cl$roots$structure == "branching"), sum(cl$roots$structure == "consolidation"),
+              sum(cl$roots$structure == "dispersed")))
   cat(sprintf("Themes : %d (%d convergent, %d consolidated, %d dispersed)\n", nrow(cl$themes),
               sum(cl$themes$structure == "convergence"), sum(cl$themes$structure == "consolidation"),
               sum(cl$themes$structure == "dispersed")))
-  cat(sprintf("Links  : %d school-theme links; schools vs themes NMI %.2f\n", nrow(cl$links), cl$NMI))
-  if (!is.null(cl$schools$label_source)) {
-    oa <- grepl("OpenAlex", cl$schools$label_source)
-    ti <- grepl("^titles", cl$schools$label_source)
-    cat(sprintf("School names from the titles of their strong references: %d schools (%d with OpenAlex), from their cited sources: %d\n",
+  cat(sprintf("Links  : %d root-theme links; roots vs themes NMI %.2f\n", nrow(cl$links), cl$NMI))
+  if (!is.null(cl$unclustered) && any(cl$unclustered > 0)) {
+    cat(sprintf("Left out (clusters of fewer than %s documents): %d documents in no root, %d in no theme\n",
+                cl$params$values[cl$params$params == "min.size"], cl$unclustered[["roots"]],
+                cl$unclustered[["themes"]]))
+  }
+  if (!is.null(cl$roots$label_source)) {
+    oa <- grepl("OpenAlex", cl$roots$label_source)
+    ti <- grepl("^titles", cl$roots$label_source)
+    cat(sprintf("Root names from the titles of their strong references: %d roots (%d with OpenAlex), from their cited sources: %d\n",
                 sum(ti), sum(oa), sum(!ti)))
     if (!is.null(cl$openalex) && nzchar(cl$openalex) && cl$openalex != "not needed") {
       cat("  OpenAlex not used:", cl$openalex, "\n")
     }
   }
-  cat(sprintf("Agreement between single runs (ARI): schools %.2f, themes %.2f\n",
-              cl$agreement[["schools"]], cl$agreement[["themes"]]))
+  cat(sprintf("Agreement between single runs (ARI): roots %.2f, themes %.2f\n",
+              cl$agreement[["roots"]], cl$agreement[["themes"]]))
 }
 
 ## Internal helpers ----
@@ -207,18 +233,28 @@ mpUnitRows <- function(X) {
 #   mean similarity between A and B        = <S_A, S_B> / (|A| |B|)
 #   mean similarity within A (pairs i != j) = (|S_A|^2 - |A|) / (|A| (|A| - 1))
 # No pair is enumerated.
+# Documents in no cluster (NA) count in the global baseline only.
 mpClusterSimilarity <- function(U, memb) {
-  K <- max(memb)
-  Z <- Matrix::sparseMatrix(i = memb, j = seq_along(memb), x = 1, dims = c(K, length(memb)))
+  Z <- mpMembershipMatrix(memb)
+  K <- nrow(Z)
   G <- Z %*% U
   D <- as.matrix(Matrix::tcrossprod(G))
   sz <- tabulate(memb, K)
-  nz <- as.numeric(Z %*% (mpSqNorms(U) > 0))
+  has <- mpSqNorms(U) > 0
+  nz <- as.numeric(Z %*% has)
   within <- ifelse(sz > 1, (diag(D) - nz) / (sz * (sz - 1)), NA_real_)
   between <- D / outer(sz, sz)
   diag(between) <- within
   n <- length(memb)
-  list(within = within, between = between, global = (sum(D) - sum(nz)) / (n * (n - 1)), size = sz)
+  S <- Matrix::colSums(U)
+  list(within = within, between = between, global = (sum(S^2) - sum(has)) / (n * (n - 1)), size = sz)
+}
+
+# documents x clusters indicator, clusters by row; a document in no cluster
+# (NA) has an empty column
+mpMembershipMatrix <- function(memb) {
+  ok <- which(!is.na(memb))
+  Matrix::sparseMatrix(i = memb[ok], j = ok, x = 1, dims = c(max(memb, na.rm = TRUE), length(memb)))
 }
 
 # Consensus clustering of a layer graph: every edge is weighted by the share of
@@ -262,6 +298,13 @@ mpClusterLayer <- function(g, algorithm = "louvain", resolution = 1, seed = 1234
        modularity = igraph::modularity(g, relabel, weights = igraph::E(g)$weight))
 }
 
+# clusters of fewer than min.size documents become NA (in no cluster)
+mpDropSmall <- function(memb, min.size) {
+  sz <- tabulate(memb)
+  memb[sz[memb] < min.size] <- NA_integer_
+  memb
+}
+
 # mean adjusted Rand index over the pairs of partitions
 mpMeanARI <- function(runs) {
   if (length(runs) < 2) return(1)
@@ -273,7 +316,7 @@ mpMeanARI <- function(runs) {
 # concentrated in it (in-cluster count x share of the feature's documents in it)
 mpClusterLabels <- function(K, memb, n.labels = 3, short = identity) {
   B <- K > 0
-  Z <- Matrix::sparseMatrix(i = memb, j = seq_along(memb), x = 1, dims = c(max(memb), length(memb)))
+  Z <- mpMembershipMatrix(memb)
   inC <- as.matrix(Z %*% B)
   tot <- Matrix::colSums(B)
   vapply(seq_len(nrow(inC)), function(k) {
@@ -297,9 +340,9 @@ mpStandardizedResiduals <- function(tab) {
   (tab - E) / sqrt(E * outer(1 - r / n, 1 - c / n))
 }
 
-# pairs of schools: mean roots and topic similarity between the two schools,
+# pairs of roots: mean references and topic similarity between the two roots,
 # relative to two random documents (lift 1 = as close as two random documents)
-mpClusterPlane <- function(UR, UT, memb, schools) {
+mpClusterPlane <- function(UR, UT, memb, roots) {
   sR <- mpClusterSimilarity(UR, memb)
   sT <- mpClusterSimilarity(UT, memb)
   if (length(sR$size) < 2) return(data.frame())
@@ -314,7 +357,7 @@ mpClusterPlane <- function(UR, UT, memb, schools) {
     ),
     levels = c("consolidation", "branching", "convergence", "detachment")
   )
-  P$label_A <- schools$terms[P$A]
-  P$label_B <- schools$terms[P$B]
+  P$label_A <- roots$terms[P$A]
+  P$label_B <- roots$terms[P$B]
   P[order(P$A, P$B), ]
 }

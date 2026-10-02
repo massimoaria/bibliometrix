@@ -1,17 +1,17 @@
-#' Evolution of the schools of a multiplex coupling
+#' Evolution of the roots of a multiplex coupling
 #'
-#' It follows how close the schools of \code{\link{multiplexClusters}} are, in
-#' roots and in topics, period by period. Documents belong to one period only,
-#' so the clusters of different periods cannot be matched through their
-#' members: the schools are defined once, on the whole collection, and in each
-#' period the proximity of two schools is measured on their documents of that
+#' It follows how close the roots of \code{\link{multiplexClusters}} are, in
+#' references and in topics, period by period. Documents belong to one period
+#' only, so the clusters of different periods cannot be matched through their
+#' members: the roots are defined once, on the whole collection, and in each
+#' period the proximity of two roots is measured on their documents of that
 #' period, relative to two random documents of the same period (lift).
 #'
 #' The slopes of the two proximities over the periods classify the trajectory
-#' of every pair of schools seen in at least two periods:
+#' of every pair of roots seen in at least two periods:
 #' \tabular{lll}{
-#' \code{converging}     \tab \tab topics closer, roots not\cr
-#' \code{diverging}      \tab \tab topics farther, roots not\cr
+#' \code{converging}     \tab \tab topics closer, references not\cr
+#' \code{diverging}      \tab \tab topics farther, references not\cr
 #' \code{consolidating}  \tab \tab both closer\cr
 #' \code{drifting apart} \tab \tab both farther\cr
 #' \code{stable}         \tab \tab neither slope beyond \code{slope.min}}
@@ -22,14 +22,14 @@
 #'   years, e.g. \code{c(2010, 2016)} gives three periods.
 #' @param width,step are integers. Alternatively to \code{years}, sliding
 #'   windows of \code{width} years every \code{step} years.
-#' @param min.docs is an integer. A school is followed in a period when it has
+#' @param min.docs is an integer. A root is followed in a period when it has
 #'   at least \code{min.docs} documents in it. Default is 5.
 #' @param slope.min is a number. The slope of the log2 lift per period above
 #'   which a trend is called. Default is 0.1.
 #'
 #' @return an object of class \code{"biblioMultiplexEvolution"}, a list with
-#'   \code{long} (one row per pair of schools and period), \code{trajectories}
-#'   (one row per pair, with slopes and trend), \code{periods}, \code{schools}
+#'   \code{long} (one row per pair of roots and period), \code{trajectories}
+#'   (one row per pair, with slopes and trend), \code{periods}, \code{roots}
 #'   and \code{params}.
 #'
 #' @examples
@@ -49,7 +49,7 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
     stop("multiplexEvolution() needs the result of multiplexClusters()", call. = FALSE)
   }
   cl <- mc$clusters
-  memb <- cl$membership$school
+  memb <- cl$membership$root
   UR <- mpUnitRows(mc$X_R)
   UT <- mpUnitRows(mc$X_T)
   per <- mpPeriods(mc$nodes$PY, years, width, step)
@@ -57,7 +57,8 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
   long <- do.call(rbind, lapply(seq_along(per), function(k) {
     idx <- per[[k]]$idx
     if (length(idx) < 2 * min.docs) return(NULL)
-    tab <- tabulate(memb[idx], max(memb))
+    # documents in no root (NA) are not counted
+    tab <- tabulate(memb[idx], max(memb, na.rm = TRUE))
     ok <- which(tab >= min.docs)
     if (length(ok) < 2) return(NULL)
     sub <- idx[memb[idx] %in% ok]
@@ -76,12 +77,12 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
     )
   }))
   if (is.null(long) || !nrow(long)) {
-    stop("multiplexEvolution(): no period has two schools with at least ", min.docs,
+    stop("multiplexEvolution(): no period has two roots with at least ", min.docs,
          " documents", call. = FALSE)
   }
 
   # trajectory of the pairs seen in at least two periods: slope of the log2
-  # lift per period, for roots and topics
+  # lift per period, for references and topics
   floor <- 1 / 16
   long$x <- log2(pmax(long$lift_R, floor))
   long$y <- log2(pmax(long$lift_T, floor))
@@ -94,7 +95,7 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
                slope_R = slope(d$x), slope_T = slope(d$y), stringsAsFactors = FALSE)
   }))
   if (is.null(traj)) {
-    stop("multiplexEvolution(): no pair of schools is seen in two periods", call. = FALSE)
+    stop("multiplexEvolution(): no pair of roots is seen in two periods", call. = FALSE)
   }
   traj$trend <- ifelse(
     traj$slope_T >= slope.min & traj$slope_R < slope.min, "converging",
@@ -102,13 +103,13 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
       ifelse(traj$slope_T <= -slope.min & traj$slope_R <= -slope.min, "drifting apart",
         ifelse(traj$slope_T >= slope.min & traj$slope_R >= slope.min, "consolidating", "stable")))
   )
-  traj$label_A <- cl$schools$terms[traj$A]
-  traj$label_B <- cl$schools$terms[traj$B]
+  traj$label_A <- cl$roots$terms[traj$A]
+  traj$label_B <- cl$roots$terms[traj$B]
   traj <- traj[order(-abs(traj$slope_T)), ]
   rownames(traj) <- NULL
   structure(
     list(long = long, trajectories = traj, periods = vapply(per, `[[`, "", "label"),
-         schools = cl$schools,
+         roots = cl$roots,
          params = list(years = years, width = width, step = step, min.docs = min.docs,
                        slope.min = slope.min)),
     class = "biblioMultiplexEvolution"
@@ -118,9 +119,9 @@ multiplexEvolution <- function(mc, years = NULL, width = NULL, step = NULL, min.
 #' @method print biblioMultiplexEvolution
 #' @export
 print.biblioMultiplexEvolution <- function(x, ...) {
-  cat("Multiplex evolution of", nrow(x$schools), "schools over", length(x$periods), "periods:",
+  cat("Multiplex evolution of", nrow(x$roots), "roots over", length(x$periods), "periods:",
       paste(x$periods, collapse = ", "), "\n")
-  cat("Pairs of schools followed in at least two periods:", nrow(x$trajectories), "\n\n")
+  cat("Pairs of roots followed in at least two periods:", nrow(x$trajectories), "\n\n")
   print(table(x$trajectories$trend))
   cat("\nStrongest topic trends:\n")
   tr <- utils::head(x$trajectories, 8)

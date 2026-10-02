@@ -6,16 +6,18 @@
 \usage{
 multiplexPlot(
   x,
-  type = c("matrix", "links", "plane", "clusters", "trajectory", "network"),
+  type = c("matrix", "links", "plane", "clusters", "trajectory", "animation", "network"),
   interactive = FALSE,
   n.labels = 12,
   min.size = 10,
-  max.nodes = 500
+  max.nodes = 500,
+  pair = 1
 )
 }
 \arguments{
 \item{x}{an object of class \code{"biblioMultiplex"} with clusters, or of
-class \code{"biblioMultiplexEvolution"} for \code{type = "trajectory"}.}
+class \code{"biblioMultiplexEvolution"} for \code{type = "trajectory"}
+and \code{"animation"}.}
 
 \item{type}{is a character. The plot, see Details. Default is \code{"matrix"}.}
 
@@ -27,10 +29,14 @@ for \code{type = "network"}) instead of a ggplot. Default is FALSE.}
 same theme. Default is 12.}
 
 \item{min.size}{is an integer. For \code{type = "plane"}, the minimum
-number of documents of the two schools of a pair. Default is 10.}
+number of documents of the two roots of a pair. Default is 10.}
 
 \item{max.nodes}{is an integer. For \code{type = "network"}, the maximum
 number of documents drawn. Default is 500.}
+
+\item{pair}{is an integer. For \code{type = "animation"}, the pair of
+roots, by its number in \code{\link{multiplexPairs}} (the numbers of
+\code{type = "trajectory"}). Default is 1.}
 }
 \value{
 a ggplot object, or a plotly or visNetwork widget.
@@ -41,11 +47,12 @@ It draws the results of \code{\link{multiplexClusters}} and
 }
 \details{
 \tabular{lll}{
-\code{"matrix"}     \tab \tab schools x themes: documents and standardized residuals; a link is a red cell with at least \code{min.link} documents\cr
-\code{"links"}      \tab \tab schools on the left, themes on the right, one flow per link: a school with several flows is branching, a theme with several flows is convergent (interactive: a sankey diagram, with nodes that can be dragged)\cr
-\code{"plane"}      \tab \tab pairs of schools by roots and topic proximity; the pairs linked to the same theme are named with it\cr
-\code{"clusters"}   \tab \tab schools and themes by cohesion in the two layers\cr
-\code{"trajectory"} \tab \tab pairs of schools from their first to their last period (needs \code{\link{multiplexEvolution}})\cr
+\code{"matrix"}     \tab \tab roots x themes: documents and standardized residuals; a link is a red cell with at least \code{min.link} documents\cr
+\code{"links"}      \tab \tab roots on the left, themes on the right, one flow per link: a root with several flows is branching, a theme with several flows is convergent (interactive: a sankey diagram, with nodes that can be dragged)\cr
+\code{"plane"}      \tab \tab pairs of roots by references and topic proximity; the pairs linked to the same theme are named with it\cr
+\code{"clusters"}   \tab \tab roots and themes by cohesion in the two layers\cr
+\code{"trajectory"} \tab \tab the pairs of roots that change area (see \code{\link{multiplexPairs}}), through their periods, from the first to the last (needs \code{\link{multiplexEvolution}})\cr
+\code{"animation"}  \tab \tab one pair of roots moving period by period on the same plane (needs \code{\link{multiplexEvolution}}; interactive only)\cr
 \code{"network"}    \tab \tab the documents, with the edges coloured by layer (interactive only)}
 }
 \examples{

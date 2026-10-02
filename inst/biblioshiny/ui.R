@@ -7820,7 +7820,7 @@ body <- dashboardBody(
                 ),
                 div(
                   style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
-                  h5(strong("Schools and themes"), style = "color: #2c3e50; margin-bottom: 10px;"),
+                  h5(strong("Roots and themes"), style = "color: #2c3e50; margin-bottom: 10px;"),
                   fluidRow(
                     column(6, selectInput("mpxAlgorithm", "Clustering algorithm",
                                           choices = c("Louvain" = "louvain", "Leiden" = "leiden",
@@ -7828,16 +7828,19 @@ body <- dashboardBody(
                     column(6, numericInput("mpxMinLink", "Documents per link", value = 5, min = 1, step = 1))
                   ),
                   fluidRow(
-                    column(6, numericInput("mpxNperm", "Null model permutations", value = 99, min = 19, step = 20))
+                    column(6, numericInput("mpxNperm", "Null model permutations", value = 99, min = 19, step = 20)),
+                    column(6, numericInput("mpxMinSize", "Documents per cluster", value = 5, min = 1, step = 1))
                   )
                 ),
                 div(
                   style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
                   h5(strong("Evolution"), style = "color: #2c3e50; margin-bottom: 10px;"),
                   fluidRow(
-                    column(6, numericInput("mpxPeriods", "Number of periods", value = 3, min = 2, max = 8)),
-                    column(6, numericInput("mpxMinDocs", "Documents per school and period", value = 5, min = 2))
-                  )
+                    column(6, numericInput("mpxNumSlices", "Number of Cutting Points", value = 2, min = 1, max = 6)),
+                    column(6, numericInput("mpxMinDocs", "Documents per root and period", value = 5, min = 2))
+                  ),
+                  "Please, write the cutting points (in year) for your collection",
+                  uiOutput("mpxSliders")
                 ),
                 style = "gradient",
                 right = TRUE,
@@ -7857,7 +7860,7 @@ body <- dashboardBody(
             id = "mpxTabs",
             type = "tabs",
             tabPanel(
-              "Schools x Themes",
+              "Roots x Themes",
               value = "matrix",
               shinycssloaders::withSpinner(plotlyOutput("mpxMatrix", height = "75vh"))
             ),
@@ -7867,7 +7870,7 @@ body <- dashboardBody(
               shinycssloaders::withSpinner(plotlyOutput("mpxLinks", height = "80vh"))
             ),
             tabPanel(
-              "Pairs of Schools",
+              "Pairs of Roots",
               value = "plane",
               shinycssloaders::withSpinner(plotlyOutput("mpxPlane", height = "75vh"))
             ),
@@ -7879,14 +7882,24 @@ body <- dashboardBody(
             tabPanel(
               "Evolution",
               value = "trajectory",
-              shinycssloaders::withSpinner(plotlyOutput("mpxTrajectory", height = "75vh"))
+              tabsetPanel(
+                type = "pills",
+                tabPanel("Trajectories", shinycssloaders::withSpinner(plotlyOutput("mpxTrajectory", height = "72vh"))),
+                tabPanel(
+                  "Animation",
+                  br(),
+                  uiOutput("mpxPairUI"),
+                  shinycssloaders::withSpinner(plotlyOutput("mpxAnimation", height = "68vh"))
+                ),
+                tabPanel("Pairs", br(), shinycssloaders::withSpinner(uiOutput("mpxPairsTable")))
+              )
             ),
             tabPanel(
               "Tables",
               value = "tables",
               tabsetPanel(
                 type = "pills",
-                tabPanel("Schools", shinycssloaders::withSpinner(uiOutput("mpxSchoolsTable"))),
+                tabPanel("Roots", shinycssloaders::withSpinner(uiOutput("mpxRootsTable"))),
                 tabPanel("Themes", shinycssloaders::withSpinner(uiOutput("mpxThemesTable"))),
                 tabPanel("Links", shinycssloaders::withSpinner(uiOutput("mpxLinksTable"))),
                 tabPanel("Summary", verbatimTextOutput("mpxSummary"))

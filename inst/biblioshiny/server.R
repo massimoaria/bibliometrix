@@ -11234,27 +11234,66 @@ To ensure the functionality of Biblioshiny,
   })
 
   ### Multiplex Coupling ----
+  # cutting years of the evolution, as in Thematic Evolution: by default the
+  # periods hold about the same number of documents
+  mpxDefaultCuts <- function(PY, numSlices) {
+    v <- stats::quantile(as.numeric(PY), seq(0, 1, by = 1 / (numSlices + 1)), na.rm = TRUE, names = FALSE)
+    round(v[-c(1, length(v))], 0)
+  }
+  output$mpxSliders <- renderUI({
+    req(values$M)
+    numSlices <- max(1L, as.integer(input$mpxNumSlices))
+    PY <- as.numeric(values$M$PY)
+    v <- mpxDefaultCuts(PY, numSlices)
+    lapply(seq_len(numSlices), function(i) {
+      numericInput(
+        inputId = paste0("mpxSlice", i),
+        label = paste("Cutting Year", i),
+        value = v[i],
+        min = min(PY, na.rm = TRUE) + 1,
+        max = max(PY, na.rm = TRUE) - 1,
+        step = 1
+      )
+    })
+  })
+  # the options are in a dropdown: the cutting years must exist before it is
+  # first opened
+  outputOptions(output, "mpxSliders", suspendWhenHidden = FALSE)
+
+  # a period ends at each cutting year; NULL when the roots cannot be
+  # followed (no valid year, or too few documents per root and period)
+  mpxEvolution <- function(mc) {
+    numSlices <- max(1L, as.integer(input$mpxNumSlices))
+    years <- unlist(lapply(seq_len(numSlices), function(i) input[[paste0("mpxSlice", i)]]))
+    if (is.null(years)) years <- mpxDefaultCuts(values$M$PY, numSlices)
+    PY <- mc$nodes$PY[!is.na(mc$nodes$PY)]
+    years <- sort(unique(years[!is.na(years) & years >= min(PY) & years < max(PY)]))
+    if (!length(years)) return(NULL)
+    tryCatch(multiplexEvolution(mc, years = years, min.docs = input$mpxMinDocs), error = function(e) NULL)
+  }
+
   MPXResult <- eventReactive(input$applyMPX, {
     req(values$M)
     topic_field <- if (input$mpxTopicField == "auto") "auto" else strsplit(input$mpxTopicField, ";")[[1]]
     # the same data and options give the result again without computing it;
     # whether OpenAlex is configured is part of the key, as it changes the
-    # names of the schools
+    # names of the roots
     cache_key <- make_cache_key(
       fp = data_fingerprint(values$M), n = input$mpxN, select.by = input$mpxSelectBy,
       topic = input$mpxTopicField, k = input$mpxK, n.perm = input$mpxNperm,
-      algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, periods = input$mpxPeriods,
-      min.docs = input$mpxMinDocs,
+      algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, min.size = input$mpxMinSize,
       openalex = nzchar(Sys.getenv("openalexR.apikey")) && nzchar(Sys.getenv("openalexR.mailto"))
     )
     if (identical(cache_key, values$cache_MPX_key) && !is.null(values$cache_MPX_result)) {
-      values$MPX <- values$cache_MPX_result$mc
-      values$MPXev <- values$cache_MPX_result$ev
-      return(values$cache_MPX_result)
+      mc <- values$cache_MPX_result$mc
+      ev <- mpxEvolution(mc)
+      values$MPX <- mc
+      values$MPXev <- ev
+      return(list(mc = mc, ev = ev))
     }
     res <- NULL
     withProgress(message = "Multiplex coupling", value = 0, {
-      incProgress(0.05, detail = "roots and topic layers, null model")
+      incProgress(0.05, detail = "references and topic layers, null model")
       mc <- tryCatch(
         multiplexCoupling(
           values$M,
@@ -11271,26 +11310,29 @@ To ensure the functionality of Biblioshiny,
         }
       )
       if (!is.null(mc)) {
-        incProgress(0.6, detail = "schools and themes (school names from their references)")
-        mc <- multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, verbose = FALSE)
-        incProgress(0.15, detail = "evolution")
-        # periods of about the same number of documents
-        PY <- mc$nodes$PY[!is.na(mc$nodes$PY)]
-        nper <- max(2, input$mpxPeriods)
-        years <- unique(floor(stats::quantile(PY, probs = seq_len(nper - 1) / nper, names = FALSE)))
-        years <- years[years < max(PY)]
-        ev <- tryCatch(
-          if (length(years)) multiplexEvolution(mc, years = years, min.docs = input$mpxMinDocs) else NULL,
-          error = function(e) NULL
+        incProgress(0.6, detail = "roots and themes (root names from their references)")
+        mc <- tryCatch(
+          multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink,
+                            min.size = input$mpxMinSize, verbose = FALSE),
+          error = function(e) {
+            showNotification(paste("Multiplex Coupling:", conditionMessage(e)), type = "error", duration = 10)
+            NULL
+          }
         )
+      }
+      if (!is.null(mc)) {
+        incProgress(0.15, detail = "evolution")
+        ev <- mpxEvolution(mc)
         res <- list(mc = mc, ev = ev)
       }
     })
     req(res)
     values$MPX <- res$mc
     values$MPXev <- res$ev
+    # the cache keeps the coupling only: the evolution is quick, and is
+    # computed again for other cutting years
     values$cache_MPX_key <- cache_key
-    values$cache_MPX_result <- res
+    values$cache_MPX_result <- list(mc = res$mc)
     res
   })
 
@@ -11315,10 +11357,30 @@ To ensure the functionality of Biblioshiny,
   })
   output$mpxTrajectory <- renderPlotly({
     ev <- MPXResult()$ev
-    validate(need(!is.null(ev), "Not enough documents per school and period to follow the schools over time: lower the number of periods or of documents per school and period."))
+    validate(need(!is.null(ev), "Not enough documents per root and period to follow the roots over time: use fewer cutting points, or fewer documents per root and period."))
     p <- tryCatch(multiplexPlot(ev, "trajectory", interactive = TRUE), error = function(e) NULL)
-    validate(need(!is.null(p), "Every pair of schools is stable over the periods."))
+    validate(need(!is.null(p), "Every pair of roots is stable over the periods."))
     mpxPlotly(p)
+  })
+
+  # one pair of roots at a time, numbered as in the Trajectories plot
+  output$mpxPairUI <- renderUI({
+    ev <- MPXResult()$ev
+    req(ev)
+    # the pairs that change area, as in Trajectories; all of them are in Pairs
+    tr <- multiplexPairs(ev)
+    tr <- tr[tr$moves & tr$trend != "stable", ]
+    validate(need(nrow(tr) > 0, "No pair of roots with a trend changes area: see the list in Pairs."))
+    selectInput("mpxPair", "Pair of roots (those that change area)",
+                choices = stats::setNames(tr$id, sprintf("%d. %s (%s, %d periods)", tr$id, tr$pair, tr$trend,
+                                                         tr$periods)),
+                width = "60%")
+  })
+  output$mpxAnimation <- renderPlotly({
+    ev <- MPXResult()$ev
+    validate(need(!is.null(ev), "Not enough documents per root and period to follow the roots over time: use fewer cutting points, or fewer documents per root and period."))
+    req(input$mpxPair)
+    mpxPlotly(multiplexPlot(ev, "animation", pair = as.integer(input$mpxPair)))
   })
 
   mpxTable <- function(df, filename, numeric = NULL) {
@@ -11343,14 +11405,14 @@ To ensure the functionality of Biblioshiny,
     )
   }
 
-  mpxSchoolsDF <- function(mc) {
-    s <- mc$clusters$schools
+  mpxRootsDF <- function(mc) {
+    s <- mc$clusters$roots
     data.frame(
-      School = paste0("S", s$cluster), Documents = s$size, `Name (from the roots)` = s$terms,
+      Root = paste0("R", s$cluster), Documents = s$size, `Name (from its references)` = s$terms,
       `Named from` = s$label_source, `Strongest references` = s$references,
       `Keywords of its documents` = s$doc_terms, Structure = s$structure, `Linked themes` = ifelse(s$themes == "", "",
                                                         gsub("(\\d+)", "T\\1", s$themes)),
-      `Roots cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
+      `References cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
       check.names = FALSE, stringsAsFactors = FALSE
     )
   }
@@ -11358,9 +11420,9 @@ To ensure the functionality of Biblioshiny,
     s <- mc$clusters$themes
     data.frame(
       Theme = paste0("T", s$cluster), Documents = s$size, Terms = s$terms,
-      Structure = s$structure, `Linked schools` = ifelse(s$schools == "", "",
-                                                         gsub("(\\d+)", "S\\1", s$schools)),
-      `Roots cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
+      Structure = s$structure, `Linked roots` = ifelse(s$roots == "", "",
+                                                         gsub("(\\d+)", "R\\1", s$roots)),
+      `References cohesion` = s$cohesion_R, `Topic cohesion` = s$cohesion_T,
       check.names = FALSE, stringsAsFactors = FALSE
     )
   }
@@ -11368,16 +11430,31 @@ To ensure the functionality of Biblioshiny,
     cl <- mc$clusters
     l <- cl$links
     data.frame(
-      School = paste0("S", l$school, " ", sub(";.*", "", cl$schools$terms[l$school])),
+      Root = paste0("R", l$root, " ", sub(";.*", "", cl$roots$terms[l$root])),
       Theme = paste0("T", l$theme, " ", sub(";.*", "", cl$themes$terms[l$theme])),
       Documents = l$n, `Standardized residual` = l$residual,
-      `Share of the school` = l$share_school, `Share of the theme` = l$share_theme,
+      `Share of the root` = l$share_root, `Share of the theme` = l$share_theme,
       check.names = FALSE, stringsAsFactors = FALSE
     )
   }
 
-  output$mpxSchoolsTable <- renderUI({
-    mpxTable(mpxSchoolsDF(MPXResult()$mc), "Multiplex_Schools", numeric = 9:10)
+  # every pair of roots followed in two periods or more, with the areas it
+  # crosses; the numbers are those of Trajectories and Animation
+  output$mpxPairsTable <- renderUI({
+    ev <- MPXResult()$ev
+    validate(need(!is.null(ev), "Not enough documents per root and period to follow the roots over time: use fewer cutting points, or fewer documents per root and period."))
+    tr <- multiplexPairs(ev)
+    df <- data.frame(
+      No. = tr$id, `Pair of roots` = tr$pair, `Root A` = paste0("R", tr$A), `Root B` = paste0("R", tr$B),
+      Periods = tr$periods, From = tr$first, To = tr$last, Areas = tr$areas,
+      `Changes area` = ifelse(tr$moves, "yes", "no"), Trend = tr$trend,
+      `References slope` = tr$slope_R, `Topics slope` = tr$slope_T,
+      check.names = FALSE, stringsAsFactors = FALSE
+    )
+    mpxTable(df, "Multiplex_Pairs", numeric = 11:12)
+  })
+  output$mpxRootsTable <- renderUI({
+    mpxTable(mpxRootsDF(MPXResult()$mc), "Multiplex_Roots", numeric = 9:10)
   })
   output$mpxThemesTable <- renderUI({
     mpxTable(mpxThemesDF(MPXResult()$mc), "Multiplex_Themes", numeric = 6:7)
@@ -11436,7 +11513,7 @@ To ensure the functionality of Biblioshiny,
     if (!is.null(values$MPX)) {
       popUp(title = NULL, type = "waiting")
       mc <- values$MPX
-      list_df <- list(mc$params, mpxSchoolsDF(mc), mpxThemesDF(mc), mpxLinksDF(mc))
+      list_df <- list(mc$params, mpxRootsDF(mc), mpxThemesDF(mc), mpxLinksDF(mc))
       list_plot <- list(multiplexPlot(mc, "matrix"), multiplexPlot(mc, "links"), multiplexPlot(mc, "plane"))
       wb <- addSheetToReport(list_df, list_plot, sheetname = "MultiplexCoupling", wb = values$wb)
       values$wb <- wb

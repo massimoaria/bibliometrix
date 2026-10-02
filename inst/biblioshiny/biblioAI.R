@@ -1025,22 +1025,23 @@ biblioAiPrompts <- function(values, activeTab) {
     "multiplexCoupling" = {
       prompt <- paste0(
         "Provide an interpretation of this 'Multiplex Coupling' analysis. The same documents are linked in two layers: ",
-        "the roots layer links documents that share cited references (bibliographic coupling), the topic layer links ",
-        "documents that share keywords. The clusters of the roots layer are the schools (intellectual traditions, named ",
-        "after the titles of their strongest references), the clusters of the topic layer are the themes (named after the ",
-        "keywords of their documents). A school and a theme are linked when the theme holds more documents of the school ",
+        "the references layer links documents that share cited references (bibliographic coupling), the topic layer links ",
+        "documents that share keywords. The clusters of the references layer are the roots (the intellectual bases ",
+        "their documents share, named after the titles of their strongest references), the clusters of the topic layer ",
+        "are the themes (named after the ",
+        "keywords of their documents). A root and a theme are linked when the theme holds more documents of the root ",
         "than expected under independence (standardized residual above 2) and at least a minimum number of them. ",
-        "A school linked to two or more themes is branching (a tradition spread over several subjects), a theme linked to ",
-        "two or more schools is convergent (a subject where different traditions meet), a school or theme with a single ",
+        "A root linked to two or more themes is branching (a tradition spread over several subjects), a theme linked to ",
+        "two or more roots is convergent (a subject where different traditions meet), a root or theme with a single ",
         "link is consolidated, one with no link is dispersed. ",
-        "You have been provided with three plots: (1) the schools x themes matrix, where each cell is the number of ",
-        "documents and red cells hold more documents than expected; (2) the links between schools (left) and themes ",
-        "(right); (3) the plane of the pairs of schools, placed by how close the two schools are in roots (horizontal) ",
-        "and in topics (vertical), relative to two random documents: top left are schools with different roots that ",
+        "You have been provided with three plots: (1) the roots x themes matrix, where each cell is the number of ",
+        "documents and red cells hold more documents than expected; (2) the links between roots (left) and themes ",
+        "(right); (3) the plane of the pairs of roots, placed by how close the two roots are in references (horizontal) ",
+        "and in topics (vertical), relative to two random documents: top left are roots with different references that ",
         "write about similar things. ",
-        "Please discuss: (1) the main schools and the intellectual traditions they represent, looking at their strongest ",
-        "references; (2) the branching schools and the themes they spread into; (3) the convergent themes and the ",
-        "traditions that meet in them; (4) the pairs of schools close in topics but distant in roots; (5) the overall ",
+        "Please discuss: (1) the main roots and the intellectual traditions they represent, looking at their strongest ",
+        "references; (2) the branching roots and the themes they spread into; (3) the convergent themes and the ",
+        "traditions that meet in them; (4) the pairs of roots close in topics but distant in references; (5) the overall ",
         "agreement between the two layers and the stability of the clusters, and what it implies for the reliability ",
         "of the results. ",
         mpx2GeminiText(values$MPX)
@@ -2098,33 +2099,33 @@ MPX2Gemini <- function(mc) {
   files
 }
 
-## schools, themes and links of the multiplex coupling as text for Biblio AI
+## roots, themes and links of the multiplex coupling as text for Biblio AI
 mpx2GeminiText <- function(mc) {
   cl <- mc$clusters
-  s <- cl$schools
+  s <- cl$roots
   th <- cl$themes
-  schools <- paste0(
-    "S", s$cluster, " '", s$terms, "' (", s$size, " documents, ", s$structure,
+  roots <- paste0(
+    "R", s$cluster, " '", s$terms, "' (", s$size, " documents, ", s$structure,
     ifelse(s$themes == "", "", paste0(", linked to ", gsub("(\\d+)", "T\\1", s$themes))),
     "; strongest references: ", trimws(s$references), ")",
     collapse = "; "
   )
   themes <- paste0(
     "T", th$cluster, " '", th$terms, "' (", th$size, " documents, ", th$structure,
-    ifelse(th$schools == "", "", paste0(", linked to ", gsub("(\\d+)", "S\\1", th$schools))),
+    ifelse(th$roots == "", "", paste0(", linked to ", gsub("(\\d+)", "R\\1", th$roots))),
     ")",
     collapse = "; "
   )
   links <- paste0(
-    "S", cl$links$school, " -> T", cl$links$theme, ": ", cl$links$n, " documents, residual ",
+    "R", cl$links$root, " -> T", cl$links$theme, ": ", cl$links$n, " documents, residual ",
     round(cl$links$residual, 2),
     collapse = "; "
   )
   paste0(
-    "SCHOOLS: ", schools, ". THEMES: ", themes, ". LINKS: ", links, ". ",
-    "Agreement between schools and themes (normalized mutual information): ", round(cl$NMI, 2), ". ",
-    "Stability of the clusters (adjusted Rand index between single clustering runs, 1 = identical): schools ",
-    round(cl$agreement[["schools"]], 2), ", themes ", round(cl$agreement[["themes"]], 2), "."
+    "ROOTS: ", roots, ". THEMES: ", themes, ". LINKS: ", links, ". ",
+    "Agreement between roots and themes (normalized mutual information): ", round(cl$NMI, 2), ". ",
+    "Stability of the clusters (adjusted Rand index between single clustering runs, 1 = identical): roots ",
+    round(cl$agreement[["roots"]], 2), ", themes ", round(cl$agreement[["themes"]], 2), "."
   )
 }
 

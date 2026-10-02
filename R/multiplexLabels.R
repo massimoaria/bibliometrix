@@ -1,7 +1,7 @@
-# Names of the schools of a multiplex coupling.
+# Names of the roots of a multiplex coupling.
 #
-# A school is a group of documents that cite the same works: an intellectual
-# root. Its name therefore comes from the content of its strong references (the
+# A root is a group of documents that cite the same works: an intellectual
+# base. Its name therefore comes from the content of its strong references (the
 # references frequent among its documents and concentrated in it), not from the
 # keywords of its documents, which name the themes. The content used is the
 # title of each strong reference, taken from
@@ -10,7 +10,7 @@
 #   3. OpenAlex, by DOI or OpenAlex id, only when the user is online and has
 #      configured both an OpenAlex API key and an email; the titles are kept in
 #      a cache for the R session, so that a repeated analysis downloads nothing.
-# A school with fewer than five reference titles is named after its
+# A root with fewer than five reference titles is named after its
 # cited sources and its most representative reference.
 
 # session cache of the OpenAlex titles of cited references, keyed by
@@ -28,7 +28,7 @@ mpCacheHas <- function(keys) {
 }
 
 # Index of the cited references of the analysed documents: one row per
-# normalized reference (the unit of the roots layer), with its DOI, its
+# normalized reference (the unit of the references layer), with its DOI, its
 # OpenAlex id, the title of the collection document with the same DOI, and the
 # title written in the reference string (Scopus).
 mpReferenceIndex <- function(M, M_all, keys) {
@@ -189,12 +189,12 @@ mpTitleTerms <- function(title) {
   unique(out)
 }
 
-# Label of every school from the titles of its strong references.
+# Label of every root from the titles of its strong references.
 mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api.key = NULL,
                           verbose = TRUE) {
   X <- mc$X_R > 0
-  K <- max(memb)
-  Z <- Matrix::sparseMatrix(i = memb, j = seq_along(memb), x = 1, dims = c(K, length(memb)))
+  Z <- mpMembershipMatrix(memb)
+  K <- nrow(Z)
   inC <- as.matrix(Z %*% X)
   tot <- Matrix::colSums(X)
   refs <- colnames(X)
@@ -223,16 +223,16 @@ mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api
       title[fill] <- ft[fill]
       origin[fill] <- "OpenAlex"
     } else if (isTRUE(verbose)) {
-      message("School names without OpenAlex (", oa$reason, "): from the titles in the collection",
+      message("Root names without OpenAlex (", oa$reason, "): from the titles in the collection",
               " and in the references, otherwise from the cited sources")
     }
   }
   title_of <- stats::setNames(title, needed)
   origin_of <- stats::setNames(origin, needed)
 
-  # terms of every school: weight of the strong references whose title has the
-  # term, then idf across the schools
-  terms_by_school <- lapply(strong, function(s) {
+  # terms of every root: weight of the strong references whose title has the
+  # term, then idf across the roots
+  terms_by_root <- lapply(strong, function(s) {
     t <- title_of[s$ref]
     has <- !is.na(t)
     if (!any(has)) return(stats::setNames(numeric(0), character(0)))
@@ -240,8 +240,8 @@ mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api
     w <- rep(s$w[has], lengths(tt))
     tapply(w, unlist(tt), sum)
   })
-  vocab <- unique(unlist(lapply(terms_by_school, names)))
-  df <- table(factor(unlist(lapply(terms_by_school, names)), levels = vocab))
+  vocab <- unique(unlist(lapply(terms_by_root, names)))
+  df <- table(factor(unlist(lapply(terms_by_root, names)), levels = vocab))
   idf <- log(1 + K / as.numeric(df[vocab]))
   names(idf) <- vocab
 
@@ -249,7 +249,7 @@ mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api
   for (k in seq_len(K)) {
     s <- strong[[k]]
     n_titled <- sum(!is.na(title_of[s$ref]))
-    sc <- terms_by_school[[k]]
+    sc <- terms_by_root[[k]]
     if (n_titled >= 5 && length(sc)) {
       sc <- sc * idf[names(sc)] * ifelse(grepl(" ", names(sc)), 1.5, 1)
       sc <- sort(sc, decreasing = TRUE)

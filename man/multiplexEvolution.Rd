@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiplexEvolution.R
 \name{multiplexEvolution}
 \alias{multiplexEvolution}
-\title{Evolution of the schools of a multiplex coupling}
+\title{Evolution of the roots of a multiplex coupling}
 \usage{
 multiplexEvolution(
   mc,
@@ -23,7 +23,7 @@ years, e.g. \code{c(2010, 2016)} gives three periods.}
 \item{width, step}{are integers. Alternatively to \code{years}, sliding
 windows of \code{width} years every \code{step} years.}
 
-\item{min.docs}{is an integer. A school is followed in a period when it has
+\item{min.docs}{is an integer. A root is followed in a period when it has
 at least \code{min.docs} documents in it. Default is 5.}
 
 \item{slope.min}{is a number. The slope of the log2 lift per period above
@@ -31,24 +31,24 @@ which a trend is called. Default is 0.1.}
 }
 \value{
 an object of class \code{"biblioMultiplexEvolution"}, a list with
-  \code{long} (one row per pair of schools and period), \code{trajectories}
-  (one row per pair, with slopes and trend), \code{periods}, \code{schools}
+  \code{long} (one row per pair of roots and period), \code{trajectories}
+  (one row per pair, with slopes and trend), \code{periods}, \code{roots}
   and \code{params}.
 }
 \description{
-It follows how close the schools of \code{\link{multiplexClusters}} are, in
-roots and in topics, period by period. Documents belong to one period only,
-so the clusters of different periods cannot be matched through their
-members: the schools are defined once, on the whole collection, and in each
-period the proximity of two schools is measured on their documents of that
+It follows how close the roots of \code{\link{multiplexClusters}} are, in
+references and in topics, period by period. Documents belong to one period
+only, so the clusters of different periods cannot be matched through their
+members: the roots are defined once, on the whole collection, and in each
+period the proximity of two roots is measured on their documents of that
 period, relative to two random documents of the same period (lift).
 }
 \details{
 The slopes of the two proximities over the periods classify the trajectory
-of every pair of schools seen in at least two periods:
+of every pair of roots seen in at least two periods:
 \tabular{lll}{
-\code{converging}     \tab \tab topics closer, roots not\cr
-\code{diverging}      \tab \tab topics farther, roots not\cr
+\code{converging}     \tab \tab topics closer, references not\cr
+\code{diverging}      \tab \tab topics farther, references not\cr
 \code{consolidating}  \tab \tab both closer\cr
 \code{drifting apart} \tab \tab both farther\cr
 \code{stable}         \tab \tab neither slope beyond \code{slope.min}}

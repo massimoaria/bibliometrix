@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiplexClusters.R
 \name{multiplexClusters}
 \alias{multiplexClusters}
-\title{Schools and themes of a multiplex coupling}
+\title{Roots and themes of a multiplex coupling}
 \usage{
 multiplexClusters(
   mc,
@@ -11,6 +11,7 @@ multiplexClusters(
   n.runs = 20,
   res.crit = 2,
   min.link = 5,
+  min.size = 5,
   n.labels = 3,
   n.refs = 30,
   email = NULL,
@@ -33,17 +34,20 @@ Default is 1.}
 \item{n.runs}{is an integer. The number of runs combined by the consensus.
 Default is 20.}
 
-\item{res.crit}{is a number. The standardized residual above which a school
+\item{res.crit}{is a number. The standardized residual above which a root
 and a theme can be linked. Default is 2.}
 
 \item{min.link}{is an integer. The minimum number of documents of a link.
 Default is 5; on collections much larger than 2,000 documents a higher
 value may be preferable.}
 
+\item{min.size}{is an integer. The minimum number of documents of a root
+or a theme. Default is 5.}
+
 \item{n.labels}{is an integer. The number of terms and references that label
 a cluster. Default is 3.}
 
-\item{n.refs}{is an integer. The number of strong references of a school whose
+\item{n.refs}{is an integer. The number of strong references of a root whose
 titles name it. Default is 30.}
 
 \item{email, api.key}{are characters. The email and the API key for OpenAlex. When
@@ -54,46 +58,47 @@ Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answe
 \item{seed}{is an integer. The seed of the runs. The random number state of
 the session is restored on exit.}
 
-\item{verbose}{is logical. If TRUE, messages on how the schools are named.}
+\item{verbose}{is logical. If TRUE, messages on how the roots are named.}
 }
 \value{
 the object \code{mc} with an element \code{clusters}, a list with:
 \tabular{lll}{
-\code{schools}, \code{themes} \tab \tab one row per cluster: size, labels, cohesion in the two layers, linked clusters, structure\cr
-\code{links}       \tab \tab one row per school-theme link: documents, residual, share of the school and of the theme\cr
-\code{contingency}, \code{residuals} \tab \tab the schools x themes table and its standardized residuals\cr
-\code{membership}  \tab \tab school and theme of every document\cr
-\code{plane}       \tab \tab the pairs of schools, with their roots and topic proximity\cr
-\code{NMI}, \code{ARI} \tab \tab agreement between schools and themes\cr
+\code{roots}, \code{themes} \tab \tab one row per cluster: size, labels, cohesion in the two layers, linked clusters, structure\cr
+\code{links}       \tab \tab one row per root-theme link: documents, residual, share of the root and of the theme\cr
+\code{contingency}, \code{residuals} \tab \tab the roots x themes table and its standardized residuals\cr
+\code{membership}  \tab \tab root and theme of every document (\code{NA} when in a cluster of fewer than \code{min.size} documents)\cr
+\code{unclustered} \tab \tab the number of documents in no root and in no theme\cr
+\code{plane}       \tab \tab the pairs of roots, with their references and topic proximity\cr
+\code{NMI}, \code{ARI} \tab \tab agreement between roots and themes\cr
 \code{agreement}, \code{modularity} \tab \tab stability and modularity of the two partitions}
 }
 \description{
 It groups the documents of a \code{\link{multiplexCoupling}} into
-\emph{schools} (clusters of the roots layer: documents that cite the same
+\emph{roots} (clusters of the references layer: documents that cite the same
 literature) and \emph{themes} (clusters of the topic layer: documents about
 the same subject), and links them.
 }
 \details{
-A school is an intellectual root, so it is named after the titles of its
-strong references (the references frequent among its documents and
-concentrated in it), not after the keywords of its documents, which name the
-themes. The titles come from the collection, when a reference is one of its
+A root is the intellectual base its documents share, so it is named after
+the titles of its strong references (the references frequent among its
+documents and concentrated in it), not after the keywords of its documents,
+which name the themes. The titles come from the collection, when a reference is one of its
 documents, from the reference string (Scopus writes the cited title) and from
 OpenAlex, by DOI or OpenAlex id. OpenAlex is queried only when the user is
 online and has configured both an OpenAlex API key and an email; the titles
 are kept in a cache for the R session, so that a repeated analysis downloads
-nothing. A school with fewer than five reference titles is named after its cited
-sources and its most representative reference. \code{schools$label_source}
-tells which, and \code{schools$doc_terms} keeps the keywords of its documents.
+nothing. A root with fewer than five reference titles is named after its cited
+sources and its most representative reference. \code{roots$label_source}
+tells which, and \code{roots$doc_terms} keeps the keywords of its documents.
 
-A school and a theme are \emph{linked} when the theme holds more documents of
-the school than expected if schools and themes were independent
+A root and a theme are \emph{linked} when the theme holds more documents of
+the root than expected if roots and themes were independent
 (standardized residual above \code{res.crit}) and at least \code{min.link}
 of them. The same links classify both sides:
 \tabular{lll}{
-\code{branching} school   \tab \tab linked to two or more themes\cr
-\code{consolidation}      \tab \tab a school linked to one theme, or a theme linked to one school\cr
-\code{convergence} theme  \tab \tab linked to two or more schools\cr
+\code{branching} root     \tab \tab linked to two or more themes\cr
+\code{consolidation}      \tab \tab a root linked to one theme, or a theme linked to one root\cr
+\code{convergence} theme  \tab \tab linked to two or more roots\cr
 \code{dispersed}          \tab \tab no link}
 
 Each layer is clustered with consensus clustering (Lancichinetti & Fortunato,
@@ -101,6 +106,14 @@ Each layer is clustered with consensus clustering (Lancichinetti & Fortunato,
 is not reproducible on the topic layer. \code{agreement} reports the mean
 adjusted Rand index between the single runs: the lower it is, the weaker the
 structure of the layer and the more cautiously its clusters should be read.
+
+A root or a theme of fewer than \code{min.size} documents is left out:
+its documents share almost nothing with the rest of the collection, and a
+cluster of two or three of them would be a root or a theme only in name.
+Those documents are in no root (or in no theme): their membership is
+\code{NA}, they are not counted in the roots x themes table, and
+\code{unclustered} reports how many they are. They still count in the
+baseline of the lifts (two random documents of the collection).
 }
 \examples{
 \donttest{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiplexCoupling.R
 \name{multiplexCoupling}
 \alias{multiplexCoupling}
-\title{Multiplex coupling of roots and topics}
+\title{Multiplex coupling of references and topics}
 \usage{
 multiplexCoupling(
   M,
@@ -90,7 +90,7 @@ state of the session is restored on exit.}
 \value{
 an object of class \code{"biblioMultiplex"}, a list with:
 \tabular{lll}{
-\code{pairs}  \tab   \tab the neighbour pairs, with their roots and topic similarity (\code{s_R}, \code{s_T}), layer (\code{edge_type}) and typology (\code{quadrant})\cr
+\code{pairs}  \tab   \tab the neighbour pairs, with their references and topic similarity (\code{s_R}, \code{s_T}), layer (\code{edge_type}) and typology (\code{quadrant})\cr
 \code{nodes}  \tab   \tab the documents, with their node indices (\code{LA} alignment, \code{CI} convergence, \code{BI} branching, \code{P} participation)\cr
 \code{layers} \tab   \tab the igraph graphs of the two layers and of their union\cr
 \code{X_R}, \code{X_T} \tab \tab the document x reference and document x term matrices\cr
@@ -99,13 +99,13 @@ an object of class \code{"biblioMultiplex"}, a list with:
 }
 \description{
 It compares two kinds of closeness between the documents of a collection:
-sharing cited references (the \emph{roots} layer, bibliographic coupling) and
+sharing cited references (the \emph{references} layer, bibliographic coupling) and
 sharing content (the \emph{topic} layer, keyword or text similarity). The two
 layers are built on the same documents, sparsified to the \code{k} nearest
 neighbours of each document, and compared pair by pair: pairs with common
-roots and similar topics (consolidation), common roots and different topics
-(branching), different roots and similar topics (convergence), neither
-(detachment).
+references and similar topics (consolidation), common references and
+different topics (branching), different references and similar topics
+(convergence), neither (detachment).
 }
 \details{
 Statistics on the relation between the layers (\code{info$association},
@@ -115,12 +115,13 @@ neighbour pair because one of its similarities is high, and this selection
 alone induces a negative correlation between the two.
 
 The result is the input of \code{\link{multiplexClusters}}, which groups the
-documents into schools (roots) and themes (topics) and links them, and of
+documents into roots (clusters of the references layer) and themes (clusters
+of the topic layer) and links them, and of
 \code{\link{multiplexPlot}}.
 }
 \section{Reference matching (Scopus)}{
 
-The roots layer matches cited references as strings. Scopus writes the same
+The references layer matches cited references as strings. Scopus writes the same
 reference in different ways, so many shared references are missed. Run
 \code{\link{applyReferenceMatching}} on a Scopus collection first: on two
 test collections it doubled the shared references and brought the

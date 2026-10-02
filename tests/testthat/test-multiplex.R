@@ -23,7 +23,7 @@ mcFixture <- local({
   }
 })
 
-test_that("the roots layer reproduces the coupling indices of normalizeSimilarity()", {
+test_that("the references layer reproduces the coupling indices of normalizeSimilarity()", {
   skip_on_cran()
   skip_if_not_installed("bibliometrixData")
   data(management, package = "bibliometrixData")
@@ -63,7 +63,7 @@ test_that("documents without references or terms are left out and counted", {
     DE = c("AA;BB", "AA;CC", "BB;CC", "AA;BB", NA, "AA;BB;CC")
   )
   mc <- multiplexCoupling(M, n = NULL, k = 2, n.sample = 100, n.perm = 9, verbose = FALSE)
-  expect_equal(mc$info$dropped[["no_roots"]], 1)
+  expect_equal(mc$info$dropped[["no_references"]], 1)
   expect_equal(mc$info$dropped[["no_topic"]], 1)
   expect_setequal(mc$nodes$node, c("D1", "D2", "D3", "D6"))
 })
@@ -98,9 +98,11 @@ test_that("the analysis is reproducible and leaves the session's random numbers 
   expected <- stats::runif(1)
   set.seed(42)
   a <- multiplexCoupling(M, n = NULL, k = 3, n.sample = 100, n.perm = 9, verbose = FALSE)
-  a <- multiplexClusters(a)
+  # seven documents: every cluster is kept (min.size = 1)
+  a <- multiplexClusters(a, min.size = 1)
   expect_equal(stats::runif(1), expected)
-  b <- multiplexClusters(multiplexCoupling(M, n = NULL, k = 3, n.sample = 100, n.perm = 9, verbose = FALSE))
+  b <- multiplexClusters(multiplexCoupling(M, n = NULL, k = 3, n.sample = 100, n.perm = 9, verbose = FALSE),
+                         min.size = 1)
   expect_identical(a$pairs, b$pairs)
   expect_identical(a$clusters$membership, b$clusters$membership)
 })
@@ -146,6 +148,16 @@ test_that("cluster similarities from the sums of unit rows equal the mean over t
     for (b in 1:4) if (a != b) expect_equal(cs$between[a, b], mean(S[ia, memb == b]))
   }
   expect_equal(cs$global, mean(S[upper.tri(S)]))
+  # documents in no cluster (NA): left out of the clusters, kept in the baseline
+  memb[c(2, 9, 17)] <- NA
+  cs <- mpClusterSimilarity(U, memb)
+  for (a in 1:4) {
+    ia <- which(memb == a)
+    W <- S[ia, ia]
+    expect_equal(cs$within[a], mean(W[upper.tri(W)]))
+    expect_equal(cs$size[a], length(ia))
+  }
+  expect_equal(cs$global, mean(S[upper.tri(S)]))
 })
 
 test_that("standardized residuals match chisq.test()", {
@@ -154,23 +166,25 @@ test_that("standardized residuals match chisq.test()", {
                ignore_attr = TRUE)
 })
 
-test_that("schools and themes are classified from one set of links", {
+test_that("roots and themes are classified from one set of links", {
   skip_if_not_installed("bibliometrixData")
   mc <- mcFixture()
   cl <- mc$clusters
-  expect_equal(sum(cl$contingency), nrow(mc$nodes))
-  expect_equal(nrow(cl$schools), max(cl$membership$school))
-  expect_true(all(cl$schools$size == tabulate(cl$membership$school)))
-  expect_true(all(nzchar(cl$schools$terms)))
-  # the links counted by the schools and by the themes are the same
-  expect_equal(cl$schools$n_themes, tabulate(cl$links$school, nrow(cl$schools)))
-  expect_equal(cl$themes$n_schools, tabulate(cl$links$theme, nrow(cl$themes)))
+  m <- cl$membership
+  expect_equal(sum(cl$contingency), sum(!is.na(m$root) & !is.na(m$theme)))
+  expect_equal(nrow(cl$roots), max(m$root, na.rm = TRUE))
+  expect_true(all(cl$roots$size == tabulate(m$root)))
+  expect_equal(cl$unclustered, c(roots = sum(is.na(m$root)), themes = sum(is.na(m$theme))))
+  expect_true(all(nzchar(cl$roots$terms)))
+  # the links counted by the roots and by the themes are the same
+  expect_equal(cl$roots$n_themes, tabulate(cl$links$root, nrow(cl$roots)))
+  expect_equal(cl$themes$n_roots, tabulate(cl$links$theme, nrow(cl$themes)))
   expect_true(all(cl$links$residual > 2 & cl$links$n >= 5))
-  expect_equal(cl$schools$structure == "branching", cl$schools$n_themes >= 2)
-  expect_equal(cl$themes$structure == "convergence", cl$themes$n_schools >= 2)
-  expect_equal(nrow(cl$plane), choose(nrow(cl$schools), 2))
+  expect_equal(cl$roots$structure == "branching", cl$roots$n_themes >= 2)
+  expect_equal(cl$themes$structure == "convergence", cl$themes$n_roots >= 2)
+  expect_equal(nrow(cl$plane), choose(nrow(cl$roots), 2))
   expect_true(all(cl$agreement > 0 & cl$agreement <= 1))
-  expect_output(print(mc), "Schools:")
+  expect_output(print(mc), "Roots  :")
 })
 
 test_that("a stricter link rule finds no more links", {
@@ -180,6 +194,28 @@ test_that("a stricter link rule finds no more links", {
   strict <- multiplexClusters(mc, min.link = 10)$clusters$links
   expect_lte(nrow(strict), nrow(mc$clusters$links))
   expect_true(all(strict$n >= 10))
+})
+
+test_that("roots and themes smaller than min.size are left out", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  mc <- mcFixture()
+  all1 <- suppressMessages(multiplexClusters(mc, min.size = 1, verbose = FALSE))$clusters
+  sz <- all1$themes$size
+  cut <- sort(unique(sz))[2]
+  cl <- suppressMessages(multiplexClusters(mc, min.size = cut, verbose = FALSE))$clusters
+  expect_true(all(cl$themes$size >= cut) && all(cl$roots$size >= cut))
+  # the clusters kept are the same, with the same numbers
+  expect_equal(cl$themes$size, sz[sz >= cut])
+  expect_equal(cl$unclustered[["themes"]], sum(sz[sz < cut]))
+  expect_equal(is.na(cl$membership$theme), all1$membership$theme %in% which(sz < cut))
+  expect_true(is.finite(cl$NMI))
+  expect_output(printMultiplexClusters(cl), "Left out")
+  m2 <- mc
+  m2$clusters <- cl
+  ev <- multiplexEvolution(m2, years = c(2012, 2016), min.docs = 3)
+  expect_s3_class(ev, "biblioMultiplexEvolution")
+  expect_error(multiplexClusters(mc, min.size = 1e6, verbose = FALSE), "lower min.size")
 })
 
 test_that("periods from cut points and from sliding windows", {
@@ -192,7 +228,7 @@ test_that("periods from cut points and from sliding windows", {
   expect_error(mpPeriods(PY), "cut points")
 })
 
-test_that("multiplexEvolution follows pairs of schools and classifies their trend", {
+test_that("multiplexEvolution follows pairs of roots and classifies their trend", {
   skip_if_not_installed("bibliometrixData")
   mc <- mcFixture()
   ev <- multiplexEvolution(mc, years = c(2012, 2016, 2018), min.docs = 3)
@@ -228,9 +264,39 @@ test_that("every plot renders, static and interactive", {
   hooks <- multiplexPlot(mc, "links", interactive = TRUE)$jsHooks$render
   expect_true(any(vapply(hooks, function(h) grepl("sankey-node", h$code, fixed = TRUE), logical(1))))
   expect_s3_class(multiplexPlot(mc, "network"), "visNetwork")
+  # a cluster whose documents share almost nothing sits at the floor, not at
+  # log2(1e-13), which would squash every other cluster against the edge
+  m2 <- mc
+  m2$clusters$themes$cohesion_R[1] <- 1e-13
+  ch <- plotly::plotly_build(multiplexPlot(m2, "clusters", interactive = TRUE))
+  expect_equal(min(unlist(lapply(ch$x$data, function(t) t$x))), -4)
   ev <- multiplexEvolution(mc, years = c(2012, 2016, 2018), min.docs = 3)
   expect_s3_class(multiplexPlot(ev, "trajectory"), "ggplot")
-  expect_s3_class(multiplexPlot(ev, "trajectory", interactive = TRUE), "plotly")
+  # no animation: each pair is a path with an arrow at its last period, plus
+  # its first period in the same legend group
+  tp <- plotly::plotly_build(multiplexPlot(ev, "trajectory", interactive = TRUE))
+  expect_null(tp$x$frames)
+  paths <- Filter(function(t) !isFALSE(t$showlegend), tp$x$data)
+  expect_true(all(vapply(paths, function(t) utils::tail(t$marker$symbol, 1) == "arrow", logical(1))))
+  expect_equal(length(tp$x$data), 2 * length(paths))
+  # the pairs that change area with a trend come first, those followed in more
+  # periods before the others; the trajectories are those pairs
+  tr <- multiplexPairs(ev)
+  expect_equal(tr$id, seq_len(nrow(tr)))
+  drawn <- tr$moves & tr$trend != "stable"
+  expect_false(is.unsorted(!drawn))
+  expect_false(is.unsorted(rev(tr$periods[drawn])))
+  expect_equal(tr$moves, grepl("->", tr$areas))
+  expect_length(paths, min(12, sum(drawn)))
+  expect_equal(mpArea(c(1, -1, 1, -1), c(1, 1, -1, -1)),
+               c("close in both", "close in topics only", "close in references only", "close in neither"))
+  # the animation: a frame per period of the pair, the trail growing by one point
+  an <- plotly::plotly_build(multiplexPlot(ev, "animation", pair = 1))
+  d <- ev$long[ev$long$A == tr$A[1] & ev$long$B == tr$B[1], ]
+  expect_length(an$x$frames, nrow(d))
+  last <- an$x$frames[[nrow(d)]]$data[[1]]
+  expect_equal(as.numeric(last$x), d$x[order(d$period)])
+  expect_error(multiplexPlot(ev, "animation", pair = nrow(tr) + 1), "between 1 and")
   expect_error(multiplexPlot(mc, "trajectory"), "multiplexEvolution")
 })
 
@@ -289,24 +355,24 @@ test_that("OpenAlex titles come from the cache when they are there", {
   rm("doi:10.9999/cached", envir = .mpCache)
 })
 
-test_that("schools are named after their roots, offline too", {
+test_that("roots are named after their references, offline too", {
   skip_if_not_installed("bibliometrixData")
   mc <- mcFixture()
   testthat::local_mocked_bindings(mpOpenAlexReady = function(...) list(ok = FALSE, reason = "offline test"))
   cl <- suppressMessages(multiplexClusters(mc))$clusters
-  expect_true(all(nzchar(cl$schools$terms)))
-  expect_true(all(nzchar(cl$schools$doc_terms)))
-  expect_true(all(grepl("^titles of|^cited sources", cl$schools$label_source)))
-  expect_false(any(grepl("OpenAlex", cl$schools$label_source)))
+  expect_true(all(nzchar(cl$roots$terms)))
+  expect_true(all(nzchar(cl$roots$doc_terms)))
+  expect_true(all(grepl("^titles of|^cited sources", cl$roots$label_source)))
+  expect_false(any(grepl("OpenAlex", cl$roots$label_source)))
 })
 
-test_that("with OpenAlex configured, schools are named from the titles of their references", {
+test_that("with OpenAlex configured, roots are named from the titles of their references", {
   skip_on_cran()
   skip_if_offline("api.openalex.org")
   skip_if_not_installed("bibliometrixData")
   skip_if(!isTRUE(mpOpenAlexReady()$ok), "no OpenAlex API key and email configured")
   cl <- suppressMessages(multiplexClusters(mcFixture()))$clusters
-  expect_true(any(grepl("OpenAlex", cl$schools$label_source)))
+  expect_true(any(grepl("OpenAlex", cl$roots$label_source)))
 })
 
 test_that("terms of one character, digits or punctuation are not topics", {

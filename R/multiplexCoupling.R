@@ -1,13 +1,13 @@
-#' Multiplex coupling of roots and topics
+#' Multiplex coupling of references and topics
 #'
 #' It compares two kinds of closeness between the documents of a collection:
-#' sharing cited references (the \emph{roots} layer, bibliographic coupling) and
+#' sharing cited references (the \emph{references} layer, bibliographic coupling) and
 #' sharing content (the \emph{topic} layer, keyword or text similarity). The two
 #' layers are built on the same documents, sparsified to the \code{k} nearest
 #' neighbours of each document, and compared pair by pair: pairs with common
-#' roots and similar topics (consolidation), common roots and different topics
-#' (branching), different roots and similar topics (convergence), neither
-#' (detachment).
+#' references and similar topics (consolidation), common references and
+#' different topics (branching), different references and similar topics
+#' (convergence), neither (detachment).
 #'
 #' Statistics on the relation between the layers (\code{info$association},
 #' the alignment index \code{LA}) are computed on all pairs, through a uniform
@@ -16,11 +16,12 @@
 #' alone induces a negative correlation between the two.
 #'
 #' The result is the input of \code{\link{multiplexClusters}}, which groups the
-#' documents into schools (roots) and themes (topics) and links them, and of
+#' documents into roots (clusters of the references layer) and themes (clusters
+#' of the topic layer) and links them, and of
 #' \code{\link{multiplexPlot}}.
 #'
 #' @section Reference matching (Scopus):
-#' The roots layer matches cited references as strings. Scopus writes the same
+#' The references layer matches cited references as strings. Scopus writes the same
 #' reference in different ways, so many shared references are missed. Run
 #' \code{\link{applyReferenceMatching}} on a Scopus collection first: on two
 #' test collections it doubled the shared references and brought the
@@ -71,7 +72,7 @@
 #'
 #' @return an object of class \code{"biblioMultiplex"}, a list with:
 #' \tabular{lll}{
-#' \code{pairs}  \tab   \tab the neighbour pairs, with their roots and topic similarity (\code{s_R}, \code{s_T}), layer (\code{edge_type}) and typology (\code{quadrant})\cr
+#' \code{pairs}  \tab   \tab the neighbour pairs, with their references and topic similarity (\code{s_R}, \code{s_T}), layer (\code{edge_type}) and typology (\code{quadrant})\cr
 #' \code{nodes}  \tab   \tab the documents, with their node indices (\code{LA} alignment, \code{CI} convergence, \code{BI} branching, \code{P} participation)\cr
 #' \code{layers} \tab   \tab the igraph graphs of the two layers and of their union\cr
 #' \code{X_R}, \code{X_T} \tab \tab the document x reference and document x term matrices\cr
@@ -147,7 +148,7 @@ multiplexCoupling <- function(M,
     M$LCS <- H$LCS[match(M$SR, H$SR)]
   }
   nonEmpty <- function(x) !is.na(x) & nchar(trimws(x)) > 0
-  has_roots <- nonEmpty(M$CR)
+  has_refs <- nonEmpty(M$CR)
   # topic.field = "auto": the keywords when they cover at least kw.coverage of
   # the documents with references, titles and abstracts otherwise
   kw_cov <- NA_real_
@@ -158,7 +159,7 @@ multiplexCoupling <- function(M,
     } else {
       rep(FALSE, nrow(M))
     }
-    kw_cov <- mean(has_kw[has_roots])
+    kw_cov <- mean(has_kw[has_refs])
     topic.field <- if (length(kw) && isTRUE(kw_cov >= kw.coverage)) {
       kw
     } else {
@@ -175,8 +176,8 @@ multiplexCoupling <- function(M,
     stop("multiplexCoupling(): M has no field ", paste(missing_fields, collapse = ", "), call. = FALSE)
   }
   has_topic <- Reduce(`|`, lapply(topic.field, function(f) nonEmpty(M[[f]])))
-  dropped <- c(total = nrow(M), no_roots = sum(!has_roots), no_topic = sum(has_roots & !has_topic))
-  M <- M[has_roots & has_topic, , drop = FALSE]
+  dropped <- c(total = nrow(M), no_references = sum(!has_refs), no_topic = sum(has_refs & !has_topic))
+  M <- M[has_refs & has_topic, , drop = FALSE]
   if (nrow(M) < 3) {
     stop("multiplexCoupling(): fewer than 3 documents have both cited references and ",
          paste(topic.field, collapse = "/"), call. = FALSE)
@@ -188,7 +189,7 @@ multiplexCoupling <- function(M,
   }
 
   ## Layers ----
-  say("Building the roots layer (CR) and the topic layer (", paste(topic.field, collapse = "+"),
+  say("Building the references layer (CR) and the topic layer (", paste(topic.field, collapse = "+"),
       ") on ", nrow(M), " documents")
   buildLayers <- function(M) {
     list(
@@ -235,7 +236,7 @@ multiplexCoupling <- function(M,
   pairs$in_R <- key(U) %in% key(ER)
   pairs$in_T <- key(U) %in% key(ET)
   pairs$edge_type <- ifelse(pairs$in_R & pairs$in_T, "both",
-                            ifelse(pairs$in_R, "roots_only", "topics_only"))
+                            ifelse(pairs$in_R, "references_only", "topics_only"))
 
   ## Association between the layers, over all pairs ----
   say("Association between the layers on a sample of ", format(n.sample, big.mark = ","), " pairs")
@@ -295,7 +296,7 @@ multiplexCoupling <- function(M,
   )
   res <- list(
     pairs = pairs, nodes = nodes,
-    layers = list(roots = toGraph(ER, ER$s), topics = toGraph(ET, ET$s), union = gU),
+    layers = list(references = toGraph(ER, ER$s), topics = toGraph(ET, ET$s), union = gU),
     X_R = XR, X_T = XT, refs = refs,
     info = list(
       dropped = dropped, n_nodes = nrow(nodes), n_refs = ncol(L$R$inc), n_terms = ncol(L$T$inc),
@@ -316,17 +317,17 @@ print.biblioMultiplex <- function(x, ...) {
   p <- stats::setNames(x$params$values, x$params$params)
   pr <- x$pairs
   cat("Multiplex coupling of", x$info$n_nodes, "documents\n")
-  cat("  roots : CR -", x$info$n_refs, "cited references, weight", p[["ref.weight"]], "\n")
-  cat("  topics:", gsub(";", "+", p[["topic.field"]]), "-", x$info$n_terms, "terms\n")
+  cat("  references: CR -", x$info$n_refs, "cited references, weight", p[["ref.weight"]], "\n")
+  cat("  topics    :", gsub(";", "+", p[["topic.field"]]), "-", x$info$n_terms, "terms\n")
   if (!is.na(x$info$keyword_coverage)) {
-    cat(sprintf("          chosen automatically: keywords cover %.0f%% of the documents with references\n",
+    cat(sprintf("              chosen automatically: keywords cover %.0f%% of the documents with references\n",
                 100 * x$info$keyword_coverage))
   }
   cat("  similarity", p[["similarity"]], "| neighbours k =", p[["k"]], "| standardize", p[["standardize"]], "\n")
   d <- x$info$dropped
-  cat("  documents:", d[["total"]], "in M;", d[["no_roots"]], "without CR;", d[["no_topic"]],
+  cat("  documents:", d[["total"]], "in M;", d[["no_references"]], "without CR;", d[["no_topic"]],
       "without topic terms;", d[["empty_after_filters"]], "empty after the frequency filters\n\n")
-  cat("Neighbour pairs: roots", sum(pr$in_R), "| topics", sum(pr$in_T), "| both", sum(pr$in_R & pr$in_T), "\n")
+  cat("Neighbour pairs: references", sum(pr$in_R), "| topics", sum(pr$in_T), "| both", sum(pr$in_R & pr$in_T), "\n")
   a <- x$info$association
   cat(sprintf("Association of the layers on %s random pairs: Spearman %.3f (QAP p = %.3f)\n",
               format(a$n_pairs, big.mark = ","), a$spearman, a$qap_p))
@@ -650,8 +651,8 @@ mpNullPairStats <- function(layer, i, j, type, s_obs, n.perm = 99, seed = 1234) 
 }
 
 # Node indices on the neighbour pairs:
-#   CI : share of the topic neighbours that are not roots neighbours (convergence)
-#   BI : share of the roots neighbours that are not topic neighbours (branching)
+#   CI : share of the topic neighbours that are not references neighbours (convergence)
+#   BI : share of the references neighbours that are not topic neighbours (branching)
 #   P  : multiplex participation coefficient (Battiston, Nicosia & Latora 2014)
 mpNodeIndices <- function(pairs, n) {
   long <- rbind(

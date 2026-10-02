@@ -58,8 +58,14 @@
 #' @param min.ref.freq,min.term.freq are integers. The minimum number of
 #'   documents of a cited reference and of a term. Default is 2 for both: a
 #'   feature of a single document links no pair.
-#' @param ngrams,stemming,remove.terms,synonyms options of the topic layer when
-#'   it is built from titles and abstracts (see \code{\link{termExtraction}}).
+#' @param ngrams,stemming options of the topic layer when it is built from
+#'   titles and abstracts (see \code{\link{termExtraction}}).
+#' @param remove.terms is a character vector. Terms removed from the topic
+#'   layer, whatever its fields (keywords, titles and abstracts). Default is
+#'   \code{NULL}.
+#' @param synonyms is a character vector. Each element lists synonyms separated
+#'   by ";", merged into the first of them before \code{remove.terms} is
+#'   applied, whatever the fields of the topic layer. Default is \code{NULL}.
 #' @param n.sample is an integer. The number of random pairs used for the
 #'   association between the layers and the percentiles. Default is 100000.
 #' @param n.perm is an integer. The number of randomisations of the null model
@@ -404,13 +410,15 @@ mpTopicLayer <- function(M, fields = c("DE", "ID"), min.freq = 2, ngrams = 1, st
   tf <- if (all(fields %in% c("DE", "ID"))) "binary" else "log"
   parts <- lapply(fields, function(f) {
     if (f %in% c("TI", "AB")) {
+      # termExtraction() removes terms before it merges synonyms: the terms
+      # are removed afterwards, as for keywords
       M2 <- suppressMessages(termExtraction(M,
         Field = f, ngrams = ngrams, stemming = stemming,
-        remove.terms = remove.terms, synonyms = synonyms, verbose = FALSE
+        synonyms = synonyms, verbose = FALSE
       ))
       # termExtraction() returns the rows in another order
       M2 <- as.data.frame(M2)[match(M$SR, M2$SR), , drop = FALSE]
-      mpFieldMatrix(M2, paste0(f, "_TM"), binary = FALSE)
+      mpFieldMatrix(M2, paste0(f, "_TM"), binary = FALSE, remove.terms = remove.terms)
     } else {
       mpFieldMatrix(M, f, binary = TRUE, remove.terms = remove.terms, synonyms = synonyms)
     }

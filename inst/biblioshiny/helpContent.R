@@ -3052,6 +3052,7 @@ helpContent <- function() {
     <li><strong>Number of documents</strong> and <strong>Most cited by</strong>: the analysis runs on the most cited documents of the collection (by global or local citations). 1,000 documents take less than a minute.</li>
     <li><strong>Topics from</strong>: keywords (author keywords and Keywords Plus), titles and abstracts, or automatic (keywords, unless they are missing in more than 20% of the documents).</li>
     <li><strong>Neighbours per document (k)</strong>: how many nearest neighbours every document keeps in each layer. Fewer neighbours give smaller and more numerous clusters.</li>
+    <li><strong>Text editing of the topic layer</strong>: as in the other analyses, a list of terms to remove (generic words, the terms of the search query) and a list of synonyms, one row per group, merged into the first term of the row (plural and singular, spelling variants, acronyms). They apply to keywords and to titles and abstracts; synonyms are merged before the terms are removed. The references layer is not affected.</li>
     <li><strong>Clustering algorithm</strong>: Louvain, Leiden or Walktrap, used for both layers.</li>
     <li><strong>Documents per link</strong>: the minimum number of documents of a root in a theme for a link.</li>
     <li><strong>Documents per cluster</strong>: the minimum number of documents of a root or a theme. Smaller clusters are left out: their documents share almost nothing with the rest of the collection, and are in no root (or in no theme); the Summary tab reports how many they are.</li>

@@ -71,8 +71,16 @@ weighting of the cited references.}
 documents of a cited reference and of a term. Default is 2 for both: a
 feature of a single document links no pair.}
 
-\item{ngrams, stemming, remove.terms, synonyms}{options of the topic layer when
-it is built from titles and abstracts (see \code{\link{termExtraction}}).}
+\item{ngrams, stemming}{options of the topic layer when it is built from
+titles and abstracts (see \code{\link{termExtraction}}).}
+
+\item{remove.terms}{is a character vector. Terms removed from the topic
+layer, whatever its fields (keywords, titles and abstracts). Default is
+\code{NULL}.}
+
+\item{synonyms}{is a character vector. Each element lists synonyms separated
+by ";", merged into the first of them before \code{remove.terms} is
+applied, whatever the fields of the topic layer. Default is \code{NULL}.}
 
 \item{n.sample}{is an integer. The number of random pairs used for the
 association between the layers and the percentiles. Default is 100000.}

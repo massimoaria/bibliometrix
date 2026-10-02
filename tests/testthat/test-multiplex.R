@@ -381,3 +381,32 @@ test_that("terms of one character, digits or punctuation are not topics", {
   expect_false(any(c("0", "4.0", "C") %in% colnames(L$inc)))
   expect_true(all(c("INDUSTRY 4", "5G", "COVID-19") %in% colnames(L$inc)))
 })
+
+test_that("synonyms and terms to remove apply to the keywords of the topic layer", {
+  M <- mk(
+    CR = c(refs(1, 2), refs(1, 2), refs(2, 3), refs(2, 3)),
+    DE = c("NETWORKS;CO-CITATION;GENERIC", "NETWORK;COCITATION;GENERIC",
+           "NETWORK;CO-CITATION", "NETWORKS;COCITATION;GENERIC")
+  )
+  plain <- multiplexCoupling(M, n = NULL, topic.field = "DE", n.perm = 9, verbose = FALSE)
+  clean <- multiplexCoupling(M, n = NULL, topic.field = "DE", n.perm = 9, verbose = FALSE,
+                             synonyms = c("NETWORK;NETWORKS", "CO-CITATION;COCITATION"),
+                             remove.terms = "GENERIC")
+  expect_setequal(colnames(plain$X_T), c("CO-CITATION", "COCITATION", "GENERIC", "NETWORK", "NETWORKS"))
+  expect_setequal(colnames(clean$X_T), c("CO-CITATION", "NETWORK"))
+  # merged before removal: removing a head removes its synonyms too
+  gone <- multiplexCoupling(M, n = NULL, topic.field = "DE", n.perm = 9, verbose = FALSE,
+                            synonyms = "NETWORK;NETWORKS", remove.terms = "network")
+  expect_false(any(c("NETWORK", "NETWORKS") %in% colnames(gone$X_T)))
+})
+
+test_that("synonyms are merged before terms are removed in titles too", {
+  M <- mk(CR = c(refs(1, 2), refs(1, 2), refs(2, 3), refs(2, 3)), DE = "AA")
+  M$TI <- c("networks of citations", "network of citations",
+            "networks and citations", "network and citations")
+  terms <- function(...) colnames(mpTopicLayer(M, "TI", min.freq = 1, ...)$inc)
+  expect_true(all(c("NETWORK", "NETWORKS") %in% terms()))
+  expect_false("NETWORKS" %in% terms(synonyms = "NETWORK;NETWORKS"))
+  expect_false(any(c("NETWORK", "NETWORKS") %in%
+                     terms(synonyms = "NETWORK;NETWORKS", remove.terms = "network")))
+})

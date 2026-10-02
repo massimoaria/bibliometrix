@@ -7803,9 +7803,10 @@ body <- dashboardBody(
               dropdown(
                 h4(strong("Options: ")),
                 br(),
+                # Main Configuration
                 div(
                   style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
-                  h5(strong("Documents and layers"), style = "color: #2c3e50; margin-bottom: 10px;"),
+                  h5(strong("Main Configuration"), style = "color: #2c3e50; margin-bottom: 10px;"),
                   fluidRow(
                     column(6, numericInput("mpxN", "Number of documents", value = 1000, min = 50, step = 50)),
                     column(6, selectInput("mpxSelectBy", "Most cited by",
@@ -7818,9 +7819,83 @@ body <- dashboardBody(
                     column(6, numericInput("mpxK", "Neighbours per document (k)", value = 10, min = 3, max = 50))
                   )
                 ),
-                div(
-                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
-                  h5(strong("Roots and themes"), style = "color: #2c3e50; margin-bottom: 10px;"),
+
+                # Text Editing Box (topic layer)
+                box(
+                  title = span(
+                    icon("edit", style = "margin-right: 5px;"),
+                    strong("Text Editing"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "warning",
+                  div(
+                    style = "background-color: #fff8e6; padding: 12px; border-radius: 5px; margin-bottom: 15px; border-left: 3px solid #f39c12;",
+                    h6(
+                      icon("ban", style = "margin-right: 5px;"),
+                      strong("Stop Words"),
+                      style = "color: #e67e22; margin-bottom: 10px;"
+                    ),
+                    selectInput("mpxStopFile", "Load a list of terms to remove", choices = c("Yes" = "Y", "No" = "N"), selected = "N"),
+                    conditionalPanel(
+                      condition = "input.mpxStopFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(h5(strong("Upload a TXT or CSV file containing a list of terms you want to remove from the analysis.")),
+                                 h5("Terms have to be separated by a standard separator (comma, semicolon or tabulator)."),
+                                 style = "color: #666;"),
+                        fluidRow(
+                          column(8, fileInput("mpxStop", "", multiple = FALSE,
+                                              accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv", ".txt"))),
+                          column(4, selectInput("mpxSep", "File Separator",
+                                                choices = c('Comma ","' = ",", 'Semicolon ";"' = ";", "Tab" = "\t"),
+                                                selected = ","))
+                        )
+                      )
+                    )
+                  ),
+                  div(
+                    style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 3px solid #4caf50;",
+                    h6(
+                      icon("exchange-alt", style = "margin-right: 5px;"),
+                      strong("Synonyms"),
+                      style = "color: #2e7d32; margin-bottom: 10px;"
+                    ),
+                    selectInput("mpxSynFile", "Load a list of synonyms", choices = c("Yes" = "Y", "No" = "N"), selected = "N"),
+                    conditionalPanel(
+                      condition = "input.mpxSynFile == 'Y'",
+                      div(
+                        style = "margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 4px;",
+                        helpText(h5(strong("Upload a TXT or CSV file containing, in each row, a list of synonyms that will be merged into a single term (the first one of the row).")),
+                                 h5("Terms have to be separated by a standard separator. Rows have to be separated by return separator."),
+                                 style = "color: #666;"),
+                        fluidRow(
+                          column(8, fileInput("mpxSyn", "", multiple = FALSE,
+                                              accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv", ".txt"))),
+                          column(4, selectInput("mpxSynSep", "File Separator",
+                                                choices = c('Comma ","' = ",", 'Semicolon ";"' = ";", "Tab" = "\t"),
+                                                selected = ","))
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                # Roots and themes Box
+                box(
+                  title = span(
+                    icon("sliders", style = "margin-right: 5px;"),
+                    strong("Roots and Themes"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
                   fluidRow(
                     column(6, selectInput("mpxAlgorithm", "Clustering algorithm",
                                           choices = c("Louvain" = "louvain", "Leiden" = "leiden",
@@ -7832,9 +7907,19 @@ body <- dashboardBody(
                     column(6, numericInput("mpxMinSize", "Documents per cluster", value = 5, min = 1, step = 1))
                   )
                 ),
-                div(
-                  style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;",
-                  h5(strong("Evolution"), style = "color: #2c3e50; margin-bottom: 10px;"),
+
+                # Evolution Box
+                box(
+                  title = span(
+                    icon("clock", style = "margin-right: 5px;"),
+                    strong("Evolution"),
+                    style = "font-size: 16px; color: #2c3e50;"
+                  ),
+                  collapsible = TRUE,
+                  width = 15,
+                  solidHeader = FALSE,
+                  collapsed = TRUE,
+                  status = "info",
                   fluidRow(
                     column(6, numericInput("mpxNumSlices", "Number of Cutting Points", value = 2, min = 1, max = 6)),
                     column(6, numericInput("mpxMinDocs", "Documents per root and period", value = 5, min = 2))

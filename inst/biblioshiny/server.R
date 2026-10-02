@@ -11272,9 +11272,34 @@ To ensure the functionality of Biblioshiny,
     tryCatch(multiplexEvolution(mc, years = years, min.docs = input$mpxMinDocs), error = function(e) NULL)
   }
 
+  # text editing of the topic layer: terms to remove and synonyms, as in the
+  # other analyses
+  observeEvent(input$mpxStop, {
+    values$MPXremove.terms <- data.frame(stopword = trimws(readStopwordsFile(file = input$mpxStop, sep = input$mpxSep)))
+    values$GenericSL <- values$MPXremove.terms
+    popUpGeneric(title = "Stopword list", type = NULL, color = c("#1d8fe1"),
+                 subtitle = uiOutput("stopwordList"), btn_labels = "OK")
+  })
+  observeEvent(input$mpxSyn, {
+    synonyms <- trimws(readSynWordsFile(file = input$mpxSyn, sep = input$mpxSynSep))
+    term <- unlist(lapply(strsplit(synonyms, ";"), function(l) l[1]))
+    synList <- unlist(lapply(strsplit(synonyms, ";"), function(l) paste0(trimws(l[-1]), collapse = ";")))
+    values$MPXsyn.terms <- data.frame(term = term, synonyms = synList)
+    values$GenericSYN <- values$MPXsyn.terms
+    popUpGeneric(title = "Synonym List", type = NULL, color = c("#1d8fe1"),
+                 subtitle = uiOutput("synonymList"), btn_labels = "OK")
+  })
+
   MPXResult <- eventReactive(input$applyMPX, {
     req(values$M)
     topic_field <- if (input$mpxTopicField == "auto") "auto" else strsplit(input$mpxTopicField, ";")[[1]]
+    remove.terms <- if (input$mpxStopFile == "Y" && !is.null(values$MPXremove.terms)) {
+      trimws(values$MPXremove.terms$stopword)
+    }
+    synonyms <- if (input$mpxSynFile == "Y" && !is.null(values$MPXsyn.terms)) {
+      s <- values$MPXsyn.terms
+      ifelse(nzchar(s$synonyms), paste0(s$term, ";", s$synonyms), s$term)
+    }
     # the same data and options give the result again without computing it;
     # whether OpenAlex is configured is part of the key, as it changes the
     # names of the roots
@@ -11282,6 +11307,7 @@ To ensure the functionality of Biblioshiny,
       fp = data_fingerprint(values$M), n = input$mpxN, select.by = input$mpxSelectBy,
       topic = input$mpxTopicField, k = input$mpxK, n.perm = input$mpxNperm,
       algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink, min.size = input$mpxMinSize,
+      remove.terms = remove.terms, synonyms = synonyms,
       openalex = nzchar(Sys.getenv("openalexR.apikey")) && nzchar(Sys.getenv("openalexR.mailto"))
     )
     if (identical(cache_key, values$cache_MPX_key) && !is.null(values$cache_MPX_result)) {
@@ -11302,6 +11328,8 @@ To ensure the functionality of Biblioshiny,
           topic.field = topic_field,
           k = input$mpxK,
           n.perm = input$mpxNperm,
+          remove.terms = remove.terms,
+          synonyms = synonyms,
           verbose = FALSE
         ),
         error = function(e) {

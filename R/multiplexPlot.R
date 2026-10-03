@@ -33,6 +33,13 @@ utils::globalVariables(c(
 #' @param pair is an integer. For \code{type = "animation"}, the pair of
 #'   roots, by its number in \code{\link{multiplexPairs}} (the numbers of
 #'   \code{type = "trajectory"}). Default is 1.
+#' @param greyscale is logical. For the static plots \code{"matrix"},
+#'   \code{"links"}, \code{"clusters"} and \code{"trajectory"}: if TRUE, the
+#'   structures are also told apart by the shape of the points (roots circles,
+#'   themes triangles; filled when branching or convergent, open when
+#'   consolidated, a cross when dispersed), the trends by the line type, and
+#'   the link cells of the matrix are outlined, so that the plot can be read
+#'   without colour (print). Default is FALSE.
 #' @param max.nodes is an integer. For \code{type = "network"}, the maximum
 #'   number of documents drawn. Default is 500.
 #'
@@ -55,23 +62,24 @@ multiplexPlot <- function(x,
                           n.labels = 12,
                           min.size = 10,
                           max.nodes = 500,
-                          pair = 1) {
+                          pair = 1,
+                          greyscale = FALSE) {
   type <- match.arg(type)
   if (type %in% c("trajectory", "animation")) {
     if (!inherits(x, "biblioMultiplexEvolution")) {
       stop("multiplexPlot(type = \"", type, "\") needs the result of multiplexEvolution()", call. = FALSE)
     }
     if (type == "animation") return(mpTrajectoryAnimation(x, pair))
-    return(mpTrajectoryPlot(x, interactive, n.labels))
+    return(mpTrajectoryPlot(x, interactive, n.labels, greyscale))
   }
   if (!inherits(x, "biblioMultiplex") || is.null(x$clusters)) {
     stop("multiplexPlot() needs the result of multiplexClusters()", call. = FALSE)
   }
   switch(type,
-    matrix = mpMatrixPlot(x, interactive),
-    links = mpLinksPlot(x, interactive),
+    matrix = mpMatrixPlot(x, interactive, greyscale),
+    links = mpLinksPlot(x, interactive, greyscale),
     plane = mpPlanePlot(x, interactive, n.labels, min.size),
-    clusters = mpClustersPlot(x, interactive),
+    clusters = mpClustersPlot(x, interactive, greyscale),
     network = mpNetwork(x, max.nodes)
   )
 }
@@ -79,6 +87,24 @@ multiplexPlot <- function(x,
 MP_COLORS <- c(consolidation = "#1B9E77", branching = "#D95F02", convergence = "#7570B3",
                detachment = "#AAAAAA", dispersed = "#999999")
 MP_EDGE_COLORS <- c(both = "#1B9E77", references_only = "#D95F02", topics_only = "#7570B3")
+
+# With greyscale = TRUE the static plots are readable without colour (print):
+# structures are told apart by shape (roots circles, themes triangles; filled
+# when branching or convergent, open when consolidated, a cross when
+# dispersed), trends by line type, and the link cells of the matrix are
+# outlined; colour only reinforces them
+MP_GROUPS <- c("branching root", "consolidated root", "dispersed root",
+               "convergent theme", "consolidated theme", "dispersed theme")
+MP_GROUP_COLORS <- c(`branching root` = "#D95F02", `consolidated root` = "#1B9E77", `dispersed root` = "#999999",
+                     `convergent theme` = "#7570B3", `consolidated theme` = "#1B9E77",
+                     `dispersed theme` = "#999999")
+MP_GROUP_SHAPES <- c(`branching root` = 16, `consolidated root` = 1, `dispersed root` = 4,
+                     `convergent theme` = 17, `consolidated theme` = 2, `dispersed theme` = 3)
+mpGroup <- function(structure, layer) {
+  kind <- c(branching = "branching", consolidation = "consolidated", convergence = "convergent",
+            dispersed = "dispersed")
+  paste(kind[structure], layer)
+}
 
 mpFirstLabel <- function(x) sub(";.*", "", x)
 
@@ -94,7 +120,7 @@ mpTheme <- function(base) {
 }
 
 # roots x themes, themes ordered by the root they are most over-represented in
-mpMatrixPlot <- function(mc, interactive = FALSE) {
+mpMatrixPlot <- function(mc, interactive = FALSE, greyscale = FALSE) {
   cl <- mc$clusters
   R <- cl$residuals
   col_order <- order(apply(R, 2, which.max), -apply(R, 2, max))
@@ -108,15 +134,19 @@ mpMatrixPlot <- function(mc, interactive = FALSE) {
   D$n_lab <- ifelse(D$n > 0, D$n, "")
   D$text <- sprintf("%s x %s\n%d documents, residual %.1f", D$roots_lab, D$themes_lab, D$n, D$res)
   lim <- max(abs(D$res))
+  # greyscale: the link cells are outlined, so that they are found without the colours
+  D$link <- greyscale & paste(as.integer(D$roots), as.integer(D$themes)) %in% paste(cl$links$root, cl$links$theme)
   g <- suppressWarnings(
     ggplot2::ggplot(D, ggplot2::aes(themes_lab, roots_lab, fill = res, text = text)) +
       ggplot2::geom_tile(colour = "white") +
+      (if (any(D$link)) ggplot2::geom_tile(data = D[D$link, ], colour = "black", linewidth = 0.6, fill = NA)) +
       ggplot2::geom_text(ggplot2::aes(label = n_lab), size = 2.6) +
       ggplot2::scale_fill_gradient2(low = "#2166AC", mid = "white", high = "#B2182B", limits = c(-lim, lim),
                                     name = "standardized\nresidual") +
       ggplot2::labs(x = "themes (topic clusters)", y = "roots (references clusters)",
                     title = "Roots x themes",
-                    subtitle = sprintf("documents per cell; red = more than expected (NMI %.2f)", cl$NMI)) +
+                    subtitle = sprintf("documents per cell; red = more than expected%s (NMI %.2f)",
+                                       if (greyscale) "; outlined = link" else "", cl$NMI)) +
       ggplot2::theme_minimal() +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
   )
@@ -131,7 +161,7 @@ mpPersistenceText <- function(p) {
 }
 
 # roots on the left, themes on the right, one line per link (width = documents)
-mpLinksPlot <- function(mc, interactive = FALSE) {
+mpLinksPlot <- function(mc, interactive = FALSE, greyscale = FALSE) {
   if (interactive) return(mpLinksSankey(mc))
   cl <- mc$clusters
   lk <- cl$links
@@ -149,16 +179,18 @@ mpLinksPlot <- function(mc, interactive = FALSE) {
   ord <- order(is.na(Tm$bary), -Tm$bary, -Tm$size)
   Tm$y <- NA_real_
   Tm$y[ord] <- -seq_len(nrow(Tm)) * nrow(S) / nrow(Tm)
+  # default: colour by structure; greyscale: also shape, roots and themes apart
   struct <- c(branching = "branching root", consolidation = "consolidated",
               convergence = "convergent theme", dispersed = "no link")
   cols <- c("branching root" = MP_COLORS[["branching"]], consolidated = MP_COLORS[["consolidation"]],
             "convergent theme" = MP_COLORS[["convergence"]], "no link" = MP_COLORS[["dispersed"]])
+  node_group <- function(structure, layer) if (greyscale) mpGroup(structure, layer) else struct[structure]
   N <- rbind(
-    data.frame(x = 0, y = S$y, size = S$size, structure = struct[S$structure],
+    data.frame(x = 0, y = S$y, size = S$size, structure = node_group(S$structure, "root"),
                label = mpRootLabels(cl),
                text = sprintf("Root R%d: %s\n%d documents, %d linked themes", S$cluster, S$terms, S$size,
                               S$n_themes), stringsAsFactors = FALSE),
-    data.frame(x = 1, y = Tm$y, size = Tm$size, structure = struct[Tm$structure],
+    data.frame(x = 1, y = Tm$y, size = Tm$size, structure = node_group(Tm$structure, "theme"),
                label = mpThemeLabels(cl),
                text = sprintf("Theme T%d: %s\n%d documents, %d linked roots", Tm$cluster, Tm$terms, Tm$size,
                               Tm$n_roots), stringsAsFactors = FALSE)
@@ -179,15 +211,27 @@ mpLinksPlot <- function(mc, interactive = FALSE) {
       ggplot2::scale_linetype_manual(values = c("at every k" = "solid", "not at every k" = "22"),
                                      name = if (robust) paste0("link persists (k = ",
                                                                paste(cl$robustness$k, collapse = ", "), ")") else NULL,
-                                     guide = if (robust) "legend" else "none") +
-      ggplot2::geom_point(data = N, ggplot2::aes(x, y, size = size, colour = structure, text = text)) +
+                                     guide = if (robust) ggplot2::guide_legend(order = 3) else "none") +
+      (if (greyscale) {
+        ggplot2::geom_point(data = N, ggplot2::aes(x, y, size = size, colour = structure, shape = structure,
+                                                   text = text), stroke = 1.1)
+      } else {
+        ggplot2::geom_point(data = N, ggplot2::aes(x, y, size = size, colour = structure, text = text))
+      }) +
       ggplot2::geom_text(data = N[N$x == 0, ], ggplot2::aes(x - 0.04, y, label = label), hjust = 1, size = 3.3) +
       ggplot2::geom_text(data = N[N$x == 1, ], ggplot2::aes(x + 0.04, y, label = label), hjust = 0, size = 3.3) +
       ggplot2::annotate("text", x = c(0, 1), y = 0, label = c("ROOTS (references)", "THEMES (topics)"),
                         fontface = "bold", size = 3.8, hjust = c(1, 0)) +
-      ggplot2::scale_linewidth(range = c(0.4, 5), name = "documents") +
+      ggplot2::scale_linewidth(range = c(0.4, 5), name = "documents", guide = ggplot2::guide_legend(order = 2)) +
       ggplot2::scale_size_area(max_size = 7, guide = "none") +
-      ggplot2::scale_colour_manual(values = cols, name = NULL) +
+      (if (greyscale) {
+        list(ggplot2::scale_colour_manual(values = MP_GROUP_COLORS, breaks = MP_GROUPS[MP_GROUPS %in% N$structure],
+                                          name = NULL, guide = ggplot2::guide_legend(order = 1)),
+             ggplot2::scale_shape_manual(values = MP_GROUP_SHAPES, breaks = MP_GROUPS[MP_GROUPS %in% N$structure],
+                                         name = NULL, guide = ggplot2::guide_legend(order = 1)))
+      } else {
+        ggplot2::scale_colour_manual(values = cols, name = NULL, guide = ggplot2::guide_legend(order = 1))
+      }) +
       ggplot2::scale_x_continuous(limits = c(-0.9, 1.9)) +
       ggplot2::labs(title = "Roots and the themes they are linked to",
                     subtitle = sprintf("one line per link: more documents than expected (residual > 2), at least %s of them",
@@ -350,7 +394,7 @@ mpPlanePlot <- function(mc, interactive = FALSE, n.labels = 12, min.size = 10, f
 # does; a theme (a topic cluster) far above it shares its topics more than its
 # references, as a
 # convergent theme does. The axes read in words, as the other planes
-mpClustersPlot <- function(mc, interactive = FALSE, floor = 1 / 16) {
+mpClustersPlot <- function(mc, interactive = FALSE, greyscale = FALSE, floor = 1 / 16) {
   cl <- mc$clusters
   D <- rbind(
     data.frame(layer = "root", code = paste0("R", cl$roots$cluster),
@@ -365,16 +409,10 @@ mpClustersPlot <- function(mc, interactive = FALSE, floor = 1 / 16) {
   D <- D[is.finite(D$cohesion_R) & is.finite(D$cohesion_T), ]
   D$x <- log2(pmax(D$cohesion_R, floor))
   D$y <- log2(pmax(D$cohesion_T, floor))
-  kind <- c(branching = "branching", consolidation = "consolidated", convergence = "convergent",
-            dispersed = "dispersed")
-  D$group <- paste(kind[D$structure], D$layer)
-  groups <- c("branching root", "consolidated root", "dispersed root",
-              "convergent theme", "consolidated theme", "dispersed theme")
-  groups <- groups[groups %in% D$group]
+  D$group <- mpGroup(D$structure, D$layer)
+  groups <- MP_GROUPS[MP_GROUPS %in% D$group]
   D$group <- factor(D$group, levels = groups)
-  gcol <- c(`branching root` = MP_COLORS[["branching"]], `consolidated root` = MP_COLORS[["consolidation"]],
-            `dispersed root` = MP_COLORS[["dispersed"]], `convergent theme` = MP_COLORS[["convergence"]],
-            `consolidated theme` = MP_COLORS[["consolidation"]], `dispersed theme` = MP_COLORS[["dispersed"]])
+  gcol <- MP_GROUP_COLORS
   D$label <- paste(D$code, mpFirstLabel(D$terms))
   D$text <- sprintf("<b>%s %s</b> (%s)<br>%d documents<br>references: %s than random<br>topics: %s than random",
                     D$layer, D$label, D$group, D$size, mpLiftWords(D$x, log2(floor)), mpLiftWords(D$y, log2(floor)))
@@ -428,7 +466,6 @@ mpClustersPlot <- function(mc, interactive = FALSE, floor = 1 / 16) {
       legend = list(font = list(size = 11)), margin = list(t = 70)
     ))
   }
-  shape <- stats::setNames(ifelse(grepl("root", groups), 16, 17), groups)
   g <- ggplot2::ggplot(D, ggplot2::aes(x, y)) +
     ggplot2::annotate("polygon", x = up$x, y = up$y, fill = "#EAE9F4") +
     ggplot2::annotate("polygon", x = down$x, y = down$y, fill = "#FBEADF") +
@@ -437,11 +474,13 @@ mpClustersPlot <- function(mc, interactive = FALSE, floor = 1 / 16) {
                       label = c("MORE COHESIVE IN TOPICS", "MORE COHESIVE IN REFERENCES"),
                       colour = c(MP_COLORS[["convergence"]], MP_COLORS[["branching"]]), fontface = "bold",
                       size = 3.2, hjust = c(-0.05, 1.05), vjust = c(1.5, -0.6)) +
-    ggplot2::geom_point(ggplot2::aes(size = size, colour = group, shape = group), alpha = 0.8) +
+    ggplot2::geom_point(ggplot2::aes(size = size, colour = group, shape = group), alpha = 0.8,
+                        stroke = if (greyscale) 1.1 else 0.5) +
     ggrepel::geom_text_repel(ggplot2::aes(label = label, colour = group), size = 2.8, max.overlaps = 25,
                              show.legend = FALSE) +
     ggplot2::scale_colour_manual(values = gcol[groups]) +
-    ggplot2::scale_shape_manual(values = shape) +
+    ggplot2::scale_shape_manual(values = if (greyscale) MP_GROUP_SHAPES[groups] else
+                                  stats::setNames(ifelse(grepl("root", groups), 16, 17), groups)) +
     ggplot2::scale_size_area(max_size = 12, guide = "none") +
     ggplot2::scale_x_continuous(limits = r, breaks = ticks, labels = mpLiftWords(ticks, log2(floor)), expand = c(0, 0)) +
     ggplot2::scale_y_continuous(limits = r, breaks = ticks, labels = mpLiftWords(ticks, log2(floor)), expand = c(0, 0)) +
@@ -455,6 +494,9 @@ mpClustersPlot <- function(mc, interactive = FALSE, floor = 1 / 16) {
 MP_TREND_COLORS <- c(converging = "#7570B3", diverging = "#D95F02", `drifting apart` = "#666666",
                      consolidating = "#1B9E77", `closer in references` = "#E7298A",
                      `farther in references` = "#A6761D", stable = "#AAAAAA")
+MP_TREND_LINETYPES <- c(converging = "solid", diverging = "22", `drifting apart` = "11",
+                        consolidating = "longdash", `closer in references` = "4212",
+                        `farther in references` = "1343", stable = "solid")
 
 #' The pairs of roots of a multiplex evolution, numbered
 #'
@@ -503,7 +545,7 @@ mpArea <- function(x, y) {
 # point (first period) to an arrow (last period); the pairs are numbered. The
 # plane is split into its four areas, and the axes read in words (how many
 # times closer or farther than two random documents)
-mpTrajectoryPlot <- function(ev, interactive = FALSE, n.pairs = 12) {
+mpTrajectoryPlot <- function(ev, interactive = FALSE, n.pairs = 12, greyscale = FALSE) {
   # the pairs that change area: a trend within one area changes no relation
   tr <- multiplexPairs(ev)
   tr <- tr[tr$moves & tr$trend != "stable", ]
@@ -581,16 +623,23 @@ mpTrajectoryPlot <- function(ev, interactive = FALSE, n.pairs = 12) {
   ends <- L[L$step == "last", ]
   ends$label <- sprintf("%d. %s", ends$id, ends$pair)
   mpTheme(
-    ggplot2::ggplot(L, ggplot2::aes(x, y, colour = trend, group = id)) +
+    ggplot2::ggplot(L, if (greyscale) ggplot2::aes(x, y, colour = trend, linetype = trend, group = id) else
+                         ggplot2::aes(x, y, colour = trend, group = id)) +
       mpAreaLayers(ar) +
       ggplot2::geom_path(arrow = ggplot2::arrow(length = ggplot2::unit(0.25, "cm"), type = "closed"),
                          linewidth = 0.9) +
-      ggplot2::geom_point(data = L[L$step == "first", ], shape = 21, fill = "white", size = 2.8, stroke = 1.1) +
-      ggplot2::geom_point(data = L[L$step == "middle", ], size = 2.2) +
+      ggplot2::geom_point(data = L[L$step == "first", ], shape = 21, fill = "white", size = 2.8, stroke = 1.1,
+                          show.legend = if (greyscale) FALSE else NA) +
+      ggplot2::geom_point(data = L[L$step == "middle", ], size = 2.2, show.legend = if (greyscale) FALSE else NA) +
       ggrepel::geom_text_repel(data = ends, ggplot2::aes(label = label), size = 2.8, max.overlaps = 30,
                                show.legend = FALSE) +
       ggplot2::scale_colour_manual(values = cols) +
-      ggplot2::labs(colour = NULL, title = title,
+      (if (greyscale) {
+        list(ggplot2::scale_linetype_manual(values = MP_TREND_LINETYPES),
+             ggplot2::guides(colour = ggplot2::guide_legend(keywidth = ggplot2::unit(1.4, "cm")),
+                             linetype = ggplot2::guide_legend(keywidth = ggplot2::unit(1.4, "cm"))))
+      }) +
+      ggplot2::labs(colour = NULL, linetype = NULL, title = title,
                     subtitle = "each pair from its first period (hollow point) to its last (arrow), through the periods between") +
       ggplot2::theme_minimal() +
       ggplot2::theme(panel.grid = ggplot2::element_blank())

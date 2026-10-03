@@ -11,7 +11,8 @@ multiplexPlot(
   n.labels = 12,
   min.size = 10,
   max.nodes = 500,
-  pair = 1
+  pair = 1,
+  greyscale = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,14 @@ number of documents drawn. Default is 500.}
 \item{pair}{is an integer. For \code{type = "animation"}, the pair of
 roots, by its number in \code{\link{multiplexPairs}} (the numbers of
 \code{type = "trajectory"}). Default is 1.}
+
+\item{greyscale}{is logical. For the static plots \code{"matrix"},
+\code{"links"}, \code{"clusters"} and \code{"trajectory"}: if TRUE, the
+structures are also told apart by the shape of the points (roots circles,
+themes triangles; filled when branching or convergent, open when
+consolidated, a cross when dispersed), the trends by the line type, and
+the link cells of the matrix are outlined, so that the plot can be read
+without colour (print). Default is FALSE.}
 }
 \value{
 a ggplot object, or a plotly or visNetwork widget.

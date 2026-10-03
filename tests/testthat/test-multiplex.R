@@ -471,3 +471,17 @@ test_that("the roots and themes of multiplexRobustness are those of a new analys
   mR <- mpDropSmall(mpClusterLayer(gR, "louvain", 1, 1234L, 20L)$membership, 5)
   expect_identical(mR, mc20$clusters$membership$root)
 })
+
+test_that("greyscale = TRUE adds shapes, line types and link outlines to the static plots", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  mc <- mcFixture()
+  for (tp in c("matrix", "links", "clusters")) {
+    expect_s3_class(multiplexPlot(mc, tp, greyscale = TRUE), "ggplot")
+  }
+  g <- multiplexPlot(mc, "links", greyscale = TRUE)
+  expect_false(is.null(ggplot2::ggplot_build(g)$plot$scales$get_scales("shape")))
+  m <- multiplexPlot(mc, "matrix", greyscale = TRUE)
+  expect_match(m$labels$subtitle, "outlined = link")
+  expect_no_match(multiplexPlot(mc, "matrix")$labels$subtitle, "outlined")
+})

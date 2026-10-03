@@ -124,8 +124,9 @@ normalized strings (default 100), exact matching on normalized strings is used
 instead to maintain performance.
 
 \strong{Phase 4: Canonical Representative Selection}
-For each cluster, the most complete citation (prioritizing those with volume
-and page information) is selected as the canonical representative.
+For each cluster, the canonical representative is the most frequent variant
+among those that keep the title of the work (Scopus citations; WoS citations
+carry no title), with DOI, volume, pages and length as tiebreakers.
 
 \strong{Phase 5: Post-Processing}
 Citations sharing the same first author, year, journal, and volume are merged

@@ -65,6 +65,9 @@
 #'   \code{NULL} (default) they are read from the options and environment variables
 #'   \code{openalexR.mailto} and \code{openalexR.apikey}, or from the files saved by
 #'   Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answers.
+#' @param openalex is logical. If FALSE, OpenAlex is never queried and the roots
+#'   are named from the titles found in the collection and in the references
+#'   only (no network access). Default is TRUE.
 #' @param verbose is logical. If TRUE, messages on how the roots are named.
 #' @param seed is an integer. The seed of the runs. The random number state of
 #'   the session is restored on exit.
@@ -89,7 +92,8 @@
 #' \donttest{
 #' data(management, package = "bibliometrixData")
 #' mc <- multiplexCoupling(management, n = 300, n.perm = 19)
-#' mc <- multiplexClusters(mc)
+#' # openalex = FALSE: no network access; the roots are named from local titles
+#' mc <- multiplexClusters(mc, openalex = FALSE)
 #' mc$clusters$links
 #' }
 #'
@@ -107,6 +111,7 @@ multiplexClusters <- function(mc,
                               n.refs = 30,
                               email = NULL,
                               api.key = NULL,
+                              openalex = TRUE,
                               seed = 1234,
                               verbose = TRUE) {
   if (!inherits(mc, "biblioMultiplex")) {
@@ -144,7 +149,7 @@ multiplexClusters <- function(mc,
   themes <- summarise(mT)
   # a root is an intellectual base: it is named after the titles of its
   # strong references; the keywords of its documents are kept as doc_terms
-  roots_lab <- mpRootsLabels(mc, mR, n.labels, n.refs, email, api.key, verbose)
+  roots_lab <- mpRootsLabels(mc, mR, n.labels, n.refs, email, api.key, verbose, openalex)
   roots$doc_terms <- roots$terms
   roots$terms <- roots_lab$terms
   roots$label_source <- roots_lab$label_source

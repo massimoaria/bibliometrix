@@ -206,7 +206,7 @@ mpTitleTerms <- function(title) {
 
 # Label of every root from the titles of its strong references.
 mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api.key = NULL,
-                          verbose = TRUE) {
+                          verbose = TRUE, openalex = TRUE) {
   X <- mc$X_R > 0
   Z <- mpMembershipMatrix(memb)
   K <- nrow(Z)
@@ -227,7 +227,9 @@ mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api
   # configured an API key and an email
   miss <- is.na(title) & (!is.na(ix$doi) | !is.na(ix$oaid))
   oa <- list(ok = FALSE, reason = "not needed")
-  if (any(miss)) {
+  if (any(miss) && !isTRUE(openalex)) {
+    oa <- list(ok = FALSE, reason = "openalex = FALSE")
+  } else if (any(miss)) {
     oa <- mpOpenAlexReady(email, api.key)
     if (oa$ok) {
       d <- ix$doi[miss & !is.na(ix$doi)]

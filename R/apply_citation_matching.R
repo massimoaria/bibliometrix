@@ -1,5 +1,6 @@
 utils::globalVariables(c(
   "CR_canonical",
+  "has_title",
   "CR_id",
   "CR_normalized",
   "CR_original",
@@ -21,7 +22,6 @@ utils::globalVariables(c(
   "NO_ABBR",
   "WORD",
   "WORD_CLEAN",
-  "cur_group_id",
   "journal_iso4",
   "journal_original",
   "len",
@@ -961,8 +961,9 @@ convert_scopus_new_to_classic <- function(citation) {
 #' instead to maintain performance.
 #'
 #' \strong{Phase 4: Canonical Representative Selection}
-#' For each cluster, the most complete citation (prioritizing those with volume
-#' and page information) is selected as the canonical representative.
+#' For each cluster, the canonical representative is the most frequent variant
+#' among those that keep the title of the work (Scopus citations; WoS citations
+#' carry no title), with DOI, volume, pages and length as tiebreakers.
 #'
 #' \strong{Phase 5: Post-Processing}
 #' Citations sharing the same first author, year, journal, and volume are merged
@@ -1560,7 +1561,7 @@ normalize_citations <- function(
           new_cluster_id = paste0(
             unique(block_df$blocking_key)[1],
             "_C",
-            cur_group_id()
+            dplyr::cur_group_id()
           )
         ) %>%
         ungroup() %>%
@@ -1889,6 +1890,12 @@ normalize_citations <- function(
 
   cat("Phase 5: Selecting canonical representatives...\n")
 
+  # Scopus variants that keep the title of the work come first, so that the
+  # canonical citation is not a variant that lost it (e.g. "AUTHORS (2016)
+  # PP. 1-10"); WoS citations carry no title and are not affected
+  df_matched$has_title <- df_matched$format %in% c("scopus", "scopus_new") &
+    !is.na(mpScopusTitle(df_matched$CR_original))
+
   result <- df_matched %>%
     # Count frequency of each variant within its cluster
     group_by(cluster_id, CR_original) %>%
@@ -1897,15 +1904,17 @@ normalize_citations <- function(
     group_by(cluster_id) %>%
     mutate(
       n_cluster = n(),
-      # Scoring: frequency first, then completeness as tiebreaker
-      completeness_score = variant_freq * 1000 +
+      # Scoring: a Scopus variant with the title first, then frequency, then
+      # completeness as tiebreaker
+      completeness_score = has_title * 1e6 +
+        variant_freq * 1000 +
         (!is.na(doi)) * 100 +
         (!is.na(volume)) * 10 +
         (!is.na(pages)) * 5 +
         nchar(CR_original) * 0.01,
       CR_canonical = CR_original[which.max(completeness_score)][1]
     ) %>%
-    select(-variant_freq) %>%
+    select(-variant_freq, -has_title) %>%
     ungroup() %>%
     arrange(desc(n_cluster), cluster_id) %>%
     select(

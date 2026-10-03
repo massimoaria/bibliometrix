@@ -67,7 +67,7 @@ It draws the results of \code{\link{multiplexClusters}} and
 \examples{
 \donttest{
 data(management, package = "bibliometrixData")
-mc <- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19))
+mc <- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19), openalex = FALSE)
 multiplexPlot(mc, "links")
 }
 

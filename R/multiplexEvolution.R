@@ -37,7 +37,7 @@
 #' @examples
 #' \donttest{
 #' data(management, package = "bibliometrixData")
-#' mc <- multiplexClusters(multiplexCoupling(management, n = 500, n.perm = 19))
+#' mc <- multiplexClusters(multiplexCoupling(management, n = 500, n.perm = 19), openalex = FALSE)
 #' ev <- multiplexEvolution(mc, years = c(2012, 2016))
 #' ev
 #' }

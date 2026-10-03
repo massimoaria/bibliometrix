@@ -38,7 +38,7 @@
 #' @examples
 #' \donttest{
 #' data(management, package = "bibliometrixData")
-#' mc <- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19))
+#' mc <- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19), openalex = FALSE)
 #' mc <- multiplexRobustness(mc, k = c(5, 20))
 #' mc$clusters$robustness$summary
 #' mc$clusters$links

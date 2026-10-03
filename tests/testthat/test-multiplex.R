@@ -17,7 +17,8 @@ mcFixture <- local({
   function() {
     if (is.null(mc)) {
       data(management, package = "bibliometrixData", envir = environment())
-      mc <<- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19, verbose = FALSE))
+      mc <<- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19, verbose = FALSE),
+                               openalex = FALSE)
     }
     mc
   }
@@ -99,10 +100,10 @@ test_that("the analysis is reproducible and leaves the session's random numbers 
   set.seed(42)
   a <- multiplexCoupling(M, n = NULL, k = 3, n.sample = 100, n.perm = 9, verbose = FALSE)
   # seven documents: every cluster is kept (min.size = 1)
-  a <- multiplexClusters(a, min.size = 1)
+  a <- multiplexClusters(a, min.size = 1, openalex = FALSE)
   expect_equal(stats::runif(1), expected)
   b <- multiplexClusters(multiplexCoupling(M, n = NULL, k = 3, n.sample = 100, n.perm = 9, verbose = FALSE),
-                         min.size = 1)
+                         min.size = 1, openalex = FALSE)
   expect_identical(a$pairs, b$pairs)
   expect_identical(a$clusters$membership, b$clusters$membership)
 })
@@ -191,7 +192,7 @@ test_that("a stricter link rule finds no more links", {
   skip_on_cran()
   skip_if_not_installed("bibliometrixData")
   mc <- mcFixture()
-  strict <- multiplexClusters(mc, min.link = 10)$clusters$links
+  strict <- multiplexClusters(mc, min.link = 10, openalex = FALSE)$clusters$links
   expect_lte(nrow(strict), nrow(mc$clusters$links))
   expect_true(all(strict$n >= 10))
 })
@@ -200,10 +201,10 @@ test_that("roots and themes smaller than min.size are left out", {
   skip_on_cran()
   skip_if_not_installed("bibliometrixData")
   mc <- mcFixture()
-  all1 <- suppressMessages(multiplexClusters(mc, min.size = 1, verbose = FALSE))$clusters
+  all1 <- suppressMessages(multiplexClusters(mc, min.size = 1, verbose = FALSE, openalex = FALSE))$clusters
   sz <- all1$themes$size
   cut <- sort(unique(sz))[2]
-  cl <- suppressMessages(multiplexClusters(mc, min.size = cut, verbose = FALSE))$clusters
+  cl <- suppressMessages(multiplexClusters(mc, min.size = cut, verbose = FALSE, openalex = FALSE))$clusters
   expect_true(all(cl$themes$size >= cut) && all(cl$roots$size >= cut))
   # the clusters kept are the same, with the same numbers
   expect_equal(cl$themes$size, sz[sz >= cut])
@@ -215,7 +216,7 @@ test_that("roots and themes smaller than min.size are left out", {
   m2$clusters <- cl
   ev <- multiplexEvolution(m2, years = c(2012, 2016), min.docs = 3)
   expect_s3_class(ev, "biblioMultiplexEvolution")
-  expect_error(multiplexClusters(mc, min.size = 1e6, verbose = FALSE), "lower min.size")
+  expect_error(multiplexClusters(mc, min.size = 1e6, verbose = FALSE, openalex = FALSE), "lower min.size")
 })
 
 test_that("periods from cut points and from sliding windows", {
@@ -366,7 +367,7 @@ test_that("roots are named after their references, offline too", {
   skip_if_not_installed("bibliometrixData")
   mc <- mcFixture()
   testthat::local_mocked_bindings(mpOpenAlexReady = function(...) list(ok = FALSE, reason = "offline test"))
-  cl <- suppressMessages(multiplexClusters(mc))$clusters
+  cl <- suppressMessages(multiplexClusters(mc, openalex = FALSE))$clusters
   expect_true(all(nzchar(cl$roots$terms)))
   expect_true(all(nzchar(cl$roots$doc_terms)))
   expect_true(all(grepl("^titles of|^cited sources", cl$roots$label_source)))
@@ -374,11 +375,12 @@ test_that("roots are named after their references, offline too", {
 })
 
 test_that("with OpenAlex configured, roots are named from the titles of their references", {
-  skip_on_cran()
+  # opt-in: no download from OpenAlex in R CMD check
+  skip_if_not(identical(Sys.getenv("BIBLIOMETRIX_TEST_OPENALEX"), "true"), "OpenAlex tests are opt-in")
   skip_if_offline("api.openalex.org")
   skip_if_not_installed("bibliometrixData")
   skip_if(!isTRUE(mpOpenAlexReady()$ok), "no OpenAlex API key and email configured")
-  cl <- suppressMessages(multiplexClusters(mcFixture()))$clusters
+  cl <- suppressMessages(multiplexClusters(mcFixture(), openalex = TRUE))$clusters
   expect_true(any(grepl("OpenAlex", cl$roots$label_source)))
 })
 
@@ -465,7 +467,7 @@ test_that("the roots and themes of multiplexRobustness are those of a new analys
   skip_if_not_installed("bibliometrixData")
   data(management, package = "bibliometrixData")
   mc20 <- multiplexClusters(multiplexCoupling(management, n = 300, n.perm = 19, k = 20, verbose = FALSE),
-                            verbose = FALSE)
+                            verbose = FALSE, openalex = FALSE)
   ER <- mpKnn(mcFixture()$X_R, "cosine", 20)
   gR <- mpEdgeGraph(mcFixture()$nodes$node, ER, ER$s)
   mR <- mpDropSmall(mpClusterLayer(gR, "louvain", 1, 1234L, 20L)$membership, 5)

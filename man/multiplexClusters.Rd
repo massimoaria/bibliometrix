@@ -16,6 +16,7 @@ multiplexClusters(
   n.refs = 30,
   email = NULL,
   api.key = NULL,
+  openalex = TRUE,
   seed = 1234,
   verbose = TRUE
 )
@@ -54,6 +55,10 @@ titles name it. Default is 30.}
 \code{NULL} (default) they are read from the options and environment variables
 \code{openalexR.mailto} and \code{openalexR.apikey}, or from the files saved by
 Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answers.}
+
+\item{openalex}{is logical. If FALSE, OpenAlex is never queried and the roots
+are named from the titles found in the collection and in the references
+only (no network access). Default is TRUE.}
 
 \item{seed}{is an integer. The seed of the runs. The random number state of
 the session is restored on exit.}
@@ -120,7 +125,8 @@ baseline of the lifts (two random documents of the collection).
 \donttest{
 data(management, package = "bibliometrixData")
 mc <- multiplexCoupling(management, n = 300, n.perm = 19)
-mc <- multiplexClusters(mc)
+# openalex = FALSE: no network access; the roots are named from local titles
+mc <- multiplexClusters(mc, openalex = FALSE)
 mc$clusters$links
 }
 

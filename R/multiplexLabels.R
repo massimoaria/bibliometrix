@@ -112,14 +112,20 @@ mpOpenAlexReady <- function(email = NULL, api.key = NULL) {
   list(ok = TRUE, email = email, api.key = key, reason = "")
 }
 
-# titles of works from OpenAlex, by DOI and by OpenAlex id, through the cache
-mpFetchTitles <- function(doi, oaid, email, api.key, verbose = TRUE) {
+# titles of works from OpenAlex, by DOI and by OpenAlex id, through the cache.
+# The download stops after `timeout` seconds (a slow or hanging OpenAlex must
+# not block the analysis): the keys not reached are left out of the cache, so
+# that a later call asks for them again, and the result has the attribute
+# "timed_out". A request already started may end up to 30 s later (the timeout
+# of openalexR).
+mpFetchTitles <- function(doi, oaid, email, api.key, verbose = TRUE, timeout = 60) {
   doi <- unique(doi[!is.na(doi)])
   oaid <- unique(oaid[!is.na(oaid)])
   # paste0() of a zero-length vector gives one string ("id:"), not none
   ck <- c(if (length(doi)) paste0("doi:", doi), if (length(oaid)) paste0("id:", oaid))
   todo_doi <- if (length(doi)) doi[!mpCacheHas(paste0("doi:", doi))] else character(0)
   todo_id <- if (length(oaid)) oaid[!mpCacheHas(paste0("id:", oaid))] else character(0)
+  timed_out <- FALSE
   if (length(todo_doi) + length(todo_id)) {
     op <- options(openalexR.mailto = email, openalexR.apikey = api.key)
     on.exit(options(op), add = TRUE)
@@ -133,8 +139,13 @@ mpFetchTitles <- function(doi, oaid, email, api.key, verbose = TRUE) {
     if (isTRUE(verbose)) {
       message("Downloading from OpenAlex the titles of ", length(todo_doi) + length(todo_id), " references")
     }
+    deadline <- proc.time()[["elapsed"]] + timeout
     fetch <- function(keys, type) {
       for (chunk in split(keys, ceiling(seq_along(keys) / 50))) {
+        if (timed_out || proc.time()[["elapsed"]] > deadline) {
+          timed_out <<- TRUE
+          return(invisible())
+        }
         works <- tryCatch(
           if (type == "doi") {
             openalexR::oa_fetch(entity = "works", doi = chunk, output = "list", verbose = FALSE)
@@ -169,7 +180,9 @@ mpFetchTitles <- function(doi, oaid, email, api.key, verbose = TRUE) {
     if (length(todo_id)) fetch(unique(todo_id), "id")
   }
   if (!length(ck)) return(stats::setNames(character(0), character(0)))
-  stats::setNames(mpCacheGet(ck), ck)
+  out <- stats::setNames(mpCacheGet(ck), ck)
+  if (timed_out) attr(out, "timed_out") <- TRUE
+  out
 }
 
 # unigrams and bigrams of a title, without stopwords and generic title words.
@@ -206,7 +219,7 @@ mpTitleTerms <- function(title) {
 
 # Label of every root from the titles of its strong references.
 mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api.key = NULL,
-                          verbose = TRUE, openalex = TRUE) {
+                          verbose = TRUE, openalex = TRUE, openalex.timeout = 60) {
   X <- mc$X_R > 0
   Z <- mpMembershipMatrix(memb)
   K <- nrow(Z)
@@ -234,11 +247,18 @@ mpRootsLabels <- function(mc, memb, n.labels = 3, n.refs = 30, email = NULL, api
     if (oa$ok) {
       d <- ix$doi[miss & !is.na(ix$doi)]
       o <- ix$oaid[miss & is.na(ix$doi) & !is.na(ix$oaid)]
-      got <- mpFetchTitles(d, o, oa$email, oa$api.key, verbose)
+      got <- mpFetchTitles(d, o, oa$email, oa$api.key, verbose, timeout = openalex.timeout)
       ft <- ifelse(!is.na(ix$doi), got[paste0("doi:", ix$doi)], got[paste0("id:", ix$oaid)])
       fill <- miss & !is.na(ft)
       title[fill] <- ft[fill]
       origin[fill] <- "OpenAlex"
+      if (isTRUE(attr(got, "timed_out"))) {
+        oa$reason <- sprintf(paste0("download stopped after %g s without all the answers; the roots are named ",
+                                    "from the titles found so far (run again to download the others)"),
+                             openalex.timeout)
+        attr(oa$reason, "timed_out") <- TRUE
+        warning("OpenAlex: ", oa$reason, call. = FALSE)
+      }
     } else if (isTRUE(verbose)) {
       message("Root names without OpenAlex (", oa$reason, "): from the titles in the collection",
               " and in the references, otherwise from the cited sources")

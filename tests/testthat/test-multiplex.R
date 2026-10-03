@@ -501,3 +501,33 @@ test_that("the title of a Scopus reference is found in both export formats", {
   expect_true(is.na(t[4]))
   expect_true(is.na(t[5]))
 })
+
+test_that("a slow OpenAlex stops the download of the titles at the timeout", {
+  # every request fails after 0.2 s: without the timeout the 120 keys would
+  # take 3 batches plus 120 single requests, about 25 s
+  testthat::local_mocked_bindings(oa_fetch = function(...) {
+    Sys.sleep(0.2)
+    stop("no answer")
+  }, .package = "openalexR")
+  doi <- sprintf("10.9999/slow%03d", 1:120)
+  t <- system.time(got <- mpFetchTitles(doi, character(0), "x@y.z", "key", verbose = FALSE, timeout = 1))
+  expect_lt(t[["elapsed"]], 5)
+  expect_true(isTRUE(attr(got, "timed_out")))
+  expect_true(all(is.na(got)))
+  # the keys not reached stay out of the cache, so a later call asks for them again
+  expect_false(all(mpCacheHas(paste0("doi:", doi))))
+  rm(list = intersect(ls(.mpCache), paste0("doi:", doi)), envir = .mpCache)
+})
+
+test_that("multiplexClusters warns and names the roots when OpenAlex times out", {
+  skip_if_not_installed("bibliometrixData")
+  mc <- mcFixture()
+  testthat::local_mocked_bindings(mpOpenAlexReady = function(...) list(ok = TRUE, email = "x@y.z", api.key = "key", reason = ""))
+  testthat::local_mocked_bindings(mpFetchTitles = function(doi, oaid, ...) {
+    ck <- c(if (length(doi)) paste0("doi:", doi), if (length(oaid)) paste0("id:", oaid))
+    structure(stats::setNames(rep(NA_character_, length(ck)), ck), timed_out = TRUE)
+  })
+  expect_warning(cl <- multiplexClusters(mc, verbose = FALSE, openalex.timeout = 1)$clusters, "stopped after 1 s")
+  expect_true(isTRUE(attr(cl$openalex, "timed_out")))
+  expect_true(all(nzchar(cl$roots$terms)))
+})

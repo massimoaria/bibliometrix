@@ -11346,8 +11346,15 @@ To ensure the functionality of Biblioshiny,
       if (!is.null(mc)) {
         incProgress(0.6, detail = "roots and themes (root names from their references)")
         mc <- tryCatch(
-          multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink,
-                            min.size = input$mpxMinSize, verbose = FALSE),
+          # a slow OpenAlex stops the download of the titles with a warning
+          withCallingHandlers(
+            multiplexClusters(mc, algorithm = input$mpxAlgorithm, min.link = input$mpxMinLink,
+                              min.size = input$mpxMinSize, verbose = FALSE),
+            warning = function(w) {
+              showNotification(conditionMessage(w), type = "warning", duration = 15)
+              invokeRestart("muffleWarning")
+            }
+          ),
           error = function(e) {
             showNotification(paste("Multiplex Coupling:", conditionMessage(e)), type = "error", duration = 10)
             NULL
@@ -11375,8 +11382,12 @@ To ensure the functionality of Biblioshiny,
     values$MPXev <- res$ev
     # the cache keeps the coupling only: the evolution is quick, and is
     # computed again for other cutting years
-    values$cache_MPX_key <- cache_key
-    values$cache_MPX_result <- list(mc = res$mc)
+    # root names with an interrupted OpenAlex download are not cached: a new
+    # run continues the download (the titles found are kept for the session)
+    if (!isTRUE(attr(res$mc$clusters$openalex, "timed_out"))) {
+      values$cache_MPX_key <- cache_key
+      values$cache_MPX_result <- list(mc = res$mc)
+    }
     res
   })
 

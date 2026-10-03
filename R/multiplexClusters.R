@@ -68,6 +68,11 @@
 #' @param openalex is logical. If FALSE, OpenAlex is never queried and the roots
 #'   are named from the titles found in the collection and in the references
 #'   only (no network access). Default is TRUE.
+#' @param openalex.timeout is a number. The maximum time, in seconds, of the
+#'   download of titles from OpenAlex. When it is reached, the download stops
+#'   with a warning and the roots are named from the titles found so far; the
+#'   titles downloaded are kept for the R session, so a new call continues from
+#'   there. Default is 60.
 #' @param verbose is logical. If TRUE, messages on how the roots are named.
 #' @param seed is an integer. The seed of the runs. The random number state of
 #'   the session is restored on exit.
@@ -112,6 +117,7 @@ multiplexClusters <- function(mc,
                               email = NULL,
                               api.key = NULL,
                               openalex = TRUE,
+                              openalex.timeout = 60,
                               seed = 1234,
                               verbose = TRUE) {
   if (!inherits(mc, "biblioMultiplex")) {
@@ -149,7 +155,7 @@ multiplexClusters <- function(mc,
   themes <- summarise(mT)
   # a root is an intellectual base: it is named after the titles of its
   # strong references; the keywords of its documents are kept as doc_terms
-  roots_lab <- mpRootsLabels(mc, mR, n.labels, n.refs, email, api.key, verbose, openalex)
+  roots_lab <- mpRootsLabels(mc, mR, n.labels, n.refs, email, api.key, verbose, openalex, openalex.timeout)
   roots$doc_terms <- roots$terms
   roots$terms <- roots_lab$terms
   roots$label_source <- roots_lab$label_source
@@ -206,7 +212,7 @@ printMultiplexClusters <- function(cl) {
     cat(sprintf("Root names from the titles of their strong references: %d roots (%d with OpenAlex), from their cited sources: %d\n",
                 sum(ti), sum(oa), sum(!ti)))
     if (!is.null(cl$openalex) && nzchar(cl$openalex) && cl$openalex != "not needed") {
-      cat("  OpenAlex not used:", cl$openalex, "\n")
+      cat(if (isTRUE(attr(cl$openalex, "timed_out"))) "  OpenAlex:" else "  OpenAlex not used:", cl$openalex, "\n")
     }
   }
   cat(sprintf("Agreement between single runs (ARI): roots %.2f, themes %.2f\n",

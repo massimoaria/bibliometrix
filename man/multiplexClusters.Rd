@@ -17,6 +17,7 @@ multiplexClusters(
   email = NULL,
   api.key = NULL,
   openalex = TRUE,
+  openalex.timeout = 60,
   seed = 1234,
   verbose = TRUE
 )
@@ -59,6 +60,12 @@ Biblioshiny. OpenAlex is queried only when both are available and OpenAlex answe
 \item{openalex}{is logical. If FALSE, OpenAlex is never queried and the roots
 are named from the titles found in the collection and in the references
 only (no network access). Default is TRUE.}
+
+\item{openalex.timeout}{is a number. The maximum time, in seconds, of the
+download of titles from OpenAlex. When it is reached, the download stops
+with a warning and the roots are named from the titles found so far; the
+titles downloaded are kept for the R session, so a new call continues from
+there. Default is 60.}
 
 \item{seed}{is an integer. The seed of the runs. The random number state of
 the session is restored on exit.}

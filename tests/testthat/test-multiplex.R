@@ -485,3 +485,17 @@ test_that("greyscale = TRUE adds shapes, line types and link outlines to the sta
   expect_match(m$labels$subtitle, "outlined = link")
   expect_no_match(multiplexPlot(mc, "matrix")$labels$subtitle, "outlined")
 })
+
+test_that("the title of a Scopus reference is found in both export formats", {
+  x <- c("RIBEIRO M.T., SINGH S., GUESTRIN C., WHY SHOULD I TRUST YOU?: EXPLAINING THE PREDICTIONS OF ANY CLASSIFIER, PROC. 22ND ACM SIGKDD INTERNATIONAL CONFERENCE, PP. 1135-1144, (2016)",
+         "Ribeiro, M.T., Singh, S., Guestrin, C., Why should I trust you? Explaining the predictions of any classifier (2016) Proc. KDD",
+         "ARRIETA A.B., DIAZ-RODRIGUEZ N., EXPLAINABLE AI: CONCEPTS, TAXONOMIES AND CHALLENGES, INF. FUSION, 58, PP. 82-115, (2020)",
+         "RIBEIRO M.T., SINGH S., GUESTRIN C. (2016) PP. 1135-1144",
+         NA)
+  t <- mpScopusTitle(x)
+  expect_equal(t[1], "WHY SHOULD I TRUST YOU?: EXPLAINING THE PREDICTIONS OF ANY CLASSIFIER")
+  expect_equal(t[2], "Why should I trust you? Explaining the predictions of any classifier")
+  expect_equal(t[3], "EXPLAINABLE AI: CONCEPTS, TAXONOMIES AND CHALLENGES")
+  expect_true(is.na(t[4]))
+  expect_true(is.na(t[5]))
+})

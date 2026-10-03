@@ -66,14 +66,29 @@ mpReferenceIndex <- function(M, M_all, keys) {
   idx
 }
 
-# title written in a Scopus reference: the text between the authors and the year
+# title written in a Scopus reference. Scopus writes the authors as
+# "Surname, I." (classic export) or "SURNAME I." (recent export, and the
+# references normalised by applyReferenceMatching()), and the year either after
+# the title ("Authors, Title (2017) Source") or at the end ("Authors, Title,
+# Source, 30, pp. 1-10, (2017)"): the authors are removed, and the title ends at
+# the year or at the first comma. A reference that keeps no title gives NA.
 mpScopusTitle <- function(x) {
-  t <- sub("^(.*?)\\s*\\(\\d{4}\\).*$", "\\1", x, perl = TRUE)
-  t[t == x] <- NA_character_
-  # the authors end at the last "Surname, I." group before the title
-  t <- sub("^.*?(?:[A-Z][^,]*,\\s+(?:[A-Z]\\.\\s*-?)+,\\s+)+", "", t, perl = TRUE)
-  t <- trimws(t)
-  t[!is.na(t) & nchar(t) < 8] <- NA_character_
+  initials <- "(?:[A-Z]\\.\\s?-?)+"
+  author <- paste0("\\p{Lu}[\\p{L}'\\-]*(?:\\s\\p{Lu}[\\p{L}'\\-]*)*,?\\s+",
+                   initials, "(?:,\\s+|\\s+(?=\\())")
+  t <- sub(paste0("(*UTF)(*UCP)^(?:", author, ")+"), "", enc2utf8(x), perl = TRUE)
+  t <- sub("\\s*\\(\\d{4}\\).*$", "", t, perl = TRUE)
+  # the title keeps its own commas and ends where the source begins: an
+  # abbreviation ("Inf. Fusion", "Proc."), a word of venues, a number or pages
+  source <- paste0("(?i)^(?:.*\\.\\s|.*\\.$|(?:proceedings|journal|conference|transactions|advances in|",
+                   "lecture notes|ieee|acm|arxiv|in:|vol|pp)\\b|\\d)")
+  t <- vapply(strsplit(t, ",\\s+", perl = TRUE), function(seg) {
+    if (!length(seg)) return(NA_character_)
+    end <- which(grepl(source, seg[-1], perl = TRUE))
+    paste(seg[seq_len(if (length(end)) end[1] else length(seg))], collapse = ", ")
+  }, "")
+  t <- trimws(sub("[,;:\\s]+$", "", t, perl = TRUE))
+  t[is.na(x) | nchar(t) < 8 | grepl("^\\(?\\d{4}\\)?", t)] <- NA_character_
   t
 }
 

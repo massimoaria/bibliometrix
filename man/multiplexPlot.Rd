@@ -27,7 +27,9 @@ for \code{type = "network"}) instead of a ggplot. Default is FALSE.}
 
 \item{n.labels}{is an integer. For \code{type = "plane"} and
 \code{"trajectory"}, the number of pairs named besides those linked to the
-same theme. Default is 12.}
+same theme. On the plane they are spread over the three areas other than
+"close in neither", the pairs furthest from "as random" first in each area.
+Default is 12.}
 
 \item{min.size}{is an integer. For \code{type = "plane"}, the minimum
 number of documents of the two roots of a pair. Default is 10.}
@@ -58,7 +60,7 @@ It draws the results of \code{\link{multiplexClusters}} and
 \tabular{lll}{
 \code{"matrix"}     \tab \tab roots x themes: documents and standardized residuals; a link is a red cell with at least \code{min.link} documents\cr
 \code{"links"}      \tab \tab roots on the left, themes on the right, one flow per link: a root with several flows is branching, a theme with several flows is convergent (interactive: a sankey diagram, with nodes that can be dragged)\cr
-\code{"plane"}      \tab \tab pairs of roots by references and topic proximity; the pairs linked to the same theme are named with it\cr
+\code{"plane"}      \tab \tab pairs of roots by references and topic proximity; the pairs close in topics whose roots are linked to the same theme are named with it\cr
 \code{"clusters"}   \tab \tab roots and themes by cohesion in the two layers\cr
 \code{"trajectory"} \tab \tab the pairs of roots that change area (see \code{\link{multiplexPairs}}), through their periods, from the first to the last (needs \code{\link{multiplexEvolution}})\cr
 \code{"animation"}  \tab \tab one pair of roots moving period by period on the same plane (needs \code{\link{multiplexEvolution}}; interactive only)\cr

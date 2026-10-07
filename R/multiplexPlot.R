@@ -13,7 +13,7 @@ utils::globalVariables(c(
 #' \tabular{lll}{
 #' \code{"matrix"}     \tab \tab roots x themes: documents and standardized residuals; a link is a red cell with at least \code{min.link} documents\cr
 #' \code{"links"}      \tab \tab roots on the left, themes on the right, one flow per link: a root with several flows is branching, a theme with several flows is convergent (interactive: a sankey diagram, with nodes that can be dragged)\cr
-#' \code{"plane"}      \tab \tab pairs of roots by references and topic proximity; the pairs linked to the same theme are named with it\cr
+#' \code{"plane"}      \tab \tab pairs of roots by references and topic proximity; the pairs close in topics whose roots are linked to the same theme are named with it\cr
 #' \code{"clusters"}   \tab \tab roots and themes by cohesion in the two layers\cr
 #' \code{"trajectory"} \tab \tab the pairs of roots that change area (see \code{\link{multiplexPairs}}), through their periods, from the first to the last (needs \code{\link{multiplexEvolution}})\cr
 #' \code{"animation"}  \tab \tab one pair of roots moving period by period on the same plane (needs \code{\link{multiplexEvolution}}; interactive only)\cr
@@ -27,7 +27,9 @@ utils::globalVariables(c(
 #'   for \code{type = "network"}) instead of a ggplot. Default is FALSE.
 #' @param n.labels is an integer. For \code{type = "plane"} and
 #'   \code{"trajectory"}, the number of pairs named besides those linked to the
-#'   same theme. Default is 12.
+#'   same theme. On the plane they are spread over the three areas other than
+#'   "close in neither", the pairs furthest from "as random" first in each area.
+#'   Default is 12.
 #' @param min.size is an integer. For \code{type = "plane"}, the minimum
 #'   number of documents of the two roots of a pair. Default is 10.
 #' @param pair is an integer. For \code{type = "animation"}, the pair of
@@ -340,14 +342,25 @@ mpPlanePlot <- function(mc, interactive = FALSE, n.labels = 12, min.size = 10, f
   P$y <- log2(pmax(P$lift_T, floor))
   P$size <- P$size_A + P$size_B
   P$pair <- paste0(mpFirstLabel(P$label_A), " / ", mpFirstLabel(P$label_B))
-  P$theme <- mpSharedTheme(cl, P$A, P$B)
+  # the theme both roots are linked to names what brings a pair together only
+  # when the pair is close in topics: for a pair close in references only, the
+  # two roots meet on a theme through a part of their documents while being far
+  # apart in topics on the whole, and the label would contradict the area
+  P$theme <- ifelse(P$quadrant %in% c("consolidation", "convergence"),
+                    mpSharedTheme(cl, P$A, P$B), "")
   # the relation of the pair, in words that are not those of the typology of
   # roots and themes (the pair "consolidation" is not a consolidated root)
   rel <- c(consolidation = "close in both", branching = "close in references only",
            convergence = "close in topics only", detachment = "close in neither")
   P$relation <- factor(rel[as.character(P$quadrant)], levels = rel)
   rel_cols <- stats::setNames(MP_COLORS[names(rel)], rel)
-  top <- order(-(abs(P$x) + abs(P$y)) * (P$quadrant != "detachment"))[seq_len(min(n.labels, nrow(P)))]
+  # the pairs named are spread over the three areas other than "close in
+  # neither" (the furthest from "as random" first in each area), so that the
+  # labels do not pile up in the most crowded area
+  dist <- abs(P$x) + abs(P$y)
+  cand <- which(P$quadrant != "detachment")
+  rank_in_area <- stats::ave(-dist[cand], P$quadrant[cand], FUN = function(v) rank(v, ties.method = "first"))
+  top <- cand[order(rank_in_area, -dist[cand])][seq_len(min(n.labels, length(cand)))]
   top <- union(top, which(P$theme != ""))
   P$show <- ifelse(seq_len(nrow(P)) %in% top,
                    ifelse(P$theme == "", P$pair, paste0(P$pair, "\n", P$theme)), "")
@@ -364,7 +377,7 @@ mpPlanePlot <- function(mc, interactive = FALSE, n.labels = 12, min.size = 10, f
       ggplot2::scale_size_area(max_size = 12, guide = "none") +
       ggplot2::labs(colour = NULL, title = "Pairs of roots",
                     subtitle = sprintf(paste0("pairs of roots with at least %d documents each; ",
-                                              "-> theme both roots are linked to"), min.size)) +
+                                              "-> theme both roots are linked to (pairs close in topics)"), min.size)) +
       ggplot2::theme_minimal() +
       ggplot2::theme(panel.grid = ggplot2::element_blank())
   )

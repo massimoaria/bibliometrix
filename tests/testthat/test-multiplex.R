@@ -253,6 +253,23 @@ test_that("multiplexEvolution follows pairs of roots and classifies their trend"
   ), n.perm = 9, n.sample = 10, verbose = FALSE)), "multiplexClusters")
 })
 
+test_that("the plane names shared themes only for pairs close in topics and spreads its labels", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  mc <- mcFixture()
+  P <- multiplexPlot(mc, "plane", n.labels = 6)$data
+  # a pair close in references only, or in neither, never carries a theme
+  expect_true(all(P$theme[!P$quadrant %in% c("consolidation", "convergence")] == ""))
+  # the pairs named without a theme are spread over the areas other than
+  # "close in neither": no area gets more than its share while another lacks it
+  named <- P$show != "" & P$theme == ""
+  expect_false(any(named & P$quadrant == "detachment"))
+  per_area <- table(factor(P$quadrant[named], levels = c("consolidation", "convergence", "branching")))
+  avail <- table(factor(P$quadrant[P$quadrant != "detachment" & P$theme == ""],
+                        levels = c("consolidation", "convergence", "branching")))
+  expect_true(all(per_area >= pmin(avail, 1)))
+})
+
 test_that("every plot renders, static and interactive", {
   skip_on_cran()
   skip_if_not_installed("bibliometrixData")

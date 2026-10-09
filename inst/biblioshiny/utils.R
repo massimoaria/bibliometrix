@@ -5188,14 +5188,19 @@ hist2vis <- function(
 
   ## split node tooltips into two strings
   title <- strsplit(stringi::stri_trans_totitle(vn$nodes$title), " ")
+  title[lengths(title) == 0 | is.na(title)] <- "Not Available"
 
   vn$nodes$title <- unlist(lapply(title, function(l) {
-    n <- floor(length(l) / 2)
-    paste0(
-      paste(l[1:n], collapse = " ", sep = ""),
-      "<br>",
-      paste(l[(n + 1):length(l)], collapse = " ", sep = "")
-    )
+    if (length(l) > 1) {
+      n <- floor(length(l) / 2)
+      paste0(
+        paste(l[1:n], collapse = " ", sep = ""),
+        "<br>",
+        paste(l[(n + 1):length(l)], collapse = " ", sep = "")
+      )
+    } else {
+      l
+    }
   }))
 
   vn$nodes <- vn$nodes %>%

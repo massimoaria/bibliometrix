@@ -217,4 +217,10 @@ test_that("histPlot formatta i titoli a singola parola e mancanti senza duplicaz
   h <- suppressMessages(histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE))
   p <- suppressWarnings(histPlot(h, label = "title", verbose = FALSE))
   expect_equal(igraph::V(p$net)$id, c("Alpha", "Beta\nStudy", "Not Available", "Delta\nReview"))
+
+  # an empty title is not dropped (the labels would be one fewer than the nodes)
+  M$TI[3] <- ""
+  h <- suppressMessages(histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE))
+  p <- suppressWarnings(histPlot(h, label = "title", verbose = FALSE))
+  expect_equal(igraph::V(p$net)$id, c("Alpha", "Beta\nStudy", "Not Available", "Delta\nReview"))
 })

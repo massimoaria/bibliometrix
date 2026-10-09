@@ -87,7 +87,7 @@ histPlot <- function(histResults, n = 20, size = 5, labelsize = 5, remove.isolat
   switch(label,
     title = {
       title <- strsplit(stringi::stri_trans_totitle(V(bsk.network)$title), " ")
-      title[is.na(title)] <- "Not Available"
+      title[lengths(title) == 0 | is.na(title)] <- "Not Available"
       V(bsk.network)$id <- unlist(lapply(title, function(l) {
         if (length(l) > 1) {
           n <- floor(length(l) / 2)

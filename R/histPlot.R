@@ -87,9 +87,14 @@ histPlot <- function(histResults, n = 20, size = 5, labelsize = 5, remove.isolat
   switch(label,
     title = {
       title <- strsplit(stringi::stri_trans_totitle(V(bsk.network)$title), " ")
+      title[is.na(title)] <- "Not Available"
       V(bsk.network)$id <- unlist(lapply(title, function(l) {
-        n <- floor(length(l) / 2)
-        paste0(paste(l[1:n], collapse = " ", sep = ""), "\n", paste(l[(n + 1):length(l)], collapse = " ", sep = ""))
+        if (length(l) > 1) {
+          n <- floor(length(l) / 2)
+          paste0(paste(l[1:n], collapse = " ", sep = ""), "\n", paste(l[(n + 1):length(l)], collapse = " ", sep = ""))
+        } else {
+          l
+        }
       }))
     },
     keywords = {

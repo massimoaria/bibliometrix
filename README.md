@@ -667,17 +667,17 @@ dplyr::glimpse(authorInfo)
 #> Columns: 26
 #> $ id                          <chr> "https://openalex.org/A5069892096"
 #> $ display_name                <chr> "Massimo Aria"
-#> $ display_name_alternatives   <list> <"Aria, M. Qasem", "Aria, Massimo", "M Aria", "M. Aria", "M. Qasem Aria", "MASSIMO…
+#> $ display_name_alternatives   <list> <"Aria M.", "Aria, Massimo", "M Aria", "M. Aria", "MASSIMO ARIA", "Massimo Aria">
 #> $ full_name                   <chr> "Massimo Aria"
-#> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411">
+#> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411", "htt…
 #> $ orcid                       <chr> "https://orcid.org/0000-0002-8517-9411"
-#> $ works_count                 <int> 237
-#> $ cited_by_count              <int> 20543
-#> $ counts_by_year              <list> [<data.frame[24 x 4]>]
-#> $ `2yr_mean_citedness`        <dbl> 3.77193
-#> $ h_index                     <int> 37
-#> $ i10_index                   <int> 99
-#> $ last_known_institutions     <list> [<data.frame[3 x 6]>]
+#> $ works_count                 <int> 241
+#> $ cited_by_count              <int> 21269
+#> $ counts_by_year              <list> [<data.frame[23 x 4]>]
+#> $ `2yr_mean_citedness`        <dbl> 3.984127
+#> $ h_index                     <int> 38
+#> $ i10_index                   <int> 102
+#> $ last_known_institutions     <list> [<data.frame[1 x 6]>]
 #> $ topics                      <list> [<tbl_df[20 x 5]>]
 #> $ works_api_url               <chr> "https://api.openalex.org/works?filter=author.id:A5069892096"
 #> $ author_position_in_paper    <dbl> 1
@@ -690,7 +690,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-08-28 15:16:23
+#> $ query_timestamp             <dttm> 2026-10-12 13:35:04
 ```
 
 This function provides comprehensive author profiles including:
@@ -1048,7 +1048,7 @@ identify seminal works and breakthrough moments in a research field. The
 rpysResults <- rpys(M, sep = ";", timespan = NULL, graph = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" alt="" width="100%" />
 
 ``` r
 

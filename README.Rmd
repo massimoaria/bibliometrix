@@ -208,7 +208,8 @@ through an interactive workflow organized around the SAAS model.
 
 -   **Conceptual Structure**: Analyze the topics and themes through
     co-word networks, thematic mapping (strategic diagrams), and
-    thematic evolution over time.
+    thematic evolution over time (Sankey flows and the thematic maps of
+    the periods stacked as layers).
 
 <p align="center">
 <img src="man/figures/c08_thematicMap.png" width="500"/>
@@ -676,6 +677,47 @@ plot(TEResults$TM[[3]]$map)
 
 # 2016-2020
 plot(TEResults$TM[[4]]$map)
+```
+
+#### Thematic Layers: the maps of the periods stacked
+
+The Sankey diagram shows the flows between themes but not their
+position, the thematic maps show the positions but not the flows.
+**plotThematicLayers** shows both: it stacks the thematic maps of the
+periods as planes in an oblique view, the oldest at the bottom, places
+each theme on its plane at its centrality and density, and links the
+themes of adjacent periods that share words. A theme can then be
+followed as it moves across the quadrants while it merges with or
+splits from other themes. The plot follows the hand-drawn Fig. 12 of
+Angelelli et al. (2025).
+
+The links of a lineage, and the themes they join, share the colour of
+the lineage; the other links are thin and faint, the other themes grey.
+Positions are relative to each period (the cross of the quadrants is the
+mean centrality and density of the period) and the size of a theme is
+its frequency relative to the largest theme of the period.
+
+```{r Thematic-Layers, fig.height=10, fig.width=8}
+# The thematic maps of the periods stacked, with the links between them
+plotThematicLayers(TEResults)
+```
+
+`min.flow` hides the weakest links, using the same lineage strength as
+the Sankey diagram:
+
+```{r Thematic-Layers-min-flow, fig.height=10, fig.width=8}
+plotThematicLayers(TEResults, min.flow = 0.4)
+```
+
+With `interactive = TRUE` the plot is a plotly widget: the tooltip of a
+theme gives its period, quadrant, frequency and the themes it comes from
+and leads to; a click on a theme keeps the themes it comes from and
+those it leads to, across all periods, and fades the rest. In
+biblioshiny the same plot is in the **Layers** tab of Thematic
+Evolution.
+
+```{r eval=FALSE}
+plotThematicLayers(TEResults, interactive = TRUE)
 ```
 
 ## Co-Word Analysis: The conceptual structure of a field

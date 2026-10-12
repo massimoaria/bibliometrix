@@ -32,10 +32,10 @@ safe_oa_fetch <- function(entity,
   result <- tryCatch({
     if (!is.null(identifier)) {
       fetch_args$identifier <- identifier
-      do.call(openalexR::oa_fetch, fetch_args)
+      do.call(oaFetch, fetch_args)
     } else if (!is.null(doi)) {
       fetch_args$doi <- doi
-      do.call(openalexR::oa_fetch, fetch_args)
+      do.call(oaFetch, fetch_args)
     }
   }, error = function(e) {
     error_msg <- as.character(e$message)
@@ -433,7 +433,7 @@ get_authors_summary <- function(doi = "10.1016/j.joi.2017.08.007",
     tryCatch({
       fetch_args <- list(entity = "works", doi = doi, output = "tibble")
       if (!is.null(mailto) && nchar(mailto) > 0) fetch_args$mailto <- mailto
-      do.call(openalexR::oa_fetch, fetch_args)
+      do.call(oaFetch, fetch_args)
     }, error = function(e) {
       if ((grepl("429", e$message) || grepl("Too Many Requests", e$message)) && 
           attempt < max_retries) {

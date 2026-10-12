@@ -2600,11 +2600,23 @@ helpContent <- function() {
       <li><strong>Evolutionary pathways:</strong> Maximal directed sequences through the evolution graph represent coherent thematic trajectories spanning multiple periods, characterised by pathway strength, length, and cumulative size</li>
     </ul>
 
+    <h4>&#128209; Layers: the thematic maps stacked</h4>
+    <p>The <strong>Layers</strong> tab draws the thematic map of each period as a plane, the oldest at the bottom, as in <strong>Angelelli et al. (2025)</strong>. Each theme sits on its plane at its relevance degree (centrality) and development degree (density), and the themes of adjacent periods that share words are linked. The Sankey diagram shows the flows but not the positions, the thematic maps the positions but not the flows: the layers show both, so you can follow a theme as it moves across the quadrants while it merges with or splits from other themes.</p>
+    <ul>
+      <li><strong>Position:</strong> Relative to the period: the cross of the quadrants is the mean centrality and density of that period, and every plane has the same scale</li>
+      <li><strong>Colours:</strong> The links of a lineage, and the themes they join, share the colour of the lineage; the other links are thin and faint, the other themes grey</li>
+      <li><strong>Size:</strong> The frequency of a theme relative to the largest theme of its period</li>
+      <li><strong>Click on a theme:</strong> Keeps the themes it comes from and those it leads to, across all periods, and fades the rest; a note above the plot names the selected theme. Click it again, or double click, to restore the plot</li>
+      <li><strong>Minimum flow:</strong> The same threshold as the Sankey diagram hides the weakest links</li>
+    </ul>
+
     <br>
 
     <h5>&#128218; Key References</h5>
 
     <p><strong>Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2025).</strong> <i>Rethinking Thematic Evolution in Science Mapping: An Integrated Framework for Longitudinal Analysis.</i> Working Paper.</p>
+
+    <p><strong>Angelelli, M., Ciavolino, E., Ringle, C. M., Sarstedt, M., &amp; Aria, M. (2025).</strong> <i>Conceptual structure and thematic evolution in partial least squares structural equation modeling research.</i> <strong>Quality &amp; Quantity</strong>, 59(3), 2753&#x2013;2798. <a href='https://doi.org/10.1007/s11135-025-02071-4' target='_blank'>https://doi.org/10.1007/s11135-025-02071-4</a></p>
 
     <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
 

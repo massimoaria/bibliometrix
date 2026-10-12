@@ -9158,6 +9158,13 @@ body <- dashboardBody(
                   ))
                 ),
                 tabPanel(
+                  "Layers",
+                  shinycssloaders::withSpinner(plotlyOutput(
+                    outputId = "TELayersPlot",
+                    height = "75vh"
+                  ))
+                ),
+                tabPanel(
                   "Table",
                   shinycssloaders::withSpinner(uiOutput(
                     outputId = "TETable"

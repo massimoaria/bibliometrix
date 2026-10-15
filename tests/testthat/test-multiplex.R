@@ -335,6 +335,13 @@ test_that("title terms are adjacent words of the same segment, without generic w
   expect_false("forty" %in% tt)
   expect_true("industrial marketing" %in% tt)
   expect_true("absorptive capacity" %in% mpTitleTerms("Absorptive capacity: a new perspective on learning"))
+  # punctuation separates segments: no bigram across ":", ";", brackets or quotes
+  tt <- mpTitleTerms("Fake rumors: fact-checking; social [media] \"platforms\"")
+  expect_false(any(c("rumors fact-checking", "fact-checking social", "social media", "media platforms") %in% tt))
+  expect_true(all(c("fake rumors", "fact-checking", "media", "platforms") %in% tt))
+  # accented words are kept whole
+  tt <- mpTitleTerms("Desinformación y verificación en España")
+  expect_true(all(c("desinformación", "verificación", "españa") %in% tt))
 })
 
 test_that("Scopus references give their title, WoS references none", {

@@ -200,10 +200,13 @@ mpTitleTerms <- function(title) {
                    "hundred", "anniversary"))
   keep <- function(w) nchar(w) > 2 & !grepl("^[0-9]+$", w) & !(w %in% stop)
   # "&" is a conjunction: "Business & Industrial" gives no "business industrial"
-  segs <- strsplit(gsub("&", " and ", tolower(title), fixed = TRUE), "[:;,.?!()\\[\\]\"]+")[[1]]
+  # perl = TRUE: in a POSIX bracket expression "\\[" is not an escape and the
+  # class would end at the first "]", so that no title would be split
+  segs <- strsplit(gsub("&", " and ", tolower(title), fixed = TRUE), "[:;,.?!()\\[\\]\"]+", perl = TRUE)[[1]]
   out <- character(0)
   for (sg in segs) {
-    w <- strsplit(gsub("[^a-z0-9 -]", " ", sg), "\\s+")[[1]]
+    # letters of any alphabet: accented words ("desinformación") are kept whole
+    w <- strsplit(gsub("[^\\p{L}\\p{N} -]", " ", sg, perl = TRUE), "\\s+")[[1]]
     w <- gsub("^-+|-+$", "", w)
     w <- w[nchar(w) > 0]
     if (!length(w)) next

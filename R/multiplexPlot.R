@@ -215,8 +215,10 @@ mpLinksPlot <- function(mc, interactive = FALSE, greyscale = FALSE) {
                                                                paste(cl$robustness$k, collapse = ", "), ")") else NULL,
                                      guide = if (robust) ggplot2::guide_legend(order = 3) else "none") +
       (if (greyscale) {
+        # show.legend = TRUE: the key draws also the groups absent from the data
         ggplot2::geom_point(data = N, ggplot2::aes(x, y, size = size, colour = structure, shape = structure,
-                                                   text = text), stroke = 1.1)
+                                                   text = text), stroke = 1.1,
+                            show.legend = c(colour = TRUE, shape = TRUE))
       } else {
         ggplot2::geom_point(data = N, ggplot2::aes(x, y, size = size, colour = structure, text = text))
       }) +
@@ -227,10 +229,12 @@ mpLinksPlot <- function(mc, interactive = FALSE, greyscale = FALSE) {
       ggplot2::scale_linewidth(range = c(0.4, 5), name = "documents", guide = ggplot2::guide_legend(order = 2)) +
       ggplot2::scale_size_area(max_size = 7, guide = "none") +
       (if (greyscale) {
-        list(ggplot2::scale_colour_manual(values = MP_GROUP_COLORS, breaks = MP_GROUPS[MP_GROUPS %in% N$structure],
-                                          name = NULL, guide = ggplot2::guide_legend(order = 1)),
-             ggplot2::scale_shape_manual(values = MP_GROUP_SHAPES, breaks = MP_GROUPS[MP_GROUPS %in% N$structure],
-                                         name = NULL, guide = ggplot2::guide_legend(order = 1)))
+        # the whole key, one row for the roots and one for the themes
+        key <- ggplot2::guide_legend(order = 1, nrow = 2, byrow = TRUE)
+        list(ggplot2::scale_colour_manual(values = MP_GROUP_COLORS, limits = MP_GROUPS, drop = FALSE,
+                                          name = NULL, guide = key),
+             ggplot2::scale_shape_manual(values = MP_GROUP_SHAPES, limits = MP_GROUPS, drop = FALSE,
+                                         name = NULL, guide = key))
       } else {
         ggplot2::scale_colour_manual(values = cols, name = NULL, guide = ggplot2::guide_legend(order = 1))
       }) +

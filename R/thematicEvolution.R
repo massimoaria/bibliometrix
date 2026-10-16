@@ -68,7 +68,7 @@ utils::globalVariables(c(
 #' @param field is a character object. It indicates the content field to use. Field can be one of c=("ID","DE","KW_Merged","TI","AB"). Default value is \code{field="ID"}.
 #' @param years is a numeric vector of one or more unique cut points.
 #' @param n is numerical. It indicates the number of words to use in the network analysis
-#' @param minFreq is numerical. It indicates the min frequency of words included in to a cluster.
+#' @param minFreq is numerical. It indicates the minimum frequency of a term (per thousand documents of the period, and at least 2, see \code{\link{thematicMap}}): terms occurring less often are left out before the co-occurrence network of the period is built.
 #' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 #' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).

@@ -71,7 +71,7 @@ utils::globalVariables(c(
 #' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE","KW_Merged","TI", "AB")}.
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param n is an integer. It indicates the number of terms to include in the analysis.
-#' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).
+#' @param minfreq is a integer. It indicates the minimum frequency (per thousand documents, and at least 2) of a term: terms occurring less often are left out before the co-occurrence network is built. It is a number in the range (0,1000).
 #' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 #' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
@@ -206,19 +206,33 @@ thematicMap <- function(
     }
   )
 
+  # Terms below minfreq are left out before the network is built (Aria et
+  # al., 2026, Sect. 3.1): kept until after the clustering, they shaped the
+  # partition -- under association strength the rarest terms weigh the most
+  # -- and then left tiny themes behind.
+  keep <- Matrix::diag(NetMatrix) >= minfreq
+  if (nrow(NetMatrix) > 0 && !any(keep)) {
+    cat(
+      "\n\nNo term of the network occurs at least ", minfreq,
+      " times, the count minfreq gives on this collection",
+      "\nThe analysis cannot be performed\n\n", sep = ""
+    )
+    return()
+  }
+  NetMatrix <- NetMatrix[keep, keep, drop = FALSE]
+
   if (nrow(NetMatrix) > 0) {
     # The themes are the communities of the association-strength network W
     # (Aria et al., 2026, Eq. 3), and so are the term centralities computed on
-    # it: networkPlot() receives W itself, since given the counts it would
-    # cluster them and use the normalised similarity only for the layout.
+    # it: networkPlot() clusters W (normalize.clusters = TRUE).
     S <- normalizeSimilarity(NetMatrix, type = "association")
     # A matrix with rows can still hold no link between two distinct terms:
     # networkPlot() then refuses it. For the thematic map that is the same case
     # as an empty matrix, and keeps the same contract -- NULL, which
     # thematicEvolution() reports by period.
     Net <- tryCatch(networkPlot(
-      S,
-      normalize = NULL,
+      NetMatrix,
+      normalize = "association",
       Title = "Keyword co-occurrences",
       type = "auto",
       labelsize = 2,

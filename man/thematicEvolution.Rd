@@ -34,7 +34,7 @@ thematicEvolution(
 
 \item{n}{is numerical. It indicates the number of words to use in the network analysis}
 
-\item{minFreq}{is numerical. It indicates the min frequency of words included in to a cluster.}
+\item{minFreq}{is numerical. It indicates the minimum frequency of a term (per thousand documents of the period, and at least 2, see \code{\link{thematicMap}}): terms occurring less often are left out before the co-occurrence network of the period is built.}
 
 \item{size}{is numerical. It indicates del size of the cluster circles and is a number in the range (0.01,1).}
 

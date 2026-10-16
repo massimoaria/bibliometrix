@@ -8576,7 +8576,7 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "TMfreq",
-                            label = "Min Cluster Frequency (per thousand docs)",
+                            label = "Min Term Frequency (per thousand docs)",
                             value = 5,
                             min = 1,
                             max = 100,
@@ -9003,7 +9003,7 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "fTE",
-                            label = "Min Cluster Frequency (per thousand docs)",
+                            label = "Min Term Frequency (per thousand docs)",
                             value = 5,
                             min = 1,
                             max = 100,

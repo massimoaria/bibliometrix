@@ -837,6 +837,27 @@ buildTMPlot <- function(
 # co-occurrence counts in thematicMap()); a term with no edge inside its
 # cluster gets the baseline (1 - d) / n, n being the number of terms of the
 # cluster.
+# The terms of a co-occurrence network drawn by networkPlot(), in the shape
+# clusterAssignment() reads: their cluster, their occurrences (the diagonal of
+# the counts) and their PageRank within the cluster on the co-occurrence
+# counts, as thematicMap() computes it. The vertex names of networkPlot() are
+# lower case and the names of biblioNetwork() are not, so the counts are
+# matched in lower case: matched as they were, no term found its occurrences.
+clusterWords <- function(NetMatrix, cluster_res) {
+  rownames(NetMatrix) <- colnames(NetMatrix) <- tolower(rownames(NetMatrix))
+  words <- as.character(cluster_res$vertex)
+  occ <- Matrix::diag(NetMatrix)[match(words, rownames(NetMatrix))]
+  occ[is.na(occ) | occ == 0] <- 1
+  data.frame(
+    Words = words,
+    cluster = cluster_res$cluster,
+    pagerank_centrality = cluster_res$pagerank_centrality,
+    Occurrences = as.numeric(occ),
+    Cluster_PageRank = clusterPageRank(NetMatrix, words, cluster_res$cluster),
+    stringsAsFactors = FALSE
+  )
+}
+
 clusterPageRank <- function(S, words, groups, damping = 0.85) {
   pr <- numeric(length(words))
   for (h in unique(groups)) {

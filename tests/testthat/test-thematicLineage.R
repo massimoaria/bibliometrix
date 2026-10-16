@@ -221,3 +221,29 @@ test_that("the most frequent term of a theme keeps its weight in the lineage", {
   out <- nx$Data[nx$Data$CL1 == "citation analysis--2005-2010", ]
   expect_equal(link$Lineage_Strength, max(out$Lineage_Strength))
 })
+
+test_that("the documents of a co-occurrence network are assigned to its clusters", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  data(management, package = "bibliometrixData", envir = environment())
+  NW <- biblioNetwork(management, analysis = "co-occurrences",
+                      network = "author_keywords", n = 50, sep = ";")
+  net <- suppressWarnings(networkPlot(NW, n = 50, normalize = "association",
+                                      remove.multiple = FALSE, verbose = FALSE))
+  w <- clusterWords(NW, net$cluster_res)
+  # the occurrences are those of the counts: matched in the case of the
+  # matrix, no term found them and every term counted 1
+  expect_identical(w$Occurrences,
+                   unname(diag(as.matrix(NW))[match(w$Words, tolower(rownames(NW)))]))
+  expect_gt(max(w$Occurrences), 1)
+  NWl <- NW
+  rownames(NWl) <- colnames(NWl) <- tolower(rownames(NW))
+  expect_identical(w$Cluster_PageRank, clusterPageRank(NWl, w$Words, w$cluster))
+  # clusterAssignment() reads Cluster_PageRank: without it the Documents table
+  # of the co-occurrence network failed, and the failure was swallowed
+  w$Cluster_Label <- paste("Cluster", w$cluster)
+  dtc <- clusterAssignment(management, words = w, field = "DE",
+                           remove.terms = NULL, synonyms = NULL, threshold = 0.5)
+  expect_true(nrow(dtc) > 0)
+  expect_true(all(c("Assigned_cluster", "SR") %in% names(dtc)))
+})

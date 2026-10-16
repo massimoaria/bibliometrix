@@ -832,11 +832,6 @@ buildTMPlot <- function(
   return(g)
 }
 
-# PageRank within each cluster (Aria et al., 2026, Sect. 3.2): computed on the
-# subgraph that the cluster's terms induce in the weighted network S (the
-# co-occurrence counts in thematicMap()); a term with no edge inside its
-# cluster gets the baseline (1 - d) / n, n being the number of terms of the
-# cluster.
 # The terms of a co-occurrence network drawn by networkPlot(), in the shape
 # clusterAssignment() reads: their cluster, their occurrences (the diagonal of
 # the counts) and their PageRank within the cluster on the co-occurrence
@@ -858,6 +853,11 @@ clusterWords <- function(NetMatrix, cluster_res) {
   )
 }
 
+# PageRank within each cluster (Aria et al., 2026, Sect. 3.2): computed on the
+# subgraph that the cluster's terms induce in the weighted network S (the
+# co-occurrence counts in thematicMap()); a term with no edge inside its
+# cluster gets the baseline (1 - d) / n, n being the number of terms of the
+# cluster.
 clusterPageRank <- function(S, words, groups, damping = 0.85) {
   pr <- numeric(length(words))
   for (h in unique(groups)) {

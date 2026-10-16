@@ -195,7 +195,8 @@ through an interactive workflow organized around the SAAS model.
 
 - **Conceptual Structure**: Analyze the topics and themes through
   co-word networks, thematic mapping (strategic diagrams), and thematic
-  evolution over time.
+  evolution over time (Sankey flows and the thematic maps of the periods
+  stacked as layers).
 
 <p align="center">
 
@@ -666,17 +667,17 @@ dplyr::glimpse(authorInfo)
 #> Columns: 26
 #> $ id                          <chr> "https://openalex.org/A5069892096"
 #> $ display_name                <chr> "Massimo Aria"
-#> $ display_name_alternatives   <list> <"Aria, M. Qasem", "Aria, Massimo", "M Aria", "M. Aria", "M. Qasem Aria", "MASSIMO…
+#> $ display_name_alternatives   <list> <"Aria M.", "Aria, Massimo", "M Aria", "M. Aria", "MASSIMO ARIA", "Massimo Aria">
 #> $ full_name                   <chr> "Massimo Aria"
-#> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411">
+#> $ ids                         <list> <"https://openalex.org/A5069892096", "https://orcid.org/0000-0002-8517-9411", "htt…
 #> $ orcid                       <chr> "https://orcid.org/0000-0002-8517-9411"
-#> $ works_count                 <int> 237
-#> $ cited_by_count              <int> 20543
-#> $ counts_by_year              <list> [<data.frame[24 x 4]>]
-#> $ `2yr_mean_citedness`        <dbl> 3.77193
-#> $ h_index                     <int> 37
-#> $ i10_index                   <int> 99
-#> $ last_known_institutions     <list> [<data.frame[3 x 6]>]
+#> $ works_count                 <int> 241
+#> $ cited_by_count              <int> 21269
+#> $ counts_by_year              <list> [<data.frame[23 x 4]>]
+#> $ `2yr_mean_citedness`        <dbl> 3.984127
+#> $ h_index                     <int> 38
+#> $ i10_index                   <int> 102
+#> $ last_known_institutions     <list> [<data.frame[1 x 6]>]
 #> $ topics                      <list> [<tbl_df[20 x 5]>]
 #> $ works_api_url               <chr> "https://api.openalex.org/works?filter=author.id:A5069892096"
 #> $ author_position_in_paper    <dbl> 1
@@ -689,7 +690,7 @@ dplyr::glimpse(authorInfo)
 #> $ affiliation_raw             <chr> "Department of Economics and Statistics, Università degli Studi di Napoli Federico…
 #> $ source_doi                  <chr> "10.1016/j.joi.2017.08.007"
 #> $ source_title                <chr> "bibliometrix : An R-tool for comprehensive science mapping analysis"
-#> $ query_timestamp             <dttm> 2026-08-28 15:16:23
+#> $ query_timestamp             <dttm> 2026-10-12 13:35:04
 ```
 
 This function provides comprehensive author profiles including:
@@ -950,6 +951,51 @@ plot(TEResults$TM[[4]]$map)
 
 <img src="man/figures/README-unnamed-chunk-16-1.png" alt="" width="100%" />
 
+#### Thematic Layers: the maps of the periods stacked
+
+The Sankey diagram shows the flows between themes but not their
+position, the thematic maps show the positions but not the flows.
+**plotThematicLayers** shows both: it stacks the thematic maps of the
+periods as planes in an oblique view, the oldest at the bottom, places
+each theme on its plane at its centrality and density, and links the
+themes of adjacent periods that share words. A theme can then be
+followed as it moves across the quadrants while it merges with or splits
+from other themes. The plot follows the hand-drawn Fig. 12 of Angelelli
+et al. (2025).
+
+The links of a lineage, and the themes they join, share the colour of
+the lineage; the other links are thin and faint, the other themes grey.
+Positions are relative to each period (the cross of the quadrants is the
+mean centrality and density of the period) and the size of a theme is
+its frequency relative to the largest theme of the period.
+
+``` r
+# The thematic maps of the periods stacked, with the links between them
+plotThematicLayers(TEResults)
+```
+
+<img src="man/figures/README-Thematic-Layers-1.png" alt="" width="100%" />
+
+`min.flow` hides the weakest links, using the same lineage strength as
+the Sankey diagram:
+
+``` r
+plotThematicLayers(TEResults, min.flow = 0.4)
+```
+
+<img src="man/figures/README-Thematic-Layers-min-flow-1.png" alt="" width="100%" />
+
+With `interactive = TRUE` the plot is a plotly widget: the tooltip of a
+theme gives its period, quadrant, frequency and the themes it comes from
+and leads to; a click on a theme keeps the themes it comes from and
+those it leads to, across all periods, and fades the rest. In
+biblioshiny the same plot is in the **Layers** tab of Thematic
+Evolution.
+
+``` r
+plotThematicLayers(TEResults, interactive = TRUE)
+```
+
 ## Co-Word Analysis: The conceptual structure of a field
 
 Co-word analysis maps the conceptual structure of a research domain by
@@ -1002,7 +1048,7 @@ identify seminal works and breakthrough moments in a research field. The
 rpysResults <- rpys(M, sep = ";", timespan = NULL, graph = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" alt="" width="100%" />
 
 ``` r
 

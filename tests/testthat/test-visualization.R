@@ -191,3 +191,36 @@ test_that("threeFieldsPlot mappa correttamente campi con dimensioni differenti",
   expect_true(any(links$from == "dave" & links$to == "journal_y"))
   expect_true(any(links$from == "eve" & links$to == "journal_z"))
 })
+
+test_that("histPlot formatta i titoli a singola parola e mancanti senza duplicazioni", {
+  M <- data.frame(
+    AU = c("SMITH J", "JONES A", "BROWN K", "WHITE L"),
+    TI = c("ALPHA", "BETA STUDY", NA, "DELTA REVIEW"),
+    SO = c("J ONE", "J TWO", "J ONE", "J THREE"),
+    PY = c(2010L, 2012L, 2014L, 2016L),
+    TC = c(30L, 20L, 10L, 5L),
+    DI = c("10.1/a", "10.1/b", "10.1/c", "10.1/d"),
+    DE = NA_character_, ID = NA_character_, AB = NA_character_,
+    id_oa = c("W1", "W2", "W3", "W4"),
+    DB = "OPENALEX",
+    SR_FULL = c("SMITH J, 2010, J ONE", "JONES A, 2012, J TWO",
+                "BROWN K, 2014, J ONE", "WHITE L, 2016, J THREE"),
+    stringsAsFactors = FALSE
+  )
+  M$SR <- M$SR_FULL
+  M$CR <- c(NA, NA,
+    "SMITH JB, 2010, J ONE ABBREV, V1, P1, DOI 10.1/A",
+    paste("SMITH JB, 2010, J ONE ABBREV, V1, P1, DOI 10.1/A",
+          "JONES AC, 2012, J TWO ABBREV, V2, P9, DOI 10.1/B",
+          "BROWN KP, 2014, J ONE ABBREV, V3, P4, DOI 10.1/C", sep = ";"))
+
+  h <- suppressMessages(histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE))
+  p <- suppressWarnings(histPlot(h, label = "title", verbose = FALSE))
+  expect_equal(igraph::V(p$net)$id, c("Alpha", "Beta\nStudy", "Not Available", "Delta\nReview"))
+
+  # an empty title is not dropped (the labels would be one fewer than the nodes)
+  M$TI[3] <- ""
+  h <- suppressMessages(histNetwork(M, min.citations = 0, sep = ";", verbose = FALSE))
+  p <- suppressWarnings(histPlot(h, label = "title", verbose = FALSE))
+  expect_equal(igraph::V(p$net)$id, c("Alpha", "Beta\nStudy", "Not Available", "Delta\nReview"))
+})

@@ -19,7 +19,8 @@ utils::globalVariables(c(
 #' @param Nodes is a list of nodes obtained by \code{\link{thematicEvolution}} function.
 #' @param Edges is a list of edges obtained by \code{\link{thematicEvolution}} function.
 #' @param measure is a character. It is deprecated and has no effect. The weight of the flows is always calculated using lineage_strength.
-#' @param min.flow is numerical. It indicates the minimum value of measure to plot a flow.
+#' @param min.flow is numerical. It indicates the minimum lineage strength of a flow to plot it. The flows that
+#' \code{thematicEvolution()} leaves out of the evolutionary graph (\code{Edges$retained}) are never plotted.
 #' @return a sankeyPlot
 #'
 #'
@@ -78,6 +79,11 @@ plotThematicEvolution <- function(
   # instead (zero width + transparent colour, see below).
   Edges$is_weak <- !is.na(Edges$lineage_strength) &
     Edges$lineage_strength < min.flow
+  # links left out of the evolutionary graph by the dual threshold of
+  # thematicEvolution() are hidden in the same way
+  if ("retained" %in% names(Edges)) {
+    Edges$is_weak <- Edges$is_weak | !Edges$retained
+  }
 
   # Use lineage_strength as weight
   Edges <- Edges %>%
@@ -140,16 +146,22 @@ plotThematicEvolution <- function(
   Nodes$color[hidden_node] <- "rgba(0,0,0,0)"
 
   # Prepare tooltips
+  fuzzy <- if ("fuzzy_cardinality" %in% names(Nodes)) {
+    Nodes$fuzzy_cardinality
+  } else {
+    rep(NA_real_, nrow(Nodes))
+  }
   node_customdata <- matrix(
-    c(Nodes$freq, Nodes$rel_freq),
+    c(Nodes$freq, Nodes$rel_freq, fuzzy),
     nrow = nrow(Nodes),
-    ncol = 2
+    ncol = 3
   )
 
   node_hovertemplate <- paste0(
     "<b>%{label}</b><br>",
     "Frequency: %{customdata[0]:.0f}<br>",
     "Relative Frequency: %{customdata[1]:.2f}%<br>",
+    if (all(is.na(fuzzy))) "" else "Fuzzy cardinality: %{customdata[2]:.1f}<br>",
     "<extra></extra>"
   )
 

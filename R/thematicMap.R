@@ -54,9 +54,15 @@ utils::globalVariables(c(
 #' The methodology is inspired by the proposal of Cobo et al. (2011).
 #'
 #' \code{thematicMap} starts from a co-occurrence keyword network to plot in a
-#' two-dimensional map the typological themes of a domain.\cr\cr
+#' two-dimensional map the typological themes of a domain. The themes are the communities of the
+#' co-occurrence network normalised by association strength, and each document belongs to every theme
+#' with a graded (fuzzy) membership, based on the PageRank of its terms within the theme, as in
+#' Aria et al. (2026).\cr\cr
 #'
-#' Reference:\cr
+#' References:\cr
+#' Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2026). Rethinking thematic evolution in science mapping:
+#' An integrated framework for longitudinal analysis. Journal of Informetrics, 20, 101877. \doi{10.1016/j.joi.2026.101877}\cr
+#'
 #' Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying,
 #' and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 #'
@@ -65,7 +71,7 @@ utils::globalVariables(c(
 #' @param field is the textual attribute used to build up the thematic map. It can be \code{field = c("ID","DE","KW_Merged","TI", "AB")}.
 #' \code{\link{biblioNetwork}} or \code{\link{cocMatrix}}.
 #' @param n is an integer. It indicates the number of terms to include in the analysis.
-#' @param minfreq is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).
+#' @param minfreq is a integer. It indicates the minimum frequency (per thousand documents, and at least 2) of a term: terms occurring less often are left out before the co-occurrence network is built. It is a number in the range (0,1000).
 #' @param ngrams is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 #' An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.
 #' @param stemming is logical. If it is TRUE the word (from titles or abstracts) will be stemmed (using the Porter's algorithm).
@@ -82,8 +88,9 @@ utils::globalVariables(c(
 #' @return a list containing:
 #' \tabular{lll}{
 #' \code{map}\tab   \tab The thematic map as ggplot2 object\cr
-#' \code{clusters}\tab   \tab Centrality and Density values for each cluster. \cr
-#' \code{words}\tab   \tab A list of words following in each cluster\cr
+#' \code{clusters}\tab   \tab Centrality and Density values for each cluster, and its fuzzy cardinality (the sum of the memberships of the documents)\cr
+#' \code{words}\tab   \tab A list of words following in each cluster, with their PageRank on the whole network (\code{PageRank}) and within their cluster (\code{Cluster_PageRank})\cr
+#' \code{documentToClusters}\tab   \tab The membership of each document in each cluster (each row sums to one) and the cluster it is assigned to when its membership there is at least 0.5\cr
 #' \code{nclust}\tab   \tab The number of clusters\cr
 #' \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
 #'
@@ -199,7 +206,26 @@ thematicMap <- function(
     }
   )
 
+  # Terms below minfreq are left out before the network is built (Aria et
+  # al., 2026, Sect. 3.1): kept until after the clustering, they shaped the
+  # partition -- under association strength the rarest terms weigh the most
+  # -- and then left tiny themes behind.
+  keep <- Matrix::diag(NetMatrix) >= minfreq
+  if (nrow(NetMatrix) > 0 && !any(keep)) {
+    cat(
+      "\n\nNo term of the network occurs at least ", minfreq,
+      " times, the count minfreq gives on this collection",
+      "\nThe analysis cannot be performed\n\n", sep = ""
+    )
+    return()
+  }
+  NetMatrix <- NetMatrix[keep, keep, drop = FALSE]
+
   if (nrow(NetMatrix) > 0) {
+    # The themes are the communities of the association-strength network W
+    # (Aria et al., 2026, Eq. 3), and so are the term centralities computed on
+    # it: networkPlot() clusters W (normalize.clusters = TRUE).
+    S <- normalizeSimilarity(NetMatrix, type = "association")
     # A matrix with rows can still hold no link between two distinct terms:
     # networkPlot() then refuses it. For the thematic map that is the same case
     # as an empty matrix, and keeps the same contract -- NULL, which
@@ -236,10 +262,8 @@ thematicMap <- function(
     cat("\n\nNetwork matrix is empty!\nThe analysis cannot be performed\n\n")
     return()
   }
-  #dev.off();file.remove(t) ### end of trick
-  S = Net$S
-
   row.names(NetMatrix) = colnames(NetMatrix) = tolower(row.names(NetMatrix))
+  row.names(S) = colnames(S) = row.names(NetMatrix)
   net = Net$graph
   net_groups <- Net$cluster_obj
   group = net_groups$membership
@@ -266,8 +290,18 @@ thematicMap <- function(
   label_cluster = unique(group)
   word_cluster = word[group]
 
-  centr <- networkStat(Net$graph, stat = "all", type = "pagerank")$vertex %>%
-    rename(pagerank = vertexPageRank)
+  # PageRank on W itself: the graph returned by networkPlot() carries the
+  # co-occurrence counts
+  W_net <- as.matrix(S[V(net)$name, V(net)$name])
+  diag(W_net) <- 0
+  centr <- data.frame(
+    vertexID = V(net)$name,
+    pagerank = page_rank(graph_from_adjacency_matrix(
+      W_net,
+      mode = "undirected",
+      weighted = TRUE
+    ))$vector
+  )
   df_lab <- data.frame(
     sC = sC,
     words = word,
@@ -288,7 +322,14 @@ thematicMap <- function(
   df_lab <- df_lab %>%
     dplyr::filter(sC >= minfreq) %>%
     group_by(groups) %>%
-    mutate(freq = sum(sC), cluster_label = words[which.max(score)])
+    mutate(freq = sum(sC), cluster_label = words[which.max(score)]) %>%
+    ungroup()
+  # PageRank within the cluster on the co-occurrence counts: on the
+  # association strength every link of a term is divided by its frequency, so
+  # the most frequent term of a cluster -- the one naming it -- came out among
+  # its least central ones, and two clusters sharing their label could be
+  # left unlinked
+  df_lab$Cluster_PageRank <- clusterPageRank(NetMatrix, df_lab$words, df_lab$groups)
 
   sEij <- triu(sEij)
   df_lab_top <- df_lab %>% select(words, groups)
@@ -305,7 +346,9 @@ thematicMap <- function(
 
   df_lab_top <- df_lab %>%
     select(groups, cluster_label, color, freq) %>%
-    slice_head(n = 1)
+    group_by(groups) %>%
+    slice_head(n = 1) %>%
+    ungroup()
 
   df <- sEij_df %>%
     dplyr::filter(
@@ -403,16 +446,21 @@ thematicMap <- function(
   ) +
     annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2])
 
+  # PageRank: on the whole network, used with the frequency to name the
+  # cluster; Cluster_Frequency: the term's share of the cluster occurrences;
+  # Cluster_PageRank: on the cluster subgraph, used by the document assignment
+  # and by the lineage of thematicEvolution()
   names(df_lab) = c(
     "Occurrences",
     "Words",
     "Cluster",
     "Color",
     "Cluster_Label",
-    "Cluster_Frequency",
     "PageRank",
+    "Cluster_Frequency",
     "Score",
-    "Freq"
+    "Freq",
+    "Cluster_PageRank"
   )
 
   df_lab <- df_lab %>%
@@ -436,6 +484,14 @@ thematicMap <- function(
     synonyms,
     threshold = 0.5
   )
+  # fuzzy cardinality of each theme (Aria et al., 2026, Eq. 6): the sum of
+  # the memberships of the documents of the collection
+  card <- colSums(as.matrix(documentToClusters[, intersect(
+    unique(df_lab$Cluster_Label),
+    names(documentToClusters)
+  ), drop = FALSE]))
+  df$fuzzy_cardinality <- unname(card[df$name])
+  df$fuzzy_cardinality[is.na(df$fuzzy_cardinality)] <- 0
 
   params <- list(
     field = field,
@@ -480,10 +536,7 @@ thematicMap <- function(
     axisLimits = c(xlimits, ylimits),
     annotations = annotations,
     clusters = df,
-    words = df_lab %>%
-      rename(
-        Cluster_PageRank = PageRank
-      ),
+    words = df_lab,
     nclust = dim(df)[1],
     net = Net,
     modularity = Net$modularity,
@@ -542,12 +595,15 @@ clusterAssignment <- function(
   }
 
   # 5. Preparazione tabella 'words'
+  # similarity of a document to a cluster (Aria et al., 2026, Eq. 4): the
+  # PageRank of the shared terms within the cluster, each divided by the
+  # term's frequency in the period
   words_clean <- words %>%
     mutate(
       terms = tolower(Words),
-      p_w = pagerank_centrality / Occurrences #1 / Occurrences
+      p_w = Cluster_PageRank / Occurrences
     ) %>%
-    select(terms, Cluster_Label, p_w, p_c = pagerank_centrality)
+    select(terms, Cluster_Label, p_w, p_c = Cluster_PageRank)
 
   # 6. Calcolo Probabilità
   TERMS_processed <- allField %>%
@@ -592,6 +648,27 @@ clusterAssignment <- function(
       values_from = p,
       values_fill = 0
     )
+  # a document whose terms all fall outside the clusters (filtered out) gets
+  # the same membership 1 / n_t in each of them (Aria et al., 2026, Sect.
+  # 3.2), so that its memberships sum to one; a document with no term in the
+  # field has no membership
+  all_clusters <- unique(words_clean$Cluster_Label)
+  for (cl in setdiff(all_clusters, names(TERMS_wide))) {
+    TERMS_wide[[cl]] <- 0
+  }
+  no_match <- setdiff(unique(allField$SR), TERMS_wide$SR)
+  if (length(no_match) > 0 && length(all_clusters) > 0) {
+    uniform <- as.data.frame(matrix(
+      1 / length(all_clusters),
+      nrow = length(no_match),
+      ncol = length(all_clusters),
+      dimnames = list(NULL, all_clusters)
+    ), check.names = FALSE)
+    TERMS_wide <- bind_rows(
+      TERMS_wide,
+      bind_cols(tibble(SR = no_match), uniform)
+    )
+  }
   cluster_cols <- setdiff(names(TERMS_wide), "SR")
   if (length(cluster_cols) > 0) {
     k <- suppressWarnings(as.numeric(gsub("\\D+", "", cluster_cols)))
@@ -753,4 +830,27 @@ buildTMPlot <- function(
   #annotation_custom(logo, xmin = x[1], xmax = x[2], ymin = y[1], ymax = y[2])
 
   return(g)
+}
+
+# PageRank within each cluster (Aria et al., 2026, Sect. 3.2): computed on the
+# subgraph that the cluster's terms induce in the weighted network S (the
+# co-occurrence counts in thematicMap()); a term with no edge inside its
+# cluster gets the baseline (1 - d) / n, n being the number of terms of the
+# cluster.
+clusterPageRank <- function(S, words, groups, damping = 0.85) {
+  pr <- numeric(length(words))
+  for (h in unique(groups)) {
+    i <- which(groups == h)
+    Sh <- as.matrix(S[words[i], words[i], drop = FALSE])
+    diag(Sh) <- 0
+    g <- igraph::graph_from_adjacency_matrix(
+      Sh,
+      mode = "undirected",
+      weighted = TRUE
+    )
+    p <- igraph::page_rank(g, damping = damping)$vector
+    p[igraph::degree(g) == 0] <- (1 - damping) / length(i)
+    pr[i] <- unname(p)
+  }
+  pr
 }

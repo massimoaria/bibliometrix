@@ -2454,7 +2454,7 @@ helpContent <- function() {
     <ul>
       <li><strong>Field:</strong> Choose between Author's Keywords (DE), Keywords Plus (ID), Title words, or Abstract words as the unit of analysis</li>
       <li><strong>Network layout:</strong> Select from various layout algorithms (e.g., Fruchterman-Reingold, Kamada-Kawai) to optimize the visual representation</li>
-      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Inclusion, Salton's cosine, or Equivalence index to normalize co-occurrence frequencies</li>
+      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Inclusion, Salton's cosine, or Equivalence index to normalize co-occurrence frequencies. The normalised network drives both the clusters and the layout, so that frequent terms do not dominate the communities; the edge widths still show the co-occurrence counts. With <em>None</em>, clusters and layout are computed on the counts</li>
       <li><strong>Clustering algorithm:</strong> Choose between Louvain, Walktrap, or other community detection algorithms to identify thematic groups</li>
       <li><strong>Number of nodes:</strong> Control how many top terms to include in the network</li>
       <li><strong>Minimum edges:</strong> Filter weak connections to focus on meaningful associations</li>
@@ -2494,14 +2494,15 @@ helpContent <- function() {
     <p>The <strong>Thematic Map</strong> (also known as the <strong>Strategic Diagram</strong>) is a two-dimensional visualization that classifies research themes according to their <strong>centrality</strong> (importance within the field) and <strong>density</strong> (internal coherence of the theme). Originally proposed by <strong>Callon et al. (1991)</strong> and further developed by <strong>Cobo et al. (2011)</strong>, it provides a comprehensive snapshot of the thematic landscape of a scientific domain.</p>
 
     <h4>&#127891; Theoretical Foundations</h4>
-    <p>The Thematic Map is built from a co-occurrence network of terms. After applying a clustering algorithm (e.g., Louvain or Walktrap) to identify thematic groups, each cluster is characterized by two metrics:</p>
+    <p>The Thematic Map is built from a co-occurrence network of terms, normalised by <strong>association strength</strong> (van Eck &amp; Waltman, 2009): the co-occurrence of two terms is divided by the product of their frequencies, so that frequent terms do not dominate the network. A community detection algorithm (Louvain by default) is applied to this normalised network to identify the thematic groups, as in <strong>Aria et al. (2026)</strong>, and each cluster is characterized by two metrics:</p>
     <ul>
       <li><strong>Centrality (Callon's centrality):</strong> Measures the strength of external ties between a cluster and other clusters. High centrality indicates that a theme is strongly connected to other themes, making it central to the field.</li>
       <li><strong>Density (Callon's density):</strong> Measures the strength of internal ties within a cluster. High density indicates that a theme is well-developed and internally coherent.</li>
     </ul>
 
     <h4>&#128203; Fuzzy Publication-to-Cluster Assignment</h4>
-    <p>Following the framework proposed by <strong>Aria et al. (2025)</strong>, publications are not assigned to a single cluster through hard partitioning. Instead, each publication receives a <strong>graded membership degree</strong> across all thematic clusters, reflecting the multithematic nature of scientific documents. The membership score is based on the overlap between a publication's terms and each cluster's vocabulary, weighted by the <em>PageRank centrality</em> of shared terms within the cluster. This means that a publication's affiliation with a cluster is stronger when its terms are central (high PageRank) and distinctive (low global frequency) within that cluster's semantic structure. The resulting fuzzy membership is then normalised to produce a distribution over clusters summing to one.</p>
+    <p>Following the framework of <strong>Aria et al. (2026)</strong>, publications are not assigned to a single cluster through hard partitioning. Instead, each publication receives a <strong>graded membership degree</strong> across all thematic clusters, reflecting the multithematic nature of scientific documents. The <em>PageRank centrality</em> of each term is computed <em>within its cluster</em>, on the co-occurrences among the cluster's terms (a term with no link inside its cluster gets the baseline (1 &minus; d) / n, with d = 0.85 and n the number of terms of the cluster). The similarity of a publication to a cluster is the sum, over the terms they share, of the term's PageRank in the cluster divided by its frequency in the collection: a publication's affiliation with a cluster is stronger when its terms are central (high PageRank) and distinctive (low frequency) within that cluster. The similarities are then normalised to a distribution over clusters summing to one. A publication whose terms all lie outside the clusters (left out by the term filters) belongs to every cluster with the same degree 1 / (number of clusters); a publication with no term in the chosen field has no membership.</p>
+    <p>The <strong>Documents</strong> table reports the membership degrees of each publication, and the cluster it is assigned to when its membership there is at least 0.5.</p>
     <p>This approach has two key advantages:</p>
     <ul>
       <li><strong>Multithematic representation:</strong> A publication working at the intersection of two research themes contributes proportionally to both, rather than being forced into a single category</li>
@@ -2521,14 +2522,14 @@ helpContent <- function() {
     <ul>
       <li><strong>Field:</strong> Choose the bibliographic field to analyze (Keywords, Title words, Abstract terms, etc.)</li>
       <li><strong>Number of terms:</strong> Set how many top terms to include in the analysis</li>
-      <li><strong>Minimum cluster frequency:</strong> Filter out small clusters below a given size threshold</li>
+      <li><strong>Minimum frequency (per thousand documents):</strong> Terms occurring less often (and in fewer than two documents in any case) are left out before the co-occurrence network is built, so that very rare terms neither shape the themes nor leave tiny themes behind</li>
       <li><strong>Clustering algorithm:</strong> Select between Louvain, Walktrap, or other community detection methods</li>
       <li><strong>Label size:</strong> Adjust the size of theme labels for readability</li>
     </ul>
 
     <h4>&#128270; Interpreting Results</h4>
     <ul>
-      <li><strong>Bubble size:</strong> Proportional to the fuzzy cardinality of the cluster (the sum of publication membership degrees), reflecting the substantive weight of the theme rather than a simple document count</li>
+      <li><strong>Bubble size:</strong> Proportional (on a log scale) to the occurrences of the words of the theme. The <strong>Clusters</strong> table also reports the <em>fuzzy cardinality</em> of each theme, the sum of the membership degrees of the publications, which measures its substantive weight in documents</li>
       <li><strong>Bubble position:</strong> Determined by the centrality (x-axis) and density (y-axis) of the cluster</li>
       <li><strong>Theme labels:</strong> Show the most representative keywords of each cluster</li>
       <li><strong>Quadrant analysis:</strong> Focus on the strategic position of each theme to understand the field's structure</li>
@@ -2538,7 +2539,7 @@ helpContent <- function() {
 
     <h5>&#128218; Key References</h5>
 
-    <p><strong>Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2025).</strong> <i>Rethinking Thematic Evolution in Science Mapping: An Integrated Framework for Longitudinal Analysis.</i> Working Paper.</p>
+    <p><strong>Aria, M., D'Aniello, L., Misuraca, M., &amp; Spano, M. (2026).</strong> <i>Rethinking thematic evolution in science mapping: An integrated framework for longitudinal analysis.</i> <strong>Journal of Informetrics</strong>, 20, 101877. <a href='https://doi.org/10.1016/j.joi.2026.101877' target='_blank'>https://doi.org/10.1016/j.joi.2026.101877</a></p>
 
     <p><strong>Callon, M., Courtial, J.-P., & Laville, F. (1991).</strong> <i>Co-word analysis as a tool for describing the network of interactions between basic and technological research: The case of polymer chemistry.</i> <strong>Scientometrics</strong>, 22(1), 155-205. <a href='https://doi.org/10.1007/BF02019280' target='_blank'>https://doi.org/10.1007/BF02019280</a></p>
 
@@ -2558,25 +2559,25 @@ helpContent <- function() {
     <div class='container'>
     <h3>&#128336; Thematic Evolution</h3>
 
-    <p>The <strong>Thematic Evolution</strong> analysis tracks how research themes emerge, grow, merge, split, and decline over time. By dividing the publication timeline into consecutive <strong>time slices</strong> and performing co-occurrence analysis within each slice, this method reveals the dynamic evolution of a field's conceptual structure. The implementation in bibliometrix adopts the integrated framework proposed by <strong>Aria et al. (2025)</strong>, which reconceptualises thematic evolution as a fully network-based process where cross-sectional thematic detection, graded document affiliation, and inter-temporal linkage are jointly modelled within a coherent relational architecture.</p>
+    <p>The <strong>Thematic Evolution</strong> analysis tracks how research themes emerge, grow, merge, split, and decline over time. By dividing the publication timeline into consecutive <strong>time slices</strong> and performing co-occurrence analysis within each slice, this method reveals the dynamic evolution of a field's conceptual structure. The implementation in bibliometrix adopts the integrated framework proposed by <strong>Aria et al. (2026)</strong>, which reconceptualises thematic evolution as a fully network-based process where cross-sectional thematic detection, graded document affiliation, and inter-temporal linkage are jointly modelled within a coherent relational architecture.</p>
 
     <h4>&#127891; Theoretical Foundations</h4>
-    <p>This approach extends static thematic mapping into a <strong>longitudinal framework</strong>. It was originally formalised by <strong>Cobo et al. (2011)</strong>, who introduced overlap-based similarity measures to identify continuities, splits, and mergers between themes across consecutive periods. <strong>Aria et al. (2025)</strong> further developed the methodology by addressing a key structural asymmetry in existing approaches: while cross-sectional theme detection is explicitly relational (based on weighted co-occurrence networks), lineage construction was traditionally reduced to set-theoretic comparisons of term lists, discarding the relational structure that defines a theme's semantic core.</p>
+    <p>This approach extends static thematic mapping into a <strong>longitudinal framework</strong>. It was originally formalised by <strong>Cobo et al. (2011)</strong>, who introduced overlap-based similarity measures to identify continuities, splits, and mergers between themes across consecutive periods. <strong>Aria et al. (2026)</strong> further developed the methodology by addressing a key structural asymmetry in existing approaches: while cross-sectional theme detection is explicitly relational (based on weighted co-occurrence networks), lineage construction was traditionally reduced to set-theoretic comparisons of term lists, discarding the relational structure that defines a theme's semantic core.</p>
     <p>The integrated framework resolves this asymmetry through three key innovations:</p>
     <ul>
-      <li><strong>Fuzzy publication-to-cluster assignment:</strong> Instead of hard partitioning, each publication receives a graded membership degree across all thematic clusters, computed using <em>PageRank centrality</em> of shared terms. This captures the multithematic nature of publications, particularly relevant in interdisciplinary research.</li>
-      <li><strong>Network-based lineage strength:</strong> Inter-temporal connections are quantified through a <em>lineage strength</em> measure that integrates two complementary dimensions: a <em>weighted inclusion index</em> (directional coverage weighted by PageRank centrality) and an <em>importance index</em> (mutual structural relevance of shared terms). This ensures that lineage reflects the preservation of structural relations, not merely lexical overlap.</li>
+      <li><strong>Fuzzy publication-to-cluster assignment:</strong> Instead of hard partitioning, each publication receives a graded membership degree across all thematic clusters, computed from the <em>PageRank centrality</em> of the shared terms within each cluster. This captures the multithematic nature of publications, particularly relevant in interdisciplinary research.</li>
+      <li><strong>Network-based lineage strength:</strong> Inter-temporal connections are quantified through a <em>lineage strength</em> measure that integrates two complementary dimensions: a <em>weighted inclusion index</em> (the directional coverage of the source theme, weighted by PageRank centrality) and an <em>importance index</em> (the mutual structural relevance of the shared terms). This ensures that lineage reflects the preservation of structural relations, not merely lexical overlap: in classical approaches every shared term counts the same, here a shared term counts as much as it is central in the themes.</li>
       <li><strong>Automatic lineage detection:</strong> Significant evolutionary connections are identified through a dual-thresholding approach combining absolute and relative (top-k) criteria, preventing the loss of important evolutionary paths while filtering noise.</li>
     </ul>
 
     <h4>&#128200; How It Works</h4>
     <ol>
       <li><strong>Time slicing:</strong> The publication period is divided into consecutive time windows (e.g., 2000-2005, 2006-2010, 2011-2015)</li>
-      <li><strong>Thematic identification:</strong> Within each slice, a co-occurrence matrix is built and normalised using association strength. Community detection is applied to identify thematic clusters, characterised by centrality and density measures</li>
-      <li><strong>Fuzzy document assignment:</strong> Each publication is assigned graded membership degrees to all clusters, based on the PageRank centrality of the terms it shares with each cluster</li>
-      <li><strong>Lineage computation:</strong> For each pair of consecutive periods, a lineage strength matrix is computed combining weighted inclusion (directional coverage) and importance (mutual structural relevance) of shared terms</li>
-      <li><strong>Automatic lineage detection:</strong> Significant evolutionary connections are identified using dual thresholding (absolute strength + top-k per source cluster)</li>
-      <li><strong>Evolution mapping:</strong> The result is a temporally ordered directed graph visualised as a Sankey-like flow diagram, where edge thickness reflects lineage strength</li>
+      <li><strong>Thematic identification:</strong> Within each slice, a co-occurrence matrix is built and normalised using association strength. Community detection is applied to the normalised network to identify thematic clusters, characterised by centrality and density measures</li>
+      <li><strong>Fuzzy document assignment:</strong> Each publication is assigned graded membership degrees to all clusters, based on the PageRank centrality, within each cluster, of the terms it shares with it (see the Thematic Map help). The <em>fuzzy cardinality</em> of a cluster is the sum of the membership degrees of the publications</li>
+      <li><strong>Lineage computation:</strong> For a theme <em>h</em> of a period and a theme <em>j</em> of the next one, let PR be the PageRank of a term within its theme and PR<sub>tot</sub> the total PageRank of a theme. The <em>weighted inclusion index</em> I<sub>w</sub>(h, j) is the share of PR<sub>tot</sub>(h) carried by the terms that h shares with j; it is directional: it measures how much of the source theme is carried over to the successor. The <em>importance index</em> &Omega;(h, j) is the square root of the sum, over the shared terms, of PR(h) &times; PR(j), divided by PR<sub>tot</sub>(h) &times; PR<sub>tot</sub>(j); it is high when the shared terms are central in both themes. The <strong>lineage strength</strong> is L = &alpha; I<sub>w</sub> + (1 &minus; &alpha;) &Omega;, a number between 0 and 1</li>
+      <li><strong>Automatic lineage detection:</strong> A link from a theme to a theme of the next period enters the evolutionary graph when its lineage strength is at least &theta; (absolute criterion), or when it is among the k strongest links leaving that theme (relative criterion). The relative criterion keeps the continuations that are weak in absolute terms but are the main successors of their theme</li>
+      <li><strong>Evolution mapping:</strong> The result is a temporally ordered directed graph, visualised as a Sankey diagram where the thickness of a flow is its lineage strength</li>
     </ol>
 
     <h4>&#9881;&#65039; Parameters and Options</h4>
@@ -2584,27 +2585,43 @@ helpContent <- function() {
       <li><strong>Field:</strong> Choose the bibliographic field (Keywords, Title words, etc.)</li>
       <li><strong>Time slices:</strong> Define the number and boundaries of time periods for the analysis</li>
       <li><strong>Number of terms:</strong> Set how many top terms to include per time slice</li>
-      <li><strong>Minimum cluster frequency:</strong> Filter out small or insignificant clusters</li>
+      <li><strong>Minimum frequency (per thousand documents):</strong> Terms occurring less often (and in fewer than two documents in any case) are left out before the co-occurrence network is built, so that very rare terms neither shape the themes nor leave tiny themes behind</li>
       <li><strong>Clustering algorithm:</strong> Select the community detection method (Louvain, Walktrap, etc.)</li>
+      <li><strong>&alpha; (coverage vs. structural relevance):</strong> The weight of the weighted inclusion index in the lineage strength. Values close to 1 favour the coverage of the source theme, values close to 0 the centrality of the shared terms in both themes; 0.5 (default) balances the two</li>
+      <li><strong>Min lineage strength (&theta;):</strong> The absolute threshold of the dual thresholding (default 0.10)</li>
+      <li><strong>Top-k successors per theme:</strong> The relative threshold: each theme keeps its k strongest links to the next period whatever their strength (default 2; 0 leaves only the absolute threshold)</li>
     </ul>
+    <p>The default values (&alpha; = 0.5, &theta; = 0.10, k = 2) are those of the application in Aria et al. (2026) and should be regarded as a starting point: collections with a broader scope, larger vocabularies or shorter periods may require recalibration. &theta; and k together set how dense the evolutionary graph is.</p>
 
     <h4>&#128270; Interpreting Results</h4>
     <ul>
-      <li><strong>Node size:</strong> Proportional to the fuzzy cardinality of the cluster (cumulative partial memberships), reflecting the substantive weight of the theme</li>
-      <li><strong>Edge thickness:</strong> Proportional to the lineage strength between themes across consecutive time slices, capturing both the extent of term overlap and the centrality of shared content</li>
+      <li><strong>Flows:</strong> Only the links of the evolutionary graph (dual thresholding) are drawn; the thickness of a flow is its lineage strength, which captures both the extent of term overlap and the centrality of the shared content. The height of a theme in the Sankey diagram is the sum of its flows; its tooltip reports its frequency and its fuzzy cardinality</li>
       <li><strong>Continuation:</strong> A one-to-one link (single incoming and single outgoing edge) indicates a stable thematic trajectory across consecutive periods</li>
       <li><strong>Splitting themes:</strong> A theme with multiple outgoing edges suggests differentiation or thematic specialisation</li>
       <li><strong>Merging themes:</strong> A theme with multiple incoming edges indicates thematic consolidation</li>
       <li><strong>Emerging themes:</strong> Clusters with no incoming edges represent newly appearing topics</li>
       <li><strong>Disappearing themes:</strong> Clusters with no outgoing edges represent themes that are fading from the research landscape</li>
-      <li><strong>Evolutionary pathways:</strong> Maximal directed sequences through the evolution graph represent coherent thematic trajectories spanning multiple periods, characterised by pathway strength, length, and cumulative size</li>
+      <li><strong>Evolutionary pathways:</strong> Maximal directed sequences through the evolution graph represent coherent thematic trajectories spanning multiple periods, characterised by their strength (the product of the lineage strengths along the pathway), their length (the number of periods) and their cumulative size (the sum of the fuzzy cardinalities of their themes)</li>
+    </ul>
+    <p>The <strong>Table</strong> tab reports, for every pair of themes of consecutive periods that share at least one term, the shared words, the weighted inclusion, the inclusion index, the occurrences, the stability, the importance index, the lineage strength, and whether the link is kept in the evolutionary graph. In R, <code>thematicEvolution()</code> also returns the pattern of each theme (emergent, disappearing, continuation, split, merge) in <code>Nodes</code> and the pathways in <code>pathways</code>.</p>
+
+    <h4>&#128209; Layers: the thematic maps stacked</h4>
+    <p>The <strong>Layers</strong> tab draws the thematic map of each period as a plane, the oldest at the bottom, as in <strong>Angelelli et al. (2025)</strong>. Each theme sits on its plane at its relevance degree (centrality) and development degree (density), and the themes of adjacent periods are linked as in the evolutionary graph. The Sankey diagram shows the flows but not the positions, the thematic maps the positions but not the flows: the layers show both, so you can follow a theme as it moves across the quadrants while it merges with or splits from other themes.</p>
+    <ul>
+      <li><strong>Position:</strong> Relative to the period: the cross of the quadrants is the mean centrality and density of that period, and every plane has the same scale</li>
+      <li><strong>Colours:</strong> The links of a lineage, and the themes they join, share the colour of the lineage; the other links are thin and faint, the other themes grey</li>
+      <li><strong>Size:</strong> The frequency of a theme relative to the largest theme of its period</li>
+      <li><strong>Click on a theme:</strong> Keeps the themes it comes from and those it leads to, across all periods, and fades the rest; a note above the plot names the selected theme. Click it again, or double click, to restore the plot</li>
+      <li><strong>Links:</strong> The same links as the Sankey diagram, those kept by the dual thresholding</li>
     </ul>
 
     <br>
 
     <h5>&#128218; Key References</h5>
 
-    <p><strong>Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2025).</strong> <i>Rethinking Thematic Evolution in Science Mapping: An Integrated Framework for Longitudinal Analysis.</i> Working Paper.</p>
+    <p><strong>Aria, M., D'Aniello, L., Misuraca, M., &amp; Spano, M. (2026).</strong> <i>Rethinking thematic evolution in science mapping: An integrated framework for longitudinal analysis.</i> <strong>Journal of Informetrics</strong>, 20, 101877. <a href='https://doi.org/10.1016/j.joi.2026.101877' target='_blank'>https://doi.org/10.1016/j.joi.2026.101877</a></p>
+
+    <p><strong>Angelelli, M., Ciavolino, E., Ringle, C. M., Sarstedt, M., &amp; Aria, M. (2025).</strong> <i>Conceptual structure and thematic evolution in partial least squares structural equation modeling research.</i> <strong>Quality &amp; Quantity</strong>, 59(3), 2753&#x2013;2798. <a href='https://doi.org/10.1007/s11135-025-02071-4' target='_blank'>https://doi.org/10.1007/s11135-025-02071-4</a></p>
 
     <p><strong>Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011).</strong> <i>An approach for detecting, quantifying, and visualizing the evolution of a research field.</i> <strong>Journal of Informetrics</strong>, 5(1), 146-166. <a href='https://doi.org/10.1016/j.joi.2010.10.002' target='_blank'>https://doi.org/10.1016/j.joi.2010.10.002</a></p>
 
@@ -2704,7 +2721,7 @@ helpContent <- function() {
     <ul>
       <li><strong>Analysis type:</strong> Choose between co-citation analysis or bibliographic coupling</li>
       <li><strong>Network layout:</strong> Select the layout algorithm for network visualization</li>
-      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Salton's cosine, or other normalization methods</li>
+      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Salton's cosine, or other normalization methods. The normalised network drives both the clusters and the layout, so that the most cited items do not dominate the communities; the edge widths still show the counts. With <em>None</em>, clusters and layout are computed on the counts</li>
       <li><strong>Clustering algorithm:</strong> Choose community detection method (Louvain, Walktrap, etc.)</li>
       <li><strong>Number of nodes:</strong> Control how many top references or documents to include</li>
     </ul>

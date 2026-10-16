@@ -11849,23 +11849,13 @@ To ensure the functionality of Biblioshiny,
           !is.null(cocnet$cluster_res) &&
             nrow(cocnet$cluster_res) > 0
         ) {
-          occ <- diag(as.matrix(NetWords))
-          words_coc <- data.frame(
-            Words = cocnet$cluster_res$vertex,
-            Cluster_Label = paste(
-              "Cluster",
-              cocnet$cluster_res$cluster
-            ),
-            pagerank_centrality = cocnet$cluster_res$pagerank_centrality,
-            stringsAsFactors = FALSE
+          # occurrences and PageRank within the cluster, as the
+          # memberships of the thematic map
+          words_coc <- bibliometrix:::clusterWords(
+            NetWords,
+            cocnet$cluster_res
           )
-          words_coc$Occurrences <- occ[match(
-            words_coc$Words,
-            rownames(NetWords)
-          )]
-          words_coc$Occurrences[
-            is.na(words_coc$Occurrences) | words_coc$Occurrences == 0
-          ] <- 1
+          words_coc$Cluster_Label <- paste("Cluster", words_coc$cluster)
           bibliometrix:::clusterAssignment(
             M_data,
             words = words_coc,

@@ -291,7 +291,7 @@ thematicMap <- function(
   word_cluster = word[group]
 
   # PageRank on W itself: the graph returned by networkPlot() carries the
-  # weights it altered for the layout (community.repulsion)
+  # co-occurrence counts
   W_net <- as.matrix(S[V(net)$name, V(net)$name])
   diag(W_net) <- 0
   centr <- data.frame(

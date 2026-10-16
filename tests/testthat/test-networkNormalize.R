@@ -46,3 +46,19 @@ test_that("normalize.clusters = FALSE keeps the communities of the counts", {
   b <- plot_net(NM)
   expect_identical(a$cluster_obj$membership, b$cluster_obj$membership)
 })
+
+test_that("without a normalisation modularity and PageRank are those of the counts", {
+  skip_on_cran()
+  skip_if_not_installed("bibliometrixData")
+  NM <- norm_fixture()
+  net <- plot_net(NM, community.repulsion = 0.5)
+  g <- net$graph
+  el <- igraph::as_edgelist(g)
+  # the layout altered a copy of the weights, not the network
+  expect_identical(igraph::E(g)$weight, as.numeric(as.matrix(NM)[toupper(el)]))
+  expect_equal(net$modularity, igraph::modularity(g, net$cluster_obj$membership))
+  expect_equal(
+    net$cluster_res$pagerank_centrality,
+    unname(igraph::page_rank(g)$vector[match(net$cluster_res$vertex, igraph::V(g)$name)])
+  )
+})

@@ -31,7 +31,7 @@ thematicMap(
 
 \item{n}{is an integer. It indicates the number of terms to include in the analysis.}
 
-\item{minfreq}{is a integer. It indicates the minimum frequency (per thousand) of a cluster. It is a number in the range (0,1000).}
+\item{minfreq}{is a integer. It indicates the minimum frequency (per thousand documents, and at least 2) of a term: terms occurring less often are left out before the co-occurrence network is built. It is a number in the range (0,1000).}
 
 \item{ngrams}{is an integer between 1 and 4. It indicates the type of n-gram to extract from texts.
 An n-gram is a contiguous sequence of n terms. The function can extract n-grams composed by 1, 2, 3 or 4 terms. Default value is \code{ngrams=1}.}

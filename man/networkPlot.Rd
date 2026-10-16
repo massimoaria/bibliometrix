@@ -29,6 +29,7 @@ networkPlot(
   weighted = NULL,
   edgesize = 1,
   edges.min = 0,
+  normalize.clusters = TRUE,
   alpha = 0.5,
   seed = 123,
   verbose = TRUE
@@ -38,7 +39,8 @@ networkPlot(
 \item{NetMatrix}{is a network matrix obtained by the function \code{\link{biblioNetwork}}.}
 
 \item{normalize}{is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard,
-Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.}
+Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.
+The normalised similarity drives the layout and, with \code{normalize.clusters = TRUE}, the communities.}
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
 
@@ -103,6 +105,11 @@ named by the weighted argument. If it is TRUE then a weighted graph is created a
 \item{edgesize}{is an integer. It indicates the network edge size.}
 
 \item{edges.min}{is an integer. It indicates the min frequency of edges between two vertices. If edge.min=0, all edges are plotted.}
+
+\item{normalize.clusters}{is logical. If TRUE (default) and \code{normalize} is not NULL, the communities, their
+modularity and the PageRank centrality of the vertices are computed on the normalised network, as in
+Aria et al. (2026, Journal of Informetrics, 20, 101877); if FALSE they are computed on the raw counts, and the
+normalisation only drives the layout. It has no effect when \code{normalize = NULL}.}
 
 \item{alpha}{is a number. Legal alpha values are any numbers from 0 (transparent) to 1 (opaque). The default alpha value usually is 0.5.}
 

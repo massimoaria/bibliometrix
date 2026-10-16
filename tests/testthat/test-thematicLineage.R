@@ -25,6 +25,10 @@ test_that("themes are the Louvain communities of the association-strength networ
   P <- management[management$PY > 2004 & management$PY <= 2015, ]
   tm <- suppressWarnings(thematicMap(P, field = "DE", n = 250, minfreq = 5))
   NM <- period_counts(P)
+  # terms below minfreq (here 2) are left out before the network is built
+  # (Sect. 3.1)
+  mf <- max(2, floor(5 * nrow(P) / 1000))
+  NM <- NM[diag(NM) >= mf, diag(NM) >= mf]
   D <- diag(NM)
   W <- as.matrix(NM) / outer(D, D)
   diag(W) <- 0
@@ -34,6 +38,7 @@ test_that("themes are the Louvain communities of the association-strength networ
   got <- tm$net$cluster_obj
   m_ref <- setNames(ref$membership, ref$names)
   m_got <- setNames(got$membership, got$names)
+  expect_true(all(D[names(m_got)] >= mf))
   expect_setequal(names(m_ref), names(m_got))
   expect_equal(igraph::compare(m_ref[names(m_got)], m_got, method = "nmi"), 1)
 })

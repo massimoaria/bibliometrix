@@ -2454,7 +2454,7 @@ helpContent <- function() {
     <ul>
       <li><strong>Field:</strong> Choose between Author's Keywords (DE), Keywords Plus (ID), Title words, or Abstract words as the unit of analysis</li>
       <li><strong>Network layout:</strong> Select from various layout algorithms (e.g., Fruchterman-Reingold, Kamada-Kawai) to optimize the visual representation</li>
-      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Inclusion, Salton's cosine, or Equivalence index to normalize co-occurrence frequencies</li>
+      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Inclusion, Salton's cosine, or Equivalence index to normalize co-occurrence frequencies. The normalised network drives both the clusters and the layout, so that frequent terms do not dominate the communities; the edge widths still show the co-occurrence counts. With <em>None</em>, clusters and layout are computed on the counts</li>
       <li><strong>Clustering algorithm:</strong> Choose between Louvain, Walktrap, or other community detection algorithms to identify thematic groups</li>
       <li><strong>Number of nodes:</strong> Control how many top terms to include in the network</li>
       <li><strong>Minimum edges:</strong> Filter weak connections to focus on meaningful associations</li>
@@ -2522,7 +2522,7 @@ helpContent <- function() {
     <ul>
       <li><strong>Field:</strong> Choose the bibliographic field to analyze (Keywords, Title words, Abstract terms, etc.)</li>
       <li><strong>Number of terms:</strong> Set how many top terms to include in the analysis</li>
-      <li><strong>Minimum cluster frequency:</strong> Filter out small clusters below a given size threshold</li>
+      <li><strong>Minimum frequency (per thousand documents):</strong> Terms occurring less often (and in fewer than two documents in any case) are left out before the co-occurrence network is built, so that very rare terms neither shape the themes nor leave tiny themes behind</li>
       <li><strong>Clustering algorithm:</strong> Select between Louvain, Walktrap, or other community detection methods</li>
       <li><strong>Label size:</strong> Adjust the size of theme labels for readability</li>
     </ul>
@@ -2585,7 +2585,7 @@ helpContent <- function() {
       <li><strong>Field:</strong> Choose the bibliographic field (Keywords, Title words, etc.)</li>
       <li><strong>Time slices:</strong> Define the number and boundaries of time periods for the analysis</li>
       <li><strong>Number of terms:</strong> Set how many top terms to include per time slice</li>
-      <li><strong>Minimum cluster frequency:</strong> Filter out small or insignificant clusters</li>
+      <li><strong>Minimum frequency (per thousand documents):</strong> Terms occurring less often (and in fewer than two documents in any case) are left out before the co-occurrence network is built, so that very rare terms neither shape the themes nor leave tiny themes behind</li>
       <li><strong>Clustering algorithm:</strong> Select the community detection method (Louvain, Walktrap, etc.)</li>
       <li><strong>&alpha; (coverage vs. structural relevance):</strong> The weight of the weighted inclusion index in the lineage strength. Values close to 1 favour the coverage of the source theme, values close to 0 the centrality of the shared terms in both themes; 0.5 (default) balances the two</li>
       <li><strong>Min lineage strength (&theta;):</strong> The absolute threshold of the dual thresholding (default 0.10)</li>
@@ -2721,7 +2721,7 @@ helpContent <- function() {
     <ul>
       <li><strong>Analysis type:</strong> Choose between co-citation analysis or bibliographic coupling</li>
       <li><strong>Network layout:</strong> Select the layout algorithm for network visualization</li>
-      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Salton's cosine, or other normalization methods</li>
+      <li><strong>Normalization:</strong> Apply association strength, Jaccard, Salton's cosine, or other normalization methods. The normalised network drives both the clusters and the layout, so that the most cited items do not dominate the communities; the edge widths still show the counts. With <em>None</em>, clusters and layout are computed on the counts</li>
       <li><strong>Clustering algorithm:</strong> Choose community detection method (Louvain, Walktrap, etc.)</li>
       <li><strong>Number of nodes:</strong> Control how many top references or documents to include</li>
     </ul>

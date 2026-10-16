@@ -318,7 +318,7 @@ network <- function(M, analysis, field, stemming, n, cluster, community.repulsio
 
   if (nrow(NetMatrix) > 0) {
     Net <- networkPlot(NetMatrix,
-      normalize = "salton", n = n, Title = paste("Coupling network of ", analysis, " using ", field, sep = ""), type = "auto",
+      normalize = "salton", normalize.clusters = FALSE, n = n, Title = paste("Coupling network of ", analysis, " using ", field, sep = ""), type = "auto",
       labelsize = 2, halo = F, cluster = cluster, remove.isolates = TRUE, community.repulsion = community.repulsion,
       remove.multiple = FALSE, noloops = TRUE, weighted = TRUE, label.cex = T, edgesize = 5,
       size = 1, edges.min = 1, label.n = n, verbose = FALSE

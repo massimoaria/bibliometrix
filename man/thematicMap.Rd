@@ -62,8 +62,9 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 a list containing:
 \tabular{lll}{
 \code{map}\tab   \tab The thematic map as ggplot2 object\cr
-\code{clusters}\tab   \tab Centrality and Density values for each cluster. \cr
-\code{words}\tab   \tab A list of words following in each cluster\cr
+\code{clusters}\tab   \tab Centrality and Density values for each cluster, and its fuzzy cardinality (the sum of the memberships of the documents)\cr
+\code{words}\tab   \tab A list of words following in each cluster, with their PageRank on the whole network (\code{PageRank}) and within their cluster (\code{Cluster_PageRank})\cr
+\code{documentToClusters}\tab   \tab The membership of each document in each cluster (each row sums to one) and the cluster it is assigned to when its membership there is at least 0.5\cr
 \code{nclust}\tab   \tab The number of clusters\cr
 \code{net}\tab    \tab A list containing the network output (as provided from the networkPlot function)}
 }
@@ -73,9 +74,15 @@ The methodology is inspired by the proposal of Cobo et al. (2011).
 }
 \details{
 \code{thematicMap} starts from a co-occurrence keyword network to plot in a
-two-dimensional map the typological themes of a domain.\cr\cr
+two-dimensional map the typological themes of a domain. The themes are the communities of the
+co-occurrence network normalised by association strength, and each document belongs to every theme
+with a graded (fuzzy) membership, based on the PageRank of its terms within the theme, as in
+Aria et al. (2026).\cr\cr
 
-Reference:\cr
+References:\cr
+Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2026). Rethinking thematic evolution in science mapping:
+An integrated framework for longitudinal analysis. Journal of Informetrics, 20, 101877. \doi{10.1016/j.joi.2026.101877}\cr
+
 Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying,
 and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 }

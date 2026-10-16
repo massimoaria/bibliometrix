@@ -1,6 +1,7 @@
 utils::globalVariables(c(
   "cluster",
   "color_original",
+  "retained",
   "values",
   "vertex"
 ))
@@ -24,7 +25,9 @@ utils::globalVariables(c(
 #' @param palette Character vector. Optional custom color palette as hex codes. If NULL,
 #'   uses a default palette of 50+ distinct colors. Colors are assigned sequentially
 #'   without reuse.
-#' @param alpha Numeric. Balancing parameters between inclusion and importance measures. Default value is 0.5.
+#' @param alpha Numeric. The weight of the weighted inclusion index against the importance index in the
+#'   lineage strength, \code{alpha * Inc_Weighted + (1 - alpha) * PageRankIndex} (Aria et al., 2026, Eq. 9).
+#'   Default value is 0.5.
 #'
 #' @return Returns the modified \code{nexus} object with updated colors:
 #'   \itemize{
@@ -105,8 +108,14 @@ assignEvolutionColors <- function(
       lineage_strength = (alpha * Inc_Weighted) + (1 - alpha) * PageRankIndex
     )
 
+  # only the links of the evolutionary graph (thematicEvolution(), dual
+  # threshold) can carry a lineage colour
+  if (!"retained" %in% names(Edges)) {
+    Edges$retained <- TRUE
+  }
+
   strong_edges <- Edges %>%
-    dplyr::filter(Inc_Weighted >= threshold) %>%
+    dplyr::filter(retained & Inc_Weighted >= threshold) %>%
     select(from, to, weight = lineage_strength, inc_weighted = Inc_Weighted)
 
   if (is.null(palette)) {
@@ -399,29 +408,21 @@ assignEvolutionColors <- function(
 
     V(g)$color <- clusters$color[match(V(g)$community, clusters$slice)]
 
-    old_edge_colors <- data.frame(
-      from = as.character(igraph::as_edgelist(g)[, 1]),
-      to = as.character(igraph::as_edgelist(g)[, 2]),
-      color_original = E(g)$color
+    # an edge inside a community takes the new colour of the community, the
+    # grey ones (between communities, or inside a grey community) stay grey.
+    # The edges are matched by community, not by their old colour, which two
+    # communities can share once there are more of them than colours in
+    # colorlist()
+    el <- igraph::as_edgelist(g, names = FALSE)
+    comm <- V(g)$community
+    inside <- comm[el[, 1]] == comm[el[, 2]] &
+      toupper(substr(E(g)$color, 1, 7)) != "#B3B3B3"
+    new_col <- clusters$color[match(comm[el[, 1]], clusters$slice)]
+    E(g)$color <- ifelse(
+      inside & !is.na(new_col),
+      paste0(substr(new_col, 1, 7), "40"),
+      "#B3B3B340"
     )
-    new_edge_colors <- old_edge_colors %>%
-      left_join(
-        clusters %>%
-          select(color_original, color) %>%
-          mutate(color_original = paste0(substr(color_original, 1, 7), "40")),
-        by = "color_original"
-      ) %>%
-      mutate(
-        color = ifelse(is.na(color), "#B3B3B380", color),
-        color = ifelse(color_original == "#B3B3B340", "#B3B3B380", color)
-      )
-
-    color_map <- setNames(
-      paste0(substr(new_edge_colors$color, 1, 7), "40"),
-      new_edge_colors$color_original
-    )
-
-    E(g)$color <- color_map[E(g)$color]
     nexus$Net[[i]]$graph <- g
   }
 

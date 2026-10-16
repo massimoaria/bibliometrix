@@ -12149,14 +12149,15 @@ To ensure the functionality of Biblioshiny,
     )]
     values$TM$words <- values$TM$words[, -c(4, 6)]
     values$TM$clusters_orig <- values$TM$clusters
-    values$TM$clusters <- values$TM$clusters[, c(9, 5:8, 11)]
+    values$TM$clusters <- values$TM$clusters[, c(9, 5:8, 11, 12)]
     names(values$TM$clusters) <- c(
       "Cluster",
       "CallonCentrality",
       "CallonDensity",
       "RankCentrality",
       "RankDensity",
-      "ClusterFrequency"
+      "ClusterFrequency",
+      "FuzzyCardinality"
     )
     values$TMmap <- plot.ly(
       values$TM$map,
@@ -12494,7 +12495,8 @@ To ensure the functionality of Biblioshiny,
         synonyms = synonyms,
         seed = values$random_seed,
         alpha = input$TEalpha,
-        minFlow = input$minFlowTE
+        minFlow = input$minFlowTE,
+        topK = input$TEtopK
       )
 
       if (identical(cache_key, values$cache_TE_key)) {
@@ -12516,6 +12518,7 @@ To ensure the functionality of Biblioshiny,
       seed <- values$random_seed
       alpha <- input$TEalpha
       minFlow <- input$minFlowTE
+      topK <- input$TEtopK
 
       nexus <- tryCatch({
         withProgress(message = 'Thematic Evolution: computing...', value = 0, {
@@ -12533,7 +12536,10 @@ To ensure the functionality of Biblioshiny,
             remove.terms = remove.terms,
             synonyms = synonyms,
             seed = seed,
-            assign.evolution.colors = list(assign = TRUE, alpha = alpha)
+            alpha = alpha,
+            min.lineage = minFlow,
+            top.k = topK,
+            assign.evolution.colors = list(assign = TRUE)
           )
         })
       }, error = function(e) {
@@ -12553,10 +12559,11 @@ To ensure the functionality of Biblioshiny,
       values$nexus <- nexus
       # the layers need the clusters as thematicEvolution() returns them,
       # before their columns are renamed for the tables below
-      values$TElayers <- plotThematicLayers(nexus, min.flow = minFlow)
+      # the links shown are those kept by the dual threshold
+      # (min.lineage, top.k) of thematicEvolution()
+      values$TElayers <- plotThematicLayers(nexus)
       values$TElayersPlotly <- plotThematicLayers(
         nexus,
-        min.flow = minFlow,
         interactive = TRUE
       )
       for (i in 1:(length(yearSlices) + 1)) {
@@ -12564,7 +12571,8 @@ To ensure the functionality of Biblioshiny,
         values$nexus$TM[[i]]$clusters <- values$nexus$TM[[i]]$clusters[, c(
           9,
           5:8,
-          11
+          11,
+          12
         )]
         names(values$nexus$TM[[i]]$clusters) <- c(
           "Cluster",
@@ -12572,7 +12580,8 @@ To ensure the functionality of Biblioshiny,
           "CallonDensity",
           "RankCentrality",
           "RankDensity",
-          "ClusterFrequency"
+          "ClusterFrequency",
+          "FuzzyCardinality"
         )
 
         values$nexus$TM[[i]]$documentToClusters$DI <- paste0(
@@ -12609,8 +12618,7 @@ To ensure the functionality of Biblioshiny,
       ]
       values$TEplot <- plotThematicEvolution(
         Nodes = values$nexus$Nodes,
-        Edges = values$nexus$Edges,
-        min.flow = minFlow
+        Edges = values$nexus$Edges
       )
       values$cache_TE_key <- cache_key
       values$TE_computing <- FALSE
@@ -12727,7 +12735,9 @@ To ensure the functionality of Biblioshiny,
       "Inclusion Index",
       "Occurrences",
       "Stability Index",
-      "PageRank Index"
+      "Importance Index",
+      "Lineage Strength",
+      "In Evolutionary Graph"
     )
     names(TEData)[seq_len(min(ncol(TEData), length(base_names)))] <-
       base_names[seq_len(min(ncol(TEData), length(base_names)))]
@@ -12738,7 +12748,7 @@ To ensure the functionality of Biblioshiny,
       pagelength = TRUE,
       left = NULL,
       right = NULL,
-      numeric = c(4, 5, 7, intersect(8, seq_len(ncol(TEData)))),
+      numeric = c(4, 5, 7, intersect(8:9, seq_len(ncol(TEData)))),
       dom = TRUE,
       size = '85%',
       filter = "top",

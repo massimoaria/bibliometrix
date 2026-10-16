@@ -157,6 +157,11 @@ teLayerGeometry <- function(
   }
   ids <- nexus$Nodes[, c("id", "label")]
   ed <- ed[!is.na(ed$weight) & ed$weight >= min.flow, ]
+  # only the links of the evolutionary graph (dual threshold of
+  # thematicEvolution())
+  if ("retained" %in% names(ed)) {
+    ed <- ed[ed$retained, ]
+  }
   ed <- ed %>%
     left_join(rename(ids, from = "id", lab_from = "label"), by = "from") %>%
     left_join(rename(ids, to = "id", lab_to = "label"), by = "to") %>%

@@ -32,8 +32,11 @@ utils::globalVariables(c(
   "lineage_strength",
   "new old_combined",
   "pagerank_assigned",
-  "pagerank_centrality.x",
-  "pagerank_centrality.y",
+  "Cluster_PageRank",
+  "Cluster_PageRank.x",
+  "Cluster_PageRank.y",
+  "Lineage_Strength",
+  "fuzzy_cardinality",
   "rel_freq_temp",
   "separate_longer_delim",
   "total_pagerank"
@@ -41,12 +44,23 @@ utils::globalVariables(c(
 
 #' Perform a Thematic Evolution Analysis
 #'
-#' It performs a Thematic Evolution Analysis based on co-word network analysis and clustering.
-#' The methodology is inspired by the proposal of Cobo et al. (2011).
+#' It performs a Thematic Evolution Analysis based on co-word network analysis and clustering,
+#' following the integrated framework of Aria, D'Aniello, Misuraca & Spano (2026).
 #'
-#' \code{\link{thematicEvolution}} starts from two or more thematic maps created by \code{\link{thematicMap}} function.\cr\cr
+#' \code{\link{thematicEvolution}} starts from two or more thematic maps created by \code{\link{thematicMap}} function:
+#' in each period the themes are the communities of the association-strength co-occurrence network, and each
+#' document belongs to every theme with a graded (fuzzy) membership based on the PageRank of its terms within the theme.
+#' Themes of consecutive periods are linked by their \emph{lineage strength}
+#' \deqn{L = \alpha I_w + (1 - \alpha) \Omega,}
+#' where the weighted inclusion index \eqn{I_w} is the share of the source theme's PageRank carried by the terms it
+#' shares with the target (directional), and the importance index \eqn{\Omega} is the PageRank-weighted overlap of the
+#' shared terms in both themes. A link enters the evolutionary graph when \eqn{L \ge} \code{min.lineage}, or when it
+#' is among the \code{top.k} strongest links leaving its source theme.\cr\cr
 #'
-#' Reference:\cr
+#' References:\cr
+#' Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2026). Rethinking thematic evolution in science mapping:
+#' An integrated framework for longitudinal analysis. Journal of Informetrics, 20, 101877. \doi{10.1016/j.joi.2026.101877}\cr
+#'
 #' Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying,
 #' and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 #'
@@ -65,12 +79,27 @@ utils::globalVariables(c(
 #' @param synonyms is a character vector. Each element contains a list of synonyms, separated by ";",  that will be merged into a single term (the first word contained in the vector element). The default is \code{synonyms = NULL}.
 #' @param cluster is a character. It indicates the type of cluster to perform among ("optimal", "louvain","leiden", "infomap","edge_betweenness","walktrap", "spinglass", "leading_eigen", "fast_greedy").
 #' @param seed is numerical. It indicates the seed for random number generator to obtain always the same results. Default value is \code{seed = 1234}.
-#' @param assign.evolution.colors is a list. If \code{assignEvolutionColors = list(assign = TRUE)}, colors are assigned to lineages based on the highest weighted inclusion value. If a list is provided, it must contain the arguments \code{assignEvolutionColors = list(assign = c(TRUE, FALSE), alpha=0.5)}.
-#' Default is \code{assign.evolution.colors = list(assign=TRUE, alpha = 0.5)}. If assign = FALSE, measure argument is ignored.
+#' @param alpha is a number in [0, 1]. The weight of the weighted inclusion index (directional coverage) against the
+#' importance index (structural relevance) in the lineage strength. Default is \code{alpha = 0.5}.
+#' @param min.lineage is a number. The minimum lineage strength of a link of the evolutionary graph (absolute criterion).
+#' Default is \code{min.lineage = 0.10}.
+#' @param top.k is an integer. Each theme also keeps its \code{top.k} strongest links to the next period, whatever their
+#' strength (relative criterion). Default is \code{top.k = 2}.
+#' @param assign.evolution.colors is a list. If \code{assign.evolution.colors = list(assign = TRUE)}, the links of the
+#' evolutionary graph are coloured by lineage (see \code{\link{assignEvolutionColors}}). Default is
+#' \code{assign.evolution.colors = list(assign = TRUE)}. An \code{alpha} element, as in earlier versions, is still
+#' accepted and replaces the \code{alpha} argument.
 #' @return a list containing:
 #' \tabular{lll}{
-#' \code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
-#' \code{incMatrix}\tab   \tab Some useful statistics about the thematic nexus}
+#' \code{Nodes}\tab   \tab The themes of all periods, with their fuzzy cardinality, their number of incoming and
+#' outgoing links in the evolutionary graph and their pattern (emergent, disappearing, continuation, split, merge)\cr
+#' \code{Edges}\tab   \tab All links between themes of consecutive periods sharing at least one term, with their
+#' \code{lineage_strength}; \code{retained} marks the links of the evolutionary graph\cr
+#' \code{pathways}\tab   \tab The maximal directed sequences of themes in the evolutionary graph, with their length (periods),
+#' strength (product of the lineage strengths) and cumulative size (sum of the fuzzy cardinalities)\cr
+#' \code{Data}\tab   \tab The statistics of every link (inclusion indices, importance index, lineage strength)\cr
+#' \code{TM}\tab   \tab The thematic maps of the periods\cr
+#' \code{Net}\tab   \tab The co-occurrence networks of the periods}
 #'
 #'
 #' @examples
@@ -102,8 +131,22 @@ thematicEvolution <- function(
   synonyms = NULL,
   cluster = "louvain",
   seed = 1234,
-  assign.evolution.colors = list(assign = TRUE, alpha = 0.5)
+  alpha = 0.5,
+  min.lineage = 0.10,
+  top.k = 2,
+  assign.evolution.colors = list(assign = TRUE)
 ) {
+  if (!is.list(assign.evolution.colors) ||
+    is.null(assign.evolution.colors$assign)) {
+    assign.evolution.colors <- list(assign = TRUE)
+  }
+  # alpha used to be passed inside assign.evolution.colors: still accepted
+  if (!is.null(assign.evolution.colors$alpha)) {
+    alpha <- assign.evolution.colors$alpha
+  }
+  if (!is.numeric(alpha) || length(alpha) != 1 || alpha < 0 || alpha > 1) {
+    stop("thematicEvolution(): alpha must be a number between 0 and 1.", call. = FALSE)
+  }
   list_df <- timeslice(M, breaks = years)
   # K is the number of periods, and it is always at least two: timeslice()
   # builds its cut points as c(min(PY) - 1, years, max(PY)), so any years
@@ -205,14 +248,14 @@ thematicEvolution <- function(
       mutate(
         len = length(Words),
         tot = sum(Occurrences),
-        PageRankTot = sum(pagerank_centrality, na.rm = TRUE)
+        PageRankTot = sum(Cluster_PageRank, na.rm = TRUE)
       )
     cluster2 <- res2$words %>%
       group_by(Cluster_Label) %>%
       mutate(
         len = length(Words),
         tot = sum(Occurrences),
-        PageRankTot = sum(pagerank_centrality, na.rm = TRUE)
+        PageRankTot = sum(Cluster_PageRank, na.rm = TRUE)
       )
     A <- inner_join(cluster1, cluster2, by = "Words") %>%
       group_by(Cluster_Label.x, Cluster_Label.y) %>%
@@ -226,7 +269,7 @@ thematicEvolution <- function(
         tot = min(tot.x, tot.y),
         PageRankTot.x = min(PageRankTot.x),
         PageRankTot.y = min(PageRankTot.y),
-        PageRankXY = pagerank_centrality.x * pagerank_centrality.y
+        PageRankXY = Cluster_PageRank.x * Cluster_PageRank.y
       ) %>%
       ungroup() %>%
       mutate(PageRankProd = PageRankTot.x * PageRankTot.y)
@@ -237,22 +280,27 @@ thematicEvolution <- function(
         CL2 = Cluster.y[1],
         Words = paste0(Words, collapse = ";", sep = ""),
         sum = sum(min),
-        Inc_Weighted = sum(min) / min(tot),
-        Inc_index = length(Words) /
+        # weighted inclusion (Aria et al., 2026, Eq. 7): the share of the
+        # source cluster's PageRank carried by the terms it shares with the
+        # target; directional, unlike Inc_index
+        Inc_Weighted = sum(Cluster_PageRank.x) / PageRankTot.x[1],
+        # n() is the number of shared words: Words is already collapsed here
+        Inc_index = n() /
           min(
             len.x,
             len.y
           ),
         Occ = Occ[1],
         Tot = tot[1],
-        Stability = length(Words) /
+        Stability = n() /
           (len.x[1] +
             len.y[1] -
-            length(Words)),
-        PageRank1 = sum(pagerank_centrality.x),
-        PageRank2 = sum(pagerank_centrality.y),
+            n()),
+        PageRank1 = sum(Cluster_PageRank.x),
+        PageRank2 = sum(Cluster_PageRank.y),
         PageRankXYTot = sum(PageRankXY),
-        PageRankIndex = sqrt(PageRankXYTot / PageRankProd)
+        # importance index (Aria et al., 2026, Eq. 8)
+        PageRankIndex = sqrt(PageRankXYTot / PageRankProd[1])
       ) %>%
       data.frame() %>%
       distinct()
@@ -264,6 +312,19 @@ thematicEvolution <- function(
       INC <- rbind(INC, incMatrix[[i]])
     }
   }
+
+  # lineage strength (Aria et al., 2026, Eq. 9) and dual threshold (Eq. 10-11):
+  # a link is kept when its strength reaches min.lineage or when it is among
+  # the top.k strongest links leaving its source cluster
+  INC <- INC %>%
+    mutate(Lineage_Strength = alpha * Inc_Weighted + (1 - alpha) * PageRankIndex) %>%
+    group_by(CL1) %>%
+    mutate(
+      Retained = Lineage_Strength >= min.lineage |
+        rank(-Lineage_Strength, ties.method = "first") <= top.k
+    ) %>%
+    ungroup() %>%
+    data.frame()
   edges <- INC[, c(
     "CL1",
     "CL2",
@@ -297,6 +358,8 @@ thematicEvolution <- function(
   )
   edges$from <- as.numeric(edges$from)
   edges$to <- as.numeric(edges$to)
+  edges$lineage_strength <- INC$Lineage_Strength
+  edges$retained <- INC$Retained
 
   ### for colors
   nodes <- nodes %>%
@@ -389,7 +452,7 @@ thematicEvolution <- function(
 
   for (i in 1:length(res)) {
     df <- res[[i]]$clusters %>%
-      select(name, freq)
+      select(name, freq, fuzzy_cardinality)
     df$group <- periods[i]
     clusters <- bind_rows(clusters, df)
   }
@@ -399,10 +462,14 @@ thematicEvolution <- function(
 
   edges$color <- "#D3D3D380"
 
+  evo <- evolutionPatterns(Nodes, edges)
+  Nodes <- evo$Nodes
+
   nexus <- list(
     Nodes = Nodes,
     Edges = edges,
     clusters = clusters,
+    pathways = evo$pathways,
     Data = INC[, -c(1, 2)],
     check = TRUE,
     TM = res,
@@ -410,27 +477,82 @@ thematicEvolution <- function(
     params = params
   )
 
-  if (!is.list(assign.evolution.colors)) {
-    assign.evolution.colors <- list(assign = TRUE, alpha = 0.5)
-  }
-
-  if (is.null(assign.evolution.colors$assign)) {
-    assign.evolution.colors <- list(assign = TRUE, alpha = 0.5)
-  }
-
-  if (is.null(assign.evolution.colors$alpha)) {
-    assign.evolution.colors$alpha = 0.5
-  }
-
   if (assign.evolution.colors$assign) {
     ## Assign colors based on lineages
     nexus <- assignEvolutionColors(
       nexus = nexus,
       threshold = 0.5,
       palette = NULL,
-      alpha = assign.evolution.colors$alpha
+      alpha = alpha
     )
   }
 
   return(nexus)
+}
+
+# Evolutionary patterns and pathways (Aria et al., 2026, Sect. 3.5), on the
+# links kept by the dual threshold. A theme with no incoming link after the
+# first period is emergent, one with no outgoing link before the last is
+# disappearing; more than one outgoing link is a split, more than one incoming
+# link a merge; a single link to a theme with a single incoming link is a
+# continuation. A pathway is a maximal directed sequence of themes: its
+# strength is the product of the lineage strengths along it (Eq. 13), its size
+# the sum of the fuzzy cardinalities of its themes (Eq. 14).
+evolutionPatterns <- function(Nodes, Edges) {
+  kept <- Edges[Edges$retained, c("from", "to", "lineage_strength")]
+  K <- max(as.integer(as.character(Nodes$slice)))
+  slice <- as.integer(as.character(Nodes$slice))
+  n_in <- tabulate(match(kept$to, Nodes$id), nrow(Nodes))
+  n_out <- tabulate(match(kept$from, Nodes$id), nrow(Nodes))
+  succ_in <- vapply(seq_len(nrow(Nodes)), function(i) {
+    to <- kept$to[kept$from == Nodes$id[i]]
+    if (length(to) == 1) n_in[match(to, Nodes$id)] else NA_integer_
+  }, integer(1))
+  Nodes$n_in <- n_in
+  Nodes$n_out <- n_out
+  Nodes$pattern <- vapply(seq_len(nrow(Nodes)), function(i) {
+    p <- c(
+      if (slice[i] > 1 && n_in[i] == 0) "emergent",
+      if (slice[i] < K && n_out[i] == 0) "disappearing",
+      if (n_out[i] == 1 && isTRUE(succ_in[i] == 1)) "continuation",
+      if (n_out[i] > 1) "split",
+      if (n_in[i] > 1) "merge"
+    )
+    paste(p, collapse = ", ")
+  }, character(1))
+
+  pathways <- data.frame(
+    pathway = character(0),
+    length = integer(0),
+    strength = numeric(0),
+    cumulative_size = numeric(0)
+  )
+  if (nrow(kept) > 0) {
+    g <- igraph::graph_from_data_frame(
+      data.frame(from = as.character(kept$from), to = as.character(kept$to)),
+      directed = TRUE,
+      vertices = data.frame(name = as.character(Nodes$id))
+    )
+    w <- setNames(kept$lineage_strength, paste(kept$from, kept$to))
+    sources <- which(n_in == 0 & n_out > 0)
+    sinks <- as.character(Nodes$id[n_out == 0 & n_in > 0])
+    paths <- unlist(lapply(sources, function(v) {
+      igraph::all_simple_paths(g, from = as.character(Nodes$id[v]), to = sinks, mode = "out")
+    }), recursive = FALSE)
+    if (length(paths) > 0) {
+      pathways <- do.call(rbind, lapply(paths, function(p) {
+        id <- as.numeric(names(p))
+        i <- match(id, Nodes$id)
+        data.frame(
+          pathway = paste(Nodes$label[i], collapse = " -> "),
+          length = length(id),
+          strength = prod(w[paste(head(id, -1), id[-1])]),
+          cumulative_size = sum(Nodes$fuzzy_cardinality[i], na.rm = TRUE)
+        )
+      }))
+      pathways <- pathways[order(-pathways$strength, -pathways$length), ]
+      rownames(pathways) <- NULL
+    }
+  }
+  list(Nodes = Nodes, pathways = pathways)
 }

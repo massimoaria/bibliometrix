@@ -19,7 +19,10 @@ thematicEvolution(
   synonyms = NULL,
   cluster = "louvain",
   seed = 1234,
-  assign.evolution.colors = list(assign = TRUE, alpha = 0.5)
+  alpha = 0.5,
+  min.lineage = 0.1,
+  top.k = 2,
+  assign.evolution.colors = list(assign = TRUE)
 )
 }
 \arguments{
@@ -52,23 +55,52 @@ An n-gram is a contiguous sequence of n terms. The function can extract n-grams 
 
 \item{seed}{is numerical. It indicates the seed for random number generator to obtain always the same results. Default value is \code{seed = 1234}.}
 
-\item{assign.evolution.colors}{is a list. If \code{assignEvolutionColors = list(assign = TRUE)}, colors are assigned to lineages based on the highest weighted inclusion value. If a list is provided, it must contain the arguments \code{assignEvolutionColors = list(assign = c(TRUE, FALSE), alpha=0.5)}.
-Default is \code{assign.evolution.colors = list(assign=TRUE, alpha = 0.5)}. If assign = FALSE, measure argument is ignored.}
+\item{alpha}{is a number in [0, 1]. The weight of the weighted inclusion index (directional coverage) against the
+importance index (structural relevance) in the lineage strength. Default is \code{alpha = 0.5}.}
+
+\item{min.lineage}{is a number. The minimum lineage strength of a link of the evolutionary graph (absolute criterion).
+Default is \code{min.lineage = 0.10}.}
+
+\item{top.k}{is an integer. Each theme also keeps its \code{top.k} strongest links to the next period, whatever their
+strength (relative criterion). Default is \code{top.k = 2}.}
+
+\item{assign.evolution.colors}{is a list. If \code{assign.evolution.colors = list(assign = TRUE)}, the links of the
+evolutionary graph are coloured by lineage (see \code{\link{assignEvolutionColors}}). Default is
+\code{assign.evolution.colors = list(assign = TRUE)}. An \code{alpha} element, as in earlier versions, is still
+accepted and replaces the \code{alpha} argument.}
 }
 \value{
 a list containing:
 \tabular{lll}{
-\code{nets}\tab   \tab The thematic nexus graph for each comparison\cr
-\code{incMatrix}\tab   \tab Some useful statistics about the thematic nexus}
+\code{Nodes}\tab   \tab The themes of all periods, with their fuzzy cardinality, their number of incoming and
+outgoing links in the evolutionary graph and their pattern (emergent, disappearing, continuation, split, merge)\cr
+\code{Edges}\tab   \tab All links between themes of consecutive periods sharing at least one term, with their
+\code{lineage_strength}; \code{retained} marks the links of the evolutionary graph\cr
+\code{pathways}\tab   \tab The maximal directed sequences of themes in the evolutionary graph, with their length (periods),
+strength (product of the lineage strengths) and cumulative size (sum of the fuzzy cardinalities)\cr
+\code{Data}\tab   \tab The statistics of every link (inclusion indices, importance index, lineage strength)\cr
+\code{TM}\tab   \tab The thematic maps of the periods\cr
+\code{Net}\tab   \tab The co-occurrence networks of the periods}
 }
 \description{
-It performs a Thematic Evolution Analysis based on co-word network analysis and clustering.
-The methodology is inspired by the proposal of Cobo et al. (2011).
+It performs a Thematic Evolution Analysis based on co-word network analysis and clustering,
+following the integrated framework of Aria, D'Aniello, Misuraca & Spano (2026).
 }
 \details{
-\code{\link{thematicEvolution}} starts from two or more thematic maps created by \code{\link{thematicMap}} function.\cr\cr
+\code{\link{thematicEvolution}} starts from two or more thematic maps created by \code{\link{thematicMap}} function:
+in each period the themes are the communities of the association-strength co-occurrence network, and each
+document belongs to every theme with a graded (fuzzy) membership based on the PageRank of its terms within the theme.
+Themes of consecutive periods are linked by their \emph{lineage strength}
+\deqn{L = \alpha I_w + (1 - \alpha) \Omega,}
+where the weighted inclusion index \eqn{I_w} is the share of the source theme's PageRank carried by the terms it
+shares with the target (directional), and the importance index \eqn{\Omega} is the PageRank-weighted overlap of the
+shared terms in both themes. A link enters the evolutionary graph when \eqn{L \ge} \code{min.lineage}, or when it
+is among the \code{top.k} strongest links leaving its source theme.\cr\cr
 
-Reference:\cr
+References:\cr
+Aria, M., D'Aniello, L., Misuraca, M., & Spano, M. (2026). Rethinking thematic evolution in science mapping:
+An integrated framework for longitudinal analysis. Journal of Informetrics, 20, 101877. \doi{10.1016/j.joi.2026.101877}\cr
+
 Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying,
 and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.\cr
 }

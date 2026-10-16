@@ -34,35 +34,41 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top = 10, cdf = TRUE, remove
   Tab <- lapply(strsplit(as.character(M[, i]), sep),
                 function(x) unique(trimws(x)))
   Y <- rep(PY, lengths(Tab))
-  A <- data.frame(Tab = unlist(Tab), Y = Y)
+  doc <- rep(seq_along(Tab), lengths(Tab))
+  A <- data.frame(Tab = unlist(Tab), Y = Y, doc = doc)
   A <- A[A$Tab != "", ]
   A <- A[!is.na(A$Y), ]
 
-  ### remove terms
-  terms <- data.frame(Tab = toupper(remove.terms))
-  A <- anti_join(A, terms)
-  # end of block
-
-  ### Merge synonyms in the vector synonyms
+  ### Merge synonyms, then remove terms, as tableTag() and cocMatrix() do
+  # A synonym replaces a whole term, as in tableTag() and cocMatrix(). It was a
+  # regular expression replaced inside every term: a group without synonyms
+  # (a line with no ";") gave the empty pattern, on which
+  # stringi::stri_replace_all_regex() returns NA for every term, and the
+  # analysis failed with "arguments imply differing number of rows"; a synonym
+  # also rewrote longer terms containing it, and its regex characters were not
+  # escaped. Terms were removed before the merge, so a stopword came back when
+  # a group merged other terms into it, which tableTag() does not do.
   if (length(synonyms) > 0 & is.character(synonyms)) {
     s <- strsplit(toupper(synonyms), ";")
     snew <- trimws(unlist(lapply(s, function(l) l[1])))
-    sold <- (lapply(s, function(l) trimws(l[-1])))
-    for (i in 1:length(s)) {
-      A <- A %>%
-        mutate(
-          # Tab = str_replace_all(Tab, paste(sold[[i]], collapse="|",sep=""),snew[i])
-          # Tab= str_replace_all(Tab, str_replace_all(str_replace_all(paste(sold[[i]], collapse="|",sep=""),"\\(","\\\\("),"\\)","\\\\)"),snew[i]),
-          Tab = stringi::stri_replace_all_regex(Tab, stringi::stri_replace_all_regex(stringi::stri_replace_all_regex(paste(sold[[i]], collapse = "|", sep = ""), "\\(", "\\\\("), "\\)", "\\\\)"), snew[i])
-        )
+    sold <- lapply(s, function(l) trimws(l[-1]))
+    for (i in seq_along(s)) {
+      A$Tab[A$Tab %in% sold[[i]]] <- snew[i]
     }
+    # a document counts once for a term, also when it held two of its synonyms
+    A <- A[!duplicated(A[, c("doc", "Tab")]), , drop = FALSE]
+  }
+  if (length(remove.terms) > 0) {
+    A <- A[!(A$Tab %in% trimws(toupper(remove.terms))), , drop = FALSE]
   }
   # end of block
 
   Ymin <- min(A$Y)
   Ymax <- max(A$Y)
   Year <- Ymin:Ymax
-  if (top==Inf) top <- length(unique(A$Tab))
+  # no more columns than distinct terms: beyond them names() gave NA and the
+  # table of the years failed
+  top <- min(top, length(unique(A$Tab)))
   Tab <- names(sort(table(A$Tab), decreasing = TRUE))[1:top]
 
   words <- matrix(0, length(Year), top + 1)
@@ -70,7 +76,7 @@ KeywordGrowth <- function(M, Tag = "ID", sep = ";", top = 10, cdf = TRUE, remove
   names(words) <- c("Year", Tab)
   words[, 1] <- Year
   for (j in 1:length(Tab)) {
-    word <- (table(A[A$Tab %in% Tab[j], 2]))
+    word <- table(A$Y[A$Tab %in% Tab[j]])
     words[, j + 1] <- trim.years(word, Year, cdf)
   }
   return(words)

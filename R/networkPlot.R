@@ -8,6 +8,11 @@ utils::globalVariables(c("degree"))
 #' @param NetMatrix is a network matrix obtained by the function \code{\link{biblioNetwork}}.
 #' @param normalize is a character. It can be "association", "jaccard", "inclusion","salton" or "equivalence" to obtain Association Strength, Jaccard,
 #' Inclusion, Salton or Equivalence similarity index respectively. The default is type = NULL.
+#' The normalised similarity drives the layout and, with \code{normalize.clusters = TRUE}, the communities.
+#' @param normalize.clusters is logical. If TRUE (default) and \code{normalize} is not NULL, the communities, their
+#' modularity and the PageRank centrality of the vertices are computed on the normalised network, as in
+#' Aria et al. (2026, Journal of Informetrics, 20, 101877); if FALSE they are computed on the raw counts, and the
+#' normalisation only drives the layout. It has no effect when \code{normalize = NULL}.
 #' @param n is an integer. It indicates the number of vertices to plot.
 #' @param degree is an integer. It indicates the min frequency of a vertex. If degree is not NULL, n is ignored.
 #' @param type is a character object. It indicates the network map layout:
@@ -105,6 +110,7 @@ networkPlot <-
     weighted = NULL,
     edgesize = 1,
     edges.min = 0,
+    normalize.clusters = TRUE,
     alpha = 0.5,
     seed = 123,
     verbose = TRUE
@@ -288,12 +294,30 @@ networkPlot <-
 
     # Community Detection
 
-    cl <- clusteringNetwork(bsk.network, cluster, seed = seed)
+    # With a normalisation, the communities are those of the normalised
+    # network (normalize.clusters = TRUE): the counts favour the most frequent
+    # items, which the normalisation is meant to correct. The graph of the
+    # counts keeps its edge widths and takes the communities.
+    on_S <- !isTRUE(bsk.S) && isTRUE(normalize.clusters)
+    if (on_S && !identical(V(bsk.S)$name, V(bsk.network)$name)) {
+      stop("networkPlot(): the normalised network and the network of the counts have different vertices.", call. = FALSE)
+    }
+    cl <- clusteringNetwork(if (on_S) bsk.S else bsk.network, cluster, seed = seed)
 
-    bsk.network <- cl$bsk.network
-    if (!isTRUE(bsk.S)) {
-      V(bsk.S)$color <- V(bsk.network)$color
-      V(bsk.S)$community <- V(bsk.network)$community
+    if (on_S) {
+      bsk.S <- cl$bsk.network
+      # before the layout changes its weights (community.repulsion)
+      bsk.cluster <- bsk.S
+      V(bsk.network)$color <- V(bsk.S)$color
+      V(bsk.network)$community <- V(bsk.S)$community
+      bsk.network <- colourEdgesByCommunity(bsk.network)
+    } else {
+      bsk.network <- cl$bsk.network
+      bsk.cluster <- bsk.network
+      if (!isTRUE(bsk.S)) {
+        V(bsk.S)$color <- V(bsk.network)$color
+        V(bsk.S)$community <- V(bsk.network)$community
+      }
     }
     net_groups <- cl$net_groups
 
@@ -302,8 +326,11 @@ networkPlot <-
       layout_results <- switchLayout(bsk.S, type, community.repulsion)
       bsk.S <- layout_results$bsk.S
     } else {
+      # only the layout: switchLayout() alters the weights (community.repulsion)
+      # to separate the communities, and the network keeps its own. Taking its
+      # graph made the modularity, the PageRank and the returned graph read
+      # the altered weights, which inflated the modularity.
       layout_results <- switchLayout(bsk.network, type, community.repulsion)
-      bsk.network <- layout_results$bsk.network
     }
     l <- layout_results$l
 
@@ -378,7 +405,7 @@ networkPlot <-
         suppressWarnings(as.numeric(closeness(
           bsk.network
         ))),
-        as.numeric(page_rank(bsk.network)$vector)
+        as.numeric(page_rank(bsk.cluster)$vector)
       )
       names(cluster_res) <- c(
         "vertex",
@@ -416,6 +443,7 @@ networkPlot <-
       weighted = weighted,
       edgesize = edgesize,
       edges.min = edges.min,
+      normalize.clusters = normalize.clusters,
       alpha = alpha,
       verbose = verbose
     )
@@ -426,7 +454,9 @@ networkPlot <-
     )
 
     ## Modularity of community detection
-    Q <- modularity(bsk.network, V(bsk.network)$community)
+    # on the network the communities were found on (the normalised one, with
+    # a normalisation)
+    Q <- modularity(bsk.cluster, V(bsk.cluster)$community)
 
     net <- list(
       graph = bsk.network,
@@ -549,20 +579,7 @@ clusteringNetwork <- function(bsk.network, cluster, seed = NULL, n_runs = 10) {
 
   V(bsk.network)$color <- colorlist[net_groups$membership]
   V(bsk.network)$community <- net_groups$membership
-  El <- as.data.frame(as_edgelist(bsk.network, names = F))
-
-  colorlist <- colorlist()
-  # An edge inside a community takes the colour of the community, an edge
-  # between communities is grey. Computed on the whole edge list at once: an
-  # apply() over the edges read the vertex attribute again for every edge. A
-  # graph without edges has no edge to colour.
-  if (nrow(El) > 0) {
-    community <- V(bsk.network)$community
-    c_from <- community[El[, 1]]
-    E(bsk.network)$color <- ifelse(c_from == community[El[, 2]], colorlist[c_from], "gray70")
-  }
-  E(bsk.network)$lty <- 1
-  E(bsk.network)$lty[E(bsk.network)$color == "gray70"] <- 5
+  bsk.network <- colourEdgesByCommunity(bsk.network)
 
   cl <- list()
   cl$bsk.network <- bsk.network
@@ -695,3 +712,20 @@ adaptive_repulsion_strength <- function(
 #   cl <- list(membership=as.numeric(cl), names=V(g)$name)
 #   return(cl)
 # }
+
+# An edge inside a community takes the colour of the community, an edge
+# between communities is grey. Computed on the whole edge list at once: an
+# apply() over the edges read the vertex attribute again for every edge. A
+# graph without edges has no edge to colour.
+colourEdgesByCommunity <- function(bsk.network) {
+  colorlist <- colorlist()
+  El <- as.data.frame(as_edgelist(bsk.network, names = F))
+  if (nrow(El) > 0) {
+    community <- V(bsk.network)$community
+    c_from <- community[El[, 1]]
+    E(bsk.network)$color <- ifelse(c_from == community[El[, 2]], colorlist[c_from], "gray70")
+  }
+  E(bsk.network)$lty <- 1
+  E(bsk.network)$lty[E(bsk.network)$color == "gray70"] <- 5
+  bsk.network
+}

@@ -8576,7 +8576,7 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "TMfreq",
-                            label = "Min Cluster Frequency (per thousand docs)",
+                            label = "Min Term Frequency (per thousand docs)",
                             value = 5,
                             min = 1,
                             max = 100,
@@ -9003,7 +9003,7 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "fTE",
-                            label = "Min Cluster Frequency (per thousand docs)",
+                            label = "Min Term Frequency (per thousand docs)",
                             value = 5,
                             min = 1,
                             max = 100,
@@ -9016,7 +9016,7 @@ body <- dashboardBody(
                   div(
                     style = "background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin-bottom: 10px;",
                     h6(
-                      strong("Weight Parameters"),
+                      strong("Lineage Parameters"),
                       style = "color: #2e7d32; margin-bottom: 10px;"
                     ),
                     fluidRow(
@@ -9026,7 +9026,7 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "TEalpha",
-                            label = "\u{03B1} Parameter (Balancing Occurrence vs. Centrality)",
+                            label = "\u{03B1} (Coverage vs. Structural Relevance)",
                             value = 0.5,
                             min = 0,
                             max = 1,
@@ -9040,11 +9040,27 @@ body <- dashboardBody(
                           style = "padding-left: 8px;",
                           numericInput(
                             "minFlowTE",
-                            label = "Min Weight Index",
+                            label = "Min Lineage Strength (\u{03B8})",
                             value = 0.1,
-                            min = 0.02,
+                            min = 0,
                             max = 1,
-                            step = 0.02
+                            step = 0.01
+                          )
+                        )
+                      )
+                    ),
+                    fluidRow(
+                      column(
+                        6,
+                        div(
+                          style = "padding-left: 8px;",
+                          numericInput(
+                            "TEtopK",
+                            label = "Top-k Successors per Theme",
+                            value = 2,
+                            min = 0,
+                            max = 10,
+                            step = 1
                           )
                         )
                       )

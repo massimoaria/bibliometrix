@@ -22,7 +22,9 @@ the same color to connected nodes across periods.}
 uses a default palette of 50+ distinct colors. Colors are assigned sequentially
 without reuse.}
 
-\item{alpha}{Numeric. Balancing parameters between inclusion and importance measures. Default value is 0.5.}
+\item{alpha}{Numeric. The weight of the weighted inclusion index against the importance index in the
+lineage strength, \code{alpha * Inc_Weighted + (1 - alpha) * PageRankIndex} (Aria et al., 2026, Eq. 9).
+Default value is 0.5.}
 }
 \value{
 Returns the modified \code{nexus} object with updated colors:

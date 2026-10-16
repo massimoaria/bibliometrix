@@ -13,7 +13,8 @@ plotThematicEvolution(Nodes, Edges, measure = "lineage_strength", min.flow = 0)
 
 \item{measure}{is a character. It is deprecated and has no effect. The weight of the flows is always calculated using lineage_strength.}
 
-\item{min.flow}{is numerical. It indicates the minimum value of measure to plot a flow.}
+\item{min.flow}{is numerical. It indicates the minimum lineage strength of a flow to plot it. The flows that
+\code{thematicEvolution()} leaves out of the evolutionary graph (\code{Edges$retained}) are never plotted.}
 }
 \value{
 a sankeyPlot

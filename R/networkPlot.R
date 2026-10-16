@@ -326,8 +326,11 @@ networkPlot <-
       layout_results <- switchLayout(bsk.S, type, community.repulsion)
       bsk.S <- layout_results$bsk.S
     } else {
+      # only the layout: switchLayout() alters the weights (community.repulsion)
+      # to separate the communities, and the network keeps its own. Taking its
+      # graph made the modularity, the PageRank and the returned graph read
+      # the altered weights, which inflated the modularity.
       layout_results <- switchLayout(bsk.network, type, community.repulsion)
-      bsk.network <- layout_results$bsk.network
     }
     l <- layout_results$l
 
@@ -402,7 +405,7 @@ networkPlot <-
         suppressWarnings(as.numeric(closeness(
           bsk.network
         ))),
-        as.numeric(page_rank(if (on_S) bsk.cluster else bsk.network)$vector)
+        as.numeric(page_rank(bsk.cluster)$vector)
       )
       names(cluster_res) <- c(
         "vertex",
@@ -451,13 +454,9 @@ networkPlot <-
     )
 
     ## Modularity of community detection
-    # with a normalisation, on the normalised network before the layout;
-    # without one, as before, on the graph whose weights the layout altered
-    Q <- if (on_S) {
-      modularity(bsk.cluster, V(bsk.cluster)$community)
-    } else {
-      modularity(bsk.network, V(bsk.network)$community)
-    }
+    # on the network the communities were found on (the normalised one, with
+    # a normalisation)
+    Q <- modularity(bsk.cluster, V(bsk.cluster)$community)
 
     net <- list(
       graph = bsk.network,

@@ -324,7 +324,12 @@ thematicMap <- function(
     group_by(groups) %>%
     mutate(freq = sum(sC), cluster_label = words[which.max(score)]) %>%
     ungroup()
-  df_lab$Cluster_PageRank <- clusterPageRank(S, df_lab$words, df_lab$groups)
+  # PageRank within the cluster on the co-occurrence counts: on the
+  # association strength every link of a term is divided by its frequency, so
+  # the most frequent term of a cluster -- the one naming it -- came out among
+  # its least central ones, and two clusters sharing their label could be
+  # left unlinked
+  df_lab$Cluster_PageRank <- clusterPageRank(NetMatrix, df_lab$words, df_lab$groups)
 
   sEij <- triu(sEij)
   df_lab_top <- df_lab %>% select(words, groups)
@@ -828,9 +833,10 @@ buildTMPlot <- function(
 }
 
 # PageRank within each cluster (Aria et al., 2026, Sect. 3.2): computed on the
-# subgraph of the association-strength network S induced by the cluster's
-# terms; a term with no edge inside its cluster gets the baseline (1 - d) / n,
-# n being the number of terms of the cluster.
+# subgraph that the cluster's terms induce in the weighted network S (the
+# co-occurrence counts in thematicMap()); a term with no edge inside its
+# cluster gets the baseline (1 - d) / n, n being the number of terms of the
+# cluster.
 clusterPageRank <- function(S, words, groups, damping = 0.85) {
   pr <- numeric(length(words))
   for (h in unique(groups)) {

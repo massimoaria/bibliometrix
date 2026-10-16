@@ -43,7 +43,7 @@ test_that("themes are the Louvain communities of the association-strength networ
   expect_equal(igraph::compare(m_ref[names(m_got)], m_got, method = "nmi"), 1)
 })
 
-test_that("Cluster_PageRank is the PageRank within the cluster subgraph", {
+test_that("Cluster_PageRank is the PageRank within the cluster subgraph of the counts", {
   skip_on_cran()
   skip_if_not_installed("bibliometrixData")
   nx <- lineage_fixture()
@@ -53,7 +53,7 @@ test_that("Cluster_PageRank is the PageRank within the cluster subgraph", {
   D <- diag(NM)
   w <- nx$TM[[2]]$words
   for (d in split(w, w$Cluster)) {
-    Wh <- as.matrix(NM[d$Words, d$Words]) / outer(D[d$Words], D[d$Words])
+    Wh <- as.matrix(NM[d$Words, d$Words])
     diag(Wh) <- 0
     g <- igraph::graph_from_adjacency_matrix(Wh, mode = "undirected", weighted = TRUE)
     p <- igraph::page_rank(g)$vector
@@ -199,4 +199,25 @@ test_that("alpha inside assign.evolution.colors is still accepted", {
     thematicEvolution(management, field = "DE", years = c(2004, 2015), alpha = 2),
     "alpha must be a number between 0 and 1"
   )
+})
+
+test_that("the most frequent term of a theme keeps its weight in the lineage", {
+  skip_on_cran()
+  skip_if_offline()
+  M <- suppressMessages(loadBookDataset())
+  nx <- suppressWarnings(suppressMessages(
+    thematicEvolution(M, field = "DE", years = c(2004, 2010, 2015), n = 250, minFreq = 5)
+  ))
+  # "citation analysis" names a theme in 2005-2010 and in 2011-2015; on the
+  # association strength the term was 26th of 31 by PageRank in its theme and
+  # the link between the two was dropped
+  w <- nx$TM[[3]]$words
+  w <- w[w$Cluster_Label == "citation analysis", ]
+  expect_equal(w$Words[which.max(w$Cluster_PageRank)], "citation analysis")
+  link <- nx$Data[nx$Data$CL1 == "citation analysis--2005-2010" &
+    nx$Data$CL2 == "citation analysis--2011-2015", ]
+  expect_equal(nrow(link), 1)
+  expect_true(link$Retained)
+  out <- nx$Data[nx$Data$CL1 == "citation analysis--2005-2010", ]
+  expect_equal(link$Lineage_Strength, max(out$Lineage_Strength))
 })

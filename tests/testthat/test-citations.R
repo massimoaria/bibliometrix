@@ -102,3 +102,27 @@ test_that("Hindex calcola indici per source con zero citazioni", {
   expect_equal(so$g_index, 0L)
 })
 
+
+test_that("a doubled DOI tag no longer hides a local citation", {
+  skip_if_not_installed("bibliometrixData")
+  # WoS exports some references as "V0027, P00164, DOI DOI 10.1111/BEER.12177": the text
+  # after the first tag is empty, and the local citation was lost (2092 on management)
+  expect_identical(.cr_doi(c("KOSEOGLU MA, 2018, BUS ETHICS, V0027, P00164, DOI DOI 10.1111/BEER.12177",
+                             "VOGEL R, 2017, RES POLICY, V46, P1707, DOI 10.1016/J.RESPOL.2017.07.001",
+                             "SMITH J, 2001, BOOK", NA)),
+                   c("10.1111/BEER.12177", "10.1016/J.RESPOL.2017.07.001", "", ""))
+  data(management, package = "bibliometrixData", envir = environment())
+  a <- localCitations(management)$M
+  expect_equal(sum(a$LCS), 2098)
+  expect_equal(a$LCS[a$SR == "KOSEOGLU MA, 2018, BUS ETHICS"], 1)
+})
+
+test_that("a collection without SR_FULL keeps its document names", {
+  skip_if_not_installed("bibliometrixData")
+  data(scientometrics, package = "bibliometrixData", envir = environment())
+  expect_false("SR_FULL" %in% names(scientometrics))
+  a <- localCitations(scientometrics)$M
+  # SR was rebuilt from the authors (SANCHEZ RIOFRIO AM); the stored name stays
+  expect_setequal(a$SR, scientometrics$SR)
+  expect_equal(sum(a$LCS), 6)
+})

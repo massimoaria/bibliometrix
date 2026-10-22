@@ -44,6 +44,31 @@ test_that("metaTagExtraction estrae CR_SO da Scopus con CR mancante (#696)", {
   expect_identical(convert_scopus_new_to_classic(""), "")
 })
 
+test_that("metaTagExtraction non assegna autori a CR_SO per riferimenti Scopus senza fonte (#711)", {
+  # Citazione di libro senza fonte editoriale non deve estrarre il primo autore (#711)
+  ref_book <- "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM, AND EDUCATION, (2014)"
+  test_book <- data.frame(DB = "SCOPUS", CR = ref_book, stringsAsFactors = FALSE)
+  res_book <- metaTagExtraction(test_book, Field = "CR_SO", sep = ";")
+  expect_true(is.na(res_book$CR_SO))
+
+  # Citazione mista: il libro senza fonte viene omesso, i periodici sono mantenuti
+  ref_mixed <- paste(
+    "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM, AND EDUCATION, (2014)",
+    "SMITH J., TITLE (2020) NATURE, 10, PP. 1-5",
+    "LI T., YAN J., LI J., REVIEW, ANN MED, 57, (2025)",
+    sep = ";"
+  )
+  test_mixed <- data.frame(DB = "SCOPUS", CR = ref_mixed, stringsAsFactors = FALSE)
+  res_mixed <- metaTagExtraction(test_mixed, Field = "CR_SO", sep = ";")
+  expect_equal(res_mixed$CR_SO, "NATURE;ANN MED")
+
+  # Periodico con layout corto (volume senza pagine) non viene piu scartato
+  ref_short <- "DOE J., A STUDY, ANN MED, 57, (2025)"
+  test_short <- data.frame(DB = "SCOPUS", CR = ref_short, stringsAsFactors = FALSE)
+  res_short <- metaTagExtraction(test_short, Field = "CR_SO", sep = ";")
+  expect_equal(res_short$CR_SO, "ANN MED")
+})
+
 test_that("applyReferenceMatching ignora i documenti Scopus senza CR (#696)", {
   M <- load_scopus_fixture()
   M$CR[1] <- NA

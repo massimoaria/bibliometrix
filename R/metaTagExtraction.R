@@ -225,6 +225,10 @@ CR_SO <- function(M, sep) {
       cr_i <- vapply(listCAU[[i]],
                      function(r) convert_scopus_new_to_classic(r),
                      character(1), USE.NAMES = FALSE)
+      # A reference with nothing after its year has no source (Scopus books,
+      # "AUTHORS, TITLE, (YEAR)"): left out, since the first field would be
+      # the first author (#711)
+      cr_i <- cr_i[grepl("\\) ", cr_i)]
       refs <- gsub(".*?\\) ", "", cr_i)
       elem <- strsplit(as.character(refs), ",")
       ind <- lengths(elem)

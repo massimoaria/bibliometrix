@@ -118,9 +118,7 @@ wos <- function(M, min.citations, sep, network, verbose, match_by_doi = FALSE) {
   if (isTRUE(verbose)) {
     cat("\nWOS DB:\nSearching local citations (LCS) by reference items (SR) and DOIs...\n")
   }
-  if (!("SR_FULL" %in% names(M))) {
-    M <- metaTagExtraction(M, Field = "SR")
-  }
+  M <- .sr_full(M)
 
   M <- M[order(M$PY), ]
   M$Paper <- 1:nrow(M)
@@ -138,11 +136,8 @@ wos <- function(M, min.citations, sep, network, verbose, match_by_doi = FALSE) {
     )
   })
   CR <- (do.call(rbind, CR))
-  CR$DI <-
-    trimws(unlist(lapply(
-      strsplit(CR$ref, "DOI", fixed = TRUE), "[", 2
-    )))
-  CR$DI[is.na(CR$DI) | CR$DI == "NA"] <- ""
+  # the DOI after the last "DOI " tag (.cr_doi())
+  CR$DI <- .cr_doi(CR$ref)
   CR$AU <-
     trimws(gsub("[ ]{2,}", "", (gsub(
       "\\.", " ", unlist(lapply(strsplit(CR$ref, ",", fixed = TRUE), "[", 1))
@@ -280,9 +275,7 @@ wos <- function(M, min.citations, sep, network, verbose, match_by_doi = FALSE) {
 
 # New algorithm for Scopus
 scopus <- function(M, min.citations, sep, network, verbose) {
-  if (!("SR_FULL" %in% names(M))) {
-    M <- metaTagExtraction(M, Field = "SR")
-  }
+  M <- .sr_full(M)
   
   CR <- match_citations_fast(M = M, sep = sep)
 
@@ -590,4 +583,30 @@ match_citations_fast <- function(M, sep = ";") {
   matches <- unique(cand[cand$SR_cited != cand$SR_citing, c("SR_cited", "SR_citing"), drop = FALSE])
   rownames(matches) <- NULL
   matches
+}
+# The DOI of a cited reference: the text after its LAST "DOI " tag. WoS exports a share of
+# references with the tag doubled and the volume and page zero-padded ("V0027, P00164, DOI
+# DOI 10.1111/BEER.12177"): the text after the FIRST tag is then empty, and the local
+# citation was lost (2092 instead of 2098 on management). "" without a DOI.
+.cr_doi <- function(cr) {
+  cr <- as.character(cr)
+  out <- rep("", length(cr))
+  has <- !is.na(cr) & grepl("DOI", cr, fixed = TRUE)
+  out[has] <- trimws(sub(".*DOI ", "", cr[has]))
+  out[is.na(out) | out == "NA"] <- ""
+  out
+}
+
+# SR_FULL, the label histNetwork() matches the cited references against, for a collection
+# that lacks it. It is the stored SR without the suffix (-a, -b, ...) that SR() appends to
+# tell apart documents with the same label. It used to be rebuilt with metaTagExtraction(M,
+# "SR"), which also REWROTE SR from the authors -- lossy: a collection imported earlier, or
+# whose AU holds full names, came back with other document names (SANCHEZ RIOFRIO AM
+# instead of the stored SANCHEZ-RIOFRIO AM on scientometrics). Only a collection with no SR
+# either still goes through metaTagExtraction().
+.sr_full <- function(M) {
+  if ("SR_FULL" %in% names(M)) return(M)
+  if (!"SR" %in% names(M)) return(metaTagExtraction(M, Field = "SR"))
+  M$SR_FULL <- sub("(-[a-z])+$", "", M$SR)
+  M
 }

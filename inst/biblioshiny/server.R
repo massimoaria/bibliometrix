@@ -8343,9 +8343,9 @@ To ensure the functionality of Biblioshiny,
           dplyr::slice_head(n = k) %>%
           dplyr::select(Country, SCP, MCP)
         xx <- xx[order(-(xx$SCP + xx$MCP)), ]
-        xx1 <- cbind(xx[, 1:2], rep("SCP", k))
+        xx1 <- cbind(xx[, 1:2], rep("SCP", nrow(xx)))
         names(xx1) <- c("Country", "Freq", "Collaboration")
-        xx2 <- cbind(xx[, c(1, 3)], rep("MCP", k))
+        xx2 <- cbind(xx[, c(1, 3)], rep("MCP", nrow(xx)))
         names(xx2) <- c("Country", "Freq", "Collaboration")
         xx <- rbind(xx2, xx1)
         xx$Country <- factor(xx$Country, levels = xx$Country[1:nrow(xx2)])
@@ -11279,23 +11279,13 @@ To ensure the functionality of Biblioshiny,
           !is.null(cocnet$cluster_res) &&
             nrow(cocnet$cluster_res) > 0
         ) {
-          occ <- diag(as.matrix(NetWords))
-          words_coc <- data.frame(
-            Words = cocnet$cluster_res$vertex,
-            Cluster_Label = paste(
-              "Cluster",
-              cocnet$cluster_res$cluster
-            ),
-            pagerank_centrality = cocnet$cluster_res$pagerank_centrality,
-            stringsAsFactors = FALSE
+          # occurrences and PageRank within the cluster, as the
+          # memberships of the thematic map
+          words_coc <- bibliometrix:::clusterWords(
+            NetWords,
+            cocnet$cluster_res
           )
-          words_coc$Occurrences <- occ[match(
-            words_coc$Words,
-            rownames(NetWords)
-          )]
-          words_coc$Occurrences[
-            is.na(words_coc$Occurrences) | words_coc$Occurrences == 0
-          ] <- 1
+          words_coc$Cluster_Label <- paste("Cluster", words_coc$cluster)
           bibliometrix:::clusterAssignment(
             M_data,
             words = words_coc,

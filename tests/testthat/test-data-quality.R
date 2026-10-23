@@ -226,3 +226,19 @@ test_that("metaTagExtraction AU_UN non scambia una qualifica per un ente", {
     )
   )
 })
+
+test_that("metaTagExtraction CR_SO leaves out Scopus references with no source (#711)", {
+  M <- data.frame(
+    DB = "SCOPUS",
+    CR = paste(
+      "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM, AND EDUCATION, (2014)",
+      "SMITH J., BROWN A., A STUDY OF X, J INFORMETR, 11, 3, PP. 959-975, (2017)",
+      "ROSSI M., ANOTHER STUDY (2015) SCIENTOMETRICS, 102, PP. 1-20",
+      sep = ";"
+    )
+  )
+  expect_identical(metaTagExtraction(M, Field = "CR_SO")$CR_SO, "J INFORMETR;SCIENTOMETRICS")
+
+  M$CR <- "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM, AND EDUCATION, (2014)"
+  expect_true(is.na(metaTagExtraction(M, Field = "CR_SO")$CR_SO))
+})

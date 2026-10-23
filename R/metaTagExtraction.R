@@ -218,20 +218,28 @@ CR_SO <- function(M, sep) {
     # JOURNAL, VOL, PAGE" (year before journal) and the newer "AUTHORS, TITLE,
     # JOURNAL, VOL, ISSUE, PP. PAGES, (YEAR)" (year last). Normalize the new layout
     # to the classic one first (convert_scopus_new_to_classic moves the trailing
-    # year back after the title) so that, after dropping everything up to ") ",
-    # the journal is the 1st field for both. The previous code skipped the
-    # conversion and returned the first author for new-format refs.
+    # year back after the title) so that the journal is after the parenthesised
+    # year for both. If a reference has no text after the year (e.g. books lacking
+    # publisher metadata), no source is extracted instead of falling back to the
+    # first author (#711).
     for (i in seq_len(size[1])) {
-      cr_i <- vapply(listCAU[[i]],
-                     function(r) convert_scopus_new_to_classic(r),
-                     character(1), USE.NAMES = FALSE)
-      refs <- gsub(".*?\\) ", "", cr_i)
-      elem <- strsplit(as.character(refs), ",")
-      ind <- lengths(elem)
-      if (length(ind) > 0 && max(ind) > 2) {
-        elem <- elem[ind > 2]
-        CCR[i] <- paste(trim.leading(unlist(lapply(elem, function(l) l[[1]]))),
-                        collapse = ";")
+      refs_raw <- listCAU[[i]]
+      if (length(refs_raw) == 0 || all(is.na(refs_raw))) next
+
+      sources <- character(0)
+      for (r in refs_raw) {
+        if (is.na(r) || !nzchar(trimws(r))) next
+        cr <- convert_scopus_new_to_classic(trimws(r))
+        if (!grepl("\\(\\d{4}\\)", cr)) next
+        after_year <- trimws(sub(".*\\(\\d{4}\\)[, ]*", "", cr))
+        if (!nzchar(after_year)) next
+        so <- trimws(sub(",.*", "", after_year))
+        if (nzchar(so) && !grepl("^PP\\.?|^\\d+$", so, ignore.case = TRUE)) {
+          sources <- c(sources, so)
+        }
+      }
+      if (length(sources) > 0) {
+        CCR[i] <- paste(sources, collapse = ";")
       }
     }
   } else if (db %in% c("ISI", "WOS", "OPENALEX", "PUBMED", "DIMENSIONS")) {

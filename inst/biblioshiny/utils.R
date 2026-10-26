@@ -1254,7 +1254,7 @@ authorCard <- function(selected_author, values) {
   ) %>%
     filter(!is.na(doi))
   if (nrow(works_exact) == 0) {
-    return(HTML("No works found for this author.", type = "error"))
+    return(HTML("No works with a DOI found for this author."))
   }
   author_position <- works_exact$author_position[1]
   doi <- works_exact$doi[1]
@@ -1277,9 +1277,7 @@ authorCard <- function(selected_author, values) {
             authorBio(author_position = author_position, doi = doi,
                       mailto = if (nchar(oa_email) > 0) oa_email else NULL)
           },
-          error = function(e) {
-            NULL
-          }
+          error = function(e) e
         )
       )
       # check if AUid is a tibble
@@ -1291,7 +1289,17 @@ authorCard <- function(selected_author, values) {
         )
         values$author_data <- author_data
       } else {
-        return(HTML("No author data found.", type = "error"))
+        # Show why OpenAlex gave nothing, not a generic message
+        reason <- if (inherits(AU_data, "error")) {
+          conditionMessage(AU_data)
+        } else {
+          "no data returned"
+        }
+        message("Author profile of ", selected_author, " (DOI ", doi, "): ", reason)
+        return(tags$p(paste0(
+          "Unable to retrieve the author profile from OpenAlex (DOI ",
+          doi, "): ", reason
+        )))
       }
     }
     # values$author_data <- author_data
@@ -1303,11 +1311,20 @@ authorCard <- function(selected_author, values) {
       max_topics = 20
     )
   } else {
-    card <- HTML(
-      "No internet connection. Unable to fetch author data.",
-      type = "error"
-    )
+    card <- HTML("No internet connection. Unable to fetch author data.")
   }
+}
+
+# Name shown on the Local Profile: the OpenAlex name when the Global Profile
+# retrieved it, otherwise the name in the collection. The Local Profile needs
+# only the collection, so it does not fail with the Global one.
+localAuthorName <- function(author_data, selected_author) {
+  name <- if (is.data.frame(author_data)) {
+    author_data$display_name[author_data$AUid == selected_author]
+  } else {
+    character(0)
+  }
+  if (length(name) == 0 || is.na(name[1])) selected_author else name[1]
 }
 
 create_empty_author_bio_card <- function(

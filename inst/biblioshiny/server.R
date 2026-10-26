@@ -7136,9 +7136,7 @@ To ensure the functionality of Biblioshiny,
           })
           values$authorGlobalCard <- authorGlobalProfile
 
-          local_author <- values$author_data %>%
-            dplyr::filter(AUid == selected_author) %>%
-            pull(display_name)
+          local_author <- localAuthorName(values$author_data, selected_author)
 
           local_data <- values$M[
             gregexpr(selected_author, values$M$AU) > -1,
@@ -7163,11 +7161,7 @@ To ensure the functionality of Biblioshiny,
             authorLocalProfile
           })
           values$authorLocalCard <- authorLocalProfile
-          values$authorProfileName <- if (length(local_author) > 0) {
-            local_author[1]
-          } else {
-            selected_author
-          }
+          values$authorProfileName <- local_author
         },
         error = function(e) {
           # Manage the error
@@ -7440,9 +7434,7 @@ To ensure the functionality of Biblioshiny,
         authorGlobalProfile
       })
 
-      local_author <- values$author_data %>%
-        dplyr::filter(AUid == selected_author) %>%
-        pull(display_name)
+      local_author <- localAuthorName(values$author_data, selected_author)
 
       local_data <- values$M[gregexpr(selected_author, values$M$AU) > -1, ] %>%
         mutate(TI = to_title_case(TI), SO = to_title_case(SO))

@@ -12,7 +12,8 @@ authorBio(
   sleep_time = 1,
   max_retries = 3,
   retry_delay = 2,
-  mailto = NULL
+  mailto = NULL,
+  author_name = NULL
 )
 }
 \arguments{
@@ -31,6 +32,12 @@ authorBio(
 \item{retry_delay}{Numeric. Base delay in seconds before retrying after an error (default: 2)}
 
 \item{mailto}{Character. Email address for OpenAlex polite pool (default: NULL, uses openalexR.mailto option if set)}
+
+\item{author_name}{Character. Name of the author as written in the collection, e.g. "CENOZ J"
+(default: NULL). When given, the author is found by name among the authors of the work in
+OpenAlex, and \code{author_position} is used only to choose among authors with the same
+surname: the order of the authors in OpenAlex can differ from the one in Scopus or WoS.
+The function stops if no author of the work has that surname.}
 }
 \value{
 If \code{return_all_authors = FALSE}, returns a tibble with comprehensive information 

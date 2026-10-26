@@ -88,6 +88,11 @@ safe_oa_fetch <- function(entity,
 #' @param max_retries Integer. Maximum number of retry attempts for failed API calls (default: 3)
 #' @param retry_delay Numeric. Base delay in seconds before retrying after an error (default: 2)
 #' @param mailto Character. Email address for OpenAlex polite pool (default: NULL, uses openalexR.mailto option if set)
+#' @param author_name Character. Name of the author as written in the collection, e.g. "CENOZ J"
+#'   (default: NULL). When given, the author is found by name among the authors of the work in
+#'   OpenAlex, and \code{author_position} is used only to choose among authors with the same
+#'   surname: the order of the authors in OpenAlex can differ from the one in Scopus or WoS.
+#'   The function stops if no author of the work has that surname.
 #'
 #' @return If \code{return_all_authors = FALSE}, returns a tibble with comprehensive information 
 #'   about the specified author including:
@@ -144,11 +149,18 @@ authorBio <- function(author_position = 1,
                       sleep_time = 1,
                       max_retries = 3,
                       retry_delay = 2,
-                      mailto = NULL) {
-  
+                      mailto = NULL,
+                      author_name = NULL) {
+
   # Input validation
   if (is.null(doi) || !is.character(doi) || nchar(trimws(doi)) == 0) {
     stop("The 'doi' parameter must be a non-empty character string")
+  }
+
+  if (!is.null(author_name) &&
+      (!is.character(author_name) || length(author_name) != 1 ||
+       nchar(trimws(author_name)) == 0)) {
+    stop("The 'author_name' parameter must be NULL or a non-empty character string")
   }
   
   if (!is.numeric(author_position) || author_position < 1 || author_position != as.integer(author_position)) {
@@ -201,6 +213,16 @@ authorBio <- function(author_position = 1,
     stop("No author information found for this article")
   }
   
+  # Find the author by name: OpenAlex may list the authors in another order
+  if (!is.null(author_name) && !return_all_authors) {
+    matched <- oaAuthorMatch(author_name, authorships$display_name, author_position)
+    if (is.na(matched)) {
+      stop("Author ", author_name, " not found among the OpenAlex authors of this article (",
+           paste(authorships$display_name, collapse = "; "), ")")
+    }
+    author_position <- matched
+  }
+
   # Verify that the requested position exists
   if (author_position > nrow(authorships)) {
     stop("Author position (", author_position, 
@@ -377,6 +399,40 @@ authorBio <- function(author_position = 1,
   }
   
   return(au_info)
+}
+
+# Position of an author among the OpenAlex names of a work. `author_name` is
+# written as in the collection: "SURNAME I" (Scopus, WoS) or "SURNAME, I.".
+# The surname must appear as whole words in the OpenAlex name, accents,
+# hyphens and case aside; among several such authors the initial of the first
+# name decides, then the closest to `author_position`. NA when nobody matches.
+#' @keywords internal
+#' @noRd
+oaAuthorMatch <- function(author_name, oa_names, author_position = 1) {
+  norm <- function(x) {
+    x <- toupper(stringi::stri_trans_general(x, "Latin-ASCII"))
+    trimws(gsub(" +", " ", gsub("[^A-Z]", " ", x)))
+  }
+  if (grepl(",", author_name)) {
+    parts <- strsplit(author_name, ",")[[1]]
+    surname <- norm(parts[1])
+    initials <- norm(paste(parts[-1], collapse = " "))
+  } else {
+    tokens <- strsplit(norm(author_name), " ")[[1]]
+    n <- length(tokens)
+    surname <- if (n > 1) paste(tokens[-n], collapse = " ") else tokens
+    initials <- if (n > 1) tokens[n] else ""
+  }
+  oa <- norm(oa_names)
+  hits <- which(grepl(paste0("(^| )", surname, "( |$)"), oa))
+  if (length(hits) == 0 || nchar(surname) == 0) {
+    return(NA_integer_)
+  }
+  if (length(hits) > 1 && nchar(initials) > 0) {
+    same_initial <- hits[substr(oa[hits], 1, 1) == substr(initials, 1, 1)]
+    if (length(same_initial) > 0) hits <- same_initial
+  }
+  hits[which.min(abs(hits - author_position))]
 }
 
 # Helper function to analyze all authors of an article

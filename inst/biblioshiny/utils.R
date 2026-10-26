@@ -1256,8 +1256,9 @@ authorCard <- function(selected_author, values) {
   if (nrow(works_exact) == 0) {
     return(HTML("No works with a DOI found for this author."))
   }
-  author_position <- works_exact$author_position[1]
-  doi <- works_exact$doi[1]
+  # The author is found by name in each work; a work missing from OpenAlex, or
+  # whose OpenAlex authors leave the author out, gives way to the next one
+  works_exact <- head(dplyr::distinct(works_exact, doi, .keep_all = TRUE), 5)
   on_line <- check_online(method = "http")
 
   if (on_line) {
@@ -1270,16 +1271,31 @@ authorCard <- function(selected_author, values) {
     if (selected_author %in% author_data$AUid) {
       AU_data <- author_data %>% dplyr::filter(AUid == selected_author)
     } else {
-      suppressWarnings(
+      oa_email <- Sys.getenv("openalexR.mailto", unset = "")
+      reasons <- character(0)
+      for (i in seq_len(nrow(works_exact))) {
+        doi <- works_exact$doi[i]
         AU_data <- tryCatch(
-          {
-            oa_email <- Sys.getenv("openalexR.mailto", unset = "")
-            authorBio(author_position = author_position, doi = doi,
-                      mailto = if (nchar(oa_email) > 0) oa_email else NULL)
-          },
+          suppressWarnings(authorBio(
+            author_position = works_exact$author_position[i],
+            doi = doi,
+            mailto = if (nchar(oa_email) > 0) oa_email else NULL,
+            author_name = selected_author
+          )),
           error = function(e) e
         )
-      )
+        if (is.data.frame(AU_data)) {
+          break
+        }
+        # Keep why OpenAlex gave nothing, not a generic message
+        reason <- if (inherits(AU_data, "error")) {
+          conditionMessage(AU_data)
+        } else {
+          "no data returned"
+        }
+        message("Author profile of ", selected_author, " (DOI ", doi, "): ", reason)
+        reasons <- c(reasons, paste0("DOI ", doi, ": ", reason))
+      }
       # check if AUid is a tibble
       if (is.data.frame(AU_data)) {
         author_data <- bind_rows(
@@ -1289,17 +1305,10 @@ authorCard <- function(selected_author, values) {
         )
         values$author_data <- author_data
       } else {
-        # Show why OpenAlex gave nothing, not a generic message
-        reason <- if (inherits(AU_data, "error")) {
-          conditionMessage(AU_data)
-        } else {
-          "no data returned"
-        }
-        message("Author profile of ", selected_author, " (DOI ", doi, "): ", reason)
-        return(tags$p(paste0(
-          "Unable to retrieve the author profile from OpenAlex (DOI ",
-          doi, "): ", reason
-        )))
+        return(tags$div(
+          tags$p("Unable to retrieve the author profile from OpenAlex:"),
+          tags$ul(lapply(reasons, tags$li))
+        ))
       }
     }
     # values$author_data <- author_data

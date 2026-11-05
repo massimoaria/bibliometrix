@@ -1,6 +1,6 @@
 utils::globalVariables(c(
   "CR_canonical",
-  "has_title",
+  "keeps_title",
   "CR_id",
   "CR_normalized",
   "CR_original",
@@ -1971,8 +1971,9 @@ normalize_citations <- function(
   # Scopus variants that keep the title of the work come first, so that the
   # canonical citation is not a variant that lost it (e.g. "AUTHORS (2016)
   # PP. 1-10"); WoS citations carry no title and are not affected
-  df_matched$has_title <- df_matched$format %in% c("scopus", "scopus_new") &
-    !is.na(mpScopusTitle(df_matched$CR_original))
+  df_matched$keeps_title <- df_matched$has_title |
+    (df_matched$format %in% c("scopus", "scopus_new") &
+      !is.na(mpScopusTitle(df_matched$CR_original)))
 
   result <- df_matched %>%
     # Count frequency of each variant within its cluster
@@ -1984,7 +1985,7 @@ normalize_citations <- function(
       n_cluster = n(),
       # Scoring: a Scopus variant with the title first, then frequency, then
       # completeness as tiebreaker
-      completeness_score = has_title * 1e6 +
+      completeness_score = keeps_title * 1e6 +
         variant_freq * 1000 +
         (!is.na(doi)) * 100 +
         (!is.na(volume)) * 10 +
@@ -1993,7 +1994,7 @@ normalize_citations <- function(
       CR_canonical = CR_original[which.max(completeness_score)][1],
       canonical_title = title_norm[which.max(completeness_score)][1]
     ) %>%
-    select(-variant_freq, -has_title) %>%
+    select(-variant_freq, -keeps_title) %>%
     ungroup() %>%
     mutate(
       similarity = reference_similarity(

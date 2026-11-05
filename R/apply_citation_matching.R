@@ -32,7 +32,13 @@ utils::globalVariables(c(
   "temp_citation",
   "variant_freq",
   "wos_key",
-  "author_surname"
+  "author_surname",
+  "similarity",
+  "title_norm",
+  "title_first",
+  "has_title",
+  "canonical_title",
+  "min_similarity"
 ))
 
 #' Normalize journal names to ISO4 abbreviated form
@@ -926,6 +932,13 @@ convert_scopus_new_to_classic <- function(citation) {
 #'   merges; it relies solely on the part marker (not on full-title similarity)
 #'   so it does not interfere with robustness to title typos. Default
 #'   \code{FALSE} (legacy behaviour).
+#' @param use_title Logical. If \code{TRUE} (default), references with their year in
+#'   parentheses are compared on their title (see \emph{Details}). \code{FALSE} gives
+#'   the earlier behaviour.
+#' @param merge_editions Logical. If \code{FALSE} (default), the same title in years
+#'   further apart counts as different works, the editions of a book for instance. If
+#'   \code{TRUE}, all of them count as one work, unless their volume or first page
+#'   differ. It requires \code{use_title = TRUE}.
 #'
 #' @details
 #' The function implements a five-phase matching algorithm:
@@ -969,6 +982,18 @@ convert_scopus_new_to_classic <- function(citation) {
 #' into a single cluster, even if they weren't matched in Phase 3. This catches
 #' cases where minor title variations prevented matching.
 #'
+#' \strong{Title comparison}
+#' With \code{use_title = TRUE} (the default), a reference with its year in
+#' parentheses (the Scopus form) is compared on its title, within the block of its
+#' first author's surname and year: co-authors, written in many ways, play no part.
+#' Two references are the same work when their whole titles, or their first segments
+#' if long enough (a chapter cited with different containers), reach \code{threshold},
+#' unless their volume, first page or part number differ. The same long title in the
+#' year most cited and the years next to it is also the same work; years further away
+#' are other editions, and stay separate unless \code{merge_editions = TRUE}. A book and a chapter in it stay separate, since their
+#' titles differ. Set \code{use_title = FALSE} to reproduce the earlier behaviour, in
+#' which the comparison had no title and the similarity was relative to each block.
+#'
 #' @return A data frame with the following columns:
 #' \itemize{
 #'   \item \code{CR_original}: Original citation string
@@ -982,6 +1007,8 @@ convert_scopus_new_to_classic <- function(citation) {
 #'   \item \code{volume}: Volume number
 #'   \item \code{doi}: Digital Object Identifier (when available)
 #'   \item \code{blocking_key}: Internal key used for blocking (author_year_journal)
+#'   \item \code{similarity}: Similarity between the title and that of the canonical
+#'     citation (1 for the canonical citation itself; \code{NA} when no title is known)
 #' }
 #'
 #' @examples
@@ -1026,7 +1053,9 @@ normalize_citations <- function(
   use_exact = TRUE,
   fuzzy = TRUE,
   use_postproc = TRUE,
-  title_guard = FALSE
+  title_guard = FALSE,
+  use_title = TRUE,
+  merge_editions = FALSE
 ) {
   # Detect citation format
   detect_format <- function(x) {
@@ -1292,8 +1321,27 @@ normalize_citations <- function(
       volume = sapply(features, function(x) x$volume %||% NA),
       pages = sapply(features, function(x) x$pages %||% NA),
       title_words = sapply(features, function(x) x$title_words %||% NA),
-      CR_normalized = sapply(features, function(x) x$full_normalized)
-    ) %>% # exclude rows with NA in first_author and year
+      CR_normalized = sapply(features, function(x) x$full_normalized),
+      title_norm = NA_character_,
+      title_first = NA_character_,
+      page_start_ref = NA_character_,
+      has_title = FALSE
+    )
+
+  # References with their year in parentheses hold a title: compare that, since
+  # the first author and the year are already the block. The year is the one in
+  # the parentheses, not the first number of four digits ("2030 AGENDA ... (2019)").
+  if (isTRUE(use_title) && nrow(df) > 0) {
+    parsed <- parse_reference_titles(df$CR_original)
+    keep <- !is.na(parsed$title) & df$format != "wos"
+    df$title_norm[keep] <- parsed$title[keep]
+    df$title_first[keep] <- parsed$title_first[keep]
+    df$year[keep] <- parsed$year[keep]
+    df$page_start_ref <- str_extract(df$pages, "\\d+")
+    df$has_title <- keep
+  }
+
+  df <- df %>% # exclude rows with NA in first_author and year
     dplyr::filter(!is.na(first_author), !is.na(year)) %>%
     # exclude rows with year < 1700 and > current year+1
     dplyr::filter(
@@ -1381,6 +1429,20 @@ normalize_citations <- function(
     cat("  Proceeding without journal normalization\n")
     df <- df %>%
       mutate(journal_original = journal)
+  }
+
+  # The string rebuilt above holds no title, and for a reference with no journal
+  # nothing but the author and the year: all the works of an author in one year
+  # would become the same string. Where a title is known, the string is built on it.
+  if (any(df$has_title)) {
+    title_rows <- df$has_title
+    df$CR_normalized[title_rows] <- paste(
+      gsub("\\s.*", "", df$first_author[title_rows]),
+      df$year[title_rows],
+      df$title_norm[title_rows],
+      coalesce(df$volume[title_rows], ""),
+      coalesce(df$page_start_ref[title_rows], "")
+    )
   }
 
   cat("Phase 2: Exact matching by DOI and normalized string...\n")
@@ -1508,6 +1570,12 @@ normalize_citations <- function(
 
   # Function to match within a block
   match_within_block <- function(block_df) {
+    # References with a title are clustered by title, whatever the exact phases
+    # found: variants of one work may already sit in two exact clusters.
+    if (fuzzy && any(block_df$has_title)) {
+      block_df <- cluster_by_title(block_df, threshold, method, max_block_size)
+    }
+
     # Only work with unmatched citations
     unmatched <- block_df %>% dplyr::filter(is.na(cluster_id))
 
@@ -1667,6 +1735,10 @@ normalize_citations <- function(
       author_surname = coalesce(gsub("\\s.*", "", first_author), "UNK"),
 
       merge_key = case_when(
+        # Already compared by title: a shared author, year and volume is no
+        # evidence that two titles are the same work.
+        has_title ~ paste0("NOMERGE_", cluster_id),
+
         # WoS format: DOI is most reliable
         format == "wos" & !is.na(doi) ~ paste0("DOI_", doi),
 
@@ -1745,6 +1817,12 @@ normalize_citations <- function(
     ) %>%
     ungroup() %>%
     select(-merge_key, -page_start, -author_surname)
+  }
+
+  # The same long title in consecutive years is one work, online and in print, or a
+  # year mistyped in the reference. Blocks hold one year, so this comes after them.
+  if (any(df_matched$has_title)) {
+    df_matched <- merge_adjacent_years(df_matched, merge_editions)
   }
 
   n_clusters_after_merge <- n_distinct(df_matched$cluster_id)
@@ -1903,10 +1981,16 @@ normalize_citations <- function(
         (!is.na(volume)) * 10 +
         (!is.na(pages)) * 5 +
         nchar(CR_original) * 0.01,
-      CR_canonical = CR_original[which.max(completeness_score)][1]
+      CR_canonical = CR_original[which.max(completeness_score)][1],
+      canonical_title = title_norm[which.max(completeness_score)][1]
     ) %>%
     select(-variant_freq) %>%
     ungroup() %>%
+    mutate(
+      similarity = reference_similarity(
+        title_norm, canonical_title, CR_original == CR_canonical, method
+      )
+    ) %>%
     arrange(desc(n_cluster), cluster_id) %>%
     select(
       CR_original,
@@ -1920,7 +2004,8 @@ normalize_citations <- function(
       journal_original, # Keep original
       volume,
       doi,
-      blocking_key
+      blocking_key,
+      similarity
     )
 
   cat(
@@ -1998,7 +2083,8 @@ normalize_citations <- function(
         }),
         volume = NA_character_,
         doi = NA_character_,
-        blocking_key = "FILTERED"
+        blocking_key = "FILTERED",
+        similarity = NA_real_
       )
 
     result <- bind_rows(result, filtered_citations)
@@ -2058,6 +2144,11 @@ normalize_citations <- function(
 #' @param title_guard Logical. Enable the optional Phase 4.6 series part-marker
 #'   cluster purification that splits over-merged multi-part works (default
 #'   \code{FALSE}). Passed through to \code{\link{normalize_citations}}.
+#' @param use_title Logical. Compare references on their title (default \code{TRUE}).
+#'   Passed through to \code{\link{normalize_citations}}.
+#' @param merge_editions Logical. Count the same title in years further apart, such as
+#'   the editions of a book, as one work (default \code{FALSE}). Passed through to
+#'   \code{\link{normalize_citations}}.
 #'
 #' @details
 #' The function performs the following steps:
@@ -2084,6 +2175,7 @@ normalize_citations <- function(
 #'       \item \code{cluster_id}: Unique cluster identifier
 #'       \item \code{n_cluster}: Size of the citation cluster
 #'       \item \code{first_author}, \code{year}, \code{journal}, \code{volume}: Extracted metadata
+#'       \item \code{similarity}: Similarity of the title to that of the canonical citation
 #'     }
 #'   }
 #'   \item{summary}{A data frame summarizing citation frequencies with columns:
@@ -2091,6 +2183,8 @@ normalize_citations <- function(
 #'       \item \code{CR_canonical}: The canonical citation for each cluster
 #'       \item \code{n}: Total number of times this work was cited
 #'       \item \code{n_variants}: Number of different formatting variants found
+#'       \item \code{min_similarity}: The lowest similarity among the variants, to find
+#'         the merges worth checking; see \code{\link{splitReferenceVariant}} to undo one
 #'       \item \code{variants_example}: Sample of variant formats (up to 3 examples)
 #'     }
 #'     Sorted by citation frequency (n) in descending order.
@@ -2168,7 +2262,9 @@ applyReferenceMatching <- function(
   use_exact = TRUE,
   fuzzy = TRUE,
   use_postproc = TRUE,
-  title_guard = FALSE
+  title_guard = FALSE,
+  use_title = TRUE,
+  merge_editions = FALSE
 ) {
   # Extract citations
   CR <- strsplit(M$CR, ";")
@@ -2227,7 +2323,9 @@ applyReferenceMatching <- function(
     use_exact = use_exact,
     fuzzy = fuzzy,
     use_postproc = use_postproc,
-    title_guard = title_guard
+    title_guard = title_guard,
+    use_title = use_title,
+    merge_editions = merge_editions
   )
 
   # Join with SR. normalize_citations() returns one row per occurrence, so a
@@ -2261,6 +2359,7 @@ applyReferenceMatching <- function(
       year = first(year),
       journal_iso4 = first(journal_iso4), # Add ISO4 journal
       journal_original = first(journal_original), # Add original journal
+      min_similarity = if (all(is.na(similarity))) NA_real_ else min(similarity, na.rm = TRUE),
       variants_example = paste(head(unique(CR), 3), collapse = " | "),
       .groups = "drop"
     ) %>%
@@ -2321,7 +2420,9 @@ applyCitationMatching <- function(
   use_exact = TRUE,
   fuzzy = TRUE,
   use_postproc = TRUE,
-  title_guard = FALSE
+  title_guard = FALSE,
+  use_title = TRUE,
+  merge_editions = FALSE
 ) {
   warning(
     "applyCitationMatching() is deprecated as of bibliometrix 6.0. ",
@@ -2339,6 +2440,338 @@ applyCitationMatching <- function(
     use_exact = use_exact,
     fuzzy = fuzzy,
     use_postproc = use_postproc,
-    title_guard = title_guard
+    title_guard = title_guard,
+    use_title = use_title,
+    merge_editions = merge_editions
   )
+}
+
+
+#' Separate a variant from the citation it was merged into
+#'
+#' It undoes one merge in the result of \code{\link{applyReferenceMatching}}, without
+#' running the matching again: the given reference string becomes a work of its own.
+#' Find the merges worth checking with the \code{min_similarity} column of
+#' \code{results$summary}, and the variants with the \code{similarity} column of
+#' \code{results$full_data}.
+#'
+#' @param results The list returned by \code{\link{applyReferenceMatching}}.
+#' @param variant Character vector. The reference strings to separate, as in the
+#'   \code{CR} column of \code{results$full_data}.
+#'
+#' @return The same list, with \code{full_data}, \code{summary} and \code{CR_normalized}
+#'   updated. Each variant keeps its own canonical form, its own cluster and a similarity
+#'   of 1. If it was the canonical citation of its cluster, the most frequent remaining
+#'   variant takes its place.
+#'
+#' @examples
+#' \dontrun{
+#' results <- applyReferenceMatching(M)
+#'
+#' # The merges with the least similar variants
+#' head(results$summary[order(results$summary$min_similarity), ])
+#'
+#' results <- splitReferenceVariant(results, "GENESEE F., A WRONGLY MERGED WORK (2004)")
+#' }
+#'
+#' @seealso \code{\link{applyReferenceMatching}}
+#'
+#' @export
+splitReferenceVariant <- function(results, variant) {
+  full_data <- results$full_data
+  unknown <- setdiff(variant, full_data$CR)
+  if (length(unknown) > 0) {
+    stop(
+      "Not among the references of these results: ",
+      paste(unknown, collapse = "; "),
+      call. = FALSE
+    )
+  }
+
+  for (v in unique(variant)) {
+    rows <- full_data$CR == v
+    old_canonical <- full_data$CR_canonical[rows][1]
+    old_cluster <- full_data$cluster_id[rows][1]
+
+    # A variant that was the canonical citation hands that role over
+    others <- full_data$cluster_id == old_cluster & !rows
+    if (identical(old_canonical, v) && any(others)) {
+      counts <- sort(table(full_data$CR[others]), decreasing = TRUE)
+      full_data$CR_canonical[others] <- names(counts)[1]
+      full_data$similarity[others & full_data$CR == names(counts)[1]] <- 1
+    }
+
+    full_data$CR_canonical[rows] <- v
+    full_data$cluster_id[rows] <- paste0("SPLIT_", old_cluster, "_", match(v, variant))
+    full_data$n_cluster[rows] <- sum(rows)
+    full_data$similarity[rows] <- 1
+    full_data$n_cluster[others] <- sum(others)
+  }
+
+  citation_count <- full_data %>% distinct() %>% count(CR_canonical, sort = TRUE)
+  results$summary <- full_data %>%
+    group_by(CR_canonical, cluster_id) %>%
+    summarise(
+      n_variants = n_distinct(CR),
+      format = first(format),
+      first_author = first(first_author),
+      year = first(year),
+      journal_iso4 = first(journal_iso4),
+      journal_original = first(journal_original),
+      min_similarity = if (all(is.na(similarity))) NA_real_ else min(similarity, na.rm = TRUE),
+      variants_example = paste(head(unique(CR), 3), collapse = " | "),
+      .groups = "drop"
+    ) %>%
+    left_join(citation_count, by = "CR_canonical") %>%
+    arrange(desc(n))
+  results$CR_normalized <- full_data %>%
+    group_by(SR) %>%
+    summarise(
+      CR = paste(unique(CR_canonical), collapse = "; "),
+      n_references = n_distinct(CR_canonical),
+      .groups = "drop"
+    )
+  results$full_data <- full_data
+  results
+}
+
+
+# The title of a reference with its year in parentheses, in the form
+# "AUTHOR I., AUTHOR J., TITLE, CONTAINER (YEAR) SOURCE, VOLUME, PP. 1-2".
+# Returns the year, the normalised text between the authors and the year (title), and
+# its first segment (title_first): a chapter's title without its container.
+parse_reference_titles <- function(x) {
+  words <- "[A-Z][A-Z'\\-]*"
+  # "GARCIA O.", "LIN A.F.M.", "JOHNSON S. I.", "IBARRA JOHNSON S.", "TLEMISSOVA ZH"
+  author <- paste0(
+    "^", words, "( ", words, ")*( ([A-Z]\\.( ?[A-Z]\\.)*|[A-Z]|[B-DF-HJ-NP-TV-Z]{2,3}))$"
+  )
+  initials <- "^([A-Z]\\. ?)+$|^[A-Z]{1,2}$"
+  clean <- function(t) {
+    t <- gsub("[^A-Z0-9 ]", " ", gsub("'", "", t))
+    trimws(gsub(" +", " ", t))
+  }
+
+  parse_one <- function(ref) {
+    out <- c(year = NA_character_, title = NA_character_, title_first = NA_character_)
+    m <- regexec("^(.*?)\\s*\\((\\d{4})\\)", ref, perl = TRUE)
+    hit <- regmatches(ref, m)[[1]]
+    if (length(hit) < 3) return(out)
+    out["year"] <- hit[3]
+
+    # A note in parentheses is no part of the title: "... (PALGRAVE PIVOT)"
+    segments <- trimws(strsplit(gsub("\\([^()]*\\)", " ", hit[2]), ",")[[1]])
+    segments <- segments[nzchar(segments)]
+    if (length(segments) == 0) return(out)
+
+    # The first segment is always the first author; "SMITH, J." takes two
+    i <- 1L
+    if (length(segments) > 1 && grepl(initials, segments[2])) i <- 2L
+    while (i < length(segments)) {
+      nxt <- segments[i + 1L]
+      if (grepl(author, nxt)) {
+        i <- i + 1L
+      } else if (i + 2L <= length(segments) && grepl(initials, segments[i + 2L]) &&
+        grepl(paste0("^", words, "( ", words, ")*$"), nxt)) {
+        i <- i + 2L
+      } else {
+        break
+      }
+    }
+    if (i >= length(segments)) return(out)
+
+    rest <- segments[(i + 1L):length(segments)]
+    title <- clean(paste(rest, collapse = " "))
+    if (nchar(title) < 5) return(out)
+    out["title"] <- title
+    out["title_first"] <- clean(rest[1])
+    out
+  }
+
+  unique_refs <- unique(x)
+  upper <- toupper(vapply(unique_refs, remove_diacritics, character(1), USE.NAMES = FALSE))
+  parsed <- vapply(upper, parse_one, character(3), USE.NAMES = FALSE)
+  rows <- match(x, unique_refs)
+  list(
+    year = parsed[1, rows],
+    title = parsed[2, rows],
+    title_first = parsed[3, rows]
+  )
+}
+
+
+# Words that do not occur in a name: a segment holding one of them is not an author.
+reference_stop_words <- c(
+  "AND", "OR", "OF", "THE", "IN", "ON", "FOR", "A", "AN", "TO", "WITH", "AT", "FROM",
+  "BY", "AS", "VS"
+)
+
+
+# Part numbers in a title: "... PART II" and "... PART III" are different works.
+reference_parts <- function(title) {
+  tokens <- strsplit(title, " ", fixed = TRUE)[[1]]
+  sort(unique(tokens[grepl("^([0-9]+|II|III|IV|VI|VII|VIII|IX)$", tokens)]))
+}
+
+
+# Word overlap between all the pairs of a vector of titles.
+reference_overlap <- function(titles) {
+  tokens <- strsplit(titles, " ", fixed = TRUE)
+  n <- length(titles)
+  overlap <- diag(n)
+  for (a in seq_len(n - 1L)) {
+    for (b in (a + 1L):n) {
+      shared <- length(intersect(tokens[[a]], tokens[[b]]))
+      overlap[a, b] <- overlap[b, a] <-
+        shared / max(1L, length(union(tokens[[a]], tokens[[b]])))
+    }
+  }
+  overlap
+}
+
+
+# Which pairs of titles are close enough. A string distance alone says too much on
+# long titles with a common start ("TRANSLANGUAGING AND EDUCATION" and "TRANSLANGUAGING
+# IN EDUCATION"), so the words must overlap as well, unless the edit is tiny.
+reference_titles_close <- function(titles, threshold, method) {
+  close <- stringdist::stringsimmatrix(titles, titles, method = method) >= threshold
+  edit <- stringdist::stringsimmatrix(titles, titles, method = "lv")
+  close & (reference_overlap(titles) >= 0.6 | edit >= 0.95)
+}
+
+
+# Cluster the references of a block that hold a title. Each distinct combination of
+# title, volume and first page is one point; complete linkage keeps apart any pair
+# that conflicts. Other references are left to the caller, and DOI clusters stay.
+cluster_by_title <- function(block_df, threshold, method, max_block_size) {
+  rows <- which(block_df$has_title & !grepl("^DOI_", coalesce(block_df$cluster_id, "")))
+  if (length(rows) == 0) return(block_df)
+
+  key <- paste(
+    block_df$title_norm[rows],
+    coalesce(block_df$volume[rows], ""),
+    coalesce(block_df$page_start_ref[rows], ""),
+    sep = "\r"
+  )
+  points <- which(!duplicated(key))
+  n <- length(points)
+  label <- unique(block_df$blocking_key)[1]
+
+  # Too many to compare: only the same title, volume and page stay together
+  if (n < 2 || n >= max_block_size) {
+    block_df$cluster_id[rows] <- paste0(label, "_T", match(key, key[points]))
+    return(block_df)
+  }
+
+  title <- block_df$title_norm[rows][points]
+  first <- block_df$title_first[rows][points]
+  volume <- block_df$volume[rows][points]
+  page <- block_df$page_start_ref[rows][points]
+
+  # A co-author written in full ("WEI LI") is not recognised as a name, and stays at
+  # the start of the title. If what follows it is the title of another reference of
+  # the same kind, that is the title. Up to two words, none of them common: what comes
+  # before the title of a book, in a chapter, is a title and not a name.
+  has_page <- !is.na(page)
+  for (i in order(nchar(title), decreasing = TRUE)) {
+    others <- which(
+      nchar(title) >= 20 & nchar(title) < nchar(title[i]) & has_page == has_page[i] &
+        endsWith(title[i], paste0(" ", title))
+    )
+    for (o in others[order(-nchar(title[others]))]) {
+      extra <- strsplit(trimws(substr(
+        title[i], 1, nchar(title[i]) - nchar(title[o])
+      )), " ", fixed = TRUE)[[1]]
+      if (length(extra) <= 2 && !any(extra %in% reference_stop_words)) {
+        title[i] <- title[o]
+        first[i] <- first[o]
+        break
+      }
+    }
+  }
+
+  same <- reference_titles_close(title, threshold, method)
+
+  # A chapter cited with different containers: the first segment decides, if long
+  long_first <- nchar(first) >= 20
+  if (sum(long_first) > 1) {
+    same_first <- reference_titles_close(first, threshold, method)
+    same_first[!long_first, ] <- FALSE
+    same_first[, !long_first] <- FALSE
+    same <- same | same_first
+
+    # With the same first page, overlapping words are enough: "LANGUAGE PRACTICES IN
+    # KENYA" and "LANGUAGE CLASSROOM PRACTICES IN KENYA", both at PP. 131-152. Page 1
+    # says nothing: most reports and articles paged on their own start there.
+    same_page <- outer(page, page, "==")
+    same_page[is.na(same_page)] <- FALSE
+    same_page[page %in% "1", ] <- FALSE
+    same <- same | (same_page & reference_overlap(first) >= 0.6)
+  }
+
+  # A chapter (pages, no journal after the year) against a book (no pages): the title
+  # of one holds the title of the other, so only a tiny edit makes them one work.
+  is_chapter <- has_page & is.na(block_df$journal[rows][points])
+  mixed <- outer(is_chapter, !has_page, "&")
+  mixed <- mixed | t(mixed)
+  same[mixed] <- (stringdist::stringsimmatrix(title, title, method = "lv") >= 0.95)[mixed]
+
+  parts <- lapply(first, reference_parts)
+  for (a in seq_len(n - 1L)) {
+    for (b in (a + 1L):n) {
+      conflict <- (!is.na(volume[a]) && !is.na(volume[b]) && volume[a] != volume[b]) ||
+        (!is.na(page[a]) && !is.na(page[b]) && page[a] != page[b] && title[a] != title[b]) ||
+        !identical(parts[[a]], parts[[b]])
+
+      if (conflict) same[a, b] <- same[b, a] <- FALSE
+    }
+  }
+
+  groups <- stats::cutree(
+    stats::hclust(stats::as.dist(1 - (same * 1)), method = "complete"),
+    h = 0.5
+  )
+  block_df$cluster_id[rows] <- paste0(label, "_T", groups[match(key, key[points])])
+  block_df
+}
+
+
+# Merge the clusters holding the same long title in the year most cited and the years
+# next to it, unless their volume or first page disagree. Years further away are
+# other editions, and stay apart unless merge_editions is TRUE.
+merge_adjacent_years <- function(df, merge_editions = FALSE) {
+  rows <- which(df$has_title & nchar(coalesce(df$title_norm, "")) >= 25)
+  if (length(rows) == 0) return(df)
+
+  key <- paste(gsub("\\s.*", "", df$first_author[rows]), df$title_norm[rows])
+  groups <- split(rows, key)
+  groups <- groups[lengths(groups) > 1]
+  mapping <- character(0)
+  for (g in groups) {
+    years <- as.numeric(df$year[g])
+    if (length(unique(years)) < 2) next
+    counts <- table(years)
+    main <- as.numeric(names(counts)[which.max(counts)])
+    if (!isTRUE(merge_editions)) g <- g[abs(years - main) <= 1]
+    if (length(unique(df$year[g])) < 2) next
+    if (dplyr::n_distinct(stats::na.omit(df$volume[g])) > 1) next
+    if (dplyr::n_distinct(stats::na.omit(df$page_start_ref[g])) > 1) next
+    ids <- unique(df$cluster_id[g])
+    mapping[ids] <- min(ids)
+  }
+  if (length(mapping) > 0) {
+    found <- df$cluster_id %in% names(mapping)
+    df$cluster_id[found] <- mapping[df$cluster_id[found]]
+  }
+  df
+}
+
+
+# Similarity between the whole title of each reference and that of the canonical one
+# of its cluster: 1 for the canonical string itself, NA with no title to compare. It
+# stays low on merges resting on less than the whole title, the ones worth checking.
+reference_similarity <- function(title, canonical, is_canonical, method) {
+  out <- stringdist::stringsim(title, canonical, method = method)
+  out[is_canonical] <- 1
+  round(out, 3)
 }

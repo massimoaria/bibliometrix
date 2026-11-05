@@ -15,7 +15,9 @@ normalize_citations(
   use_exact = TRUE,
   fuzzy = TRUE,
   use_postproc = TRUE,
-  title_guard = FALSE
+  title_guard = FALSE,
+  use_title = TRUE,
+  merge_editions = FALSE
 )
 }
 \arguments{
@@ -66,6 +68,15 @@ are split into separate clusters. This step only splits clusters, never
 merges; it relies solely on the part marker (not on full-title similarity)
 so it does not interfere with robustness to title typos. Default
 \code{FALSE} (legacy behaviour).}
+
+\item{use_title}{Logical. If \code{TRUE} (default), references with their year in
+parentheses are compared on their title (see \emph{Details}). \code{FALSE} gives
+the earlier behaviour.}
+
+\item{merge_editions}{Logical. If \code{FALSE} (default), the same title in years
+further apart counts as different works, the editions of a book for instance. If
+\code{TRUE}, all of them count as one work, unless their volume or first page
+differ. It requires \code{use_title = TRUE}.}
 }
 \value{
 A data frame with the following columns:
@@ -81,6 +92,8 @@ A data frame with the following columns:
   \item \code{volume}: Volume number
   \item \code{doi}: Digital Object Identifier (when available)
   \item \code{blocking_key}: Internal key used for blocking (author_year_journal)
+  \item \code{similarity}: Similarity between the title and that of the canonical
+    citation (1 for the canonical citation itself; \code{NA} when no title is known)
 }
 }
 \description{
@@ -131,6 +144,18 @@ and page information) is selected as the canonical representative.
 Citations sharing the same first author, year, journal, and volume are merged
 into a single cluster, even if they weren't matched in Phase 3. This catches
 cases where minor title variations prevented matching.
+
+\strong{Title comparison}
+With \code{use_title = TRUE} (the default), a reference with its year in
+parentheses (the Scopus form) is compared on its title, within the block of its
+first author's surname and year: co-authors, written in many ways, play no part.
+Two references are the same work when their whole titles, or their first segments
+if long enough (a chapter cited with different containers), reach \code{threshold},
+unless their volume, first page or part number differ. The same long title in the
+year most cited and the years next to it is also the same work; years further away
+are other editions, and stay separate unless \code{merge_editions = TRUE}. A book and a chapter in it stay separate, since their
+titles differ. Set \code{use_title = FALSE} to reproduce the earlier behaviour, in
+which the comparison had no title and the similarity was relative to each block.
 }
 \examples{
 \dontrun{

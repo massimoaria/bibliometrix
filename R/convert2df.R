@@ -163,6 +163,13 @@ convert2df <- function(
         api = {
           M <- pmApi2df(file)
           M$DB <- "PUBMED"
+          # pubmedR <= 1.0.2 sets PY to the earliest date in the record's
+          # history (entered, received, ...), which is often the year before
+          # the publication. The year of the journal issue is in PY_IS.
+          if ("PY_IS" %in% names(M)) {
+            issue_year <- suppressWarnings(as.numeric(M$PY_IS))
+            M$PY <- ifelse(is.na(issue_year), M$PY, issue_year)
+          }
         },
         {
           D <- importFiles(file)
@@ -263,6 +270,12 @@ convert2df <- function(
     # format is preserved (no regex stripping) because the API returns full
     # names that may include hyphens (e.g. U+2010), dots, and accented chars.
     M$AU <- gsub("; +", ";", M$AU)
+  }
+
+  # OpenAlex names are in natural order: put the surname first, as in every
+  # other source.
+  if (dbsource %in% c("openalex", "openalex_api")) {
+    M <- oaAuthorForm(M)
   }
 
   if ((dbsource == "pubmed") & (format == "pubmed")) {

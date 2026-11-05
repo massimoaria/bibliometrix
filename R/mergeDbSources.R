@@ -34,7 +34,14 @@ utils::globalVariables(c("num"))
 #' \code{REID, MONIQUE}, WoS as \code{REID MONIQUE}). Import the collections you
 #' intend to merge with the \strong{same author name format} -- full names for all
 #' of them, or surname and initials for all of them -- so that their \code{AU}
-#' fields are comparable.
+#' fields are comparable. OpenAlex records saved before names were put surname
+#' first are rewritten on merging.
+#'
+#' When the collections come from more than one database, the record kept among
+#' duplicates is the one with the most metadata, and the order of the databases
+#' only decides ties. An OpenAlex record whose source is PubMed or PubMed Central
+#' (OpenAlex gives the repository, not the journal) is kept only if every copy is
+#' such a record. The kept record takes the highest citation count of its copies.
 #'
 #' @param ... are the bibliographic data frames to merge.
 #' @param remove.duplicated is logical. If TRUE duplicated documents will be deleted from the bibliographic collection.
@@ -75,6 +82,9 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
   # create KW_Merged field 
   M <- M %>% mergeKeywords(force=TRUE)
 
+  # OpenAlex files saved by earlier versions still carry names in natural order
+  M <- oaAuthorForm(M, which(M$DB == "OPENALEX"))
+
   dbLabels <- data.frame(
     DB = toupper(c("isi", "scopus", "openalex", "lens", "dimensions", "pubmed", "cochrane")),
     num = c(1, 2, 3, 4, 5, 6, 7)
@@ -107,19 +117,30 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
   
 
   if (isTRUE(remove.duplicated)) {
+    # Which copy of a duplicated document to keep. Within a single database the
+    # first one; across databases the one with the most metadata.
+    rank <- if (length(DB) > 1) mergeRecordRank(M) else seq_len(nrow(M))
+
     # remove by DOI
     if ("DI" %in% names(M)) {
       M$DI[M$DI == ""] <- NA
-      index <- which(duplicated(M$DI) & !is.na(M$DI))
-      if (length(index) > 0) M <- M[-index, ]
+      d <- mergeDuplicates(M$DI, rank)
+      index <- which(d)
+      if (length(index) > 0) {
+        if (length(DB) > 1) M <- mergeKeepCitations(M, M$DI)
+        M <- M[-index, ]
+        rank <- rank[-index]
+      }
     }
 
     # remove by title
     if ("TI" %in% names(M)) {
       TI <- gsub("[^[:alnum:] ]", "", M$TI)
       TI <- gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", "", TI, perl = TRUE)
-      d <- duplicated(paste(TI, " ", M$PY))
+      key <- paste(TI, " ", M$PY)
+      d <- mergeDuplicates(key, rank)
       if (isTRUE(verbose)) cat("\n", sum(d) + length(index), "duplicated documents have been removed\n")
+      if (any(d) && length(DB) > 1) M <- mergeKeepCitations(M, key)
       M <- M[!d, ]
     }
   }
@@ -165,4 +186,56 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
 
   class(M) <- c("bibliometrixDB", "data.frame")
   return(M)
+}
+
+# The position of each record in the preference among copies of a document
+# (1 = kept first): not an OpenAlex record with a repository as its source, then
+# the most metadata, then the order of the rows, which is the order of the
+# databases.
+mergeRecordRank <- function(M) {
+  fields <- intersect(
+    c(
+      "AU", "TI", "SO", "DI", "AB", "DE", "ID", "C1", "RP", "VL", "IS", "PP",
+      "BP", "SN", "LA", "CR_raw"
+    ),
+    names(M)
+  )
+  filled <- function(x) {
+    x <- as.character(x)
+    !is.na(x) & nzchar(trimws(x)) & !toupper(trimws(x)) %in% c("NA", "NONE")
+  }
+  score <- Reduce(`+`, lapply(M[fields], filled), init = 0L)
+  if ("TC" %in% names(M)) {
+    score <- score + (!is.na(M$TC) & M$TC > 0)
+  }
+  repository <- M$DB == "OPENALEX" &
+    grepl("^(PUBMED|PUBMED CENTRAL|EUROPE PMC.*)$", toupper(trimws(M$SO)))
+  repository[is.na(repository)] <- FALSE
+
+  rank <- integer(nrow(M))
+  rank[order(repository, -score, seq_len(nrow(M)))] <- seq_len(nrow(M))
+  rank
+}
+
+# TRUE for every copy of a document but the best ranked. A missing key is never
+# a duplicate.
+mergeDuplicates <- function(key, rank) {
+  d <- rep(FALSE, length(key))
+  ord <- order(rank)
+  ord <- ord[!is.na(key[ord])]
+  d[ord] <- duplicated(key[ord])
+  d
+}
+
+# All the copies of a document take its highest citation count: a database that
+# does not count citations (PubMed) would otherwise lose them.
+mergeKeepCitations <- function(M, key) {
+  if (!"TC" %in% names(M)) {
+    return(M)
+  }
+  has <- !is.na(key)
+  M$TC[has] <- ave(M$TC[has], key[has], FUN = function(x) {
+    if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
+  })
+  M
 }

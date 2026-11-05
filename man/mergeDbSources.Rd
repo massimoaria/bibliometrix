@@ -53,7 +53,14 @@ harmonises how the databases punctuate them (Scopus writes the full names as
 \code{REID, MONIQUE}, WoS as \code{REID MONIQUE}). Import the collections you
 intend to merge with the \strong{same author name format} -- full names for all
 of them, or surname and initials for all of them -- so that their \code{AU}
-fields are comparable.
+fields are comparable. OpenAlex records saved before names were put surname
+first are rewritten on merging.
+
+When the collections come from more than one database, the record kept among
+duplicates is the one with the most metadata, and the order of the databases
+only decides ties. An OpenAlex record whose source is PubMed or PubMed Central
+(OpenAlex gives the repository, not the journal) is kept only if every copy is
+such a record. The kept record takes the highest citation count of its copies.
 }
 \examples{
 

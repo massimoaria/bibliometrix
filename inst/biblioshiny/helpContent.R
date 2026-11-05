@@ -1272,7 +1272,7 @@ helpContent <- function() {
     <h4>Stage 1: Database Identification and Ordering</h4>
     <ul>
       <li>Each collection is tagged with its source database (<code>DB</code> field: ISI, SCOPUS, OPENALEX, LENS, DIMENSIONS, PUBMED, COCHRANE)</li>
-      <li>Collections are ordered by database priority to preserve the most reliable metadata when conflicts arise</li>
+      <li>Collections are ordered by database priority, which decides between duplicates with equally complete metadata</li>
       <li>Order: Web of Science (ISI) > Scopus > OpenAlex > Lens > Dimensions > PubMed > Cochrane</li>
     </ul>
     
@@ -1280,7 +1280,6 @@ helpContent <- function() {
     <ul>
       <li>Common metadata fields are identified and aligned across databases (e.g., <code>TI</code> = Title, <code>AU</code> = Authors, <code>DI</code> = DOI)</li>
       <li>Database-specific fields are preserved when possible</li>
-      <li>Missing fields in one database are filled from another when duplicates are detected</li>
       <li>A unified <code>KW_Merged</code> field is created by combining keywords from all sources</li>
     </ul>
     
@@ -1293,7 +1292,7 @@ helpContent <- function() {
       <li>Documents with identical DOIs are flagged as duplicates</li>
       <li>This is the most reliable method, as DOIs are unique identifiers</li>
       <li>Empty or missing DOIs (<code>''</code> or <code>NA</code>) are ignored to avoid false positives</li>
-      <li>Only the first occurrence is retained; subsequent matches are removed</li>
+      <li>Across databases, the record with the most metadata is retained and takes the highest citation count of its copies; an OpenAlex record whose source is PubMed or PubMed Central comes after the others</li>
     </ul>
     
     <p><strong>Step 3.2: Title-Year Matching</strong></p>
@@ -1317,12 +1316,12 @@ helpContent <- function() {
     </ul>
     
     <h4>Stage 4: Author Name Standardization</h4>
-    <p>When merging collections from multiple databases, author name formats are standardized:</p>
+    <p>Author names keep the format chosen when each collection was imported, and only their punctuation is harmonised:</p>
     <ul>
-      <li>Format: <code>LASTNAME INITIALS</code> (e.g., 'Aria M; Cuccurullo C')</li>
-      <li>Commas in author names are removed to ensure consistency</li>
-      <li>Middle initials are condensed to single letters</li>
-      <li>This standardization improves author-based analyses (e.g., collaboration networks, productivity rankings)</li>
+      <li>Format: <code>LASTNAME INITIALS</code> (e.g., 'ARIA M;CUCCURULLO C'), or the full name if the collection was imported with Fullname</li>
+      <li>Periods and commas in author names are removed to ensure consistency</li>
+      <li>OpenAlex gives names in natural order, so its names are rewritten with the surname first. A surname of more than one word is recognised only from its particles (VAN DER, DE LA, ...): for 'Juan Garcia Lopez' the surname taken is LOPEZ</li>
+      <li>Import the collections with the same author name format, so that the <code>AU</code> fields are comparable</li>
     </ul>
     
     <h4>Stage 5: Metadata Integration</h4>

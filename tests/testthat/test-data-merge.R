@@ -143,3 +143,67 @@ test_that("mergeDbSources non lascia campi paese stantii", {
   expect_true(length(co) >= nrow(M_wos))
   expect_true(any(grepl(";", co))) # almeno una collaborazione internazionale
 })
+
+# ----- PubMed + OpenAlex (Silver et al. 1991, PMID 10171110) ------------------
+
+pm_silver <- function(...) {
+  x <- data.frame(
+    AU = "SILVER FH;TRIA AJ;ZAWADSKY JP;DUNN MG",
+    AF = "SILVER, F H;TRIA, A J;ZAWADSKY, J P;DUNN, M G",
+    TI = "ANTERIOR CRUCIATE LIGAMENT REPLACEMENT: A REVIEW.",
+    SO = "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS",
+    JI = "J LONG TERM EFF MED IMPLANTS", PY = 1991, DB = "PUBMED", DE = NA_character_,
+    ID = "ANTERIOR CRUCIATE LIGAMENT", CR = NA_character_, DI = NA_character_,
+    TC = 0, LA = "ENG", DT = "JOURNAL ARTICLE", C1 = "UMD", RP = NA_character_,
+    VL = "1", IS = "2", stringsAsFactors = FALSE
+  )
+  modifyList(x, list(...)) |> as.data.frame()
+}
+oa_silver <- function(...) {
+  au <- "FREDERICK H. SILVER;ALFRED J. TRIA;JOSEPH P. ZAWADSKY;MICHAEL G. DUNN"
+  x <- pm_silver(
+    AU = au, AF = au, SO = "PUBMED", JI = NA_character_, DB = "OPENALEX",
+    DE = "ACL", TC = 42, LA = "EN", DT = "ARTICLE", VL = "1", IS = "2",
+    AB = "AN ABSTRACT"
+  )
+  modifyList(x, list(...)) |> as.data.frame()
+}
+
+test_that("un record OpenAlex con PubMed come fonte cede al record della rivista", {
+  M <- mergeDbSources(oa_silver(), pm_silver(), verbose = FALSE)
+  expect_equal(nrow(M), 1)
+  expect_equal(M$DB, "PUBMED")
+  expect_equal(M$SO, "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS")
+  expect_equal(M$AU, "SILVER FH;TRIA AJ;ZAWADSKY JP;DUNN MG")
+  expect_equal(M$TC, 42) # le citazioni di OpenAlex non si perdono
+})
+
+test_that("tra i duplicati resta il record con piu' metadati, a parita' l'ordine dei db", {
+  completo <- oa_silver(SO = "A JOURNAL", DE = "ACL", DI = "10.1/x")
+  scarso <- pm_silver(ID = NA_character_, C1 = NA_character_, DI = "10.1/x")
+  M <- mergeDbSources(completo, scarso, verbose = FALSE)
+  expect_equal(M$DB, "OPENALEX")
+
+  # stesso DOI, stessi campi pieni: vince l'ordine dei database (OpenAlex prima)
+  a <- oa_silver(SO = "A JOURNAL", AB = NULL)
+  b <- pm_silver(SO = "A JOURNAL", DE = "ACL", TC = 42)
+  M <- mergeDbSources(b, a, verbose = FALSE)
+  expect_equal(nrow(M), 1)
+  expect_equal(M$DB, "OPENALEX")
+})
+
+test_that("con un solo database resta il primo record, e TC non cambia", {
+  a <- pm_silver(TC = 1, AB = NA_character_)
+  b <- pm_silver(TC = 9, AB = "AN ABSTRACT")
+  M <- mergeDbSources(a, b, verbose = FALSE)
+  expect_equal(nrow(M), 1)
+  expect_equal(M$TC, 1)
+})
+
+test_that("un file OpenAlex salvato con i nomi in ordine naturale viene riscritto", {
+  M <- mergeDbSources(oa_silver(TI = "ANOTHER TITLE"), pm_silver(), verbose = FALSE)
+  expect_equal(nrow(M), 2)
+  oa <- M[M$DB_Original == "OPENALEX", ]
+  expect_equal(oa$AU, "SILVER FH;TRIA AJ;ZAWADSKY JP;DUNN MG")
+  expect_match(oa$SR, "^SILVER FH, 1991")
+})

@@ -15,7 +15,9 @@ applyReferenceMatching(
   use_exact = TRUE,
   fuzzy = TRUE,
   use_postproc = TRUE,
-  title_guard = FALSE
+  title_guard = FALSE,
+  use_title = TRUE,
+  merge_editions = FALSE
 )
 }
 \arguments{
@@ -63,6 +65,13 @@ for ablation analyses and are passed through to \code{\link{normalize_citations}
 \item{title_guard}{Logical. Enable the optional Phase 4.6 series part-marker
 cluster purification that splits over-merged multi-part works (default
 \code{FALSE}). Passed through to \code{\link{normalize_citations}}.}
+
+\item{use_title}{Logical. Compare references on their title (default \code{TRUE}).
+Passed through to \code{\link{normalize_citations}}.}
+
+\item{merge_editions}{Logical. Count the same title in years further apart, such as
+the editions of a book, as one work (default \code{FALSE}). Passed through to
+\code{\link{normalize_citations}}.}
 }
 \value{
 A list with four elements:
@@ -75,6 +84,7 @@ A list with four elements:
       \item \code{cluster_id}: Unique cluster identifier
       \item \code{n_cluster}: Size of the citation cluster
       \item \code{first_author}, \code{year}, \code{journal}, \code{volume}: Extracted metadata
+      \item \code{similarity}: Similarity of the title to that of the canonical citation
     }
   }
   \item{summary}{A data frame summarizing citation frequencies with columns:
@@ -82,6 +92,8 @@ A list with four elements:
       \item \code{CR_canonical}: The canonical citation for each cluster
       \item \code{n}: Total number of times this work was cited
       \item \code{n_variants}: Number of different formatting variants found
+      \item \code{min_similarity}: The lowest similarity among the variants, to find
+        the merges worth checking; see \code{\link{splitReferenceVariant}} to undo one
       \item \code{variants_example}: Sample of variant formats (up to 3 examples)
     }
     Sorted by citation frequency (n) in descending order.

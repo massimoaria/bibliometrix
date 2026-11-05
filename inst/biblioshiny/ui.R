@@ -1823,6 +1823,11 @@ body <- dashboardBody(
                   ),
                   selected = "jw"
                 ),
+                checkboxInput(
+                  "refMatch_mergeEditions",
+                  "Count editions of a work as one (same title, years further apart)",
+                  value = FALSE
+                ),
 
                 hr(),
 

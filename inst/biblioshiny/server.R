@@ -3907,7 +3907,8 @@ To ensure the functionality of Biblioshiny,
         results <- applyReferenceMatching(
           M = values$M,
           threshold = input$refMatch_threshold,
-          method = input$refMatch_method
+          method = input$refMatch_method,
+          merge_editions = isTRUE(input$refMatch_mergeEditions)
         )
 
         refMatch_results(results)
@@ -4145,13 +4146,16 @@ To ensure the functionality of Biblioshiny,
           # Documents none of whose references survives the matching are
           # absent from CR_normalized: they keep their original CR (#696)
           values$M <- values$M %>%
-            mutate(CR_original = CR) %>%
             left_join(
               refMatch_results()$CR_normalized %>% select(SR, CR_norm = CR),
               by = "SR"
             ) %>%
             mutate(CR = coalesce(CR_norm, CR)) %>%
             select(-CR_norm)
+
+          # Fields derived from CR would still describe the references before the
+          # matching: the analyses that need them extract them again.
+          values$M <- values$M[, setdiff(names(values$M), c("CR_AU", "CR_SO")), drop = FALSE]
 
           if (input$refMatch_addStats) {
             stats <- refMatch_results()$CR_normalized %>%
@@ -4678,19 +4682,63 @@ To ensure the functionality of Biblioshiny,
 
     variants <- refMatch_results()$full_data %>%
       filter(CR_canonical == selected_citation) %>%
-      select(Variant = CR) %>%
-      group_by(Variant) %>%
-      summarise(Count = n(), .groups = "drop") %>%
-      arrange(desc(Count))
+      group_by(Variant = CR) %>%
+      summarise(
+        Count = n(),
+        Similarity = first(similarity),
+        .groups = "drop"
+      ) %>%
+      arrange(Similarity, desc(Count))
 
-    HTML(htmlBoxFormat(
-      variants,
-      nrow = 10,
-      title = paste0("Variants of: ", substr(selected_citation, 1, 80), "..."),
-      right = "Count",
-      numeric = "Count",
-      scrollX = TRUE
-    ))
+    tagList(
+      HTML(htmlBoxFormat(
+        variants,
+        nrow = 10,
+        title = paste0("Variants of: ", substr(selected_citation, 1, 80), "..."),
+        right = c("Count", "Similarity"),
+        numeric = c("Count", "Similarity"),
+        scrollX = TRUE
+      )),
+      if (nrow(variants) > 1) {
+        fluidRow(
+          column(
+            9,
+            selectInput(
+              "refMatch_splitVariant",
+              "Wrongly merged? Separate this variant:",
+              choices = variants$Variant,
+              width = "100%"
+            )
+          ),
+          column(
+            3,
+            div(
+              style = "margin-top: 25px;",
+              actionButton("refMatch_split", "Separate", icon = icon("unlink"))
+            )
+          )
+        )
+      }
+    )
+  })
+
+  # Undo one merge, without running the matching again
+  observeEvent(input$refMatch_split, {
+    req(refMatch_results(), input$refMatch_splitVariant)
+    results <- tryCatch(
+      splitReferenceVariant(refMatch_results(), input$refMatch_splitVariant),
+      error = function(e) {
+        showNotification(conditionMessage(e), type = "error", duration = 10)
+        NULL
+      }
+    )
+    req(results)
+    refMatch_results(results)
+    showNotification(
+      "The variant is now a work of its own. Apply the normalized citations to use this result.",
+      type = "message",
+      duration = 6
+    )
   })
 
   # Download handlers
@@ -4730,6 +4778,8 @@ To ensure the functionality of Biblioshiny,
             ) %>%
             mutate(CR = coalesce(CR_norm, CR)) %>%
             select(-CR_norm)
+
+          M_normalized <- M_normalized[, setdiff(names(M_normalized), c("CR_AU", "CR_SO")), drop = FALSE]
 
           if (input$refMatch_addStats) {
             stats <- refMatch_results()$CR_normalized %>%

@@ -15,7 +15,9 @@ applyCitationMatching(
   use_exact = TRUE,
   fuzzy = TRUE,
   use_postproc = TRUE,
-  title_guard = FALSE
+  title_guard = FALSE,
+  use_title = TRUE,
+  merge_editions = FALSE
 )
 }
 \arguments{
@@ -63,6 +65,13 @@ for ablation analyses and are passed through to \code{\link{normalize_citations}
 \item{title_guard}{Logical. Enable the optional Phase 4.6 series part-marker
 cluster purification that splits over-merged multi-part works (default
 \code{FALSE}). Passed through to \code{\link{normalize_citations}}.}
+
+\item{use_title}{Logical. Compare references on their title (default \code{TRUE}).
+Passed through to \code{\link{normalize_citations}}.}
+
+\item{merge_editions}{Logical. Count the same title in years further apart, such as
+the editions of a book, as one work (default \code{FALSE}). Passed through to
+\code{\link{normalize_citations}}.}
 }
 \value{
 Same as \code{\link{applyReferenceMatching}}.

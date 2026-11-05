@@ -267,3 +267,139 @@ test_that("metaTagExtraction CR_SO leaves out Scopus references with no source (
   M$CR <- "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM, AND EDUCATION, (2014)"
   expect_true(is.na(metaTagExtraction(M, Field = "CR_SO")$CR_SO))
 })
+
+# ----- Reference matching on titles (cases from a Scopus collection, 569 documents) ---
+
+rm_clusters <- function(refs, ...) {
+  invisible(capture.output(res <- normalize_citations(refs, ...)))
+  res$cluster_id[match(refs, res$CR_original)]
+}
+
+test_that("i coautori scritti in modi diversi non separano lo stesso lavoro", {
+  refs <- c(
+    "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014)",
+    "GARCIA O., LI W., TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014)",
+    "GARCIA O., WEI LI, TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014)",
+    "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM, AND EDUCATION (2014)",
+    "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (PALGRAVE PIVOT) (2014)",
+    "GARCIA O., JOHNSON S.I., SELTZER K., THE TRANSLANGUAGING CLASSROOM: LEVERAGING STUDENT BILINGUALISM FOR LEARNING (2017)",
+    "GARCIA O., IBARRA JOHNSON S., SELTZER K., THE TRANSLANGUAGING CLASSROOM: LEVERAGING STUDENT BILINGUALISM FOR LEARNING (2017)",
+    "GARCIA O., JOHNSON S. I., SELTZER K., THE TRANSLANGUAGING CLASSROOM. LEVERAGING STUDENT BILINGUALISM FOR LEARNING (2017)"
+  )
+  cl <- rm_clusters(refs)
+  expect_length(unique(cl[1:5]), 1)
+  expect_length(unique(cl[6:8]), 1)
+  expect_false(cl[1] == cl[6])
+})
+
+test_that("lavori diversi dello stesso autore e anno restano separati", {
+  refs <- c(
+    "GENESEE F., GEVA E., DRESSLER C., KAMIL M., SYNTHESIS: CROSS-LINGUISTIC RELATIONSHIPS, DEVELOPING LITERACY IN SECOND-LANGUAGE LEARNERS (2006) PP. 153-174",
+    "GENESEE F., BILINGUAL FIRST LANGUAGE ACQUISITION IN PERSPECTIVE, CHILDHOOD BILINGUALISM: RESEARCH ON INFANCY THROUGH SCHOOL AGE (2006) PP. 45-67",
+    "GENESEE F., WHAT DO WE KNOW ABOUT BILINGUAL EDUCATION FOR MAJORITY-LANGUAGE STUDENTS?, THE HANDBOOK OF BILINGUALISM (2006) PP. 547-576"
+  )
+  expect_length(unique(rm_clusters(refs)), 3)
+
+  refs <- c(
+    "GARCIA O., WEI L., TRANSLANGUAGING AND EDUCATION, TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014) PP. 63-77",
+    "GARCIA O., WEI L., TRANSLANGUAGING IN EDUCATION: PRINCIPLES, IMPLICATIONS AND CHALLENGES, TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014) PP. 119-135",
+    "GARCIA O., KANO N., TRANSLANGUAGING AS PROCESS AND PEDAGOGY: DEVELOPING THE ENGLISH WRITING OF JAPANESE STUDENTS IN THE US, THE MULTILINGUAL TURN IN LANGUAGES EDUCATION (2014) PP. 258-277"
+  )
+  expect_length(unique(rm_clusters(refs)), 3)
+})
+
+test_that("un capitolo resta distinto dal libro che lo contiene", {
+  refs <- c(
+    "GARCIA O., WEI L., TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014)",
+    "GARCIA O., WEI L., TRANSLANGUAGING AND EDUCATION, TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014) PP. 63-77",
+    "CENOZ J., BASQUE EDUCATIONAL RESEARCH FROM AN INTERNATIONAL PERSPECTIVE (2009)",
+    "CENOZ J., TOWARDS MULTILINGUAL EDUCATION, BASQUE EDUCATIONAL RESEARCH FROM AN INTERNATIONAL PERSPECTIVE (2009)"
+  )
+  cl <- rm_clusters(refs)
+  expect_false(cl[1] == cl[2])
+  expect_false(cl[3] == cl[4])
+})
+
+test_that("un capitolo citato con contenitori diversi resta uno, una ristampa no", {
+  refs <- c(
+    "GENESEE F., WHAT DO WE KNOW ABOUT BILINGUAL EDUCATION FOR MAJORITY-LANGUAGE STUDENTS?, THE HANDBOOK OF BILINGUALISM (2004) PP. 547-576",
+    "GENESEE F., WHAT DO WE KNOW ABOUT BILINGUAL EDUCATION FOR MAJORITY LANGUAGE STUDENTS, HANDBOOK OF BILINGUALISM AND MULTICULTURALISM (2004) PP. 547-576",
+    "GENESEE F., WHAT DO WE KNOW ABOUT BILINGUAL EDUCATION FOR MAJORITY LANGUAGE STUDENTS?, EDUCATION FOR ALL (2004) PP. 141-156"
+  )
+  cl <- rm_clusters(refs)
+  expect_equal(cl[1], cl[2])
+  expect_false(cl[1] == cl[3])
+})
+
+test_that("gli anni vicini si uniscono, le edizioni lontane no", {
+  title <- "SOCIAL LINGUISTICS AND LITERACIES: IDEOLOGY IN DISCOURSES"
+  refs <- paste0("GEE J.P., ", title, c(" (2015)", " (2015) ", " (2016)", " (1996)", " (2008)"))
+  refs <- trimws(refs)
+  refs <- unique(c(refs, paste0("GEE J. P., ", title, " (2015)")))
+  cl <- rm_clusters(refs)
+  expect_equal(cl[refs == paste0("GEE J.P., ", title, " (2016)")], cl[1])
+  expect_false(cl[refs == paste0("GEE J.P., ", title, " (1996)")] == cl[1])
+  expect_false(cl[refs == paste0("GEE J.P., ", title, " (2008)")] == cl[1])
+})
+
+test_that("merge_editions unisce le edizioni, ma non volumi o pagine diversi", {
+  title <- "SOCIAL LINGUISTICS AND LITERACIES: IDEOLOGY IN DISCOURSES"
+  refs <- paste0("GEE J.P., ", title, c(" (1996)", " (2008)", " (2015)"))
+  expect_length(unique(rm_clusters(refs)), 3)
+  expect_length(unique(rm_clusters(refs, merge_editions = TRUE)), 1)
+
+  articles <- c(
+    "SMITH J., LANGUAGE POLICY IN MULTILINGUAL SCHOOLS (2001) JOURNAL OF LANGUAGE, 10, PP. 1-20",
+    "SMITH J., LANGUAGE POLICY IN MULTILINGUAL SCHOOLS (2010) JOURNAL OF LANGUAGE, 19, PP. 30-50"
+  )
+  expect_length(unique(rm_clusters(articles, merge_editions = TRUE)), 2)
+})
+
+test_that("l'anno viene dalle parentesi, non da un numero nel titolo", {
+  refs <- c(
+    "SMITH J., THE 2030 AGENDA FOR LANGUAGE EDUCATION POLICY (2019)",
+    "SMITH J., JONES K., THE 2030 AGENDA FOR LANGUAGE EDUCATION POLICY (2019)"
+  )
+  invisible(capture.output(res <- normalize_citations(refs)))
+  expect_setequal(res$year, "2019")
+  expect_length(unique(res$cluster_id), 1)
+})
+
+test_that("use_title = FALSE riproduce il confronto senza titolo", {
+  refs <- c(
+    "GARCIA O., WEI L., TRANSLANGUAGING AND EDUCATION, TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014) PP. 63-77",
+    "GARCIA O., WEI L., TRANSLANGUAGING IN EDUCATION: PRINCIPLES, IMPLICATIONS AND CHALLENGES, TRANSLANGUAGING: LANGUAGE, BILINGUALISM AND EDUCATION (2014) PP. 119-135"
+  )
+  expect_length(unique(rm_clusters(refs, use_title = FALSE)), 1)
+})
+
+test_that("la similarita segnala le fusioni deboli e splitReferenceVariant le annulla", {
+  M <- data.frame(
+    SR = c("A", "B", "C"),
+    CR = c(
+      "KRAMSCH C., THE MULTILINGUAL SUBJECT (2006) INTERNATIONAL JOURNAL OF APPLIED LINGUISTICS, 16, 1, PP. 97-110;DOE J., A DIFFERENT WORK ABOUT LANGUAGES (2006)",
+      "KRAMSCH C., THE MULTILINGUAL SUBJECT (2006) INTERNATIONAL JOURNAL OF APPLIED LINGUISTICS, 16, 1, PP. 97-110",
+      "KRAMSCH C., PREVIEW ARTICLE: THE MULTILINGUAL SUBJECT (2006) INTERNATIONAL JOURNAL OF APPLIED LINGUISTICS, 16, 1, PP. 97-110"
+    ),
+    stringsAsFactors = FALSE
+  )
+  invisible(capture.output(res <- applyReferenceMatching(M)))
+  merged <- res$summary[grepl("KRAMSCH", res$summary$CR_canonical), ]
+  expect_equal(nrow(merged), 1)
+  expect_equal(merged$n_variants, 2)
+  expect_lt(merged$min_similarity, 0.9)
+  expect_equal(max(res$full_data$similarity[grepl("KRAMSCH", res$full_data$CR)]), 1)
+
+  variant <- "KRAMSCH C., PREVIEW ARTICLE: THE MULTILINGUAL SUBJECT (2006) INTERNATIONAL JOURNAL OF APPLIED LINGUISTICS, 16, 1, PP. 97-110"
+  split <- splitReferenceVariant(res, variant)
+  expect_equal(sum(grepl("KRAMSCH", split$summary$CR_canonical)), 2)
+  expect_equal(split$CR_normalized$CR[split$CR_normalized$SR == "C"], variant)
+  expect_false(grepl("PREVIEW", split$CR_normalized$CR[split$CR_normalized$SR == "B"]))
+  expect_error(splitReferenceVariant(res, "NOT A REFERENCE"), "Not among")
+
+  # Separare la forma canonica lascia il ruolo alla variante rimasta
+  canon <- merged$CR_canonical
+  other <- splitReferenceVariant(res, canon)
+  expect_equal(sum(grepl("KRAMSCH", other$summary$CR_canonical)), 2)
+  expect_true(all(c(canon, variant) %in% other$summary$CR_canonical))
+})

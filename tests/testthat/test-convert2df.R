@@ -186,3 +186,80 @@ test_that("replace_corresponding_info tollera il separatore con spazio", {
   expect_equal(res$RP, "UNIV B")
   expect_equal(res$AU1_CO, "CANADA")
 })
+
+# ----- Nomi OpenAlex: cognome prima ---------------------------------------------
+
+test_that("oaParseNames mette il cognome prima", {
+  casi <- c(
+    "Frederick H. Silver" = "SILVER FH",
+    "F. H. Silver" = "SILVER FH",
+    "F.H. Silver" = "SILVER FH",
+    "Jean-Pierre Dupont" = "DUPONT JP",
+    "Jean‐Pierre Dupont" = "DUPONT JP",
+    "Bas van der Meer" = "VAN DER MEER B",
+    "Ana de la Cruz" = "DE LA CRUZ A",
+    "Joao da Silva" = "DA SILVA J",
+    "Mohamed El Sayed" = "EL SAYED M",
+    "Conor O’Brien" = "O'BRIEN C",
+    "John Smith Jr." = "SMITH J",
+    "Silver, F. H." = "SILVER FH",
+    "Da Li" = "LI D",
+    "Madonna" = "MADONNA",
+    "World Health Organization" = "WORLD HEALTH ORGANIZATION",
+    "Juan Garcia Lopez" = "LOPEZ JG" # limite noto: cognome composto senza particella
+  )
+  expect_equal(oaParseNames(names(casi))$AU, unname(casi))
+  expect_equal(oaParseNames("Frederick H. Silver")$AF, "SILVER, FREDERICK H")
+})
+
+test_that("oaAuthorForm e' idempotente e conserva le posizioni", {
+  au <- "FREDERICK H. SILVER;ALFRED J. TRIA"
+  M <- data.frame(
+    AU = c(au, "X"), AF = c(au, NA), AU_ID = c("A1;A2", "A3"),
+    corresponding_author_name = c("ALFRED J. TRIA", NA), stringsAsFactors = FALSE
+  )
+  once <- oaAuthorForm(M)
+  expect_equal(once$AU, c("SILVER FH;TRIA AJ", "X")) # AF mancante: AU non si tocca
+  expect_equal(once$AF, c("SILVER, FREDERICK H;TRIA, ALFRED J", NA))
+  expect_equal(once$corresponding_author_name, c("TRIA AJ", NA))
+  expect_equal(oaAuthorForm(once), once)
+})
+
+test_that("convert2df scrive gli autori OpenAlex con il cognome prima", {
+  M <- load_openalex_fixture()
+  i <- grep("ARIA", M$AU)[1]
+  expect_match(M$AU[i], "^ARIA M;CUCCURULLO C")
+  expect_match(M$AF[i], "^ARIA, MASSIMO;CUCCURULLO, CORRADO")
+  expect_match(M$SR[i], "^ARIA M, 2017")
+})
+
+test_that("convert2df usa l'anno della rivista per PubMed via API", {
+  # La struttura che pmApiRequest() ottiene da XML::xmlToList()
+  record <- list(
+    MedlineCitation = list(
+      PMID = list(text = "10171110", .attrs = c(Version = "1")),
+      Article = list(
+        Journal = list(
+          JournalIssue = list(PubDate = list(Year = "1991")),
+          Title = "Journal of long-term effects of medical implants"
+        ),
+        ArticleTitle = "Anterior cruciate ligament replacement: a review.",
+        AuthorList = list(Author = list(
+          LastName = "Silver", ForeName = "F H", Initials = "FH"
+        )),
+        PublicationTypeList = list(PublicationType = list(
+          text = "Journal Article", .attrs = c(UI = "D016428")
+        ))
+      )
+    ),
+    PubmedData = list(History = list(PubMedPubDate = list(
+      Year = "1990", Month = "12", Day = "10", .attrs = c(PubStatus = "entrez")
+    )))
+  )
+  P <- list(data = list(PubmedArticle = record))
+  M <- suppressWarnings(suppressMessages({
+    utils::capture.output(res <- convert2df(P, dbsource = "pubmed", format = "api"))
+    res
+  }))
+  expect_equal(M$PY, 1991)
+})

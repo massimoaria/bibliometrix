@@ -603,6 +603,52 @@ countryTable <- function(M) {
 
 # LOAD FUNCTIONS -----
 
+resolveUploadSettings <- function(inFile, mode, dbsource) {
+  # Shiny's temporary path may have no suffix; the uploaded name is authoritative.
+  ext <- tolower(tools::file_ext(inFile$name[1]))
+  notice <- character(0)
+
+  if (!mode %in% c("import", "load")) {
+    stop("Choose 'Import raw file(s)' or 'Load bibliometrix file(s)' first.",
+         call. = FALSE)
+  }
+
+  if (ext == "bib") {
+    header <- readLines(inFile$datapath[1], n = 5, warn = FALSE,
+                        encoding = "UTF-8")
+    header <- trimws(sub("^\ufeff", "", header))
+    header <- header[nzchar(header)]
+    scopus <- length(header) > 0 && identical(tolower(header[1]), "scopus") &&
+      any(grepl("^EXPORT DATE:", header, ignore.case = TRUE))
+    if (scopus && (mode != "import" || dbsource != "scopus")) {
+      # Scopus identifies its own export. Recover from the saved-collection
+      # option (or the default WoS source) without guessing from a .bib suffix.
+      mode <- "import"
+      dbsource <- "scopus"
+      notice <- paste(
+        "Detected a Scopus BibTeX export.",
+        "Using 'Import raw file(s)' with database 'Scopus'."
+      )
+    }
+  }
+
+  if (mode == "load" && !ext %in% c("xlsx", "rdata", "rda", "rds")) {
+    stop(paste(
+      "'Load bibliometrix file(s)' accepts saved .xlsx, .rdata, .rda or .rds collections.",
+      "For database exports, choose 'Import raw file(s)' and the source database."
+    ), call. = FALSE)
+  }
+  if (mode == "import" && dbsource == "scopus" &&
+      !ext %in% c("bib", "csv", "zip")) {
+    stop(paste(
+      "Scopus import accepts .bib, .csv or .zip exports.",
+      "Scopus plain-text exports are not supported."
+    ), call. = FALSE)
+  }
+
+  list(mode = mode, dbsource = dbsource, extension = ext, notice = notice)
+}
+
 formatDB <- function(obj) {
   ext <- sub(".*\\.", "", obj[1])
   switch(

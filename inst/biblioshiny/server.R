@@ -15043,19 +15043,20 @@ To ensure the functionality of Biblioshiny,
         choices = list(
           "Free tier" = c(
             "Gemini 3.5 Flash Lite" = "3.5-flash-lite",
-            "Gemini 3.0 Flash" = "3-flash-preview",
+            "Gemini 3.8 Flash" = "3.8-flash",
+            "Gemini 3.6 Flash" = "3.6-flash",
             "Gemma 4 31B (experimental)" = "gemma-4-31b-it",
             "Gemma 4 26B (experimental)" = "gemma-4-26b-a4b-it"
           ),
           "Paid API key required" = c(
+            "Gemini 4 Argon" = "4-argon",
             "Gemini 3.1 Pro" = "3.1-pro-preview",
             "Gemini Pro Latest" = "pro-latest"
           ),
-          # Still served to keys created before Google retired the 2.5 family,
-          # so they stay selectable \u{2014} but they 404 on newer keys and must not
-          # be the default any more.
+          # Google still serves 2.5 Flash Lite to the keys that already used
+          # it, so it stays selectable, but newer keys get HTTP 404 and it must
+          # not be the default.
           "Legacy (not available for recently created API keys)" = c(
-            "Gemini 2.5 Flash" = "2.5-flash",
             "Gemini 2.5 Flash Lite" = "2.5-flash-lite"
           )
         ),
@@ -15066,46 +15067,27 @@ To ensure the functionality of Biblioshiny,
         )
       ),
       conditionalPanel(
-        condition = "input.gemini_api_model == '2.5-flash' || input.gemini_api_model == '2.5-flash-lite'",
+        condition = "input.gemini_api_model == '2.5-flash-lite'",
         helpText(strong(style = "color: #d9534f;", "Legacy model")),
         helpText(em(
-          "Google no longer serves the Gemini 2.5 family to API keys created",
-          " recently: those keys get \"this model is no longer available to",
+          "Google serves Gemini 2.5 Flash Lite only to API keys that already",
+          " used it: newer keys get \"this model is no longer available to",
           " new users\" (HTTP 404). Keep it only if it already works for you,",
           " otherwise choose a Gemini 3.x model."
         ))
       ),
       conditionalPanel(
-        condition = "input.gemini_api_model == '2.5-flash'",
-        helpText(strong("Free Tier Rate Limits:")),
+        condition = "input.gemini_api_model == '3.8-flash' || input.gemini_api_model == '3.6-flash'",
+        helpText(strong("Works with both free and paid API keys")),
         helpText(em(
-          "Request per Minutes: 10",
+          "Gemini 3.8 Flash is the newest Flash model; Gemini 3.6 Flash is the",
+          " previous one. Both give more thorough answers than Flash Lite,",
+          " with higher latency.",
           tags$br(),
-          "Requests per Day: 500",
+          "Latency time: Medium",
           tags$br(),
-          "Latency time: High"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '2.5-flash-lite'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 15",
-          tags$br(),
-          "Requests per Day: 500",
-          tags$br(),
-          "Latency time: Low"
-        ))
-      ),
-      conditionalPanel(
-        condition = "input.gemini_api_model == '3-flash-preview'",
-        helpText(strong("Free Tier Rate Limits:")),
-        helpText(em(
-          "Request per Minutes: 10",
-          tags$br(),
-          "Requests per Day: 500",
-          tags$br(),
-          "Latency time: Medium"
+          "Current rate limits depend on your key tier and are shown in",
+          " Google AI Studio (Rate limits)."
         ))
       ),
       conditionalPanel(
@@ -15122,10 +15104,12 @@ To ensure the functionality of Biblioshiny,
         ))
       ),
       conditionalPanel(
-        condition = "input.gemini_api_model == '3.1-pro-preview' || input.gemini_api_model == 'pro-latest'",
+        condition = "input.gemini_api_model == '4-argon' || input.gemini_api_model == '3.1-pro-preview' || input.gemini_api_model == 'pro-latest'",
         helpText(strong(style = "color: #d9534f;", "Paid API Key Required")),
         helpText(em(
-          "Pro models require a paid (non-free tier) API key.",
+          "Gemini 4 Argon and the Pro models require a paid (non-free tier) API key.",
+          tags$br(),
+          "Gemini 4 Argon is the most capable model for reasoning, and the slowest.",
           tags$br(),
           "Free tier API keys will not work with these models."
         ))
@@ -15156,11 +15140,11 @@ To ensure the functionality of Biblioshiny,
       values$gemini_output_size <- input$gemini_output_size
 
       # Alert for Pro models requiring paid API key
-      if (input$gemini_api_model %in% c("3.1-pro-preview", "pro-latest")) {
+      if (input$gemini_api_model %in% c("4-argon", "3.1-pro-preview", "pro-latest")) {
         showModal(modalDialog(
           title = "Paid API Key Required",
-          tags$p("The selected Pro model requires a ", tags$strong("paid (non-free tier)"), " Google AI API key."),
-          tags$p("Free tier API keys do not support Pro models. If you are using a free tier key, the API calls will fail."),
+          tags$p("The selected model requires a ", tags$strong("paid (non-free tier)"), " Google AI API key."),
+          tags$p("Free tier API keys do not support Gemini 4 Argon or the Pro models. If you are using a free tier key, the API calls will fail."),
           tags$p("You can upgrade your API key at: ", tags$a(href = "https://aistudio.google.com/apikey", target = "_blank", "Google AI Studio")),
           easyClose = TRUE,
           footer = modalButton("OK")

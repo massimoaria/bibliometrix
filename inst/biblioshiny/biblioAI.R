@@ -106,7 +106,7 @@ gemini_ai <- function(
   image = NULL,
   docs = NULL,
   prompt = "Explain these images",
-  model = "2.5-flash",
+  model = "3.5-flash-lite",
   image_type = "png",
   retry_503 = 5,
   api_key = NULL,
@@ -418,7 +418,7 @@ gemini_ai <- function(
           "This model needs available billing/prepayment credits on the key's ",
           "Google Cloud project \u{2014} retrying will not help. Top up or enable ",
           "billing at https://ai.studio/projects , or switch to a Flash model ",
-          "(e.g. Gemini 2.5 Flash), which is often covered separately. Note ",
+          "(e.g. Gemini 3.5 Flash Lite), which is often covered separately. Note ",
           "that restricted promotional/EDU credits may not apply to the Pro ",
           "models' prepay balance."
         ))
@@ -457,7 +457,7 @@ gemini_ai <- function(
         "This is a per-minute rate-limit (RPM) or shared-capacity response, ",
         "not a server outage. The request was retried ", retry_503,
         " times without success. Try a higher-throughput model such as ",
-        "Gemini 2.5 Flash (much higher RPM than the Pro models), run the ",
+        "Gemini 3.5 Flash Lite (much higher RPM than the Pro models), run the ",
         "analysis less frequently, or wait a minute and retry."
       ))
     }
@@ -751,6 +751,13 @@ loadGeminiModel = function(file) {
   }
   if (length(model) == 1) {
     model <- c(model, "medium")
+  }
+  # Models removed from the menu: Google routes gemini-2.5-flash to
+  # gemini-3.5-flash-lite from 1 December 2026, and names gemini-3.6-flash as
+  # the replacement of gemini-3-flash-preview.
+  retired <- c("2.5-flash" = "3.5-flash-lite", "3-flash-preview" = "3.6-flash")
+  if (model[1] %in% names(retired)) {
+    model[1] <- retired[[model[1]]]
   }
   return(model)
 }

@@ -206,7 +206,10 @@ test_that("oaParseNames mette il cognome prima", {
     "Da Li" = "LI D",
     "Madonna" = "MADONNA",
     "World Health Organization" = "WORLD HEALTH ORGANIZATION",
-    "Juan Garcia Lopez" = "LOPEZ JG" # limite noto: cognome composto senza particella
+    "Juan Garcia Lopez" = "LOPEZ JG", # limite noto: cognome composto senza particella
+    "Wei Yang (109917)" = "YANG W",
+    "Silver, F. H. (A123) (B45)" = "SILVER FH",
+    "(109917)" = "(109917)"
   )
   expect_equal(oaParseNames(names(casi))$AU, unname(casi))
   expect_equal(oaParseNames("Frederick H. Silver")$AF, "SILVER, FREDERICK H")

@@ -1406,8 +1406,25 @@ To ensure the functionality of Biblioshiny,
     }
     inFile <- input$file1
 
-    if (!is.null(inFile) & input$load == "import") {
-      ext <- tools::file_ext(inFile$datapath)
+    if (is.null(inFile)) return(NULL)
+    # Stop before any conversion when the file does not fit the chosen mode or
+    # database, and tell the user which settings to choose.
+    ext <- tryCatch(
+      checkUploadFormat(inFile, input$load, input$dbsource),
+      error = function(e) {
+        showModal(modalDialog(
+          title = tags$strong(icon("exclamation-triangle"), " Wrong file format"),
+          tags$p(conditionMessage(e)),
+          footer = modalButton("OK"),
+          easyClose = TRUE
+        ))
+        NULL
+      }
+    )
+    if (is.null(ext)) return(NULL)
+    M <- NULL
+
+    if (input$load == "import") {
 
       ## ---- max.rows check ----
       if (is.finite(max_rows)) {
@@ -2215,8 +2232,7 @@ To ensure the functionality of Biblioshiny,
           )
         }
       )
-    } else if (!is.null(inFile) & input$load == "load") {
-      ext <- tolower(tools::file_ext(inFile$datapath))
+    } else if (input$load == "load") {
 
       ## ---- max.rows check for load ----
       if (is.finite(max_rows)) {
@@ -2300,7 +2316,15 @@ To ensure the functionality of Biblioshiny,
           M <- readRDS(inFile$datapath)
         }
       )
-    } else if (is.null(inFile)) {
+    }
+
+    # An unmatched format used to reach names(M) below without ever creating M.
+    # Keep the current collection when an upload cannot produce a new one.
+    if (!is.data.frame(M) || nrow(M) == 0) {
+      showNotification(
+        "No records were imported. Check the file format and source database.",
+        type = "error", duration = NULL
+      )
       return(NULL)
     }
 

@@ -2,6 +2,16 @@
 ## before an analysis, rather than probing connectivity in general.
 GEMINI_ENDPOINT_HOST <- "https://generativelanguage.googleapis.com"
 
+# A request to the Gemini REST API, with the key in the x-goog-api-key header.
+# Keys passed in the URL (?key=) work only for the classic "AIzaSy" keys: the
+# newer keys that Google AI Studio issues ("AQ.") get HTTP 403 "unregistered
+# callers" there, while the header accepts both. The header also keeps the key
+# out of URLs, and it is redacted when the request is printed.
+geminiRequest <- function(url, api_key) {
+  httr2::request(url) |>
+    httr2::req_headers("x-goog-api-key" = api_key, .redact = "x-goog-api-key")
+}
+
 ## OpenRouter AI function
 openrouter_ai <- function(
   image = NULL,
@@ -96,7 +106,7 @@ gemini_ai <- function(
   image = NULL,
   docs = NULL,
   prompt = "Explain these images",
-  model = "2.5-flash",
+  model = "3.5-flash-lite",
   image_type = "png",
   retry_503 = 5,
   api_key = NULL,
@@ -347,8 +357,7 @@ gemini_ai <- function(
     # status" so 4xx/5xx come back as normal response objects: this lets us
     # read the actual error message Gemini returns instead of masking every
     # failure as an invalid API key.
-    req <- request(url) |>
-      req_url_query(key = api_key) |>
+    req <- geminiRequest(url, api_key) |>
       req_headers("Content-Type" = "application/json") |>
       req_body_json(request_body) |>
       req_timeout(120) |>
@@ -409,7 +418,7 @@ gemini_ai <- function(
           "This model needs available billing/prepayment credits on the key's ",
           "Google Cloud project \u{2014} retrying will not help. Top up or enable ",
           "billing at https://ai.studio/projects , or switch to a Flash model ",
-          "(e.g. Gemini 2.5 Flash), which is often covered separately. Note ",
+          "(e.g. Gemini 3.5 Flash Lite), which is often covered separately. Note ",
           "that restricted promotional/EDU credits may not apply to the Pro ",
           "models' prepay balance."
         ))
@@ -448,7 +457,7 @@ gemini_ai <- function(
         "This is a per-minute rate-limit (RPM) or shared-capacity response, ",
         "not a server outage. The request was retried ", retry_503,
         " times without success. Try a higher-throughput model such as ",
-        "Gemini 2.5 Flash (much higher RPM than the Pro models), run the ",
+        "Gemini 3.5 Flash Lite (much higher RPM than the Pro models), run the ",
         "analysis less frequently, or wait a minute and retry."
       ))
     }
@@ -541,10 +550,11 @@ gemini_ai <- function(
 # key?") and no model retirement can break it. As a bonus it returns the
 # catalogue, so the selected model can be checked against it.
 .geminiAvailableModels <- function(api_key, timeout = 30) {
-  req <- httr2::request(
-    "https://generativelanguage.googleapis.com/v1beta/models"
+  req <- geminiRequest(
+    "https://generativelanguage.googleapis.com/v1beta/models",
+    api_key
   ) |>
-    httr2::req_url_query(key = api_key, pageSize = 1000) |>
+    httr2::req_url_query(pageSize = 1000) |>
     httr2::req_timeout(timeout) |>
     httr2::req_error(is_error = function(resp) FALSE)
 
@@ -645,33 +655,11 @@ setGeminiAPI <- function(api_key, model = NULL) {
       return(list(valid = FALSE, message = catalogue$message))
     }
 
-    apiCheck <- catalogue$message
-    # Google AI Studio has started issuing some accounts OAuth-style tokens
-    # prefixed with "AQ." instead of the classic "AIzaSy..." API key. Those
-    # tokens are rejected by the generativelanguage.googleapis.com REST
-    # endpoint Biblio AI calls, so they can never work here. The generic
-    # "check your key" message leaves the user with nothing to act on, so
-    # name the problem. The hint is added only *after* the live check fails,
-    # so a key that Google later starts accepting is not pre-emptively
-    # blocked.
-    hint <- if (startsWith(api_key, "AQ.")) {
-      paste0(
-        "\n\nYour key starts with \"AQ.\": that is an OAuth-style token, not a ",
-        "Gemini API key. The Gemini REST API used by Biblio AI only accepts ",
-        "classic keys starting with \"AIzaSy\". In Google AI Studio ",
-        "(https://aistudio.google.com/apikey) create the key inside a Google ",
-        "Cloud project \u{2014} the project-scoped flow still issues \"AIzaSy\" keys."
-      )
-    } else {
-      ""
-    }
-
     return(list(
       valid = FALSE,
       message = paste0(
         "\u{274C} Google refused this API key.\n",
-        apiCheck,
-        hint
+        catalogue$message
       )
     ))
   }
@@ -763,6 +751,13 @@ loadGeminiModel = function(file) {
   }
   if (length(model) == 1) {
     model <- c(model, "medium")
+  }
+  # Models removed from the menu: Google routes gemini-2.5-flash to
+  # gemini-3.5-flash-lite from 1 December 2026, and names gemini-3.6-flash as
+  # the replacement of gemini-3-flash-preview.
+  retired <- c("2.5-flash" = "3.5-flash-lite", "3-flash-preview" = "3.6-flash")
+  if (model[1] %in% names(retired)) {
+    model[1] <- retired[[model[1]]]
   }
   return(model)
 }

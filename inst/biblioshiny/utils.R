@@ -603,6 +603,109 @@ countryTable <- function(M) {
 
 # LOAD FUNCTIONS -----
 
+# Names of the databases as shown in the "Database" menu.
+uploadDbLabels <- c(
+  isi = "Web of Science (WoS/WoK)",
+  scopus = "Scopus",
+  dimensions = "Dimensions",
+  openalex = "Openalex",
+  openalex_api = "OpenAlex API (via openalexR)",
+  lens = "Lens.org",
+  pubmed = "PubMed",
+  cochrane = "Cochrane Library"
+)
+
+# Recognize an export from its first lines: the Scopus BibTeX header, the WoS
+# plain-text header or BibTeX keys, and the PubMed (MEDLINE) tags. NA otherwise.
+detectExportSource <- function(path, ext) {
+  if (!ext %in% c("bib", "txt", "ciw")) {
+    return(NA_character_)
+  }
+  header <- tryCatch(
+    readLines(path, n = 10, warn = FALSE, encoding = "UTF-8"),
+    error = function(e) character(0)
+  )
+  header <- trimws(sub("^\ufeff", "", header))
+  header <- header[nzchar(header)]
+  if (length(header) == 0) {
+    return(NA_character_)
+  }
+  first <- header[1]
+  if (ext == "bib") {
+    if (identical(tolower(first), "scopus") &&
+        any(grepl("^EXPORT DATE:", header, ignore.case = TRUE))) {
+      return("scopus")
+    }
+    if (grepl("^@[A-Za-z]+\\{\\s*WOS:", first)) {
+      return("isi")
+    }
+    return(NA_character_)
+  }
+  if (grepl("^FN ", first)) {
+    return("isi")
+  }
+  if (grepl("^PMID-", first)) {
+    return("pubmed")
+  }
+  NA_character_
+}
+
+# Check that the uploaded file fits the chosen mode and database. It never
+# changes the user's choice: when the file does not fit, it stops with a
+# message that names the settings to choose. Returns the file extension, taken
+# from the original file name and in lower case.
+checkUploadFormat <- function(inFile, mode, dbsource) {
+  ext <- tolower(tools::file_ext(inFile$name[1]))
+  saved <- c("xlsx", "rdata", "rda", "rds")
+
+  if (!mode %in% c("import", "load")) {
+    stop("Choose 'Import raw file(s)' or 'Load bibliometrix file(s)' first.",
+         call. = FALSE)
+  }
+
+  detected <- detectExportSource(inFile$datapath[1], ext)
+  suggestion <- if (!is.na(detected)) {
+    paste0(
+      "It looks like a ", uploadDbLabels[[detected]], " export: choose ",
+      "'Import raw file(s)' and select '", uploadDbLabels[[detected]],
+      "' as the database."
+    )
+  } else {
+    paste(
+      "To import an export from a database, choose 'Import raw file(s)'",
+      "and select its database."
+    )
+  }
+
+  if (mode == "load") {
+    if (!ext %in% saved) {
+      stop(paste0(
+        "The file format (.", ext, ") is not correct for 'Load bibliometrix ",
+        "file(s)', which opens only collections saved by bibliometrix ",
+        "(.xlsx, .rdata, .rda or .rds). ", suggestion
+      ), call. = FALSE)
+    }
+    return(ext)
+  }
+
+  if (!is.na(detected) && detected != dbsource) {
+    stop(paste0(
+      "The file looks like a ", uploadDbLabels[[detected]], " export, but the ",
+      "selected database is '", uploadDbLabels[[dbsource]], "'. Select '",
+      uploadDbLabels[[detected]], "' as the database and press Start again."
+    ), call. = FALSE)
+  }
+  if (dbsource == "scopus" && !ext %in% c("bib", "csv", "zip")) {
+    stop(paste0(
+      "The file format (.", ext, ") is not correct for Scopus, which is ",
+      "imported from .bib, .csv or .zip exports. Scopus plain-text exports ",
+      "are not supported: export the collection again as BibTeX or CSV."
+    ), call. = FALSE)
+  }
+
+  ext
+}
+
 formatDB <- function(obj) {
   ext <- sub(".*\\.", "", obj[1])
   switch(

@@ -1,113 +1,110 @@
-upload_settings_helper <- function() {
+# checkUploadFormat() lives in the Biblioshiny sources, not in the package
+# namespace: evaluate it, with the objects it uses, from utils.R.
+upload_check_helper <- function() {
   path <- system.file("biblioshiny", "utils.R", package = "bibliometrix")
+  wanted <- c("uploadDbLabels", "detectExportSource", "checkUploadFormat")
   env <- new.env(parent = globalenv())
   for (expr in as.list(parse(path))) {
     if (is.call(expr) && identical(expr[[1]], as.name("<-")) &&
-        identical(expr[[2]], as.name("resolveUploadSettings"))) {
+        as.character(expr[[2]]) %in% wanted) {
       eval(expr, envir = env)
     }
   }
-  env$resolveUploadSettings
+  env$checkUploadFormat
 }
 
 mock_upload <- function(name, lines = "") {
-  # Reproduce uploads whose temporary storage name has lost the suffix.
   path <- tempfile()
   writeLines(lines, path, useBytes = TRUE)
   data.frame(name = name, datapath = path, stringsAsFactors = FALSE)
 }
 
 scopus_bib_header <- c("Scopus", "EXPORT DATE: 06 November 2026", "",
-                      "@ARTICLE{example,", "  title = {Example title},")
+                       "@ARTICLE{example,", "  title = {Example title},")
 
-test_that("Scopus BibTeX recovers from saved-collection mode and default WoS", {
-  resolve <- upload_settings_helper()
+test_that("a Scopus BibTeX in 'Load bibliometrix file(s)' is a wrong format", {
+  check <- upload_check_helper()
   upload <- mock_upload("export.bib", scopus_bib_header)
   on.exit(unlink(upload$datapath))
 
-  result <- resolve(upload, "load", "isi")
-  expect_identical(result$mode, "import")
-  expect_identical(result$dbsource, "scopus")
-  expect_match(result$notice, "Detected a Scopus BibTeX")
+  expect_error(check(upload, "load", "isi"), "is not correct for 'Load",
+               fixed = TRUE)
+  expect_error(check(upload, "load", "isi"),
+               "select 'Scopus' as the database", fixed = TRUE)
 })
 
-test_that("correct Scopus import settings are retained without a notice", {
-  resolve <- upload_settings_helper()
-  upload <- mock_upload("export.bib", scopus_bib_header)
+test_that("a Scopus BibTeX with another database is stopped, not switched", {
+  check <- upload_check_helper()
+  upload <- mock_upload("EXPORT.BIB", c("\ufeffScopus", scopus_bib_header[-1]))
   on.exit(unlink(upload$datapath))
 
-  result <- resolve(upload, "import", "scopus")
-  expect_identical(result$mode, "import")
-  expect_identical(result$dbsource, "scopus")
-  expect_length(result$notice, 0)
+  expect_error(check(upload, "import", "isi"),
+               "looks like a Scopus export, but the selected database is 'Web of Science",
+               fixed = TRUE)
+  expect_identical(check(upload, "import", "scopus"), "bib")
 })
 
-test_that("recovered settings import an actual Scopus BibTeX collection", {
-  resolve <- upload_settings_helper()
+test_that("the Scopus BibTeX fixture is imported with the right settings", {
+  check <- upload_check_helper()
   upload <- mock_upload(
     "EXPORT.BIB",
     readLines(fixture_path("scopus_bibtex_sample.bib"), warn = FALSE)
   )
   on.exit(unlink(upload$datapath))
 
-  settings <- resolve(upload, "load", "isi")
-  expect_identical(settings$mode, "import")
-  expect_identical(settings$extension, "bib")
-  M <- convert2df(upload$datapath, dbsource = settings$dbsource,
-                  format = "bibtex")
+  expect_identical(check(upload, "import", "scopus"), "bib")
+  M <- convert2df(upload$datapath, dbsource = "scopus", format = "bibtex")
   expect_s3_class(M, "bibliometrixDB")
   expect_equal(nrow(M), 2)
   expect_identical(unique(M$DB), "SCOPUS")
-  expect_setequal(M$DI, c("10.0000/biblioshiny-upload-1",
-                         "10.0000/biblioshiny-upload-2"))
 })
 
-test_that("uppercase filenames and a UTF-8 BOM still identify Scopus exports", {
-  resolve <- upload_settings_helper()
-  upload <- mock_upload("EXPORT.BIB", c("\ufeffScopus", scopus_bib_header[-1]))
-  on.exit(unlink(upload$datapath))
+test_that("WoS exports are recognized and suggested", {
+  check <- upload_check_helper()
+  txt <- mock_upload("savedrecs.txt",
+                     readLines(fixture_path("wos_sample.txt"), n = 5))
+  bib <- mock_upload("savedrecs.bib",
+                     readLines(fixture_path("wos_bibtex_sample.bib"), n = 5))
+  on.exit(unlink(c(txt$datapath, bib$datapath)))
 
-  result <- resolve(upload, "load", "isi")
-  expect_identical(result$extension, "bib")
-  expect_identical(result$dbsource, "scopus")
-  expect_identical(result$mode, "import")
+  expect_identical(check(txt, "import", "isi"), "txt")
+  expect_identical(check(bib, "import", "isi"), "bib")
+  expect_error(check(txt, "import", "scopus"), "looks like a Web of Science")
+  expect_error(check(bib, "load", "isi"), "select 'Web of Science",
+               fixed = TRUE)
 })
 
-test_that("a generic BibTeX suffix is not enough to guess a source", {
-  resolve <- upload_settings_helper()
+test_that("an unrecognized export keeps the chosen database", {
+  check <- upload_check_helper()
   upload <- mock_upload("export.bib", "@article{example, title={Scopus}}")
   on.exit(unlink(upload$datapath))
 
-  expect_error(resolve(upload, "load", "isi"), "Import raw file", fixed = TRUE)
-  result <- resolve(upload, "import", "isi")
-  expect_identical(result$dbsource, "isi")
-  expect_length(result$notice, 0)
+  expect_error(check(upload, "load", "isi"), "choose 'Import raw file(s)'",
+               fixed = TRUE)
+  expect_identical(check(upload, "import", "isi"), "bib")
 })
 
-test_that("unsupported Scopus formats fail with actionable text", {
-  resolve <- upload_settings_helper()
+test_that("unsupported Scopus formats and no mode give a message", {
+  check <- upload_check_helper()
   upload <- mock_upload("export.txt", "Scopus")
   on.exit(unlink(upload$datapath))
 
-  expect_error(resolve(upload, "import", "scopus"), "Scopus import accepts")
-  expect_error(resolve(upload, "load", "scopus"), "saved .xlsx", fixed = TRUE)
-  expect_error(resolve(upload, "null", "scopus"), "Choose 'Import raw file")
+  expect_error(check(upload, "import", "scopus"), "not correct for Scopus")
+  expect_error(check(upload, "load", "scopus"), "(.txt) is not correct",
+               fixed = TRUE)
+  expect_error(check(upload, "null", "scopus"), "Choose 'Import raw file")
 })
 
-test_that("saved collections and Scopus CSV or ZIP keep their existing routes", {
-  resolve <- upload_settings_helper()
+test_that("saved collections and Scopus CSV or ZIP are accepted", {
+  check <- upload_check_helper()
   for (ext in c("xlsx", "rdata", "rda", "rds")) {
     upload <- mock_upload(paste0("collection.", toupper(ext)))
-    result <- resolve(upload, "load", "isi")
-    expect_identical(result$mode, "load")
-    expect_identical(result$extension, ext)
+    expect_identical(check(upload, "load", "isi"), ext)
     unlink(upload$datapath)
   }
   for (ext in c("csv", "zip")) {
     upload <- mock_upload(paste0("export.", toupper(ext)))
-    result <- resolve(upload, "import", "scopus")
-    expect_identical(result$mode, "import")
-    expect_identical(result$extension, ext)
+    expect_identical(check(upload, "import", "scopus"), ext)
     unlink(upload$datapath)
   }
 })

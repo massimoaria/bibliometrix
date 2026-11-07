@@ -1407,29 +1407,24 @@ To ensure the functionality of Biblioshiny,
     inFile <- input$file1
 
     if (is.null(inFile)) return(NULL)
-    upload <- tryCatch(
-      resolveUploadSettings(inFile, input$load, input$dbsource),
+    # Stop before any conversion when the file does not fit the chosen mode or
+    # database, and tell the user which settings to choose.
+    ext <- tryCatch(
+      checkUploadFormat(inFile, input$load, input$dbsource),
       error = function(e) {
-        showNotification(conditionMessage(e), type = "error", duration = NULL)
+        showModal(modalDialog(
+          title = tags$strong(icon("exclamation-triangle"), " Wrong file format"),
+          tags$p(conditionMessage(e)),
+          footer = modalButton("OK"),
+          easyClose = TRUE
+        ))
         NULL
       }
     )
-    if (is.null(upload)) return(NULL)
-    if (length(upload$notice)) {
-      showNotification(upload$notice, type = "message", duration = 10)
-    }
-    if (upload$mode != input$load) {
-      updateSelectInput(session, "load", selected = upload$mode)
-    }
-    if (upload$dbsource != input$dbsource) {
-      updateSelectInput(session, "dbsource", selected = upload$dbsource)
-    }
-    # UI updates are asynchronous: this conversion must use the resolved values.
-    upload_dbsource <- upload$dbsource
-    ext <- upload$extension
+    if (is.null(ext)) return(NULL)
     M <- NULL
 
-    if (upload$mode == "import") {
+    if (input$load == "import") {
 
       ## ---- max.rows check ----
       if (is.finite(max_rows)) {
@@ -1437,7 +1432,7 @@ To ensure the functionality of Biblioshiny,
         orig_ext <- tolower(tools::file_ext(inFile$name[1]))
         fmt <- switch(
           orig_ext,
-          txt = if (upload_dbsource == "pubmed") "pubmed" else "plaintext",
+          txt = if (input$dbsource == "pubmed") "pubmed" else "plaintext",
           csv = "csv",
           bib = "bibtex",
           ciw = "plaintext",
@@ -1453,7 +1448,7 @@ To ensure the functionality of Biblioshiny,
           file_to_check <- zip_tmp
         }
         n_records <- tryCatch(
-          countRecords(file_to_check, dbsource = upload_dbsource, format = fmt),
+          countRecords(file_to_check, dbsource = input$dbsource, format = fmt),
           error = function(e) NA_integer_
         )
         if (orig_ext == "zip" && file.exists(zip_tmp)) {
@@ -1485,7 +1480,7 @@ To ensure the functionality of Biblioshiny,
       ## ---- end max.rows check ----
 
       switch(
-        upload_dbsource,
+        input$dbsource,
         isi = {
           switch(
             ext,
@@ -1501,7 +1496,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   D,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = formatDB(D)
                 )
                 M <- authorNameFormat(M, input$authorName)
@@ -1513,7 +1508,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = formatDB(inFile$datapath)
                 )
                 M <- authorNameFormat(M, input$authorName)
@@ -1537,7 +1532,7 @@ To ensure the functionality of Biblioshiny,
                 # Usiamo i percorsi dei file estratti (contenuti in D)
                 M <- convert2df(
                   D,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = formatDB(D)
                 )
 
@@ -1555,7 +1550,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = "csv"
                 )
                 M <- authorNameFormat(M, input$authorName)
@@ -1566,7 +1561,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = "bibtex"
                 )
                 M <- authorNameFormat(M, input$authorName)
@@ -1585,7 +1580,7 @@ To ensure the functionality of Biblioshiny,
               withCallingHandlers(
                 convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = "csv"
                 ),
                 warning = function(w) {
@@ -1873,7 +1868,7 @@ To ensure the functionality of Biblioshiny,
         openalex_api = {
           M <- convert2df(
             inFile$datapath,
-            dbsource = upload_dbsource,
+            dbsource = input$dbsource,
             format = "api"
           )
 
@@ -2115,7 +2110,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   D,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = formatDB(D)
                 )
               })
@@ -2126,7 +2121,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = formatDB(inFile$datapath)
                 )
               })
@@ -2148,7 +2143,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   D,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = formatDB(D)
                 )
               })
@@ -2159,7 +2154,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = "plaintext"
                 )
               })
@@ -2179,7 +2174,7 @@ To ensure the functionality of Biblioshiny,
               # (exdir viene creata automaticamente se non esiste)
               D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
               withProgress(message = 'Conversion in progress', value = 0, {
-                M <- convert2df(D, dbsource = upload_dbsource, format = "pubmed")
+                M <- convert2df(D, dbsource = input$dbsource, format = "pubmed")
               })
               on.exit(unlink(temp_exdir, recursive = TRUE))
             },
@@ -2188,7 +2183,7 @@ To ensure the functionality of Biblioshiny,
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <- convert2df(
                   inFile$datapath,
-                  dbsource = upload_dbsource,
+                  dbsource = input$dbsource,
                   format = "pubmed"
                 )
               })
@@ -2209,7 +2204,7 @@ To ensure the functionality of Biblioshiny,
               D <- utils::unzip(inFile$datapath, exdir = temp_exdir)
               withProgress(message = 'Conversion in progress', value = 0, {
                 M <-
-                  convert2df(D, dbsource = upload_dbsource, format = formatDB(D))
+                  convert2df(D, dbsource = input$dbsource, format = formatDB(D))
               })
               on.exit(unlink(temp_exdir, recursive = TRUE))
             },
@@ -2237,7 +2232,7 @@ To ensure the functionality of Biblioshiny,
           )
         }
       )
-    } else if (upload$mode == "load") {
+    } else if (input$load == "load") {
 
       ## ---- max.rows check for load ----
       if (is.finite(max_rows)) {

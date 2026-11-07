@@ -62,6 +62,10 @@ oaParseNames <- function(x) {
   x <- gsub("[\u2010\u2011\u2012\u2013]", "-", x)
   x <- gsub("\u2019", "'", x)
   x <- trimws(gsub("\\s+", " ", gsub("\\.", " ", toupper(x))))
+  # A trailing group in parentheses ("WEI YANG (109917)") is not part of the
+  # name: left in place it would be taken for the surname.
+  bare <- trimws(gsub("(\\s*\\([^()]*\\))+$", "", x))
+  x <- ifelse(nzchar(bare), bare, x)
 
   parse_one <- function(name) {
     if (!nzchar(name) || grepl(oaCollectiveAuthor, name)) {

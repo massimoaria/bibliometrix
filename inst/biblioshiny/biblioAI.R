@@ -781,7 +781,7 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
     solidHeader = TRUE,
     div(
       id = "typing-box",
-      style = "white-space: pre-wrap; background-color:#f9f9f9; padding:15px; border:1px solid #ccc; border-radius:5px; max-height:400px; overflow-y: auto;",
+      style = "background-color:#f9f9f9; padding:15px; border:1px solid #ccc; border-radius:5px; max-height:400px; overflow-y: auto;",
       #HTML(text_to_html(content))
       HTML(gemini_to_html(content))
     ),
@@ -2038,192 +2038,132 @@ copy_to_clipboard <- function(x) {
   }
 }
 
-## New function to convert gemini output as HTML blocks
+## Convert the Markdown returned by Gemini (or an abstract) into HTML.
+## The Markdown is parsed by commonmark (through shiny::markdown), so nested
+## emphasis, nested lists and continuation lines are handled; LaTeX math is
+## turned into plain HTML first, since the box does not load MathJax.
 gemini_to_html <- function(text, font_size = "16px") {
-  # Remove original leading/trailing whitespace
-  text <- trimws(text)
+  text <- trimws(paste(text, collapse = "\n"))
+  body <- as.character(shiny::markdown(latex_to_html(text)))
+  # no newlines between tags: the Biblio AI box uses white-space: pre-wrap
+  body <- gsub(">\\s*\n\\s*<", "><", body)
+  body <- gsub("\n", " ", body, fixed = TRUE)
 
-  # Divide text into lines
-  lines <- unlist(strsplit(text, "\n", fixed = TRUE))
-
-  # Initialize HTML output with CSS styles including font size
-  html_lines <- c(
-    paste0(
-      "<div style='font-family: Arial, sans-serif; line-height: 1.4; margin: 0 auto; padding: 15px; font-size: ",
-      font_size,
-      ";'>"
-    )
+  css <- paste0(
+    "<style>",
+    ".biblio-ai-text h1,.biblio-ai-text h2,.biblio-ai-text h3,",
+    ".biblio-ai-text h4,.biblio-ai-text h5,.biblio-ai-text h6",
+    "{color:#333;border-bottom:1px solid #007acc;padding-bottom:4px;",
+    "margin:14px 0 6px 0;font-size:1em;font-weight:bold;}",
+    ".biblio-ai-text h1{font-size:1.3em;}",
+    ".biblio-ai-text h2{font-size:1.15em;}",
+    ".biblio-ai-text h3{font-size:1.05em;}",
+    ".biblio-ai-text p{margin:2px 0 5px 0;}",
+    ".biblio-ai-text ul,.biblio-ai-text ol{margin:4px 0 6px 0;}",
+    ".biblio-ai-text li{margin-bottom:2px;}",
+    ".biblio-ai-text li p{margin:0;}",
+    ".biblio-ai-text hr{display:none;}",
+    ".biblio-ai-text code{background-color:#f4f4f4;padding:2px 4px;",
+    "border-radius:3px;font-family:'Courier New',monospace;}",
+    ".biblio-ai-text table{border-collapse:collapse;margin:6px 0;}",
+    ".biblio-ai-text th,.biblio-ai-text td{border:1px solid #ccc;padding:3px 6px;}",
+    "</style>"
   )
 
-  in_list <- FALSE
-  list_type <- ""
-  last_ol_number <- 0
-
-  close_list <- function() {
-    if (in_list) {
-      if (list_type == "ul") {
-        html_lines <<- c(html_lines, "</ul>")
-      } else {
-        html_lines <<- c(html_lines, "</ol>")
-      }
-      in_list <<- FALSE
-    }
-  }
-
-  for (i in seq_along(lines)) {
-    line <- trimws(lines[i])
-
-    # Skip empty lines
-    if (line == "") next
-
-    # Skip horizontal rules (--- or ***)
-    if (grepl("^[-*_]{3,}\\s*$", line)) next
-
-    # Markdown header management (lines starting with #, ##, ###, ####)
-    if (stringr::str_detect(line, "^#{1,4}\\s+")) {
-      close_list()
-
-      header_level <- nchar(stringr::str_extract(line, "^#+"))
-      header_text <- stringr::str_replace(line, "^#+\\s+", "")
-      header_text <- stringr::str_replace(header_text, "\\s*#+\\s*$", "")
-      header_text <- stringr::str_replace_all(header_text, "\\*\\*([^*]+)\\*\\*", "\\1")
-
-      h_tag <- paste0("h", min(header_level + 1, 5))
-      h_size <- switch(as.character(header_level),
-        "1" = "font-size: 1.3em;",
-        "2" = "font-size: 1.15em;",
-        "3" = "font-size: 1.05em;",
-        "font-size: 1em;"
-      )
-      html_lines <- c(
-        html_lines,
-        paste0(
-          "<", h_tag, " style='color: #333; border-bottom: 1px solid #007acc; padding-bottom: 4px; margin-bottom: 6px; margin-top: 14px; ", h_size, "'>",
-          header_text,
-          "</", h_tag, ">"
-        )
-      )
-      next
-    }
-
-    # Title management (lines enclosed in ** only)
-    if (stringr::str_detect(line, "^\\*\\*[^*]+\\*\\*$")) {
-      close_list()
-
-      title_text <- stringr::str_replace_all(line, "^\\*\\*(.+)\\*\\*$", "\\1")
-      title_text <- stringr::str_replace(title_text, "^\\d+\\.\\s*", "")
-      html_lines <- c(
-        html_lines,
-        paste0(
-          "<h3 style='color: #333; border-bottom: 1px solid #007acc; padding-bottom: 4px; margin-bottom: 6px; margin-top: 14px;'>",
-          title_text,
-          "</h3>"
-        )
-      )
-      next
-    }
-
-    # Managing bulleted lists (starting with * or -)
-    if (stringr::str_detect(line, "^\\s*[*\\-]\\s+")) {
-      if (!in_list || list_type != "ul") {
-        close_list()
-        html_lines <- c(
-          html_lines,
-          "<ul style='margin-bottom: 6px; margin-top: 4px;'>"
-        )
-        in_list <- TRUE
-        list_type <- "ul"
-      }
-
-      item_text <- stringr::str_replace(line, "^\\s*[*\\-]\\s+", "")
-      item_text <- format_inline_text(item_text)
-
-      html_lines <- c(
-        html_lines,
-        paste0("<li style='margin-bottom: 2px;'>", item_text, "</li>")
-      )
-      next
-    }
-
-    # Managing numbered lists (starting with a number followed by a period)
-    if (stringr::str_detect(line, "^\\s*\\d+\\.\\s+")) {
-      item_number <- as.integer(stringr::str_extract(line, "^\\s*\\d+"))
-
-      if (!in_list || list_type != "ol") {
-        close_list()
-        start_attr <- if (item_number > 1) paste0(" start='", item_number, "'") else ""
-        html_lines <- c(
-          html_lines,
-          paste0("<ol style='margin-bottom: 6px; margin-top: 4px;'", start_attr, ">")
-        )
-        in_list <- TRUE
-        list_type <- "ol"
-      }
-
-      last_ol_number <- item_number
-      item_text <- stringr::str_replace(line, "^\\s*\\d+\\.\\s+", "")
-      item_text <- format_inline_text(item_text)
-      html_lines <- c(
-        html_lines,
-        paste0("<li style='margin-bottom: 2px;'>", item_text, "</li>")
-      )
-      next
-    }
-
-    # Non-list, non-header line: close any open list
-    close_list()
-
-    # Normal paragraph management
-    formatted_line <- format_inline_text(line)
-    html_lines <- c(
-      html_lines,
-      paste0("<p style='margin-bottom: 5px; margin-top: 2px;'>", formatted_line, "</p>")
-    )
-  }
-
-  # Close any lists that remain open
-  close_list()
-
-  # Close the container div
-  html_lines <- c(html_lines, "</div>")
-
-  # Merge all lines
-  html_result <- paste(html_lines, collapse = "\n")
-
-  return(html_result)
+  paste0(
+    css,
+    "<div class='biblio-ai-text' style='font-family: Arial, sans-serif; line-height: 1.4; margin: 0 auto; padding: 15px; font-size: ",
+    font_size,
+    "; white-space: normal;'>",
+    body,
+    "</div>"
+  )
 }
 
-# Auxiliary function for formatting inline text
-format_inline_text <- function(text) {
-  # Bold management (**text**)
-  text <- stringr::str_replace_all(
-    text,
-    "\\*\\*([^*]+)\\*\\*",
-    "<strong>\\1</strong>"
+## LaTeX math ($...$, $$...$$, \(...\), \[...\]) to HTML with Unicode symbols,
+## <sup> and <sub>. Known commands written outside math (e.g. \rightarrow) are
+## converted too. A "$" followed by a space or closed by "$<digit>" is left
+## alone, so amounts such as "$5 and $10" stay as they are.
+latex_to_html <- function(text) {
+  math <- paste0(
+    "\\$\\$([\\s\\S]+?)\\$\\$",
+    "|\\\\\\[([\\s\\S]+?)\\\\\\]",
+    "|\\\\\\(([\\s\\S]+?)\\\\\\)",
+    "|(?<![\\\\$])\\$(?=[^\\s$])((?:[^$\\n\\\\]|\\\\.)+?)(?<=\\S)\\$(?!\\d)"
   )
+  text <- stringr::str_replace_all(text, math, function(m) {
+    inner <- sub("^(\\$\\$|\\\\\\[|\\\\\\(|\\$)", "", m)
+    inner <- sub("(\\$\\$|\\\\\\]|\\\\\\)|\\$)$", "", inner)
+    latex_math_to_html(inner)
+  })
+  latex_symbols(text)
+}
 
-  # Italic management (*text*) - only if it is not already in bold
-  text <- stringr::str_replace_all(
-    text,
-    "(?<!\\*)\\*([^*]+)\\*(?!\\*)",
-    "<em>\\1</em>"
+latex_symbols <- function(x) {
+  symbols <- c(
+    rightarrow = "\u2192", to = "\u2192", leftarrow = "\u2190",
+    gets = "\u2190", leftrightarrow = "\u2194", Rightarrow = "\u21d2",
+    Leftarrow = "\u21d0", Leftrightarrow = "\u21d4", implies = "\u21d2",
+    iff = "\u21d4", longrightarrow = "\u27f6", mapsto = "\u21a6",
+    uparrow = "\u2191", downarrow = "\u2193",
+    times = "\u00d7", cdot = "\u00b7", div = "\u00f7", pm = "\u00b1",
+    mp = "\u2213", ast = "\u2217", star = "\u22c6", circ = "\u2218",
+    leq = "\u2264", le = "\u2264", geq = "\u2265", ge = "\u2265",
+    neq = "\u2260", ne = "\u2260", approx = "\u2248", sim = "\u223c",
+    simeq = "\u2243", equiv = "\u2261", propto = "\u221d", ll = "\u226a",
+    gg = "\u226b", infty = "\u221e", partial = "\u2202", nabla = "\u2207",
+    sum = "\u2211", prod = "\u220f", int = "\u222b", sqrt = "\u221a",
+    "in" = "\u2208", notin = "\u2209", subset = "\u2282",
+    subseteq = "\u2286", cup = "\u222a", cap = "\u2229",
+    emptyset = "\u2205", forall = "\u2200", exists = "\u2203",
+    neg = "\u00ac", land = "\u2227", lor = "\u2228", wedge = "\u2227",
+    vee = "\u2228", ldots = "\u2026", cdots = "\u22ef", dots = "\u2026",
+    prime = "\u2032", degree = "\u00b0",
+    alpha = "\u03b1", beta = "\u03b2", gamma = "\u03b3", delta = "\u03b4",
+    epsilon = "\u03b5", varepsilon = "\u03b5", zeta = "\u03b6",
+    eta = "\u03b7", theta = "\u03b8", vartheta = "\u03d1", iota = "\u03b9",
+    kappa = "\u03ba", lambda = "\u03bb", mu = "\u03bc", nu = "\u03bd",
+    xi = "\u03be", pi = "\u03c0", rho = "\u03c1", sigma = "\u03c3",
+    tau = "\u03c4", upsilon = "\u03c5", phi = "\u03c6", varphi = "\u03c6",
+    chi = "\u03c7", psi = "\u03c8", omega = "\u03c9",
+    Gamma = "\u0393", Delta = "\u0394", Theta = "\u0398", Lambda = "\u039b",
+    Xi = "\u039e", Pi = "\u03a0", Sigma = "\u03a3", Phi = "\u03a6",
+    Psi = "\u03a8", Omega = "\u03a9"
   )
+  # longest names first, so that \leq is not read as \le + q
+  for (nm in names(symbols)[order(-nchar(names(symbols)))]) {
+    x <- gsub(paste0("\\\\", nm, "(?![A-Za-z])"), symbols[[nm]], x, perl = TRUE)
+  }
+  x
+}
 
-  # Handling text in quotation marks as inline code ("text")
-  text <- stringr::str_replace_all(
-    text,
-    '"([^"]+)"',
-    '<code style="background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: \'Courier New\', monospace;">\\1</code>'
+latex_math_to_html <- function(x) {
+  x <- trimws(x)
+  # text-like wrappers keep only their content
+  x <- gsub(
+    "\\\\(?:text|textrm|textit|textbf|mathrm|mathit|mathbf|mathsf|mathcal|operatorname|boldsymbol|mbox)\\s*\\{([^{}]*)\\}",
+    "\\1", x, perl = TRUE
   )
-
-  # Handling parentheses with percentages or numerical values
-  text <- stringr::str_replace_all(
-    text,
-    "\\(([^)]*%[^)]*)\\)",
-    "<span style='color: #007acc; font-weight: bold;'>(\\1)</span>"
-  )
-
-  return(text)
+  x <- gsub("\\\\(?:hat|bar|tilde|overline)\\s*\\{([^{}]*)\\}", "\\1", x, perl = TRUE)
+  x <- gsub("\\\\[dt]?frac\\s*\\{([^{}]*)\\}\\s*\\{([^{}]*)\\}", "\\1/\\2", x, perl = TRUE)
+  x <- gsub("\\\\sqrt\\s*\\{([^{}]*)\\}", "\u221a(\\1)", x, perl = TRUE)
+  x <- gsub("\\\\(left|right|big|Big|bigg|Bigg)(?![A-Za-z])", "", x, perl = TRUE)
+  x <- latex_symbols(x)
+  x <- gsub("\\\\([%&#_$])", "\\1", x, perl = TRUE)
+  x <- gsub("\\\\(?:,|;|:|!|quad|qquad)", " ", x, perl = TRUE)
+  x <- gsub("\\\\\\\\", " ", x)
+  # super- and subscripts
+  x <- gsub("\\^\\s*\\{([^{}]*)\\}", "<sup>\\1</sup>", x, perl = TRUE)
+  x <- gsub("_\\s*\\{([^{}]*)\\}", "<sub>\\1</sub>", x, perl = TRUE)
+  x <- gsub("\\^\\s*(\\\\?[A-Za-z0-9]|[^\\s<])", "<sup>\\1</sup>", x, perl = TRUE)
+  x <- gsub("_\\s*(\\\\?[A-Za-z0-9]|[^\\s<])", "<sub>\\1</sub>", x, perl = TRUE)
+  # leftovers: braces and unknown commands
+  x <- gsub("[{}]", "", x)
+  x <- gsub("\\\\([A-Za-z]+)", "\\1", x, perl = TRUE)
+  # keep Markdown from reading * or _ as emphasis
+  x <- gsub("*", "&#42;", x, fixed = TRUE)
+  x <- gsub("_", "&#95;", x, fixed = TRUE)
+  x
 }
 
 

@@ -313,3 +313,33 @@ test_that("dominancePlot nomina solo la bolla con DF maggiore tra due vicine", {
     function(l) inherits(l$geom, "GeomText") && "Label" %in% names(l$data),
     logical(1))))
 })
+
+test_that("summary.bibliometrix rispetta verbose = TRUE e non popola righe NA per collezioni piccole (#732)", {
+  M <- data.frame(
+    TI = c("Paper 1", "Paper 2"),
+    AU = c("DOE J;SMITH A", "DOE J"),
+    SO = c("JOURNAL A", "JOURNAL B"),
+    PY = c(2020L, 2021L),
+    TC = c(5, 10),
+    CR = c("REF 1", "REF 2"),
+    DB = "ISI",
+    stringsAsFactors = FALSE
+  )
+  res <- suppressWarnings(suppressMessages(biblioAnalysis(M)))
+
+  # verbose = TRUE deve stampare l'output a schermo
+  out_true <- capture.output(s_true <- summary(res, verbose = TRUE, pause = FALSE))
+  expect_gt(length(out_true), 0)
+
+  # verbose = FALSE non deve stampare nulla
+  out_false <- capture.output(s_false <- summary(res, verbose = FALSE, pause = FALSE))
+  expect_equal(length(out_false), 0)
+
+  # Le tabelle devono essere limitate al numero di elementi disponibili (2) senza righe NA
+  expect_equal(nrow(s_true$MostProdAuthors), 2)
+  expect_false(any(is.na(s_true$MostProdAuthors$Articles)))
+
+  expect_equal(nrow(s_true$MostCitedPapers), 2)
+  expect_false(any(is.na(s_true$MostCitedPapers$TC)))
+})
+

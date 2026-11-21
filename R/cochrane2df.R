@@ -3,6 +3,7 @@ cochrane2df <- function(D) {
   D <- D[nchar(D) > 0] # remove empty rows
 
   Papers <- which(substr(D, 1, 8) == "Record #") # first row of each document
+  if (length(Papers) == 0) noRecordsFound("Cochrane")
   nP <- length(Papers) # number of documents
 
   rowPapers <- diff(c(Papers, length(D) + 1))

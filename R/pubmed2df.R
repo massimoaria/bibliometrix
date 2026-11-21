@@ -1,6 +1,7 @@
 utils::globalVariables(c("Paper", "Tag", "content", "cont"))
 pubmed2df <- function(D) {
   D <- D[nchar(D) > 0] # remove empty rows
+  if (!any(regexpr("PMID-", D) == 1)) noRecordsFound("PubMed")
 
   for (i in 1:length(D)) {
     if (substr(D[i], 1, 4) == "    ") substr(D[i], 1, 4) <- substr(D[i - 1], 1, 4)

@@ -13,6 +13,7 @@ isi2df <- function(D) {
   }
 
   D <- D[!(substr(D, 1, 3) %in% c("FN ", "VR "))]
+  if (!any(substr(D, 1, 3) == "PT ")) noRecordsFound("Web of Science plain text")
 
   for (i in 1:length(D)) {
     if (substr(D[i], 1, 3) == "   ") substr(D[i], 1, 3) <- substr(D[i - 1], 1, 3)

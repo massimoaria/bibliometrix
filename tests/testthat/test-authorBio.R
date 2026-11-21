@@ -17,6 +17,15 @@ test_that("cognomi composti, accenti e trattini non impediscono il confronto", {
   expect_equal(oaAuthorMatch("Cenoz, J.", c("Durk Gorter", "Jasone Cenoz")), 2L)
 })
 
+test_that("un cognome con la particella unita (WoS) trova quello separato (OpenAlex)", {
+  oa <- c("Henk F. Moed", "W. J. M. Burger", "J. G. Frankfort", "Anthony F. J. van Raan")
+  expect_equal(oaAuthorMatch("VANRAAN AFJ", oa, author_position = 1), 4L)
+  expect_equal(oaAuthorMatch("VAN RAAN AFJ", oa, author_position = 1), 4L)
+  expect_equal(oaAuthorMatch("DEMELO JM", c("Maria Rossi", "João Maria de Melo"), author_position = 1), 2L)
+  # l'unione delle parole non crea falsi riscontri
+  expect_true(is.na(oaAuthorMatch("ROSSIMARIO M", "Mario Rossi")))
+})
+
 test_that("un autore assente da OpenAlex da' NA, non un altro autore", {
   # Scopus: HOFER B;JESSNER U ; OpenAlex ha solo Jessner
   expect_true(is.na(oaAuthorMatch("HOFER B", "Ulrike Jessner")))

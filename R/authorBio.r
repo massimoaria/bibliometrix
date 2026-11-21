@@ -425,6 +425,18 @@ oaAuthorMatch <- function(author_name, oa_names, author_position = 1) {
   }
   oa <- norm(oa_names)
   hits <- which(grepl(paste0("(^| )", surname, "( |$)"), oa))
+  if (length(hits) == 0 && nchar(surname) > 0) {
+    # WoS joins a surname's particles ("VANRAAN AFJ"), OpenAlex keeps them apart
+    # ("Anthony F. J. van Raan"): compare the surname without spaces with every
+    # run of consecutive words of each OpenAlex name
+    compact <- gsub(" ", "", surname)
+    hits <- which(vapply(strsplit(oa, " "), function(w) {
+      n <- length(w)
+      any(vapply(seq_len(n), function(i) {
+        any(vapply(i:n, function(j) paste(w[i:j], collapse = "") == compact, logical(1)))
+      }, logical(1)))
+    }, logical(1)))
+  }
   if (length(hits) == 0 || nchar(surname) == 0) {
     return(NA_integer_)
   }

@@ -266,3 +266,75 @@ test_that("convert2df usa l'anno della rivista per PubMed via API", {
   }))
   expect_equal(M$PY, 1991)
 })
+
+# Un export vuoto, o il file di un'altra banca dati, si fermava con un errore
+# estraneo (argomento 'times' non valido, sostituzione con 1 riga, ...)
+test_that("un export senza documenti si ferma con un messaggio chiaro", {
+  d <- tempfile("vuoti")
+  dir.create(d)
+  on.exit(unlink(d, recursive = TRUE))
+  scrivi <- function(nome, righe) {
+    p <- file.path(d, nome)
+    writeLines(righe, p)
+    p
+  }
+  casi <- list(
+    list(scrivi("w.txt", c("FN Clarivate Analytics Web of Science", "VR 1.0", "EF")),
+         "wos", "plaintext", "Web of Science plain text"),
+    list(scrivi("w.bib", character(0)), "wos", "bibtex", "BibTeX"),
+    list(scrivi("s.bib", c("Scopus", "EXPORT DATE: 21 November 2026", "")), "scopus", "bibtex", "BibTeX"),
+    list(scrivi("s.csv", '"Authors","Title","Year","Source title","Cited by","DOI","References"'),
+         "scopus", "csv", "Scopus CSV"),
+    list(scrivi("p.txt", character(0)), "pubmed", "pubmed", "PubMed"),
+    list(scrivi("l.csv", '"Lens ID","Title","Publication Year","Source Title","Author/s","DOI"'),
+         "lens", "csv", "Lens.org CSV"),
+    list(scrivi("d.csv", '"Publication ID","DOI","Title","Source title","PubYear","Authors","Times cited"'),
+         "dimensions", "csv", "Dimensions"),
+    list(scrivi("o.csv", '"id","doi","title","publication_year","cited_by_count"'),
+         "openalex", "csv", "OpenAlex CSV")
+  )
+  for (caso in casi) {
+    expect_error(
+      suppressWarnings(capture.output(convert2df(caso[[1]], dbsource = caso[[2]], format = caso[[3]]))),
+      paste0("No documents found: the file is empty or is not in the ", caso[[4]], " format."),
+      fixed = TRUE, label = basename(caso[[1]])
+    )
+  }
+
+  # un file di un'altra banca dati: un CSV di Scopus letto come WoS
+  expect_error(
+    suppressWarnings(capture.output(convert2df(test_path("fixtures", "scopus_sample.csv"),
+                                               dbsource = "wos", format = "plaintext"))),
+    "not in the Web of Science plain text format", fixed = TRUE
+  )
+
+  # oggetti delle API vuoti
+  expect_error(suppressWarnings(capture.output(convert2df(list(data = list()), dbsource = "pubmed", format = "api"))),
+               "the object is empty or is not in the pubmedR format", fixed = TRUE)
+  works <- list()
+  rd <- file.path(d, "oa.RData")
+  save(works, file = rd)
+  expect_error(suppressWarnings(capture.output(convert2df(rd, dbsource = "openalex_api", format = "api"))),
+               "the object is empty or is not in the openalexR format", fixed = TRUE)
+})
+
+test_that("un file vuoto accanto a uno pieno non cambia la collezione", {
+  vuoto_txt <- tempfile(fileext = ".txt")
+  writeLines(c("FN Clarivate Analytics Web of Science", "VR 1.0", "EF"), vuoto_txt)
+  suppressWarnings(capture.output(
+    M1 <- convert2df(test_path("fixtures", "wos_sample.txt"), dbsource = "wos", format = "plaintext")))
+  suppressWarnings(capture.output(
+    M2 <- convert2df(c(test_path("fixtures", "wos_sample.txt"), vuoto_txt), dbsource = "wos", format = "plaintext")))
+  # la riga EF del file vuoto si aggiunge all'ultimo documento letto (campo EF)
+  campi <- setdiff(names(M1), "EF")
+  expect_identical(M2[campi], M1[campi])
+
+  vuoto_csv <- tempfile(fileext = ".csv")
+  writeLines(readLines(test_path("fixtures", "scopus_sample.csv"), n = 1), vuoto_csv)
+  on.exit(unlink(c(vuoto_txt, vuoto_csv)))
+  suppressWarnings(capture.output(
+    S1 <- convert2df(test_path("fixtures", "scopus_sample.csv"), dbsource = "scopus", format = "csv")))
+  suppressWarnings(capture.output(
+    S2 <- convert2df(c(test_path("fixtures", "scopus_sample.csv"), vuoto_csv), dbsource = "scopus", format = "csv")))
+  expect_identical(S2, S1)
+})

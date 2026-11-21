@@ -35,6 +35,7 @@ importOAFiles <- function(file) {
 # Function to apply the extraction to the whole list of items.
 apiOA2df <- function(file) {
   DATA <- importOAFiles(file)
+  if (is.list(DATA) && length(DATA) == 0) noRecordsFound("openalexR", what = "object")
 
   if (inherits(DATA, "list")) {
     type <- "list"

@@ -39,6 +39,7 @@ dimensions2df <- function(file, format = "csv") {
       # DATA <- rio::import(file, skip = 1)
     }
   )
+  if (nrow(DATA) == 0) noRecordsFound("Dimensions")
   # Encoding(DATA) <- "UTF-8"
 
   bibtag <- NULL

@@ -21,6 +21,8 @@ csvScopus2df <- function(file) {
     }
   }
 
+  if (nrow(DATA) == 0) noRecordsFound("Scopus CSV")
+
   ## Post-Processing
 
   # column re-labelling

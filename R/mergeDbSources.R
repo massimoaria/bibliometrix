@@ -82,8 +82,13 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
   # create KW_Merged field 
   M <- M %>% mergeKeywords(force=TRUE)
 
-  # OpenAlex files saved by earlier versions still carry names in natural order
-  M <- oaAuthorForm(M, which(M$DB == "OPENALEX"))
+  # OpenAlex files saved by earlier versions still carry names in natural order.
+  # A collection that was already merged says OPENALEX only in DB_Original.
+  oa_rows <- M$DB == "OPENALEX"
+  if ("DB_Original" %in% names(M)) {
+    oa_rows <- oa_rows | M$DB_Original %in% "OPENALEX"
+  }
+  M <- oaAuthorForm(M, which(oa_rows))
 
   dbLabels <- data.frame(
     DB = toupper(c("isi", "scopus", "openalex", "lens", "dimensions", "pubmed", "cochrane")),

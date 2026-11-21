@@ -207,3 +207,11 @@ test_that("un file OpenAlex salvato con i nomi in ordine naturale viene riscritt
   expect_equal(oa$AU, "SILVER FH;TRIA AJ;ZAWADSKY JP;DUNN MG")
   expect_match(oa$SR, "^SILVER FH, 1991")
 })
+
+test_that("una collezione gia' fusa riscrive i nomi OpenAlex (DB_Original)", {
+  fusa <- oa_silver(DB = "ISI", DB_Original = "OPENALEX", DI = "10.1/gia", TI = "ALTRO TITOLO")
+  altra <- pm_silver(DI = "10.1/altra")
+  M <- mergeDbSources(fusa, altra, verbose = FALSE)
+  riga <- M[M$DI %in% "10.1/gia", ]
+  expect_equal(riga$AU, "SILVER FH;TRIA AJ;ZAWADSKY JP;DUNN MG")
+})

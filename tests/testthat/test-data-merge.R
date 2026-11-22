@@ -215,3 +215,59 @@ test_that("una collezione gia' fusa riscrive i nomi OpenAlex (DB_Original)", {
   riga <- M[M$DI %in% "10.1/gia", ]
   expect_equal(riga$AU, "SILVER FH;TRIA AJ;ZAWADSKY JP;DUNN MG")
 })
+
+# Senza DOI il titolo e l'anno dovevano coincidere: documenti diversi con lo
+# stesso titolo e anno (errata, case report) sparivano, e le copie con anni
+# diversi (online e fascicolo) restavano doppie
+test_that("titolo e anno uguali ma DOI diversi: restano due documenti", {
+  a <- pm_silver(TI = "ERRATUM", DI = "10.1/A")
+  b <- oa_silver(TI = "ERRATUM", DI = "10.1/B", SO = "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS")
+  M <- mergeDbSources(a, b, verbose = FALSE)
+  expect_setequal(M$DI, c("10.1/A", "10.1/B"))
+  # una sola DOI nel gruppo: la copia senza DOI e' ancora un duplicato
+  M <- mergeDbSources(pm_silver(DI = "10.1/A"), oa_silver(), verbose = FALSE)
+  expect_equal(nrow(M), 1)
+  # stesso database, DOI diversi: due documenti anche qui
+  M <- mergeDbSources(rbind(pm_silver(TI = "ERRATUM", DI = "10.1/A"), pm_silver(TI = "ERRATUM", DI = "10.1/B")),
+                      verbose = FALSE)
+  expect_equal(nrow(M), 2)
+})
+
+test_that("tra database diversi si uniscono le copie con anni vicini", {
+  so_pm <- "ANATOMICAL RECORD (HOBOKEN, N.J. : 2007)"
+  a <- pm_silver(PY = 1993, SO = so_pm, AU = "DE SILVER FH;TRIA AJ")
+  b <- oa_silver(PY = 1991, SO = "THE ANATOMICAL RECORD")
+  M <- mergeDbSources(a, b, verbose = FALSE)
+  expect_equal(nrow(M), 1)
+  expect_equal(M$TC, 42)
+
+  # restano separati
+  sep <- function(...) nrow(mergeDbSources(..., verbose = FALSE))
+  # piu' di tre anni
+  expect_equal(sep(pm_silver(PY = 1995), oa_silver(SO = "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS")), 2)
+  # fonte diversa (atti di un convegno e articolo)
+  expect_equal(sep(pm_silver(PY = 1992), oa_silver(SO = "PROCEEDINGS OF ISSI 1991")), 2)
+  # primo autore diverso
+  expect_equal(sep(pm_silver(PY = 1992), oa_silver(AU = "MARIO ROSSI", AF = "MARIO ROSSI", SO = "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS")), 2)
+  # titolo di meno di quattro parole
+  expect_equal(sep(pm_silver(PY = 1992, TI = "EDITORIAL"),
+                   oa_silver(TI = "EDITORIAL", SO = "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS")), 2)
+  # DOI diversi
+  expect_equal(sep(pm_silver(PY = 1992, DI = "10.1/A"),
+                   oa_silver(DI = "10.1/B", SO = "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS")), 2)
+  # stesso database
+  expect_equal(sep(rbind(pm_silver(PY = 1992), pm_silver())), 2)
+  # due record per database (una rubrica annuale): nessuno si unisce all'anno vicino
+  so <- "JOURNAL OF LONG-TERM EFFECTS OF MEDICAL IMPLANTS"
+  expect_equal(sep(rbind(pm_silver(PY = 1991), pm_silver(PY = 1992)),
+                   rbind(oa_silver(PY = 1991, SO = so), oa_silver(PY = 1992, SO = so))), 2)
+})
+
+test_that("WoS e Scopus: si unisce anche Barre' 1994/1995", {
+  skip_if_not_installed("bibliometrixData")
+  data(isiCollection, package = "bibliometrixData")
+  data(scopusCollection, package = "bibliometrixData")
+  M <- suppressWarnings(mergeDbSources(isiCollection, scopusCollection, verbose = FALSE))
+  expect_equal(nrow(M), 596)
+  expect_equal(sum(grepl("^DO NOT LOOK FOR SCAPEGOATS", M$TI)), 1)
+})

@@ -1424,6 +1424,9 @@ To ensure the functionality of Biblioshiny,
     if (is.null(ext)) return(NULL)
     M <- NULL
 
+    # A conversion error (an empty export, a file of another database, ...)
+    # is shown in a dialog, and the current collection is kept.
+    imported <- tryCatch({
     if (input$load == "import") {
 
       ## ---- max.rows check ----
@@ -2317,6 +2320,17 @@ To ensure the functionality of Biblioshiny,
         }
       )
     }
+    TRUE
+    }, error = function(e) {
+      showModal(modalDialog(
+        title = tags$strong(icon("exclamation-triangle"), " Import failed"),
+        tags$p(conditionMessage(e)),
+        footer = modalButton("OK"),
+        easyClose = TRUE
+      ))
+      FALSE
+    })
+    if (!isTRUE(imported)) return(NULL)
 
     # An unmatched format used to reach names(M) below without ever creating M.
     # Keep the current collection when an upload cannot produce a new one.

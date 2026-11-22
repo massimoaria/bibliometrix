@@ -19,6 +19,7 @@ csvLens2df <- function(file) {
     }
   }
   rm(D)
+  if (nrow(DATA) == 0) noRecordsFound("Lens.org CSV")
 
   ## Post-Processing
 

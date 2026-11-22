@@ -313,3 +313,68 @@ test_that("dominancePlot nomina solo la bolla con DF maggiore tra due vicine", {
     function(l) inherits(l$geom, "GeomText") && "Label" %in% names(l$data),
     logical(1))))
 })
+
+# #732: verbose = TRUE stampava nulla, e le tabelle di una collezione piccola
+# avevano righe NA fino a k
+summary_test_M <- function(DE = NULL, ID = NULL) {
+  M <- data.frame(
+    TI = c("PAPER 1", "PAPER 2", "PAPER 3"), AU = c("DOE J;SMITH A", "DOE J", "ROSSI M"),
+    SO = c("JOURNAL A", "JOURNAL B", "JOURNAL A"), PY = c(2020L, 2021L, 2022L),
+    TC = c(5, 10, 1), CR = "REF 1", DB = "ISI", stringsAsFactors = FALSE
+  )
+  if (!is.null(DE)) M$DE <- DE
+  if (!is.null(ID)) M$ID <- ID
+  M
+}
+# le colonne formattate da summary sono AsIs e con spazi
+col_text <- function(x) as.character(trimws(unclass(x)))
+
+test_that("summary stampa con verbose = TRUE e tace con verbose = FALSE (#732)", {
+  res <- suppressWarnings(suppressMessages(biblioAnalysis(summary_test_M())))
+  expect_gt(length(capture.output(summary(res, verbose = TRUE, pause = FALSE))), 0)
+  expect_length(capture.output(summary(res, verbose = FALSE, pause = FALSE)), 0)
+  expect_identical(capture.output(summary(res, verbose = TRUE, pause = FALSE)),
+                   capture.output(summary(res, pause = FALSE)))
+})
+
+test_that("summary non aggiunge righe NA a una collezione piccola (#732)", {
+  res <- suppressWarnings(suppressMessages(biblioAnalysis(summary_test_M())))
+  s <- summary(res, verbose = FALSE)
+  expect_equal(nrow(s$MostProdAuthors), 3)
+  expect_equal(col_text(s$MostProdAuthors[[1]]), c("DOE J", "ROSSI M", "SMITH A"))
+  expect_equal(nrow(s$MostCitedPapers), 3)
+  expect_false(any(trimws(as.matrix(s$MostCitedPapers)) == "NA"))
+})
+
+test_that("le parole chiave seguono la lista piu' lunga, l'altra resta vuota (#732)", {
+  M <- summary_test_M(DE = c("A;B;C;D", "E;F;G", "H;I;J;K;L"), ID = c("X", NA, NA))
+  kw <- summary(suppressWarnings(suppressMessages(biblioAnalysis(M))), verbose = FALSE)$MostRelKeywords
+  expect_equal(nrow(kw), 10)
+  expect_equal(col_text(kw[[1]]), LETTERS[1:10])
+  expect_equal(col_text(kw[[3]]), c("X", rep("", 9)))
+  expect_equal(col_text(kw[[4]]), c("1", rep("", 9)))
+
+  # Keywords Plus del tutto assenti: prima un errore con la correzione proposta
+  M <- summary_test_M(DE = c("A;B", "C", "D"), ID = NA_character_)
+  kw <- summary(suppressWarnings(suppressMessages(biblioAnalysis(M))), verbose = FALSE)$MostRelKeywords
+  expect_equal(col_text(kw[[1]]), c("A", "B", "C", "D"))
+  expect_true(all(col_text(kw[[3]]) == ""))
+
+  # k = Inf mostra tutte le parole chiave di entrambe le liste
+  kw <- summary(suppressWarnings(suppressMessages(biblioAnalysis(
+    summary_test_M(DE = c("A;B;C;D", "E;F;G", "H;I;J;K;L"), ID = c("X", NA, NA))))),
+    k = Inf, verbose = FALSE)$MostRelKeywords
+  expect_equal(nrow(kw), 12)
+})
+
+test_that("summary di management resta uguale con k = 10", {
+  skip_if_not_installed("bibliometrixData")
+  data(management, package = "bibliometrixData")
+  s <- summary(suppressWarnings(suppressMessages(biblioAnalysis(management))), verbose = FALSE)
+  for (tab in c("MostProdAuthors", "MostCitedPapers", "MostProdCountries", "TCperCountries",
+                "MostRelSources", "MostRelKeywords")) {
+    expect_equal(nrow(s[[tab]]), 10, label = tab)
+    # la prima colonna e' il nome: mai vuota o NA (altre colonne, come il DOI, possono mancare)
+    expect_false(any(col_text(s[[tab]][[1]]) %in% c("NA", "")), label = tab)
+  }
+})

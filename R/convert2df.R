@@ -162,6 +162,7 @@ convert2df <- function(
         format,
         api = {
           M <- pmApi2df(file)
+          if (NROW(M) == 0) noRecordsFound("pubmedR", what = "object")
           M$DB <- "PUBMED"
           # pubmedR <= 1.0.2 sets PY to the earliest date in the record's
           # history (entered, received, ...), which is often the year before
@@ -188,6 +189,7 @@ convert2df <- function(
         format,
         api = {
           M <- dsApi2df(file)
+          if (NROW(M) == 0) noRecordsFound("dimensionsR", what = "object")
           M$DB <- "DIMENSIONS"
         },
         {
@@ -215,6 +217,9 @@ convert2df <- function(
       )
     }
   )
+  # the parsers of the export files stop earlier; this covers the API objects
+  if (!is.data.frame(M) || nrow(M) == 0) noRecordsFound(dbsource, what = "collection")
+
   if ("PY" %in% names(M)) {
     M$PY <- as.numeric(M$PY)
   } else {
@@ -343,4 +348,13 @@ convert2df <- function(
   class(M) <- c("bibliometrixDB", "data.frame")
 
   return(M)
+}
+
+# An empty export, or a file of another database, has no record: each parser
+# used to stop later with an unrelated error ("invalid 'times' argument",
+# "replacement has 1 row, data has 0", ...).
+#' @noRd
+noRecordsFound <- function(source, what = "file") {
+  stop("No documents found: the ", what, " is empty or is not in the ", source,
+       " format.", call. = FALSE)
 }

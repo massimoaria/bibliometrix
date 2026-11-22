@@ -24,6 +24,7 @@ csvOA2df <- function(file) {
     }
   }
   rm(D)
+  if (nrow(DATA) == 0) noRecordsFound("OpenAlex CSV")
 
   ## Post-Processing
 

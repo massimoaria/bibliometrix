@@ -16,6 +16,7 @@ bib2df <- function(D, dbsource = "isi") {
   D <- gsub("\\{\\[\\}", "[", D)
   D <- gsub("\\{\\]\\}", "]", D)
   Papers <- which(substr(D, 1, 1) == "@") # # first row of each document
+  if (length(Papers) == 0) noRecordsFound("BibTeX")
   if (Papers[1] > 1) {
     D <- D[-(1:(Papers[1] - 1))]
     Papers <- Papers - (Papers[1] - 1)

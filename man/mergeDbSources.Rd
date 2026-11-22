@@ -56,6 +56,14 @@ of them, or surname and initials for all of them -- so that their \code{AU}
 fields are comparable. OpenAlex records saved before names were put surname
 first are rewritten on merging.
 
+Duplicates are found by DOI, then by title and publication year. Records with
+the same title and year but two different DOIs (errata, case reports,
+editorials) are different documents and are all kept. Across databases, two
+records whose years differ by up to three (the year online and the year of
+the issue) are also duplicates when they are the only record of each database
+with that title (of four words or more), share a word of the first author's
+name, come from the same source and do not carry two different DOIs.
+
 When the collections come from more than one database, the record kept among
 duplicates is the one with the most metadata, and the order of the databases
 only decides ties. An OpenAlex record whose source is PubMed or PubMed Central

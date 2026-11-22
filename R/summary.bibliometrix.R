@@ -63,7 +63,7 @@ summary.bibliometrix <- function(object, ...) {
   if (sum(names(arguments) == "verbose") == 0) {
     verbose <- TRUE
   } else {
-    verbose <- FALSE
+    verbose <- isTRUE(as.logical(arguments$verbose))
   }
   K <- k
   Co <- NULL
@@ -185,13 +185,15 @@ summary.bibliometrix <- function(object, ...) {
     if (K == Inf) {
       k <- length(object$Authors)
     }
-    A <- data.frame(cbind(object$Authors[1:k]))
+    ## A collection with fewer than k authors gives a shorter table, not NA rows
+    kk <- min(k, length(object$Authors))
+    A <- data.frame(cbind(object$Authors[seq_len(kk)]))
     A$MPA <- row.names(A)
     A <- A[, c(2, 1)]
-    A[, 3:4] <- object$AuthorsFrac[1:k, ]
+    A[, 3:4] <- object$AuthorsFrac[seq_len(kk), ]
     names(A) <- c("Authors       ", "Articles", "Authors       ", "Articles Fractionalized")
     A <- format(A, justify = "left", digits = 3)
-    row.names(A) <- 1:k
+    row.names(A) <- seq_len(kk)
     if (isTRUE(verbose)) {
       print(A, row.names = TRUE)
       cat("\n")
@@ -214,9 +216,10 @@ summary.bibliometrix <- function(object, ...) {
     if (K == Inf) {
       k <- dim(object$MostCitedPapers)[1]
     }
-    MostCitedPapers <- object$MostCitedPapers[1:k, ]
+    kk <- min(k, nrow(object$MostCitedPapers))
+    MostCitedPapers <- object$MostCitedPapers[seq_len(kk), ]
     MostCitedPapers <- format(MostCitedPapers, justify = "left", digits = 3)
-    row.names(MostCitedPapers) <- 1:k
+    row.names(MostCitedPapers) <- seq_len(kk)
     if (isTRUE(verbose)) {
       print(MostCitedPapers, row.names = TRUE)
       cat("\n")
@@ -283,8 +286,10 @@ summary.bibliometrix <- function(object, ...) {
       AC <- as.data.frame(AC)
 
       names(AC) <- c("Country     ", "Total Citations", "Average Article Citations")
-      AC <- format(AC, justify = "left", digits = 3)[1:kk, ]
-      row.names(AC) <- 1:kk
+      ## Countries with no citation field drop out of AC, which can be shorter
+      kc <- min(kk, nrow(AC))
+      AC <- format(AC, justify = "left", digits = 3)[seq_len(kc), ]
+      row.names(AC) <- seq_len(kc)
       if (isTRUE(verbose)) {
         print(AC, row.names = TRUE)
         cat("\n")
@@ -333,20 +338,26 @@ summary.bibliometrix <- function(object, ...) {
     if (isTRUE(verbose)) {
       cat("\nMost Relevant Keywords\n\n")
     }
+    ## The table is as long as the longer of the two lists (at most k rows); the
+    ## shorter one is padded with blanks. Cutting both to the shorter list would
+    ## hide author keywords, and an empty list would leave no row at all.
     if (K == Inf) {
-      k <- min(c(length(object$DE), length(object$ID)))
+      k <- max(length(object$DE), length(object$ID))
     }
-    AAA <- data.frame(cbind(object$DE[1:k]))
-    AAA$MPA <- row.names(AAA)
-    AAA <- AAA[, c(2, 1)]
-    names(AAA) <- c("DE Keywords     ", "Articles")
-    A2 <- data.frame(cbind(object$ID[1:k]))
-    A2$MPA <- row.names(A2)
-    A2 <- A2[, c(2, 1)]
-    AAA[, c(3, 4)] <- A2
+    kk <- min(k, max(length(object$DE), length(object$ID)))
+    kwColumns <- function(tab) {
+      n <- min(kk, length(tab))
+      data.frame(
+        Keyword = c(names(tab)[seq_len(n)], rep(NA, kk - n)),
+        Articles = c(as.numeric(tab)[seq_len(n)], rep(NA, kk - n))
+      )
+    }
+    AAA <- cbind(kwColumns(object$DE), kwColumns(object$ID))
+    blank <- is.na(AAA)
     names(AAA) <- c("Author Keywords (DE)     ", "Articles", "Keywords-Plus (ID)    ", "Articles")
     AAA <- format(AAA, justify = "left", digits = 3)
-    row.names(AAA) <- 1:k
+    AAA[blank] <- ""
+    row.names(AAA) <- seq_len(kk)
     if (isTRUE(verbose)) {
       print(AAA, row.names = TRUE)
       cat("\n")

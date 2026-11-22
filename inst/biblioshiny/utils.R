@@ -1348,6 +1348,22 @@ get_all_authors <- function(df, separator = ";") {
 }
 
 
+# The works whose DOI is sent to OpenAlex to find the author: journal articles
+# before proceedings, books and chapters, which OpenAlex often misses or lists
+# without the author, then by DOI as before. Ordering by year or by citations
+# was tried and dropped: on two collections it found the same profiles, and at
+# times a small profile of its own that OpenAlex had not merged.
+authorCardWorks <- function(works, M, n = 5) {
+  works <- dplyr::distinct(works, doi, .keep_all = TRUE)
+  if (!"DT" %in% names(M)) {
+    return(head(works, n))
+  }
+  doi <- toupper(trimws(as.character(M$DI)))
+  type <- toupper(as.character(M$DT))[match(toupper(trimws(works$doi)), doi)]
+  journal <- !is.na(type) & !grepl("PROCEEDING|CONFERENCE|BOOK|CHAPTER", type)
+  head(works[order(!journal, works$doi), ], n)
+}
+
 authorCard <- function(selected_author, values) {
   req(selected_author)
   works_exact <- findAuthorWorks(
@@ -1361,7 +1377,7 @@ authorCard <- function(selected_author, values) {
   }
   # The author is found by name in each work; a work missing from OpenAlex, or
   # whose OpenAlex authors leave the author out, gives way to the next one
-  works_exact <- head(dplyr::distinct(works_exact, doi, .keep_all = TRUE), 5)
+  works_exact <- authorCardWorks(works_exact, values$M, n = 5)
   on_line <- check_online(method = "http")
 
   if (on_line) {

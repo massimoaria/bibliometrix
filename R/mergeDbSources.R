@@ -37,6 +37,14 @@ utils::globalVariables(c("num"))
 #' fields are comparable. OpenAlex records saved before names were put surname
 #' first are rewritten on merging.
 #'
+#' Duplicates are found by DOI, then by title and publication year. Records with
+#' the same title and year but two different DOIs (errata, case reports,
+#' editorials) are different documents and are all kept. Across databases, two
+#' records whose years differ by up to three (the year online and the year of
+#' the issue) are also duplicates when they are the only record of each database
+#' with that title (of four words or more), share a word of the first author's
+#' name, come from the same source and do not carry two different DOIs.
+#'
 #' When the collections come from more than one database, the record kept among
 #' duplicates is the one with the most metadata, and the order of the databases
 #' only decides ties. An OpenAlex record whose source is PubMed or PubMed Central
@@ -142,11 +150,34 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
     if ("TI" %in% names(M)) {
       TI <- gsub("[^[:alnum:] ]", "", M$TI)
       TI <- gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", "", TI, perl = TRUE)
+      DI <- if ("DI" %in% names(M)) M$DI else rep(NA_character_, nrow(M))
       key <- paste(TI, " ", M$PY)
+      # Two records with different DOIs are two documents, even with the same
+      # title and year (errata, case reports, editorials): such a group keeps
+      # all its records.
+      key[mergeDoiConflict(key, DI)] <- NA
       d <- mergeDuplicates(key, rank)
-      if (isTRUE(verbose)) cat("\n", sum(d) + length(index), "duplicated documents have been removed\n")
       if (any(d) && length(DB) > 1) M <- mergeKeepCitations(M, key)
       M <- M[!d, ]
+      rank <- rank[!d]
+      TI <- TI[!d]
+      DI <- DI[!d]
+      n_title <- sum(d)
+
+      # Across databases the same document can carry different years (online
+      # and issue year). A pair is joined only if it is the only record of each
+      # database with that title, by the same first author in the same source.
+      n_year <- 0
+      if (length(DB) > 1) {
+        key <- mergeYearKey(M, TI, DI)
+        d <- mergeDuplicates(key, rank)
+        if (any(d)) {
+          M <- mergeKeepCitations(M, key)
+          M <- M[!d, ]
+        }
+        n_year <- sum(d)
+      }
+      if (isTRUE(verbose)) cat("\n", n_title + n_year + length(index), "duplicated documents have been removed\n")
     }
   }
 
@@ -243,4 +274,62 @@ mergeKeepCitations <- function(M, key) {
     if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
   })
   M
+}
+
+# TRUE for the records of a key shared by more than one DOI: their title and
+# year match, but the DOIs say they are different documents.
+mergeDoiConflict <- function(key, DI) {
+  DI <- toupper(trimws(as.character(DI)))
+  DI[DI %in% c("", "NA")] <- NA
+  n_doi <- ave(DI, key, FUN = function(x) length(unique(x[!is.na(x)])))
+  as.integer(n_doi) > 1
+}
+
+# The key of the copies of a document whose years differ (online and issue
+# year, up to three years apart): the title, for groups of exactly two records
+# from two databases that also share a word of the first author's name, come
+# from the same source (one name may extend the other, as PubMed's "ANATOMICAL
+# RECORD (HOBOKEN, N.J. : 2007)") and do not carry two different DOIs. Titles
+# shorter than four words ("EDITORIAL", "ERRATUM") are left out. NA for every
+# other record.
+mergeYearKey <- function(M, TI, DI, max_gap = 3) {
+  n <- nrow(M)
+  if (n == 0 || !all(c("PY", "AU", "SO") %in% names(M))) {
+    return(rep(NA_character_, n))
+  }
+  ascii <- function(x) toupper(stringi::stri_trans_general(as.character(x), "Latin-ASCII"))
+  db <- M$DB
+  if ("DB_Original" %in% names(M)) {
+    db <- ifelse(is.na(M$DB_Original) | M$DB_Original == "", db, M$DB_Original)
+  }
+  # the words of the first author's name, initials aside: "DE MELO JM" and
+  # "MELO JM", "MOHD RAZALI S" and "RAZALI SM" share one
+  first_author <- strsplit(gsub("[^A-Z ]", " ", ascii(sub(";.*$", "", M$AU))), " +")
+  first_author <- lapply(first_author, function(w) w[nchar(w) >= 3])
+  source <- gsub("\\([^)]*\\)", "", ascii(M$SO))
+  source <- gsub("\\\\?&", " AND ", source)
+  source <- gsub("[^[:alnum:]]", "", gsub("^\\s*THE ", "", source))
+  words <- lengths(strsplit(trimws(ascii(TI)), "\\s+"))
+  key <- gsub("[^[:alnum:]]", "", ascii(TI))
+  usable <- words >= 4 & nzchar(source) & !is.na(M$PY) & lengths(first_author) > 0
+  usable[is.na(usable)] <- FALSE
+
+  DI <- toupper(trimws(as.character(DI)))
+  DI[DI %in% c("", "NA")] <- NA
+  same_source <- function(a, b) startsWith(a, b) || startsWith(b, a)
+  keep <- rep(FALSE, n)
+  for (idx in split(seq_len(n)[usable], key[usable])) {
+    if (length(idx) != 2) next
+    a <- idx[1]
+    b <- idx[2]
+    gap <- abs(M$PY[a] - M$PY[b])
+    if (db[a] != db[b] && gap >= 1 && gap <= max_gap &&
+        same_source(source[a], source[b]) &&
+        length(intersect(first_author[[a]], first_author[[b]])) > 0 &&
+        !(!is.na(DI[a]) && !is.na(DI[b]) && DI[a] != DI[b])) {
+      keep[idx] <- TRUE
+    }
+  }
+  key[!keep] <- NA
+  key
 }

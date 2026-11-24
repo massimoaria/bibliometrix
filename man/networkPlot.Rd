@@ -44,7 +44,10 @@ The normalised similarity drives the layout and, with \code{normalize.clusters =
 
 \item{n}{is an integer. It indicates the number of vertices to plot.}
 
-\item{degree}{is an integer. It indicates the min frequency of a vertex. If degree is not NULL, n is ignored.}
+\item{degree}{is an integer or NULL. If not NULL, only vertices with at least \code{degree} co-occurrences with the other
+vertices of \code{NetMatrix} are kept. The count is the off-diagonal row sum of \code{NetMatrix} (co-occurrences with
+multiplicity; the item's own frequency on the diagonal is excluded), computed before \code{edges.min} pruning and
+isolate removal. If degree is not NULL, \code{n} is ignored.}
 
 \item{Title}{is a character indicating the plot title.}
 

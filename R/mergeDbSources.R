@@ -87,6 +87,9 @@ mergeDbSources <- function(..., remove.duplicated = TRUE, verbose = TRUE) {
   } else {
     M <- dplyr::bind_rows(...)
   }
+  # Collections converted by earlier versions may still carry Unicode spaces
+  # in the names (see convert2df).
+  M <- .norm_spaces_df(M)
   # create KW_Merged field 
   M <- M %>% mergeKeywords(force=TRUE)
 

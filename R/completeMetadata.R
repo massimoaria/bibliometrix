@@ -926,7 +926,7 @@ completeMetadata <- function(
       if (is.null(val) || length(val) == 0) {
         next
       }
-      v <- as.character(val[[1]])
+      v <- trimws(.norm_spaces(as.character(val[[1]])))
       if (is.na(v) || !nzchar(v)) {
         next
       }

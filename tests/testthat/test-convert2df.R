@@ -338,3 +338,53 @@ test_that("un file vuoto accanto a uno pieno non cambia la collezione", {
     S2 <- convert2df(c(test_path("fixtures", "scopus_sample.csv"), vuoto_csv), dbsource = "scopus", format = "csv")))
   expect_identical(S2, S1)
 })
+
+# Spazi Unicode (U+00A0, U+202F, zero-width, BOM, ...) dentro i nomi facevano
+# di un autore due o piu' autori: convert2df() li normalizza in tutte le
+# colonne di testo.
+
+test_that(".norm_spaces collapses Unicode spaces and keeps NA", {
+  u <- function(cp) intToUtf8(cp)
+  x <- c(paste0("Abu", u(0xA0), "Afifa"), paste0("Abu", u(0x202F), "Afifa"),
+         paste0("Abu", u(0x200B), " Afifa"), paste0("Abu", u(0x2009), "Afifa"),
+         "Abu  Afifa", "Abu\tAfifa", paste0("Abu ", u(0x2060), "Afifa"), NA)
+  out <- bibliometrix:::.norm_spaces(x)
+  expect_equal(out, c(rep("Abu Afifa", 7), NA))
+  # zero-width non-joiner/joiner are part of Persian/Indic words: untouched
+  zw <- c(paste0("mi", u(0x200C), "khoham"), paste0("a", u(0x200D), "b"))
+  expect_identical(bibliometrix:::.norm_spaces(zw), zw)
+})
+
+test_that("convert2df merges author variants split by Unicode spaces", {
+  u <- function(cp) intToUtf8(cp)
+  d <- read.csv(fixture_path("scopus_sample.csv"), check.names = FALSE,
+                stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")[1:8, ]
+  v <- c("Abu Afifa M.",
+         paste0("Abu", u(0xA0), "Afifa M."),
+         paste0("Abu", u(0x2009), "Afifa M."),
+         paste0("Abu", u(0x202F), "Afifa M."),
+         paste0("Abu Afifa", u(0x200B), " M."),
+         paste0(u(0xFEFF), "Abu Afifa M."),
+         "Abu  Afifa M.",
+         "Abu\tAfifa M.")
+  d$Authors <- paste0(v, "; Rossi P.")
+  d[["Author full names"]] <- paste0(v, " (57220105830); Rossi, P. (1)")
+  f <- tempfile(fileext = ".csv")
+  on.exit(unlink(f))
+  write.csv(d, f, row.names = FALSE, fileEncoding = "UTF-8")
+  invisible(capture.output(M <- suppressWarnings(suppressMessages(
+    convert2df(f, dbsource = "scopus", format = "csv")))))
+
+  expect_equal(nrow(M), 8)
+  expect_true(all(sub(";.*", "", M$AU) == "ABU AFIFA M"))
+  expect_false(any(grepl("[^ -~]", M$AF)))
+  expect_equal(length(unique(M$SR)), 8)
+
+  tt <- tableTag(M, "AU")
+  expect_equal(unname(tt[["ABU AFIFA M"]]), 8)
+  expect_equal(sum(grepl("AFIFA", names(tt))), 1)
+
+  res <- biblioAnalysis(M)$Authors
+  expect_equal(unname(res[["ABU AFIFA M"]]), 8)
+  expect_equal(sum(grepl("AFIFA", names(res))), 1)
+})

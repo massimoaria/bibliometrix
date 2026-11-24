@@ -834,9 +834,18 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
   )
 }
 
+## Appended as the last part of every Biblio AI prompt (see geminiPrepareImage)
+BIBLIO_AI_RESPONSE_RULES <- paste0(
+  "Response rules: give a contextualized interpretation of these results only, ",
+  "and end the response when the interpretation is complete. Do not close with ",
+  "questions to the user, offers of further help, or suggestions of additional ",
+  "analyses or next steps (e.g. 'How would you like to proceed?'). ",
+  "The user cannot reply in this interface."
+)
+
 biblioAiPrompts <- function(values, activeTab) {
   ## ROle definition for Gemini as Biblio AI assistant
-  promptInitial <- "You are Biblio AI, an AI assistant integrated within Biblioshiny. Your task is to support researchers in interpreting and critically discussing the results of their bibliometric analyses, offering insights, contextual explanations, and guidance for data-driven interpretation. "
+  promptInitial <- "You are Biblio AI, an AI assistant integrated within Biblioshiny. Your task is to support researchers in interpreting and critically discussing the results of their bibliometric analyses, offering insights and contextual explanations grounded in the data provided. "
 
   switch(
     activeTab,
@@ -1049,7 +1058,7 @@ biblioAiPrompts <- function(values, activeTab) {
     },
     {
       prompt <- paste0(
-        "Provide an interpretation of this plot creted with \u{2018}bibliometrix R Package\u{2019}"
+        "Provide an interpretation of this plot created with \u{2018}bibliometrix R Package\u{2019}"
       )
     }
   )
@@ -1381,6 +1390,9 @@ geminiPrepareImage <- function(obj, type, prompt, key, desc, values) {
   if (!is.null(desc)) {
     prompt <- paste0(prompt, desc, collapse = ". ")
   }
+  # The response rules close every Biblio AI prompt: the panel shows a single
+  # answer and the user cannot reply to it.
+  prompt <- paste0(prompt, " ", BIBLIO_AI_RESPONSE_RULES)
 
   # Convert plot to PNG
   file_path <- tempfile(fileext = ".png", tmpdir = getWD())

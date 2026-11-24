@@ -220,6 +220,11 @@ convert2df <- function(
   # the parsers of the export files stop earlier; this covers the API objects
   if (!is.data.frame(M) || nrow(M) == 0) noRecordsFound(dbsource, what = "collection")
 
+  # Unicode spaces (U+00A0, U+202F, zero-width, BOM, ...) inside names and
+  # titles split one author into several: normalise them in every character
+  # column, for every source, before AU/CR normalisation and SR.
+  M <- .norm_spaces_df(M)
+
   if ("PY" %in% names(M)) {
     M$PY <- as.numeric(M$PY)
   } else {

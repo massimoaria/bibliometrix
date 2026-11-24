@@ -340,3 +340,29 @@ test_that("cocMatrix scarta i frammenti SICI e non lascia colonne vuote", {
   expect_true(all(Matrix::colSums(WF) > 0))
   expect_equal(ncol(WF), 3L)
 })
+
+# networkPlot(degree =) sottraeva la diagonale al grado di igraph, che conta un
+# self-loop due volte: Deg includeva la frequenza dell'item stesso, e un item
+# con 3 co-occorrenze e frequenza 6 valeva 9 e superava degree = 8.
+
+test_that("networkPlot degree counts off-diagonal co-occurrences, not the diagonal", {
+  # "hub" occurs 20 times (diagonal) but co-occurs only once (with d): it must
+  # not pass degree = 3.
+  nm <- c("a", "b", "c", "d", "hub")
+  X <- matrix(0, 5, 5, dimnames = list(nm, nm))
+  X["a", "b"] <- 3; X["a", "c"] <- 2; X["a", "d"] <- 1
+  X["b", "c"] <- 2; X["c", "d"] <- 1; X["d", "hub"] <- 1
+  X <- X + t(X)
+  diag(X) <- c(2, 2, 2, 1, 20)
+  for (w in list(NULL, TRUE)) {
+    np <- networkPlot(X, degree = 3, type = "fruchterman",
+      cluster = "none", weighted = w, verbose = FALSE, seed = 1)
+    v <- igraph::V(np$graph)$name
+    expect_false("hub" %in% v)
+    expect_setequal(v, c("a", "b", "c", "d"))
+  }
+  # d has exactly 3 co-occurrences: degree = 4 drops it, keeps a, b, c
+  np4 <- networkPlot(X, degree = 4, type = "fruchterman",
+    cluster = "none", verbose = FALSE, seed = 1)
+  expect_setequal(igraph::V(np4$graph)$name, c("a", "b", "c"))
+})

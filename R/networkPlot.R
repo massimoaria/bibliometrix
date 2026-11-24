@@ -14,7 +14,10 @@ utils::globalVariables(c("degree"))
 #' Aria et al. (2026, Journal of Informetrics, 20, 101877); if FALSE they are computed on the raw counts, and the
 #' normalisation only drives the layout. It has no effect when \code{normalize = NULL}.
 #' @param n is an integer. It indicates the number of vertices to plot.
-#' @param degree is an integer. It indicates the min frequency of a vertex. If degree is not NULL, n is ignored.
+#' @param degree is an integer or NULL. If not NULL, only vertices with at least \code{degree} co-occurrences with the other
+#' vertices of \code{NetMatrix} are kept. The count is the off-diagonal row sum of \code{NetMatrix} (co-occurrences with
+#' multiplicity; the item's own frequency on the diagonal is excluded), computed before \code{edges.min} pruning and
+#' isolate removal. If degree is not NULL, \code{n} is ignored.
 #' @param type is a character object. It indicates the network map layout:
 #'
 #' \tabular{lll}{
@@ -178,7 +181,11 @@ networkPlot <-
 
     # Select number of vertices to plot
     if (!is.null(degree)) {
-      Deg <- deg - diag(NetMatrix)
+      # Number of co-occurrences (with multiplicity) with the other vertices:
+      # off-diagonal row sums of NetMatrix. igraph's degree() cannot be used
+      # here: it counts a self-loop twice (so `deg - diag` added the item's
+      # own frequency) and with weighted = TRUE it counts distinct neighbours.
+      Deg <- as.numeric(Matrix::rowSums(NetMatrix)) - as.numeric(Matrix::diag(NetMatrix))
       Vind <- Deg < degree
       if (sum(!Vind) == 0) {
         cat("\ndegree argument is to high!\n\n")

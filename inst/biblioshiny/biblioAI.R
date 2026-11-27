@@ -1020,7 +1020,7 @@ biblioAiPrompts <- function(values, activeTab) {
     "couplingNetwork" = {
       prompt <- paste0(
         "Provide an interpretation of this bibliographic 'coupling' network. ",
-        "Two units (documents, authors, sources or countries) are coupled when they share cited references; ",
+        "Two units (documents, authors or sources) are coupled when they share cited references; ",
         "the more references they share, the stronger the link. ",
         "Focus on the structure of the network, the presence of communities (research fronts), ",
         "and the relevance of the most central and most strongly coupled units."

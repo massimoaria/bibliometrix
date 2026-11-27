@@ -4929,7 +4929,8 @@ igraph2vis <- function(
   net,
   shadow = TRUE,
   edgesize = 5,
-  noOverlap = TRUE
+  noOverlap = TRUE,
+  nodeTitles = NULL
 ) {
   LABEL <- igraph::V(g)$name
 
@@ -5028,9 +5029,17 @@ igraph2vis <- function(
 
   vn$nodes <- vn$nodes %>%
     mutate(
-      label = ifelse(label %in% labelToRemove, "", label),
-      title = id
+      label = ifelse(label %in% labelToRemove, "", label)
     )
+  # Node tooltip: default is the node id; callers may pass `nodeTitles`
+  # (a character vector keyed by node id) to show richer HTML tooltips,
+  # falling back to the id whenever a node has no entry.
+  if (is.null(nodeTitles)) {
+    vn$nodes$title <- vn$nodes$id
+  } else {
+    tt <- nodeTitles[as.character(vn$nodes$id)]
+    vn$nodes$title <- ifelse(is.na(tt), as.character(vn$nodes$id), unname(tt))
+  }
   ##
 
   VIS <-
@@ -7058,13 +7067,14 @@ updateMenuVisibility <- function(session, values) {
     )
   }
 
-  # Intellectual Structure - hide entire menu if no CR
+  # Intellectual Structure and Coupling - hide the entire menus if no CR
   if (!CR) {
     js_code <- paste0(
       js_code,
       "
     $('.sidebar-menu .treeview').each(function() {
-      if ($(this).find('> a > span').first().text().trim() === 'Intellectual Structure') {
+      var t = $(this).find('> a > span').first().text().trim();
+      if (t === 'Intellectual Structure' || t === 'Coupling') {
         $(this).hide();
       }
     });
@@ -7075,7 +7085,8 @@ updateMenuVisibility <- function(session, values) {
       js_code,
       "
     $('.sidebar-menu .treeview').each(function() {
-      if ($(this).find('> a > span').first().text().trim() === 'Intellectual Structure') {
+      var t = $(this).find('> a > span').first().text().trim();
+      if (t === 'Intellectual Structure' || t === 'Coupling') {
         $(this).show();
       }
     });
@@ -7150,7 +7161,7 @@ updateMenuVisibility <- function(session, values) {
     out <- c(out, "Most Local Cited References", "References Spectroscopy")
   }
   if (!isTRUE(CR)) {
-    out <- c(out, "Co-citation Network")
+    out <- c(out, "Co-citation Network", "Bibliographic Coupling")
   }
   if (!(isTRUE(DB_TC) & isTRUE(CR))) {
     out <- c(out, "Historiograph")

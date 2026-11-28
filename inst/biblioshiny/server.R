@@ -11594,10 +11594,9 @@ To ensure the functionality of Biblioshiny,
     )
     if (!is.null(cocDTC)) {
       ## simplified frame for Biblio AI (same structure as Thematic Map)
-      values$cocnet$doc2clust <- cocDTC[, c(
-        "Assigned_cluster",
-        "SR",
-        "pagerank"
+      values$cocnet$doc2clust <- cocDTC[, intersect(
+        c("Assigned_cluster", "SR", "TI", "PY", "TC", "pagerank"),
+        names(cocDTC)
       )]
       ## display table: clickable DOI + readable column names
       cocDTC$DI <- paste0(
@@ -12403,7 +12402,7 @@ To ensure the functionality of Biblioshiny,
     }
     values$TM <- TM
     values$TM$doc2clust <- TM$documentToClusters %>%
-      select(Assigned_cluster, SR, pagerank)
+      select(Assigned_cluster, SR, any_of(c("TI", "PY", "TC")), pagerank)
     values$TM$documentToClusters$DI <- paste0(
       '<a href=\"https://doi.org/',
       TM$documentToClusters$DI,

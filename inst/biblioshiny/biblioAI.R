@@ -834,13 +834,26 @@ This AI-powered feature leverages Google Gemini to help you understand patterns 
   )
 }
 
+## Citation rules: appended to BIBLIO_AI_RESPONSE_RULES
+BIBLIO_AI_CITATION_RULES <- paste0(
+  "Citation rules: when you refer to a document, author or source of the collection, ",
+  "use only those that appear in the data above, with exactly the identifier given there, ",
+  "and describe a document only through the title and fields provided: do not invent ",
+  "titles, findings or content, and do not present any other publication as part of the ",
+  "collection or of these results. If the data do not list documents, do not attribute ",
+  "any specific publication to the collection. General methodological references ",
+  "(e.g. the works that introduced a method, indicator or map used here) may be cited, ",
+  "but only as methodological background and explicitly outside the collection."
+)
+
 ## Appended as the last part of every Biblio AI prompt (see geminiPrepareImage)
 BIBLIO_AI_RESPONSE_RULES <- paste0(
   "Response rules: give a contextualized interpretation of these results only, ",
   "and end the response when the interpretation is complete. Do not close with ",
   "questions to the user, offers of further help, or suggestions of additional ",
   "analyses or next steps (e.g. 'How would you like to proceed?'). ",
-  "The user cannot reply in this interface."
+  "The user cannot reply in this interface. ",
+  BIBLIO_AI_CITATION_RULES
 )
 
 biblioAiPrompts <- function(values, activeTab) {
@@ -2208,14 +2221,36 @@ latex_math_to_html <- function(x) {
 }
 
 
-# Thematic Map top 3 documents for each cluster
+# Thematic Map / co-occurrence network: top 3 documents for each cluster.
+# Title, year and citations travel with the SR: with the SR alone the model
+# cannot describe a document and fills the gap with publications outside the
+# collection. A field the collection does not carry is left out, not sent as NA.
 doc2clust <- function(res, n = 3) {
   df <- res$doc2clust %>%
     drop_na(Assigned_cluster) %>%
     group_by(Assigned_cluster) %>%
-    slice_max(pagerank, n = n) %>%
-    mutate(cluster = paste(SR, ", pagerank ", round(pagerank, 3), sep = "")) %>%
-    select(Assigned_cluster, cluster)
+    slice_max(pagerank, n = n, with_ties = FALSE) %>%
+    ungroup()
+  field <- function(col, label, quote = FALSE) {
+    if (!col %in% names(df)) {
+      return(rep("", nrow(df)))
+    }
+    # "; " separates the rows in merge_df_to_string(): keep it out of a title
+    v <- gsub(";", ",", as.character(df[[col]]), fixed = TRUE)
+    v <- trimws(gsub("\\s+", " ", v))
+    ok <- !is.na(v) & v != "" & v != "NA"
+    if (quote) v <- paste0('"', v, '"')
+    ifelse(ok, paste0(", ", label, v), "")
+  }
+  df$cluster <- paste0(
+    df$SR,
+    field("TI", "title ", quote = TRUE),
+    field("PY", "year "),
+    field("TC", "total citations "),
+    ", pagerank ",
+    round(df$pagerank, 3)
+  )
+  df[, c("Assigned_cluster", "cluster")]
 }
 
 # APOT top 3 Documents per author
